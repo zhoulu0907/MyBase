@@ -16,6 +16,8 @@
 package com.cmsr.onebase.framework.uid.worker.dao;
 
 import com.cmsr.onebase.framework.uid.worker.entity.WorkerNodeEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -34,6 +36,8 @@ import java.util.Map;
  * @author yutianbao
  */
 public class WorkerNodeDAO {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkerNodeDAO.class);
 
     // 数据库类型常量
     private static final String MYSQL = "mysql";
@@ -56,6 +60,7 @@ public class WorkerNodeDAO {
     /**
      * 获取数据库类型（懒加载）
      * 支持多种数据库类型检测，包括国产数据库
+     * 使用多种检测策略：驱动名称、数据库URL、数据库产品名称
      *
      * @return 数据库类型字符串
      */
@@ -64,27 +69,36 @@ public class WorkerNodeDAO {
             synchronized (this) {
                 if (databaseType == null) {
                     try {
-                        String driverName = dataSource.getConnection().getMetaData().getDriverName().toLowerCase();
+                        var metaData = dataSource.getConnection().getMetaData();
+                        String driverName = metaData.getDriverName().toLowerCase();
+                        String url = metaData.getURL().toLowerCase();
+                        String databaseProductName = metaData.getDatabaseProductName().toLowerCase();
 
-                        // 使用if-else判断数据库类型
-                        if (driverName.contains("mysql")) {
+                        LOGGER.info("检测到数据库信息 - 驱动名称: {}, URL: {}, 产品名称: {}", driverName, url, databaseProductName);
+
+                        // 使用多种策略判断数据库类型
+                        if (driverName.contains("mysql") || url.contains("mysql")) {
                             databaseType = MYSQL;
-                        } else if (driverName.contains("postgresql")) {
+                        } else if (driverName.contains("postgresql") || url.contains("postgresql") || databaseProductName.contains("postgresql")) {
                             databaseType = POSTGRESQL;
-                        } else if (driverName.contains("dm")) {
+                        } else if (driverName.contains("dm") || url.contains("dm") || databaseProductName.contains("dameng")) {
                             databaseType = DM;
-                        } else if (driverName.contains("kingbase")) {
+                        } else if (driverName.contains("kingbase") || url.contains("kingbase") || databaseProductName.contains("kingbase")) {
                             databaseType = KINGBASE;
-                        } else if (driverName.contains("oracle")) {
+                        } else if (driverName.contains("oracle") || databaseProductName.contains("oracle")) {
                             databaseType = ORACLE;
-                        } else if (driverName.contains("sqlserver") || driverName.contains("microsoft")) {
+                        } else if (driverName.contains("sqlserver") || url.contains("sqlserver") || databaseProductName.contains("microsoft")) {
                             databaseType = SQLSERVER;
                         } else {
+                            LOGGER.warn("未识别的数据库驱动 - 驱动名称: {}, URL: {}, 产品名称: {}, 将使用默认类型 OTHER",
+                                    driverName, url, databaseProductName);
                             databaseType = OTHER;
                         }
+                        LOGGER.info("数据库类型检测结果: {}", databaseType);
 
                     } catch (Exception e) {
                         // 检测失败时使用默认类型
+                        LOGGER.error("检测数据库类型失败，将使用默认类型 OTHER。错误信息: ", e);
                         databaseType = OTHER;
                     }
                 }

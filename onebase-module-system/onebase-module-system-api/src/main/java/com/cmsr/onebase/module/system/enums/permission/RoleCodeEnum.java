@@ -139,7 +139,8 @@ public enum RoleCodeEnum {
 
         add("corp"); // 一级
 
-        add("corp:app-auth"); // 二级 应用授权
+        //除企业管理员外，企业下其他用户不允许查看应用授权页面
+//        add("corp:app-auth"); // 二级 应用授权
         add("corp:app-auth:query"); // 三级 应用授权查看
 
         add("corp:user"); // 二级 用户

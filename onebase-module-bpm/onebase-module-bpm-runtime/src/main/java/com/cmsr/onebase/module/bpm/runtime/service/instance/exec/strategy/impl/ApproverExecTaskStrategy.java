@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.bpm.runtime.service.instance.exec.strategy.impl;
 
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
@@ -154,6 +155,7 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
         reqVO.setId(entityId);
         // 需要包含子表数据
         reqVO.setContainSubTable(true);
+        reqVO.setTraceId(UuidUtils.getUuid());
         SemanticEntityValueDTO existEntityValueDTO = semanticDynamicDataApi.getDataById(reqVO);
 
         if (existEntityValueDTO == null) {

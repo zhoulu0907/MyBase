@@ -135,7 +135,6 @@ public class BusinessEntityController {
         List<SimpleEntityRespVO> result = businessEntityService.getSimpleEntityListByAppId(appId);
         return success(result);
     }
-
     /**
      * 批量查询实体及完整字段信息
      *

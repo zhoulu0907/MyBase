@@ -143,9 +143,15 @@ public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper,
 
         // 根据关键词模糊查询
         if (StringUtils.isNotBlank(pageReqVO.getKeyword())) {
-            queryWrapper.and(SYSTEM_TENANT.NAME.like(pageReqVO.getKeyword())
-                    .or(SYSTEM_TENANT.TENANT_CODE.like(pageReqVO.getKeyword()))
-            );
+            if (isNumeric(pageReqVO.getKeyword())) {
+                queryWrapper.and(SYSTEM_TENANT.NAME.like(pageReqVO.getKeyword())
+                        .or(SYSTEM_TENANT.TENANT_CODE.like(pageReqVO.getKeyword())
+                        .or(SYSTEM_TENANT.ID.eq(Long.valueOf(pageReqVO.getKeyword()))))
+                );
+            } else {
+                queryWrapper.and(SYSTEM_TENANT.NAME.like(pageReqVO.getKeyword())
+                        .or(SYSTEM_TENANT.TENANT_CODE.like(pageReqVO.getKeyword())));
+            }
         }
 
         // 按状态查询
@@ -165,5 +171,15 @@ public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper,
 
         Page<TenantDO> page = page(Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize()), queryWrapper);
         return new PageResult<>(page.getRecords(), page.getTotalRow());
+    }
+
+    /**
+     * 判断字符串是否为纯数字
+     */
+    private boolean isNumeric(String str) {
+        if (str == null || str.isEmpty()) {
+            return false;
+        }
+        return str.matches("\\d+");
     }
 }

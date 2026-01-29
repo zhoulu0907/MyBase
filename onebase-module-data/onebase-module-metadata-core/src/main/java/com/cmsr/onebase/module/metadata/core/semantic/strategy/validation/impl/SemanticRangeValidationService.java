@@ -61,35 +61,30 @@ public class SemanticRangeValidationService implements SemanticValidationService
             if (value instanceof BigDecimal) { numValue = (BigDecimal) value; }
             else { numValue = new BigDecimal(value.toString()); }
         } catch (NumberFormatException e) {
-            String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-            throw new IllegalArgumentException(prefix + "字段[" + field.getDisplayName() + "]不是有效的数值");
+            throw new IllegalArgumentException(field.getDisplayName() + "不是有效的数值");
         }
         if (rule.getMinValue() != null) {
             boolean includeMin = rule.getIncludeMin() != null && rule.getIncludeMin() == 1;
             if (includeMin && numValue.compareTo(rule.getMinValue()) < 0) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]值不能小于" + rule.getMinValue();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "值不能小于" + rule.getMinValue();
+                throw new IllegalArgumentException(errorMessage);
             } else if (!includeMin && numValue.compareTo(rule.getMinValue()) <= 0) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]值必须大于" + rule.getMinValue();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "值必须大于" + rule.getMinValue();
+                throw new IllegalArgumentException(errorMessage);
             }
         }
         if (rule.getMaxValue() != null) {
             boolean includeMax = rule.getIncludeMax() != null && rule.getIncludeMax() == 1;
             if (includeMax && numValue.compareTo(rule.getMaxValue()) > 0) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]值不能大于" + rule.getMaxValue();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "值不能大于" + rule.getMaxValue();
+                throw new IllegalArgumentException(errorMessage);
             } else if (!includeMax && numValue.compareTo(rule.getMaxValue()) >= 0) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]值必须小于" + rule.getMaxValue();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "值必须小于" + rule.getMaxValue();
+                throw new IllegalArgumentException(errorMessage);
             }
         }
     }
@@ -104,35 +99,30 @@ public class SemanticRangeValidationService implements SemanticValidationService
                 dateValue = LocalDateTime.parse(dateStr, formatter);
             }
         } catch (DateTimeParseException e) {
-            String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-            throw new IllegalArgumentException(prefix + "字段[" + field.getDisplayName() + "]不是有效的日期格式");
+            throw new IllegalArgumentException(field.getDisplayName() + "不是有效的日期格式");
         }
         if (rule.getMinDate() != null) {
             boolean includeMin = rule.getIncludeMin() != null && rule.getIncludeMin() == 1;
             if (includeMin && dateValue.isBefore(rule.getMinDate())) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]日期不能早于" + rule.getMinDate();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "日期不能早于" + rule.getMinDate();
+                throw new IllegalArgumentException(errorMessage);
             } else if (!includeMin && !dateValue.isAfter(rule.getMinDate())) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]日期必须晚于" + rule.getMinDate();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "日期必须晚于" + rule.getMinDate();
+                throw new IllegalArgumentException(errorMessage);
             }
         }
         if (rule.getMaxDate() != null) {
             boolean includeMax = rule.getIncludeMax() != null && rule.getIncludeMax() == 1;
             if (includeMax && dateValue.isAfter(rule.getMaxDate())) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]日期不能晚于" + rule.getMaxDate();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "日期不能晚于" + rule.getMaxDate();
+                throw new IllegalArgumentException(errorMessage);
             } else if (!includeMax && !dateValue.isBefore(rule.getMaxDate())) {
                 String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                        ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]日期必须早于" + rule.getMaxDate();
-                String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                throw new IllegalArgumentException(prefix + errorMessage);
+                        ? rule.getPromptMessage() : field.getDisplayName() + "日期必须早于" + rule.getMaxDate();
+                throw new IllegalArgumentException(errorMessage);
             }
         }
     }

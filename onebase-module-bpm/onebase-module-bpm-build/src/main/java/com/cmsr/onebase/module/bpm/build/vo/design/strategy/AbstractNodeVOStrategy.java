@@ -1,6 +1,6 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.strategy;
 
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.*;
@@ -27,7 +27,7 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 @Slf4j
 public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends BaseNodeExtDTO> implements NodeVOStrategy<T, E> {
     @Resource
-    protected AppAuthRoleUser appAuthRoleUser;
+    protected AppAuthRoleUserService appAuthRoleUserService;
 
     /**
      * 解析 ext 数据并填充到节点配置VO中
@@ -179,7 +179,7 @@ public abstract class AbstractNodeVOStrategy<T extends BaseNodeVO, E extends Bas
             }
 
             // 此处需要过滤非当前应用的角色，todo：或抛出异常
-            List<Long> roleIds = appAuthRoleUser.findRoleIdsByAppId(appId);
+            List<Long> roleIds = appAuthRoleUserService.findRoleIdsByAppId(appId);
 
             roles.removeIf(role -> !roleIds.contains(role.getRoleId()));
 

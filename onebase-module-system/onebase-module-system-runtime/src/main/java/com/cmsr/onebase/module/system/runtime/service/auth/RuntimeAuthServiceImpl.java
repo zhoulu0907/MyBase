@@ -19,7 +19,7 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
@@ -167,7 +167,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     private SystemConfigService systemConfigService;
 
     @Resource
-    private AppAuthRoleUser appAuthRoleUser;
+    private AppAuthRoleUserService appAuthRoleUserService;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -216,6 +216,11 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (applicationDTO == null) {
             throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
         }
+
+        if (!Objects.equals(applicationDTO.getAppStatus(), CommonStatusEnum.ENABLE.getStatus())) {
+            throw exception(AUTH_LOGIN_APP_NOT_LAUNCHED_YET);
+        }
+
         return applicationDTO.getTenantId();
     }
 
@@ -316,8 +321,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
     private void checkPermission(Long appId, Long userId) {
         List<Long> roleIdsByAppId = ApplicationManager.withoutApplicationCondition(() ->
-                appAuthRoleUser.findRoleIdsByAppId(appId));
-        List<Long> userIdsByRoleIds = appAuthRoleUser.findUserIdsByRoleIds(roleIdsByAppId);
+                appAuthRoleUserService.findRoleIdsByAppId(appId));
+        List<Long> userIdsByRoleIds = appAuthRoleUserService.findUserIdsByRoleIds(roleIdsByAppId);
         if (userIdsByRoleIds.isEmpty() || !userIdsByRoleIds.contains(userId)){
             throw exception(AUTH_LOGIN_NO_PERMISSION);
         }

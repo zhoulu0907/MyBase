@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.formula.service.extendsion;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUser;
+import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.app.api.auth.dto.AuthRoleDTO;
 import com.cmsr.onebase.module.system.api.dept.DeptApi;
 import com.cmsr.onebase.module.system.api.dept.dto.DeptRespDTO;
@@ -42,7 +42,7 @@ public class FormulaExtendsServiceImpl implements FormulaExtendsService {
      * 注入角色API
      */
     @Resource
-    private AppAuthRoleUser authRoleUser;
+    private AppAuthRoleUserService authRoleUser;
 
     /**
      * 注入部门API

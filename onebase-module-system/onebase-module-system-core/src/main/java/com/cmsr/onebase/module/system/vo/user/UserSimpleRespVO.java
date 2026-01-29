@@ -31,4 +31,7 @@ public class UserSimpleRespVO {
     @Schema(description = "用户类型", example = "1024")
     private Integer userType;
 
+    @Schema(description = "用户头像", example = "https://www.cmsr.com")
+    private String avatar;
+
 }

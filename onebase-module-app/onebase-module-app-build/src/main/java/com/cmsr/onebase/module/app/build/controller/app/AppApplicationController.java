@@ -1,5 +1,19 @@
 package com.cmsr.onebase.module.app.build.controller.app;
 
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -13,22 +27,15 @@ import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationRespVO;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/22 14:48
+ *                  @Date：2025/7/22 14:48
  */
 @Setter
 @Tag(name = "应用管理")
@@ -58,14 +65,16 @@ public class AppApplicationController {
     @PostMapping("/create")
     @Operation(summary = "创建应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:create')")
-    public CommonResult<ApplicationCreateRespVO> createApplication(@Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
+    public CommonResult<ApplicationCreateRespVO> createApplication(
+            @Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
         return CommonResult.success(appApplicationService.createApplication(applicationCreateReqVO));
     }
 
     @PostMapping("/update")
     @Operation(summary = "更新应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:update')")
-    public CommonResult<Boolean> updateApplication(@Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
+    public CommonResult<Boolean> updateApplication(
+            @Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
         appApplicationService.updateApplication(applicationCreateReqVO);
         return CommonResult.success(true);
     }
@@ -92,7 +101,7 @@ public class AppApplicationController {
         return CommonResult.success(appApplicationService.generateId());
     }
 
-    @GetMapping(value = {"/simple-list"})
+    @GetMapping(value = { "/simple-list" })
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {
@@ -100,12 +109,12 @@ public class AppApplicationController {
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
     }
 
-    @GetMapping(value = {"/simple-list-by-name"})
+    @GetMapping(value = { "/simple-list-by-name" })
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     @Operation(summary = "获取我创建的应用列表-不分页", description = "获取我创建的应用列表")
-    public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(@RequestParam(value = "appName", required = false) String appName) {
-        List<AppApplicationDO> list = appApplicationService.getMySimpleAppListByName(appName);
-        return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
+    public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(
+            @RequestParam(value = "appName", required = false) String appName) {
+        return success(appApplicationService.getMySimpleAppListByName(appName));
     }
 
     @GetMapping("/get-navigation-config")
@@ -118,9 +127,9 @@ public class AppApplicationController {
     @PostMapping("/update-navigation-config")
     @Operation(summary = "更新应用导航配置")
     @PreAuthorize("@ss.hasPermission('tenant:app:update')")
-    public CommonResult<Boolean> updateApplicationNavigationConfig(@Validated @RequestBody ApplicationNavigationConfigVO updateReqVO) {
+    public CommonResult<Boolean> updateApplicationNavigationConfig(
+            @Validated @RequestBody ApplicationNavigationConfigVO updateReqVO) {
         appApplicationService.updateApplicationNavigationConfig(updateReqVO);
         return CommonResult.success(true);
     }
-
 }

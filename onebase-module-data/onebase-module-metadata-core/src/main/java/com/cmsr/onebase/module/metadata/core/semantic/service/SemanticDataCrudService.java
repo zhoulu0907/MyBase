@@ -25,6 +25,7 @@ import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -122,6 +123,7 @@ public class SemanticDataCrudService {
      * - 若 `entity` 或 `value` 为空，方法直接返回
      * - 自动编号由 AutoNumberService 根据字段策略生成并应用
      */
+    @Transactional(rollbackFor = Exception.class)
     public void create(SemanticRecordDTO recordDTO) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
@@ -195,6 +197,7 @@ public class SemanticDataCrudService {
      * - 若无法解析到主键 id，方法直接返回
      * - 为防止误更新主键，显式从 Row 中移除主键字段
      */
+    @Transactional(rollbackFor = Exception.class)
     public void update(SemanticRecordDTO recordDTO) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
@@ -263,6 +266,7 @@ public class SemanticDataCrudService {
      * 3. 按策略执行删除
      * 4. 清理数据源并执行后置工作流
      */
+    @Transactional(rollbackFor = Exception.class)
     public Integer delete(SemanticRecordDTO recordDTO) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
@@ -327,6 +331,7 @@ public class SemanticDataCrudService {
     /**
      * 条件删除主表数据（软删优先，物理删回退）
      */
+    @Transactional(rollbackFor = Exception.class)
     public Integer deleteByCondition(SemanticRecordDTO recordDTO) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         semanticWorkflowExecutor.preExecute(
@@ -378,21 +383,19 @@ public class SemanticDataCrudService {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         String pkField = getPrimaryKeyFieldName(entity.getFields());
         Object id = recordDTO.getEntityValue().getId();
-        // 切换到目标数据源
-        try {
-            // 查询主表记录；若存在软删除字段则进行条件过滤
-            Row row = dynamicMetadataRepository.selectMainById(entity.getTableName(), pkField, id, hasDeletedField(entity.getFields()), entity.getFields());
-            if (row == null) {
-                return null;
-            }
+        // 查询主表记录；若存在软删除字段则进行条件过滤
+        Row row = dynamicMetadataRepository.selectMainById(entity.getTableName(), pkField, id, hasDeletedField(entity.getFields()), entity.getFields());
+        if (row == null) {
+            return null;
+        }
 
-            Map<String, Object> result = new HashMap<>();
-            List<SemanticFieldSchemaDTO> fieldsDto = entity.getFields();
-            if (fieldsDto != null) {
-                for (SemanticFieldSchemaDTO f : fieldsDto) {
-                    String name = f.getFieldName();
-                    // 仅回填具有字段名的列
-                    if (name != null) {
+        Map<String, Object> result = new HashMap<>();
+        List<SemanticFieldSchemaDTO> fieldsDto = entity.getFields();
+        if (fieldsDto != null) {
+            for (SemanticFieldSchemaDTO f : fieldsDto) {
+                String name = f.getFieldName();
+                // 仅回填具有字段名的列
+                if (name != null) {
                         result.put(name, row.get(name));
                     }
                 }
@@ -415,7 +418,7 @@ public class SemanticDataCrudService {
                             connVals.put(c.getTargetEntityTableName(), rv);
                         }
                     } else if (RelationshipTypeEnum.isConnectorRelationTable(c.getRelationshipType().getRelationshipType())) {
-                        // 读取关系表连接器的值
+                        // 读取关系表连接器的值（包括一对一关系）
                         SemanticFieldSchemaDTO targetFiledSchema = c.getRelationAttributes().stream().filter(attr ->
                                 attr.getFieldUuid().equals(c.getTargetKeyFieldUuid())).findFirst().orElse(null);
                         if (targetFiledSchema == null) continue;
@@ -423,7 +426,29 @@ public class SemanticDataCrudService {
                         SemanticFieldSchemaDTO sourceFiledSchema = entity.getFields().stream().filter(filed ->
                                 filed.getFieldUuid().equals(c.getSourceKeyFieldUuid())).findFirst().orElse(null);
                         if (sourceFiledSchema == null) continue;
-                        Object targetFiledValue = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName()).getStoreValue();
+                        // 安全获取源字段值，避免NPE
+                        SemanticFieldValueDTO<?> sourceFieldValueDto = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName());
+                        if (sourceFieldValueDto == null) continue;
+                        Object targetFiledValue = sourceFieldValueDto.getStoreValue();
+                        if (targetFiledValue == null) continue;
+                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
+                        if (rv != null) {
+                            connVals.put(c.getTargetEntityTableName(), rv);
+                        }
+                    } else if (RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) {
+                        // 读取数据选择关系的值（包括单选和多选）
+                        SemanticFieldSchemaDTO targetFiledSchema = c.getRelationAttributes().stream().filter(attr ->
+                                attr.getFieldUuid().equals(c.getTargetKeyFieldUuid())).findFirst().orElse(null);
+                        if (targetFiledSchema == null) continue;
+                        String targetFiledName = targetFiledSchema.getFieldName();
+                        SemanticFieldSchemaDTO sourceFiledSchema = entity.getFields().stream().filter(filed ->
+                                filed.getFieldUuid().equals(c.getSourceKeyFieldUuid())).findFirst().orElse(null);
+                        if (sourceFiledSchema == null) continue;
+                        // 安全获取源字段值
+                        SemanticFieldValueDTO<?> sourceFieldValueDto = resultVal.getFieldValueMap().get(sourceFiledSchema.getFieldName());
+                        if (sourceFieldValueDto == null) continue;
+                        Object targetFiledValue = sourceFieldValueDto.getStoreValue();
+                        if (targetFiledValue == null) continue;
                         SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
                         if (rv != null) {
                             connVals.put(c.getTargetEntityTableName(), rv);
@@ -433,16 +458,12 @@ public class SemanticDataCrudService {
                 resultVal.setConnectors(connVals);
             }
 
-            // 引用解析与富化（如字典翻译、外键名称回填）
-            semanticRefResolver.enrich(entity, resultVal);
-            // 设置读取结果到上下文，用于统一输出
-            recordDTO.setResultValue(resultVal);
-            // 转换为可序列化的 Map（适配前端 JSON 输出）
-            Map<String, Object> resultData = recordDTO.getResultValue().getGlobalRawMapForJson();
-            return resultData;
-        } catch (Exception e) {
-            throw e;
-        }
+        // 引用解析与富化（如字典翻译、外键名称回填）
+        semanticRefResolver.enrich(entity, resultVal);
+        // 设置读取结果到上下文，用于统一输出
+        recordDTO.setResultValue(resultVal);
+        // 转换为可序列化的 Map（适配前端 JSON 输出）
+        return recordDTO.getResultValue().getGlobalRawMapForJson();
     }
 
     /**
@@ -490,6 +511,7 @@ public class SemanticDataCrudService {
      * @param qw        条件包装器；为空时创建默认条件
      * @return 实际受影响的主表记录数
      */
+    @Transactional(rollbackFor = Exception.class)
     public Integer deleteByQuery(SemanticRecordDTO recordDTO, QueryWrapper qw) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         if (qw == null) {
@@ -525,6 +547,7 @@ public class SemanticDataCrudService {
      * @param qw        条件包装器；为空时创建默认条件
      * @return 批量更新后的主表记录结果集（已做权限过滤）
      */
+    @Transactional(rollbackFor = Exception.class)
     public List<Map<String, Object>> updateByQuery(SemanticRecordDTO recordDTO, Map<String, Object> updates, QueryWrapper qw) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         List<SemanticFieldSchemaDTO> fields = entity.getFields();
@@ -889,7 +912,7 @@ public class SemanticDataCrudService {
      * - 生成编码并写回原始值（rawValue）
      *
      * @param connector 连接器定义
-     * @param fields    字段值映射
+     * @param fields    字段值映射（key为fieldName）
      */
     private void applyConnectorAutoNumbers(SemanticRelationSchemaDTO connector, Map<String, SemanticFieldValueDTO<Object>> fields) {
         if (connector == null || fields == null) {
@@ -897,25 +920,77 @@ public class SemanticDataCrudService {
         }
         List<SemanticFieldSchemaDTO> attrs = connector.getRelationAttributes();
         if (attrs == null || attrs.isEmpty()) {
+            log.debug("[子表自动编号] 连接器 {} 没有字段属性", connector.getTargetEntityTableName());
             return;
         }
-        List<String> fieldIds = attrs.stream()
+        
+        // 打印所有字段及其类型，便于调试
+        if (log.isDebugEnabled()) {
+            for (SemanticFieldSchemaDTO attr : attrs) {
+                log.debug("[子表自动编号] 字段: {}, fieldUuid: {}, fieldType: {}, fieldTypeEnum: {}", 
+                    attr.getFieldName(), attr.getFieldUuid(), attr.getFieldType(), attr.getFieldTypeEnum());
+            }
+        }
+        
+        List<String> fieldUuids = attrs.stream()
                 .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
                 .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
-        if (fieldIds.isEmpty()) {
+        if (fieldUuids.isEmpty()) {
+            log.debug("[子表自动编号] 连接器 {} 没有 AUTO_CODE 类型字段", connector.getTargetEntityTableName());
             return;
         }
-        Map<String, Object> raw = new HashMap<>();
+        log.debug("[子表自动编号] 连接器 {} 找到 AUTO_CODE 字段 UUIDs: {}", connector.getTargetEntityTableName(), fieldUuids);
+        
+        // 构建 fieldUuid -> fieldName 的映射
+        Map<String, String> uuidToNameMap = new HashMap<>();
+        for (SemanticFieldSchemaDTO attr : attrs) {
+            if (attr.getFieldUuid() != null && attr.getFieldName() != null) {
+                uuidToNameMap.put(attr.getFieldUuid(), attr.getFieldName());
+            }
+        }
+        
+        // 构建上下文数据：将字段名映射到 "field_" + fieldUuid 格式的key
+        // 用于支持 FIELD_REF 类型规则项获取引用字段的值
+        Map<String, Object> contextData = new HashMap<>();
         for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
             SemanticFieldValueDTO<Object> v = e.getValue();
-            raw.put(e.getKey(), v == null ? null : v.getRawValue());
+            contextData.put(e.getKey(), v == null ? null : v.getRawValue());
         }
-        Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldIds, raw);
+        for (SemanticFieldSchemaDTO attr : attrs) {
+            String fieldName = attr.getFieldName();
+            String fieldUuid = attr.getFieldUuid();
+            if (fieldName != null && fieldUuid != null && contextData.containsKey(fieldName)) {
+                contextData.put("field_" + fieldUuid, contextData.get(fieldName));
+            }
+        }
+        
+        Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldUuids, contextData);
+        log.debug("[子表自动编号] 连接器 {} 生成的自动编号: {}", connector.getTargetEntityTableName(), autoNumbers);
+        
+        // 遍历生成的自动编号，根据fieldUuid找到对应的fieldName，再更新fields map
         for (Map.Entry<String, String> e : autoNumbers.entrySet()) {
-            SemanticFieldValueDTO<Object> v = fields.get(e.getKey());
-            if (v != null) {
-                v.setRawValue(e.getValue());
+            String fieldUuid = e.getKey();
+            String generatedNumber = e.getValue();
+            String fieldName = uuidToNameMap.get(fieldUuid);
+            
+            log.debug("[子表自动编号] 处理字段 fieldUuid={}, fieldName={}, generatedNumber={}", 
+                fieldUuid, fieldName, generatedNumber);
+            
+            if (fieldName != null) {
+                SemanticFieldValueDTO<Object> v = fields.get(fieldName);
+                if (v != null) {
+                    log.debug("[子表自动编号] 更新已存在字段 {} 的值为 {}", fieldName, generatedNumber);
+                    v.setRawValue(generatedNumber);
+                } else {
+                    // 如果fields中不存在该字段，创建一个新的字段值并添加
+                    log.debug("[子表自动编号] 创建新字段 {} 并设置值为 {}", fieldName, generatedNumber);
+                    SemanticFieldValueDTO<Object> newFieldValue = new SemanticFieldValueDTO<>(AUTO_CODE);
+                    newFieldValue.setFieldUuid(fieldUuid);
+                    newFieldValue.setFieldName(fieldName);
+                    newFieldValue.setRawValue(generatedNumber);
+                    fields.put(fieldName, newFieldValue);
+                }
             }
         }
     }
@@ -1217,13 +1292,28 @@ public class SemanticDataCrudService {
         QueryWrapper qw = QueryWrapper.create().where(new QueryColumn("id").eq(toLongIfNotEmpty(id)))
                 .and(new QueryColumn("deleted").eq(0));
         Row row = dynamicMetadataRepository.selectOneByQuery(recordDTO.getEntitySchema().getTableName(), qw, fields);
+        // 查询不到数据时，使用空值填充所有字段
+        if (row == null) {
+            log.warn("未查询到id={}的记录数据，将使用空值填充字段", id);
+            for (SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields) {
+                String fieldName = semanticFieldSchemaDTO.getFieldName();
+                SemanticFieldValueDTO semanticFieldValueDTO = new SemanticFieldValueDTO(SemanticFieldTypeEnum.valueOf(semanticFieldSchemaDTO.getFieldType()));
+                semanticFieldValueDTO.setFieldId(semanticFieldSchemaDTO.getId());
+                semanticFieldValueDTO.setFieldUuid(semanticFieldSchemaDTO.getFieldUuid());
+                semanticFieldValueDTO.setTableName(recordDTO.getEntitySchema().getTableName());
+                semanticFieldValueDTO.setFieldName(fieldName);
+                semanticFieldValueDTO.setRawValue(null);
+                valueDTOMap.put(fieldName, semanticFieldValueDTO);
+            }
+            return valueDTOMap;
+        }
         for (SemanticFieldSchemaDTO semanticFieldSchemaDTO : fields) {
             String fieldName = semanticFieldSchemaDTO.getFieldName();
             Object value = row.get(fieldName);
             SemanticFieldValueDTO semanticFieldValueDTO = new SemanticFieldValueDTO(SemanticFieldTypeEnum.valueOf(semanticFieldSchemaDTO.getFieldType()));
             semanticFieldValueDTO.setFieldId(semanticFieldSchemaDTO.getId());
             semanticFieldValueDTO.setFieldUuid(semanticFieldSchemaDTO.getFieldUuid());
-            semanticFieldValueDTO.setTableName(semanticFieldValueDTO.getTableName());
+            semanticFieldValueDTO.setTableName(recordDTO.getEntitySchema().getTableName());
             semanticFieldValueDTO.setFieldName(fieldName);
             semanticFieldValueDTO.setRawValue(value);
             valueDTOMap.put(fieldName, semanticFieldValueDTO);

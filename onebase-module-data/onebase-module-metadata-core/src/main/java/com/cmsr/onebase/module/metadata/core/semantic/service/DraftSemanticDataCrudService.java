@@ -20,6 +20,7 @@ import com.mybatisflex.core.row.Row;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -111,6 +112,7 @@ public class DraftSemanticDataCrudService {
      * - 若 `entity` 或 `value` 为空，方法直接返回
      * - 自动编号由 AutoNumberService 根据字段策略生成并应用
      */
+    @Transactional(rollbackFor = Exception.class)
     public void create(SemanticRecordDTO recordDTO) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
@@ -176,8 +178,7 @@ public class DraftSemanticDataCrudService {
      * - 若无法解析到主键 id，方法直接返回
      * - 为防止误更新主键，显式从 Row 中移除主键字段
      */
-
-
+    @Transactional(rollbackFor = Exception.class)
     public void update(SemanticRecordDTO recordDTO) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
@@ -243,7 +244,7 @@ public class DraftSemanticDataCrudService {
      * 3. 按策略执行删除
      * 4. 清理数据源并执行后置工作流
      */
-
+    @Transactional(rollbackFor = Exception.class)
     public Integer delete(SemanticRecordDTO recordDTO) {
         SemanticEntitySchemaDTO entity = recordDTO.getEntitySchema();
         SemanticEntityValueDTO value = recordDTO.getEntityValue();
@@ -409,7 +410,13 @@ public class DraftSemanticDataCrudService {
                             connVals.put(c.getTargetEntityTableName(), rv);
                         }
                     } else if (RelationshipTypeEnum.isConnectorRelationTable(c.getRelationshipType().getRelationshipType())) {
-                        // 读取关系表连接器的值
+                        // 读取关系表连接器的值（包括一对一关系）
+                        SemanticRelationValueDTO rv = readRelationConnector(c, id);
+                        if (rv != null) {
+                            connVals.put(c.getTargetEntityTableName(), rv);
+                        }
+                    } else if (RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) {
+                        // 读取数据选择关系的值（包括单选和多选）
                         SemanticRelationValueDTO rv = readRelationConnector(c, id);
                         if (rv != null) {
                             connVals.put(c.getTargetEntityTableName(), rv);

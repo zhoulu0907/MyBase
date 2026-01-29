@@ -1,5 +1,12 @@
 package com.cmsr.onebase.module.app.core.provider.resource;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
@@ -20,15 +27,10 @@ import com.cmsr.onebase.module.app.core.vo.resource.ListPageSetReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.ListPageSetRespVO;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
+
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Setter
 @Service
@@ -61,12 +63,10 @@ public class PageSetServiceProvider {
         return pagesetDO.getId();
     }
 
-
     public Long getAppId(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(pageSetId);
         return pageSetDO.getApplicationId();
     }
-
 
     public String getMainMetadata(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(pageSetId);
@@ -75,7 +75,6 @@ public class PageSetServiceProvider {
         }
         return pageSetDO.getMainMetadata();
     }
-
 
     public LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO) {
         AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(loadPageSetReqVO.getId());
@@ -109,11 +108,15 @@ public class PageSetServiceProvider {
         LoadPageSetRespVO loadPageSetRespVO = new LoadPageSetRespVO();
         loadPageSetRespVO.setId(pageSetDO.getId());
         loadPageSetRespVO.setPageSetType(pageSetDO.getPageSetType());
+        loadPageSetRespVO.setDataTitleType(pageSetDO.getDataTitleType());
+        loadPageSetRespVO.setDataTitle(pageSetDO.getDataTitle());
+        loadPageSetRespVO.setRedirectType(pageSetDO.getRedirectType());
 
         // 读取每个页面的组件和配置
         List<PageDTO> pageDTOs = new ArrayList<>();
         pageDOs.forEach(pageDO -> {
-            List<AppResourceComponentDO> componentDOs = componentDataRepository.findByAppIdAndPageUuid(applicationId, pageDO.getPageUuid());
+            List<AppResourceComponentDO> componentDOs = componentDataRepository.findByAppIdAndPageUuid(applicationId,
+                    pageDO.getPageUuid());
             PageDTO pageDTO = BeanUtils.toBean(pageDO, PageDTO.class);
             pageDTO.setComponents(componentDOs.stream()
                     .map(componentDO -> BeanUtils.toBean(componentDO, ComponentDTO.class))
@@ -127,7 +130,6 @@ public class PageSetServiceProvider {
         return loadPageSetRespVO;
     }
 
-
     public PageSetRespDTO getPageSet(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(pageSetId);
         if (pageSetDO == null) {
@@ -138,7 +140,6 @@ public class PageSetServiceProvider {
 
         return pageSetRespDTO;
     }
-
 
     public ListPageSetRespVO listPageSet(ListPageSetReqVO listPageSetReqVO) {
         ListPageSetRespVO respVO = new ListPageSetRespVO();

@@ -27,4 +27,10 @@ public class DataSelectionConfig {
 
     @Schema(description = "关联的目标字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
     private String targetFieldUuid;
+
+    @Schema(description = "关联的目标字段名称", example = "user_name")
+    private String targetFieldName;
+
+    @Schema(description = "关联的目标表名", example = "t_user_info")
+    private String targetTableName;
 }

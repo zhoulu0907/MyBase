@@ -54,35 +54,34 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
     private void validateRuleGroup(MetadataValidationRuleGroupDO ruleGroup, Map<String, Object> context, Map<String, String> fieldUuidToNameMap, SemanticFieldSchemaDTO field, SemanticValidationContext svcContext) {
         List<MetadataValidationRuleDefinitionDO> rules = svcContext.getRuleDefinitionsByGroup().getOrDefault(ruleGroup.getGroupUuid(), Collections.emptyList());
         if (rules.isEmpty()) { return; }
-        String expression = buildExpression(rules, fieldUuidToNameMap);
+        String expression = buildExpression(rules, fieldUuidToNameMap, context);
         Serializable compiled = MVEL.compileExpression(expression, parserContext);
         Object result = MVEL.executeExpression(compiled, context);
         if (Boolean.TRUE.equals(result)) {
-            String message = Optional.ofNullable(ruleGroup.getPopPrompt()).filter(s -> !s.trim().isEmpty()).orElse("字段[" + field.getDisplayName() + "]不满足自定义校验规则：" + ruleGroup.getRgName());
-            String prefix = svcContext.getTableName() != null ? "表[" + svcContext.getTableName() + "] " : "";
-            throw new IllegalArgumentException(prefix + message);
+            String message = Optional.ofNullable(ruleGroup.getPopPrompt()).filter(s -> !s.trim().isEmpty()).orElse(field.getDisplayName() + "不满足自定义校验规则：" + ruleGroup.getRgName());
+            throw new IllegalArgumentException(message);
         }
     }
 
-    private String buildExpression(List<MetadataValidationRuleDefinitionDO> allRules, Map<String, String> fieldUuidToNameMap) {
+    private String buildExpression(List<MetadataValidationRuleDefinitionDO> allRules, Map<String, String> fieldUuidToNameMap, Map<String, Object> context) {
         List<MetadataValidationRuleDefinitionDO> topRules = allRules.stream().filter(rule -> rule.getParentRuleUuid() == null).collect(Collectors.toList());
         if (topRules.isEmpty()) { return "false"; }
         List<String> topExpressions = new ArrayList<>();
         for (MetadataValidationRuleDefinitionDO topRule : topRules) {
-            String expr = buildRuleExpression(topRule, allRules, fieldUuidToNameMap);
+            String expr = buildRuleExpression(topRule, allRules, fieldUuidToNameMap, context);
             if (expr != null && !expr.trim().isEmpty()) { topExpressions.add("(" + expr + ")"); }
         }
         return topExpressions.isEmpty() ? "false" : String.join(" || ", topExpressions);
     }
 
-    private String buildRuleExpression(MetadataValidationRuleDefinitionDO rule, List<MetadataValidationRuleDefinitionDO> allRules, Map<String, String> fieldUuidToNameMap) {
-        if ("CONDITION".equals(rule.getLogicType())) { return buildConditionExpression(rule, fieldUuidToNameMap); }
+    private String buildRuleExpression(MetadataValidationRuleDefinitionDO rule, List<MetadataValidationRuleDefinitionDO> allRules, Map<String, String> fieldUuidToNameMap, Map<String, Object> context) {
+        if ("CONDITION".equals(rule.getLogicType())) { return buildConditionExpression(rule, fieldUuidToNameMap, context); }
         if ("LOGIC".equals(rule.getLogicType())) {
             List<MetadataValidationRuleDefinitionDO> children = findChildRules(rule.getDefinitionUuid(), allRules);
-            if (children.isEmpty()) { return handleEmptyLogicNode(rule, fieldUuidToNameMap); }
+            if (children.isEmpty()) { return handleEmptyLogicNode(rule, fieldUuidToNameMap, context); }
             List<String> childExpressions = new ArrayList<>();
             for (MetadataValidationRuleDefinitionDO child : children) {
-                String childExpr = buildRuleExpression(child, allRules, fieldUuidToNameMap);
+                String childExpr = buildRuleExpression(child, allRules, fieldUuidToNameMap, context);
                 if (childExpr != null && !childExpr.trim().isEmpty()) { childExpressions.add("(" + childExpr + ")"); }
             }
             if (childExpressions.isEmpty()) { return "false"; }
@@ -92,18 +91,69 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
         return "false";
     }
 
-    private String handleEmptyLogicNode(MetadataValidationRuleDefinitionDO rule, Map<String, String> fieldUuidToNameMap) {
-        if (rule.getOperator() != null && !rule.getOperator().trim().isEmpty()) { return buildConditionExpression(rule, fieldUuidToNameMap); }
+    private String handleEmptyLogicNode(MetadataValidationRuleDefinitionDO rule, Map<String, String> fieldUuidToNameMap, Map<String, Object> context) {
+        if (rule.getOperator() != null && !rule.getOperator().trim().isEmpty()) { return buildConditionExpression(rule, fieldUuidToNameMap, context); }
         return "AND".equals(rule.getLogicOperator()) ? "true" : "false";
     }
 
-    private String buildConditionExpression(MetadataValidationRuleDefinitionDO rule, Map<String, String> fieldUuidToNameMap) {
+    private String buildConditionExpression(MetadataValidationRuleDefinitionDO rule, Map<String, String> fieldUuidToNameMap, Map<String, Object> context) {
         String fieldName = getFieldName(rule, fieldUuidToNameMap);
         if (fieldName == null) { return "false"; }
         OpEnum operator = OpEnum.valueOf(rule.getOperator());
         Object value = rule.getFieldValue();
         Object value2 = rule.getFieldValue2();
+        // 当value_type为variables时，field_value存储的是另一个字段的ID，需要解析为字段名或直接获取字段值
+        String valueType = rule.getValueType();
+        if ("variables".equalsIgnoreCase(valueType)) {
+            // field_value存储的是字段ID，需要转换为字段名以便在表达式中引用
+            String targetFieldName = resolveFieldIdToName(value, fieldUuidToNameMap);
+            String targetFieldName2 = resolveFieldIdToName(value2, fieldUuidToNameMap);
+            return buildVariableOperatorExpression(fieldName, operator, targetFieldName, targetFieldName2);
+        }
         return buildOperatorExpression(fieldName, operator, value, value2);
+    }
+
+    /**
+     * 将字段ID解析为字段名
+     *
+     * @param fieldId 字段ID（可能是Long或String类型）
+     * @param fieldUuidToNameMap 字段UUID到字段名的映射
+     * @return 字段名，如果找不到则返回null
+     */
+    private String resolveFieldIdToName(Object fieldId, Map<String, String> fieldUuidToNameMap) {
+        if (fieldId == null) { return null; }
+        String fieldIdStr = String.valueOf(fieldId);
+        // 尝试通过UUID直接查找
+        if (fieldUuidToNameMap.containsKey(fieldIdStr)) {
+            return fieldUuidToNameMap.get(fieldIdStr);
+        }
+        // 尝试通过ID匹配（遍历查找）
+        for (Map.Entry<String, String> entry : fieldUuidToNameMap.entrySet()) {
+            // 字段UUID可能是长整型ID的字符串形式
+            if (entry.getKey().equals(fieldIdStr)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 构建变量类型的操作表达式（字段与字段比较）
+     */
+    private String buildVariableOperatorExpression(String fieldName, OpEnum operator, String targetFieldName, String targetFieldName2) {
+        if (targetFieldName == null) { return "false"; }
+        switch (operator) {
+            case EQUALS: return String.format("(%s != null && %s != null && %s == %s)", fieldName, targetFieldName, fieldName, targetFieldName);
+            case NOT_EQUALS: return String.format("(%s != null && %s != null && %s != %s)", fieldName, targetFieldName, fieldName, targetFieldName);
+            case GREATER_THAN: return String.format("(%s != null && %s != null && %s > %s)", fieldName, targetFieldName, fieldName, targetFieldName);
+            case GREATER_EQUALS: return String.format("(%s != null && %s != null && %s >= %s)", fieldName, targetFieldName, fieldName, targetFieldName);
+            case LESS_THAN: return String.format("(%s != null && %s != null && %s < %s)", fieldName, targetFieldName, fieldName, targetFieldName);
+            case LESS_EQUALS: return String.format("(%s != null && %s != null && %s <= %s)", fieldName, targetFieldName, fieldName, targetFieldName);
+            case RANGE:
+                if (targetFieldName2 == null) { return "false"; }
+                return String.format("(%s != null && %s != null && %s != null && %s >= %s && %s <= %s)", fieldName, targetFieldName, targetFieldName2, fieldName, targetFieldName, fieldName, targetFieldName2);
+            default: return "false";
+        }
     }
 
     private String buildOperatorExpression(String fieldName, OpEnum operator, Object value, Object value2) {

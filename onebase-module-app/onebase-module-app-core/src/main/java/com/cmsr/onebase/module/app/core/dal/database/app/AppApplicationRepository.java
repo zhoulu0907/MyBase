@@ -95,6 +95,12 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
         return list(queryWrapper);
     }
 
+    public List<AppApplicationDO> getSimpleAllAppList(Long tenantId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.TENANT_ID.eq(tenantId));
+        return list(queryWrapper);
+    }
+
     public List<AppApplicationDO> findAppApplicationByAppName(String appName, Integer status) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_APPLICATION.APP_NAME.like(appName).when(StringUtils.isNotBlank(appName)))

@@ -41,6 +41,12 @@
         </dependency>
         <dependency>
             <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-dashboard-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-module-app-api</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -160,7 +166,6 @@
             <artifactId>mockito-inline</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

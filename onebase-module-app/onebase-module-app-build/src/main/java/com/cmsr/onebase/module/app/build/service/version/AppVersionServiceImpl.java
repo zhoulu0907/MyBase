@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.build.service.version;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -9,13 +10,17 @@ import java.util.function.BiConsumer;
 import java.util.zip.ZipOutputStream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
@@ -23,11 +28,14 @@ import com.cmsr.onebase.framework.common.util.io.ZipUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
+import com.cmsr.onebase.module.app.build.vo.version.ExportPageReqVO;
+import com.cmsr.onebase.module.app.build.vo.version.ExportPageRespVO;
 import com.cmsr.onebase.module.app.build.vo.version.VersionImportReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionOnlineReq;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageReqVo;
 import com.cmsr.onebase.module.app.build.vo.version.VersionPageRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
+import com.cmsr.onebase.module.app.core.dal.database.app.AppExportRepository;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
@@ -35,6 +43,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthFieldDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthRoleDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthViewDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppExportDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppNavigationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
@@ -44,13 +53,17 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchCompo
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceWorkbenchPageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
+import com.cmsr.onebase.module.app.core.enums.app.AppExportStatusEnum;
 import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
 import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
+import com.cmsr.onebase.module.infra.api.file.FileApi;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.export.MetadataExportDataDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +96,14 @@ public class AppVersionServiceImpl implements AppVersionService {
     private static final String CONFIG_METADATA = "config/metadata.json";
     private static final String CONFIG_BPM = "config/bpm.json";
 
+    /**
+     * 自注入代理对象，用于调用异步方法（解决同一类中 @Async 不生效的问题）
+     * 使用 @Lazy 避免循环依赖
+     */
+    @Lazy
+    @Autowired
+    private AppVersionServiceImpl self;
+
     @Autowired
     private AppApplicationRepository applicationRepository;
 
@@ -106,6 +127,12 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Autowired
     private TransactionTemplate transactionTemplate;
+
+    @Autowired
+    private AppExportRepository appExportRepository;
+
+    @Autowired
+    private FileApi fileApi;
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
@@ -228,64 +255,6 @@ public class AppVersionServiceImpl implements AppVersionService {
         });
     }
 
-    /**
-     * 导出应用版本配置压缩包
-     *
-     * @param versionId 版本ID
-     * @param response  HTTP响应对象
-     */
-    @Override
-    public void exportApplicationVersion(Long versionId, HttpServletResponse response) {
-        // 获取版本信息
-        AppVersionDO versionDO = versionRepository.getById(versionId);
-        if (versionDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
-        }
-
-        // 获取应用信息
-        Long applicationId = versionDO.getApplicationId();
-        AppApplicationDO applicationDO = applicationRepository.getById(applicationId);
-        if (applicationDO == null) {
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
-        }
-
-        // 获取版本配置数据
-        Long versionTag = versionId;
-        ApplicationVersionConfigData configData = ApplicationManager
-                .withoutVersionTagCondition(() -> appDataManager.getApplicationVersionConfigData(applicationId,
-                        versionTag));
-
-        // 设置响应头
-        String fileName = String.format("%s_%s_%s_config.zip", applicationDO.getAppName(), versionDO.getVersionName(),
-                versionDO.getVersionNumber());
-        try {
-            fileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
-        } catch (Exception e) {
-            log.warn("文件名编码转换失败", e);
-        }
-        response.setContentType("application/zip");
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-
-        // 创建ZIP文件
-        try (ZipOutputStream zos = new ZipOutputStream(response.getOutputStream(), StandardCharsets.UTF_8)) {
-            // 写入版本信息
-            ZipUtils.writeJsonToZip(zos, "version.json", versionDO);
-
-            // 写入应用信息
-            ZipUtils.writeJsonToZip(zos, "application.json", applicationDO);
-
-            // 写入配置数据
-            writeConfigDataToZip(zos, configData);
-
-            zos.finish();
-            response.flushBuffer();
-        } catch (IOException e) {
-            log.error("导出应用版本配置失败", e);
-            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_ERROR);
-        }
-    }
-
     @Override
     public void importApplicationVersion(VersionImportReq versionImportReq) {
         MultipartFile file = versionImportReq.getFile();
@@ -299,23 +268,38 @@ public class AppVersionServiceImpl implements AppVersionService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_IMPORT_ERROR);
         }
 
-        // 创建全新的应用
         AppApplicationDO importApp = importPackage.getApplicationDO();
         if (importApp == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_IMPORT_ERROR);
         }
 
-        transactionTemplate.executeWithoutResult(transactionStatus -> {
-            // 拷贝导入的应用信息，创建新应用（去除原有ID，仅保留必要信息）
-            String appUid = appCommonService.findAndCreateAppUid();
-            AppApplicationDO newApp = applicationRepository.createImportedApplication(importApp, appUid,
-                    TenantContextHolder.getRequiredTenantId());
-            Long applicationId = newApp.getId();
+        Long applicationId = versionImportReq.getApplicationId();
+        if (applicationId != null) {
+            // 覆盖当前应用的开发版本
+            AppApplicationDO existingApp = appCommonService.validateApplicationExist(applicationId);
+            transactionTemplate.executeWithoutResult(transactionStatus -> {
+                // 删除现有的开发版本数据（version_tag 为 0）
+                appDataManager.deleteApplicationVersionData(applicationId, VersionTagEnum.BUILD.getValue());
 
-            // 导入配置数据到新应用
-            appDataManager.saveApplicationVersionConfigData(applicationId, appUid, newApp.getTenantId(), 0L,
-                    importPackage.getConfigData());
-        });
+                // 导入配置数据到开发版本
+                appDataManager.saveApplicationVersionConfigData(applicationId, existingApp.getAppUid(),
+                        existingApp.getTenantId(), VersionTagEnum.BUILD.getValue(), importPackage.getConfigData());
+            });
+        } else {
+            // 创建全新的应用
+            transactionTemplate.executeWithoutResult(transactionStatus -> {
+                // 拷贝导入的应用信息，创建新应用（去除原有ID，仅保留必要信息）
+                String appUid = appCommonService.findAndCreateAppUid();
+                AppApplicationDO newApp = applicationRepository.createImportedApplication(importApp, appUid,
+                        TenantContextHolder.getRequiredTenantId());
+                Long newApplicationId = newApp.getId();
+
+                // 导入配置数据到新应用
+                appDataManager.saveApplicationVersionConfigData(newApplicationId, appUid, newApp.getTenantId(),
+                        VersionTagEnum.BUILD.getValue(), importPackage.getConfigData());
+                log.info("创建新应用，newApplicationId: {}", newApplicationId);
+            });
+        }
     }
 
     private ImportPackage parseImportFile(MultipartFile file) {
@@ -386,35 +370,312 @@ public class AppVersionServiceImpl implements AppVersionService {
         if (navigationJson != null) {
             configData.setNavigation(JsonUtils.parseObject(navigationJson, AppNavigationDO.class));
         }
+
+        String bpmJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_BPM));
+        if (bpmJson != null) {
+            configData.setBpmConfig(JsonUtils.parseObject(bpmJson, Object.class));
+        }
+
+        String metadataJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_METADATA));
+        if (metadataJson != null) {
+            configData.setMetaDataConfig(JsonUtils.parseObject(metadataJson, MetadataExportDataDTO.class));
+        }
+
     }
 
     /**
-     * 将配置数据写入ZIP文件
+     * 导出指定版本的应用配置为 ZIP
      *
-     * @param zos        ZIP输出流
-     * @param configData 配置数据
-     * @throws IOException IO异常
+     * @param versionId 版本ID
+     * @return 导出记录ID
      */
-    private void writeConfigDataToZip(ZipOutputStream zos, ApplicationVersionConfigData configData)
-            throws IOException {
-        Map<String, Object> configMap = new LinkedHashMap<>();
-        configMap.put(CONFIG_WORKBENCH_COMPONENTS, configData.getWorkbenchComponents());
-        configMap.put(CONFIG_COMPONENTS, configData.getComponents());
-        configMap.put(CONFIG_WORKBENCH_PAGES, configData.getWorkbenchPages());
-        configMap.put(CONFIG_PAGES, configData.getPages());
-        configMap.put(CONFIG_PAGE_SETS, configData.getPageSets());
-        configMap.put(CONFIG_MENUS, configData.getMenus());
-        configMap.put(CONFIG_AUTH_VIEWS, configData.getAuthViews());
-        configMap.put(CONFIG_AUTH_FIELDS, configData.getAuthFields());
-        configMap.put(CONFIG_AUTH_DATA_GROUPS, configData.getAuthDataGroups());
-        configMap.put(CONFIG_AUTH_PERMISSIONS, configData.getAuthPermissions());
-        configMap.put(CONFIG_NAVIGATION, configData.getNavigation());
-        configMap.put(CONFIG_AUTH_ROLES, configData.getAuthRoles());
-        configMap.put(CONFIG_METADATA, configData.getMetaDataConfig());
-        configMap.put(CONFIG_BPM, configData.getBpmConfig());
+    @Override
+    public Long exportApplicationVersion(Long versionId, Long applicationId) {
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
-        for (Map.Entry<String, Object> entry : configMap.entrySet()) {
-            ZipUtils.writeJsonToZip(zos, entry.getKey(), entry.getValue());
+        AppVersionDO versionDO = null;
+        // 验证版本是否存在且属于当前应用
+        if (versionId.intValue() == VersionTypeEnum.BUILD.getValue()
+                || versionId.intValue() == VersionTypeEnum.RUNTIME.getValue()) {
+            versionDO = new AppVersionDO();
+            versionDO.setApplicationId(applicationId);
+            versionDO.setVersionType(versionId.intValue());
+        } else {
+            versionDO = ApplicationManager
+                    .withoutApplicationIdAndVersionTag(
+                            () -> versionRepository.getById(versionId));
+        }
+
+        if (versionDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
+        }
+        if (!versionDO.getApplicationId().equals(applicationId)) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
+        }
+
+        // 创建导出记录，状态为导出中
+        AppExportDO exportDO = new AppExportDO();
+        exportDO.setApplicationId(applicationId);
+        exportDO.setExportStatus(AppExportStatusEnum.EXPORTING.getValue());
+        exportDO.setVersionId(versionId);
+        appExportRepository.save(exportDO);
+        Long exportId = exportDO.getId();
+
+        // 通过代理对象调用异步方法，确保 @Async 生效
+        self.asyncExportApplication(exportId, applicationDO, versionDO);
+
+        return exportId;
+    }
+
+    /**
+     * 根据导出记录ID获取导出资源
+     * <p>
+     * 如果导出状态为 SUCCESS，则通过 response 返回文件流；否则返回当前状态值
+     *
+     * @param exportId 导出记录ID
+     * @param request  HTTP 请求
+     * @param response HTTP 响应，用于输出文件流（仅当状态为成功时）
+     */
+    @Override
+    public void getExportApplicationResource(Long exportId, HttpServletRequest request,
+            HttpServletResponse response) {
+        // 查询导出记录
+        AppExportDO exportDO = appExportRepository.getById(exportId);
+        if (exportDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_ERROR);
+        }
+
+        String objectId = exportDO.getObjectId();
+        Long applicationId = exportDO.getApplicationId();
+
+        // 将 objectId（文件ID）转换为 Long，通过 FileApi 获取文件内容并写入 response
+        try {
+            Long fileId = Long.parseLong(objectId);
+            // 使用 getFileContentBytes 获取文件字节数组
+            CommonResult<byte[]> result = fileApi.getFileContentBytes(fileId);
+            if (result == null || !result.isSuccess() || result.getData() == null) {
+                log.error("获取文件内容失败，exportId: {}, fileId: {}", exportId, fileId);
+                throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_ERROR);
+            }
+
+            byte[] fileContent = result.getData();
+            String fileName = applicationId + ".zip";
+
+            // 设置响应头
+            response.setContentType("application/zip");
+            response.setCharacterEncoding("UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+            // 将文件内容写入 response
+            response.getOutputStream().write(fileContent);
+            response.getOutputStream().flush();
+
+        } catch (Exception e) {
+            log.error("获取导出资源失败，exportId: {}, objectId: {}", exportId, objectId, e);
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_ERROR);
         }
     }
+
+    /**
+     * 异步执行应用导出
+     *
+     * @param exportId      导出记录ID
+     * @param applicationDO 应用信息
+     * @param versionDO     版本信息
+     */
+    @Async
+    public void asyncExportApplication(Long exportId, AppApplicationDO applicationDO, AppVersionDO versionDO) {
+        log.info("异步执行应用导出，exportId: {}, applicationDO: {}, versionDO: {}", exportId, applicationDO, versionDO);
+
+        try {
+            String fileName = applicationDO.getAppName() + "_" + versionDO.getVersionNumber() + "_config.zip";
+
+            // 将 ZIP 写入内存
+            byte[] zipBytes;
+            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    ZipOutputStream zos = new ZipOutputStream(baos, StandardCharsets.UTF_8)) {
+                ZipUtils.writeJsonToZip(zos, "application.json", applicationDO);
+                ZipUtils.writeJsonToZip(zos, "version.json", versionDO);
+
+                long versionTag = resolveVersionTag(versionDO);
+                ApplicationVersionConfigData configData = ApplicationManager
+                        .withoutApplicationIdAndVersionTag(
+                                () -> appDataManager.getApplicationVersionConfigData(applicationDO.getId(),
+                                        versionTag));
+
+                appDataManager.writeConfigDataToZip(zos, configData, "");
+
+                zos.finish();
+                zipBytes = baos.toByteArray();
+            }
+
+            // 上传到对象存储
+            String objectId = fileApi.createFile(zipBytes, fileName, "app/export", "application/zip");
+
+            // 更新导出记录：状态为成功，保存 objectId
+            updateExportStatusAndObjectId(exportId, AppExportStatusEnum.SUCCESS, objectId);
+        } catch (Exception e) {
+            log.error("异步导出应用配置失败，exportId: {}", exportId, e);
+            // 导出失败，更新状态为失败
+            updateExportStatus(exportId, AppExportStatusEnum.FAILED);
+        }
+    }
+
+    /**
+     * 更新导出状态
+     *
+     * @param exportId 导出记录ID
+     * @param status   导出状态
+     */
+    private void updateExportStatus(Long exportId, AppExportStatusEnum status) {
+        updateExportStatusAndObjectId(exportId, status, null);
+    }
+
+    /**
+     * 更新导出状态和对象ID
+     *
+     * @param exportId 导出记录ID
+     * @param status   导出状态
+     * @param objectId 对象ID（S3中的资源ID）
+     */
+    private void updateExportStatusAndObjectId(Long exportId, AppExportStatusEnum status, String objectId) {
+        try {
+            AppExportDO exportDO = appExportRepository.getById(exportId);
+            if (exportDO != null) {
+                exportDO.setExportStatus(status.getValue());
+                if (objectId != null) {
+                    exportDO.setObjectId(objectId);
+                }
+                appExportRepository.updateById(exportDO);
+            }
+        } catch (Exception e) {
+            log.error("更新导出状态失败，exportId: {}, status: {}, objectId: {}", exportId, status, objectId, e);
+        }
+    }
+
+    /**
+     * 查询导出状态
+     *
+     * @param exportId 导出记录ID
+     * @return 导出状态值
+     */
+    @Override
+    public Integer getExportStatus(Long exportId) {
+        AppExportDO exportDO = appExportRepository.getById(exportId);
+        if (exportDO == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_RECORD_NOT_EXIST);
+        }
+        Integer exportStatus = exportDO.getExportStatus();
+        if (exportStatus == null) {
+            exportStatus = AppExportStatusEnum.UNKNOWN.getValue();
+        }
+        return exportStatus;
+    }
+
+    /**
+     * 分页查询导出记录
+     *
+     * @param pageReqVO 分页查询请求
+     * @return 分页结果
+     */
+    @Override
+    public PageResult<ExportPageRespVO> getExportPage(ExportPageReqVO pageReqVO) {
+        PageResult<AppExportDO> pageResult = appExportRepository.selectPage(pageReqVO.getApplicationId(),
+                pageReqVO.getExportStatus(),
+                pageReqVO);
+
+        if (pageResult.getList().isEmpty()) {
+            return PageResult.empty();
+        }
+
+        // 获取用户信息
+        AppCommonService.UserHelper userHelper = appCommonService.getUserHelper(pageResult.getList());
+
+        // 转换为响应VO
+        List<ExportPageRespVO> respVOS = pageResult.getList().stream().map(exportDO -> {
+            ExportPageRespVO respVO = BeanUtils.toBean(exportDO, ExportPageRespVO.class);
+            respVO.setCreatorName(userHelper.getUserNickname(exportDO.getCreator()));
+            respVO.setUpdaterName(userHelper.getUserNickname(exportDO.getUpdater()));
+            return respVO;
+        }).toList();
+
+        return new PageResult<>(respVOS, pageResult.getTotal());
+    }
+
+    /**
+     * 删除导出记录
+     *
+     * @param exportId 导出记录ID
+     */
+    @Override
+    public void deleteExportRecord(Long exportId) {
+        Long applicationId = ApplicationManager.getApplicationId();
+        if (applicationId == null) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_NOT_EXIST);
+        }
+
+        // 查询导出记录并验证是否属于当前应用
+        AppExportDO exportDO = appExportRepository.getById(exportId);
+        if (exportDO == null || !exportDO.getApplicationId().equals(applicationId)) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_RECORD_DELETE_ERROR);
+        }
+
+        // 删除导出记录
+        appExportRepository.removeById(exportId);
+    }
+
+    /**
+     * 重试导出应用
+     *
+     * @param exportId  导出记录ID
+     * @param versionId 版本ID
+     * @return 导出记录ID（返回原导出记录ID）
+     */
+    @Override
+    public Long retryExportApplication(Long exportId, Long applicationId) {
+        AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
+
+        // 查询导出记录并验证是否属于当前应用
+        AppExportDO exportDO = appExportRepository.getById(exportId);
+        if (exportDO == null || !exportDO.getApplicationId().equals(applicationId)) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_ERROR);
+        }
+
+        // 验证版本是否存在且属于当前应用
+        AppVersionDO versionDO = versionRepository.getById(exportDO.getVersionId());
+        if (versionDO == null || !versionDO.getApplicationId().equals(applicationId)) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
+        }
+
+        // 验证导出状态，只有失败状态才能重试
+        Integer exportStatus = exportDO.getExportStatus();
+        if (exportStatus == null || !AppExportStatusEnum.FAILED.getValue().equals(exportStatus)) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_EXPORT_ERROR);
+        }
+
+        // 更新导出记录状态为导出中
+        exportDO.setExportStatus(AppExportStatusEnum.EXPORTING.getValue());
+        exportDO.setObjectId(null); // 清空之前的文件ID
+        appExportRepository.updateById(exportDO);
+
+        // 通过代理对象调用异步方法，确保 @Async 生效
+        self.asyncExportApplication(exportId, applicationDO, versionDO);
+
+        return exportId;
+    }
+
+    /**
+     * 按版本类型解析用于查询配置的 versionTag：BUILD=0，RUNTIME=1，HISTORY=版本 ID
+     */
+    private long resolveVersionTag(AppVersionDO versionDO) {
+        Integer vt = versionDO.getVersionType();
+        if (vt != null && vt == VersionTypeEnum.BUILD.getValue()) {
+            return VersionTagEnum.BUILD.getValue();
+        }
+        if (vt != null && vt == VersionTypeEnum.RUNTIME.getValue()) {
+            return VersionTagEnum.RUNTIME.getValue();
+        }
+        return versionDO.getId();
+    }
+
 }

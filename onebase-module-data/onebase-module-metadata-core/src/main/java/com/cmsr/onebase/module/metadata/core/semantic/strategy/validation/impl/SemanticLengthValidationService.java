@@ -38,15 +38,13 @@ public class SemanticLengthValidationService implements SemanticValidationServic
                 if (rule.getTrimBefore() != null && rule.getTrimBefore() == 1) { stringValue = stringValue.trim(); }
                 if (rule.getMinLength() != null && stringValue.length() < rule.getMinLength()) {
                     String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                            ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]长度不能小于" + rule.getMinLength() + "个字符";
-                    String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                    throw new IllegalArgumentException(prefix + errorMessage);
+                            ? rule.getPromptMessage() : field.getDisplayName() + "长度不能小于" + rule.getMinLength() + "个字符";
+                    throw new IllegalArgumentException(errorMessage);
                 }
                 if (rule.getMaxLength() != null && stringValue.length() > rule.getMaxLength()) {
                     String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
-                            ? rule.getPromptMessage() : "字段[" + field.getDisplayName() + "]长度不能大于" + rule.getMaxLength() + "个字符";
-                    String prefix = context.getTableName() != null ? "表[" + context.getTableName() + "] " : "";
-                    throw new IllegalArgumentException(prefix + errorMessage);
+                            ? rule.getPromptMessage() : field.getDisplayName() + "长度不能大于" + rule.getMaxLength() + "个字符";
+                    throw new IllegalArgumentException(errorMessage);
                 }
             }
         }

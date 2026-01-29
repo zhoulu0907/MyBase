@@ -20,4 +20,12 @@ public class VersionImportReq {
     @Schema(description = "版本压缩包", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "导入文件不能为空")
     private MultipartFile file;
+
+    /**
+     * 应用ID（可选）
+     * 如果传了应用ID，则覆盖当前应用的开发版本（version_tag 为0）
+     * 如果没传，就创建新的应用
+     */
+    @Schema(description = "应用ID（可选），如果传了则覆盖当前应用的开发版本，没传则创建新应用")
+    private Long applicationId;
 }

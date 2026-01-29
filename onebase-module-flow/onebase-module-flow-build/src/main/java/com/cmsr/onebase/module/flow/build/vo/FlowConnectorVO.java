@@ -37,5 +37,19 @@ public class FlowConnectorVO {
     @Schema(description = "连接器创建时间")
     private LocalDateTime createTime;
 
+    @Schema(description = "环境UUID")
+    private String envUuid;
+
+    @Schema(description = "环境名称")
+    private String envName;
+
+    @Schema(description = "环境编码（DEV/TEST/PROD）")
+    private String envCode;
+
+    @Schema(description = "启用状态（0-禁用，1-启用）")
+    private Integer activeStatus;
+
+    @Schema(description = "配置状态（configured-已配置, unconfigured-未配置）")
+    private String configStatus;
 
 }

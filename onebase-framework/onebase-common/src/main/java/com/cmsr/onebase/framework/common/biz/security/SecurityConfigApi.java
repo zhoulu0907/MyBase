@@ -211,4 +211,22 @@ public interface SecurityConfigApi {
     @PostMapping("/session-idle/update")
     CommonResult<Boolean> updateSessionIdleKey(@RequestParam("tenantId") Long tenantId,
                                                 @RequestParam("userId") Long userId, @RequestParam("deviceId") String deviceId);
+
+    /**
+     * 根据租户ID删除安全配置记录
+     *
+     * @param tenantId 租户ID
+     * @return 删除记录数量
+     */
+    @PostMapping("/delete-config-by-tenant")
+    CommonResult<Long> removeSecurityConfigsByTenantId(@RequestParam("tenantId") Long tenantId);
+
+    /**
+     * 根据租户ID删除安全记录
+     *
+     * @param tenantId 租户ID
+     * @return 删除记录数量
+     */
+    @PostMapping("/delete-record-by-tenant")
+    CommonResult<Long> removeSecurityRecordsByTenantId(@RequestParam("tenantId") Long tenantId);
 }

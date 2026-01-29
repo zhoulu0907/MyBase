@@ -17,5 +17,5 @@ public interface DashboardProjectApi {
 
     Long createDashboardByTemplate(Long templateId, String dashboardName);
 
-
+    Long removeDashboardByAppId(Long appId);
 }

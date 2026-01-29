@@ -44,21 +44,19 @@ class FlowConnectorRepositoryTest {
         testData = new FlowConnectorDO();
         testData.setConnectorUuid("test-connector-uuid");
         testData.setConnectorName("测试连接器");
-        testData.setCode("TEST_CONNECTOR");
         testData.setTypeCode("HTTP");
         testData.setDescription("这是一个测试连接器");
-        testData.setConfig("{}");
-        testData.setConfigJson("{\"type\":\"object\",\"properties\":{\"action1\":{},\"action2\":{}}}");
+        testData.setConfig("{\"type\":\"object\",\"properties\":{\"action1\":{},\"action2\":{}}}");
         repository.save(testData);
     }
 
     /**
-     * 测试根据 connectorUuid 查询连接器 - 成功场景
+     * 测试根据 ID 查询连接器 - 成功场景
      */
     @Test
-    void testSelectByConnectorUuid_Success() {
+    void testGetById_Success() {
         // When
-        FlowConnectorDO result = repository.selectByConnectorUuid("test-connector-uuid");
+        FlowConnectorDO result = repository.getById(testData.getId());
 
         // Then
         assertThat(result).isNotNull();
@@ -68,24 +66,12 @@ class FlowConnectorRepositoryTest {
     }
 
     /**
-     * 测试根据不存在的 connectorUuid 查询 - 返回 null
+     * 测试根据不存在的 ID 查询 - 返回 null
      */
     @Test
-    void testSelectByConnectorUuid_NotFound() {
+    void testGetById_NotFound() {
         // When
-        FlowConnectorDO result = repository.selectByConnectorUuid("non-existent-uuid");
-
-        // Then
-        assertThat(result).isNull();
-    }
-
-    /**
-     * 测试根据 null connectorUuid 查询 - 返回 null
-     */
-    @Test
-    void testSelectByConnectorUuid_NullInput() {
-        // When
-        FlowConnectorDO result = repository.selectByConnectorUuid(null);
+        FlowConnectorDO result = repository.getById(999999L);
 
         // Then
         assertThat(result).isNull();
