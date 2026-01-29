@@ -5,7 +5,6 @@ import {
   dataFieldConfig,
   directionConfig,
   layoutConfig,
-  alignConfig,
   statusConfig,
   widthConfig,
   labelConfig,
@@ -44,7 +43,6 @@ import type {
   TTextAreaDefaultType,
   TNumberDefaultType,
   TTextDefaultType,
-  IAlignConfigType,
   TRadioDefaultType,
   ICommonConfigType,
   IDefaultValueConfigType
@@ -64,7 +62,6 @@ export type TXInputCheckboxEditData = Array<
   | ICheckboxDataConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | ICommonConfigType
@@ -155,8 +152,6 @@ const XCheckbox: XInputCheckboxSchema = {
     verifyConfig,
     // 显示状态
     statusConfig,
-    // 对齐方式
-    alignConfig,
     // 布局方式
     layoutConfig,
     // 字段宽度

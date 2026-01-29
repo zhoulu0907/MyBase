@@ -166,17 +166,6 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             </Grid.Row>
           )}
 
-          {typeof configs[verifyKey]['maxChecked'] === 'number' && (
-            <InputNumber
-              value={configs[verifyKey]['maxChecked']}
-              min={0}
-              prefix="可选数量限制"
-              onChange={(value) => {
-                if (!value) return;
-                handlePropsChange(verifyKey, { ...configs[verifyKey], maxChecked: value });
-              }}
-            />
-          )}
           {typeof configs[verifyKey]['maxCount'] === 'number' && (
             <InputNumber
               value={configs[verifyKey]['maxCount']}
