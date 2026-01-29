@@ -1,22 +1,16 @@
-import { Button, Checkbox, Form, Message, Popconfirm, Space, Table, Tooltip, List, Card } from '@arco-design/web-react';
+import { Button, Form, List, Card } from '@arco-design/web-react';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { isRuntimeEnv, menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
-import { getFileUrlById } from '@onebase/platform-center';
 import {
-  CATEGORY_TYPE,
-  dataMethodDeleteV2,
   dataMethodPageV2,
-  deleteFormDataPage,
-  DeleteMethodV2Params,
   getEntityFieldsWithChildren,
   getFormDataPage,
+  attachmentDownload,
   menuSignal,
   PageMethodV2Params,
   PageType,
-  queryFlowExecForm,
-  TRIGGER_EVENTS,
   VALIDATION_TYPE,
   type AppEntityField
 } from '@onebase/app';
@@ -25,6 +19,7 @@ import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
 import type { XCardConfig } from './schema';
 import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
+import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import PreviewRender from 'src/components/render/PreviewRender';
 import CardSearch from './cardSerach';
 import './index.css';
@@ -54,26 +49,45 @@ const XCard = memo(
 
     const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
     const { menuPermission, canCreate, canEdit, canDelete } = menuPermissionSignal;
+    const {
+      curPage,
+      setDrawerVisible,
+      setDrawerPageId,
+      setDetailPageViewId,
+      setRowDataId,
+      setFlows,
+      setBpmInstanceId,
+      setRowDataType
+    } = pagesRuntimeSignal;
+    const { curMenu } = menuSignal;
 
     const {
       status,
       runtime = true,
       metaData,
+      tableName,
       coverField,
       imageFill,
       titleField,
       showFields,
       columns,
       layout,
+      filterCondition,
       showAddBtn = true,
       searchItems,
       pageSetType,
-      cardWidth
+      cardWidth,
+      showFromPageData,
+      refresh,
+      sortBy,
     } = props;
     const [form] = Form.useForm();
     const [cardForm] = Form.useForm();
+    // 实际查询用的参数
+    let queryData: object = {};
+    let scrollLoad = false;
 
-    const [cardData, setCardData] = useState<any[]>([
+    const [cardData, setCardData] = useState<any[]>(runtime ? [] : [
       { key1: '1', key2: '2' },
       { key1: '1', key2: '2' },
       { key1: '1', key2: '2' },
@@ -83,12 +97,28 @@ const XCard = memo(
       { key1: '1', key2: '2' },
       { key1: '1', key2: '2' }
     ]);
+    const [cardTotal, setCardTotal] = useState<number>(0);
+    const [cardPageNo, setCardPageNo] = useState<number>(1);
 
     const [mainMetaData, setMainMetaData] = useState<any>({});
 
     useEffect(() => {
-      getMainMetaData();
+      if (refresh) {
+        handlePage();
+      }
+    }, [refresh]);
+
+    useEffect(() => {
+      if (metaData) {
+        getMainMetaData();
+      }
     }, [metaData]);
+
+    useEffect(() => {
+      if (metaData) {
+        handlePage();
+      }
+    }, [cardPageNo, metaData, sortBy]);
 
     const getMainMetaData = async () => {
       const res = await getEntityFieldsWithChildren(metaData);
@@ -97,21 +127,125 @@ const XCard = memo(
 
     // 新增
     const handleCreate = () => {
-      console.log('点击新增');
       if (!runtime) {
         return;
       }
+      setRowDataId('');
+      showFromPageData?.(null, true);
     };
     // 查询
-    const handleSearch = () => {};
+    const handleSearch = () => {
+      setCardPageNo(1);
+      handlePage();
+    };
 
     // 重置
-    const handleReset = () => {};
+    const handleReset = () => {
+      form.resetFields();
+      queryData = {};
+      setCardPageNo(1);
+      handlePage();
+    };
 
     const handlePage = async () => {
       if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
+
+      queryData = form.getFieldsValue();
+
+      const conditions: any[] = [];
+      Object.entries(queryData).forEach(([key, value]) => {
+        if (typeof value === 'object') {
+          if (value?.id == undefined || value?.id == null || value?.id == '') {
+            return;
+          }
+        }
+
+        if (value != undefined && value != null && value !== '') {
+          conditions.push({
+            nodeType: 'CONDITION',
+            fieldName: key,
+            operator: VALIDATION_TYPE.EQUALS,
+            fieldValue: typeof value === 'object' ? [value?.id] : [value]
+          });
+        }
+      });
+
+      const filters = {
+        nodeType: 'GROUP',
+        combinator: 'AND',
+        children: conditions
+      };
+
+      const req: PageMethodV2Params = {
+        pageNo: cardPageNo,
+        pageSize: 12,
+        filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
+      };
+      let res: any;
+      if (props?.pageSetType === PageType.BPM) {
+        const params = {
+          menuId: curMenu.value?.id,
+          tableName,
+          ...req
+        };
+        res = await getFormDataPage(params);
+      } else {
+        res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
+      }
+
+      const mainMetaData = await getEntityFieldsWithChildren(metaData);
+
+      const { list, total } = res;
+
+      let newCardData= [];
+      for(let item of (list || [])){
+        const newItem = item;
+        Object.entries(newItem).forEach(([key, value]) => {
+          // 优化：减少重复查找，提升可读性和性能
+          if (Array.isArray(mainMetaData?.parentFields)) {
+            const dataField = mainMetaData.parentFields.find(
+              (field: AppEntityField) => field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE
+            );
+            if (dataField && newItem[key]) {
+              // 仅当字段类型为日期且有值时格式化
+              const dateValue = new Date(newItem[key]);
+              if (!isNaN(dateValue.getTime())) {
+                newItem[key] = dateValue.toLocaleDateString();
+              }
+            }
+          }
+        });
+
+        const rowId = (item && item.id) || (item?.data && item.data.id);
+
+        let coverFieldValue = null;
+        if (coverField) {
+          coverFieldValue = await attachmentDownload(tableName, {
+            menuId: curMenu.value.id,
+            id: rowId,
+            fieldName: coverField,
+            fileId: item[coverField]?.[0].id
+          })
+        }
+        newCardData.push({
+          id: rowId,
+          ...newItem,
+          key: rowId,
+          [coverField]: coverFieldValue
+        })
+      }
+
+      cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
+      if (scrollLoad) {
+        setCardData((prev) => prev.concat(...newCardData));
+        setCardTotal(total);
+      } else {
+        setCardData(newCardData);
+        setCardTotal(total);
+      }
+      scrollLoad = false;
     };
 
     const getSpan = () => {
@@ -174,8 +308,6 @@ const XCard = memo(
             tooltip: ''
           }
         };
-
-        console.log('componentConfig', componentConfig);
 
         return (
           <PreviewRender
@@ -264,6 +396,7 @@ const XCard = memo(
           {/* 滚动加载 */}
           <Form
             form={cardForm}
+            className="cardListForm"
             labelCol={layout === 'horizontal' ? { span: 10 } : {}}
             wrapperCol={layout === 'horizontal' ? { span: 14 } : {}}
           >
@@ -271,7 +404,9 @@ const XCard = memo(
               bordered={false}
               dataSource={cardData}
               grid={{ span: getSpan(), gutter: [20, 20] }}
-              render={(item, index) => (
+              render={(item, index) => {
+                console.log('itrm',item,coverField)
+                return (
                 <Card
                   className="card"
                   bordered={false}
@@ -279,7 +414,7 @@ const XCard = memo(
                     coverField ? (
                       <img
                         style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
-                        src={getFileUrlById(item[coverField]?.[0]?.id)}
+                        src={item[coverField]}
                         alt=""
                       />
                     ) : undefined
@@ -298,7 +433,14 @@ const XCard = memo(
                     }
                   />
                 </Card>
-              )}
+              )
+              }}
+              onReachBottom={(currentPage) => {
+                if (currentPage < cardTotal) {
+                  scrollLoad = true;
+                  setCardPageNo((prev) => prev + 1)
+                }
+              }}
             ></List>
           </Form>
         </div>
