@@ -109,6 +109,7 @@ export interface XInputImgUploadConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
     maxSize: TNumberDefaultType;
     fileFormat: TTextDefaultType;
@@ -163,6 +164,7 @@ const XImgUpload: XInputImgUploadSchema = {
     },
     verify: {
       required: false,
+      noRepeat: false,
       maxCount: 1,
       maxSize: 10,
       fileFormat: ''

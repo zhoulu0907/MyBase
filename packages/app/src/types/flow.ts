@@ -254,11 +254,10 @@ export interface ListConnectorByTypeReq {
 }
 
 export interface ListConnectorActionReq {
-  connectorUuid: string;
+  id: string;
 }
 
 export interface GetActionValueReq {
-  connectorUuid: string;
   actionName: string;
 }
 

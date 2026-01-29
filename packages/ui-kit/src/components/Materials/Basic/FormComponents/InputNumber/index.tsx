@@ -40,10 +40,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
   // =====  内部状态 & 回显 end =====
 
   // ===== 表单上下文与字段名与值读取 begin =====
-  const {
-    form,
-    fieldValue
-  } = useFormFieldWatch(dataField);
+  const { form, fieldValue } = useFormFieldWatch(dataField);
   // ===== 表单上下文与字段名与值读取 end =====
 
   // ===== 外部事件：选择数据 begin =====
@@ -62,9 +59,6 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         value = Number(value);
         result = value;
       }
-      if (showPercent) {
-        value = value * 100;
-      }
       if (showPrecision && value) {
         result = Number(value).toFixed(precision);
       }
@@ -80,7 +74,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
 
       return result.toString();
     }
-  }
+  };
   // ===== 方法：帮助方法 end =====
 
   return (
@@ -90,7 +84,9 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           label.display &&
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
-        field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
+        field={
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`
+        }
         layout={layout}
         tooltip={ tooltip && {
           content: tooltip,
@@ -128,7 +124,9 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
               textAlignLast: align,
               pointerEvents: runtime ? 'unset' : 'none'
             }}
-            suffix={showUnit ? unitValue : ''}
+            suffix={
+              showUnit && showPercent && unitValue ? `% ${unitValue}` : showUnit ? unitValue : showPercent ? '%' : ''
+            }
           />
         )}
       </Form.Item>

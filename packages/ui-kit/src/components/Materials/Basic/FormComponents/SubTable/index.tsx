@@ -376,7 +376,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
         fixed: subTableConfig?.operateFixed ? 'right' : '',
         render: (_col: any, _record: any, index: number) => {
-          const delDisabled = (_record.key || _record.key === '0') && !subTableConfig?.deleteRow;
+          const delDisabled =
+            status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ||
+            ((_record.key || _record.key === 'θ') && !subTableConfig?.deleteRow);
+          //status的readonly优先级最高
           return (
             <Button
               type="text"
@@ -439,7 +442,13 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             )}
 
             {!detailMode && (
-              <Button type="outline" size="small" icon={<IconPlus />} onClick={handleAdd}>
+              <Button
+                type="outline"
+                size="small"
+                icon={<IconPlus />}
+                onClick={handleAdd}
+                disabled={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
+              >
                 新增一项
               </Button>
             )}

@@ -25,7 +25,6 @@ const XUserSelect = memo((props: XInputUserSelectConfig & { runtime?: boolean; d
     layout,
     selectScope,
     defaultUserValue,
-    labelColSpan = 0,
     runtime,
     detailMode
   } = props;

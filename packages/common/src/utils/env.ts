@@ -1,7 +1,7 @@
 import { CONFIG_PRIVATE_KEY, sm2Decrypt } from './crypto';
 
-export const getProdConfig = () => {
-  const config = (window as any).global_config?.CONFIG;
+export const getProdConfig = (key = 'CONFIG') => {
+  const config = (window as any).global_config?.[key];
   if (config) {
     const decryptedData = sm2Decrypt(CONFIG_PRIVATE_KEY, config);
     return JSON.parse(decryptedData as string);
@@ -11,6 +11,7 @@ export const getProdConfig = () => {
 };
 
 export const envConfig = process.env.NODE_ENV === 'production' ? getProdConfig() : (window as any).global_config;
+export const aiConfig = process.env.NODE_ENV === 'production' ? getProdConfig('AI_CONFIG') : (window as any).global_config;
 
 // 平台、空间、应用端环境
 export const getEnv = (): string => {
@@ -42,6 +43,10 @@ export const getPublicKey = (): string => {
 
 export const getMobileEditorURL = (): string => {
   return envConfig?.MOBILE_EDITOR_URL;
+};
+
+export const getAiGenURL = (): string => {
+  return aiConfig?.AI_CONFIG;
 };
 
 export const getResourceURL = (): string => {

@@ -44,6 +44,10 @@ export const CONFIG_TYPES = {
   RELATED_FORM_DATA: 'RelatedFormData',
   // 表格数据配置
   TABLE_DATA: 'TableData',
+  // 树字段配置
+  TREE_FIELDS: 'TreeFields',
+  // 树数据配置
+  TREE_DATA: 'TreeData',
   // 表格分页数量
   TABLE_PAGE_SIZE: 'TablePageSize',
   // 图片、附件上传大小限制

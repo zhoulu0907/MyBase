@@ -56,8 +56,48 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
       console.log('original nodeData: ', originalNodeData);
       console.log('formInfo: ', formInfo);
 
-      let param = { ...formInfo };
       const curNode = searchNodeById(nodeId.value, nodes.value);
+
+      // 对于 CONNECTOR 节点，从 signal 中读取数据（因为数据保存在 signal 中作为缓存）
+      let param: Record<string, any>;
+      if (curNode && curNode.type === NodeType.CONNECTOR) {
+        // 先调用保存方法，将最新的 actionParams 保存到 signal
+        console.log('CONNECTOR saveNode - checking saveActionParamsToSignal:', nodeInfo.props.form?.saveActionParamsToSignal);
+        // @ts-ignore - 调用表单实例上挂载的保存方法
+        if (nodeInfo.props.form?.saveActionParamsToSignal) {
+          console.log('CONNECTOR saveNode - calling saveActionParamsToSignal');
+          nodeInfo.props.form.saveActionParamsToSignal();
+        } else {
+          console.warn('CONNECTOR saveNode - saveActionParamsToSignal not found on form');
+        }
+
+        // 从 signal 中读取最新的数据（包含 actionParams 等）
+        const signalData = nodeData.value[nodeId.value] || {};
+        console.log('CONNECTOR saveNode - signalData:', signalData);
+        console.log('CONNECTOR saveNode - formInfo:', formInfo);
+
+        // 合并数据：先使用 signal 数据，然后用表单数据覆盖（表单数据可能是最新的）
+        param = { ...signalData, ...formInfo };
+
+        // 确保 actionParams 从 signal 中读取（因为它按 actionKey 存储，包含所有动作的参数）
+        if (signalData.actionParams) {
+          param.actionParams = signalData.actionParams;
+        }
+
+        // 如果表单中有 actionParams，也需要合并（可能是最新的编辑值）
+        if (formInfo.actionParams && typeof formInfo.actionParams === 'object') {
+          // 如果 signal 中也有 actionParams，合并它们
+          if (signalData.actionParams && typeof signalData.actionParams === 'object') {
+            param.actionParams = { ...signalData.actionParams, ...formInfo.actionParams };
+          } else {
+            param.actionParams = formInfo.actionParams;
+          }
+        }
+
+        console.log('CONNECTOR saveNode - final param:', param);
+      } else {
+        param = { ...formInfo };
+      }
 
       if (originalNodeData) {
         //   针对有变更的节点，需要清空下游节点的依赖

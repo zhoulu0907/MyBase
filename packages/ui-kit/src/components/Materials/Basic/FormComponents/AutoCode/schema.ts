@@ -111,7 +111,21 @@ const XautoCode: XautoCodeSchema = {
     tooltipConfig,
     ...dataFieldConfig,
     autoCodeConfig,
-    statusConfig,
+    {key: 'status',
+      name: '显示状态',
+      type: 'StatusRadio',
+      range: [
+        {
+          key: '只读',
+          text: '只读',
+          value: 'readonly'
+        },
+        {
+          key: '隐藏',
+          text: '隐藏',
+          value: 'hidden'
+        }
+    ]},
     layoutConfig,
     widthConfig
   ],
@@ -124,7 +138,7 @@ const XautoCode: XautoCodeSchema = {
     placeholder: '自动生成无需填写',
     tooltip: '',
     dataField: [],
-    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    status: STATUS_VALUES[STATUS_OPTIONS.READONLY],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF]
   }

@@ -117,7 +117,7 @@ const XFileUpload = memo(
                 </div>
               ) : (
                 <div className="uplaodList-text-item-opera">
-                  {showDownload && (
+                  {detailMode && showDownload && (
                     <IconDownload
                       style={{ color: '#009E9E' }}
                       onClick={async (e) => {

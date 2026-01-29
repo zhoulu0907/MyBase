@@ -1,3 +1,4 @@
+import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import { Form } from '@arco-design/web-react';
 import { getEntityFieldsWithChildren, getPageSetMetaData, type AppEntityField } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -5,6 +6,7 @@ import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   getComponentWidth,
+  normalizeFormValues,
   PreviewRender,
   startLoadPageSet,
   STATUS_OPTIONS,
@@ -14,7 +16,7 @@ import {
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import { forwardRef, Fragment, useEffect, useImperativeHandle, useState, useRef } from 'react';
+import { forwardRef, Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
 interface PreviewProps {
@@ -68,11 +70,13 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   // 直接访问 signal 的值，useSignals() 会确保组件在 signal 变化时重新渲染
   const { pageSetId, detailData } = props;
   const [form] = Form.useForm();
+  const isDev = useIsRuntimeDev();
   const { editPageViewId, mainMetaDataFields, setMainMetaDataFields, subEntities, setSubEntities } = pagesRuntimeSignal;
   const { loadPageComponentSchemas: loadFormPageComponentSchemas } = useFormEditorSignal;
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [newCompents, setNewCompents] = useState<any>();
+  const [loading, setLoading] = useState(false);
   const executionCount = useRef(0);
   const pageComponentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
   const fieldPerm = detailData?.formData?.fieldPermMap;
@@ -127,18 +131,32 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       Object.entries(pageComponentSchemas).map(([key, value]) => {
         const [bpmKey, tKey] = value?.config?.dataField || [];
         const newStatus = fieldPerm?.[bpmKey]?.[tKey];
+        const tableName = value?.config?.tableName;
+        let newTableStatus = '';
+        if (tableName) {
+          //子表XsubTable没有dataField,需要用tableName
+          newTableStatus = fieldPerm?.[tableName]?.[tableName];
+        }
         if (value && value.config) {
           const newConfig = {
             ...value,
             config: {
               ...value.config,
-              status: newStatus
+              status: newStatus || newTableStatus,
+              subTableConfig: {
+                showIndex: true,
+                showOperate: true,
+                editRow: true,
+                operateFixed: true,
+                pageSize: 5,
+                columnFixed: 0,
+                deleteRow: newTableStatus === STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
+              }
             }
           };
           useEditorSignalMap.get(editPageViewId.value)!.setPageComponentSchemas(key, newConfig);
           loadFormPageComponentSchemas(useEditorSignalMap.get(editPageViewId.value)!.pageComponentSchemas.value);
           prevFieldPermRef.current = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
-
         }
       });
     }
@@ -146,58 +164,19 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
 
   const handleGetData = async () => {
     const res = detailData?.formData;
-    const formValues: Record<string, any> = {};
-    if (res && res.data) {
-      const dataItem = res?.data;
-      //   主表渲染逻辑
-      if (dataItem && typeof dataItem === 'object') {
-        Object.entries(dataItem).forEach(([fieldName, value]) => {
-          formValues[fieldName] = value;
-        });
-      }
-
-      //   子表渲染逻辑
-
+    let formValues: Record<string, any> = {};
+    if (res && res?.data) {
       const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+      const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
 
-      for (const subEntity of subEntities.value) {
-        console.log('subEntity: ', subEntity);
-        // 判断 res 对象内的 key 是否等于 subEntity.childTableName
-
-        if (
-          dataItem &&
-          subEntity.childTableName &&
-          Object.prototype.hasOwnProperty.call(dataItem, subEntity.childTableName)
-        ) {
-          console.log(`找到子表 ${subEntity.childTableName} 数据:`, dataItem[subEntity.childTableName]);
-
-          const subData = dataItem[subEntity.childTableName];
-
-          Object.entries(componentSchemas).forEach(([key, schema]: [string, any]) => {
-            if (
-              key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE) &&
-              schema?.config?.subTable == subEntity.childEntityUuid
-            ) {
-              pagesRuntimeSignal.setSubTableDataLength(key, (subData || []).length);
-
-              for (let idx = 0; idx < (subData || []).length; idx++) {
-                const keys = Object.keys((subData || [])[idx]);
-                for (let ele in componentSchemas) {
-                  const config = componentSchemas[ele]?.config;
-                  const fieldId = config?.dataField?.[1];
-                  if (keys.includes(fieldId)) {
-                    formValues[`${key}.${idx}.${fieldId}`] = subData[idx]?.[fieldId];
-                  }
-                }
-                // 补充id
-                formValues[`${key}.${idx}.id`] = subData[idx]?.id;
-              }
-            }
-          });
-        }
-      }
+      formValues = normalizeFormValues({
+        dataItem: res?.data,
+        componentSchemas,
+        subEntities: subEntities.value,
+        subTableComponents,
+        setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
+      });
     }
-
     console.log('formValues: ', formValues);
     form.setFieldsValue(formValues);
   };
@@ -211,7 +190,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldName == key);
       if (field) {
         console.log('field: ', field);
-        formData[field.fieldName] = value||'';
+        formData[field.fieldName] = value || '';
       }
 
       if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
@@ -234,7 +213,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           subTableRows.push(temp);
         }
         subFormData[subTableName] = subTableRows;
-
       }
     });
     console.log('formData:   ', formData);
@@ -246,8 +224,16 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     return dataObj;
   };
 
-  const parseData = () => {
-    startLoadPageSet({ pageSetId: pageSetId, runtime: true });
+  const parseData = async () => {
+    setLoading(true);
+    try {
+      await startLoadPageSet({ pageSetId: pageSetId, runtime: true, isDev });
+    } finally {
+      // 数据加载完成后，延迟一小段时间确保组件已更新
+      setTimeout(() => {
+        setLoading(false);
+      }, 100);
+    }
   };
 
   useEffect(() => {
@@ -274,35 +260,39 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
     <div>
       <Form layout="inline" form={form}>
         {newCompents &&
-          useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
-            <Fragment key={cp.id}>
-              {newCompents?.[cp.id]?.config?.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                <div
-                  key={cp.id}
-                  style={{
-                    width: `calc(${getComponentWidth(
-                      useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                      cp.type
-                    )} - 8px)`,
-                    margin: '4px'
-                  }}
-                >
-                  <ErrorBoundary FallbackComponent={() => <div style={{display: 'none'}}>组件错误</div>}>
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageType={pageType}
-                      pageComponentSchema={newCompents && newCompents[cp.id]}
-                      runtime={true}
-                      showFromPageData={() => {
-                        setPageType(EDITOR_TYPES.FORM_EDITOR);
+          useEditorSignalMap.get(editPageViewId.value)?.components.value.map(
+            (cp: GridItem) =>
+              newCompents[cp.id] &&
+              !loading && (
+                <Fragment key={cp.id}>
+                  {newCompents?.[cp.id]?.config?.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    <div
+                      key={cp.id}
+                      style={{
+                        width: `calc(${getComponentWidth(
+                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )} - 8px)`,
+                        margin: '4px'
                       }}
-                    />
-                  </ErrorBoundary>
-                </div>
-              )}
-            </Fragment>
-          ))}
+                    >
+                      <ErrorBoundary FallbackComponent={() => <div style={{ display: 'none' }}>组件错误</div>}>
+                        <PreviewRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageType={pageType}
+                          pageComponentSchema={newCompents && newCompents[cp.id]}
+                          runtime={true}
+                          showFromPageData={() => {
+                            setPageType(EDITOR_TYPES.FORM_EDITOR);
+                          }}
+                        />
+                      </ErrorBoundary>
+                    </div>
+                  )}
+                </Fragment>
+              )
+          )}
       </Form>
     </div>
   );
