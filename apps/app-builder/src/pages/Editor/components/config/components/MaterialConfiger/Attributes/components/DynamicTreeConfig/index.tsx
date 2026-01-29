@@ -54,6 +54,11 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
   const [entityFields, setEntityFields] = useState<MetadataEntityField[]>([]);
   const [entityUuid, setEntityUuid] = useState<string>('');
   const [treeFieldsConfig, setTreeFieldsConfig] = useState<any[]>([]);
+  // 高度设置相关状态
+  const [enableMinHeight, setEnableMinHeight] = useState(!!configs.enableMinHeight);
+  const [enableMaxHeight, setEnableMaxHeight] = useState(!!configs.enableMaxHeight);
+  const [minHeight, setMinHeight] = useState(configs.minHeight || 350);
+  const [maxHeight, setMaxHeight] = useState(configs.maxHeight || 720);
 
   const { curMenu } = menuSignal;
 
@@ -138,6 +143,18 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
   useEffect(() => {
     console.log('树字段配置发生变化:', treeFieldsConfig);
   }, [treeFieldsConfig]);
+
+  // 监听高度设置变化，同步到配置
+  useEffect(() => {
+    handlePropsChange('enableMinHeight', enableMinHeight);
+    handlePropsChange('enableMaxHeight', enableMaxHeight);
+    if (enableMinHeight) {
+      handlePropsChange('minHeight', minHeight);
+    }
+    if (enableMaxHeight) {
+      handlePropsChange('maxHeight', maxHeight);
+    }
+  }, [enableMinHeight, enableMaxHeight, minHeight, maxHeight]);
 
   // 处理实体变更
   const handleEntityChange = (value: string) => {
@@ -265,6 +282,69 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
           step={1}
           onChange={(value) => handlePropsChange('defaultExpandLevel', value)}
         />
+      </FormItem>
+
+      {/* 高度设置 */}
+      <FormItem layout="vertical" labelAlign="left" label="高度设置" className={styles.formItem}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Checkbox
+              checked={enableMinHeight}
+              onChange={(checked) => {
+                setEnableMinHeight(checked);
+              }}
+            >
+              最小高度
+            </Checkbox>
+            {enableMinHeight && (
+              <>
+                <InputNumber
+                  size="mini"
+                  value={minHeight}
+                  min={100}
+                  max={enableMaxHeight ? maxHeight : 1000}
+                  step={10}
+                  style={{ width: 80 }}
+                  onChange={(value) => {
+                    if (value !== undefined) {
+                      setMinHeight(value);
+                    }
+                  }}
+                />
+                <span>px</span>
+              </>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Checkbox
+              checked={enableMaxHeight}
+              onChange={(checked) => {
+                setEnableMaxHeight(checked);
+              }}
+            >
+              最大高度
+            </Checkbox>
+            {enableMaxHeight && (
+              <>
+                <InputNumber
+                  size="mini"
+                  value={maxHeight}
+                  min={enableMinHeight ? minHeight : 100}
+                  max={1000}
+                  step={10}
+                  style={{ width: 80 }}
+                  onChange={(value) => {
+                    if (value !== undefined) {
+                      setMaxHeight(value);
+                    }
+                  }}
+                />
+                <span>px</span>
+              </>
+            )}
+          </div>
+        </div>
       </FormItem>
     </div>
   );
