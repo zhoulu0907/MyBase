@@ -30,6 +30,9 @@ const DynamicNumberFormatConfig = ({ handlePropsChange, item, configs }: Props) 
             <InputNumber
               size="mini"
               value={configs[item.key]['precision']}
+              min={0}
+              max={10}
+              precision={0}
               onChange={(value) => {
                 handlePropsChange(item.key, { ...configs[item.key], precision: value });
               }}
@@ -64,6 +67,7 @@ const DynamicNumberFormatConfig = ({ handlePropsChange, item, configs }: Props) 
               style={{ width: 80 }}
               size="mini"
               value={configs[item.key]['unitValue']}
+              maxLength={10}
               onChange={(value) => {
                 handlePropsChange(item.key, { ...configs[item.key], unitValue: value });
               }}
