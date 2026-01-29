@@ -1,4 +1,4 @@
-import { Button, Select, Input, List, Tag } from '@arco-design/web-react';
+import { Button, Input, List, Tag } from '@arco-design/web-react';
 import { FilterEntityFields, type AppEntityField } from '@onebase/app';
 import {
   COMPONENT_MAP,
@@ -48,9 +48,14 @@ const TagInput: React.FC<TagInputProps> = ({
   const [tags, setTags] = useState<TagItem[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [editorValue, setEditorValue] = useState(value);
   const fieldSelectorRef = useRef<HTMLDivElement>(null);
 
   const { mainEntity } = useAppEntityStore();
+
+  useEffect(() => {
+    setEditorValue(value);
+  }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -146,12 +151,16 @@ const TagInput: React.FC<TagInputProps> = ({
         }
       });
 
+      const newValue = state.doc.toString().slice(0, insertFrom) + tagText + state.doc.toString().slice(insertTo);
+      setEditorValue(newValue);
+      onChange(newValue);
+
       setTags([...tags, { label: field.label, fieldName: field.fieldName }]);
       setShowFieldSelector(false);
 
       view.focus();
     },
-    [tags]
+    [tags, editorValue, onChange]
   );
 
   const handleAddField = useCallback(
@@ -204,6 +213,10 @@ const TagInput: React.FC<TagInputProps> = ({
               }
             });
 
+            const newValue = state.doc.toString().slice(0, tagStart) + state.doc.toString().slice(range.from);
+            setEditorValue(newValue);
+            onChange(newValue);
+
             const tag = tags.find((t) => `{{${t.label}}}` === tagText);
             if (tag) {
               setTags(tags.filter((t) => t.fieldName !== tag.fieldName));
@@ -242,8 +255,11 @@ const TagInput: React.FC<TagInputProps> = ({
     <div className={styles.tagInputWrapper}>
       <CodeMirror
         ref={editorRef}
-        value={value}
-        onChange={onChange}
+        value={editorValue}
+        onChange={(val) => {
+          setEditorValue(val);
+          onChange(val);
+        }}
         height="100px"
         placeholder={isFocused ? '' : placeholder}
         className={styles.editor}

@@ -1,10 +1,14 @@
 import { Form, Radio } from '@arco-design/web-react';
-import React, { useState } from 'react';
+import React from 'react';
+import { useSignals } from '@preact/signals-react/runtime';
+import { usePageSettingSignal } from '@onebase/ui-kit';
 import styles from './components.module.less';
 import TagInput from './TagInput';
 
 const BasicSettings: React.FC = () => {
-  const [titleType, setTitleType] = useState('default');
+  useSignals();
+
+  const { dataTitleType, redirectType, dataTitle, setDataTitleType, setRedirectType, setDataTitle } = usePageSettingSignal;
 
   return (
     <div className={styles.settingsPage}>
@@ -12,11 +16,11 @@ const BasicSettings: React.FC = () => {
         <h2 className={styles.sectionTitle}>常用设置</h2>
         <Form layout="vertical" className={styles.form}>
           <Form.Item label="数据标题" required>
-            <Radio.Group defaultValue="default" onChange={(value) => setTitleType(value)}>
-              <Radio value="default">默认标题</Radio>
-              <Radio value="custom">自定义标题</Radio>
+            <Radio.Group value={dataTitleType.value} onChange={(value) => setDataTitleType(value)}>
+              <Radio value={1}>默认标题</Radio>
+              <Radio value={2}>自定义标题</Radio>
             </Radio.Group>
-            {titleType === 'default' ? (
+            {dataTitleType.value === 1 ? (
               <div className={styles.defaultTitleInfo}>
                 <p>
                   <span className={styles.title}>规则：</span>
@@ -31,16 +35,16 @@ const BasicSettings: React.FC = () => {
               </div>
             ) : (
               <div className={styles.customTitle}>
-                <TagInput />
+                <TagInput value={dataTitle.value} onChange={setDataTitle} />
               </div>
             )}
           </Form.Item>
 
           <Form.Item label="表单提交后跳转页面">
-            <Radio.Group defaultValue="list" direction="vertical">
-              <Radio value="list">列表页</Radio>
-              <Radio value="create">展示【是否创建下一条】窗口</Radio>
-              <Radio value="record">打开刚才创建的记录</Radio>
+            <Radio.Group value={redirectType.value} onChange={(value) => setRedirectType(value)} direction="vertical">
+              <Radio value={1}>列表页</Radio>
+              <Radio value={2}>展示【是否创建下一条】窗口</Radio>
+              <Radio value={3}>打开刚才创建的记录</Radio>
             </Radio.Group>
           </Form.Item>
         </Form>
