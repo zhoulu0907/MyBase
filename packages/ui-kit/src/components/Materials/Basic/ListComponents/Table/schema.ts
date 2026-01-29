@@ -239,7 +239,7 @@ const XTable: XTableSchema = {
     labelConfig,
     tableMetaDataConfig,
     // keyDataConfig,
-    labelColSpanConfig,
+    // labelColSpanConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,

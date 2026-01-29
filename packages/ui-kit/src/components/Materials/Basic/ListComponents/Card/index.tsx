@@ -199,8 +199,8 @@ const XCard = memo(
 
       const { list, total } = res;
 
-      let newCardData= [];
-      for(let item of (list || [])){
+      let newCardData = [];
+      for (let item of (list || [])) {
         const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
@@ -405,35 +405,34 @@ const XCard = memo(
               dataSource={cardData}
               grid={{ span: getSpan(), gutter: [20, 20] }}
               render={(item, index) => {
-                console.log('itrm',item,coverField)
                 return (
-                <Card
-                  className="card"
-                  bordered={false}
-                  cover={
-                    coverField ? (
-                      <img
-                        style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
-                        src={item[coverField]}
-                        alt=""
-                      />
-                    ) : undefined
-                  }
-                >
-                  <Card.Meta
-                    title={titleField ? renderItem(item, titleField, index, true) : undefined}
-                    description={
-                      showFields ? (
-                        <>
-                          {columns?.map((ele, i) => (
-                            <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
-                          ))}
-                        </>
+                  <Card
+                    className="card"
+                    bordered={false}
+                    cover={
+                      coverField ? (
+                        <img
+                          style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
+                          src={item[coverField]}
+                          alt=""
+                        />
                       ) : undefined
                     }
-                  />
-                </Card>
-              )
+                  >
+                    <Card.Meta
+                      title={titleField ? renderItem(item, titleField, index, true) : undefined}
+                      description={
+                        showFields ? (
+                          <>
+                            {columns?.map((ele, i) => (
+                              <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
+                            ))}
+                          </>
+                        ) : undefined
+                      }
+                    />
+                  </Card>
+                )
               }}
               onReachBottom={(currentPage) => {
                 if (currentPage < cardTotal) {

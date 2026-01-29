@@ -333,6 +333,7 @@ const XTable = memo(
 
                 return (
                   <PreviewRender
+                    key={`table-${index}-${columnId}`}
                     cpId={columnId}
                     cpType={cpType}
                     detailMode={true}
@@ -369,6 +370,7 @@ const XTable = memo(
                   };
                   return (
                     <PreviewRender
+                      key={`table-${index}-${columnId}`}
                       cpId={columnId}
                       cpType={cpType}
                       detailMode={true}
