@@ -116,6 +116,9 @@ const XTree = memo(
         loadTreeData();
       } else {
         setTreeData(getDefaultPreviewData());
+        // 设置默认展开层级
+        const expandedKeys = getDefaultExpandedKeys(getDefaultPreviewData(), defaultExpandLevel || 2);
+        setExpandedKeys(expandedKeys);
       }
     } else {
       // 编辑/预览环境：根据treeFields配置生成预览数据
@@ -123,8 +126,14 @@ const XTree = memo(
         // 根据配置的字段生成结构化的预览数据
         const previewData = generatePreviewDataFromFields(treeFields);
         setTreeData(previewData);
+        // 设置默认展开层级
+        const expandedKeys = getDefaultExpandedKeys(previewData, defaultExpandLevel || 2);
+        setExpandedKeys(expandedKeys);
       } else {
         setTreeData(getDefaultPreviewData());
+        // 设置默认展开层级
+        const expandedKeys = getDefaultExpandedKeys(getDefaultPreviewData(), defaultExpandLevel || 2);
+        setExpandedKeys(expandedKeys);
       }
     }
   }, [metaData, treeFields, defaultExpandLevel]);
@@ -144,11 +153,21 @@ const XTree = memo(
           const treeStructure = buildTreeStructure(res.data.list, treeFields);
           setTreeData(treeStructure);
 
+          // 设置默认展开层级
           const defaultExpanded = getDefaultExpandedKeys(treeStructure, defaultExpandLevel || 2);
+          setExpandedKeys(defaultExpanded);
+        } else {
+          // 如果没有数据，使用默认预览数据并设置展开层级
+          setTreeData(getDefaultPreviewData());
+          const defaultExpanded = getDefaultExpandedKeys(getDefaultPreviewData(), defaultExpandLevel || 2);
           setExpandedKeys(defaultExpanded);
         }
       } catch (error) {
         console.error('加载树数据失败:', error);
+        // 出错时使用默认预览数据并设置展开层级
+        setTreeData(getDefaultPreviewData());
+        const defaultExpanded = getDefaultExpandedKeys(getDefaultPreviewData(), defaultExpandLevel || 2);
+        setExpandedKeys(defaultExpanded);
       }
     };
 
@@ -271,6 +290,7 @@ const XTree = memo(
       <div className="x-tree-container">
         <Tree
           treeData={treeData}
+          expandedKeys={expandedKeys}
           icons={{
             switcherIcon: <IconCaretDown />
           }}

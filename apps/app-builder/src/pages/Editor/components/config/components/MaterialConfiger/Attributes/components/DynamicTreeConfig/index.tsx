@@ -115,7 +115,7 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
       const loadEntityFields = async () => {
         try {
           const fields = await getEntityFields({ entityUuid });
-          
+
           // 标记禁用的字段类型
           fields.forEach((item: MetadataEntityField) => {
             if (item.fieldType && !supportedTreeFieldTypes.includes(item.fieldType)) {
@@ -207,56 +207,43 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
 
       {/* 树字段配置 */}
       {entityUuid && (
-        <FormItem layout="vertical" labelAlign="left" label="树字段配置" className={styles.formItem}>
+        <FormItem layout="vertical" labelAlign="left" label="目录字段" className={styles.formItem}>
           <div className={styles.treeFieldsContainer}>
             {treeFieldsConfig.map((field, index) => (
               <div key={index} className={styles.treeFieldItem}>
-                <div className={styles.treeFieldHeader}>
-                  <span>第 {field.level} 级</span>
-                  <span style={{ fontSize: '12px', color: '#999' }}>
-                    {field.displayName || '未选择字段'}
-                  </span>
-                  <Button
-                    icon={<IconDelete />}
-                    size="small"
-                    type="text"
-                    onClick={() => handleDeleteTreeField(index)}
-                  />
-                </div>
-                <div className={styles.treeFieldContent}>
-                  <FormItem label="字段" layout="vertical">
-                    <Select
-                      placeholder="选择字段"
-                      value={field.fieldName}
-                      onChange={(value) => {
-                        const selectedField = entityFields.find(f => f.fieldName === value);
-                        handleTreeFieldChange(index, {
-                          ...field,
-                          fieldName: value,
-                          displayName: selectedField?.displayName || value,
-                          fieldType: selectedField?.fieldType || ''
-                        });
-                      }}
-                    >
-                      {entityFields.map((field) => (
-                        <Select.Option key={field.fieldName} value={field.fieldName}>
-                          {field.displayName} ({field.fieldName})
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </FormItem>
+                <div className={styles.treeFieldContent} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>{field.level} 级</span>
+                  <Select
+                    placeholder="选择字段"
+                    value={field.fieldName}
+                    style={{ flex: 1 }}
+                    onChange={(value) => {
+                      const selectedField = entityFields.find((f) => f.fieldName === value);
+                      handleTreeFieldChange(index, {
+                        ...field,
+                        fieldName: value,
+                        displayName: selectedField?.displayName || value,
+                        fieldType: selectedField?.fieldType || ''
+                      });
+                    }}
+                  >
+                    {entityFields.map((field) => (
+                      <Select.Option key={field.fieldName} value={field.fieldName}>
+                        {field.displayName}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                  <Button icon={<IconDelete />} size="small" type="text" onClick={() => handleDeleteTreeField(index)} />
                 </div>
               </div>
             ))}
-            
             <Button
-              type="dashed"
-              long
-              icon={<IconPlus />}
+              type={treeFieldsConfig.length < 5 ? 'outline' : 'secondary'}
               onClick={handleAddTreeField}
               disabled={treeFieldsConfig.length >= 5}
+              style={{ marginTop: '8px' }}
             >
-              添加层级 (最多5级)
+              新增目录字段
             </Button>
           </div>
         </FormItem>
