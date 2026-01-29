@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Form, Grid, Message } from '@arco-design/web-react';
+import { Button, Input, Modal, Form, Grid, Message, Empty } from '@arco-design/web-react';
 import { IconDelete, IconPlusCircle } from '@arco-design/web-react/icon';
 import { getApplicationTagGroupCount, updateApplicationTag, type ListTagReq } from '@onebase/app';
 import React, { useEffect } from 'react';
@@ -53,19 +53,20 @@ const TagModal: React.FC<TagModalProps> = ({ visible, onOk, onCancel }) => {
             <Grid.Col span={11}>
               <div className={styles.headerTagName}>标签名称</div>
             </Grid.Col>
-            <Grid.Col span={11}>
+            {/* <Grid.Col span={11}>
               <div className={styles.headerAppCount}>应用数</div>
-            </Grid.Col>
+            </Grid.Col> */}
             <Grid.Col span={2}></Grid.Col>
           </Grid.Row>
           <Form.List field="tagList">
             {(fields, { add, remove }) => {
               return (
                 <>
+                  {fields.length === 0 && <Empty />}
                   {fields.map((item, index) => {
                     return (
                       <Grid.Row key={item.key} gutter={8}>
-                        <Grid.Col span={11}>
+                        <Grid.Col span={21}>
                           <Form.Item
                             field={item.field + '.tagName'}
                             rules={[
@@ -85,11 +86,11 @@ const TagModal: React.FC<TagModalProps> = ({ visible, onOk, onCancel }) => {
                             <Input placeholder="请输入" />
                           </Form.Item>
                         </Grid.Col>
-                        <Grid.Col span={11}>
+                        {/* <Grid.Col span={11}>
                           <Form.Item field={item.field + '.tagCount'}>
                             <Input readOnly />
                           </Form.Item>
-                        </Grid.Col>
+                        </Grid.Col> */}
                         <Grid.Col span={2}>
                           <Button type="text" status="danger" icon={<IconDelete />} onClick={() => remove(index)} />
                         </Grid.Col>

@@ -116,7 +116,7 @@ export const getOperatorOptions = (components: any[], cpId: string): { label: st
 
   switch (cpType) {
     case FORM_COMPONENT_TYPES.INPUT_TEXT:
-    case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
+    case FORM_COMPONENT_TYPES.INPUT_TEXT_AREA:
     case FORM_COMPONENT_TYPES.INPUT_EMAIL:
     case FORM_COMPONENT_TYPES.INPUT_PHONE:
     case FORM_COMPONENT_TYPES.SELECT_ONE:

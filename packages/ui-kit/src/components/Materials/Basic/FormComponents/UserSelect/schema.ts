@@ -16,6 +16,7 @@ import {
 } from '../../../common';
 import {
   CONFIG_TYPES,
+  DEFAULT_VALUE_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -97,7 +98,7 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
   /**
    * 默认值方式
    */
-  defaultValueMode?: TTextDefaultType;
+  defaultValueMode?: any;
 
   /**
    * 人员默认值
@@ -166,7 +167,10 @@ const XUserSelect: XInputUserSelectSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValueMode: 'custom',
+    defaultValueMode: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      formulaValue: ''
+    },
     defaultUserValue: undefined,
     isSelectScope: false,
     selectScope: [],

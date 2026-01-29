@@ -105,10 +105,13 @@ const TableSearch = memo((props: TableSearchConfig) => {
 
     // 组件配置
     let componentConfig: any = {};
+    let placeholderOverride: string | undefined = '请输入';
 
     if (cpType) {
       // 组件默认配置
       const defaultSchema = getComponentSchema(cpType as any);
+
+      placeholderOverride = cpType === FORM_COMPONENT_TYPES.AUTO_CODE ? '请输入' : undefined;
 
       componentConfig = {
         ...defaultSchema.config,
@@ -125,7 +128,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
         status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
         verify: { required: false },
         tooltip: '',
-        placeholder: cpType === FORM_COMPONENT_TYPES.AUTO_CODE ? '请输入' : undefined
+        placeholder: placeholderOverride
       };
     }
 
@@ -160,7 +163,7 @@ const TableSearch = memo((props: TableSearchConfig) => {
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
+      case FORM_COMPONENT_TYPES.INPUT_TEXT_AREA:
         return (
           <FormComp.XInputTextArea
             cpName={cpId}

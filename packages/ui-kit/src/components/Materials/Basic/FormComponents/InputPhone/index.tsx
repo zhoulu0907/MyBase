@@ -13,13 +13,14 @@ import { useFormFieldWatch } from '../useFormField';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
-const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   // ===== 外部 props begin =====
   const {
     label,
     dataField,
     placeholder,
     tooltip,
+    tooltipPosition,
     status,
     defaultValueConfig,
     verify,
@@ -57,7 +58,10 @@ const XInputPhone = memo((props: XInputPhoneConfig & { runtime?: boolean; detail
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_PHONE}_${nanoid()}`
         }
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
           { required: verify?.required, message: `${label.text}是必填项` },

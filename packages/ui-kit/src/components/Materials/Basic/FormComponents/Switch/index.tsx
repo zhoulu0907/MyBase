@@ -7,11 +7,12 @@ import '../index.css';
 import { useFormFieldWatch } from '../useFormField';
 import type { XInputSwitchConfig } from './schema';
 
-const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
     defaultValueConfig,
     align,
@@ -34,7 +35,10 @@ const XSwitch = memo((props: XInputSwitchConfig & { runtime?: boolean; detailMod
         }
         field={fieldId}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         triggerPropName="checked"
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

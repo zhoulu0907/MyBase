@@ -15,12 +15,14 @@ import { handelDisabledDate } from '../date';
 import '../index.css';
 
 const { YearPicker, MonthPicker } = DatePicker;
-const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
+    placeholder,
     defaultValueConfig,
     verify,
     dateType,
@@ -52,6 +54,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
             }}
             format="YYYY"
             getPopupContainer={getPopupContainer}
+            placeholder={placeholder}
           />
         );
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
@@ -63,6 +66,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
             }}
             format="YYYY-MM"
             getPopupContainer={getPopupContainer}
+            placeholder={placeholder}
           />
         );
       case DATE_VALUES[DATE_OPTIONS.DATE]:
@@ -74,6 +78,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
             }}
             format="YYYY-MM-DD"
             getPopupContainer={getPopupContainer}
+            placeholder={placeholder}
           />
         );
       case DATE_VALUES[DATE_OPTIONS.FULL]:
@@ -86,11 +91,12 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
             }}
             format="YYYY-MM-DD HH:mm:ss"
             getPopupContainer={getPopupContainer}
+            placeholder={placeholder}
           />
         );
       default:
         // 默认显示日期选择器
-        return <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />;
+        return <DatePicker placeholder={placeholder} style={{ width: '100%' }} format="YYYY-MM-DD" />;
     }
   };
 
@@ -106,7 +112,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</>;
       default:
         // 默认显示日期选择器
-        return <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />;
+        return <DatePicker placeholder={placeholder} style={{ width: '100%' }} format="YYYY-MM-DD" />;
     }
   };
 
@@ -119,7 +125,10 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
         }
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

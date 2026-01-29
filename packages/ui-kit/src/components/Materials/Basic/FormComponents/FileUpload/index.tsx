@@ -13,12 +13,13 @@ import './index.css';
 import type { XInputFileUploadConfig } from './schema';
 
 const XFileUpload = memo(
-  (props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string }) => {
+  (props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; tooltipPosition: any; }) => {
     const {
       label,
       dataField,
       status,
       tooltip,
+      tooltipPosition,
       showDownload,
       buttonName,
       buttonType,
@@ -162,7 +163,10 @@ const XFileUpload = memo(
           }
           field={fieldId}
           layout={layout}
-          tooltip={tooltip}
+          tooltip={ tooltip && {
+            content: tooltip,
+            position: tooltipPosition
+          }}
           labelCol={layout === 'horizontal' ? { span: 10 } : {}}
           rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
           hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

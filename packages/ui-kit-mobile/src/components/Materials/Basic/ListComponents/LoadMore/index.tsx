@@ -9,9 +9,10 @@ import {
   getEntityFieldsWithChildren,
   menuSignal,
   PageMethodV2Params,
+  VALIDATION_TYPE,
   type AppEntityField
 } from '@onebase/app';
-import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
+import { isRuntimeEnv, menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
 import {
   BUTTON_OPTIONS,
   BUTTON_VALUES,
@@ -27,6 +28,7 @@ import { memo, useCallback, useEffect, useState } from 'react';
 import './index.css';
 import type { XLoadMoreConfig } from './schema';
 import TableSearch from './tableSerach';
+import { getSimpleUserList } from '@onebase/platform-center';
 
 type XTableSelectProps = {
   showSelect: boolean;
@@ -71,7 +73,8 @@ const XLoadMore = memo(
       advancedButtonPermission,
       // operationButtonCollpaseNumber,
       refresh,
-      manuClick
+      manuClick,
+      filterCondition,
     } = props;
 
     const { curMenu } = menuSignal;
@@ -87,7 +90,8 @@ const XLoadMore = memo(
     const [tablePageNo, setTablePageNo] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
     // const [showDropdown, setShowDropdown] = useState(false);
-    const [localMainMetaData, setLocalMainMetaData] = useState<AppEntityField[]>();
+    const [localMainMetaData, setLocalMainMetaData] = useState<any>();
+    const [userSelectData, setUserSelectData] = useState<any[]>([]); // 人员选择数据
 
     const [searchForm] = useForm();
 
@@ -213,7 +217,7 @@ const XLoadMore = memo(
 
     const handlePage = async () => {
       try {
-        if (!runtime || (tablePageNo - 1) * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
+        if (!runtime || !metaData || !isRuntimeEnv()) {
           return;
         }
 
@@ -225,23 +229,52 @@ const XLoadMore = memo(
         //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
         // }
 
-        let newQueryData: any = {};
+        let fieldValue;
+        const conditions: any[] = [];
+        for (const [key, value] of Object.entries(queryData.value)) {
+          if (value != undefined && value != null && value !== '') {
+            const fieldType = localMainMetaData?.parentFields.find((field: any) => field.fieldName === key).fieldType;
 
-        Object.entries(queryData.value).forEach(([key, value]) => {
-          if ((value !== '' && value !== null) || (Array.isArray(value) && value.length !== 0)) {
-            newQueryData[key] = value;
+            if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
+              fieldValue = [dayjs((value as number)).format('YYYY-MM-DD')];
+            } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
+              fieldValue = [dayjs((value as number)).format('YYYY-MM-DD hh:mm:ss')];
+            } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE) {
+              let userTempData = userSelectData;
+              if (userTempData.length === 0) {
+                const userList = await getSimpleUserList();
+                userTempData = userList;
+                setUserSelectData(userList);
+              }
+              const userData = userTempData.find((item) => (value as string[])?.includes(item.nickname));
+              fieldValue = [userData?.id];
+            } else {
+              fieldValue = Array.isArray(value) ? value : [value]
+            }
+            conditions.push({
+              nodeType: 'CONDITION',
+              fieldName: key,
+              operator: VALIDATION_TYPE.EQUALS,
+              fieldValue
+            });
           }
-        });
+        };
+
+        const filters = {
+          nodeType: 'GROUP',
+          combinator: 'AND',
+          children: conditions
+        };
 
         const req: PageMethodV2Params = {
-          ...newQueryData,
           pageNo: tablePageNo,
-          pageSize: pageSize || 10
+          pageSize: pageSize || 10,
+          filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
         };
 
         const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
 
-        const mainMetaData = await getMainMetaData();
+        const mainMetaData = localMainMetaData;
 
         const { list = [], total = 0 } = res;
 
@@ -419,8 +452,6 @@ const XLoadMore = memo(
         }
       }
     };
-
-    const [form] = useForm();
 
     const noEdit =
       (advancedButtonPermission === BUTTON_VALUES[BUTTON_OPTIONS.HIDDEN] && !hasOperationPermission) ||
