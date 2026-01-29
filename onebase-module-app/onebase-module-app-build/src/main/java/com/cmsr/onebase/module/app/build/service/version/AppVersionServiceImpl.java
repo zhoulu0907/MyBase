@@ -628,7 +628,6 @@ public class AppVersionServiceImpl implements AppVersionService {
      * 重试导出应用
      *
      * @param exportId  导出记录ID
-     * @param versionId 版本ID
      * @return 导出记录ID（返回原导出记录ID）
      */
     @Override
