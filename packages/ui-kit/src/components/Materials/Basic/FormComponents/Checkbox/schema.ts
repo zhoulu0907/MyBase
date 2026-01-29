@@ -42,6 +42,7 @@ import type {
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
+  TNumberDefaultType,
   TTextDefaultType,
   IAlignConfigType,
   TRadioDefaultType,
@@ -106,6 +107,9 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    checkedLimit: TBooleanDefaultType;
+    maxChecked: TNumberDefaultType;
+    minChecked: TNumberDefaultType;
   };
 
   /**
@@ -174,6 +178,9 @@ const XCheckbox: XInputCheckboxSchema = {
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
       required: false,
+      checkedLimit: false,
+      minChecked: 0,
+      maxChecked: 3,
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
