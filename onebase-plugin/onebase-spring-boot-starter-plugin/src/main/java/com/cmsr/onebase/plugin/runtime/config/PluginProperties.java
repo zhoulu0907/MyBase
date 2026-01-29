@@ -26,6 +26,21 @@ public class PluginProperties {
     private String pluginsDir = "plugins";
 
     /**
+     * 后端插件存放子目录
+     */
+    private String backendDir = "backend";
+
+    /**
+     * 前端插件存放子目录
+     */
+    private String frontendDir = "static";
+
+    /**
+     * 前端插件访问上下文路径
+     */
+    private String frontendContextPath = "/plugins/static";
+
+    /**
      * 插件运行模式
      * <ul>
      *   <li>dev: 开发模式，只加载classpath下的扩展点，支持IDE断点调试</li>
@@ -81,6 +96,30 @@ public class PluginProperties {
 
     public void setPluginsDir(String pluginsDir) {
         this.pluginsDir = pluginsDir;
+    }
+
+    public String getBackendDir() {
+        return backendDir;
+    }
+
+    public void setBackendDir(String backendDir) {
+        this.backendDir = backendDir;
+    }
+
+    public String getFrontendDir() {
+        return frontendDir;
+    }
+
+    public void setFrontendDir(String frontendDir) {
+        this.frontendDir = frontendDir;
+    }
+
+    public String getFrontendContextPath() {
+        return frontendContextPath;
+    }
+
+    public void setFrontendContextPath(String frontendContextPath) {
+        this.frontendContextPath = frontendContextPath;
     }
 
     public String getMode() {

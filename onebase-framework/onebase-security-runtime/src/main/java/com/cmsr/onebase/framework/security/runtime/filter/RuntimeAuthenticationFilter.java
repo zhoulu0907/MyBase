@@ -58,6 +58,12 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        String requestUri = request.getRequestURI();
+        if (requestUri.contains("/plugins/static/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         try {
             Authentication authentication = SecurityFrameworkUtils.getAuthentication();
             if (authentication != null && authentication.isAuthenticated()) {
