@@ -19,7 +19,7 @@ interface AppImportModalProps {
 const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onComplete, appInfo }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [appStatus, setAppStatus] = useState('');
-  const [fileId, setFileId] = useState('');
+  const [hasFile, setHasFile] = useState(false);
   const [appCode, setAppCode] = useState('');
   // 编码重复处理类型
   const [updateType, setUpdateType] = useState('');
@@ -32,7 +32,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
   // 下一步
   const handleNext = () => {
     if (currentStep === 1) {
-      if (!fileId) {
+      if (!hasFile) {
         Message.warning('请先上传文件');
         return;
       }
@@ -56,21 +56,11 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
   };
 
   // 文件上传
-  const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
+  const handleUpload = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('applicationId', appInfo.id);
-
-    const progressAdapter = onProgress
-      ? (progressEvent: ProgressEvent) => {
-          if (progressEvent.lengthComputable) {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            onProgress(percent, progressEvent);
-          }
-        }
-      : undefined;
-
-    const res = await importAppVersion(formData, progressAdapter);
+    const res = await importAppVersion(formData);
     return res;
   };
 
@@ -93,7 +83,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
           >
             取消
           </Button>
-          <Button type="primary" onClick={handleComplete} disabled={!fileId}>
+          <Button type="primary" onClick={handleComplete} disabled={!hasFile}>
               完成
             </Button>
           {/* {currentStep < stepList.length && (
@@ -122,7 +112,6 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                 tip="点击上传zip格式的应用文件"
                 limit={1}
                 showUploadList={{
-                  progressRender: () => <IconLoading />,
                   reuploadIcon: (
                     <Button size="mini" type="text" icon={<IconRefresh />}>
                       点击重试
@@ -139,12 +128,13 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                 customRequest={async (option) => {
                   const { onProgress, onError, onSuccess, file } = option;
                   try {
-                    const fileId = await handleUpload(file, onProgress);
-                    setFileId(fileId);
-                    const uploadFileUrl = URL.createObjectURL(file);
-                    // 上传文件id
-                    if (fileId && uploadFileUrl !== '') {
-                      onSuccess();
+                    const flag = await handleUpload(file);
+                    setHasFile(flag);
+                    const url = URL.createObjectURL(file)
+                    // 上传成功
+                    if (flag && url) {
+                      onProgress(100)
+                      onSuccess({url});
                     } else {
                       onError({
                         status: 'error',
@@ -160,7 +150,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                   }
                 }}
                 onRemove={() => {
-                  setFileId('');
+                  setHasFile(false);
                 }}
               >
                 <Button type="primary" icon={<IconUpload />}>
