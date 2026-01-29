@@ -1013,10 +1013,65 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         }
 
         if (field.getDefaultValue() != null && !field.getDefaultValue().isEmpty()) {
-            def.append(" DEFAULT '").append(field.getDefaultValue()).append("'");
+            String defaultValue = field.getDefaultValue();
+            // 对于特殊的默认值（如时间戳函数、数字等）不加引号
+            if (isSpecialDefaultValue(defaultValue)) {
+                def.append(" DEFAULT ").append(normalizeDefaultValue(defaultValue));
+            } else {
+                def.append(" DEFAULT '").append(defaultValue).append("'");
+            }
         }
 
         return def.toString();
+    }
+
+    /**
+     * 判断是否为特殊的默认值（不需要加引号的值）
+     *
+     * @param defaultValue 默认值
+     * @return 是否为特殊默认值
+     */
+    private boolean isSpecialDefaultValue(String defaultValue) {
+        if (defaultValue == null || defaultValue.isEmpty()) {
+            return false;
+        }
+        String upperValue = defaultValue.toUpperCase().trim();
+        // 时间戳相关函数
+        if (upperValue.contains("CURRENT_TIMESTAMP") || upperValue.contains("NOW()") 
+                || upperValue.contains("CURRENT_DATE") || upperValue.contains("CURRENT_TIME")) {
+            return true;
+        }
+        // 纯数字（包括小数和负数）
+        if (upperValue.matches("^-?\\d+(\\.\\d+)?$")) {
+            return true;
+        }
+        // NULL 值
+        if ("NULL".equals(upperValue)) {
+            return true;
+        }
+        // 布尔值
+        if ("TRUE".equals(upperValue) || "FALSE".equals(upperValue)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 标准化默认值（去除引号等）
+     *
+     * @param defaultValue 原始默认值
+     * @return 标准化后的默认值
+     */
+    private String normalizeDefaultValue(String defaultValue) {
+        if (defaultValue == null) {
+            return "NULL";
+        }
+        String value = defaultValue.trim();
+        // 移除可能存在的外层引号
+        if ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith("\"") && value.endsWith("\""))) {
+            value = value.substring(1, value.length() - 1);
+        }
+        return value;
     }
     //todo metadata_field_type_mapping 表中有存字段类型和数据库类型的映射关系，可以改为从该表中读取映射关系，而不是写死在代码中
     private String mapFieldTypeToDbType(String fieldType, Integer dataLength, Integer decimalPlaces, String datasourceType, java.util.List<FieldTypeMappingDO> typeMappings) {
