@@ -23,7 +23,7 @@ const copilotActions = initGlobalState({
 registerMicroApps([
   {
     name: 'chat',
-    entry: '/chat-app/', // 子应用运行端口
+    entry: 'http://s25029301301.dev.internal.virtueit.net:81/v1/aigenapp/', // 子应用运行端口
     container: '#chat-container',
     activeRule: (location) => location.hash.startsWith('#/chat'),
     props: actions

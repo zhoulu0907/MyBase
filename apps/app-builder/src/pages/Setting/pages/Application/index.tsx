@@ -287,7 +287,7 @@ const AppManagement: React.FC = () => {
                 icon={<IconPlus fontSize={16} />}
                 onClick={() => navigate('/chat')}
               >
-                打开子应用
+                ai生成应用
               </Button>
             )}
 
