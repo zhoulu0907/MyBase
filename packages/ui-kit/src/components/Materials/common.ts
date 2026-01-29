@@ -58,6 +58,7 @@ import type {
     ITooltipConfigType,
     IVerifyConfigType,
     IWidthConfigType,
+    ITreeDataConfigType,
     TTextDefaultType,
 } from './types';
 
@@ -461,6 +462,12 @@ export const tableMetaDataConfig: ITableDataConfigType = {
   key: 'metaData',
   name: '数据',
   type: 'TableData'
+};
+
+export const treeDataConfig: ITreeDataConfigType = {
+  key: 'metaData',
+  name: '数据绑定',
+  type: 'TreeData'
 };
 
 export const keyDataConfig: ITableDataConfigType = {
@@ -1349,6 +1356,9 @@ export const COMMON_CONFIG_GROUPS = {
   },
   security: {
     securityConfig
+  },
+  tree: {
+    treeDataConfig
   }
 } as const
 

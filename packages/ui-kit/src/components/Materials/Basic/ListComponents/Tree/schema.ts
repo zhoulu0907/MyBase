@@ -4,6 +4,7 @@ import {
   labelConfig,
   statusConfig,
   widthConfig,
+  treeDataConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
@@ -22,6 +23,7 @@ import type {
   IStatusConfigType,
   ITableDataConfigType,
   ITextConfigType,
+  ITreeDataConfigType,
   IWidthConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
@@ -42,6 +44,7 @@ export type TXTreeEditData = Array<
   | IStatusConfigType<TStatusSelectKeyType>
   | IBooleanConfigType
   | ITableDataConfigType
+  | ITreeDataConfigType
   | INumberConfigType
   | ICommonConfigType
 >;
@@ -74,6 +77,11 @@ export interface XTreeConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   saveWithHidden?: TBooleanDefaultType;
+
+  enableMinHeight?: TBooleanDefaultType;
+  enableMaxHeight?: TBooleanDefaultType;
+  minHeight?: TNumberDefaultType;
+  maxHeight?: TNumberDefaultType;
 }
 
 export interface TreeFieldConfig {
@@ -87,13 +95,8 @@ const XTree: XTreeSchema = {
   editData: [
     ...baseConfig,
     labelConfig,
+    treeDataConfig,
     /* {
-      key: 'metaData',
-      name: '数据绑定',
-      type: 'TableData',
-      advanced: false
-    },
-    {
       key: 'treeFields',
       name: '目录字段',
       type: 'TreeFields',
