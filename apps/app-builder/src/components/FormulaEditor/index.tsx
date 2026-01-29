@@ -275,9 +275,20 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   /**
    * 复制公式
    */
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(formula);
-    Message.success('公式已复制到剪贴板');
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(formula);
+      Message.success('公式已复制到剪贴板');
+    } catch (err) {
+      console.error('复制失败: ', err);
+      const textarea = document.createElement('textarea');
+      textarea.value = formula;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      Message.success('公式已复制到剪贴板');
+    }
   }, [formula]);
 
   /**
