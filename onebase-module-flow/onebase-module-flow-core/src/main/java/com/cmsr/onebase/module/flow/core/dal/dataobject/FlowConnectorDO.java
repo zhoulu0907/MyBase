@@ -55,4 +55,16 @@ public class FlowConnectorDO extends BaseAppEntity {
     @Column(value = "active_status")
     private Integer activeStatus;
 
+    /**
+     * 动作配置（JSON格式）
+     * <p>
+     * 使用 Formily Schema 存储连接器实例的动作配置
+     * 包含 actions 数组和 metadata 信息
+     *
+     * @author kanten
+     * @since 2026-01-29
+     */
+    @Column(value = "action_config")
+    private String actionConfig;
+
 }
