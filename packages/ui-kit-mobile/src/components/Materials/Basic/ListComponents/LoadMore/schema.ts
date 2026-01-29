@@ -1,15 +1,27 @@
+import { PageType } from '@onebase/app';
 import {
   baseConfig,
   baseDefault,
   labelColSpanConfig,
+  labelConfig,
+  rowRedirectConfig,
   statusConfig,
+  tableBorderCellConfig,
+  tableBorderConfig,
   tableButtonPermissionConfig,
+  tableFixedOperateConfig,
+  tableHoverConfig,
   tableMetaDataConfig,
   tableOperationConfig,
+  tablePagePositionConfig,
+  tablePageSizeConfig,
+  tableShowHeaderConfig,
+  tableShowOperateConfig,
+  tableShowTotalConfig,
+  tableStripeConfig,
   widthConfig,
   BUTTON_OPTIONS,
   BUTTON_VALUES,
-  CONFIG_TYPES,
   PAGINATION_POSITION_OPTIONS,
   PAGINATION_POSITION_VALUES,
   RedirectMethod,
@@ -17,7 +29,10 @@ import {
   STATUS_VALUES,
   TableOperationButton,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
+  WIDTH_VALUES
+} from '@onebase/ui-kit';
+
+import type {
   IBooleanConfigType,
   ILabelConfigType,
   INumberConfigType,
@@ -34,11 +49,12 @@ import {
   TRadioDefaultType,
   TSelectDefaultType,
   TTextDefaultType,
-  type ICommonBaseType,
-  type TButtonSelectKeyType,
-  type TPagePositionSelectKeyType,
-  type TStatusSelectKeyType,
-  type TWidthSelectKeyType
+  ICommonBaseType,
+  TButtonSelectKeyType,
+  TPagePositionSelectKeyType,
+  TStatusSelectKeyType,
+  TWidthSelectKeyType,
+  ICommonConfigType
 } from '@onebase/ui-kit';
 
 export interface XLoadMoreSchema {
@@ -58,9 +74,11 @@ export type TXLoadMoreEditData = Array<
   | INumberConfigType
   | ITableButtonConfigType<TButtonSelectKeyType>
   | ITableOperationConfigType
+  | ICommonConfigType
 >;
 
 export interface XLoadMoreConfig extends ICommonBaseType {
+  pageSetType?: PageType;
   /**
    * 是否开启手动点击加载更多
    */
@@ -196,6 +214,11 @@ export interface XLoadMoreConfig extends ICommonBaseType {
     fieldName: TTextDefaultType;
     sortBy: TNumberDefaultType;
   };
+
+  /**
+   * 数据选择过滤条件
+   */
+  filterCondition?: any
 }
 
 export interface OperationButtonConfig {
@@ -210,101 +233,23 @@ export interface OperationButtonConfig {
   display: boolean;
 }
 
-const pagePositionConfig: ITablePagePositionConfigType<TPagePositionSelectKeyType> = {
-  key: 'pagePosition',
-  name: '分页位置',
-  type: CONFIG_TYPES.TABLE_PAGE_POSITION_RADIO,
-  range: [
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TL],
-      text: PAGINATION_POSITION_OPTIONS.TL,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TL]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TOP_CENTER],
-      text: PAGINATION_POSITION_OPTIONS.TOP_CENTER,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TOP_CENTER]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR],
-      text: PAGINATION_POSITION_OPTIONS.TR,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.TR]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL],
-      text: PAGINATION_POSITION_OPTIONS.BL,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BL]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER],
-      text: PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BOTTOM_CENTER]
-    },
-    {
-      key: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR],
-      text: PAGINATION_POSITION_OPTIONS.BR,
-      value: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR]
-    }
-  ]
-};
-
 const XLoadMore: XLoadMoreSchema = {
   editData: [
     ...baseConfig,
-    {
-      key: 'label',
-      name: '标题',
-      type: CONFIG_TYPES.LABEL_INPUT
-    },
+    labelConfig,
     tableMetaDataConfig,
     // keyDataConfig,
     labelColSpanConfig,
-    pagePositionConfig,
-    {
-      key: 'pageSize',
-      name: '分页数量',
-      type: CONFIG_TYPES.TABLE_PAGE_SIZE
-    },
-    {
-      key: 'border',
-      name: '显示边框',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'borderCell',
-      name: '显示单元格',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showHeader',
-      name: '显示表头',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'hover',
-      name: '鼠标悬浮效果',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'stripe',
-      name: '开启斑马纹',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showTotal',
-      name: '显示表格总数',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'showOpearate',
-      name: '开启操作项',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'fixedOpearate',
-      name: '固定操作项',
-      type: CONFIG_TYPES.SWITCH_INPUT
-    },
+    tablePagePositionConfig,
+    tablePageSizeConfig,
+    tableBorderConfig,
+    tableBorderCellConfig,
+    tableShowHeaderConfig,
+    tableHoverConfig,
+    tableStripeConfig,
+    tableShowTotalConfig,
+    tableShowOperateConfig,
+    tableFixedOperateConfig,
     // {
     //   key: 'saveWithHidden',
     //   name: '隐藏时提交数据',
@@ -312,12 +257,7 @@ const XLoadMore: XLoadMoreSchema = {
     // },
     widthConfig,
     statusConfig,
-    {
-      key: 'advancedRowRedirect',
-      name: '行点击跳转',
-      type: CONFIG_TYPES.TABLE_DATA,
-      advanced: true
-    },
+    rowRedirectConfig,
     tableOperationConfig,
     tableButtonPermissionConfig
   ],
@@ -342,7 +282,8 @@ const XLoadMore: XLoadMoreSchema = {
     pageSize: 10,
     metaData: '',
     tableName: '',
-    labelColSpan: 200,
+    filterCondition: {},
+    // labelColSpan: 200,
     defaultValue: [],
     columns: [],
 

@@ -8,12 +8,14 @@ import type { XInputTimePickerConfig } from './schema';
 import { getPopupContainer, securityEncodeText } from '@/utils';
 import dayjs from 'dayjs';
 
-const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     tooltip,
+    tooltipPosition,
     status,
     dataField,
+    placeholder,
     defaultValueConfig,
     timeRange,
     dateType,
@@ -242,7 +244,10 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
         }
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.TIME_PICKER}_${nanoid()}`}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -260,6 +265,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
           // use24Hours 24小时制
           <TimePicker
             use12Hours={!use24Hours}
+            placeholder={placeholder}
             format={use24Hours ? TIME_FORMAT[dateType] : TIME_12_FORMAT[dateType]}
             getPopupContainer={getPopupContainer}
             disabledHours={handelDisabledHours}

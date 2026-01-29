@@ -377,6 +377,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
         </Button>
       )}
       <FormulaEditor
+        fieldName={configs?.label?.text}
         initialFormula={defaultValueConfig?.formulaValue}
         visible={formulaVisible}
         onCancel={() => setFormulaVisible(false)}

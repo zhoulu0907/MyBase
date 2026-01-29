@@ -9,8 +9,8 @@ import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../con
 import '../index.css';
 import type { XInputSelectOneConfig } from './schema';
 
-const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, tooltip, status, verify, layout, runtime = true, detailMode, defaultValueConfig } = props;
+const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
+  const { label, dataField, tooltip, tooltipPosition, status, verify, layout, runtime = true, detailMode, defaultValueConfig } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
   const { appDict } = menuDictSignal;
 
@@ -42,7 +42,10 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
         }
         field={fieldId}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

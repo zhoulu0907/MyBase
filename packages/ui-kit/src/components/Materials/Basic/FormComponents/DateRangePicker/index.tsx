@@ -16,13 +16,15 @@ import type { XInputDateRangePickerConfig } from './schema';
 import { getPopupContainer, securityEncodeText } from '@/utils';
 import { handelDisabledDate } from '../date';
 
-const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     dataField,
     dateRange,
     status,
+    placeholder,
     tooltip,
+    tooltipPosition,
     verify,
     layout,
     startDefaultValueConfig,
@@ -49,7 +51,10 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
         }
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.DATE_RANGE_PICKER}_${nanoid()}`}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -80,6 +85,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
             format={DATE_FORMAT[dateType]}
             mode={currentDateType}
             showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
+            placeholder={[placeholder]}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

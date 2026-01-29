@@ -18,6 +18,7 @@ import {
 } from '../../../common';
 import {
   CONFIG_TYPES,
+  DEFAULT_VALUE_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -98,7 +99,7 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   /**
    * 默认值方式
    */
-  defaultValueMode?: TTextDefaultType;
+  defaultValueMode?: any;
 
   /**
    * 部门默认值
@@ -185,7 +186,10 @@ const XDeptSelect: XInputDeptSelectSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValueMode: 'custom',
+    defaultValueMode: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      formulaValue: ''
+    },
     defaultDeptValue: '',
     // multipleMode: false,
     isSelectScope: false,

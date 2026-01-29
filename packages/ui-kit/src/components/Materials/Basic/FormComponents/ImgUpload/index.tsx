@@ -11,12 +11,13 @@ import './index.css';
 import type { XInputImgUploadConfig } from './schema';
 
 const XImgUpload = memo(
-  (props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string }) => {
+  (props: XInputImgUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; tooltipPosition: any; }) => {
     const {
       label,
       dataField,
       status,
       tooltip,
+      tooltipPosition,
       listType,
       uploadType,
       imageHandle,
@@ -345,7 +346,10 @@ const XImgUpload = memo(
           }
           field={fieldId}
           layout={layout}
-          tooltip={tooltip}
+          tooltip={ tooltip && {
+            content: tooltip,
+            position: tooltipPosition
+          }}
           labelCol={layout === 'horizontal' ? { span: 10 } : {}}
           rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
           hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

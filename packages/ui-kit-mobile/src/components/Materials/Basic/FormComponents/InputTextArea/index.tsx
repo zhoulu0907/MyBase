@@ -28,7 +28,7 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
   // 生成唯一的字段ID
   const fieldId = dataField && dataField.length > 0
     ? dataField[dataField.length - 1]
-    : `${FORM_COMPONENT_TYPES.INPUT_TEXTAREA}_${nanoid()}`;
+    : `${FORM_COMPONENT_TYPES.INPUT_TEXT_AREA}_${nanoid()}`;
 
   // 根据是否为只读模式确定内容
   const renderContent = () => {

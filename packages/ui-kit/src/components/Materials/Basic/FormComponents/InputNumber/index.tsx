@@ -13,13 +13,14 @@ import { useFormFieldWatch } from '../useFormField';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
-const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   // ===== 外部 props begin =====
   const {
     label,
     placeholder,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
     defaultValueConfig,
     verify,
@@ -91,7 +92,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         }
         field={dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
           {

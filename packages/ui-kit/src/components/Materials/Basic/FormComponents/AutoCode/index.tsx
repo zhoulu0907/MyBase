@@ -6,8 +6,8 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import { type XautoCodeConfig } from './schema';
 
-const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, dataField, tooltip, placeholder, status, layout, runtime = true, detailMode } = props;
+const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
+  const { label, dataField, tooltip, placeholder, status, layout, runtime = true, detailMode, tooltipPosition } = props;
 
   const { form } = Form.useFormContext();
 
@@ -22,7 +22,10 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         field={fieldId}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

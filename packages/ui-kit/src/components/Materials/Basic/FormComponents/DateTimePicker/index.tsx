@@ -9,12 +9,14 @@ import { getPopupContainer, securityEncodeText } from '@/utils';
 import dayjs from 'dayjs';
 import { handelDisabledDate } from '../date';
 
-const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
+    placeholder,
     defaultValueConfig,
     dateRange,
     dateType,
@@ -38,7 +40,10 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         }
         field={fieldId ? fieldId : `${FORM_COMPONENT_TYPES.DATE_TIME_PICKER}_${nanoid()}`}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -53,6 +58,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         ) : (
           <DatePicker
             showTime
+            placeholder={placeholder}
             format={DATE_TIME_FORMAT[dateType]}
             getPopupContainer={getPopupContainer}
             disabledDate={(current) => {

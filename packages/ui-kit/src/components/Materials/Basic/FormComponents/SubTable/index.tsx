@@ -29,10 +29,10 @@ import { getComponentDescriptor } from '../../../registry';
 import './index.css';
 import { type XSubTableConfig } from './schema';
 
-const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   useSignals();
 
-  const { id, label, tooltip, status, subTableConfig, verify, runtime = true, detailMode, pageType } = props;
+  const { id, label, tooltip, tooltipPosition, status, subTableConfig, verify, runtime = true, detailMode, pageType } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -249,7 +249,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
    * 子表单元格配置覆盖
    */
   const applySubTableCellOverrides = (cfg: any, type: string) => {
-    if (type === FORM_COMPONENT_TYPES.INPUT_TEXTAREA) {
+    if (type === FORM_COMPONENT_TYPES.INPUT_TEXT_AREA) {
       return { ...cfg, minRows: 1 };
     }
     return cfg;
@@ -447,7 +447,10 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         }
         labelCol={{ span: 24 }}
         layout="vertical"
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           width: '100%',
