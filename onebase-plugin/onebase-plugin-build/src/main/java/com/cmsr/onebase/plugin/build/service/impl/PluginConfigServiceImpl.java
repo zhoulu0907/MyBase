@@ -15,7 +15,6 @@ import com.cmsr.onebase.plugin.core.dal.database.PluginPackageInfoRepository;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginConfigInfoDO;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginInfoDO;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginPackageInfoDO;
-import com.cmsr.onebase.plugin.core.model.PluginMetaInfo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,31 +57,25 @@ public class PluginConfigServiceImpl implements PluginConfigService {
 
         // 2. 构建响应对象
         PluginConfigTemplateRespVO respVO = new PluginConfigTemplateRespVO();
-        List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems = new ArrayList<>();
 
-        // 3. 优先从plugin_config_info（plugin.schema.json）读取配置模板
-        if (StrUtil.isNotBlank(pluginInfo.getPluginConfigInfo()) && !"{}".equals(pluginInfo.getPluginConfigInfo())) {
-            templateItems = parseConfigTemplatesFromSchemaJson(pluginInfo.getPluginConfigInfo());
+        // 3. 从 plugin_config_info 表读取已保存的配置值
+        List<PluginConfigInfoDO> savedConfigs = pluginConfigInfoRepository.getListByPluginIdAndVersion(pluginId, pluginVersion);
+        List<PluginConfigTemplateRespVO.ConfigTemplateItem> templateItems = new ArrayList<>();
+        for (PluginConfigInfoDO config : savedConfigs) {
+            PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
+            item.setConfigKey(config.getConfigKey());
+            // 如果 valueType 为 secret，则用掩码代替配置值
+            if ("secret".equalsIgnoreCase(config.getValueType())) {
+                item.setConfigValue(SECRET_MASK);
+            } else {
+                item.setConfigValue(config.getConfigValue());
+            }
+            item.setValueType(config.getValueType());
+            templateItems.add(item);
         }
 
-        // 4. 如果plugin_config_info为空，则从plugin_meta_info（plugin.json）读取
-/*        if (CollUtil.isEmpty(templateItems) && StrUtil.isNotBlank(pluginInfo.getPluginMetaInfo())) {
-            PluginMetaInfo metaInfo = JSONUtil.toBean(pluginInfo.getPluginMetaInfo(), PluginMetaInfo.class);
-            if (CollUtil.isNotEmpty(metaInfo.getConfigTemplates())) {
-                for (PluginMetaInfo.PluginConfigTemplate template : metaInfo.getConfigTemplates()) {
-                    PluginConfigTemplateRespVO.ConfigTemplateItem item = new PluginConfigTemplateRespVO.ConfigTemplateItem();
-                    item.setConfigKey(template.getConfigKey());
-                    item.setConfigName(template.getConfigName());
-                    item.setDefaultValue(template.getDefaultValue());
-                    item.setValueType(template.getValueType());
-                    item.setDescription(template.getDescription());
-                    item.setRequired(template.getRequired());
-                    templateItems.add(item);
-                }
-            }
-        }*/
-
         respVO.setConfigTemplates(templateItems);
+        // 4. 原样返回 plugin_info 表的 plugin_config_info 字段（JSON Schema）
         respVO.setPluginConfigInfo(pluginInfo.getPluginConfigInfo());
         return respVO;
     }
