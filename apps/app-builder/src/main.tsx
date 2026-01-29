@@ -9,6 +9,7 @@ import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from 'react-error-boundary';
 import { registerMicroApps, start, initGlobalState } from 'qiankun';
 import { loadMicroApp, type MicroApp } from 'qiankun';
+import { getAiGenURL } from '@onebase/common';
 import App from './App.tsx';
 import './i18n';
 import './index.css';
@@ -23,19 +24,19 @@ const copilotActions = initGlobalState({
 registerMicroApps([
   {
     name: 'chat',
-    entry: 'http://s25029301301.dev.internal.virtueit.net:81/v1/aigenapp/', // 子应用运行端口
+    entry: getAiGenURL(), // 子应用运行端口
     container: '#chat-container',
     activeRule: (location) => location.hash.startsWith('#/chat'),
     props: actions
   }
 ]);
 
-loadMicroApp({
-  name: 'copilot',
-  entry: 'http://localhost:8888',
-  container: '#copilot-container',
-  props: copilotActions
-});
+// loadMicroApp({
+//   name: 'copilot',
+//   entry: 'http://localhost:8888',
+//   container: '#copilot-container',
+//   props: copilotActions
+// });
 
 start();
 
