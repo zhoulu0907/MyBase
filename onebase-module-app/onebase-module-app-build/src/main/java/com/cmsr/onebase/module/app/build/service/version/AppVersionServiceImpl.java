@@ -378,7 +378,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
         String metadataJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_METADATA));
         if (metadataJson != null) {
-            configData.setMetaDataConfig(JsonUtils.parseObject(metadataJson, MetadataExportDataDTO.class));
+            configData.setMetaDataConfig(JsonUtils.parseObject(metadataJson, Object.class));
         }
 
     }

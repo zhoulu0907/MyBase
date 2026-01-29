@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -77,6 +79,9 @@ public class PageSetServiceProvider {
     }
 
     public LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO) {
+        if (loadPageSetReqVO.getIsDev()){
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
         AppResourcePagesetDO pageSetDO = appPageSetRepository.getById(loadPageSetReqVO.getId());
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_SET_NOT_EXIST);
