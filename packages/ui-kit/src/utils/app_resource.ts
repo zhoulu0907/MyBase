@@ -23,8 +23,8 @@ import {
   useEditorSignalMap,
   useFormEditorSignal,
   useListEditorSignal,
-  usePageViewEditorSignal,
-  usePageSettingSignal
+  usePageSettingSignal,
+  usePageViewEditorSignal
 } from 'src/signals';
 import { isBlank } from './common';
 
@@ -245,6 +245,7 @@ export interface LoadPageSetParams {
   pageSetId: string;
   runtime?: boolean;
   allowViewUuids?: string[];
+  isDev?: boolean;
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
