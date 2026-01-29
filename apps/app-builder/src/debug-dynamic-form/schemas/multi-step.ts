@@ -116,9 +116,9 @@ export const MULTI_STEP_SCHEMA = {
               title: "HTTP请求头",
               "x-component": "ParamsTable",
             },
-            pathParams: {
+            queryParams: {
               type: "array",
-              title: "URL路径参数",
+              title: "URL查询参数",
               "x-component": "ParamsTable",
             },
             body: {
@@ -130,11 +130,6 @@ export const MULTI_STEP_SCHEMA = {
                 height: "300px",
               },
             },
-            queryParams: {
-              type: "array",
-              title: "URL查询参数",
-              "x-component": "ParamsTable",
-            }
           },
         },
         connectorParamsTitle: {

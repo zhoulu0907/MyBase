@@ -136,7 +136,7 @@ function buildSignatureString({
     timestamp
   });
 
-  console.error(
+  console.info(
     'canonicalQueryString:',
     canonicalQueryString,
     'canonicalBody:',
@@ -146,6 +146,7 @@ function buildSignatureString({
     'appSecret:',
     appSecret
   );
+  
   const signatureBase = `${canonicalQueryString}${canonicalBody}${canonicalHeaderString}${appSecret}`;
 
   return {
