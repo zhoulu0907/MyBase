@@ -39,8 +39,8 @@ public class MetadataCollector {
             schemaData.setCatalogName(catalogName);
             schemaData.setName(schemaName);
             catalogData.getSchemas().add(schemaData);
-            // 3. collect tables
-            LinkedHashMap<String, Table<?>> tables = temporary.metadata().tables(Table.TYPE.VIEW.value());
+            // 3. collect tables - 采集所有类型的表（包括普通表和视图）
+            LinkedHashMap<String, Table<?>> tables = temporary.metadata().tables();
             for (Table<?> table : tables.values()) {
                 TableData tableData = new TableData();
                 tableData.setCatalogName(catalogName);

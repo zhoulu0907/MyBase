@@ -177,7 +177,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     }
 
     @Override
-    public MetadataExportDataDTO exportDatasource(Long applicationId, Long versionTag) {
+    public Object exportDatasource(Long applicationId, Long versionTag) {
         log.info("开始导出数据源，applicationId: {}, versionTag: {}", applicationId, versionTag);
         MetadataExportDataDTO exportData = new MetadataExportDataDTO();
 
@@ -525,19 +525,28 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, MetadataExportDataDTO exportData, DatasourceImportReqDTO reqDTO) {
-        if (exportData == null) {
+    public void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object importData, DatasourceImportReqDTO reqDTO) {
+        // 将Object转换为MetadataExportDataDTO
+        MetadataExportDataDTO exportData;
+        if (importData == null) {
             log.warn("导入数据为空，跳过导入");
+            return;
+        } else if (importData instanceof MetadataExportDataDTO) {
+            exportData = (MetadataExportDataDTO) importData;
+        } else {
+            String json = JsonUtils.toJsonString(importData);
+            exportData = JsonUtils.parseObject(json, MetadataExportDataDTO.class);
+        }
+        if (exportData == null) {
+            log.warn("解析导入数据失败，跳过导入");
             return;
         }
 
         log.info("开始导入数据源，newApplicationId: {}, appUid: {}, tenantId: {}, versionTag: {}",
                 newApplicationId, appUid, tenantId, versionTag);
 
-        //String configJson = JsonUtils.toJsonString(datasourceConfig);
-        //MetadataExportDataDTO exportData = JsonUtils.parseObject(configJson, MetadataExportDataDTO.class);
-        if (exportData == null || exportData.getDatasource() == null) {
-            log.warn("解析导入数据失败或数据源为空，跳过导入");
+        if (exportData.getDatasource() == null) {
+            log.warn("数据源信息为空，跳过导入");
             return;
         }
 
