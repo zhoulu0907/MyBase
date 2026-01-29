@@ -210,7 +210,7 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
         <FormItem layout="vertical" labelAlign="left" label="目录字段" className={styles.formItem}>
           <div className={styles.treeFieldsContainer}>
             {treeFieldsConfig.map((field, index) => (
-              <div key={index} className={styles.treeFieldItem}>
+              <div key={index} className={styles.treeFieldItem} style={{ marginBottom: '8px' }}>
                 <div className={styles.treeFieldContent} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>{field.level} 级</span>
                   <Select
@@ -250,7 +250,13 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
       )}
 
       {/* 默认展开层级 */}
-      <FormItem layout="vertical" labelAlign="left" label="默认展开层级" className={styles.formItem}>
+      <FormItem
+        layout="horizontal"
+        labelAlign="left"
+        label="默认展开层级"
+        labelCol={{ span: 9 }}
+        wrapperCol={{ span: 5, offset: 10 }}
+      >
         <InputNumber
           placeholder="请输入展开层级"
           value={configs.defaultExpandLevel}
