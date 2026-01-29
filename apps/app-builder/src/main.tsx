@@ -14,20 +14,12 @@ import App from './App.tsx';
 import './i18n';
 import './index.css';
 
-const actions = initGlobalState({
-  user: { name: 'admin' }
-});
-const copilotActions = initGlobalState({
-  user: { id: '123123' }
-});
-
 registerMicroApps([
   {
     name: 'chat',
-    entry: getAiGenURL(), // 子应用运行端口
-    container: '#chat-container',
+    entry: getAiGenURL(),
+    container: '#ai-genapp-container',
     activeRule: (location) => location.hash.startsWith('#/chat'),
-    props: actions
   }
 ]);
 
@@ -38,7 +30,7 @@ createRoot(document.getElementById('root')!).render(
     <ConfigProvider prefixCls="pc">
       <ErrorBoundary FallbackComponent={ErrorPage}>
         <App />
-        <div id="chat-container"></div>
+        <div id="ai-genapp-container"></div>
         <div id="copilot-container"></div>
       </ErrorBoundary>
     </ConfigProvider>
