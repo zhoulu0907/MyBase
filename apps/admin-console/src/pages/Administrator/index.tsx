@@ -111,7 +111,7 @@ const Administrator: React.FC = () => {
               }}
               content={
                 <div className={styles.tooltipContainer}>
-                  <div className={styles.tooltipText}>Are you sure you want to delete?</div>
+                  <div className={styles.tooltipText}>确认删除</div>
                   <Space className={styles.tooltipButton}>
                     <Button
                       type="text"

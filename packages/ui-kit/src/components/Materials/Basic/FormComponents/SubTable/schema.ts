@@ -108,6 +108,8 @@ export interface XSubTableConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   pageType?: string;
+
+  tableName?: string;
 }
 
 export interface XSubTableSchema {
@@ -147,7 +149,8 @@ const XSubTable: XSubTableSchema = {
       columnFixed: 0
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL]
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+    tableName: ''
   }
 };
 

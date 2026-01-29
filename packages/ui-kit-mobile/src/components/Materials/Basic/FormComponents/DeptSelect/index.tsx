@@ -176,7 +176,7 @@ const XDeptSelect = memo(
                 maxLine={1}
               />
             ) : (
-              <div className={`${styles.selectValue} ${layout === 'vertical' ? styles.verticalLayout : ''}`}>
+              <div className={`${styles.defaultValue} ${layout === 'vertical' ? styles.verticalLayout : ''}`}>
                 请选择
               </div>
             )}

@@ -41,6 +41,11 @@ import type {
     ISwitchFillTextConfigType,
     ITableButtonConfigType,
     ITableDataConfigType,
+    ICardDataConfigType,
+    IDataSortByConfigType,
+    IDataFilterConfigType,
+    ICoverImageConfigType,
+    IGroupFilterConfigType,
     ITableOperationConfigType,
     ITablePagePositionConfigType,
     ITablePageSizeConfigType,
@@ -101,6 +106,34 @@ export const widthConfig: IWidthConfigType<TWidthSelectKeyType> = {
       key: '3/4',
       text: '3/4',
       value: '75%'
+    },
+    {
+      key: 'editor.full',
+      text: 'editor.full',
+      value: '100%'
+    }
+  ]
+};
+
+export const cardWidthConfig: IWidthConfigType<TWidthSelectKeyType> = {
+  key: 'cardWidth',
+  name: '卡片宽度',
+  type: 'WidthRadio',
+  range: [
+    {
+      key: '1/4',
+      text: '1/4',
+      value: '25%'
+    },
+    {
+      key: '1/3',
+      text: '1/3',
+      value: '33.33%'
+    },
+    {
+      key: '1/2',
+      text: '1/2',
+      value: '50%'
     },
     {
       key: 'editor.full',
@@ -434,6 +467,42 @@ export const keyDataConfig: ITableDataConfigType = {
   key: 'keyData',
   name: '主键',
   type: 'TableData'
+};
+
+// ==================== 卡片数据 ====================
+export const cardMetaDataConfig: ICardDataConfigType = {
+  key: 'cardMetaData',
+  name: '卡片数据配置',
+  type: 'CardData'
+};
+
+export const dataSortByConfig: IDataSortByConfigType = {
+  key: 'sortBy',
+  name: '数据排序规则',
+  type: 'DataSortBy'
+};
+
+export const dataFilterConfig: IDataFilterConfigType = {
+  key: 'dataFilter',
+  name: '数据过滤',
+  type: 'DataFilter'
+};
+
+export const coverImageConfig: ICoverImageConfigType = {
+  key: 'coverImage',
+  name: '封面图片',
+  type: 'CoverImage',
+  range: [
+    { label: '拉伸填满',  value: 'fill'},
+    { label: '居中填满',  value: 'cover'},
+    { label: '原图居中', value: 'contain'},
+  ]
+};
+
+export const groupFilterConfig: IGroupFilterConfigType = {
+  key: 'filterCondition',
+  name: '绑定分组筛选',
+  type: 'GroupFilter'
 };
 
 // ==================== 默认基础值 ====================
@@ -834,9 +903,9 @@ export const timeFormatConfig: ITimeFormatConfigType<TTimeTypeSelectKeyType> = {
   ]
 }
  export const dateTimeimeFormatConfig: any = {
-  key: 'dateFormat',
+  key: 'dateTimeFormat',
   name: '日期时间格式',
-  type: 'DateTimeFormat',
+  type: 'DateFormat',
   range: [
     { label: '年-月-日 时:分:秒', value: 'second' },
     { label: '年-月-日 时:分', value: 'minute' },

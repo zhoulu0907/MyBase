@@ -1,8 +1,7 @@
-import { useEffect, type FC } from 'react';
+import { type FC } from 'react';
 import { IconEdit, IconDelete, IconMoreVertical } from '@arco-design/web-react/icon';
 import { Dropdown, Space, Menu } from '@arco-design/web-react';
 import styles from './index.module.less';
-import screen1 from '@/assets/images/screen/screen1.png';
 import eye from '@/assets/images/screen/eye.png';
 import write from '@/assets/images/screen/write.png';
 import template from '@/assets/images/screen/template.png';

@@ -456,6 +456,7 @@ export default function EditorWorkspace() {
                   schema.config.label.text = cpName;
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
                   schema.config.subTable = item.entityUuid;
+                  schema.config.tableName  = item.tableName;
 
                   const props = {
                     id: cpID,

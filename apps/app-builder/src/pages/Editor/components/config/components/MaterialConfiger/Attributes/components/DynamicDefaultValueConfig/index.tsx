@@ -189,7 +189,13 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
             }}
             parser={(value) => value.replace(/,/g, '')}
             suffix={
-              configs?.numberFormat?.showUnit && configs.numberFormat?.unitValue ? configs.numberFormat.unitValue : ''
+              configs?.numberFormat?.showUnit && configs?.numberFormat?.showPercent && configs?.numberFormat?.unitValue
+                ? `% ${configs?.numberFormat?.unitValue}`
+                : configs?.numberFormat?.showUnit
+                  ? configs?.numberFormat?.unitValue
+                  : configs?.numberFormat?.showPercent
+                    ? '%'
+                    : ''
             }
           />
         );

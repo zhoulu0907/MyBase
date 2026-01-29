@@ -1,9 +1,10 @@
-import { Card, Pagination, Space, Table, Typography } from '@arco-design/web-react';
+import { Card, Pagination, Space, Table, Typography, Button } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import React, { useState } from 'react';
 import EditVersionModal from '../modals/EditVersionModal';
 import SaveVersionModal from '../modals/SaveVersionModal';
-
+import AppExportModal from '@/components/AppExportModal';
+import { useAppStore } from '@/store';
 import dayjs from 'dayjs';
 import type { VersionRecord } from '../..';
 import styles from './index.module.less';
@@ -39,12 +40,18 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
   currentPage,
   setCurrentPage
 }) => {
+    const { curAppInfo } = useAppStore();
+  
   // 弹窗状态
   const [publishModalVisible, setPublishModalVisible] = useState(false);
   const [saveModalVisible, setSaveModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editModalData, setEditModalData] = useState<EditModalData | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  // 应用导出/下载弹窗
+  const [exportVisible, setExportVisible] = useState(false);
+  const [versionInfo, setVersionInfo] = useState<VersionRecord>();
+  
 
   // 弹窗处理函数
   const handlePublishVersion = () => {
@@ -70,6 +77,11 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       description: record.description
     });
     setEditModalVisible(true);
+  };
+
+  const handleExport = (record: VersionRecord) => {
+    setVersionInfo(record)
+    setExportVisible(true);
   };
 
   const handleSaveModalOk = async (values: Partial<formData>) => {
@@ -147,29 +159,32 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       render: (value: string) => {
         return value ? dayjs(value).format('YYYY-MM-DD HH:mm:ss') : '-';
       }
+    },
+    {
+      title: '操作',
+      key: 'actions',
+      align: 'center',
+      width: 200,
+      render: (_: unknown, record: VersionRecord) => (
+        <Space>
+          <Button type="text" size="small" onClick={() => handleExport(record)}>
+            版本导出
+          </Button>
+          {/* <Button type="text" size="small" onClick={() => handleEnableVersion(record)}>
+            启用此版本
+          </Button>
+          <Button type="text" size="small" onClick={() => handleAccessVersion(record)}>
+            访问
+          </Button>
+          <Button type="text" size="small" onClick={() => handleEditVersion(record)}>
+            编辑
+          </Button>
+          <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
+            版本比对
+          </Button> */}
+        </Space>
+      )
     }
-    // {
-    //   title: '操作',
-    //   key: 'actions',
-    //   align: 'center',
-    //   width: 200,
-    //   render: (_: unknown, record: VersionRecord) => (
-    //     <Space>
-    //       <Button type="text" size="small" onClick={() => handleEnableVersion(record)}>
-    //         启用此版本
-    //       </Button>
-    //       <Button type="text" size="small" onClick={() => handleAccessVersion(record)}>
-    //         访问
-    //       </Button>
-    //       <Button type="text" size="small" onClick={() => handleEditVersion(record)}>
-    //         编辑
-    //       </Button>
-    //       {/* <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
-    //         版本比对
-    //       </Button> */}
-    //     </Space>
-    //   )
-    // }
   ];
 
   return (
@@ -231,6 +246,8 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
         loading={modalLoading}
         initialData={editModalData || undefined}
       />
+
+      <AppExportModal visible={exportVisible} onClose={() => setExportVisible(false)} appInfo={curAppInfo} versionInfo={versionInfo} />
     </Card>
   );
 };

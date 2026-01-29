@@ -1,6 +1,12 @@
 .deptCell {
   padding-right: 0;
 
+  .defaultValue {
+    text-align: right;
+    color: #cacdd3;
+    font-size: var(--fontSize);
+  }
+
   .selectValue {
     text-align: right;
     color: #1d2129;

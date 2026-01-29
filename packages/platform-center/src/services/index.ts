@@ -14,3 +14,4 @@ export * from './tenant';
 export * from './user';
 export * from './dashboard';
 export * from './externalUser';
+export * from './plugin';

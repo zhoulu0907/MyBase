@@ -44,6 +44,8 @@ export const CONFIG_TYPES = {
   RELATED_FORM_DATA: 'RelatedFormData',
   // 表格数据配置
   TABLE_DATA: 'TableData',
+  // 树字段配置
+  TREE_FIELDS: 'TreeFields',
   // 表格分页数量
   TABLE_PAGE_SIZE: 'TablePageSize',
   // 图片、附件上传大小限制
@@ -130,7 +132,17 @@ export const CONFIG_TYPES = {
   // 评分组件
   RATE_CONFIG: 'RateConfig',
   // 检查项 显示方式
-  CHECK_ITEM_SHOW_MODE: 'CheckItemShowMode'
+  CHECK_ITEM_SHOW_MODE: 'CheckItemShowMode',
+  // 卡片数据配置
+  CARD_DATA: 'CardData',
+  // 数据排序规则
+  DATA_SORT_BY: 'DataSortBy',
+  // 数据过滤
+  DATA_FILTER: 'DataFilter',
+  // 封面图片
+  COVER_IMAGE: 'CoverImage',
+  // 绑定分组筛选
+  GROUP_FILTER: 'GroupFilter',
 } as const;
 
 // 状态选项常量

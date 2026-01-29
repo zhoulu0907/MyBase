@@ -13,6 +13,7 @@ import { type FetchExecTaskReq } from '@onebase/app';
 import { getCorpResourceById } from '@onebase/common';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import FlowPredict from '../../../../Runtime/components/preview/flowPredict';
+import copy from 'copy-to-clipboard';
 const Row = Grid.Row;
 const Col = Grid.Col;
 
@@ -51,7 +52,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
 
   const setPopupVisibleByIndex = (index: number, visible: boolean, item?: any) => {
     if (item?.buttonName && detailData?.buttonConfigs) {
-      detailData?.buttonConfigs.forEach((element: any) => {
+      detailData?.buttonConfigs?.forEach((element: any) => {
         if (element.buttonName === item.buttonName) {
           setDefaultApprovalComment(element.defaultApprovalComment);
         }
@@ -106,26 +107,8 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
     searchParams.set('pageSetId', rowData.pageSetId || '');
 
     const newUrl = `${window.location.origin}${window.location.pathname}${hashPath}?${searchParams.toString()}`;
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(newUrl);
-      } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = newUrl;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-999999px';
-        textArea.style.top = '-999999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        document.execCommand('copy');
-        textArea.remove();
-      }
-      Message.success('复制成功');
-    } catch (err) {
-      console.error('复制失败:', err);
-      // 可以在这里添加错误提示
-    }
+    copy(newUrl);
+    Message.success('复制成功');
   };
 
   const fetchExec = async (value: any) => {
@@ -137,7 +120,7 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         tableName: detailData?.formData?.tableName,
         data: fieldData
       });
-      setBusinessUuid(rowData.businessUuid);
+      setBusinessUuid(rowData?.businessUuid);
       setPredictVisible(true);
       return;
     }

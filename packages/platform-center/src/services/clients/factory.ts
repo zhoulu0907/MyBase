@@ -10,6 +10,8 @@ export const userService = createClient('/user');
 export const platformInfraService = createClient('/infra', getPlatformBackendURL());
 export const appService = createClient('/app');
 export const dashboardService = createClient('/dashboard')
+export const pluginService = createClient('/plugin')
+
 
 export const runtimeService = createClient('/system', getRuntimeBackendURL());
 export const runtimeInfraService = createClient('/infra', getRuntimeBackendURL());

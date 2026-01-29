@@ -54,6 +54,7 @@ import {
   usePageEditorSignal,
   usePageViewEditorSignal,
   useWorkbenchEditorSignal,
+  usePageSettingSignal,
   type SavePageSetParams,
   type SaveWorkbenchPageSetParams
 } from '@onebase/ui-kit';
@@ -420,9 +421,7 @@ export default function EditorHeader() {
       if (appResp.appName) {
         setAppName(appResp.appName);
       }
-      if (appResp.appStatusText) {
-        setAppStatus(appResp.appStatus);
-      }
+      setAppStatus(AppStatus.DEVELOPING);
     }
 
     // 获取数据源ID
@@ -484,6 +483,8 @@ export default function EditorHeader() {
       return;
     }
 
+    const { dataTitleType, redirectType, dataTitle } = usePageSettingSignal;
+
     // 工作台使用独立保存逻辑
     if (activeTab === EDITOR_TYPES.WORKBENCH_EDITOR) {
       const saveWorkbenchParams: SaveWorkbenchPageSetParams = {
@@ -507,7 +508,10 @@ export default function EditorHeader() {
       fromSubTableComponentsMap: cloneDeep(fromSubTableComponents.value),
       listComponents: listComponents.value,
       listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
-      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) }
+      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) },
+      dataTitleType: dataTitleType.value,
+      redirectType: redirectType.value,
+      dataTitle: dataTitle.value
     };
 
     console.log('savePageSetParams: ', savePageSetParams);
@@ -525,7 +529,7 @@ export default function EditorHeader() {
           return;
         }
       }
-      const res = await fetchPublish({ id: flowId });
+      await fetchPublish({ id: flowId });
       getVersonList();
       Message.success('发布成功');
     } catch (error) {

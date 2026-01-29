@@ -14,6 +14,8 @@ interface ActionListProps {
 }
 
 export const ActionList: React.FC<ActionListProps> = ({ items, form, onSelect }) => {
+  const selectedActionKey = form.getFieldValue('actionKey');
+
   const handleSelect = (item: ActionItem) => {
     form.setFieldValue('actionKey', item.key);
     onSelect?.(item);
@@ -25,32 +27,37 @@ export const ActionList: React.FC<ActionListProps> = ({ items, form, onSelect })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {items.map((item) => (
-        <div
-          key={item.key}
-          role="button"
-          tabIndex={0}
-          style={{
-            border: '1px solid #e5e6eb',
-            borderRadius: 8,
-            padding: 16,
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8
-          }}
-          onClick={() => handleSelect(item)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleSelect(item);
-            }
-          }}
-        >
-          <div style={{ fontWeight: 500 }}>{item.title ?? item.key}</div>
-          {item.description && <div style={{ color: '#999', fontSize: 12 }}>{item.description}</div>}
-        </div>
-      ))}
+      {items.map((item) => {
+        const isSelected = selectedActionKey === item.key;
+        return (
+          <div
+            key={item.key}
+            role="button"
+            tabIndex={0}
+            style={{
+              border: isSelected ? '2px solid #165dff' : '1px solid #e5e6eb',
+              borderRadius: 8,
+              padding: 16,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+              backgroundColor: isSelected ? '#f2f3ff' : 'transparent',
+              transition: 'all 0.2s'
+            }}
+            onClick={() => handleSelect(item)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleSelect(item);
+              }
+            }}
+          >
+            <div style={{ fontWeight: 500 }}>{item.title ?? item.key}</div>
+            {item.description && <div style={{ color: '#999', fontSize: 12 }}>{item.description}</div>}
+          </div>
+        );
+      })}
     </div>
   );
 };

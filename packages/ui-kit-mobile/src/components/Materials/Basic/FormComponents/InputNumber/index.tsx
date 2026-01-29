@@ -50,9 +50,7 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         value = Number(value);
         result = value;
       }
-      if (showPercent) {
-        value = value * 100;
-      }
+      
       if (showPrecision && value) {
         result = Number(value).toFixed(precision);
       }
