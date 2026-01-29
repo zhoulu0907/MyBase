@@ -6,17 +6,7 @@ import viteCompression from 'vite-plugin-compression';
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: 4399,
-    proxy: {
-      'http://localhost:8888': {
-        target: 'http://s25029301301.dev.internal.virtueit.net:81',
-        changeOrigin: true,
-        rewrite: (path) => {
-          const newPath = path.replace(/^\/chat-app/, '/v1/aigenapp');
-          return newPath;
-        }
-      }
-    }
+    port: 4399
   },
   base: './',
   build: {

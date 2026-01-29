@@ -279,6 +279,7 @@ const AppManagement: React.FC = () => {
             >
               创建应用
             </Button>
+            {/* TODO(ai)：当前仅ai测试账号可见 */}
             {tenantId === '156421901678804992' && userPermissionInfo?.user?.id?.toString() === '156421901678804997' && (
               <Button
                 type="primary"
