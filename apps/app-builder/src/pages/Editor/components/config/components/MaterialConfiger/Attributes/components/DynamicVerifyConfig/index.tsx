@@ -170,6 +170,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             <InputNumber
               value={configs[verifyKey]['maxCount']}
               min={1}
+              precision={0}
               prefix="上传数量限制"
               onChange={(value) => {
                 if (typeof value !== 'number') return;
@@ -181,6 +182,8 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             <InputNumber
               value={configs[verifyKey]['maxSize']}
               min={0}
+              max={100}
+              precision={0}
               prefix="大小限制"
               suffix={configs[verifyKey]['maxSize'] ? 'MB' : ''}
               onChange={(value) => {
