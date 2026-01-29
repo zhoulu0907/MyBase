@@ -78,7 +78,13 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
     <div className={styles.fieldConstraintConfig}>
       <h4>字段约束</h4>
 
-      <Form form={form} initialValues={initialValues} layout="vertical" id="field-constraint-form">
+      <Form
+        form={form}
+        initialValues={initialValues}
+        layout="vertical"
+        id="field-constraint-form"
+        className={styles.fieldConstraintForm}
+      >
         {/* 长度范围配置 */}
         <div className={styles.constraintSection}>
           <div className={styles.constraintHeader}>
@@ -191,17 +197,17 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
             }
           </Form.Item>
         </div>
-
-        {/* 操作按钮 */}
-        <div className={styles.fieldConstraintFooter}>
-          <Button type="outline" size="small" onClick={onCancel}>
-            取消
-          </Button>
-          <Button type="primary" size="small" onClick={handleConfirm}>
-            确定
-          </Button>
-        </div>
       </Form>
+
+      {/* 操作按钮 */}
+      <div className={styles.fieldConstraintFooter}>
+        <Button type="outline" size="small" onClick={onCancel}>
+          取消
+        </Button>
+        <Button type="primary" size="small" onClick={handleConfirm}>
+          确定
+        </Button>
+      </div>
     </div>
   );
 };
