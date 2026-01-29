@@ -5,6 +5,7 @@ import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Grid, Message, Modal, Spin } from '@arco-design/web-react';
 import { IconLeft } from '@arco-design/web-react/icon';
 import {
+  RELATION_TYPE,
   debugFormula,
   getEntityFields,
   getEntityListByApp,
@@ -99,6 +100,17 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
                 const childEntityList = await getEntityFields({
                   entityId: item.entityId
                 });
+                // 子表字段：例如子表叫“订单明细”、字段叫“数量”，则这个字段在此处的列表里叫“订单明细.数量”
+                if (item.relationType === RELATION_TYPE.SLAVE) {
+                  return {
+                    ...item,
+                    variableId: item.entityId,
+                    variableName: item.entityName,
+                    fields: [...(item.fields || []), ...childEntityList]
+                      .reverse()
+                      .map((ele) => ({ ...ele, displayName: `${item.entityName}.${ele.displayName}` }))
+                  };
+                }
                 return {
                   ...item,
                   variableId: item.entityId,
