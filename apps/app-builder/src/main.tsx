@@ -31,13 +31,6 @@ registerMicroApps([
   }
 ]);
 
-// loadMicroApp({
-//   name: 'copilot',
-//   entry: 'http://localhost:8888',
-//   container: '#copilot-container',
-//   props: copilotActions
-// });
-
 start();
 
 createRoot(document.getElementById('root')!).render(
