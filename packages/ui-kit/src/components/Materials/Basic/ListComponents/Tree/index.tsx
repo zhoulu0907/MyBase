@@ -1,4 +1,4 @@
-import { Tree } from '@arco-design/web-react';
+import { Tree, Input } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import {
   dataMethodPageV2,
@@ -36,44 +36,11 @@ const XTree = memo(
     const [treeData, setTreeData] = useState<any[]>([]);
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+    const [searchValue, setSearchValue] = useState<string>('');
+    const [filteredTreeData, setFilteredTreeData] = useState<any[]>([]);
 
     const getDefaultPreviewData = () => {
-      return [
-        {
-          key: '1',
-          title: '根节点',
-          children: [
-            {
-              key: '1-1',
-              title: '子节点',
-              children: [
-                {
-                  key: '1-1-1',
-                  title: '叶子节点 1-1-1'
-                },
-                {
-                  key: '1-1-2',
-                  title: '叶子节点 1-1-2'
-                }
-              ]
-            },
-            {
-              key: '1-2',
-              title: '子节点 1-2'
-            }
-          ]
-        },
-        {
-          key: '2',
-          title: '根节点 2',
-          children: [
-            {
-              key: '2-1',
-              title: '子节点 2-1'
-            }
-          ]
-        }
-      ];
+      return [];
     };
 
     // 根据配置的字段生成预览数据
@@ -90,7 +57,7 @@ const XTree = memo(
         if (level > sortedFields.length) return [];
         
         const fieldConfig = sortedFields[level - 1];
-        const levelCount = level === 1 ? 2 : 2; // 根节点2个，其他层级2个
+        const levelCount = 1; // 只生成一个节点
         
         return Array.from({ length: levelCount }, (_, index) => {
           const key = parentKey ? `${parentKey}-${index + 1}` : `${index + 1}`;
@@ -286,6 +253,43 @@ const XTree = memo(
       setExpandedKeys(expandedKeys);
     };
 
+    // 搜索过滤逻辑
+    useEffect(() => {
+      if (!treeData || treeData.length === 0) {
+        setFilteredTreeData([]);
+        return;
+      }
+
+      if (!searchValue || searchValue.trim() === '') {
+        setFilteredTreeData(treeData);
+        return;
+      }
+
+      const searchTerm = searchValue.toLowerCase();
+
+      // 递归过滤树节点
+      const filterNodes = (nodes: any[]): any[] => {
+        return nodes
+          .map(node => {
+            const match = node.title.toLowerCase().includes(searchTerm);
+            const children = node.children ? filterNodes(node.children) : [];
+            const hasMatch = match || children.length > 0;
+
+            if (hasMatch) {
+              return {
+                ...node,
+                children: children.length > 0 ? children : undefined
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
+      };
+
+      const filtered = filterNodes(treeData);
+      setFilteredTreeData(filtered);
+    }, [treeData, searchValue]);
+
     if (status === 'hidden') {
       return null;
     }
@@ -304,14 +308,20 @@ const XTree = memo(
 
     return (
       <div className="x-tree-container" style={containerStyle}>
+        <div style={{ marginBottom: '12px' }}>
+          <Input.Search
+            placeholder="搜索树节点..."
+            value={searchValue}
+            onChange={ setSearchValue }
+            style={{ width: '100%' }}
+          />
+        </div>
         <Tree
-          treeData={treeData}
+          treeData={filteredTreeData.length > 0 ? filteredTreeData : treeData}
           expandedKeys={expandedKeys}
           icons={{
             switcherIcon: <IconCaretDown />
           }}
-          showLine
-          autoExpandParent
           onSelect={handleSelect}
           onExpand={handleExpand}
         />

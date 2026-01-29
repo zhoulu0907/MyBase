@@ -77,6 +77,11 @@ export interface XTreeConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   saveWithHidden?: TBooleanDefaultType;
+
+  enableMinHeight?: TBooleanDefaultType;
+  enableMaxHeight?: TBooleanDefaultType;
+  minHeight?: TNumberDefaultType;
+  maxHeight?: TNumberDefaultType;
 }
 
 export interface TreeFieldConfig {
