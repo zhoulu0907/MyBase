@@ -178,4 +178,108 @@ public interface FlowConnectorService {
      * @return 校验结果
      */
     ConnectorConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionId);
+
+    // ==================== 动作配置管理接口 v2.0 ====================
+
+    /**
+     * 获取连接器的动作列表 v2.0
+     * <p>
+     * 返回格式：ActionInfoVO（四步配置 Schema + 使用次数）
+     *
+     * @param connectorId 连接器ID
+     * @return 动作列表
+     */
+    List<ActionInfoVO> getActionInfosV2(Long connectorId);
+
+    /**
+     * 获取动作详情 v2.0
+     * <p>
+     * 返回格式：ActionDetailVO（完整的四步配置 + 使用次数）
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @return 动作详情
+     */
+    ActionDetailVO getActionDetailV2(Long connectorId, String actionId);
+
+    /**
+     * 保存动作草稿 v2.0
+     * <p>
+     * 请求格式：SaveActionReqVO（四步配置 Schema）
+     *
+     * @param connectorId 连接器ID
+     * @param reqVO       保存请求
+     * @return 创建的动作ID
+     */
+    String saveActionDraftV2(Long connectorId, SaveActionReqVO reqVO);
+
+    /**
+     * 更新动作草稿 v2.0
+     * <p>
+     * 请求格式：UpdateActionReqVO（四步配置 Schema）
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @param reqVO       更新请求
+     */
+    void updateActionDraftV2(Long connectorId, String actionId, UpdateActionReqVO reqVO);
+
+    /**
+     * 发布动作 v2.0
+     * <p>
+     * 发布前会校验所有步骤配置是否完整
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void publishActionV2(Long connectorId, String actionId);
+
+    /**
+     * 下架动作 v2.0
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void offlineActionV2(Long connectorId, String actionId);
+
+    /**
+     * 重新上线动作 v2.0
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void republishActionV2(Long connectorId, String actionId);
+
+    /**
+     * 复制动作 v2.0
+     * <p>
+     * 自动生成唯一名称：原名称_copy序号
+     * 复制的动作状态为 draft
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @return 新复制的动作信息
+     */
+    CopyActionRespVO copyActionV2(Long connectorId, String actionId);
+
+    /**
+     * 删除动作 v2.0
+     * <p>
+     * 删除前会检查是否被逻辑流引用
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     */
+    void deleteActionV2(Long connectorId, String actionId);
+
+    /**
+     * 校验动作是否可发布 v2.0
+     * <p>
+     * 返回格式：ValidationResultVO（包含完整的错误信息）
+     *
+     * @param connectorId 连接器ID
+     * @param actionId    动作ID
+     * @return 校验结果
+     */
+    ValidationResultVO validateActionForPublishV2(Long connectorId, String actionId);
 }

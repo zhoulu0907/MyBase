@@ -32,6 +32,15 @@ public class SaveActionReqVO {
     @Schema(description = "动作描述", example = "通过HTTP GET获取用户信息")
     private String description;
 
-    @Schema(description = "表单值", example = "{\"url\":\"https://api.example.com\",\"method\":\"GET\"}")
-    private JsonNode formValues;
+    @Schema(description = "基础信息配置")
+    private JsonNode basicInfo;
+
+    @Schema(description = "入参配置")
+    private JsonNode inputConfig;
+
+    @Schema(description = "出参配置")
+    private JsonNode outputConfig;
+
+    @Schema(description = "调试配置")
+    private JsonNode debugConfig;
 }
