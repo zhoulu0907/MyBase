@@ -146,15 +146,29 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
 
   // 监听高度设置变化，同步到配置
   useEffect(() => {
-    handlePropsChange('enableMinHeight', enableMinHeight);
-    handlePropsChange('enableMaxHeight', enableMaxHeight);
+    const updates = [];
+    updates.push({ key: 'enableMinHeight', value: enableMinHeight });
     if (enableMinHeight) {
-      handlePropsChange('minHeight', minHeight);
+      updates.push({ key: 'minHeight', value: minHeight });
+    } else {
+      // 未开启时不保存高度值，使用null代替undefined
+      updates.push({ key: 'minHeight', value: null });
     }
+    handleMultiPropsChange(updates);
+  }, [enableMinHeight, minHeight]);
+
+  // 监听最大高度设置变化，同步到配置
+  useEffect(() => {
+    const updates = [];
+    updates.push({ key: 'enableMaxHeight', value: enableMaxHeight });
     if (enableMaxHeight) {
-      handlePropsChange('maxHeight', maxHeight);
+      updates.push({ key: 'maxHeight', value: maxHeight });
+    } else {
+      // 未开启时不保存高度值，使用null代替undefined
+      updates.push({ key: 'maxHeight', value: null });
     }
-  }, [enableMinHeight, enableMaxHeight, minHeight, maxHeight]);
+    handleMultiPropsChange(updates);
+  }, [enableMaxHeight, maxHeight]);
 
   // 处理实体变更
   const handleEntityChange = (value: string) => {

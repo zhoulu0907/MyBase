@@ -26,7 +26,11 @@ const XTree = memo(
       metaData,
       treeFields,
       defaultExpandLevel,
-      showLine
+      showLine,
+      enableMinHeight,
+      enableMaxHeight,
+      minHeight,
+      maxHeight
     } = props;
 
     const [treeData, setTreeData] = useState<any[]>([]);
@@ -286,8 +290,20 @@ const XTree = memo(
       return null;
     }
 
+    // 计算容器样式
+    const containerStyle: React.CSSProperties = {};
+    if (enableMinHeight) {
+      containerStyle.minHeight = `${minHeight || 350}px`;
+    }
+    if (enableMaxHeight) {
+      containerStyle.maxHeight = `${maxHeight || 720}px`;
+      containerStyle.overflowY = 'auto';
+    } else {
+      containerStyle.overflowY = 'visible';
+    }
+
     return (
-      <div className="x-tree-container">
+      <div className="x-tree-container" style={containerStyle}>
         <Tree
           treeData={treeData}
           expandedKeys={expandedKeys}
