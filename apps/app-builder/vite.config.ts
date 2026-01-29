@@ -8,18 +8,12 @@ export default defineConfig({
   server: {
     port: 4399,
     proxy: {
-      '/chat-app': {
+      'http://localhost:8888': {
         target: 'http://s25029301301.dev.internal.virtueit.net:81',
         changeOrigin: true,
         rewrite: (path) => {
           const newPath = path.replace(/^\/chat-app/, '/v1/aigenapp');
-          console.log('[proxy rewrite]', path, '->', newPath);
           return newPath;
-        },
-        configure: (proxy) => {
-          proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('[proxy request]', req.method, proxyReq.protocol + '//' + proxyReq.host + proxyReq.path);
-          });
         }
       }
     }

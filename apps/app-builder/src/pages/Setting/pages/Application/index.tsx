@@ -22,7 +22,12 @@ import {
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
+import {
+  getCommonPaginationList,
+  getRuntimeURL,
+  TENANT_APP_PERMISSION as ACTIONS,
+  UserPermissionManager
+} from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -76,6 +81,7 @@ const AppManagement: React.FC = () => {
 
   // option dropdown
   const [optionVisibleId, setOptionVisibleId] = useState('');
+  const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
 
   useEffect(() => {
     if (!appContainerRef.current) return;
@@ -273,15 +279,17 @@ const AppManagement: React.FC = () => {
             >
               创建应用
             </Button>
-            <Button
-              type="primary"
-              size="large"
-              permission={ACTIONS.CREATE}
-              icon={<IconPlus fontSize={16} />}
-              onClick={() => navigate('/chat')}
-            >
-              子应用
-            </Button>
+            {tenantId === '156421901678804992' && userPermissionInfo?.user?.id?.toString() === '156421901678804997' && (
+              <Button
+                type="primary"
+                size="large"
+                permission={ACTIONS.CREATE}
+                icon={<IconPlus fontSize={16} />}
+                onClick={() => navigate('/chat')}
+              >
+                打开子应用
+              </Button>
+            )}
 
             {/* 筛选下拉框 */}
             <div>
