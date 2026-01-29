@@ -96,12 +96,12 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     </Menu>
   );
 
-  const toRuntime = () => {
+  const toRuntimeDev = () => {
     const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
 
     const newWindow = window.open('', '_blank');
     if (newWindow) {
-      const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${curAppId}/runtime/`;
+      const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${curAppId}/runtime-dev/`;
       newWindow.location.href = `${getRuntimeURL()}/#/login?redirectURL=${redirectURL}`;
     }
   };
@@ -138,10 +138,10 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         </div>
 
         <div className={styles.userInfo}>
-          <Button type="secondary" size="small" onClick={toRuntime} className={styles.visitButton}>
+          <Button type="secondary" size="small" onClick={toRuntimeDev} className={styles.visitButton}>
             <div className={styles.visitButtonContent}>
               <img src={VisitIconSVG} alt="visit" />
-              <div>访问</div>
+              <div>预览</div>
             </div>
           </Button>
 

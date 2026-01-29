@@ -19,17 +19,10 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
-      <Route path='/third/login' element={<ThirdLogin />} />
-
-      {/* <Route path="/onebase/runtime/" element={<Runtime />} /> */}
+      <Route path="/third/login" element={<ThirdLogin />} />
 
       <Route path="/onebase/:tenantId/:appId/runtime/" element={<Runtime />} />
-      {/* <Route path="/onebase/:appId/runtime/" element={<Runtime />} /> */}
-
-      {/* <Route path="/onebase/runtime/:appId/" element={<Runtime />} />
-      <Route path="/onebase/runtime/:appId/:tenantId" element={<Runtime />} /> */}
-      {/* <Route path="/onebase/tenant/runtime/my-app" element={<MyAppPage />} />
-      <Route path="/onebase/setting/*" element={<SettingPage />} /> */}
+      <Route path="/onebase/:tenantId/:appId/runtime-dev/" element={<Runtime />} />
 
       <Route path="/onebase/:tenantId/runtime/my-app" element={<MyAppPage />} />
       <Route path="/onebase/:tenantId/setting/*" element={<SettingPage />} />

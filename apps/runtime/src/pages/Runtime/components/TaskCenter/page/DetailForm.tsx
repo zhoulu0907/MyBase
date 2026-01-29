@@ -1,3 +1,4 @@
+import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import { Form } from '@arco-design/web-react';
 import { getEntityFieldsWithChildren, getPageSetMetaData, type AppEntityField } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -5,13 +6,13 @@ import {
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
   getComponentWidth,
+  normalizeFormValues,
   PreviewRender,
   startLoadPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useEditorSignalMap,
   useFormEditorSignal,
-  normalizeFormValues,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -69,6 +70,7 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   // 直接访问 signal 的值，useSignals() 会确保组件在 signal 变化时重新渲染
   const { pageSetId, detailData } = props;
   const [form] = Form.useForm();
+  const isDev = useIsRuntimeDev();
   const { editPageViewId, mainMetaDataFields, setMainMetaDataFields, subEntities, setSubEntities } = pagesRuntimeSignal;
   const { loadPageComponentSchemas: loadFormPageComponentSchemas } = useFormEditorSignal;
   const [pageType, setPageType] = useState('');
@@ -223,17 +225,15 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   };
 
   const parseData = async () => {
-    console.info('定位错误 1');
     setLoading(true);
     try {
-      await startLoadPageSet({ pageSetId: pageSetId, runtime: true });
+      await startLoadPageSet({ pageSetId: pageSetId, runtime: true, isDev });
     } finally {
       // 数据加载完成后，延迟一小段时间确保组件已更新
       setTimeout(() => {
         setLoading(false);
       }, 100);
     }
-    console.info('定位错误 2');
   };
 
   useEffect(() => {
