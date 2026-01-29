@@ -11,12 +11,14 @@ import static com.cmsr.onebase.module.formula.enums.FormulaConstants.SUPPORTED_F
 public class FormulaValidate {
 
 
+    public static final String REGEX = "REGEX";
+
     /**
      * 验证公式中是否包含受支持的函数
      *
      * @param formula 公式内容
      */
-    public static void validateSupportedFunctions(String formula) {
+    public static String validateSupportedFunctions(String formula) {
         // 使用正则表达式提取可能的函数名（大写字母开头，后面跟着字母、数字和下划线，后跟括号）
         Pattern functionPattern = Pattern.compile("\\b([A-Z][A-Z0-9_]*)\\s*\\(([^)]*)\\)");
         Matcher matcher = functionPattern.matcher(formula);
@@ -40,6 +42,10 @@ public class FormulaValidate {
             // 验证参数类型
             validateFunctionParameterTypes(functionName, params);
         }
+        // if (formula.contains(REGEX)) {
+        //     formula = formula.replace("\\","\\\\");
+        // }
+        return formula;
     }
 
     /**

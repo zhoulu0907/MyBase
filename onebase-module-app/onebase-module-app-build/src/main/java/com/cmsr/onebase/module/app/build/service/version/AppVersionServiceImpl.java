@@ -378,12 +378,22 @@ public class AppVersionServiceImpl implements AppVersionService {
      * @return 导出记录ID
      */
     @Override
-    public Long exportApplicationVersion(Long versionId) {
-        Long applicationId = ApplicationManager.getRequiredApplicationId();
+    public Long exportApplicationVersion(Long versionId, Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
+        AppVersionDO versionDO = null;
         // 验证版本是否存在且属于当前应用
-        AppVersionDO versionDO = versionRepository.getById(versionId);
+        if (versionId.intValue() == VersionTypeEnum.BUILD.getValue()
+                || versionId.intValue() == VersionTypeEnum.RUNTIME.getValue()) {
+            versionDO = new AppVersionDO();
+            versionDO.setApplicationId(applicationId);
+            versionDO.setVersionType(versionId.intValue());
+        } else {
+            versionDO = ApplicationManager
+                    .withoutApplicationIdAndVersionTag(
+                            () -> versionRepository.getById(versionId));
+        }
+
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }
@@ -558,8 +568,8 @@ public class AppVersionServiceImpl implements AppVersionService {
      */
     @Override
     public PageResult<ExportPageRespVO> getExportPage(ExportPageReqVO pageReqVO) {
-        Long applicationId = ApplicationManager.getApplicationId();
-        PageResult<AppExportDO> pageResult = appExportRepository.selectPage(applicationId, pageReqVO.getExportStatus(),
+        PageResult<AppExportDO> pageResult = appExportRepository.selectPage(pageReqVO.getApplicationId(),
+                pageReqVO.getExportStatus(),
                 pageReqVO);
 
         if (pageResult.getList().isEmpty()) {
@@ -610,8 +620,7 @@ public class AppVersionServiceImpl implements AppVersionService {
      * @return 导出记录ID（返回原导出记录ID）
      */
     @Override
-    public Long retryExportApplication(Long exportId) {
-        Long applicationId = ApplicationManager.getRequiredApplicationId();
+    public Long retryExportApplication(Long exportId, Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
         // 查询导出记录并验证是否属于当前应用

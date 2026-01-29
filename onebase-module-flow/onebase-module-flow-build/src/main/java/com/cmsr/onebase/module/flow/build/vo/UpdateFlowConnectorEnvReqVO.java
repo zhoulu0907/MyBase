@@ -43,8 +43,8 @@ public class UpdateFlowConnectorEnvReqVO {
     @Size(max = 512, message = "环境描述不能超过512个字符")
     private String description;
 
-    @Schema(description = "扩展配置")
-    private JsonNode extraConfig;
+    @Schema(description = "动作配置（JSON格式）")
+    private JsonNode config;
 
     @Schema(description = "启用状态", example = "1")
     private Integer activeStatus;

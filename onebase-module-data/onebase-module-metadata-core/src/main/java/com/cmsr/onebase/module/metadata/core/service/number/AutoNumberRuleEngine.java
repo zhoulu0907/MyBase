@@ -103,7 +103,20 @@ public class AutoNumberRuleEngine {
      */
     private String executeDateRule(MetadataAutoNumberRuleItemDO ruleItem) {
         LocalDateTime now = LocalDateTime.now();
-        String format = ruleItem.getTextValue();
+        // 获取日期格式：
+        // 1. 如果format是"自定义"，则使用textValue作为实际格式
+        // 2. 否则优先使用format字段
+        // 3. 若都为空则使用默认格式
+        String format = ruleItem.getFormat();
+        String textValue = ruleItem.getTextValue();
+        
+        if ("自定义".equals(format)) {
+            // 自定义格式时，实际格式存储在textValue字段
+            format = textValue;
+        } else if (StrUtil.isBlank(format)) {
+            // format为空时，回退到textValue字段（兼容旧数据）
+            format = textValue;
+        }
         
         if (StrUtil.isBlank(format)) {
             // 默认格式

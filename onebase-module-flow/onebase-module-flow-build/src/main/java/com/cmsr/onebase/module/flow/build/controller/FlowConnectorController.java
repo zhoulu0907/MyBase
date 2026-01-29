@@ -72,22 +72,6 @@ public class FlowConnectorController {
         return CommonResult.success(result);
     }
 
-    @Operation(summary = "查询连接器动作清单")
-    @GetMapping("/{id}/actions")
-    public CommonResult<List<String>> getActions(@PathVariable Long id) {
-        List<String> actions = connectorService.getActionsById(id);
-        return CommonResult.success(actions);
-    }
-
-    @Operation(summary = "查询指定动作配置内容")
-    @GetMapping("/{id}/action-value")
-    public CommonResult<JsonNode> getActionValue(
-            @PathVariable Long id,
-            @RequestParam("actionName") @NotBlank(message = "动作名称不能为空") String actionName) {
-        JsonNode actionValue = connectorService.getActionValueById(id, actionName);
-        return CommonResult.success(actionValue);
-    }
-
     @Operation(summary = "启用/禁用连接器实例",
               description = "启用操作要求实例必须已配置环境信息（envUuid不为空），禁用操作无限制")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
@@ -111,10 +95,28 @@ public class FlowConnectorController {
 
     // ==================== 动作管理接口 ====================
 
-    @Operation(summary = "获取连接器的动作列表")
-    @GetMapping("/{connectorId}/actions")
-    public CommonResult<List<ConnectorActionVO>> getActionList(@PathVariable Long connectorId) {
-        List<ConnectorActionVO> actions = connectorService.getActionList(connectorId);
+    @Operation(summary = "查询连接器动作清单")
+    @GetMapping("/{id}/actions")
+    public CommonResult<List<String>> getActions(@PathVariable Long id) {
+        List<String> actions = connectorService.getActionsById(id);
+        return CommonResult.success(actions);
+    }
+
+    @Operation(summary = "查询指定动作配置内容")
+    @GetMapping("/{id}/action-value")
+    public CommonResult<JsonNode> getActionValue(
+            @PathVariable Long id,
+            @RequestParam("actionName") @NotBlank(message = "动作名称不能为空") String actionName) {
+        JsonNode actionValue = connectorService.getActionValueById(id, actionName);
+        return CommonResult.success(actionValue);
+    }
+
+    @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表")
+    @GetMapping("/{id}/action-infos")
+    public CommonResult<List<ConnectorActionVO>> getActionInfos(
+            @Parameter(description = "连接器实例ID", required = true, example = "1")
+            @PathVariable Long id) {
+        List<ConnectorActionVO> actions = connectorService.getActionInfos(id);
         return CommonResult.success(actions);
     }
 

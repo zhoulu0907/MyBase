@@ -117,8 +117,8 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
         if (createVO.getAuthConfig() != null) {
             envDO.setAuthConfig(createVO.getAuthConfig().toString());
         }
-        if (createVO.getExtraConfig() != null) {
-            envDO.setExtraConfig(createVO.getExtraConfig().toString());
+        if (createVO.getConfig() != null) {
+            envDO.setConfig(createVO.getConfig().toString());
         }
 
         repository.save(envDO);
@@ -152,8 +152,8 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
         if (updateVO.getAuthConfig() != null) {
             envDO.setAuthConfig(updateVO.getAuthConfig().toString());
         }
-        if (updateVO.getExtraConfig() != null) {
-            envDO.setExtraConfig(updateVO.getExtraConfig().toString());
+        if (updateVO.getConfig() != null) {
+            envDO.setConfig(updateVO.getConfig().toString());
         }
 
         repository.updateById(envDO);
@@ -201,8 +201,8 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
             if (envDO.getAuthConfig() != null) {
                 vo.setAuthConfig(objectMapper.readTree(envDO.getAuthConfig()));
             }
-            if (envDO.getExtraConfig() != null) {
-                vo.setExtraConfig(objectMapper.readTree(envDO.getExtraConfig()));
+            if (envDO.getConfig() != null) {
+                vo.setConfig(objectMapper.readTree(envDO.getConfig()));
             }
         } catch (Exception e) {
             log.error("JSON解析失败", e);

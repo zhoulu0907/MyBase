@@ -87,16 +87,18 @@ public class AppVersionController {
     @GetMapping("/export")
     @Operation(summary = "导出应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Long> exportApplication(@RequestParam("versionId") Long versionId) {
-        Long exportId = appVersionService.exportApplicationVersion(versionId);
+    public CommonResult<Long> exportApplication(@RequestParam("versionId") Long versionId,
+            @RequestParam("applicationId") Long applicationId) {
+        Long exportId = appVersionService.exportApplicationVersion(versionId, applicationId);
         return CommonResult.success(exportId);
     }
 
     @PostMapping("/export/retry")
     @Operation(summary = "重试导出应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Long> retryExportApplication(@RequestParam("exportId") Long exportId) {
-        Long retryExportId = appVersionService.retryExportApplication(exportId);
+    public CommonResult<Long> retryExportApplication(@RequestParam("exportId") Long exportId,
+            @RequestParam("applicationId") Long applicationId) {
+        Long retryExportId = appVersionService.retryExportApplication(exportId, applicationId);
         return CommonResult.success(retryExportId);
     }
 

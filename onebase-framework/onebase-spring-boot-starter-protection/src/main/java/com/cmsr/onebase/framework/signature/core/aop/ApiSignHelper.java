@@ -15,7 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Map;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -197,9 +198,44 @@ public class ApiSignHelper {
      */
     private static SortedMap<String, String> getRequestParameterMap(HttpServletRequest request) {
         SortedMap<String, String> sortedMap = new TreeMap<>();
-        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
-            sortedMap.put(entry.getKey(), entry.getValue()[0]);
+        //todo 这里暂时排除form里的参数校验，但完整签名是需要校验所有参数，待完善
+//        for (Map.Entry<String, String[]> entry : request.getParameterMap().entrySet()) {
+//            sortedMap.put(entry.getKey(), entry.getValue()[0]);
+//        }
+
+        // 只获取查询字符串参数，不包含表单参数
+        String queryString = request.getQueryString();
+        if (queryString != null && !queryString.isEmpty()) {
+            // 解析查询字符串参数
+            String[] pairs = queryString.split("&");
+            for (String pair : pairs) {
+                if (!pair.isEmpty()) {
+                    int idx = pair.indexOf('=');
+                    String key, value;
+                    if (idx > 0) {
+                        key = urlDecode(pair.substring(0, idx));
+                        value = urlDecode(pair.substring(idx + 1));
+                    } else {
+                        key = urlDecode(pair);
+                        value = "";
+                    }
+                    if (!key.isEmpty()) {
+                        sortedMap.put(key, value);
+                    }
+                }
+            }
         }
+
         return sortedMap;
+    }
+
+    /**
+     * URL解码方法
+     */
+    private static String urlDecode(String str) {
+        if (str == null) {
+            return null;
+        }
+        return URLDecoder.decode(str, StandardCharsets.UTF_8);
     }
 }

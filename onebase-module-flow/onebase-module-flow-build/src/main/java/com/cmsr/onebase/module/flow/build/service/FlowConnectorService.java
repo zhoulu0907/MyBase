@@ -83,6 +83,14 @@ public interface FlowConnectorService {
     List<ConnectorActionVO> getActionList(Long connectorId);
 
     /**
+     * 获取连接器的动作配置列表
+     *
+     * @param connectorId 连接器ID
+     * @return 动作配置列表
+     */
+    List<ConnectorActionVO> getActionInfos(Long id);
+
+    /**
      * 获取动作详情
      *
      * @param connectorId 连接器ID
