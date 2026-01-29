@@ -949,7 +949,7 @@ export const uploadButtonTypeConfig: IStatusConfigType<TUploadButtonType> = {
 
 export const showDownloadConfig: IBooleanConfigType = {
   key: 'showDownload',
-  name: '列表页支持下载',
+  name: '支持下载',
   type: 'SwitchInput'
 }
 

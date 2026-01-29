@@ -3,7 +3,6 @@ import {
   baseDefault,
   dataFieldConfig,
   dynamicUserSelectConfig,
-  labelColSpanConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
@@ -135,11 +134,6 @@ export interface XInputUserSelectConfig extends ICommonBaseType {
   layout?: TLayoutSelectKeyType;
 
   /**
-   * 标题宽度
-   */
-  labelColSpan?: TNumberDefaultType;
-
-  /**
    * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
    */
   saveWithHidden?: TBooleanDefaultType;
@@ -153,7 +147,6 @@ const XUserSelect: XInputUserSelectSchema = {
     ...dataFieldConfig,
     dynamicUserSelectConfig,
     layoutConfig,
-    labelColSpanConfig,
     // {
     //   key: 'saveWithHidden',
     //   name: '隐藏时提交数据',
@@ -178,7 +171,6 @@ const XUserSelect: XInputUserSelectSchema = {
     isSelectScope: false,
     selectScope: [],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    labelColSpan: 200,
     saveWithHidden: false,
     verify: {
       required: false,
