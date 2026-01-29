@@ -17,12 +17,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.ZipOutputStream;
 
-import com.cmsr.onebase.framework.common.util.io.ZipUtils;
-import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
-import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.export.MetadataExportDataDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.cmsr.onebase.framework.common.util.io.ZipUtils;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppNavigationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
@@ -36,6 +36,8 @@ import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetReposito
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchComponentRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppWorkbenchPageRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppNavigationDO;
+import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
+import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.mybatisflex.core.query.QueryWrapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -235,13 +237,13 @@ public class AppDataManager {
                 .where(APP_AUTH_ROLE.VERSION_TAG.eq(versionTag));
         configData.setAuthRoles(authRoleRepository.list(authRoleQuery));
 
-//        // Bpm流程
-//        Object bpmConfig = bpmDataManager.exportApplication(applicationId, versionTag);
-//        configData.setBpmConfig(bpmConfig);
-//
-//        // 元数据配置
-//        Object metadataConfig = metadataDatasourceApi.exportDatasource(applicationId, versionTag);
-//        configData.setMetaDataConfig(metadataConfig);
+        // Bpm流程
+        Object bpmConfig = bpmDataManager.exportApplication(applicationId, versionTag);
+        configData.setBpmConfig(bpmConfig);
+
+        // 元数据配置
+        Object metadataConfig = metadataDatasourceApi.exportDatasource(applicationId, versionTag);
+        configData.setMetaDataConfig(metadataConfig);
 
         return configData;
     }
@@ -286,15 +288,16 @@ public class AppDataManager {
             navigationRepository.save(navigation);
         }
 
-//        Object bpmConfig = configData.getBpmConfig();
-//        if (bpmConfig != null){
-//            bpmDataManager.importApplication(applicationId, tenantId, versionTag, bpmConfig);
-//        }
-//
-//        Object metaDataConfig = configData.getMetaDataConfig();
-//        if (metaDataConfig != null){
-//            metadataDatasourceApi.importDatasource(applicationId, appUid, tenantId, versionTag, metaDataConfig);
-//        }
+        Object bpmConfig = configData.getBpmConfig();
+        if (bpmConfig != null) {
+            bpmDataManager.importApplication(applicationId, tenantId, versionTag, bpmConfig);
+        }
+
+        Object metaDataConfig = configData.getMetaDataConfig();
+
+        if (metaDataConfig != null) {
+//            metadataDatasourceApi.importDatasource(applicationId, appUid, tenantId, versionTag, metaDataConfig, null);
+        }
     }
 
     /**
