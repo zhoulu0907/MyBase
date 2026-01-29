@@ -64,6 +64,10 @@ public class PairJoinNode extends Node<PairJoinConfig> implements SqlQueryAction
 
     private Condition[] joinConditions() {
         return config.getFieldPairs().stream()
+                // 过滤掉空的或无效的fieldPair（前端删除连接条件后可能传递空对象{}）
+                .filter(fieldPair -> fieldPair != null 
+                        && StringUtils.isNotBlank(fieldPair.getLeftFieldFqn()) 
+                        && StringUtils.isNotBlank(fieldPair.getRightFieldFqn()))
                 .map(fieldPair -> {
                     String[] left = StringUtils.split(fieldPair.getLeftFieldFqn(), ".");
                     String[] right = StringUtils.split(fieldPair.getRightFieldFqn(), ".");
