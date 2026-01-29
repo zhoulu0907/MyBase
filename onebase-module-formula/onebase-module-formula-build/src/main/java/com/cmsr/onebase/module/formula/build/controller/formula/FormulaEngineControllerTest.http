@@ -146,6 +146,31 @@ Content-Type: application/json
 
 { "formula": "REGEXMATCH('13812345679', '\d{11}' )"}
 
+
+### AND
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "AND(1=1, 2=2)"}
+
+### IF
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "IF(1==1, 41,23)"}
+
+### CHAR
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "CHAR(100)"}
+
 ### REGEXEXTRACT
 POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
