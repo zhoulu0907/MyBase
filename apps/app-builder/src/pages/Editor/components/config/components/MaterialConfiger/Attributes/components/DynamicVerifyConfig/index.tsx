@@ -166,40 +166,92 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             </Grid.Row>
           )}
 
-          {typeof configs[verifyKey]['maxCount'] === 'number' && (
-            <InputNumber
-              value={configs[verifyKey]['maxCount']}
-              min={1}
-              precision={0}
-              prefix="上传数量限制"
-              onChange={(value) => {
-                if (typeof value !== 'number') return;
-                handlePropsChange(verifyKey, { ...configs[verifyKey], maxCount: value });
-              }}
-            />
+          {typeof configs[verifyKey]['maxCountLimit'] === 'boolean' && (
+            <Grid.Row align="center">
+              <Grid.Col span={10}>
+                <Checkbox
+                  checked={configs[verifyKey]['maxCountLimit']}
+                  onChange={(value) => {
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], maxCountLimit: value });
+                  }}
+                >
+                  上传数量限制
+                </Checkbox>
+              </Grid.Col>
+              {configs[verifyKey]['maxCountLimit'] && (
+                <Grid.Col span={14}>
+                  <InputNumber
+                    size="mini"
+                    value={configs[verifyKey]['maxCount']}
+                    min={1}
+                    max={100}
+                    precision={0}
+                    onChange={(value) => {
+                      if (typeof value !== 'number') return;
+                      handlePropsChange(verifyKey, { ...configs[verifyKey], maxCount: value });
+                    }}
+                  />
+                </Grid.Col>
+              )}
+            </Grid.Row>
           )}
-          {typeof configs[verifyKey]['maxSize'] === 'number' && (
-            <InputNumber
-              value={configs[verifyKey]['maxSize']}
-              min={0}
-              max={100}
-              precision={0}
-              prefix="大小限制"
-              suffix={configs[verifyKey]['maxSize'] ? 'MB' : ''}
-              onChange={(value) => {
-                if (!value) return;
-                handlePropsChange(verifyKey, { ...configs[verifyKey], maxSize: value });
-              }}
-            />
+
+          {typeof configs[verifyKey]['maxSizeLimit'] === 'boolean' && (
+            <Grid.Row align="center">
+              <Grid.Col span={8}>
+                <Checkbox
+                  checked={configs[verifyKey]['maxSizeLimit']}
+                  onChange={(value) => {
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], maxSizeLimit: value });
+                  }}
+                >
+                  大小限制
+                </Checkbox>
+              </Grid.Col>
+              {configs[verifyKey]['maxSizeLimit'] && (
+                <Grid.Col span={16}>
+                  <InputNumber
+                    size="mini"
+                    value={configs[verifyKey]['maxSize']}
+                    min={0}
+                    max={100}
+                    precision={0}
+                    suffix={configs[verifyKey]['maxSize'] ? 'MB' : ''}
+                    onChange={(value) => {
+                      if (!value) return;
+                      handlePropsChange(verifyKey, { ...configs[verifyKey], maxSize: value });
+                    }}
+                  />
+                </Grid.Col>
+              )}
+            </Grid.Row>
           )}
-          {typeof configs[verifyKey]['fileFormat'] === 'string' && (
-            <Input
-              placeholder={`请输入支持文件格式，用英文逗号分隔`}
-              value={configs[verifyKey]['fileFormat']}
-              onChange={(value) => {
-                handlePropsChange(verifyKey, { ...configs[verifyKey], fileFormat: value });
-              }}
-            />
+
+          {typeof configs[verifyKey]['fileFormatLimit'] === 'boolean' && (
+            <Grid.Row align="center">
+              <Grid.Col span={8}>
+                <Checkbox
+                  checked={configs[verifyKey]['fileFormatLimit']}
+                  onChange={(value) => {
+                    handlePropsChange(verifyKey, { ...configs[verifyKey], fileFormatLimit: value });
+                  }}
+                >
+                  文件格式
+                </Checkbox>
+              </Grid.Col>
+              {configs[verifyKey]['fileFormatLimit'] && (
+                <Grid.Col span={16}>
+                  <Input
+                    size="mini"
+                    placeholder={`文件格式，用英文逗号分隔`}
+                    value={configs[verifyKey]['fileFormat']}
+                    onChange={(value) => {
+                      handlePropsChange(verifyKey, { ...configs[verifyKey], fileFormat: value });
+                    }}
+                  />
+                </Grid.Col>
+              )}
+            </Grid.Row>
           )}
         </Grid.Col>
       </Grid.Row>
