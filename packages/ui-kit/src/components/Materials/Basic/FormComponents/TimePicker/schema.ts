@@ -132,6 +132,7 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
   };
 
   /**
@@ -187,7 +188,7 @@ const XTimePicker: XInputTimePickerSchema = {
     // alignConfig,
     // 布局方式
     layoutConfig,
-    securityConfig,
+    // securityConfig,
     // 字段宽度
     widthConfig
   ],
@@ -215,6 +216,7 @@ const XTimePicker: XInputTimePickerSchema = {
     },
     verify: {
       required: false,
+      noRepeat: false,
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
