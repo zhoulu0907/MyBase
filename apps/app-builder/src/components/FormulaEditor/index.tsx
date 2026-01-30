@@ -24,6 +24,7 @@ import { DebuggedFormula, FormulaInput, FunctionList, InfoPanel, VariableList } 
 import styles from './index.module.less';
 import { functionType } from './utils/formula';
 import type { FormulaEditorProps, functionGroup, FunctionItem, info } from './utils/types';
+import copy from 'copy-to-clipboard';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -277,16 +278,10 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
    */
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(formula);
+      copy(formula);
       Message.success('公式已复制到剪贴板');
     } catch (err) {
-      console.error('复制失败: ', err);
-      const textarea = document.createElement('textarea');
-      textarea.value = formula;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+      await navigator.clipboard.writeText(formula);
       Message.success('公式已复制到剪贴板');
     }
   }, [formula]);
