@@ -929,7 +929,9 @@ export const numberFormatConfig: INumberFormatConfigType = {
 export const stepConfig: INumberConfigType = {
   key: 'step',
   name: '数字步长',
-  type: 'NumberInput'
+  type: 'NumberInput',
+  min: 0,
+  max: 1000000
 }
 
 export const textDefaultValueConfig: ITextConfigType = {
