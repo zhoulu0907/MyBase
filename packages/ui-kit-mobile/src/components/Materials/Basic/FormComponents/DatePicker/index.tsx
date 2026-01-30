@@ -1,14 +1,24 @@
-import { memo } from 'react';
-import { nanoid } from 'nanoid';
-import dayjs from 'dayjs';
 import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
+import dayjs from 'dayjs';
+import { nanoid } from 'nanoid';
+import { memo } from 'react';
 // import { ItemType } from '@arco-design/mobile-react/cjs/date-picker';
-import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
-import { FORM_COMPONENT_TYPES, DATE_OPTIONS, DATE_VALUES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, DATE_EXTREME_TYPE, DATE_DYNAMIC_VALUE, securityEncodeText } from '@onebase/ui-kit';
-type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
+import {
+  DATE_DYNAMIC_VALUE,
+  DATE_EXTREME_TYPE,
+  DATE_OPTIONS,
+  DATE_VALUES,
+  FORM_COMPONENT_TYPES,
+  FormSchema,
+  securityEncodeText,
+  STATUS_OPTIONS,
+  STATUS_VALUES
+} from '@onebase/ui-kit';
 import '../index.css';
+type XDatePickerConfig = typeof FormSchema.XDatePickerSchema.config;
 
-const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
+const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
   const {
     label,
     dataField,
@@ -20,13 +30,13 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     runtime = true,
     detailMode,
     form,
-    security,
     dateRange,
     defaultValueConfig
   } = props;
 
   // 生成唯一的字段ID
-  const fieldId = dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.DATE_PICKER}_${nanoid()}`;
 
   const textAlign = layout === 'vertical' ? 'left' : 'right';
   // const currentDateType = dateType || DATE_VALUES[DATE_OPTIONS.DATE];
@@ -44,22 +54,27 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     if (dateRange?.earliestLimit) {
       // 静态值
       if (dateRange.earliestType === DATE_EXTREME_TYPE.STATIC && dateRange.earliestStaticValue) {
-        const earliestTime = new Date(dateRange.earliestStaticValue).getTime()
-        validDate.startTs = earliestTime
+        const earliestTime = new Date(dateRange.earliestStaticValue).getTime();
+        validDate.startTs = earliestTime;
       }
 
       // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
       if (dateRange.earliestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.earliestDynamicValue) {
-        const earliestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.earliestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        validDate.startTs = earliestTime
+        const earliestTime =
+          todatTime +
+          (DATE_DYNAMIC_VALUE[dateRange.earliestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) *
+            24 *
+            3600 *
+            1000;
+        validDate.startTs = earliestTime;
       }
 
       // 变量
       if (dateRange.earliestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.earliestVariableValue) {
         const earliestVariableValue = form?.getFieldValue(dateRange.earliestVariableValue);
         if (earliestVariableValue) {
-          const earliestTime = new Date(earliestVariableValue).getTime()
-          validDate.startTs = earliestTime
+          const earliestTime = new Date(earliestVariableValue).getTime();
+          validDate.startTs = earliestTime;
         }
       }
     }
@@ -68,29 +83,31 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
     if (dateRange?.latestLimit) {
       // 静态值
       if (dateRange.latestType === DATE_EXTREME_TYPE.STATIC && dateRange.latestStaticValue) {
-        const latestTime = new Date(dateRange.latestStaticValue).getTime()
-        validDate.endTs = latestTime
+        const latestTime = new Date(dateRange.latestStaticValue).getTime();
+        validDate.endTs = latestTime;
       }
 
       // 动态值  DATE_DYNAMIC_VALUE  DATE_DYNAMIC_TYPE
       if (dateRange.latestType === DATE_EXTREME_TYPE.DYNAMIC && dateRange.latestDynamicValue) {
-        const latestTime = todatTime + (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000
-        validDate.endTs = latestTime
+        const latestTime =
+          todatTime +
+          (DATE_DYNAMIC_VALUE[dateRange.latestDynamicValue as keyof typeof DATE_DYNAMIC_VALUE] || 0) * 24 * 3600 * 1000;
+        validDate.endTs = latestTime;
       }
 
       // 变量
       if (dateRange.latestType === DATE_EXTREME_TYPE.VARIABLE && dateRange.latestVariableValue) {
-        const latestVariableValue = form?.getFieldValue(dateRange.latestVariableValue)
+        const latestVariableValue = form?.getFieldValue(dateRange.latestVariableValue);
         if (latestVariableValue) {
-          const latestTime = new Date(latestVariableValue).getTime()
-          validDate.endTs = latestTime
+          const latestTime = new Date(latestVariableValue).getTime();
+          validDate.endTs = latestTime;
         }
       }
     }
 
     return {
       ...validDate
-    }
+    };
   };
 
   // 根据日期类型渲染对应的日期选择器
@@ -117,7 +134,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       <DatePicker
         title={label.text}
         // typeArr={mode}
-        mode='date'
+        mode="date"
         maskClosable
         minTs={dateSelectRange().startTs}
         maxTs={dateSelectRange().endTs}
@@ -128,13 +145,13 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
             date: '日',
             hour: '时',
             minute: '分',
-            second: '秒',
+            second: '秒'
           };
           return `${value}${map[type] || ''}`;
         }}
         contentStyle={{ marginTop: layout === 'vertical' ? '0.3rem' : 0 }}
       />
-    )
+    );
   };
 
   const rules: ITypeRules<ValidatorType.Custom>[] = [
@@ -170,7 +187,7 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       style={{
         textAlign,
-        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        pointerEvents: !runtime || detailMode ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
     >
