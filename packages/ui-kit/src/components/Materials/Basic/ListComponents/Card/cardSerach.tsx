@@ -300,7 +300,7 @@ const CardSearch = memo((props: CardSearchConfig) => {
       {(onSearch || onReset) && (
         <>
           {Array.from({ length: placeholderCount }).map((_, i) => (
-            <div key={`placeholder-${i}`} className="searchItem placeholder" />
+            <div key={`placeholder-${i}`} className="searchItem searchItemPlaceholder" />
           ))}
           <div className={`searchItem searchActions ${placeholderCount === 3 ? 'searchActions-alone' : ''}`}>
             <Form.Item label={<span className={'labelText'}></span>}>

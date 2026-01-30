@@ -76,7 +76,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
             }}
           >
             {options.map((ele, index: number) => (
-              <Select.Option key={index} value={ele.value}>
+              <Select.Option key={index} value={ele.id}>
                 {ele.label}
               </Select.Option>
             ))}
