@@ -111,10 +111,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         ) : (
           <InputNumber
             placeholder={placeholder}
-            step={step}
+            step={step || undefined}
             min={verify?.numberLimit ? verify?.min : undefined}
             max={verify?.numberLimit ? verify?.max : undefined}
-            precision={showPrecision ? precision : 0}
+            precision={showPrecision ? precision : undefined}
             formatter={(value) => {
               return useThousandsSeparator ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : value.toString();
             }}

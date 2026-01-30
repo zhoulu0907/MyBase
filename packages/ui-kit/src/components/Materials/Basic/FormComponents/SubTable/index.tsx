@@ -2,7 +2,7 @@ import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { Button, Divider, Form, Input, Layout, Table, Tooltip } from '@arco-design/web-react';
-import { IconDelete, IconPlus, IconQuestionCircle } from '@arco-design/web-react/icon';
+import { IconDelete, IconEdit, IconPlus, IconQuestionCircle } from '@arco-design/web-react/icon';
 import { ENTITY_TYPE_VALUE } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -29,10 +29,21 @@ import { getComponentDescriptor } from '../../../registry';
 import './index.css';
 import { type XSubTableConfig } from './schema';
 
-const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any }) => {
   useSignals();
 
-  const { id, label, tooltip, tooltipPosition, status, subTableConfig, verify, runtime = true, detailMode, pageType } = props;
+  const {
+    id,
+    label,
+    tooltip,
+    tooltipPosition,
+    status,
+    subTableConfig,
+    verify,
+    runtime = true,
+    detailMode,
+    pageType
+  } = props;
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const {
@@ -175,7 +186,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           ...schema.config.selectedDataSource,
           entityUuid: currentField.dataSelectionConfig?.targetEntityUuid,
           tableName: currentField.dataSelectionConfig?.targetTableName,
-          entityName: currentField.dataSelectionConfig?.targetFieldName,
+          entityName: currentField.dataSelectionConfig?.targetFieldName
         };
         // 回显字段  name
         schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
@@ -456,10 +467,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         }
         labelCol={{ span: 24 }}
         layout="vertical"
-        tooltip={ tooltip && {
-          content: tooltip,
-          position: tooltipPosition
-        }}
+        tooltip={
+          tooltip && {
+            content: tooltip,
+            position: tooltipPosition
+          }
+        }
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{
           width: '100%',
@@ -490,6 +503,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             {subTableConfig?.showIndex && (
               <div className="subComponentItem2" style={{ width: '62px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">序号</div>
+                <div style={{ textAlign: 'center', padding: '6px 0' }}>1</div>
               </div>
             )}
 
@@ -623,6 +637,26 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
             {subTableConfig?.showOperate && (
               <div className="subComponentItem2" style={{ width: '64px', paddingTop: '18px' }}>
                 <div className="simulate-header-item">操作</div>
+                <div style={{padding: '6px 0'}}>
+                  {subTableConfig?.editRow && (
+                    <Button
+                      type="text"
+                      size="small"
+                      status="success"
+                      style={{ padding: '0 4px' }}
+                      icon={<IconEdit />}
+                    ></Button>
+                  )}
+                  {subTableConfig?.deleteRow && (
+                    <Button
+                      type="text"
+                      size="small"
+                      status="danger"
+                      style={{ padding: '0 4px' }}
+                      icon={<IconDelete />}
+                    ></Button>
+                  )}
+                </div>
               </div>
             )}
           </div>
