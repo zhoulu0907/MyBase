@@ -2,7 +2,6 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  alignConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
@@ -13,7 +12,6 @@ import {
   defaultDateValueConfig,
   dateFormatConfig,
   verifyConfig,
-  securityConfig,
   type ICommonBaseType,
   type TDateTypeSelectKeyType,
   type TLayoutSelectKeyType,
@@ -55,8 +53,6 @@ import type {
   IDateFormatConfigType,
   TRadioDefaultType,
   IDefaultValueConfigType,
-  IAlignConfigType,
-  ISecurityConfigType,
   IDateRangeConfigType,
   ICommonConfigType
 } from '../../../types';
@@ -77,9 +73,7 @@ export type TXInputDatePickerEditData = Array<
   | IDateRangeConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
-  | ISecurityConfigType
   | IWidthConfigType<TWidthSelectKeyType>
   | ICommonConfigType
 >;
@@ -157,6 +151,7 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
   };
 
   /**
@@ -176,16 +171,6 @@ export interface XInputDatePickerConfig extends ICommonBaseType {
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
-
-  /**
-   * 安全
-   * display：开启
-   * type：掩码类型
-   */
-  security: {
-    display: TBooleanDefaultType;
-    type?: TTextDefaultType;
-  };
 
   /**
    * 字段宽度
@@ -208,11 +193,8 @@ const XDatePicker: XInputDatePickerSchema = {
     verifyConfig,
     // 显示状态
     statusConfig,
-    // 对齐方式
-    // alignConfig,
     // 布局方式
     layoutConfig,
-    securityConfig,
     // 字段宽度
     widthConfig,
   ],
@@ -253,14 +235,11 @@ const XDatePicker: XInputDatePickerSchema = {
     },
     verify: {
       required: false,
+      noRepeat: false
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    security: {
-      display: false,
-      type: ''
-    },
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };

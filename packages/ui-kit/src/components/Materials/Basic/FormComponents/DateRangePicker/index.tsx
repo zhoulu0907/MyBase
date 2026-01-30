@@ -1,8 +1,7 @@
 import { DatePicker, Form } from '@arco-design/web-react';
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
-import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import {
   DATE_OPTIONS,
   DATE_VALUES,
@@ -13,7 +12,7 @@ import {
 } from '../../../constants';
 import '../index.css';
 import type { XInputDateRangePickerConfig } from './schema';
-import { getPopupContainer, securityEncodeText } from '@/utils';
+import { getPopupContainer } from '@/utils';
 import { handelDisabledDate } from '../date';
 
 const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
@@ -31,8 +30,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
     endDefaultValueConfig,
     dateType,
     runtime = true,
-    detailMode,
-    security
+    detailMode
   } = props;
 
   const { form } = Form.useFormContext();
@@ -73,7 +71,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
               typeof fieldValue === 'string' &&
               fieldValue.split(',').map((ele: any, index: number) => (
                 <span key={index} style={{ marginBottom: '0' }}>
-                  {securityEncodeText(security, ele)}
+                  {ele}
                 </span>
               ))}
           </div>

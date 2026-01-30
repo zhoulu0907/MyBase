@@ -1,11 +1,11 @@
 import { FORM_COMPONENT_TYPES } from '@/components/Materials/componentTypes';
 import { DatePicker, Form } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { STATUS_OPTIONS, STATUS_VALUES, DATE_TIME_FORMAT, DEFAULT_VALUE_TYPES } from '../../../constants';
 import '../index.css';
 import type { XInputDateTimePickerConfig } from './schema';
-import { getPopupContainer, securityEncodeText } from '@/utils';
+import { getPopupContainer } from '@/utils';
 import dayjs from 'dayjs';
 import { handelDisabledDate } from '../date';
 
@@ -23,8 +23,7 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
     verify,
     layout,
     runtime = true,
-    detailMode,
-    security
+    detailMode
   } = props;
 
   const { form } = Form.useFormContext();
@@ -54,12 +53,12 @@ const XDateTimePicker = memo((props: XInputDateTimePickerConfig & { runtime?: bo
         initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div>{fieldValue ? securityEncodeText(security, dayjs(fieldValue).format(DATE_TIME_FORMAT[dateType])):'--'}</div>
+          <div>{fieldValue ? dayjs(fieldValue).format(DATE_TIME_FORMAT[dateType as keyof typeof DATE_TIME_FORMAT]):'--'}</div>
         ) : (
           <DatePicker
             showTime
             placeholder={placeholder}
-            format={DATE_TIME_FORMAT[dateType]}
+            format={DATE_TIME_FORMAT[dateType as keyof typeof DATE_TIME_FORMAT]}
             getPopupContainer={getPopupContainer}
             disabledDate={(current) => {
               return handelDisabledDate(current, dateRange, form)
