@@ -1,5 +1,6 @@
 import { AppHeader } from '@/components/header';
 import { useI18n } from '@/hooks/useI18n';
+import { initPlugins } from '@/plugin';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -21,9 +22,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
-import { initPlugins } from '@/plugin';
 import './components/TaskCenter/style/taskSide.less';
 
+import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
 
@@ -148,9 +149,12 @@ const Runtime: React.FC = () => {
   };
 
   const getMenuList = async (appID: string) => {
+    const isDev = useIsRuntimeDev();
     const req: ListApplicationMenuReq = {
-      applicationId: appID
+      applicationId: appID,
+      isDev: isDev
     };
+
     const res = await listApplicationMenu(req);
     console.log(res);
     const bpmRes = await runtimeListApplicationBPMMenu(req);

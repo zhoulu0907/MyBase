@@ -1,6 +1,7 @@
 export interface ListApplicationMenuReq {
   applicationId: string;
   name?: string;
+  isDev?: boolean;
 }
 
 export interface ApplicationMenu {
