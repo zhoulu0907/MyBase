@@ -1,7 +1,9 @@
 package com.cmsr.onebase.module.flow.build.service;
 
+import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser;
 import com.cmsr.onebase.module.flow.build.vo.EnvironmentConfigVO;
+import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -106,5 +108,127 @@ class FlowConnectorServiceImplTest {
         assertNotNull(result.getSchema());
         verify(connectorRepository).getById(connectorId);
         verify(connectorConfigParser).parseEnvironmentSchema(config, envCode);
+    }
+
+    // ==================== updateBaseInfo 测试用例 ====================
+
+    @Test
+    void testUpdateBaseInfo_noChange() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setDescription("旧描述");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        UpdateFlowConnectorReqVO updateVO = new UpdateFlowConnectorReqVO();
+        updateVO.setDescription("旧描述");
+
+        // When
+        Boolean result = connectorService.updateBaseInfo(connectorId, updateVO);
+
+        // Then
+        assertFalse(result);
+        verify(connectorRepository, never()).updateById(any());
+    }
+
+    @Test
+    void testUpdateBaseInfo_withChange() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setDescription("旧描述");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        UpdateFlowConnectorReqVO updateVO = new UpdateFlowConnectorReqVO();
+        updateVO.setDescription("新描述");
+
+        // When
+        Boolean result = connectorService.updateBaseInfo(connectorId, updateVO);
+
+        // Then
+        assertTrue(result);
+        verify(connectorRepository).updateById(any());
+    }
+
+    @Test
+    void testUpdateBaseInfo_notExists() {
+        // Given
+        Long connectorId = 999L;
+        when(connectorRepository.getById(connectorId)).thenReturn(null);
+
+        UpdateFlowConnectorReqVO updateVO = new UpdateFlowConnectorReqVO();
+        updateVO.setDescription("描述");
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            connectorService.updateBaseInfo(connectorId, updateVO);
+        });
+    }
+
+    @Test
+    void testUpdateBaseInfo_emptyStringToNull() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setDescription(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        UpdateFlowConnectorReqVO updateVO = new UpdateFlowConnectorReqVO();
+        updateVO.setDescription("");
+
+        // When
+        Boolean result = connectorService.updateBaseInfo(connectorId, updateVO);
+
+        // Then
+        assertFalse(result); // 空字符串和 null 视为相等
+        verify(connectorRepository, never()).updateById(any());
+    }
+
+    @Test
+    void testUpdateBaseInfo_nullOverwritesValue() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setDescription("旧描述");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        UpdateFlowConnectorReqVO updateVO = new UpdateFlowConnectorReqVO();
+        updateVO.setDescription(null);
+
+        // When
+        Boolean result = connectorService.updateBaseInfo(connectorId, updateVO);
+
+        // Then
+        assertTrue(result); // null 可以覆盖有值
+        verify(connectorRepository).updateById(any());
+    }
+
+    @Test
+    void testUpdateBaseInfo_valueOverwritesNull() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setDescription(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        UpdateFlowConnectorReqVO updateVO = new UpdateFlowConnectorReqVO();
+        updateVO.setDescription("新描述");
+
+        // When
+        Boolean result = connectorService.updateBaseInfo(connectorId, updateVO);
+
+        // Then
+        assertTrue(result);
+        verify(connectorRepository).updateById(any());
     }
 }

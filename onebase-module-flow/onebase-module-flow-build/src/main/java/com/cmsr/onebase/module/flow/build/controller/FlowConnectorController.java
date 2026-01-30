@@ -58,6 +58,17 @@ public class FlowConnectorController {
         return CommonResult.success(Boolean.TRUE);
     }
 
+    @Operation(summary = "更新连接器基本信息",
+              description = "只更新描述信息，自动检测变化")
+    @Parameter(name = "id", description = "连接器ID", required = true)
+    @PutMapping("/{id}/base-info")
+    public CommonResult<Boolean> updateBaseInfo(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateFlowConnectorReqVO updateVO) {
+        Boolean updated = connectorService.updateBaseInfo(id, updateVO);
+        return CommonResult.success(updated);
+    }
+
     @Operation(summary = "删除连接器")
     @DeleteMapping("/{id}")
     public CommonResult<Boolean> deleteConnector(@PathVariable Long id) {

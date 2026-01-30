@@ -28,6 +28,17 @@ public interface FlowConnectorService {
 
     void updateConnector(UpdateFlowConnectorReqVO updateVO);
 
+    /**
+     * 更新连接器基本信息
+     * <p>
+     * 只更新描述信息，自动检测变化。如果未发生变化则不执行数据库更新。
+     *
+     * @param connectorId 连接器ID
+     * @param updateVO    更新请求VO
+     * @return true=实际更新了，false=没有变化
+     */
+    Boolean updateBaseInfo(Long connectorId, UpdateFlowConnectorReqVO updateVO);
+
     void deleteById(Long connectorId);
 
     /**

@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -119,6 +120,14 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     public void updateConnector(UpdateFlowConnectorReqVO updateVO) {
+        // 手动校验必要字段（兼容性处理）
+        if (updateVO.getId() == null) {
+            throw new IllegalArgumentException("连接器ID不能为空");
+        }
+        if (StringUtils.isBlank(updateVO.getConnectorName())) {
+            throw new IllegalArgumentException("连接器名称不能为空");
+        }
+
         Long connectorId = updateVO.getId();
         FlowConnectorDO oldDO = connectorRepository.getById(connectorId);
         if (oldDO == null) {
@@ -128,6 +137,37 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         oldDO.setDescription(updateVO.getDescription());
         oldDO.setConfig(JsonUtils.toJsonString(updateVO.getConfig()));
         connectorRepository.updateById(oldDO);
+    }
+
+    @Override
+    public Boolean updateBaseInfo(Long connectorId, UpdateFlowConnectorReqVO updateVO) {
+        log.info("updateBaseInfo start, connectorId: {}, description: {}",
+                connectorId, updateVO.getDescription());
+
+        // 1. 查询连接器
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, connectorId: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 规范化描述（空字符串转 null）
+        String newDesc = StringUtils.isBlank(updateVO.getDescription())
+                ? null
+                : updateVO.getDescription();
+        String oldDesc = connector.getDescription();
+
+        // 3. 比较是否发生变化
+        if (Objects.equals(newDesc, oldDesc)) {
+            log.info("描述未变化，跳过更新，connectorId: {}", connectorId);
+            return false; // 没有变化
+        }
+
+        // 4. 执行更新
+        connector.setDescription(newDesc);
+        connectorRepository.updateById(connector);
+        log.info("描述已更新，connectorId: {}", connectorId);
+        return true; // 实际更新了
     }
 
     @Override
