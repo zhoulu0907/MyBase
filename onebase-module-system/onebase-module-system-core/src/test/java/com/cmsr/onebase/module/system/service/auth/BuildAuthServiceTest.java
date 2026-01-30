@@ -239,7 +239,7 @@ public class BuildAuthServiceTest {
         reqVO.setMobile("13888888888");
         reqVO.setScene(1); // 登录场景
 
-        when(userService.getUserByMobile(reqVO.getMobile())).thenReturn(testUser);
+        when(userService.getUserByMobile(reqVO.getMobile(), 2)).thenReturn(testUser);
 
         // 执行测试
 //        assertDoesNotThrow(() -> buildAuthService.sendSmsCode(reqVO));
@@ -258,7 +258,7 @@ public class BuildAuthServiceTest {
         reqVO.setMobile("13999999999");
         reqVO.setScene(1); // 登录场景
 
-        when(userService.getUserByMobile(reqVO.getMobile())).thenReturn(null);
+        when(userService.getUserByMobile(reqVO.getMobile(), 2)).thenReturn(null);
 
         // 执行测试并验证异常
 //        ServiceException exception = assertThrows(ServiceException.class,
@@ -276,9 +276,10 @@ public class BuildAuthServiceTest {
         AuthSmsLoginReqVO reqVO = new AuthSmsLoginReqVO();
         reqVO.setMobile("13888888888");
         reqVO.setCode("123456");
+        reqVO.setUserType(2);
 
         when(smsCodeApi.useSmsCode(any(SmsCodeUseReqDTO.class))).thenReturn(success(true));
-        when(userService.getUserByMobile(reqVO.getMobile())).thenReturn(testUser);
+        when(userService.getUserByMobile(reqVO.getMobile(), 2)).thenReturn(testUser);
         when(oauth2TokenService.createAccessToken(any(), any(), any(), any())).thenReturn(testToken);
 
         // 执行测试
@@ -298,12 +299,13 @@ public class BuildAuthServiceTest {
         AuthSmsLoginReqVO reqVO = new AuthSmsLoginReqVO();
         reqVO.setMobile("13999999999");
         reqVO.setCode("123456");
+        reqVO.setUserType(2);
 
         // SmsCodeUseRespDTO smsResp = new SmsCodeUseRespDTO();
         // smsResp.setCode(0);
 
         when(smsCodeApi.useSmsCode(any(SmsCodeUseReqDTO.class))).thenReturn(success(true));
-        when(userService.getUserByMobile(reqVO.getMobile())).thenReturn(null);
+        when(userService.getUserByMobile(reqVO.getMobile(), 2)).thenReturn(null);
 
         // 执行测试并验证异常
         ServiceException exception = assertThrows(ServiceException.class,
@@ -377,6 +379,7 @@ public class BuildAuthServiceTest {
         AuthRegisterReqVO reqVO = new AuthRegisterReqVO();
         reqVO.setUsername("newuser");
         reqVO.setPassword("123456");
+        reqVO.setUserType(2);
 
         when(userService.registerUser(reqVO)).thenReturn(testUser.getId());
         when(oauth2TokenService.createAccessToken(any(), any(), any(), any())).thenReturn(testToken);
