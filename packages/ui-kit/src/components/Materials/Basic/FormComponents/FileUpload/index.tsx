@@ -184,12 +184,11 @@ const XFileUpload = memo(
                   ? undefined
                   : verify?.maxCount
             }
-            accept={verify?.fileFormat}
             listType="text"
             beforeUpload={async (file) => {
               const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
               const fileSize = file.size / 1024;
-              if (fileSize > fileSizeLimit) {
+              if (verify?.maxSize && fileSize > fileSizeLimit) {
                 Message.warning('文件大小超出限制');
                 return false;
               }

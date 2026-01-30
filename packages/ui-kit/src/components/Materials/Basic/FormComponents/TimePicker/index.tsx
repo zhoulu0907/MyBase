@@ -5,7 +5,7 @@ import '../index.css';
 import { nanoid } from 'nanoid';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import type { XInputTimePickerConfig } from './schema';
-import { getPopupContainer, securityEncodeText } from '@/utils';
+import { getPopupContainer } from '@/utils';
 import dayjs from 'dayjs';
 
 const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
@@ -23,8 +23,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
     verify,
     layout,
     runtime = true,
-    detailMode,
-    security
+    detailMode
   } = props;
 
   const { form } = Form.useFormContext();
@@ -259,7 +258,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {securityEncodeText(security, dayjs(fieldValue).format(use24Hours ? TIME_FORMAT[dateType] : TIME_12_FORMAT[dateType]))}
+            {dayjs(fieldValue).format(use24Hours ? TIME_FORMAT[dateType] : TIME_12_FORMAT[dateType])}
           </div>
         ) : (
           // use24Hours 24小时制

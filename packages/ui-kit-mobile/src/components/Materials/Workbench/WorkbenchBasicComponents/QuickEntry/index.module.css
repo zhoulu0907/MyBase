@@ -98,6 +98,7 @@
   grid-template-columns: repeat(auto-fit, 46%);
   gap: min(10px);
   border-radius: 8px;
+  justify-items: center;
 }
 
 .quickEntryThemeOne .quickEntryItemThemeOne,
@@ -197,3 +198,17 @@
   text-align: left;
 }
 
+
+.quickEntryTabs {
+  width: 100%;
+  :global(.arco-tab-cell.vertical:not(.custom).line-divide.active) {
+    color: rgb(var(--primary-6));
+  }
+  :global(.arco-tab-cell-underline-inner) {
+    background-color: rgb(var(--primary-6));
+  }
+  :global(.arco-tab-cell-container-wrap) {
+    background-color: transparent;
+    margin-bottom: 16px;
+  }
+}
