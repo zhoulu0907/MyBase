@@ -45,8 +45,9 @@ public class PageSetController {
     }
 
     @GetMapping("/main_metadata")
-    public CommonResult<String> getMainMetadata(@RequestParam Long pageSetId) {
-        String mainMetadata = pageSetService.getMainMetadata(pageSetId);
+    public CommonResult<String> getMainMetadata(@RequestParam Long pageSetId,
+            @RequestParam(value = "isDev", required = false) Boolean isDev) {
+        String mainMetadata = pageSetService.getMainMetadata(pageSetId, isDev);
         return CommonResult.success(mainMetadata);
     }
 
