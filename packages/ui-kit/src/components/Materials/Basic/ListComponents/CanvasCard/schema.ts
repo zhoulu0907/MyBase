@@ -3,6 +3,7 @@ import {
     baseDefault,
     statusConfig,
     labelConfig,
+    canvasCardConfig,
     type ICommonBaseType,
     type TStatusSelectKeyType,
     type TWidthSelectKeyType
@@ -16,7 +17,8 @@ import type {
     ILabelConfigType,
     TTextDefaultType,
     TBooleanDefaultType,
-    TSelectDefaultType
+    TSelectDefaultType,
+    ICanvasCardConfigType
 } from '../../../types';
 
 export interface XCanvasCardSchema {
@@ -25,7 +27,7 @@ export interface XCanvasCardSchema {
 }
 
 export type TXCanvasCardEditData = Array<
-  ITextConfigType | IStatusConfigType<TStatusSelectKeyType> | ILabelConfigType | ICommonConfigType
+  ITextConfigType | IStatusConfigType<TStatusSelectKeyType> | ILabelConfigType | ICanvasCardConfigType | ICommonConfigType
 >;
 
 export interface XCanvasCardConfig extends ICommonBaseType {
@@ -47,6 +49,11 @@ export interface XCanvasCardConfig extends ICommonBaseType {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
   };
+
+  /**
+   * 组件名称
+   */
+  componentName?: 'CanvasCardType1' | 'CanvasCardType2';
 
   /**
    * 卡片配置
@@ -90,13 +97,14 @@ export interface XCanvasCardConfig extends ICommonBaseType {
 }
 
 const XCanvasCard: XCanvasCardSchema = {
-  editData: [...baseConfig, labelConfig, statusConfig],
+  editData: [...baseConfig, labelConfig, canvasCardConfig, statusConfig],
   config: {
     ...baseDefault,
     label: {
       text: '画布卡片',
       display: false
     },
+    componentName: 'CanvasCardType1',
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     config: {
