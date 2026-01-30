@@ -73,7 +73,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "启用/禁用连接器实例",
-              description = "启用操作要求实例必须已配置环境信息（envUuid不为空），禁用操作无限制")
+              description = "启用或禁用连接器实例")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @Parameter(name = "activeStatus", description = "启用状态（0-禁用，1-启用）", required = true, example = "1")
     @PutMapping("/{id}/status")

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import java.util.UUID;
  * @since 2026-01-29
  */
 @Slf4j
+@Component
 public class ActionConfigHelper {
 
     private static final String ACTIONS_KEY = "actions";
