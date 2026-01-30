@@ -55,6 +55,7 @@ const Runtime: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const isDev = useIsRuntimeDev();
 
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu');
@@ -95,9 +96,9 @@ const Runtime: React.FC = () => {
 
   useEffect(() => {
     if (appId) {
-      getMenuList(appId);
+      getMenuList(appId, isDev);
     }
-  }, [appId]);
+  }, [appId, isDev]);
 
   useEffect(() => {
     initPlugins();
@@ -148,11 +149,10 @@ const Runtime: React.FC = () => {
     return treeList;
   };
 
-  const getMenuList = async (appID: string) => {
-    const isDev = useIsRuntimeDev();
+  const getMenuList = async (appID: string, isDevMode: boolean) => {
     const req: ListApplicationMenuReq = {
       applicationId: appID,
-      isDev: isDev
+      isDev: isDevMode
     };
 
     const res = await listApplicationMenu(req);

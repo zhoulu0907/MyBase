@@ -249,7 +249,7 @@ export interface LoadPageSetParams {
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
-  const { pageSetId, allowViewUuids } = params;
+  const { pageSetId, allowViewUuids, isDev } = params;
 
   const { setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
 
@@ -275,7 +275,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   const { setDataTitleType, setRedirectType, setDataTitle } = usePageSettingSignal;
 
   const loadPageSetReq: LoadPageSetReq = {
-    id: pageSetId
+    id: pageSetId,
+    isDev: isDev
   };
   const pageSet = await loadPageSet(loadPageSetReq);
   setCurPage(pageSet);
