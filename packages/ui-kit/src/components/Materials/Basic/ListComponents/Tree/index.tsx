@@ -26,7 +26,6 @@ const XTree = memo(
       metaData,
       treeFields,
       defaultExpandLevel,
-      showLine,
       enableMinHeight,
       enableMaxHeight,
       minHeight,
