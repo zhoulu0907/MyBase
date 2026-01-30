@@ -21,7 +21,7 @@ import jakarta.annotation.Resource;
 
 /**
  * @Author：huangjie
- *                  @Date：2025/7/22 16:32
+ * @Date：2025/7/22 16:32
  */
 @Tag(name = "应用管理-菜单管理")
 @RestController

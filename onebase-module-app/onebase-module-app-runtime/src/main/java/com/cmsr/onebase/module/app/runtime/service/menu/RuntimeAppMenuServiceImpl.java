@@ -33,7 +33,6 @@ import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
 
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Author：huangjie
@@ -42,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @Service
 @Validated
-@Slf4j
 public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
 
     @Autowired
