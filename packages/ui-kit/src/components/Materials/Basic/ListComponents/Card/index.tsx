@@ -1,4 +1,4 @@
-import { Button, Form, List, Card } from '@arco-design/web-react';
+import { Button, Form, List, Card, Empty } from '@arco-design/web-react';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -87,16 +87,7 @@ const XCard = memo(
     let queryData: object = {};
     let scrollLoad = false;
 
-    const [cardData, setCardData] = useState<any[]>(runtime ? [] : [
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' }
-    ]);
+    const [cardData, setCardData] = useState<any[]>([]);
     const [cardTotal, setCardTotal] = useState<number>(0);
     const [cardPageNo, setCardPageNo] = useState<number>(1);
 
@@ -404,6 +395,7 @@ const XCard = memo(
               bordered={false}
               dataSource={cardData}
               grid={{ span: getSpan(), gutter: [20, 20] }}
+              noDataElement={<div style={{ padding: '10px 0 20px' }}><Empty /></div>}
               render={(item, index) => {
                 return (
                   <Card
