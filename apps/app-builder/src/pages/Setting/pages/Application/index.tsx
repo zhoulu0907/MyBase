@@ -285,10 +285,9 @@ const AppManagement: React.FC = () => {
                 type="primary"
                 size="large"
                 permission={ACTIONS.CREATE}
-                icon={<IconPlus fontSize={16} />}
-                onClick={() => navigate('/chat')}
+                onClick={() => navigate('/aigen/chat')}
               >
-                ai生成应用
+                AI生成应用
               </Button>
             )}
 
