@@ -19,7 +19,7 @@ registerMicroApps([
     name: 'chat',
     entry: getAiGenURL(),
     container: '#ai-genapp-container',
-    activeRule: (location) => location.hash.startsWith('#/chat'),
+    activeRule: (location) => location.hash.startsWith('#/aigen')
   }
 ]);
 

@@ -47,7 +47,7 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
-      <Route path="/chat" element={null} />
+      <Route path="/aigen/chat" element={null} />
       {/* 需要认证的路由 */}
       <Route
         path="/onebase/:tenantId/home/*"
