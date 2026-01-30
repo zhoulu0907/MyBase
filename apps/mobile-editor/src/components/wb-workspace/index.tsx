@@ -4,7 +4,8 @@ import {
   STATUS_VALUES,
   COMPONENT_GROUP_NAME,
   type GridItem,
-  getWorkbenchComponentWidth
+  getWorkbenchComponentWidth,
+  WORKBENCH_COMPONENT_TYPES
 } from '@onebase/ui-kit';
 import {
   EditRender,
@@ -60,15 +61,18 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
     setShowDeleteButton
   } = props;
 
+  // 移动端过滤掉数据列表组件
+  const displayComponents = currentComponents?.filter((cp: GridItem) => cp.type !== WORKBENCH_COMPONENT_TYPES.DATA_LIST);
+
   // 处理组件列表变化
   useEffect(() => {
-    setShowEmpty(currentComponents?.length === 0);
-  }, [currentComponents]);
+    setShowEmpty(displayComponents?.length === 0);
+  }, [displayComponents]);
 
   // 事件处理hooks
   const handlers = useWorkbenchHandlers({
     wbComponentSchemas: currentSchemas ?? {},
-    workbenchComponents: currentComponents ?? [],
+    workbenchComponents: displayComponents ?? [],
     setWorkbenchComponents,
     setWbComponentSchemas,
     delWbComponentSchemas,
@@ -112,7 +116,7 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
       >
         <ReactSortable
           id="workspace-content"
-          list={currentComponents ?? []}
+          list={displayComponents ?? []}
           setList={setWorkbenchComponents}
           group={{ name: COMPONENT_GROUP_NAME, put: true }}
           filter={SORTABLE_CONFIG.filter}
@@ -124,7 +128,7 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
           onAdd={handlers.handleComponentAdd}
           onStart={handlers.handleDragStart}
         >
-          {(currentComponents ?? [])
+          {(displayComponents ?? [])
             .filter((cp: GridItem) => cp.type !== 'entity')
             .map((cp: GridItem) => (
               <div

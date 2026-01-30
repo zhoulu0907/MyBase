@@ -88,7 +88,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
             }}
           >
             {options.map((ele, index: number) => (
-              <Select.Option key={index} value={ele.value}>
+              <Select.Option key={index} value={ele.id}>
                 {ele.label}
               </Select.Option>
             ))}

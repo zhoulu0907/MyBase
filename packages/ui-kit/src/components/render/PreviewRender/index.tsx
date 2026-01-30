@@ -136,6 +136,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       }
       if (descriptor.template.category === 'layout') {
         baseProps.pageType = pageType;
+        baseProps.showFromPageData = showFromPageData;
         baseProps.detailMode = detailMode;
       }
       if (descriptor.template.category === 'list') {
