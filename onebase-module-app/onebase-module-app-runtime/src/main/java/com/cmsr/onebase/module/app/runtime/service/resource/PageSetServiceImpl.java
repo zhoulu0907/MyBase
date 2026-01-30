@@ -37,7 +37,10 @@ public class PageSetServiceImpl implements PageSetService {
     }
 
     @Override
-    public String getMainMetadata(Long pageSetId) {
+    public String getMainMetadata(Long pageSetId, Boolean isDev) {
+        if (Boolean.TRUE.equals(isDev)) {
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
         return pageSetServiceProvider.getMainMetadata(pageSetId);
     }
 

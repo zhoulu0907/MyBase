@@ -12,7 +12,7 @@ public interface PageSetService {
 
     Long getAppId(Long pageSetId);
 
-    String getMainMetadata(Long pageSetId);
+    String getMainMetadata(Long pageSetId, Boolean isDev);
 
     LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO);
 
