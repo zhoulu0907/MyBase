@@ -207,7 +207,7 @@ const XFileUpload = memo(
               if (verify?.fileFormatLimit && verify?.fileFormat) {
                 const lastIndexOf = file.name.lastIndexOf('.');
                 const type = file.name.slice(lastIndexOf + 1);
-                if (verify.fileFormat.toLocaleLowerCase().indexOf(type.toLocaleLowerCase()) === -1) {
+                if (verify.fileFormat.toLocaleLowerCase().split(',').includes(type.toLocaleLowerCase())) {
                   Message.warning(`不支持该格式，仅支持 ${verify.fileFormat}`);
                   return false;
                 }
