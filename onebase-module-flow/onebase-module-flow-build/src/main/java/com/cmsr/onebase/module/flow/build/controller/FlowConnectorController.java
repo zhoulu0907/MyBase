@@ -130,6 +130,15 @@ public class FlowConnectorController {
         return CommonResult.success(config);
     }
 
+    @Operation(summary = "获取环境配置模板",
+              description = "获取连接器类型对应的环境配置 Formily Schema 模板，用于创建环境信息")
+    @Parameter(name = "id", description = "连接器实例ID", required = true)
+    @GetMapping("/{id}/env-config-template")
+    public CommonResult<EnvConfigTemplateVO> getEnvConfigTemplate(@PathVariable Long id) {
+        EnvConfigTemplateVO template = connectorService.getEnvConfigTemplate(id);
+        return CommonResult.success(template);
+    }
+
     // ==================== 动作管理接口 ====================
 
     @Operation(summary = "查询连接器动作清单")

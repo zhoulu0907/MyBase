@@ -11,9 +11,11 @@ import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorEnvRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeActionRefRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorEnvDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeActionRefDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ActionNameGenerator;
@@ -57,6 +59,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Autowired
     private FlowConnectorEnvRepository connectorEnvRepository;
+
+    @Autowired
+    private FlowNodeConfigRepository flowNodeConfigRepository;
 
     @Autowired
     private FlowNodeActionRefRepository actionRefRepository;
@@ -400,6 +405,50 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         vo.setTypeCode(connector.getTypeCode());
 
         log.info("getEnvironmentConfig success, connectorId: {}, envCode: {}", connectorId, envCode);
+        return vo;
+    }
+
+    @Override
+    public EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId) {
+        log.info("getEnvConfigTemplate start, connectorId: {}", connectorId);
+
+        // 1. 查询连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, connectorId: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 获取连接器类型
+        String typeCode = connector.getTypeCode();
+        log.info("Connector typeCode: {}", typeCode);
+
+        // 3. 查询节点配置模板（使用 findByNodeCode）
+        FlowNodeConfigDO nodeConfig = flowNodeConfigRepository.findByNodeCode(typeCode);
+        if (nodeConfig == null) {
+            log.warn("Node config not found for typeCode: {}", typeCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXISTS, typeCode);
+        }
+
+        // 4. 提取并解析 conn_config
+        String connConfig = nodeConfig.getConnConfig();
+        if (StringUtils.isBlank(connConfig)) {
+            log.warn("conn_config is empty for typeCode: {}", typeCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXISTS, typeCode);
+        }
+
+        JsonNode schema;
+        try {
+            schema = objectMapper.readTree(connConfig);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse conn_config for typeCode: {}", typeCode, e);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_INVALID, typeCode);
+        }
+
+        // 5. 封装返回
+        EnvConfigTemplateVO vo = new EnvConfigTemplateVO();
+        vo.setSchema(schema);
+        log.info("getEnvConfigTemplate success, connectorId: {}, typeCode: {}", connectorId, typeCode);
         return vo;
     }
 

@@ -2,11 +2,15 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser;
+import com.cmsr.onebase.module.flow.build.vo.EnvConfigTemplateVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvironmentConfigVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -32,7 +36,13 @@ class FlowConnectorServiceImplTest {
     private FlowConnectorRepository connectorRepository;
 
     @Mock
+    private FlowNodeConfigRepository flowNodeConfigRepository;
+
+    @Mock
     private ConnectorConfigParser connectorConfigParser;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private FlowConnectorServiceImpl connectorService;
@@ -40,6 +50,8 @@ class FlowConnectorServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        // 注入真实的 ObjectMapper（用于 JSON 解析）
+        connectorService.setObjectMapper(new ObjectMapper());
     }
 
     // ==================== getEnvironmentConfig 测试用例 ====================
@@ -230,5 +242,95 @@ class FlowConnectorServiceImplTest {
         // Then
         assertTrue(result);
         verify(connectorRepository).updateById(any());
+    }
+
+    // ==================== getEnvConfigTemplate 测试用例 ====================
+
+    @Test
+    void testGetEnvConfigTemplate_success() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setConnConfig("{\"type\":\"object\",\"properties\":{\"envName\":{\"type\":\"string\"}}}");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        // When
+        EnvConfigTemplateVO result = connectorService.getEnvConfigTemplate(connectorId);
+
+        // Then
+        assertNotNull(result);
+        assertNotNull(result.getSchema());
+    }
+
+    @Test
+    void testGetEnvConfigTemplate_connectorNotExists() {
+        // Given
+        Long connectorId = 999L;
+        when(connectorRepository.getById(connectorId)).thenReturn(null);
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            connectorService.getEnvConfigTemplate(connectorId);
+        });
+    }
+
+    @Test
+    void testGetEnvConfigTemplate_nodeConfigNotExists() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setTypeCode("UNKNOWN");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("UNKNOWN")).thenReturn(null);
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            connectorService.getEnvConfigTemplate(connectorId);
+        });
+    }
+
+    @Test
+    void testGetEnvConfigTemplate_connConfigIsEmpty() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setTypeCode("HTTP");
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setConnConfig("");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            connectorService.getEnvConfigTemplate(connectorId);
+        });
+    }
+
+    @Test
+    void testGetEnvConfigTemplate_connConfigInvalid() {
+        // Given
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setTypeCode("HTTP");
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setConnConfig("{invalid json}");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        // When & Then
+        assertThrows(RuntimeException.class, () -> {
+            connectorService.getEnvConfigTemplate(connectorId);
+        });
     }
 }

@@ -97,6 +97,16 @@ public interface FlowConnectorService {
      */
     EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode);
 
+    /**
+     * 获取环境配置模板
+     * <p>
+     * 根据连接器实例获取其类型对应的环境配置 Formily Schema 模板
+     *
+     * @param connectorId 连接器实例ID
+     * @return 环境配置模板 VO
+     */
+    EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId);
+
     // ==================== 动作管理接口 ====================
 
     /**

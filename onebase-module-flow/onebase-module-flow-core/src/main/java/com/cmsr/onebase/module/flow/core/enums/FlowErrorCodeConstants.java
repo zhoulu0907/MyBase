@@ -32,4 +32,14 @@ public interface FlowErrorCodeConstants {
      * 环境配置不存在
      */
     ErrorCode ENV_CONFIG_NOT_EXISTS = new ErrorCode(1123788, "环境配置不存在：envCode={}");
+
+    /**
+     * 节点配置不存在
+     */
+    ErrorCode NODE_CONFIG_NOT_EXISTS = new ErrorCode(1123790, "节点配置不存在，typeCode={}");
+
+    /**
+     * 节点配置无效
+     */
+    ErrorCode NODE_CONFIG_INVALID = new ErrorCode(1123791, "节点配置无效，typeCode={}");
 }
