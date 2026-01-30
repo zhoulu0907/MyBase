@@ -1,0 +1,94 @@
+.canvas-card-container {
+  /* 容器样式 */
+}
+
+.XCanvasCard {
+  transition: all 0.3s ease;
+  width: 100%;
+  margin: 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.XCanvasCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.canvas-card-image {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.canvas-card-body {
+  display: flex;
+  gap: 10px;
+}
+
+.canvas-card-content-wrapper {
+  flex: 1;
+  height: 129px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.canvas-card-tags {
+  margin-bottom: 0;
+}
+
+.canvas-card-tag {
+  margin-right: 8px;
+}
+
+.canvas-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.canvas-card-content {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  color: #666;
+  height: 48px;
+  overflow: hidden;
+}
+
+.canvas-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.canvas-card-meta {
+  font-size: 12px;
+  color: #999;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.canvas-card-meta .arco-text {
+  margin-right: 16px;
+}
+
+.canvas-card-stats {
+  font-size: 12px;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .canvas-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .canvas-card-meta {
+    gap: 12px;
+  }
+}
