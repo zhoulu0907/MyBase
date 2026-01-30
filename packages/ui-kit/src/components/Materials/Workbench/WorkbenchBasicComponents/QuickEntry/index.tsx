@@ -1,7 +1,7 @@
 import { Tabs } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
 import type { CSSProperties } from 'react';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { ReactSVG } from 'react-svg';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS } from '../../core/constants';
 import type { QuickEntryTitleConfig, QuickEntryStyleConfig, QuickEntryGroupConfig } from '../../core/types';
@@ -10,6 +10,7 @@ import { type XQuickEntryConfig } from './schema';
 import { getDefaultIcon } from './getDefaultIcon';
 import { useJump } from '../../hooks/useJump';
 import styles from './index.module.css';
+import CheckMoreModal from './checkMoreModal';
 
 // 主题三使用的颜色数组（对应 arcoPalette.primary 的颜色，添加 20% 透明度）
 const THEME_THREE_COLORS = ['#24b28f20', '#eb693a20', '#1979ff20', '#7e5aea20', '#009e9e20', '#ebbc0020'];
@@ -30,9 +31,10 @@ const defaultGroupConfig: QuickEntryGroupConfig = {
   groups: []
 };
 
-const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { id, status, width, titleConfig, styleConfig, groupConfig, runtime } = props;
+const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; preview?: boolean }) => {
+  const { id, status, width, titleConfig, styleConfig, groupConfig, runtime, preview } = props;
   const { handleJump } = useJump();
+  const [moreModalVisible, setMoreModalVisible] = useState(false);
 
   const finalTitleConfig = titleConfig || defaultTitleConfig;
   const finalStyleConfig = styleConfig || defaultStyleConfig;
@@ -50,12 +52,18 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
   const handleClickEntry = (item: {
     linkAddress?: string;
     menuUuid?: string;
-  }) => {
-    handleJump({
-      menuUuid: item.menuUuid,
-      linkAddress: item.linkAddress,
-      runtime,
-    })
+  }, closeModal?: boolean) => {
+    if (runtime && (item.linkAddress || item.menuUuid)) {
+      handleJump({
+        menuUuid: item.menuUuid,
+        linkAddress: item.linkAddress,
+        runtime,
+      });
+      // 如果是在弹窗中点击，关闭弹窗
+      if (closeModal) {
+        setMoreModalVisible(false);
+      }
+    }
   };
 
   // 图标渲染(使用移动端菜单图标库)
@@ -103,7 +111,8 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       group?: string;
       entryDesc?: string;
     },
-    index: number
+    index: number,
+    closeModalOnClick?: boolean
   ) => {
     const theme = finalStyleConfig?.theme || WORKBENCH_THEME_OPTIONS.THEME_1;
     const isThemeOne = theme === WORKBENCH_THEME_OPTIONS.THEME_1;
@@ -116,7 +125,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
         <div
           key={`${item.entryName}-${item.group}-${index}`}
           className={`${styles.quickEntryItem} ${styles.quickEntryItemThemeOne}`}
-          onClick={() => handleClickEntry(item)}
+          onClick={() => handleClickEntry(item, closeModalOnClick)}
           style={{
             pointerEvents: runtime ? 'unset' : 'none',
             cursor: runtime && (item.linkAddress || item.menuUuid) ? 'pointer' : 'default'
@@ -137,7 +146,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       <div
         key={`${item.entryName}-${item.group}-${index}`}
         className={`${styles.quickEntryItem} ${isThemeTwo ? styles.quickEntryItemThemeTwo : styles.quickEntryItemThemeThree}`}
-        onClick={() => handleClickEntry(item)}
+        onClick={() => handleClickEntry(item, closeModalOnClick)}
         style={{
           pointerEvents: runtime ? 'unset' : 'none',
           cursor: runtime && (item.linkAddress || item.menuUuid) ? 'pointer' : 'default',
@@ -153,10 +162,16 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     );
   };
 
-  const renderContent = () => {
+  const renderContent = (showAll: boolean = false) => {
     // 收集所有入口项，用于计算全局索引
-    const allItems = groups.flatMap((group) => group.entries ?? []);
+    // 若配置查看更多，则只展示前4个入口项（弹窗中展示全部）
+    const showMoreCount = showAll ? undefined : (finalTitleConfig?.showMore ? 4 : undefined);
+    const allItems = showMoreCount
+      ? groups.flatMap((group) => group.entries ?? []).slice(0, showMoreCount)
+      : groups.flatMap((group) => group.entries ?? []);
     let globalIndex = 0;
+    // 弹窗中的入口项点击后需要关闭弹窗
+    const closeModalOnClick = showAll;
 
     if (enableGroup && groups.length > 0) {
       return (
@@ -164,9 +179,9 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
           {groups.map((group, groupIndex) => (
             <Tabs.TabPane key={group.groupName || `group-${groupIndex}`} title={group.groupName}>
               <div className={styles.quickEntryItems}>
-                {group.entries?.map((item) => {
+                {(showMoreCount ? group.entries?.slice(0, showMoreCount) : group.entries)?.map((item) => {
                   const currentIndex = globalIndex++;
-                  return renderEntryItem(item, currentIndex);
+                  return renderEntryItem(item, currentIndex, closeModalOnClick);
                 })}
               </div>
             </Tabs.TabPane>
@@ -176,7 +191,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     } else {
       return (
         <div className={styles.quickEntryItems}>
-          {allItems.map((item, index) => renderEntryItem(item, index))}
+          {allItems.map((item, index) => renderEntryItem(item, index, closeModalOnClick))}
         </div>
       );
     }
@@ -215,6 +230,15 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     'theme-three': styles.quickEntryThemeThree
   };
 
+  const handleClickMore = () => {
+    if (preview || runtime) {
+      setMoreModalVisible(true);
+    }
+  };
+  const handleCloseMoreModal = () => {
+    setMoreModalVisible(false);
+  };
+
   return (
     <div
       className={`${styles.quickEntry} ${themeClass ? themeClassMap[themeClass] || '' : ''}`}
@@ -226,13 +250,24 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
             <span className={styles.quickEntryHeaderTitle}>{finalTitleConfig?.titleName || '快捷入口'}</span>
           )}
           {finalTitleConfig?.showMore && (
-            <span className={styles.quickEntryMore}>
+            <span className={styles.quickEntryMore} onClick={() => handleClickMore()}>
               更多 <IconRight />
             </span>
           )}
         </div>
       )}
       {renderContent()}
+
+      <CheckMoreModal
+        visible={moreModalVisible}
+        onClose={handleCloseMoreModal}
+        runtime={runtime}
+        preview={preview}
+        title={finalTitleConfig?.titleName}
+        contentClassName={`${styles.quickEntryModalContent} ${styles.quickEntry} ${themeClass ? themeClassMap[themeClass] || '' : ''}`}
+      >
+        {renderContent(true)}
+      </CheckMoreModal>
     </div>
   );
 });
