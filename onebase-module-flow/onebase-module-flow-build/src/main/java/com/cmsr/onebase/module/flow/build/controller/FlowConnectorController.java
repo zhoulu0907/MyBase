@@ -106,6 +106,19 @@ public class FlowConnectorController {
         return CommonResult.success(environments);
     }
 
+    @Operation(summary = "查询连接器的指定环境配置信息",
+              description = "从flow_connector.config的properties中解析出指定环境的Formily Schema")
+    @Parameter(name = "id", description = "连接器实例ID（主键）", required = true, example = "1")
+    @Parameter(name = "envCode", description = "环境编码（如DEV、TEST、PROD）", required = true, example = "PROD")
+    @GetMapping("/{id}/environment-config")
+    public CommonResult<EnvironmentConfigVO> getEnvironmentConfig(
+            @PathVariable("id") Long id,
+            @RequestParam("envCode") @NotBlank(message = "环境编码不能为空") String envCode) {
+
+        EnvironmentConfigVO config = connectorService.getEnvironmentConfig(id, envCode);
+        return CommonResult.success(config);
+    }
+
     // ==================== 动作管理接口 ====================
 
     @Operation(summary = "查询连接器动作清单")

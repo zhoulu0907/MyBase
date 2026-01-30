@@ -27,4 +27,9 @@ public interface FlowErrorCodeConstants {
     ErrorCode INVALID_CONNECTOR_CONFIG = new ErrorCode(1123785, "连接器配置格式错误");
 
     ErrorCode ACTION_NOT_EXISTS = new ErrorCode(1123786, "动作不存在");
+
+    /**
+     * 环境配置不存在
+     */
+    ErrorCode ENV_CONFIG_NOT_EXISTS = new ErrorCode(1123788, "环境配置不存在：envCode={}");
 }

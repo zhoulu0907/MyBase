@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.flow.build.util;
 
+import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvLiteVO;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -279,5 +281,115 @@ class ConnectorConfigParserTest {
         // Then
         assertEquals(1, result.size());
         assertNull(result.get(0).getActiveStatus());
+    }
+
+    // ==================== parseEnvironmentSchema 测试用例 ====================
+
+    @Test
+    void testParseEnvironmentSchema_withNullConfig() {
+        // Given
+        String nullConfig = null;
+        String envCode = "DEV";
+
+        // When & Then
+        assertThrows(ServiceException.class, () -> {
+            parser.parseEnvironmentSchema(nullConfig, envCode);
+        });
+    }
+
+    @Test
+    void testParseEnvironmentSchema_withEmptyConfig() {
+        // Given
+        String emptyConfig = "";
+        String envCode = "DEV";
+
+        // When & Then
+        assertThrows(ServiceException.class, () -> {
+            parser.parseEnvironmentSchema(emptyConfig, envCode);
+        });
+    }
+
+    @Test
+    void testParseEnvironmentSchema_withoutProperties() {
+        // Given
+        String config = "{\"type\":\"HTTP\"}";
+        String envCode = "DEV";
+
+        // When & Then
+        assertThrows(ServiceException.class, () -> {
+            parser.parseEnvironmentSchema(config, envCode);
+        });
+    }
+
+    @Test
+    void testParseEnvironmentSchema_envCodeNotExists() {
+        // Given
+        String config = "{" +
+                "\"properties\":{" +
+                "\"DEV\":{\"type\":\"object\"}," +
+                "\"TEST\":{\"type\":\"object\"}" +
+                "}}";
+        String envCode = "PROD";
+
+        // When & Then
+        assertThrows(ServiceException.class, () -> {
+            parser.parseEnvironmentSchema(config, envCode);
+        });
+    }
+
+    @Test
+    void testParseEnvironmentSchema_success() {
+        // Given
+        String config = "{" +
+                "\"type\":\"HTTP\"," +
+                "\"properties\":{" +
+                "\"DEV\":{" +
+                "\"type\":\"object\"," +
+                "\"title\":\"动作1\"," +
+                "\"properties\":{" +
+                "\"headers\":{\"type\":\"object\"}" +
+                "}" +
+                "}" +
+                "}}";
+        String envCode = "DEV";
+
+        // When
+        JsonNode result = parser.parseEnvironmentSchema(config, envCode);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("object", result.get("type").asText());
+        assertEquals("动作1", result.get("title").asText());
+        assertNotNull(result.get("properties"));
+    }
+
+    @Test
+    void testParseEnvironmentSchema_prodEnv() {
+        // Given
+        String config = "{" +
+                "\"type\":\"HTTP\"," +
+                "\"properties\":{" +
+                "\"PROD\":{" +
+                "\"type\":\"object\"," +
+                "\"title\":\"动作3：获取客户订单记录\"," +
+                "\"x-api-meta\":{" +
+                "\"path\":\"/api/v1/customers/{customerId}/orders\"," +
+                "\"method\":\"GET\"" +
+                "}" +
+                "}" +
+                "}}";
+        String envCode = "PROD";
+
+        // When
+        JsonNode result = parser.parseEnvironmentSchema(config, envCode);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("object", result.get("type").asText());
+        assertEquals("动作3：获取客户订单记录", result.get("title").asText());
+        assertNotNull(result.get("x-api-meta"));
+        assertEquals("/api/v1/customers/{customerId}/orders",
+                result.get("x-api-meta").get("path").asText());
+        assertEquals("GET", result.get("x-api-meta").get("method").asText());
     }
 }

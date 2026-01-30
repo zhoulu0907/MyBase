@@ -75,6 +75,17 @@ public interface FlowConnectorService {
      */
     List<FlowConnectorEnvLiteVO> getEnvironments(Long connectorId);
 
+    /**
+     * 查询连接器的指定环境配置信息
+     * <p>
+     * 从 flow_connector.config 的 properties 中解析指定环境的 Formily Schema
+     *
+     * @param connectorId 连接器实例ID（主键）
+     * @param envCode     环境编码（如 DEV、TEST、PROD）
+     * @return 环境配置 VO
+     */
+    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode);
+
     // ==================== 动作管理接口 ====================
 
     /**

@@ -315,6 +315,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         // 2. 获取 config 字段
         String configJson = connector.getConfig();
+        log.info("Connector config content, connectorId: {}, config: {}, configLength: {}",
+                connectorId, configJson, configJson != null ? configJson.length() : 0);
+
         if (StringUtils.isBlank(configJson)) {
             log.info("Connector config is empty, connectorId: {}", connectorId);
             return new ArrayList<>();
@@ -324,8 +327,40 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         List<FlowConnectorEnvLiteVO> environments = connectorConfigParser.parseEnvironments(
                 configJson, connector.getTypeCode());
 
-        log.info("getEnvironments success, connectorId: {}, count: {}", connectorId, environments.size());
+        log.info("getEnvironments success, connectorId: {}, count: {}, typeCode: {}",
+                connectorId, environments.size(), connector.getTypeCode());
         return environments;
+    }
+
+    @Override
+    public EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode) {
+        log.info("getEnvironmentConfig start, connectorId: {}, envCode: {}", connectorId, envCode);
+
+        // 1. 查询连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, connectorId: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 获取 config 字段
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.warn("Connector config is empty, connectorId: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_CONFIG_NOT_EXISTS, envCode);
+        }
+
+        // 3. 使用 Parser 提取环境 Schema
+        JsonNode envSchema = connectorConfigParser.parseEnvironmentSchema(config, envCode);
+
+        // 4. 封装 VO
+        EnvironmentConfigVO vo = new EnvironmentConfigVO();
+        vo.setSchema(envSchema);
+        vo.setEnvCode(envCode);
+        vo.setTypeCode(connector.getTypeCode());
+
+        log.info("getEnvironmentConfig success, connectorId: {}, envCode: {}", connectorId, envCode);
+        return vo;
     }
 
     // ==================== 动作管理方法实现 ====================
