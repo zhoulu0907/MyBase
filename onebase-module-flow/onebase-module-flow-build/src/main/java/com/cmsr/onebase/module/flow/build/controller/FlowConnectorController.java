@@ -93,6 +93,19 @@ public class FlowConnectorController {
         return CommonResult.success(result);
     }
 
+    // ==================== 环境配置接口 ====================
+
+    @Operation(summary = "查询连接器的环境配置列表",
+              description = "从flow_connector.config字段解析环境配置信息")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @GetMapping("/{id}/environments")
+    public CommonResult<List<FlowConnectorEnvLiteVO>> getEnvironments(
+            @Parameter(description = "连接器实例ID", required = true, example = "1")
+            @PathVariable Long id) {
+        List<FlowConnectorEnvLiteVO> environments = connectorService.getEnvironments(id);
+        return CommonResult.success(environments);
+    }
+
     // ==================== 动作管理接口 ====================
 
     @Operation(summary = "查询连接器动作清单")

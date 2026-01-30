@@ -65,6 +65,16 @@ public interface FlowConnectorService {
      */
     void updateActiveStatus(Long id, Integer activeStatus);
 
+    /**
+     * 查询连接器的环境配置列表
+     * <p>
+     * 从 flow_connector.config 字段解析环境配置信息
+     *
+     * @param connectorId 连接器ID
+     * @return 环境配置列表
+     */
+    List<FlowConnectorEnvLiteVO> getEnvironments(Long connectorId);
+
     // ==================== 动作管理接口 ====================
 
     /**

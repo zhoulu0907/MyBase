@@ -299,6 +299,35 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         log.info("updateActiveStatus success, id: {}, activeStatus: {}", id, activeStatus);
     }
 
+    @Autowired
+    private com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser connectorConfigParser;
+
+    @Override
+    public List<FlowConnectorEnvLiteVO> getEnvironments(Long connectorId) {
+        log.info("getEnvironments start, connectorId: {}", connectorId);
+
+        // 1. 查询连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 获取 config 字段
+        String configJson = connector.getConfig();
+        if (StringUtils.isBlank(configJson)) {
+            log.info("Connector config is empty, connectorId: {}", connectorId);
+            return new ArrayList<>();
+        }
+
+        // 3. 解析环境配置
+        List<FlowConnectorEnvLiteVO> environments = connectorConfigParser.parseEnvironments(
+                configJson, connector.getTypeCode());
+
+        log.info("getEnvironments success, connectorId: {}, count: {}", connectorId, environments.size());
+        return environments;
+    }
+
     // ==================== 动作管理方法实现 ====================
 
     @Override
