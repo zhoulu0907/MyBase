@@ -1,22 +1,27 @@
 package com.cmsr.onebase.module.app.runtime.controller.menu;
 
-import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuService;
-import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
-import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 import java.util.List;
 
-import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.runtime.service.menu.RuntimeAppMenuService;
+import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/22 16:32
+ *                  @Date：2025/7/22 16:32
  */
 @Tag(name = "应用管理-菜单管理")
 @RestController
@@ -35,8 +40,9 @@ public class AppMenuController {
 
     @GetMapping("/list")
     @Operation(summary = "应用菜单列表")
-    public CommonResult<List<MenuListRespVO>> listApplicationMenu() {
-        return success(runtimeAppMenuService.listApplicationMenu());
+    public CommonResult<List<MenuListRespVO>> listApplicationMenu(
+            @RequestParam(value = "isDev", required = false) Boolean isDev) {
+        return success(runtimeAppMenuService.listApplicationMenu(isDev));
     }
 
     @GetMapping("/permission")
