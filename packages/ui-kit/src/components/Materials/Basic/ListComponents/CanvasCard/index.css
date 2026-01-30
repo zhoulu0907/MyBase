@@ -1,5 +1,5 @@
 .canvas-card-container {
-  /* 容器样式 */
+  padding: 16px 20px;
 }
 
 .XCanvasCard {
@@ -29,7 +29,7 @@
   height: 129px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 5px;
 }
 
 .canvas-card-tags {
@@ -43,14 +43,14 @@
 .canvas-card-title {
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 0 !important;
   color: #333;
 }
 
 .canvas-card-content {
   font-size: 14px;
   line-height: 1.5;
-  margin-bottom: 16px;
+  margin-bottom: 0 !important;
   color: #666;
   height: 48px;
   overflow: hidden;
@@ -89,6 +89,88 @@
   }
   
   .canvas-card-meta {
+    gap: 12px;
+  }
+}
+
+/* Type 2 Card Styles */
+.canvas-card-body-type2 {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+}
+
+.canvas-card-image-type2 {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.canvas-card-content-wrapper-type2 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.canvas-card-header-type2 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.canvas-card-title-type2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.canvas-card-tags-type2 {
+  display: flex;
+  gap: 8px;
+}
+
+.canvas-card-tag-type2 {
+  font-size: 12px;
+}
+
+.canvas-card-fields-type2 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.canvas-card-field-row {
+  display: flex;
+  gap: 32px;
+}
+
+.canvas-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.canvas-card-field .arco-text {
+  font-size: 14px;
+}
+
+.canvas-card-field .arco-text:first-child {
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .canvas-card-body-type2 {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .canvas-card-header-type2 {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .canvas-card-field-row {
+    flex-direction: column;
     gap: 12px;
   }
 }
