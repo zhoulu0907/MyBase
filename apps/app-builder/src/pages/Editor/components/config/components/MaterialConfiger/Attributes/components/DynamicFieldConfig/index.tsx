@@ -145,8 +145,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         tooltip: currentMainField.description,
         verify: {
           ...configs.verify,
-          required: currentMainField.isRequired,
-          noRepeat: currentMainField.isUnique
+          required: !!currentMainField.isRequired,
+          noRepeat: !!currentMainField.isUnique
         },
         constraints: currentMainField.constraints,
         [item.key]: value
@@ -160,8 +160,8 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
         tooltip: currentSubField.description,
         verify: {
           ...configs.verify,
-          required: currentSubField.isRequired,
-          noRepeat: currentSubField.isUnique
+          required: !!currentSubField.isRequired,
+          noRepeat: !!currentSubField.isUnique
         },
         constraints: currentSubField.constraints,
         [item.key]: value

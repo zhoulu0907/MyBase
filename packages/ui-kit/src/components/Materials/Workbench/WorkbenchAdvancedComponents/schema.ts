@@ -1,7 +1,9 @@
 import XCarouselWorkbench from './CarouselWorkbench/schema';
+import XDataList from './DataList/schema';
 
 const WorkbenchSchemaAdvanced = {
-  XCarouselWorkbench
+  XCarouselWorkbench,
+  XDataList
 };
 
 export default WorkbenchSchemaAdvanced;

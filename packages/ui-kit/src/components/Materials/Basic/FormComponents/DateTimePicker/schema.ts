@@ -2,7 +2,6 @@ import {
   baseConfig,
   baseDefault,
   dataFieldConfig,
-  alignConfig,
   layoutConfig,
   statusConfig,
   widthConfig,
@@ -12,7 +11,6 @@ import {
   tooltipConfig,
   defaultDateTimeValueConfig,
   verifyConfig,
-  securityConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -55,8 +53,6 @@ import type {
   TTextDefaultType,
   TRadioDefaultType,
   IDefaultValueConfigType,
-  IAlignConfigType,
-  ISecurityConfigType,
   IDateRangeConfigType,
   ICommonConfigType,
   IDateFormatConfigType
@@ -78,9 +74,7 @@ export type TXInputDateTimePickerEditData = Array<
   | IDateRangeConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
-  | ISecurityConfigType
   | IWidthConfigType<TWidthSelectKeyType>
   | ICommonConfigType
 >;
@@ -158,6 +152,7 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
   };
 
   /**
@@ -177,16 +172,6 @@ export interface XInputDateTimePickerConfig extends ICommonBaseType {
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
-
-  /**
-   * 安全
-   * display：开启
-   * type：掩码类型
-   */
-  security: {
-    display: TBooleanDefaultType;
-    type?: TTextDefaultType;
-  };
 
   /**
    * 字段宽度
@@ -209,11 +194,8 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
     verifyConfig,
     // 显示状态
     statusConfig,
-    // 对齐方式
-    // alignConfig,
     // 布局方式
     layoutConfig,
-    securityConfig,
     // 字段宽度
     widthConfig,
   ],
@@ -254,14 +236,11 @@ const XDateTimePicker: XInputDateTimePickerSchema = {
     },
     verify: {
       required: false,
+      noRepeat: false
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    security: {
-      display: false,
-      type: ''
-    },
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };

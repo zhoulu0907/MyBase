@@ -9,7 +9,7 @@ import {
   STATUS_VALUES
 } from '../../../constants';
 import type { XInputDatePickerConfig } from './schema';
-import { getPopupContainer, securityEncodeText } from '@/utils';
+import { getPopupContainer } from '@/utils';
 import dayjs from 'dayjs';
 import { handelDisabledDate } from '../date';
 import '../index.css';
@@ -29,8 +29,7 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
     dateRange,
     layout,
     runtime = true,
-    detailMode,
-    security
+    detailMode
   } = props;
 
   const { form } = Form.useFormContext();
@@ -103,13 +102,13 @@ const XDatePicker = memo((props: XInputDatePickerConfig & { runtime?: boolean; d
   const renderTime = () => {
     switch (dateType) {
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY')}</>;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY-MM')}</>;
       case DATE_VALUES[DATE_OPTIONS.DATE]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY-MM-DD')}</>;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss')}</>;
       default:
         // 默认显示日期选择器
         return <DatePicker placeholder={placeholder} style={{ width: '100%' }} format="YYYY-MM-DD" />;

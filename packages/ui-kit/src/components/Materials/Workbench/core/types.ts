@@ -231,3 +231,12 @@ export interface IInformationListContentConfigType {
   type: typeof WORKBENCH_CONFIG_TYPES.WB_INFORMATION_LIST_CONTENT;
   meta?: Record<string, any>;
 }
+
+/**
+ * 数据列表-表格配置类型
+ */
+export interface ITableConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_TABLE_CONFIG;
+}
