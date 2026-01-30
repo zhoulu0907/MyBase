@@ -13,7 +13,9 @@ import './index.css';
 import type { XInputFileUploadConfig } from './schema';
 
 const XFileUpload = memo(
-  (props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; tooltipPosition: any; }) => {
+  (
+    props: XInputFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; tooltipPosition: any }
+  ) => {
     const {
       label,
       dataField,
@@ -100,7 +102,10 @@ const XFileUpload = memo(
           {filesList.map((file, index) => (
             <div key={file.uid} className="uplaodList-text-item">
               {getFileIcon(file)}
-              <Typography.Ellipsis showTooltip className={`${showDownload ? 'uplaodList-text-item-name-hover' : 'uplaodList-text-item-name'}`}>
+              <Typography.Ellipsis
+                showTooltip
+                className={`${showDownload ? 'uplaodList-text-item-name-hover' : 'uplaodList-text-item-name'}`}
+              >
                 {file.name}
               </Typography.Ellipsis>
               {file.percent && file.percent !== 100 ? (
@@ -163,10 +168,12 @@ const XFileUpload = memo(
           }
           field={fieldId}
           layout={layout}
-          tooltip={ tooltip && {
-            content: tooltip,
-            position: tooltipPosition
-          }}
+          tooltip={
+            tooltip && {
+              content: tooltip,
+              position: tooltipPosition
+            }
+          }
           labelCol={layout === 'horizontal' ? { span: 10 } : {}}
           rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
           hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -180,24 +187,27 @@ const XFileUpload = memo(
             limit={
               (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
                 ? fieldValue?.length
-                : verify?.maxCount === -1
+                : verify?.maxCountLimit
                   ? undefined
                   : verify?.maxCount
             }
             listType="text"
             beforeUpload={async (file) => {
-              const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
-              const fileSize = file.size / 1024;
-              if (verify?.maxSize && fileSize > fileSizeLimit) {
-                Message.warning('文件大小超出限制');
-                return false;
+              // 校验大小
+              if (verify?.maxSizeLimit && verify?.maxSize) {
+                const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
+                const fileSize = file.size / 1024;
+                if (fileSize > fileSizeLimit) {
+                  Message.warning('文件大小超出限制');
+                  return false;
+                }
               }
 
               // 校验格式
-              if (verify?.fileFormat) {
+              if (verify?.fileFormatLimit && verify?.fileFormat) {
                 const lastIndexOf = file.name.lastIndexOf('.');
                 const type = file.name.slice(lastIndexOf + 1);
-                if (verify.fileFormat.toLocaleLowerCase().indexOf(type.toLocaleLowerCase()) === -1) {
+                if (verify.fileFormat.toLocaleLowerCase().split(',').includes(type.toLocaleLowerCase())) {
                   Message.warning(`不支持该格式，仅支持 ${verify.fileFormat}`);
                   return false;
                 }
@@ -258,10 +268,17 @@ const XFileUpload = memo(
                     <div className="uplaodTriggerList-content">
                       <IconUpload />
                       <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
-                      <div className="uplaodTriggerList-describe">支持{verify?.fileFormat}格式</div>
+                      {verify?.fileFormatLimit && (
+                        <div className="uplaodTriggerList-describe">支持{verify?.fileFormat}格式</div>
+                      )}
                       <div className="uplaodTriggerList-describe">
-                        最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
-                        个文件，单个文件不超过{verify?.maxSize || 10}MB
+                        {verify?.maxCountLimit && (
+                          <span>
+                            最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                            {verify?.maxSizeLimit ? '，' : ''}
+                          </span>
+                        )}
+                        {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
                       </div>
                     </div>
                   </div>

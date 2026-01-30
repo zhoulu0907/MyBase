@@ -117,8 +117,12 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
+    maxCountLimit: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
+    maxSizeLimit: TBooleanDefaultType;
     maxSize: TNumberDefaultType;
+    fileFormatLimit: TBooleanDefaultType;
     fileFormat: TTextDefaultType;
   };
 
@@ -170,6 +174,10 @@ const XFileUpload: XInputFileUploadSchema = {
     showDownload: false,
     verify: {
       required: false,
+      noRepeat: false,
+      maxCountLimit: false,
+      maxSizeLimit: false,
+      fileFormatLimit: false,
       maxCount: 1,
       maxSize: 10,
       fileFormat: ''

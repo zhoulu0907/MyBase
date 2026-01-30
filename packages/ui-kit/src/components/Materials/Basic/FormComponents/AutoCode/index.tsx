@@ -35,7 +35,7 @@ const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
       >
-        {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+        {detailMode ? (
           <div>{fieldValue || '--'}</div>
         ) : (
           <Input

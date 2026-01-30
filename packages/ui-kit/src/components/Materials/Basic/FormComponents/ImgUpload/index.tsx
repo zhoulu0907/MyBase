@@ -364,26 +364,28 @@ const XImgUpload = memo(
             limit={
               (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
                 ? fieldValue?.length
-                : verify?.maxCount === -1
+                : verify?.maxCountLimit
                   ? undefined
                   : verify?.maxCount
             }
-            accept={verify?.fileFormat || 'image/*'}
+            accept='image/*'
             listType={'text'}
             beforeUpload={async (file) => {
               // 校验大小
-              const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
-              const fileSize = file.size / 1024;
-              if (fileSize > fileSizeLimit) {
-                Message.warning('文件大小超出限制');
-                return false;
+              if (verify?.maxSizeLimit && verify?.maxSize) {
+                const fileSizeLimit = verify?.maxSize * 1024; // 转换为kb;
+                const fileSize = file.size / 1024;
+                if (fileSize > fileSizeLimit) {
+                  Message.warning('文件大小超出限制');
+                  return false;
+                }
               }
 
               // 校验格式
-              if (verify?.fileFormat) {
+              if (verify?.fileFormatLimit && verify?.fileFormat) {
                 const lastIndexOf = file.name.lastIndexOf('.');
                 const type = file.name.slice(lastIndexOf + 1);
-                if (verify.fileFormat.toLocaleLowerCase().indexOf(type.toLocaleLowerCase()) === -1) {
+                if (verify.fileFormat.toLocaleLowerCase().split(',').includes(type.toLocaleLowerCase())) {
                   Message.warning(`不支持该格式，仅支持 ${verify.fileFormat}`);
                   return false;
                 }
@@ -450,9 +452,17 @@ const XImgUpload = memo(
                     <div className="uplaodTriggerList-content">
                       <IconPlus />
                       <div className="uplaodTriggerList-tips">点击或拖拽文件到此处上传</div>
+                      {verify?.fileFormatLimit && (
+                        <div className="uplaodTriggerList-describe">支持{verify?.fileFormat}格式</div>
+                      )}
                       <div className="uplaodTriggerList-describe">
-                        最多可上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}
-                        张图片，单张图片大小不超过{verify?.maxSize || 10}MB
+                        {verify?.maxCountLimit && (
+                          <span>
+                            最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}张图片
+                            {verify?.maxSizeLimit ? '，' : ''}
+                          </span>
+                        )}
+                        {verify?.maxSizeLimit && <span>单张图片不超过{verify?.maxSize || 10}MB</span>}
                       </div>
                     </div>
                   </div>
