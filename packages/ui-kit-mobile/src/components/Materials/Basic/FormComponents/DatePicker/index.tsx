@@ -11,7 +11,6 @@ import {
   DATE_VALUES,
   FORM_COMPONENT_TYPES,
   FormSchema,
-  securityEncodeText,
   STATUS_OPTIONS,
   STATUS_VALUES
 } from '@onebase/ui-kit';
@@ -165,14 +164,22 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
   const renderTime = () => {
     const fieldValue = form.getFieldValue(fieldId);
     switch (dateType) {
+      //   case DATE_VALUES[DATE_OPTIONS.YEAR]:
+      //     return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY'))}</>;
+      //   case DATE_VALUES[DATE_OPTIONS.MONTH]:
+      //     return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM'))}</>;
+      //   case DATE_VALUES[DATE_OPTIONS.DATE]:
+      //     return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD'))}</>;
+      //   case DATE_VALUES[DATE_OPTIONS.FULL]:
+      //     return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</>;
       case DATE_VALUES[DATE_OPTIONS.YEAR]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY')}</>;
       case DATE_VALUES[DATE_OPTIONS.MONTH]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY-MM')}</>;
       case DATE_VALUES[DATE_OPTIONS.DATE]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY-MM-DD')}</>;
       case DATE_VALUES[DATE_OPTIONS.FULL]:
-        return <>{securityEncodeText(security, dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss'))}</>;
+        return <>{dayjs(fieldValue).format('YYYY-MM-DD HH:mm:ss')}</>;
       default:
         return '--';
     }
