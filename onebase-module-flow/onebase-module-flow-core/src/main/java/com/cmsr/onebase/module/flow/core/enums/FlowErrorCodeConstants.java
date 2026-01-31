@@ -42,4 +42,9 @@ public interface FlowErrorCodeConstants {
      * 节点配置无效
      */
     ErrorCode NODE_CONFIG_INVALID = new ErrorCode(1123791, "节点配置无效，typeCode={}");
+
+    /**
+     * 动作配置模板为空
+     */
+    ErrorCode ACTION_CONFIG_EMPTY = new ErrorCode(1123792, "动作配置模板为空");
 }
