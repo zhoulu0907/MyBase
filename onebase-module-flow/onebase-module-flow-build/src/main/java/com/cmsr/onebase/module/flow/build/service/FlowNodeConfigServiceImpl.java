@@ -218,7 +218,7 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
             log.info("getActionSchemaTemplate success, typeCode: {}", typeCode);
             return template;
         } catch (Exception e) {
-            log.error("Failed to parse action_config JSON, typeCode: {}", typeCode, e);
+            log.warn("Failed to parse action_config JSON, typeCode: {}", typeCode, e);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
         }
     }
