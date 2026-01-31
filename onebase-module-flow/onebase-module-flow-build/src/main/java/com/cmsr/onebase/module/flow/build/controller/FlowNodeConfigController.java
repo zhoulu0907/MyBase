@@ -11,6 +11,8 @@ import com.cmsr.onebase.module.flow.build.vo.NodeConfigConnVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
 import com.cmsr.onebase.module.flow.core.vo.PageNodeConfigReqVO;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,6 +62,13 @@ public class FlowNodeConfigController {
     public CommonResult<NodeTypeInfoVO> getNodeTypeInfo(@RequestParam("nodeCode") String nodeCode) {
         NodeTypeInfoVO result = flowNodeConfigService.getNodeTypeInfo(nodeCode);
         return CommonResult.success(result);
+    }
+
+    @Operation(summary = "查询连接器类型动作配置模板")
+    @GetMapping("/action-schema-template")
+    public CommonResult<JsonNode> getActionSchemaTemplate(@RequestParam("typeCode") String typeCode) {
+        JsonNode template = flowNodeConfigService.getActionSchemaTemplate(typeCode);
+        return CommonResult.success(template);
     }
 
 }
