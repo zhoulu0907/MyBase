@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser;
+import com.cmsr.onebase.module.flow.build.vo.ConnectorActionVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvConfigTemplateVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvironmentConfigVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
@@ -9,6 +10,7 @@ import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
+import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +48,9 @@ class FlowConnectorServiceImplTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Spy
+    private ActionConfigHelper actionConfigHelper = new ActionConfigHelper(new ObjectMapper());
 
     @InjectMocks
     private FlowConnectorServiceImpl connectorService;
@@ -332,5 +340,45 @@ class FlowConnectorServiceImplTest {
         assertThrows(RuntimeException.class, () -> {
             connectorService.getEnvConfigTemplate(connectorId);
         });
+    }
+
+    // ==================== getActionInfos 测试用例 ====================
+
+    @Test
+    void testGetActionInfos_configIsNull() {
+        // Given - 连接器存在但 config 为 null
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+        connector.setConfig(null);  // config 为 null
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        // When - 不应该抛出异常，返回空列表
+        List<ConnectorActionVO> result = connectorService.getActionInfos(connectorId);
+
+        // Then - 返回空列表而不是抛出异常
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(connectorRepository).getById(connectorId);
+    }
+
+    @Test
+    void testGetActionInfos_configIsEmpty() {
+        // Given - 连接器存在但 config 为空字符串
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+        connector.setConfig("");  // config 为空字符串
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        // When - 不应该抛出异常，返回空列表
+        List<ConnectorActionVO> result = connectorService.getActionInfos(connectorId);
+
+        // Then - 返回空列表而不是抛出异常
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(connectorRepository).getById(connectorId);
     }
 }

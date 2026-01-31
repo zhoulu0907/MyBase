@@ -42,9 +42,6 @@ public class ConnectorActionVO {
     @Schema(description = "更新时间", example = "2026-01-25T10:00:00")
     private LocalDateTime updateTime;
 
-    @Schema(description = "被引用次数", example = "5")
-    private Integer usedCount;
-
     @Schema(description = "基础信息配置")
     private Object basicInfo;
 

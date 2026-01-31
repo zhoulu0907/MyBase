@@ -10,11 +10,9 @@ import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorEnvRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
-import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeActionRefRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorEnvDO;
-import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeActionRefDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
@@ -62,9 +60,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Autowired
     private FlowNodeConfigRepository flowNodeConfigRepository;
-
-    @Autowired
-    private FlowNodeActionRefRepository actionRefRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -464,27 +459,28 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 提取动作列表
-        List<JsonNode> actions = configHelper.getActions(connector.getConfig());
+        // 2. 提取动作列表 - 从 action_config 字段读取
+        List<JsonNode> actions = actionConfigHelper.getActions(connector.getActionConfig());
 
         // 3. 转换为 VO
         List<ConnectorActionVO> result = new ArrayList<>();
         for (JsonNode action : actions) {
+            // 安全获取字段值
+            String actionId = getString(action, "actionId");
+            if (actionId == null) {
+                log.warn("Action missing actionId, skipping: {}", action);
+                continue; // 跳过没有 actionId 的动作
+            }
+
             ConnectorActionVO vo = ConnectorActionVO.builder()
-                    .actionId(action.get("actionId").asText())
-                    .actionName(action.get("actionName").asText())
-                    .actionCode(action.get("actionCode").asText())
-                    .description(action.has("description") ? action.get("description").asText() : null)
-                    .status(action.get("status").asText())
-                    .version(action.get("version").asInt())
+                    .actionId(actionId)
+                    .actionName(getString(action, "actionName"))
+                    .actionCode(getString(action, "actionCode"))
+                    .description(getString(action, "description"))
+                    .status(getString(action, "status"))
+                    .version(getInt(action, "version"))
                     .updateTime(connector.getUpdateTime())
                     .build();
-
-            // 查询引用次数
-            List<FlowNodeActionRefDO> refs = actionRefRepository.findByConnectorAndAction(
-                    connectorId, vo.getActionId());
-            vo.setUsedCount(refs.size());
-
             result.add(vo);
         }
 
@@ -496,82 +492,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     public List<ConnectorActionVO> getActionInfos(Long connectorId) {
         return getActionList(connectorId);
     }
-
-    public List<ConnectorActionLiteVO> getActionList(Long connectorId, Long envId) {
-        log.info("getActionList start, connectorId: {}, envId: {}", connectorId, envId);
-
-        // 1. 查询环境配置
-        FlowConnectorEnvDO env = connectorEnvRepository.getById(envId);
-        if (env == null) {
-            log.warn("Environment config not found, envId: {}", envId);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_ENV_NOT_CONFIGURED);
-        }
-
-        // 2. 解析 config 字段
-        String configJson = env.getConfig();
-        if (configJson == null || configJson.isEmpty() || "null".equals(configJson)) {
-            log.info("Config is empty, return empty list, envId: {}", envId);
-            return Collections.emptyList();
-        }
-
-        try {
-            // 3. 提取 actions 对象
-            JsonNode configNode = objectMapper.readTree(configJson);
-            JsonNode actionsNode = configNode.get("actions");
-
-            if (actionsNode == null || !actionsNode.isObject()) {
-                log.info("Actions node not found or not an object, return empty list, envId: {}", envId);
-                return Collections.emptyList();
-            }
-
-            // 4. 转换为 VO 列表
-            List<ConnectorActionLiteVO> result = new ArrayList<>();
-            Iterator<Map.Entry<String, JsonNode>> fields = actionsNode.fields();
-
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                JsonNode actionNode = entry.getValue();
-
-                // 解析创建时间
-                LocalDateTime createTime = null;
-                JsonNode createTimeNode = actionNode.get("createTime");
-                if (createTimeNode != null && !createTimeNode.isNull()) {
-                    try {
-                        createTime = LocalDateTime.parse(createTimeNode.asText());
-                    } catch (Exception e) {
-                        log.warn("Failed to parse createTime for action, using null. Value: {}, error: {}",
-                                createTimeNode.asText(), e.getMessage());
-                        createTime = null;
-                    }
-                }
-
-                ConnectorActionLiteVO vo = ConnectorActionLiteVO.builder()
-                        .actionId(getJsonText(actionNode, "actionId"))
-                        .actionName(getJsonText(actionNode, "actionName"))
-                        .actionCode(getJsonText(actionNode, "actionCode"))
-                        .status(getJsonText(actionNode, "status"))
-                        .version(actionNode.has("version") ? actionNode.get("version").asInt() : 1)
-                        .createTime(createTime)
-                        .build();
-
-                result.add(vo);
-            }
-
-            // 5. 按创建时间倒序排序（null 值排最后）
-            result.sort(Comparator.comparing(
-                    ConnectorActionLiteVO::getCreateTime,
-                    Comparator.nullsLast(Comparator.naturalOrder())
-            ).reversed());
-
-            log.info("getActionList success, connectorId: {}, envId: {}, count: {}", connectorId, envId, result.size());
-            return result;
-
-        } catch (JsonProcessingException e) {
-            log.error("Failed to parse action config, envId: {}, error: {}", envId, e.getMessage(), e);
-            throw new RuntimeException("解析动作配置失败: " + e.getMessage(), e);
-        }
-    }
-
+    
     /**
      * 辅助方法：安全获取 JSON 字段文本值
      */
@@ -590,25 +511,25 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 查找动作
-        JsonNode action = configHelper.findAction(connector.getConfig(), actionId);
+        // 2. 查找动作 - 从 action_config 字段读取
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionId);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
-        // 3. 转换为 VO
+        // 3. 转换为 VO - 使用安全的字段访问方法
         ConnectorActionVO vo = ConnectorActionVO.builder()
-                .actionId(action.get("actionId").asText())
-                .actionName(action.get("actionName").asText())
-                .actionCode(action.get("actionCode").asText())
-                .description(action.has("description") ? action.get("description").asText() : null)
-                .status(action.get("status").asText())
-                .version(action.get("version").asInt())
+                .actionId(getString(action, "actionId"))
+                .actionName(getString(action, "actionName"))
+                .actionCode(getString(action, "actionCode"))
+                .description(getString(action, "description"))
+                .status(getString(action, "status"))
+                .version(getInt(action, "version"))
+                .basicInfo(action.has("基础信息") && action.get("基础信息") != null ? action.get("基础信息") : null)
+                .inputConfig(action.has("入参配置") && action.get("入参配置") != null ? action.get("入参配置") : null)
+                .outputConfig(action.has("出参配置") && action.get("出参配置") != null ? action.get("出参配置") : null)
+                .debugConfig(action.has("调试配置") && action.get("调试配置") != null ? action.get("调试配置") : null)
                 .updateTime(connector.getUpdateTime())
-                .basicInfo(action.has("基础信息") ? action.get("基础信息") : null)
-                .inputConfig(action.has("入参配置") ? action.get("入参配置") : null)
-                .outputConfig(action.has("出参配置") ? action.get("出参配置") : null)
-                .debugConfig(action.has("调试配置") ? action.get("调试配置") : null)
                 .build();
 
         log.info("getActionDetail success, connectorId: {}, actionId: {}", connectorId, actionId);
@@ -616,6 +537,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String saveActionDraft(Long connectorId, CreateConnectorActionReqVO createVO) {
         log.info("saveActionDraft start, connectorId: {}, actionName: {}", connectorId, createVO.getActionName());
 
@@ -625,10 +547,12 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 构建动作配置
+        // 2. 生成动作ID
+        String actionId = actionConfigHelper.generateActionId();
+
+        // 3. 构建动作配置
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode action = mapper.createObjectNode();
-        String actionId = configHelper.generateActionId();
         action.put("actionId", actionId);
         action.put("actionName", createVO.getActionName());
         action.put("actionCode", createVO.getActionCode());
@@ -636,6 +560,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         action.put("status", "draft");
         action.put("version", 1);
 
+        // 添加四步配置
         if (createVO.getBasicInfo() != null) {
             action.set("基础信息", createVO.getBasicInfo());
         }
@@ -649,9 +574,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             action.set("调试配置", createVO.getDebugConfig());
         }
 
-        // 3. 添加到配置
-        String updatedConfig = configHelper.addAction(connector.getConfig(), action);
-        connector.setConfig(updatedConfig);
+        // 4. 添加到配置
+        String updatedConfig = actionConfigHelper.addAction(connector.getActionConfig(), action);
+        connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
         log.info("saveActionDraft success, connectorId: {}, actionId: {}", connectorId, actionId);
@@ -659,6 +584,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateActionDraft(Long connectorId, String actionId, UpdateConnectorActionReqVO updateVO) {
         log.info("updateActionDraft start, connectorId: {}, actionId: {}", connectorId, actionId);
 
@@ -669,7 +595,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = configHelper.findAction(connector.getConfig(), actionId);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionId);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
@@ -696,14 +622,15 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 4. 保存配置
-        String updatedConfig = configHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionId, mutableAction);
+        connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
         log.info("updateActionDraft success, connectorId: {}, actionId: {}", connectorId, actionId);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void publishAction(Long connectorId, String actionId) {
         log.info("publishAction start, connectorId: {}, actionId: {}", connectorId, actionId);
 
@@ -714,19 +641,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = configHelper.findAction(connector.getConfig(), actionId);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionId);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 验证当前状态
-        String currentStatus = action.get("status").asText();
+        String currentStatus = getString(action, "status");
         if (!"draft".equals(currentStatus) && !"offline".equals(currentStatus)) {
             throw new RuntimeException("只有草稿或下架状态的动作才能发布");
         }
 
         // 4. 校验完整性
-        ConnectorConfigHelper.ValidationResult validation = configHelper.validateForPublish(action);
+        ActionConfigHelper.ValidationResult validation = actionConfigHelper.validateActionCompleteness(action);
         if (!validation.isValid()) {
             throw new RuntimeException("请完善动作信息后再进行发布：" + String.join("; ", validation.getErrors()));
         }
@@ -738,14 +665,15 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         mutableAction.put("version", newVersion);
 
         // 6. 保存配置
-        String updatedConfig = configHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionId, mutableAction);
+        connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
         log.info("publishAction success, connectorId: {}, actionId: {}, newVersion: {}", connectorId, actionId, newVersion);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void offlineAction(Long connectorId, String actionId) {
         log.info("offlineAction start, connectorId: {}, actionId: {}", connectorId, actionId);
 
@@ -756,13 +684,14 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = configHelper.findAction(connector.getConfig(), actionId);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionId);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 验证状态
-        if (!"published".equals(action.get("status").asText())) {
+        String status = getString(action, "status");
+        if (!"published".equals(status)) {
             throw new RuntimeException("只有已发布的动作才能下架");
         }
 
@@ -770,14 +699,15 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         ObjectNode mutableAction = (ObjectNode) action;
         mutableAction.put("status", "offline");
 
-        String updatedConfig = configHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionId, mutableAction);
+        connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
         log.info("offlineAction success, connectorId: {}, actionId: {}", connectorId, actionId);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void republishAction(Long connectorId, String actionId) {
         log.info("republishAction start, connectorId: {}, actionId: {}", connectorId, actionId);
 
@@ -788,18 +718,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = configHelper.findAction(connector.getConfig(), actionId);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionId);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 验证状态
-        if (!"offline".equals(action.get("status").asText())) {
+        String status = getString(action, "status");
+        if (!"offline".equals(status)) {
             throw new RuntimeException("只有已下架的动作才能重新上线");
         }
 
         // 4. 校验完整性
-        ConnectorConfigHelper.ValidationResult validation = configHelper.validateForPublish(action);
+        ActionConfigHelper.ValidationResult validation = actionConfigHelper.validateActionCompleteness(action);
         if (!validation.isValid()) {
             throw new RuntimeException("请完善动作信息后再进行发布：" + String.join("; ", validation.getErrors()));
         }
@@ -808,14 +739,15 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         ObjectNode mutableAction = (ObjectNode) action;
         mutableAction.put("status", "published");
 
-        String updatedConfig = configHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionId, mutableAction);
+        connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
         log.info("republishAction success, connectorId: {}, actionId: {}", connectorId, actionId);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String copyAction(Long connectorId, String actionId) {
         log.info("copyAction start, connectorId: {}, actionId: {}", connectorId, actionId);
 
@@ -826,419 +758,25 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找原动作
-        JsonNode originalAction = configHelper.findAction(connector.getConfig(), actionId);
+        JsonNode originalAction = actionConfigHelper.findAction(connector.getActionConfig(), actionId);
         if (originalAction == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 获取现有动作列表用于命名去重
-        List<JsonNode> existingActions = configHelper.getActions(connector.getConfig());
+        List<JsonNode> existingActions = actionConfigHelper.getActions(connector.getActionConfig());
         List<String> existingNames = existingActions.stream()
+                .filter(a -> a.has("actionName") && a.get("actionName") != null && !a.get("actionName").isNull())
                 .map(a -> a.get("actionName").asText())
                 .collect(Collectors.toList());
         List<String> existingCodes = existingActions.stream()
+                .filter(a -> a.has("actionCode") && a.get("actionCode") != null && !a.get("actionCode").isNull())
                 .map(a -> a.get("actionCode").asText())
                 .collect(Collectors.toList());
 
         // 4. 生成唯一名称和编码
-        String originalName = originalAction.get("actionName").asText();
-        String originalCode = originalAction.get("actionCode").asText();
-        String newName = nameGenerator.generateCopyName(originalName, existingNames);
-        String newCode = nameGenerator.generateCopyCode(originalCode, existingCodes);
-
-        // 5. 复制动作配置
-        ObjectNode newAction = originalAction.deepCopy();
-        newAction.put("actionId", configHelper.generateActionId());
-        newAction.put("actionName", newName);
-        newAction.put("actionCode", newCode);
-        newAction.put("status", "draft");
-        newAction.put("version", 1);
-
-        // 6. 添加到配置
-        String updatedConfig = configHelper.addAction(connector.getConfig(), newAction);
-        connector.setConfig(updatedConfig);
-        connectorRepository.updateById(connector);
-
-        String newActionId = newAction.get("actionId").asText();
-        log.info("copyAction success, connectorId: {}, originalActionId: {}, newActionId: {}, newName: {}",
-                connectorId, actionId, newActionId, newName);
-        return newActionId;
-    }
-
-    @Override
-    public void deleteAction(Long connectorId, String actionId) {
-        log.info("deleteAction start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 检查引用关系
-        List<FlowNodeActionRefDO> references = actionRefRepository.findByConnectorAndAction(
-                connectorId, actionId);
-        if (!references.isEmpty()) {
-            // 转换为引用信息 VO
-            List<ActionReferenceVO> refList = references.stream()
-                    .map(ref -> ActionReferenceVO.builder()
-                            .flowId(ref.getFlowVersion())
-                            .nodeId(ref.getNodeId())
-                            .build())
-                    .collect(Collectors.toList());
-
-            throw new RuntimeException("存在关联逻辑流，请先删除逻辑流内的动作节点！");
-        }
-
-        // 3. 从配置中删除动作
-        String updatedConfig = configHelper.removeAction(connector.getConfig(), actionId);
-        connector.setConfig(updatedConfig);
-        connectorRepository.updateById(connector);
-
-        log.info("deleteAction success, connectorId: {}, actionId: {}", connectorId, actionId);
-    }
-
-    @Override
-    public ConnectorConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionId) {
-        log.info("validateActionForPublish start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 查找动作
-        JsonNode action = configHelper.findAction(connector.getConfig(), actionId);
-        if (action == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 校验完整性
-        ConnectorConfigHelper.ValidationResult result = configHelper.validateForPublish(action);
-        log.info("validateActionForPublish success, connectorId: {}, actionId: {}, valid: {}",
-                connectorId, actionId, result.isValid());
-        return result;
-    }
-
-    // ==================== 动作配置管理方法实现 v2.0 ====================
-
-    @Override
-    public List<ActionInfoVO> getActionInfosV2(Long connectorId) {
-        log.info("getActionInfosV2 start, connectorId: {}", connectorId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 提取动作列表
-        List<JsonNode> actions = actionConfigHelper.getActions(connector.getConfig());
-
-        // 3. 批量查询引用关系
-        List<String> actionIds = actions.stream()
-                .map(a -> a.get("actionId").asText())
-                .collect(Collectors.toList());
-        Map<String, Integer> usedCountMap = getUsedCountMap(connectorId, actionIds);
-
-        // 4. 转换为 VO
-        List<ActionInfoVO> result = new ArrayList<>();
-        for (JsonNode action : actions) {
-            String actionId = action.get("actionId").asText();
-            ActionInfoVO vo = ActionInfoVO.builder()
-                    .actionId(actionId)
-                    .actionName(action.get("actionName").asText())
-                    .actionCode(action.get("actionCode").asText())
-                    .description(action.has("description") ? action.get("description").asText() : null)
-                    .status(action.get("status").asText())
-                    .version(action.get("version").asInt())
-                    .usedCount(usedCountMap.getOrDefault(actionId, 0))
-                    .updateTime(connector.getUpdateTime())
-                    .build();
-            result.add(vo);
-        }
-
-        log.info("getActionInfosV2 success, connectorId: {}, count: {}", connectorId, result.size());
-        return result;
-    }
-
-    @Override
-    public ActionDetailVO getActionDetailV2(Long connectorId, String actionId) {
-        log.info("getActionDetailV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getConfig(), actionId);
-        if (action == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 查询引用次数
-        List<FlowNodeActionRefDO> refs = actionRefRepository.findByConnectorAndAction(connectorId, actionId);
-
-        // 4. 转换为 VO
-        ActionDetailVO vo = ActionDetailVO.builder()
-                .actionId(action.get("actionId").asText())
-                .actionName(action.get("actionName").asText())
-                .actionCode(action.get("actionCode").asText())
-                .description(action.has("description") ? action.get("description").asText() : null)
-                .status(action.get("status").asText())
-                .version(action.get("version").asInt())
-                .basicInfo(action.has("基础信息") ? action.get("基础信息") : null)
-                .inputConfig(action.has("入参配置") ? action.get("入参配置") : null)
-                .outputConfig(action.has("出参配置") ? action.get("出参配置") : null)
-                .debugConfig(action.has("调试配置") ? action.get("调试配置") : null)
-                .usedCount(refs.size())
-                .updateTime(connector.getUpdateTime())
-                .build();
-
-        log.info("getActionDetailV2 success, connectorId: {}, actionId: {}", connectorId, actionId);
-        return vo;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public String saveActionDraftV2(Long connectorId, SaveActionReqVO reqVO) {
-        log.info("saveActionDraftV2 start, connectorId: {}, actionName: {}", connectorId, reqVO.getActionName());
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 生成动作ID
-        String actionId = actionConfigHelper.generateActionId();
-
-        // 3. 构建动作配置
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode action = mapper.createObjectNode();
-        action.put("actionId", actionId);
-        action.put("actionName", reqVO.getActionName());
-        action.put("actionCode", reqVO.getActionCode());
-        action.put("description", reqVO.getDescription());
-        action.put("status", "draft");
-        action.put("version", 1);
-
-        // 添加四步配置
-        if (reqVO.getBasicInfo() != null) {
-            action.set("基础信息", reqVO.getBasicInfo());
-        }
-        if (reqVO.getInputConfig() != null) {
-            action.set("入参配置", reqVO.getInputConfig());
-        }
-        if (reqVO.getOutputConfig() != null) {
-            action.set("出参配置", reqVO.getOutputConfig());
-        }
-        if (reqVO.getDebugConfig() != null) {
-            action.set("调试配置", reqVO.getDebugConfig());
-        }
-
-        // 4. 添加到配置
-        String updatedConfig = actionConfigHelper.addAction(connector.getConfig(), action);
-        connector.setConfig(updatedConfig);
-        connectorRepository.updateById(connector);
-
-        log.info("saveActionDraftV2 success, connectorId: {}, actionId: {}", connectorId, actionId);
-        return actionId;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateActionDraftV2(Long connectorId, String actionId, UpdateActionReqVO reqVO) {
-        log.info("updateActionDraftV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getConfig(), actionId);
-        if (action == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 更新动作配置
-        ObjectNode mutableAction = (ObjectNode) action;
-        if (reqVO.getActionName() != null) {
-            mutableAction.put("actionName", reqVO.getActionName());
-        }
-        if (reqVO.getDescription() != null) {
-            mutableAction.put("description", reqVO.getDescription());
-        }
-        if (reqVO.getBasicInfo() != null) {
-            mutableAction.set("基础信息", reqVO.getBasicInfo());
-        }
-        if (reqVO.getInputConfig() != null) {
-            mutableAction.set("入参配置", reqVO.getInputConfig());
-        }
-        if (reqVO.getOutputConfig() != null) {
-            mutableAction.set("出参配置", reqVO.getOutputConfig());
-        }
-        if (reqVO.getDebugConfig() != null) {
-            mutableAction.set("调试配置", reqVO.getDebugConfig());
-        }
-
-        // 4. 保存配置
-        String updatedConfig = actionConfigHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
-        connectorRepository.updateById(connector);
-
-        log.info("updateActionDraftV2 success, connectorId: {}, actionId: {}", connectorId, actionId);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void publishActionV2(Long connectorId, String actionId) {
-        log.info("publishActionV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getConfig(), actionId);
-        if (action == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 验证当前状态
-        String currentStatus = action.get("status").asText();
-        if (!"draft".equals(currentStatus) && !"offline".equals(currentStatus)) {
-            throw new RuntimeException("只有草稿或下架状态的动作才能发布");
-        }
-
-        // 4. 校验完整性
-        ValidationResultVO validation = validateActionForPublishV2(connectorId, actionId);
-        if (!validation.getValid()) {
-            throw new RuntimeException("请完善动作信息后再进行发布：" + String.join("; ", validation.getErrors()));
-        }
-
-        // 5. 更新状态和版本
-        ObjectNode mutableAction = (ObjectNode) action;
-        int newVersion = action.has("version") ? action.get("version").asInt() + 1 : 1;
-        mutableAction.put("status", "published");
-        mutableAction.put("version", newVersion);
-
-        // 6. 保存配置
-        String updatedConfig = actionConfigHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
-        connectorRepository.updateById(connector);
-
-        log.info("publishActionV2 success, connectorId: {}, actionId: {}, newVersion: {}", connectorId, actionId, newVersion);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void offlineActionV2(Long connectorId, String actionId) {
-        log.info("offlineActionV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getConfig(), actionId);
-        if (action == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 验证状态
-        if (!"published".equals(action.get("status").asText())) {
-            throw new RuntimeException("只有已发布的动作才能下架");
-        }
-
-        // 4. 更新状态
-        ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "offline");
-
-        String updatedConfig = actionConfigHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
-        connectorRepository.updateById(connector);
-
-        log.info("offlineActionV2 success, connectorId: {}, actionId: {}", connectorId, actionId);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void republishActionV2(Long connectorId, String actionId) {
-        log.info("republishActionV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getConfig(), actionId);
-        if (action == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 验证状态
-        if (!"offline".equals(action.get("status").asText())) {
-            throw new RuntimeException("只有已下架的动作才能重新上线");
-        }
-
-        // 4. 校验完整性
-        ValidationResultVO validation = validateActionForPublishV2(connectorId, actionId);
-        if (!validation.getValid()) {
-            throw new RuntimeException("请完善动作信息后再进行发布：" + String.join("; ", validation.getErrors()));
-        }
-
-        // 5. 更新状态
-        ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "published");
-
-        String updatedConfig = actionConfigHelper.updateAction(connector.getConfig(), actionId, mutableAction);
-        connector.setConfig(updatedConfig);
-        connectorRepository.updateById(connector);
-
-        log.info("republishActionV2 success, connectorId: {}, actionId: {}", connectorId, actionId);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public CopyActionRespVO copyActionV2(Long connectorId, String actionId) {
-        log.info("copyActionV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 查找原动作
-        JsonNode originalAction = actionConfigHelper.findAction(connector.getConfig(), actionId);
-        if (originalAction == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 获取现有动作列表用于命名去重
-        List<JsonNode> existingActions = actionConfigHelper.getActions(connector.getConfig());
-        List<String> existingNames = existingActions.stream()
-                .map(a -> a.get("actionName").asText())
-                .collect(Collectors.toList());
-        List<String> existingCodes = existingActions.stream()
-                .map(a -> a.get("actionCode").asText())
-                .collect(Collectors.toList());
-
-        // 4. 生成唯一名称和编码
-        String originalName = originalAction.get("actionName").asText();
-        String originalCode = originalAction.get("actionCode").asText();
+        String originalName = getString(originalAction, "actionName");
+        String originalCode = getString(originalAction, "actionCode");
         String newName = nameGenerator.generateCopyName(originalName, existingNames);
         String newCode = nameGenerator.generateCopyCode(originalCode, existingCodes);
 
@@ -1252,24 +790,20 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         newAction.put("version", 1);
 
         // 6. 添加到配置
-        String updatedConfig = actionConfigHelper.addAction(connector.getConfig(), newAction);
-        connector.setConfig(updatedConfig);
+        String updatedConfig = actionConfigHelper.addAction(connector.getActionConfig(), newAction);
+        connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("copyActionV2 success, connectorId: {}, originalActionId: {}, newActionId: {}, newName: {}",
+        log.info("copyAction success, connectorId: {}, originalActionId: {}, newActionId: {}, newName: {}",
                 connectorId, actionId, newActionId, newName);
 
-        return CopyActionRespVO.builder()
-                .actionId(newActionId)
-                .actionName(newName)
-                .actionCode(newCode)
-                .build();
+        return newActionId;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteActionV2(Long connectorId, String actionId) {
-        log.info("deleteActionV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
+    public void deleteAction(Long connectorId, String actionId) {
+        log.info("deleteAction start, connectorId: {}, actionId: {}", connectorId, actionId);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -1277,23 +811,17 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 检查引用关系
-        List<FlowNodeActionRefDO> references = actionRefRepository.findByConnectorAndAction(connectorId, actionId);
-        if (!references.isEmpty()) {
-            throw new RuntimeException("存在关联逻辑流，请先删除逻辑流内的动作节点！");
-        }
-
-        // 3. 从配置中删除动作
-        String updatedConfig = actionConfigHelper.removeAction(connector.getConfig(), actionId);
-        connector.setConfig(updatedConfig);
+        // 2. 从配置中删除动作
+        String updatedConfig = actionConfigHelper.removeAction(connector.getActionConfig(), actionId);
+        connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("deleteActionV2 success, connectorId: {}, actionId: {}", connectorId, actionId);
+        log.info("deleteAction success, connectorId: {}, actionId: {}", connectorId, actionId);
     }
 
     @Override
-    public ValidationResultVO validateActionForPublishV2(Long connectorId, String actionId) {
-        log.info("validateActionForPublishV2 start, connectorId: {}, actionId: {}", connectorId, actionId);
+    public ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionId) {
+        log.info("validateActionForPublish start, connectorId: {}, actionId: {}", connectorId, actionId);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -1302,68 +830,20 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getConfig(), actionId);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionId);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 校验完整性
-        List<String> errors = new ArrayList<>();
+        ActionConfigHelper.ValidationResult result = actionConfigHelper.validateActionCompleteness(action);
 
-        // 检查基础信息
-        if (!action.has("基础信息") || action.get("基础信息") == null || action.get("基础信息").isNull()) {
-            errors.add("基础信息不能为空");
-        }
-
-        // 检查入参配置
-        if (!action.has("入参配置") || action.get("入参配置") == null || action.get("入参配置").isNull()) {
-            errors.add("入参配置不能为空");
-        }
-
-        // 检查出参配置
-        if (!action.has("出参配置") || action.get("出参配置") == null || action.get("出参配置").isNull()) {
-            errors.add("出参配置不能为空");
-        }
-
-        boolean isValid = errors.isEmpty();
-
-        log.info("validateActionForPublishV2 success, connectorId: {}, actionId: {}, valid: {}",
-                connectorId, actionId, isValid);
-        return ValidationResultVO.builder()
-                .valid(isValid)
-                .errors(errors)
-                .build();
+        log.info("validateActionForPublish success, connectorId: {}, actionId: {}, valid: {}",
+                connectorId, actionId, result.isValid());
+        return result;
     }
 
     // ==================== 辅助方法 ====================
-
-    /**
-     * 批量获取动作的使用次数
-     *
-     * @param connectorId 连接器ID
-     * @param actionIds   动作ID列表
-     * @return 动作ID -> 使用次数的映射
-     */
-    private Map<String, Integer> getUsedCountMap(Long connectorId, List<String> actionIds) {
-        if (actionIds.isEmpty()) {
-            return new HashMap<>();
-        }
-
-        List<FlowNodeActionRefDO> refs = actionRefRepository.findByConnectorIdAndActionIds(
-                connectorId, actionIds);
-
-        Map<String, Integer> countMap = new HashMap<>();
-        for (String actionId : actionIds) {
-            countMap.put(actionId, 0);
-        }
-
-        for (FlowNodeActionRefDO ref : refs) {
-            String actionId = ref.getActionId();
-            countMap.put(actionId, countMap.getOrDefault(actionId, 0) + 1);
-        }
-
-        return countMap;
-    }
 
     /**
      * 从 JsonNode 安全获取字符串值

@@ -79,6 +79,10 @@ public class ActionConfigHelper {
      */
     public List<JsonNode> getActions(String configJson) {
         List<JsonNode> actions = new ArrayList<>();
+        if (configJson == null || configJson.trim().isEmpty()) {
+            log.debug("动作配置为空，返回空列表");
+            return actions;
+        }
         try {
             JsonNode root = objectMapper.readTree(configJson);
             JsonNode actionsNode = root.get(ACTIONS_KEY);

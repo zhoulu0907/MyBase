@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
 import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -244,118 +245,8 @@ public class FlowConnectorController {
     public CommonResult<Boolean> validateActionForPublish(
             @PathVariable Long connectorId,
             @PathVariable String actionId) {
-        ConnectorConfigHelper.ValidationResult result =
+        ActionConfigHelper.ValidationResult result =
                 connectorService.validateActionForPublish(connectorId, actionId);
         return CommonResult.success(result.isValid());
-    }
-
-    // ==================== 动作配置管理接口 v2.0 ====================
-
-    @Operation(summary = "获取连接器的动作列表 v2.0", description = "返回四步配置 Schema + 使用次数")
-    @GetMapping("/{id}/action-infos-v2")
-    public CommonResult<List<ActionInfoVO>> getActionInfosV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long id) {
-        List<ActionInfoVO> actions = connectorService.getActionInfosV2(id);
-        return CommonResult.success(actions);
-    }
-
-    @Operation(summary = "获取动作详情 v2.0", description = "返回完整的四步配置 + 使用次数")
-    @GetMapping("/{connectorId}/actions-v2/{actionId}")
-    public CommonResult<ActionDetailVO> getActionDetailV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId) {
-        ActionDetailVO action = connectorService.getActionDetailV2(connectorId, actionId);
-        return CommonResult.success(action);
-    }
-
-    @Operation(summary = "保存动作草稿 v2.0", description = "使用四步配置 Schema 创建动作")
-    @PostMapping("/{connectorId}/actions-v2")
-    public CommonResult<String> saveActionDraftV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @RequestBody @Valid SaveActionReqVO reqVO) {
-        String actionId = connectorService.saveActionDraftV2(connectorId, reqVO);
-        return CommonResult.success(actionId);
-    }
-
-    @Operation(summary = "更新动作草稿 v2.0", description = "使用四步配置 Schema 更新动作")
-    @PutMapping("/{connectorId}/actions-v2/{actionId}")
-    public CommonResult<Boolean> updateActionDraftV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId,
-            @RequestBody @Valid UpdateActionReqVO reqVO) {
-        connectorService.updateActionDraftV2(connectorId, actionId, reqVO);
-        return CommonResult.success(Boolean.TRUE);
-    }
-
-    @Operation(summary = "发布动作 v2.0", description = "发布前会校验所有步骤配置是否完整")
-    @PutMapping("/{connectorId}/actions-v2/{actionId}/publish")
-    public CommonResult<Boolean> publishActionV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId) {
-        connectorService.publishActionV2(connectorId, actionId);
-        return CommonResult.success(Boolean.TRUE);
-    }
-
-    @Operation(summary = "下架动作 v2.0")
-    @PutMapping("/{connectorId}/actions-v2/{actionId}/offline")
-    public CommonResult<Boolean> offlineActionV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId) {
-        connectorService.offlineActionV2(connectorId, actionId);
-        return CommonResult.success(Boolean.TRUE);
-    }
-
-    @Operation(summary = "重新上线动作 v2.0")
-    @PutMapping("/{connectorId}/actions-v2/{actionId}/republish")
-    public CommonResult<Boolean> republishActionV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId) {
-        connectorService.republishActionV2(connectorId, actionId);
-        return CommonResult.success(Boolean.TRUE);
-    }
-
-    @Operation(summary = "复制动作 v2.0", description = "自动生成唯一名称：原名称_copy序号，复制的动作状态为 draft")
-    @PostMapping("/{connectorId}/actions-v2/{actionId}/copy")
-    public CommonResult<CopyActionRespVO> copyActionV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId) {
-        CopyActionRespVO result = connectorService.copyActionV2(connectorId, actionId);
-        return CommonResult.success(result);
-    }
-
-    @Operation(summary = "删除动作 v2.0", description = "删除前会检查是否被逻辑流引用")
-    @DeleteMapping("/{connectorId}/actions-v2/{actionId}")
-    public CommonResult<Boolean> deleteActionV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId) {
-        connectorService.deleteActionV2(connectorId, actionId);
-        return CommonResult.success(Boolean.TRUE);
-    }
-
-    @Operation(summary = "校验动作是否可发布 v2.0", description = "返回包含完整的错误信息的校验结果")
-    @PostMapping("/{connectorId}/actions-v2/{actionId}/validate")
-    public CommonResult<ValidationResultVO> validateActionForPublishV2(
-            @Parameter(description = "连接器实例ID", required = true, example = "1")
-            @PathVariable Long connectorId,
-            @Parameter(description = "动作ID", required = true, example = "action_123")
-            @PathVariable String actionId) {
-        ValidationResultVO result = connectorService.validateActionForPublishV2(connectorId, actionId);
-        return CommonResult.success(result);
     }
 }
