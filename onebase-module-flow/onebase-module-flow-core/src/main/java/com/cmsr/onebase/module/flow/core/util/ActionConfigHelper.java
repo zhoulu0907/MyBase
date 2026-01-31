@@ -12,7 +12,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * 动作配置辅助类
@@ -22,7 +21,8 @@ import java.util.UUID;
  * 核心功能：
  * - 解析动作配置 JSON
  * - 查询、添加、更新、删除动作
- * - 生成动作 ID
+ * - 获取动作的 Formily Schema
+ * - 校验动作编码唯一性
  * - 校验动作完整性
  * - 更新元数据
  *
@@ -34,7 +34,8 @@ import java.util.UUID;
 public class ActionConfigHelper {
 
     private static final String ACTIONS_KEY = "actions";
-    private static final String ACTION_ID_KEY = "actionId";
+    private static final String ACTION_CODE_KEY = "actionCode";
+    private static final String PROPERTIES_KEY = "properties";
     private static final String METADATA_KEY = "_metadata";
     private static final String UPDATED_AT_KEY = "updatedAt";
     private static final String VERSION_KEY = "version";
@@ -104,10 +105,10 @@ public class ActionConfigHelper {
      * 查找指定动作
      *
      * @param configJson 配置 JSON 字符串
-     * @param actionId   动作 ID
+     * @param actionCode 动作编码
      * @return 动作配置，不存在返回 null
      */
-    public JsonNode findAction(String configJson, String actionId) {
+    public JsonNode findAction(String configJson, String actionCode) {
         try {
             JsonNode root = objectMapper.readTree(configJson);
             JsonNode actionsNode = root.get(ACTIONS_KEY);
@@ -115,13 +116,14 @@ public class ActionConfigHelper {
             if (actionsNode != null && actionsNode.isArray()) {
                 ArrayNode array = (ArrayNode) actionsNode;
                 for (JsonNode action : array) {
-                    if (actionId.equals(action.get(ACTION_ID_KEY).asText())) {
+                    JsonNode codeNode = action.get(ACTION_CODE_KEY);
+                    if (codeNode != null && !codeNode.isNull() && actionCode.equals(codeNode.asText())) {
                         return action;
                     }
                 }
             }
         } catch (JsonProcessingException e) {
-            log.error("查找动作配置失败, actionId={}", actionId, e);
+            log.error("查找动作配置失败, actionCode={}", actionCode, e);
         }
         return null;
     }
@@ -163,11 +165,11 @@ public class ActionConfigHelper {
      * 更新指定动作配置
      *
      * @param configJson    配置 JSON 字符串
-     * @param actionId      动作 ID
+     * @param actionCode    动作编码
      * @param updatedAction 更新后的动作配置
      * @return 更新后的配置 JSON 字符串
      */
-    public String updateAction(String configJson, String actionId, JsonNode updatedAction) {
+    public String updateAction(String configJson, String actionCode, JsonNode updatedAction) {
         try {
             JsonNode root = objectMapper.readTree(configJson);
             ObjectNode objectRoot = (ObjectNode) root;
@@ -177,7 +179,8 @@ public class ActionConfigHelper {
                 ArrayNode array = (ArrayNode) actionsNode;
                 for (int i = 0; i < array.size(); i++) {
                     JsonNode action = array.get(i);
-                    if (actionId.equals(action.get(ACTION_ID_KEY).asText())) {
+                    JsonNode codeNode = action.get(ACTION_CODE_KEY);
+                    if (codeNode != null && !codeNode.isNull() && actionCode.equals(codeNode.asText())) {
                         array.set(i, updatedAction);
 
                         // 更新元数据
@@ -188,7 +191,7 @@ public class ActionConfigHelper {
                 }
             }
 
-            throw new RuntimeException("动作不存在: " + actionId);
+            throw new RuntimeException("动作不存在: " + actionCode);
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("配置更新失败", e);
@@ -199,10 +202,10 @@ public class ActionConfigHelper {
      * 删除指定动作
      *
      * @param configJson 配置 JSON 字符串
-     * @param actionId   动作 ID
+     * @param actionCode 动作编码
      * @return 更新后的配置 JSON 字符串
      */
-    public String removeAction(String configJson, String actionId) {
+    public String removeAction(String configJson, String actionCode) {
         try {
             JsonNode root = objectMapper.readTree(configJson);
             ObjectNode objectRoot = (ObjectNode) root;
@@ -212,7 +215,8 @@ public class ActionConfigHelper {
                 ArrayNode array = (ArrayNode) actionsNode;
                 for (int i = 0; i < array.size(); i++) {
                     JsonNode action = array.get(i);
-                    if (actionId.equals(action.get(ACTION_ID_KEY).asText())) {
+                    JsonNode codeNode = action.get(ACTION_CODE_KEY);
+                    if (codeNode != null && !codeNode.isNull() && actionCode.equals(codeNode.asText())) {
                         array.remove(i);
 
                         // 更新元数据
@@ -223,7 +227,7 @@ public class ActionConfigHelper {
                 }
             }
 
-            throw new RuntimeException("动作不存在: " + actionId);
+            throw new RuntimeException("动作不存在: " + actionCode);
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("配置更新失败", e);
@@ -231,14 +235,45 @@ public class ActionConfigHelper {
     }
 
     /**
-     * 生成新的动作 ID
+     * 获取动作的 Formily Schema
      * <p>
-     * 格式：action-{8位UUID}
+     * 从 properties[actionCode] 获取完整的 Formily Schema
      *
-     * @return 动作 ID
+     * @param configJson 配置 JSON 字符串
+     * @param actionCode 动作编码
+     * @return Formily Schema，不存在返回 null
      */
-    public String generateActionId() {
-        return "action-" + UUID.randomUUID().toString().substring(0, 8);
+    public JsonNode getActionSchema(String configJson, String actionCode) {
+        JsonNode root = parseActionConfig(configJson);
+        JsonNode properties = root.get(PROPERTIES_KEY);
+        if (properties != null && properties.isObject()) {
+            return properties.get(actionCode);
+        }
+        return null;
+    }
+
+    /**
+     * 校验 actionCode 是否唯一
+     * <p>
+     * 检查 actions 数组中是否已存在该 actionCode
+     *
+     * @param configJson 配置 JSON 字符串
+     * @param actionCode 动作编码
+     * @return true=唯一，false=已存在
+     */
+    public boolean isActionCodeUnique(String configJson, String actionCode) {
+        JsonNode root = parseActionConfig(configJson);
+        JsonNode actionsNode = root.get(ACTIONS_KEY);
+
+        if (actionsNode != null && actionsNode.isArray()) {
+            for (JsonNode action : actionsNode) {
+                JsonNode codeNode = action.get(ACTION_CODE_KEY);
+                if (codeNode != null && !codeNode.isNull() && actionCode.equals(codeNode.asText())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**

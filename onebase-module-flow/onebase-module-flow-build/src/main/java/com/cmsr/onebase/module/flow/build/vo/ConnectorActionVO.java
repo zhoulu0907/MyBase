@@ -21,14 +21,11 @@ import java.time.LocalDateTime;
 @Schema(description = "连接器动作响应")
 public class ConnectorActionVO {
 
-    @Schema(description = "动作ID", example = "action-uuid-001")
-    private String actionId;
+    @Schema(description = "动作编码", example = "getUserInfo")
+    private String actionCode;
 
     @Schema(description = "动作名称", example = "获取用户信息")
     private String actionName;
-
-    @Schema(description = "动作编码", example = "GET_USER")
-    private String actionCode;
 
     @Schema(description = "动作描述", example = "通过HTTP GET获取用户信息")
     private String description;
