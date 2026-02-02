@@ -174,22 +174,27 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
         AdminUserDO user = userService.getUserByUsername(username);
+
+        if (user != null && !Objects.equals(user.getUserType(), UserTypeEnum.TENANT.getValue())) {
+            throw exception(USER_TYPE_NOT_TENANT);
+        }
+
         checkUserPsdAndStatus(username, password, user, logTypeEnum);
         return user;
     }
 
-    public AdminUserDO mobileAuthenticate(String mobile, String password) {
+    public AdminUserDO mobileAuthenticate(String mobile, String password, Integer userType) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
-        AdminUserDO user = userService.getUserByMobile(mobile);
+        AdminUserDO user = userService.getUserByMobile(mobile, userType);
         checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
         return user;
     }
 
-    public AdminUserDO thirdAuthenticate(String mobile, String verifyCode) {
+    public AdminUserDO thirdAuthenticate(String mobile, String verifyCode, Integer userType) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_MOBILE;
         // 校验账号是否存在     //验证码登录，不需要在验证密码
-        return userService.getUserByMobile(mobile);
+        return userService.getUserByMobile(mobile, userType);
     }
 
 
@@ -257,6 +262,9 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 使用账号密码，进行登录
             AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
 
+            //验证登录账户是否有权限登录该应用
+            checkPermission(reqVO.getAppId(), user.getId());
+
             authLoginRespVO.set(createAfterLoginSuccess(user.getUserType(), user.getCorpId(), reqVO.getAppId(), user.getId(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME, reqVO.getLoginPlatform()));
 
             LogRecordContext.putVariable("user", user);
@@ -300,7 +308,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 解密原文
             reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
             // 使用手机密码，进行登录
-            AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+            AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), UserTypeEnum.CORP.getValue());
 
             //验证登录账户是否有权限登录该应用
             checkPermission(reqVO.getAppId(), user.getId());
@@ -323,7 +331,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         List<Long> roleIdsByAppId = ApplicationManager.withoutApplicationCondition(() ->
                 appAuthRoleUserService.findRoleIdsByAppId(appId));
         List<Long> userIdsByRoleIds = appAuthRoleUserService.findUserIdsByRoleIds(roleIdsByAppId);
-        if (userIdsByRoleIds.isEmpty() || !userIdsByRoleIds.contains(userId)){
+        if (userIdsByRoleIds.isEmpty() || !userIdsByRoleIds.contains(userId)) {
             throw exception(AUTH_LOGIN_NO_PERMISSION);
         }
     }
@@ -343,7 +351,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 2.1 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         // 2.2 使用账号密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), UserTypeEnum.CORP.getValue());
         if (!Objects.equals(UserTypeEnum.CORP.getValue(), user.getUserType())) {
             throw exception(AUTH_VERIFY_NO_CORP_LOGIN_ERROR);
         }
@@ -406,12 +414,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 //  解密原文
                 reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
                 // 使用手机密码，进行登录
-                user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword());
+                user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), UserTypeEnum.THIRD.getValue());
 
             } else if (LongTypeEnum.VERIFYCODE.getCode().equals(reqVO.getLoginType())) {
                 // 使用手机验证码，进行登录
                 validateVerfiyCode(reqVO);
-                user = thirdAuthenticate(reqVO.getMobile(), reqVO.getVerifyCode());
+                user = thirdAuthenticate(reqVO.getMobile(), reqVO.getVerifyCode(), UserTypeEnum.THIRD.getValue());
                 if (null == user) {
                     //如果未注册，直接返回，首次注册为true
                     ThirdAuthLoginRespVO thirdAuthLoginRespVO = new ThirdAuthLoginRespVO();
@@ -463,7 +471,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         validateVerfiyCode(thirdAuthLoginReqVO);
 
         // 2.通过手机号，获取 用户
-        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
+        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile(),  UserTypeEnum.THIRD.getValue());
         if (null == user) {
             throw exception(USER_NOT_EXISTS);
         }
@@ -533,14 +541,14 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
     }
 
-    private AuthLoginRespVO createAfterLoginSuccess(Integer userType, Long corpId, Long appId, Long userId, String username, String deviceId, LoginLogTypeEnum logType,String loginPlatform) {
+    private AuthLoginRespVO createAfterLoginSuccess(Integer userType, Long corpId, Long appId, Long userId, String username, String deviceId, LoginLogTypeEnum logType, String loginPlatform) {
         // 插入登陆日志
         createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
         // 创建访问令牌
         OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
                 RunModeEnum.RUNTIME.getValue(), corpId, appId,
                 userId, userType,
-                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null,  loginPlatform);
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null, loginPlatform);
 
         // 检查并限制设备数，踢出超限的设备
         List<String> removedTokens = securityConfigApi.checkAndLimitDevices(userId, deviceId, accessTokenDO.getAccessToken()).getData();
@@ -709,7 +717,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     public AuthLoginRespVO thirdUserRegister(ThirdSupplementUserReqVO reqVO) {
         AdminUserDO user = userService.thirdUserRegister(reqVO);
         return createAfterLoginSuccess(user.getUserType(), user.getCorpId(),
-                reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE,null);
+                reqVO.getAppId(), user.getId(), reqVO.getMobile(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_MOBILE, null);
 
     }
 

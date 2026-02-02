@@ -90,7 +90,7 @@ public interface UserService {
      * @param id    用户编号
      * @param reqVO 用户个人信息
      */
-    void updateUserProfile(Long id, @Valid UserProfileUpdateReqVO reqVO);
+    void updateUserProfile(Long id, @Valid UserProfileUpdateReqVO reqVO, Integer userType);
 
     /**
      * 修改用户个人密码
@@ -137,7 +137,7 @@ public interface UserService {
      * @param mobile 手机号
      * @return 用户对象信息
      */
-    AdminUserDO getUserByMobile(String mobile);
+    AdminUserDO getUserByMobile(String mobile, Integer userType);
 
     /**
      * 获得用户分页列表

@@ -98,8 +98,8 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @param mobile 手机号
      * @return 用户对象
      */
-    public AdminUserDO findByMobile(String mobile) {
-        return getOne(query().eq(AdminUserDO.MOBILE, mobile));
+    public AdminUserDO findByMobile(String mobile, Integer userType) {
+        return getOne(query().eq(AdminUserDO.MOBILE, mobile).eq(AdminUserDO.USER_TYPE, userType, userType != null));
     }
 
     /**
