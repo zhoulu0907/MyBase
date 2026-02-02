@@ -16,6 +16,7 @@ import {
   PageType,
   RootParentPage,
   VisibleType,
+  TASKMENU_TYPE,
   type ApplicationMenu,
   type GetPageSetIdReq
 } from '@onebase/app';
@@ -103,11 +104,11 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   const [popupVisible, setPopupVisible] = useState(false);
 
   const taskIconList = [
-    { key: 'TASK-ineedtodo', value: ineedtodoSvg },
-    { key: 'TASK-ihavedone', value: ihavedoneSvg },
-    { key: 'TASK-icreated', value: icreatedSvg },
-    { key: 'TASK-icopied', value: icopiedSvg },
-    { key: 'TASK-taskproxy', value: taskproxySvg }
+    { key: TASKMENU_TYPE.TASKINEEDTODO, value: ineedtodoSvg },
+    { key: TASKMENU_TYPE.TASKIHAVEDONE, value: ihavedoneSvg },
+    { key: TASKMENU_TYPE.TASKICREATED, value: icreatedSvg },
+    { key: TASKMENU_TYPE.TASKICOPIED, value: icopiedSvg },
+    { key: TASKMENU_TYPE.TASKTASKPROXY, value: taskproxySvg }
   ];
 
   const dropList = (
