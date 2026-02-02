@@ -20,13 +20,13 @@ interface IProps {
 const Tags = ({ data }: IProps) => {
   const renderTagAdminAvatar = (tag: TagItem, size: number) => {
     return (
-      <div>
+      <div style={{display:'flex',alignItems:'center'}}>
         {tag.adminAvatar ? (
           <Avatar size={size} style={{ marginRight: 4 }}>
             <img src={getFileUrlById(tag.adminAvatar)} alt="avatar" />
           </Avatar>
         ) : (
-          <Avatar size={size} style={{ marginRight: 4 }}>
+          <Avatar size={size} style={{ marginRight: 4, backgroundColor: 'rgb(var(--primary-6))' }}>
             {tag.adminNickName?.slice(0, 1)}
           </Avatar>
         )}
