@@ -1,6 +1,6 @@
 import '@arco-design/web-react/dist/css/arco.css';
 import '@arco-themes/react-cyansu-ob03/index.less';
-import '@onebase/ui-kit/src/theme.less';
+// import '@onebase/ui-kit/src/theme.less';
 
 import { ConfigProvider } from '@arco-design/web-react';
 import { ErrorPage } from '@onebase/common';
