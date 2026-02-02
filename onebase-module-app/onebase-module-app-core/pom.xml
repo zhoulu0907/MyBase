@@ -59,6 +59,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-system-core</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-codegen</artifactId>
             <scope>test</scope>

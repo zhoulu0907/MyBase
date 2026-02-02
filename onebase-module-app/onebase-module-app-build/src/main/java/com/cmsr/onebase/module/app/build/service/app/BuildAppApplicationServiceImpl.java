@@ -7,6 +7,9 @@ import java.util.stream.Stream;
 
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
+import com.cmsr.onebase.module.system.dal.database.DictDataRepository;
+import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +72,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
+    public static final String APP = "app";
     @Autowired
     private UidGenerator uidGenerator;
 
@@ -122,6 +126,12 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     @Resource
     private DashboardProjectApi dashboardProjectApi;
+
+    @Resource
+    private DictTypeRepository dictTypeRepository;
+
+    @Resource
+    private DictDataRepository dictDataRepository;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -382,6 +392,12 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
             applicationRepository.removeById(id);
             // 删除大屏
             dashboardProjectApi.removeDashboardByAppId(id);
+            // 删除租户级别字典Dict
+            List<DictTypeDO> dictTypeDOList = dictTypeRepository.findAllListByOwner(APP, id);
+            // 删除字典类型对应的数据
+            dictDataRepository.removeDictDataByType(dictTypeDOList.stream().map(DictTypeDO::getType).collect(Collectors.toList()));
+            // 删除字典类型
+            dictTypeRepository.removeByDictOwnerId(APP, id);
         });
     }
 
