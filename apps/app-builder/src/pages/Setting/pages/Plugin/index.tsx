@@ -4,6 +4,7 @@ import { IconSettings, IconEdit, IconMoreVertical, IconPlus, IconUpload } from '
 import { getPluginListApi, type pluginParams, updatePluginStatusApi, getPluginPageListApi, type pluginPageParams, createPluginApi, getPluginDetailApi, updatePluginInfoApi, uploadPluginVersionApi, getPluginVersionListApi, deletePluginVersionApi, activePluginVersionApi, enablePluginApi, disablePluginApi, getPluginConfigTemplateApi, savePluginConfigApi, getPluginConfigDetailApi, type PluginDetailRespVO, type PluginVersionVO } from '@onebase/platform-center';
 import dayjs from 'dayjs';
 import { useEffect, useMemo, useState } from 'react';
+import { TENANT_CONFIG_UPDATE, hasPermission } from '@onebase/common';
 import MenuComp from '@/components/MenuIcon';
 import DynamicForm from '@/components/DynamicForm';
 import { createForm } from '@formily/core';
@@ -786,12 +787,14 @@ const PluginPage = () => {
                                 <span className={styles.description}>{plugin.remark}</span>
                               </div>
                             </div>
-                            <div style={{ paddingLeft: '16px', flexShrink: 0 }}>
-                              <Switch
-                                checked={plugin.status === 1 ? true : false}
-                                onChange={(checked) => handleSwitchChange(plugin, checked)}
-                              />
-                            </div>
+                            {hasPermission(TENANT_CONFIG_UPDATE) && (
+                              <div style={{ paddingLeft: '16px', flexShrink: 0 }}>
+                                <Switch
+                                  checked={plugin.status === 1 ? true : false}
+                                  onChange={(checked) => handleSwitchChange(plugin, checked)}
+                                />
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -857,12 +860,14 @@ const PluginPage = () => {
                                 </div>
                               </div>
                             </div>
-                            <div style={{ paddingLeft: '16px', flexShrink: 0 }}>
-                              <Switch
-                                checked={plugin.status === 1 ? true : false}
-                                onChange={(checked) => handleSwitchChange(plugin, checked)}
-                              />
-                            </div>
+                            {hasPermission(TENANT_CONFIG_UPDATE) && (
+                              <div style={{ paddingLeft: '16px', flexShrink: 0 }}>
+                                <Switch
+                                  checked={plugin.status === 1 ? true : false}
+                                  onChange={(checked) => handleSwitchChange(plugin, checked)}
+                                />
+                              </div>
+                            )}
                           </div>
                         );
                       })}

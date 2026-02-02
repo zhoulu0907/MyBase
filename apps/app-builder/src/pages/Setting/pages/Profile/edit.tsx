@@ -1,7 +1,7 @@
 import { filterSpace } from '@/utils';
 import { emailValidator, phoneValidator } from '@/utils/validator';
 import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
-import { getPublicKey, sm2Encrypt, UploadAvatarComponent, UserPermissionManager } from '@onebase/common';
+import { getPublicKey, hasPermission, sm2Encrypt, UploadAvatarComponent, UserPermissionManager, TENANT_PROFILE_PERMISSION as ACTIONS } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -133,141 +133,146 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
   return (
     <div className={styles.editPage}>
       <Tabs tabPosition="left">
-        <TabPane key="tab1" title="基本资料">
-          <div
-            style={{
-              maxWidth: 600,
-              padding: 32,
-              background: '#fff',
-              borderRadius: 8
-            }}
-          >
-            <Form form={form} layout="horizontal" onSubmit={handleSubmit}>
-              <FormItem label="头像" field="avatar">
-                <div>
-                  <UploadAvatarComponent
-                    getUploadFile={uploadFile}
-                    avatarUrl={avatarUrl}
-                    onUpdateUrl={setAvatarUrl}
-                    defaultPlaceholder={defaultNickName}
-                    buttonName="修改头像"
-                  />
-                </div>
-              </FormItem>
+        {hasPermission(ACTIONS.UPDATE) && (
+          <TabPane key="tab1" title="基本资料">
+            <div
+              style={{
+                maxWidth: 600,
+                padding: 32,
+                background: '#fff',
+                borderRadius: 8
+              }}
+            >
+              <Form form={form} layout="horizontal" onSubmit={handleSubmit}>
+                <FormItem label="头像" field="avatar">
+                  <div>
+                    <UploadAvatarComponent
+                      getUploadFile={uploadFile}
+                      avatarUrl={avatarUrl}
+                      onUpdateUrl={setAvatarUrl}
+                      defaultPlaceholder={defaultNickName}
+                      buttonName="修改头像"
+                    />
+                  </div>
+                </FormItem>
 
-              <FormItem label="姓名" field="nickname" required rules={[{ required: true, message: '请输入姓名' }]}>
-                <Input placeholder="请输入姓名" />
-              </FormItem>
+                <FormItem label="姓名" field="nickname" required rules={[{ required: true, message: '请输入姓名' }]}>
+                  <Input placeholder="请输入姓名" />
+                </FormItem>
 
-              <FormItem label="账号" field="username" required>
-                <Input disabled />
-              </FormItem>
+                <FormItem label="账号" field="username" required>
+                  <Input disabled />
+                </FormItem>
 
-              <FormItem
-                label="手机号"
-                field="mobile"
-                required
-                rules={[
-                  { required: true, message: '请输入手机号' },
-                  { validator: encryptedMobile?.includes('*') ? () => null : phoneValidator }
-                ]}
-                onChange={(e: any) => {
-                  setEncryptedMobile(e.target.value);
-                }}
-              >
-                <Input placeholder="请输入手机号" />
-              </FormItem>
+                <FormItem
+                  label="手机号"
+                  field="mobile"
+                  required
+                  rules={[
+                    { required: true, message: '请输入手机号' },
+                    { validator: encryptedMobile?.includes('*') ? () => null : phoneValidator }
+                  ]}
+                  onChange={(e: any) => {
+                    setEncryptedMobile(e.target.value);
+                  }}
+                >
+                  <Input placeholder="请输入手机号" />
+                </FormItem>
 
-              <FormItem
-                label="邮箱"
-                field="email"
-                required
-                rules={[
-                  { required: true, message: '请输入邮箱' },
-                  { validator: encryptedEmail?.includes('*') ? () => null : emailValidator }
-                ]}
-                onChange={(e: any) => {
-                  setEncryptedEmail(e.target.value);
-                }}
-              >
-                <Input placeholder="请输入邮箱" />
-              </FormItem>
+                <FormItem
+                  label="邮箱"
+                  field="email"
+                  required
+                  rules={[
+                    { required: true, message: '请输入邮箱' },
+                    { validator: encryptedEmail?.includes('*') ? () => null : emailValidator }
+                  ]}
+                  onChange={(e: any) => {
+                    setEncryptedEmail(e.target.value);
+                  }}
+                >
+                  <Input placeholder="请输入邮箱" />
+                </FormItem>
 
-              <FormItem label="所属部门" field="dept" required disabled>
-                <Select placeholder="请选择所属部门"></Select>
-              </FormItem>
+                <FormItem label="所属部门" field="dept" required disabled>
+                  <Select placeholder="请选择所属部门"></Select>
+                </FormItem>
 
-              <FormItem label="OneID" field="id" required disabled>
-                <Input placeholder="请输入 OneID" />
-              </FormItem>
+                <FormItem label="OneID" field="id" required disabled>
+                  <Input placeholder="请输入 OneID" />
+                </FormItem>
 
-              <FormItem wrapperCol={{ offset: 5 }}>
-                <Button type="primary" htmlType="submit">
-                  保存修改
-                </Button>
-              </FormItem>
-            </Form>
-          </div>
-        </TabPane>
+                <FormItem wrapperCol={{ offset: 5 }}>
+                  <Button type="primary" htmlType="submit">
+                    保存修改
+                  </Button>
+                </FormItem>
+              </Form>
+            </div>
+          </TabPane>
+        )}
 
-        <TabPane key="tab2" title="修改密码">
-          <div
-            style={{
-              maxWidth: 600,
-              padding: 32,
-              background: '#fff',
-              borderRadius: 8
-            }}
-          >
-            <Form form={passwordForm} layout="horizontal" onSubmit={handleSubmitPassword}>
-              <FormItem
-                label="旧密码"
-                field="oldPassword"
-                required
-                rules={[{ required: true, message: '请输入旧密码' }]}
-              >
-                <Input.Password placeholder="请输入旧密码" />
-              </FormItem>
 
-              <FormItem
-                label="新密码"
-                field="newPassword"
-                required
-                rules={[{ required: true, message: '请输入新密码' }]}
-              >
-                <Input.Password placeholder="请输入新密码" />
-              </FormItem>
+        {hasPermission(ACTIONS.RESETPWD) && (
+          <TabPane key="tab2" title="修改密码">
+            <div
+              style={{
+                maxWidth: 600,
+                padding: 32,
+                background: '#fff',
+                borderRadius: 8
+              }}
+            >
+              <Form form={passwordForm} layout="horizontal" onSubmit={handleSubmitPassword}>
+                <FormItem
+                  label="旧密码"
+                  field="oldPassword"
+                  required
+                  rules={[{ required: true, message: '请输入旧密码' }]}
+                >
+                  <Input.Password placeholder="请输入旧密码" />
+                </FormItem>
 
-              <FormItem
-                label="确认新密码"
-                field="confirmNewPassword"
-                required
-                dependencies={['newPassword']}
-                rules={[
-                  { required: true, message: '请再次输入密码' },
-                  {
-                    validator: (value, cb) => {
-                      if (!value) return cb();
-                      const newPassword = passwordForm.getFieldValue('newPassword');
-                      if (value !== newPassword) {
-                        return cb('两次输入的密码不一致');
+                <FormItem
+                  label="新密码"
+                  field="newPassword"
+                  required
+                  rules={[{ required: true, message: '请输入新密码' }]}
+                >
+                  <Input.Password placeholder="请输入新密码" />
+                </FormItem>
+
+                <FormItem
+                  label="确认新密码"
+                  field="confirmNewPassword"
+                  required
+                  dependencies={['newPassword']}
+                  rules={[
+                    { required: true, message: '请再次输入密码' },
+                    {
+                      validator: (value, cb) => {
+                        if (!value) return cb();
+                        const newPassword = passwordForm.getFieldValue('newPassword');
+                        if (value !== newPassword) {
+                          return cb('两次输入的密码不一致');
+                        }
+                        return cb();
                       }
-                      return cb();
                     }
-                  }
-                ]}
-              >
-                <Input.Password placeholder="请再次输入新密码" />
-              </FormItem>
+                  ]}
+                >
+                  <Input.Password placeholder="请再次输入新密码" />
+                </FormItem>
 
-              <FormItem wrapperCol={{ offset: 5 }}>
-                <Button type="primary" htmlType="submit">
-                  保存修改
-                </Button>
-              </FormItem>
-            </Form>
-          </div>
-        </TabPane>
+                <FormItem wrapperCol={{ offset: 5 }}>
+                  <Button type="primary" htmlType="submit">
+                    保存修改
+                  </Button>
+                </FormItem>
+              </Form>
+            </div>
+          </TabPane>
+        )}
       </Tabs>
     </div>
   );

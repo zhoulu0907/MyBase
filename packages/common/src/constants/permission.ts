@@ -36,18 +36,20 @@ export const TENANT_USER_CREATE = 'tenant:user:create'; // 增加用户
 export const TENANT_USER_UPDATE = 'tenant:user:update'; // 修改用户
 export const TENANT_USER_DELETE = 'tenant:user:delete'; // 删除用户
 export const TENANT_USER_STATUS = 'tenant:user:enable'; // 启用/禁用用户
-export const TENANT_USER_RESET = 'tenant:user:update-password'; // 重置密码
-export const TENANT_USER_IMPORT = 'tenant:user:import'; // 数据导入 // todo
-export const TENANT_USER_EXPORT = 'tenant:user:import'; // 数据导出 // todo
+export const TENANT_USER_ADMIN = 'tenant:user:set-admin'; // 设置管理员
+export const TENANT_USER_RESETPWD = 'tenant:user:update-password'; // 重置密码
+// export const TENANT_USER_IMPORT = 'tenant:user:import'; // 数据导入 // todo
+// export const TENANT_USER_EXPORT = 'tenant:user:import'; // 数据导出 // todo
 export const TENANT_USER_PERMISSION = {
   QUERY: TENANT_USER_QUERY,
   CREATE: TENANT_USER_CREATE,
   UPDATE: TENANT_USER_UPDATE,
   DELETE: TENANT_USER_DELETE,
-  RESET: TENANT_USER_RESET,
+  ADMIN: TENANT_USER_ADMIN,
+  RESETPWD: TENANT_USER_RESETPWD,
   STATUS: TENANT_USER_STATUS,
-  IMPORT: TENANT_USER_IMPORT,
-  EXPORT: TENANT_USER_EXPORT
+  // IMPORT: TENANT_USER_IMPORT,
+  // EXPORT: TENANT_USER_EXPORT
 };
 
 /** 空间管理-应用管理 */
@@ -112,12 +114,36 @@ export const TENANT_DICT_PERMISSION = {
   STATUS: TENANT_DICT_STATUS
 };
 
+/** 空间管理-安全设置 */
+export const TENANT_SECURITY_QUERY = 'tenant:security:query';
+export const TENANT_SECURITY_UPDATE = 'tenant:security:update';
+export const TENANT_SECURITY_PERMISSION = {
+  QUERY: TENANT_DICT_QUERY,
+  UPDATE: TENANT_DICT_UPDATE,
+};
+
 /** 空间管理-空间信息 */
 export const TENANT_INFO_QUERY = 'tenant:info:query';
 export const TENANT_INFO_UPDATE = 'tenant:info:update';
 export const TENANT_INFO_PERMISSION = {
   QUERY: TENANT_INFO_QUERY,
   UPDATE: TENANT_INFO_UPDATE
+};
+
+/** 空间管理-企业管理 */
+export const TENANT_CORP_QUERY = 'tenant:corp:query';
+export const TENANT_CORP_CREATE = 'tenant:corp:create';
+export const TENANT_CORP_UPDATE = 'tenant:corp:update';
+export const TENANT_CORP_DELETE = 'tenant:corp:delete';
+export const TENANT_CORP_STATUS = 'tenant:corp:enable';
+export const TENANT_CORP_APPAUTH = 'tenant:corp:app-auth';
+export const TENANT_CORP_PERMISSION = {
+  QUERY: TENANT_CORP_QUERY,
+  CREATE: TENANT_CORP_CREATE,
+  UPDATE: TENANT_CORP_UPDATE,
+  DELETE: TENANT_CORP_DELETE,
+  STATUS: TENANT_CORP_STATUS,
+  APPAUTH: TENANT_CORP_APPAUTH
 };
 
 /**空间管理-租户个人信息 */

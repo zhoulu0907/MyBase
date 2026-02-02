@@ -1,6 +1,6 @@
 import { Button, Input, Select } from '@arco-design/web-react';
 import { IconCopy, IconPlus } from '@arco-design/web-react/icon';
-import { copyToClipboard, getRuntimeURL, TokenManager } from '@onebase/common';
+import { copyToClipboard, getRuntimeURL, hasPermission, TENANT_CORP_PERMISSION as ACTIONS, TokenManager } from '@onebase/common';
 import { statusOptions } from '../../constants';
 import styles from './index.module.less';
 
@@ -37,7 +37,7 @@ export const TopHeader: React.FC<topHeaderProps> = ({
     <div className={styles.topHeader}>
       {/*顶部左侧 新建企业*/}
       <div className={styles.createBusiness}>
-        {type !== 'authorized-application' && (
+        {type !== 'authorized-application' && hasPermission(ACTIONS.CREATE) && (
           <Button type="primary" icon={<IconPlus />} onClick={onAdd}>
             {title}
           </Button>
