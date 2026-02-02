@@ -347,7 +347,7 @@ const Right: React.FC = () => {
                       >
                         没有账号？
                         <Link
-                          style={{ color: '#009E9E' }}
+                          style={{ color: 'rgb(var(--primary-6))' }}
                           onClick={() => {
                             setLoginType(ThirdLoginType.VERIFYCODE);
                           }}
