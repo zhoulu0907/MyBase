@@ -141,13 +141,15 @@
 
 .canvas-card-field-row {
   display: flex;
-  gap: 32px;
+  gap: 20px;
 }
 
 .canvas-card-field {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  gap: 20px;
+  align-items: center;
+  width: 180px;
 }
 
 .canvas-card-field .arco-text {
@@ -155,7 +157,8 @@
 }
 
 .canvas-card-field .arco-text:first-child {
-  color: #999;
+  color: #86909C;
+  min-width: 60px;
 }
 
 @media (max-width: 768px) {

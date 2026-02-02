@@ -121,12 +121,14 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
   const renderStylePreview = () => {
     return (
       <div className={styles.canvasCardStylePreview}>
-        <Image
-          src={currentComponent === 'CanvasCardType1' ? CanvasCardType1Image : CanvasCardType2Image}
-          alt="样式预览"
-          style={{ width: '100%', height: 'auto' }}
-          preview={false}
-        />
+        <div className={styles.canvasCardStylePreviewImage}>
+          <Image
+            src={currentComponent === 'CanvasCardType1' ? CanvasCardType1Image : CanvasCardType2Image}
+            alt="样式预览"
+            style={{ width: '100%', height: 'auto' }}
+            preview={false}
+          />
+        </div>
         <Button
           type="outline"
           icon={<IconSwap />}
