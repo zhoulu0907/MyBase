@@ -58,7 +58,9 @@ import type {
     ITooltipConfigType,
     IVerifyConfigType,
     IWidthConfigType,
+    ITreeDataConfigType,
     TTextDefaultType,
+    IUploadButtonConfigType,
 } from './types';
 
 // ==================== 基础与通用 ====================
@@ -461,6 +463,12 @@ export const tableMetaDataConfig: ITableDataConfigType = {
   key: 'metaData',
   name: '数据',
   type: 'TableData'
+};
+
+export const treeDataConfig: ITreeDataConfigType = {
+  key: 'metaData',
+  name: '数据绑定',
+  type: 'TreeData'
 };
 
 export const keyDataConfig: ITableDataConfigType = {
@@ -921,7 +929,9 @@ export const numberFormatConfig: INumberFormatConfigType = {
 export const stepConfig: INumberConfigType = {
   key: 'step',
   name: '数字步长',
-  type: 'NumberInput'
+  type: 'NumberInput',
+  min: 0,
+  max: 1000000
 }
 
 export const textDefaultValueConfig: ITextConfigType = {
@@ -934,6 +944,12 @@ export const buttonNameConfig: ITextConfigType = {
   key: 'buttonName',
   name: '按钮名称',
   type: 'TextInput'
+}
+
+export const uploadButtonConfig: IUploadButtonConfigType = {
+  key: 'uploadButton',
+  name: '按钮名称',
+  type: 'UploadButton'
 }
 
 export const uploadButtonTypeConfig: IStatusConfigType<TUploadButtonType> = {
@@ -949,7 +965,7 @@ export const uploadButtonTypeConfig: IStatusConfigType<TUploadButtonType> = {
 
 export const showDownloadConfig: IBooleanConfigType = {
   key: 'showDownload',
-  name: '列表页支持下载',
+  name: '支持下载',
   type: 'SwitchInput'
 }
 
@@ -1349,6 +1365,9 @@ export const COMMON_CONFIG_GROUPS = {
   },
   security: {
     securityConfig
+  },
+  tree: {
+    treeDataConfig
   }
 } as const
 

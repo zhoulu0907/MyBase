@@ -3,7 +3,6 @@ import {
   baseDefault,
   dataFieldConfig,
   directionConfig,
-  alignConfig,
   layoutConfig,
   radioDataConfig,
   statusConfig,
@@ -30,7 +29,6 @@ import {
   DEFAULT_VALUE_TYPES
 } from '../../../constants';
 import type {
-  IAlignConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
@@ -63,7 +61,6 @@ export type TXInputRadioEditData = Array<
   | IRadioDataConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | ICommonConfigType
@@ -151,8 +148,6 @@ const XRadio: XInputRadioSchema = {
     verifyConfig,
     // 显示状态
     statusConfig,
-    // 对齐方式
-    // alignConfig,
     // 布局方式
     layoutConfig,
     // 字段宽度

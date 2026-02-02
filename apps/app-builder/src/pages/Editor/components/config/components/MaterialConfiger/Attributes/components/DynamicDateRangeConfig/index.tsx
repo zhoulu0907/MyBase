@@ -162,28 +162,30 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
             >
               特定星期
             </Checkbox>
-            <Select
-              style={{ margin: '8px 0' }}
-              placeholder="请选择"
-              mode="multiple"
-              getPopupContainer={getPopupContainer}
-              value={configs[dateRangeKey]['week']}
-              options={weekOptions}
-              onChange={(value) => {
-                getIndeterminate(value);
-                handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], week: value });
-              }}
-              dropdownRender={(menu) => (
-                <div>
-                  <div style={{ borderBottom: '1px solid #e5e6eb', padding: '7px', marginBottom: '4px' }}>
-                    <Checkbox checked={checkAll} indeterminate={indeterminate} onChange={handleAllChange}>
-                      全部
-                    </Checkbox>
+            {configs[dateRangeKey]['weekLimit'] && (
+              <Select
+                style={{ margin: '8px 0' }}
+                placeholder="请选择"
+                mode="multiple"
+                getPopupContainer={getPopupContainer}
+                value={configs[dateRangeKey]['week']}
+                options={weekOptions}
+                onChange={(value) => {
+                  getIndeterminate(value);
+                  handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], week: value });
+                }}
+                dropdownRender={(menu) => (
+                  <div>
+                    <div style={{ borderBottom: '1px solid #e5e6eb', padding: '7px', marginBottom: '4px' }}>
+                      <Checkbox checked={checkAll} indeterminate={indeterminate} onChange={handleAllChange}>
+                        全部
+                      </Checkbox>
+                    </div>
+                    {menu}
                   </div>
-                  {menu}
-                </div>
-              )}
-            ></Select>
+                )}
+              ></Select>
+            )}
           </div>
         )}
 
@@ -197,113 +199,120 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
             >
               最早可选日期
             </Checkbox>
-            <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
-              <Grid.Col span={8}>
-                <Select
-                  getPopupContainer={getPopupContainer}
-                  placeholder="请选择"
-                  value={configs[dateRangeKey]['earliestType']}
-                  options={extremeOptions}
-                  onChange={(value) => {
-                    handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestType: value });
-                  }}
-                ></Select>
-              </Grid.Col>
-              <Grid.Col span={16}>
-                {/* 静态值 */}
-                {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.STATIC && (
-                  <DatePicker
-                    format="YYYY-MM-DD"
-                    getPopupContainer={getPopupContainer}
-                    value={configs[dateRangeKey]['earliestStaticValue']}
-                    onChange={(value) => {
-                      // 校验最早可选日期不得晚于最晚可选日期
-                      if (value && configs[dateRangeKey].latestStaticValue) {
-                        const latestTime = new Date(configs[dateRangeKey].latestStaticValue).getTime();
-                        const earliestTime = new Date(value).getTime();
-                        if (earliestTime > latestTime) {
-                          Message.error('最早可选日期不得晚于最晚可选日期');
-                          return;
-                        }
-                      }
-                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestStaticValue: value });
-                    }}
-                  ></DatePicker>
-                )}
-
-                {/* 动态值 */}
-                {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.DYNAMIC && (
-                  <Select
-                    getPopupContainer={getPopupContainer}
-                    value={configs[dateRangeKey]['earliestDynamicValue']}
-                    options={dynamicOptions}
-                    onChange={(value) => {
-                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestDynamicValue: value });
-                    }}
-                  ></Select>
-                )}
-
-                {/* 变量 */}
-                {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.VARIABLE && (
-                  <Select
-                    getPopupContainer={getPopupContainer}
-                    value={configs[dateRangeKey]['earliestVariableValue']}
-                    options={variableOptions}
-                    onChange={(value) => {
-                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestVariableValue: value });
-                    }}
-                  />
-                )}
-              </Grid.Col>
-            </Grid.Row>
-
-            {/* 动态值  自定义 */}
-            {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.DYNAMIC &&
-              configs[dateRangeKey]['earliestDynamicValue'] === DATE_DYNAMIC_TYPE.CUSTOM && (
-                <Grid.Row gutter={8}>
+            {configs[dateRangeKey]['earliestLimit'] && (
+              <>
+                <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <Grid.Col span={8}>
                     <Select
                       getPopupContainer={getPopupContainer}
-                      value={configs[dateRangeKey]['earliestCustomType']}
-                      options={customTypeOptions}
+                      placeholder="请选择"
+                      value={configs[dateRangeKey]['earliestType']}
+                      options={extremeOptions}
                       onChange={(value) => {
-                        handlePropsChange(dateRangeKey, {
-                          ...configs[dateRangeKey],
-                          earliestCustomType: value,
-                          earliestCustomValue:
-                            value === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
-                              ? 1
-                              : configs[dateRangeKey]['earliestCustomValue']
-                        });
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestType: value });
                       }}
-                    />
+                    ></Select>
                   </Grid.Col>
-                  <Grid.Col span={8}>
-                    <Select
-                      getPopupContainer={getPopupContainer}
-                      value={configs[dateRangeKey]['earliestCustomValue']}
-                      options={
-                        configs[dateRangeKey]['earliestCustomType'] === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
-                          ? [{ label: 1, value: 1 }]
-                          : customValueOptions
-                      }
-                      onChange={(value) => {
-                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomValue: value });
-                      }}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={8}>
-                    <Select
-                      getPopupContainer={getPopupContainer}
-                      value={configs[dateRangeKey]['earliestCustomValueType']}
-                      options={customValueTypeOptions}
-                      onChange={(value) => {
-                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomValueType: value });
-                      }}
-                    />
+                  <Grid.Col span={16}>
+                    {/* 静态值 */}
+                    {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.STATIC && (
+                      <DatePicker
+                        format="YYYY-MM-DD"
+                        getPopupContainer={getPopupContainer}
+                        value={configs[dateRangeKey]['earliestStaticValue']}
+                        onChange={(value) => {
+                          // 校验最早可选日期不得晚于最晚可选日期
+                          if (value && configs[dateRangeKey].latestStaticValue) {
+                            const latestTime = new Date(configs[dateRangeKey].latestStaticValue).getTime();
+                            const earliestTime = new Date(value).getTime();
+                            if (earliestTime > latestTime) {
+                              Message.error('最早可选日期不得晚于最晚可选日期');
+                              return;
+                            }
+                          }
+                          handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestStaticValue: value });
+                        }}
+                      ></DatePicker>
+                    )}
+
+                    {/* 动态值 */}
+                    {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.DYNAMIC && (
+                      <Select
+                        getPopupContainer={getPopupContainer}
+                        value={configs[dateRangeKey]['earliestDynamicValue']}
+                        options={dynamicOptions}
+                        onChange={(value) => {
+                          handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestDynamicValue: value });
+                        }}
+                      ></Select>
+                    )}
+
+                    {/* 变量 */}
+                    {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.VARIABLE && (
+                      <Select
+                        getPopupContainer={getPopupContainer}
+                        value={configs[dateRangeKey]['earliestVariableValue']}
+                        options={variableOptions}
+                        onChange={(value) => {
+                          handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestVariableValue: value });
+                        }}
+                      />
+                    )}
                   </Grid.Col>
                 </Grid.Row>
-              )}
+
+                {/* 动态值  自定义 */}
+                {configs[dateRangeKey]['earliestType'] === DATE_EXTREME_TYPE.DYNAMIC &&
+                  configs[dateRangeKey]['earliestDynamicValue'] === DATE_DYNAMIC_TYPE.CUSTOM && (
+                    <Grid.Row gutter={8}>
+                      <Grid.Col span={8}>
+                        <Select
+                          getPopupContainer={getPopupContainer}
+                          value={configs[dateRangeKey]['earliestCustomType']}
+                          options={customTypeOptions}
+                          onChange={(value) => {
+                            handlePropsChange(dateRangeKey, {
+                              ...configs[dateRangeKey],
+                              earliestCustomType: value,
+                              earliestCustomValue:
+                                value === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
+                                  ? 1
+                                  : configs[dateRangeKey]['earliestCustomValue']
+                            });
+                          }}
+                        />
+                      </Grid.Col>
+                      <Grid.Col span={8}>
+                        <Select
+                          getPopupContainer={getPopupContainer}
+                          value={configs[dateRangeKey]['earliestCustomValue']}
+                          options={
+                            configs[dateRangeKey]['earliestCustomType'] === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
+                              ? [{ label: 1, value: 1 }]
+                              : customValueOptions
+                          }
+                          onChange={(value) => {
+                            handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], earliestCustomValue: value });
+                          }}
+                        />
+                      </Grid.Col>
+                      <Grid.Col span={8}>
+                        <Select
+                          getPopupContainer={getPopupContainer}
+                          value={configs[dateRangeKey]['earliestCustomValueType']}
+                          options={customValueTypeOptions}
+                          onChange={(value) => {
+                            handlePropsChange(dateRangeKey, {
+                              ...configs[dateRangeKey],
+                              earliestCustomValueType: value
+                            });
+                          }}
+                        />
+                      </Grid.Col>
+                    </Grid.Row>
+                  )}
+              </>
+            )}
           </div>
         )}
 
@@ -317,111 +326,118 @@ const DynamicDateRangeConfig: React.FC<DynamicDateRangeConfigProps> = ({ handleP
             >
               最晚可选日期
             </Checkbox>
-            <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
-              <Grid.Col span={8}>
-                <Select
-                  getPopupContainer={getPopupContainer}
-                  placeholder="请选择"
-                  value={configs[dateRangeKey]['latestType']}
-                  options={extremeOptions}
-                  onChange={(value) => {
-                    handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestType: value });
-                  }}
-                ></Select>
-              </Grid.Col>
-              <Grid.Col span={16}>
-                {/* 静态值 */}
-                {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.STATIC && (
-                  <DatePicker
-                    format="YYYY-MM-DD"
-                    getPopupContainer={getPopupContainer}
-                    value={configs[dateRangeKey]['latestStaticValue']}
-                    onChange={(value) => {
-                      // 校验最早可选日期不得晚于最晚可选日期 earliestLimit earliestLimit
-                      if (value && configs[dateRangeKey].earliestStaticValue) {
-                        const earliestTime = new Date(configs[dateRangeKey].earliestStaticValue).getTime();
-                        const latestTime = new Date(value).getTime();
-                        if (earliestTime > latestTime) {
-                          Message.error('最早可选日期不得晚于最晚可选日期');
-                          return;
-                        }
-                      }
-                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestStaticValue: value });
-                    }}
-                  ></DatePicker>
-                )}
 
-                {/* 动态值 */}
-                {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.DYNAMIC && (
-                  <Select
-                    getPopupContainer={getPopupContainer}
-                    value={configs[dateRangeKey]['latestDynamicValue']}
-                    options={dynamicOptions}
-                    onChange={(value) => {
-                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestDynamicValue: value });
-                    }}
-                  ></Select>
-                )}
-
-                {/* 变量 */}
-                {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.VARIABLE && (
-                  <Select
-                    getPopupContainer={getPopupContainer}
-                    value={configs[dateRangeKey]['latestVariableValue']}
-                    options={variableOptions}
-                    onChange={(value) => {
-                      handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestVariableValue: value });
-                    }}
-                  />
-                )}
-              </Grid.Col>
-            </Grid.Row>
-
-            {/* 动态值  自定义 */}
-            {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.DYNAMIC &&
-              configs[dateRangeKey]['latestDynamicValue'] === DATE_DYNAMIC_TYPE.CUSTOM && (
-                <Grid.Row gutter={8}>
+            {configs[dateRangeKey]['latestLimit'] && (
+              <>
+                <Grid.Row gutter={8} style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <Grid.Col span={8}>
                     <Select
                       getPopupContainer={getPopupContainer}
-                      value={configs[dateRangeKey]['latestCustomType']}
-                      options={customTypeOptions}
+                      placeholder="请选择"
+                      value={configs[dateRangeKey]['latestType']}
+                      options={extremeOptions}
                       onChange={(value) => {
-                        handlePropsChange(dateRangeKey, {
-                          ...configs[dateRangeKey],
-                          latestCustomType: value,
-                          latestCustomValue:
-                            value === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT ? 1 : configs[dateRangeKey]['latestCustomValue']
-                        });
+                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestType: value });
                       }}
-                    />
+                    ></Select>
                   </Grid.Col>
-                  <Grid.Col span={8}>
-                    <Select
-                      getPopupContainer={getPopupContainer}
-                      value={configs[dateRangeKey]['latestCustomValue']}
-                      options={
-                        configs[dateRangeKey]['latestCustomType'] === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
-                          ? [{ label: 1, value: 1 }]
-                          : customValueOptions
-                      }
-                      onChange={(value) => {
-                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomValue: value });
-                      }}
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={8}>
-                    <Select
-                      getPopupContainer={getPopupContainer}
-                      value={configs[dateRangeKey]['latestCustomValueType']}
-                      options={customValueTypeOptions}
-                      onChange={(value) => {
-                        handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomValueType: value });
-                      }}
-                    />
+                  <Grid.Col span={16}>
+                    {/* 静态值 */}
+                    {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.STATIC && (
+                      <DatePicker
+                        format="YYYY-MM-DD"
+                        getPopupContainer={getPopupContainer}
+                        value={configs[dateRangeKey]['latestStaticValue']}
+                        onChange={(value) => {
+                          // 校验最早可选日期不得晚于最晚可选日期 earliestLimit earliestLimit
+                          if (value && configs[dateRangeKey].earliestStaticValue) {
+                            const earliestTime = new Date(configs[dateRangeKey].earliestStaticValue).getTime();
+                            const latestTime = new Date(value).getTime();
+                            if (earliestTime > latestTime) {
+                              Message.error('最早可选日期不得晚于最晚可选日期');
+                              return;
+                            }
+                          }
+                          handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestStaticValue: value });
+                        }}
+                      ></DatePicker>
+                    )}
+
+                    {/* 动态值 */}
+                    {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.DYNAMIC && (
+                      <Select
+                        getPopupContainer={getPopupContainer}
+                        value={configs[dateRangeKey]['latestDynamicValue']}
+                        options={dynamicOptions}
+                        onChange={(value) => {
+                          handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestDynamicValue: value });
+                        }}
+                      ></Select>
+                    )}
+
+                    {/* 变量 */}
+                    {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.VARIABLE && (
+                      <Select
+                        getPopupContainer={getPopupContainer}
+                        value={configs[dateRangeKey]['latestVariableValue']}
+                        options={variableOptions}
+                        onChange={(value) => {
+                          handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestVariableValue: value });
+                        }}
+                      />
+                    )}
                   </Grid.Col>
                 </Grid.Row>
-              )}
+
+                {/* 动态值  自定义 */}
+                {configs[dateRangeKey]['latestType'] === DATE_EXTREME_TYPE.DYNAMIC &&
+                  configs[dateRangeKey]['latestDynamicValue'] === DATE_DYNAMIC_TYPE.CUSTOM && (
+                    <Grid.Row gutter={8}>
+                      <Grid.Col span={8}>
+                        <Select
+                          getPopupContainer={getPopupContainer}
+                          value={configs[dateRangeKey]['latestCustomType']}
+                          options={customTypeOptions}
+                          onChange={(value) => {
+                            handlePropsChange(dateRangeKey, {
+                              ...configs[dateRangeKey],
+                              latestCustomType: value,
+                              latestCustomValue:
+                                value === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
+                                  ? 1
+                                  : configs[dateRangeKey]['latestCustomValue']
+                            });
+                          }}
+                        />
+                      </Grid.Col>
+                      <Grid.Col span={8}>
+                        <Select
+                          getPopupContainer={getPopupContainer}
+                          value={configs[dateRangeKey]['latestCustomValue']}
+                          options={
+                            configs[dateRangeKey]['latestCustomType'] === DATE_DYNAMIC_CUSTOM_TYPE.CURRENT
+                              ? [{ label: 1, value: 1 }]
+                              : customValueOptions
+                          }
+                          onChange={(value) => {
+                            handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomValue: value });
+                          }}
+                        />
+                      </Grid.Col>
+                      <Grid.Col span={8}>
+                        <Select
+                          getPopupContainer={getPopupContainer}
+                          value={configs[dateRangeKey]['latestCustomValueType']}
+                          options={customValueTypeOptions}
+                          onChange={(value) => {
+                            handlePropsChange(dateRangeKey, { ...configs[dateRangeKey], latestCustomValueType: value });
+                          }}
+                        />
+                      </Grid.Col>
+                    </Grid.Row>
+                  )}
+              </>
+            )}
           </div>
         )}
       </Form.Item>

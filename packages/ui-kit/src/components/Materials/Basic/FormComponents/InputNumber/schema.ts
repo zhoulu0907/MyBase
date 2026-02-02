@@ -126,7 +126,7 @@ export interface XInputNumberConfig extends ICommonBaseType {
   /**
    * 数字步长：默认1
    */
-  step: TNumberDefaultType;
+  step?: TNumberDefaultType;
 
   /**
   * required：是否必填，未填写时提交报错
@@ -221,7 +221,7 @@ const XInputNumber: XInputNumberSchema = {
       showPercent: false,
       useThousandsSeparator: false
     },
-    step: 1,
+    step: undefined,
     verify: {
       required: false,
       numberLimit: false,

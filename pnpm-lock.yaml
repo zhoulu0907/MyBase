@@ -14,8 +14,8 @@ importers:
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@arco-themes/react-cyansu-ob03':
-        specifier: ^0.0.3
-        version: 0.0.3(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        specifier: ^0.0.4
+        version: 0.0.4(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@onebase/app':
         specifier: workspace:*
         version: link:../../packages/app
@@ -138,8 +138,8 @@ importers:
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@arco-themes/react-cyansu-ob03':
-        specifier: ^0.0.3
-        version: 0.0.3(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        specifier: ^0.0.4
+        version: 0.0.4(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.28.5)
@@ -293,6 +293,9 @@ importers:
       codemirror:
         specifier: ^6.0.2
         version: 6.0.2
+      copy-to-clipboard:
+        specifier: ^3.3.3
+        version: 3.3.3
       cron-validator:
         specifier: ^1.4.0
         version: 1.4.0
@@ -795,8 +798,8 @@ importers:
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@arco-themes/react-cyansu-ob03':
-        specifier: ^0.0.3
-        version: 0.0.3(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        specifier: ^0.0.4
+        version: 0.0.4(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.28.5)
@@ -1489,6 +1492,11 @@ packages:
     resolution: {integrity: sha512-QO6BZhv0ifyuvk3Qzz7S51UN2+Z0uxivnmHR3k4e+wugwMrTCqc1lQlCv9CLEvRe+AHrT49i+/+NtYJ8yI7l2A==}
     peerDependencies:
       '@arco-design/web-react': ^2.66.3
+
+  '@arco-themes/react-cyansu-ob03@0.0.4':
+    resolution: {integrity: sha512-L0HMLoE8Rz7knspLH/cz8WSYpLL/OKe+WNsEvYC0cRZpf1WGttiHYIE2jMAWkngeo6p5yT9bsMoxtCN1EgYa9A==}
+    peerDependencies:
+      '@arco-design/web-react': ^2.66.10
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -9610,6 +9618,10 @@ snapshots:
     dependencies:
       '@arco-design/web-react': 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
+  '@arco-themes/react-cyansu-ob03@0.0.4(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
+    dependencies:
+      '@arco-design/web-react': 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+
   '@babel/code-frame@7.27.1':
     dependencies:
       '@babel/helper-validator-identifier': 7.27.1
@@ -11477,7 +11489,7 @@ snapshots:
       '@babel/preset-env': 7.20.2(@babel/core@7.28.0)
       '@babel/preset-react': 7.13.13(@babel/core@7.28.0)
       '@rushstack/eslint-config': 3.1.1(eslint@8.57.1)(typescript@5.8.3)
-      '@typescript-eslint/eslint-plugin': 6.21.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
+      '@typescript-eslint/eslint-plugin': 6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)
       '@typescript-eslint/parser': 6.21.0(eslint@8.57.1)(typescript@5.8.3)
       eslint: 8.57.1
       eslint-config-prettier: 8.10.2(eslint@8.57.1)
@@ -13485,7 +13497,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)':
+  '@typescript-eslint/eslint-plugin@6.21.0(@typescript-eslint/parser@6.21.0(eslint@8.57.1)(typescript@5.8.3))(eslint@8.57.1)(typescript@5.8.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.1
       '@typescript-eslint/parser': 6.21.0(eslint@8.57.1)(typescript@5.8.3)
@@ -15331,7 +15343,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -15358,7 +15370,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3

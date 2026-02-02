@@ -1,4 +1,4 @@
-import { Tree } from '@arco-design/web-react';
+import { Tree, Input } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import {
   dataMethodPageV2,
@@ -26,145 +26,75 @@ const XTree = memo(
       metaData,
       treeFields,
       defaultExpandLevel,
-      showLine
-    } = props;
+      enableMinHeight,
+      enableMaxHeight,
+      minHeight,
+      maxHeight
+    } = props || {};
 
     const [treeData, setTreeData] = useState<any[]>([]);
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+    const [searchValue, setSearchValue] = useState<string>('');
+    const [filteredTreeData, setFilteredTreeData] = useState<any[]>([]);
 
     const getDefaultPreviewData = () => {
-      return [
-        {
-          key: '1',
-          title: '根节点',
-          children: [
-            {
-              key: '1-1',
-              title: '子节点',
-              children: [
-                {
-                  key: '1-1-1',
-                  title: '叶子节点 1-1-1'
-                },
-                {
-                  key: '1-1-2',
-                  title: '叶子节点 1-1-2'
-                }
-              ]
-            },
-            {
-              key: '1-2',
-              title: '子节点 1-2'
-            }
-          ]
-        },
-        {
-          key: '2',
-          title: '根节点 2',
-          children: [
-            {
-              key: '2-1',
-              title: '子节点 2-1'
-            }
-          ]
-        }
-      ];
+      return [];
+    };
+
+    // 根据配置的字段生成预览数据
+    const generatePreviewDataFromFields = (fields: any[]): any[] => {
+      if (!fields || fields.length === 0) {
+        return getDefaultPreviewData();
+      }
+
+      // 按层级排序字段
+      const sortedFields = [...fields].sort((a, b) => a.level - b.level);
+
+      // 生成预览数据
+      const generateLevelData = (level: number, parentKey: string = ''): any[] => {
+        if (level > sortedFields.length) return [];
+
+        const fieldConfig = sortedFields[level - 1];
+        const levelCount = 1; // 只生成一个节点
+
+        return Array.from({ length: levelCount }, (_, index) => {
+          const key = parentKey ? `${parentKey}-${index + 1}` : `${index + 1}`;
+          // 只显示字段的displayName或fieldName，不添加额外的节点字样
+          const title = fieldConfig.displayName || fieldConfig.fieldName;
+
+          const children = generateLevelData(level + 1, key);
+
+          return {
+            key,
+            title,
+            level: level,
+            fieldName: fieldConfig.fieldName,
+            fieldValue: title,
+            ...(children.length > 0 && { children })
+          };
+        });
+      };
+
+      return generateLevelData(1);
     };
 
     useEffect(() => {
-      if (isRuntimeEnv()) {
-        if (metaData && treeFields && treeFields.length > 0) {
-          loadTreeData();
-        } else {
-          setTreeData(getDefaultPreviewData());
-        }
+      // 编辑/预览环境：根据treeFields配置生成预览数据
+      if (treeFields && treeFields.length > 0) {
+        // 根据配置的字段生成结构化的预览数据
+        const previewData = generatePreviewDataFromFields(treeFields);
+        setTreeData(previewData);
+        // 设置默认展开层级
+        const expandedKeys = getDefaultExpandedKeys(previewData, defaultExpandLevel || 2);
+        setExpandedKeys(expandedKeys);
       } else {
         setTreeData(getDefaultPreviewData());
+        // 设置默认展开层级
+        const expandedKeys = getDefaultExpandedKeys(getDefaultPreviewData(), defaultExpandLevel || 2);
+        setExpandedKeys(expandedKeys);
       }
-    }, [metaData, treeFields]);
-
-    const loadTreeData = async () => {
-      try {
-        const params: PageMethodV2Params = {
-          entityUuid: metaData,
-          pageNo: 1,
-          pageSize: 1000,
-          filterCondition: {}
-        };
-
-        const res = await dataMethodPageV2(params);
-
-        if (res?.data?.list) {
-          const treeStructure = buildTreeStructure(res.data.list, treeFields);
-          setTreeData(treeStructure);
-
-          const defaultExpanded = getDefaultExpandedKeys(treeStructure, defaultExpandLevel || 2);
-          setExpandedKeys(defaultExpanded);
-        }
-      } catch (error) {
-        console.error('加载树数据失败:', error);
-      }
-    };
-
-    const buildTreeStructure = (data: any[], fields: any[]): any[] => {
-      if (!data || data.length === 0) return [];
-
-      const levelFieldMap = new Map();
-      fields.forEach(field => {
-        levelFieldMap.set(field.level, field.fieldName);
-      });
-
-      const maxLevel = fields.length;
-      const rootNodes: any[] = [];
-      const nodeMap = new Map<string, any>();
-
-      data.forEach(item => {
-        for (let level = 1; level <= maxLevel; level++) {
-          const fieldName = levelFieldMap.get(level);
-          if (!fieldName) continue;
-
-          const fieldValue = item[fieldName];
-          const nodeKey = `${level}-${fieldValue}`;
-
-          if (level === 1) {
-            if (!nodeMap.has(nodeKey)) {
-              const rootNode = {
-                key: nodeKey,
-                title: fieldValue,
-                level: level
-              };
-              nodeMap.set(nodeKey, rootNode);
-              rootNodes.push(rootNode);
-            }
-          } else {
-            const parentField = levelFieldMap.get(level - 1);
-            const parentValue = item[parentField];
-            const parentKey = `${level - 1}-${parentValue}`;
-            const parentNode = nodeMap.get(parentKey);
-
-            if (parentNode) {
-              if (!nodeMap.has(nodeKey)) {
-                const childNode = {
-                  key: nodeKey,
-                  title: fieldValue,
-                  level: level,
-                  data: item
-                };
-                nodeMap.set(nodeKey, childNode);
-
-                if (!parentNode.children) {
-                  parentNode.children = [];
-                }
-                parentNode.children.push(childNode);
-              }
-            }
-          }
-        }
-      });
-
-      return rootNodes;
-    };
+    }, [metaData, treeFields, defaultExpandLevel]);
 
     const getDefaultExpandedKeys = (nodes: any[], level: number): string[] => {
       const keys: string[] = [];
@@ -193,19 +123,75 @@ const XTree = memo(
       setExpandedKeys(expandedKeys);
     };
 
+    // 搜索过滤逻辑
+    useEffect(() => {
+      if (!treeData || treeData.length === 0) {
+        setFilteredTreeData([]);
+        return;
+      }
+
+      if (!searchValue || searchValue.trim() === '') {
+        setFilteredTreeData(treeData);
+        return;
+      }
+
+      const searchTerm = searchValue.toLowerCase();
+
+      // 递归过滤树节点
+      const filterNodes = (nodes: any[]): any[] => {
+        return nodes
+          .map(node => {
+            const match = node.title.toLowerCase().includes(searchTerm);
+            const children = node.children ? filterNodes(node.children) : [];
+            const hasMatch = match || children.length > 0;
+
+            if (hasMatch) {
+              return {
+                ...node,
+                children: children.length > 0 ? children : undefined
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
+      };
+
+      const filtered = filterNodes(treeData);
+      setFilteredTreeData(filtered);
+    }, [treeData, searchValue]);
+
     if (status === 'hidden') {
       return null;
     }
 
+    // 计算容器样式
+    const containerStyle: React.CSSProperties = {};
+    if (enableMinHeight !== undefined && enableMinHeight && minHeight !== null && minHeight !== undefined) {
+      containerStyle.minHeight = `${minHeight}px`;
+    }
+    if (enableMaxHeight !== undefined && enableMaxHeight && maxHeight !== null && maxHeight !== undefined) {
+      containerStyle.maxHeight = `${maxHeight}px`;
+      containerStyle.overflowY = 'auto';
+    } else {
+      containerStyle.overflowY = 'visible';
+    }
+
     return (
-      <div className="x-tree-container">
+      <div className="x-tree-container" style={containerStyle}>
+        <div style={{ marginBottom: '12px' }}>
+          <Input.Search
+            placeholder="搜索树节点..."
+            value={searchValue}
+            onChange={setSearchValue}
+            style={{ width: '100%' }}
+          />
+        </div>
         <Tree
-          treeData={treeData}
+          treeData={filteredTreeData.length > 0 ? filteredTreeData : treeData}
+          expandedKeys={expandedKeys}
           icons={{
             switcherIcon: <IconCaretDown />
           }}
-          showLine
-          autoExpandParent
           onSelect={handleSelect}
           onExpand={handleExpand}
         />

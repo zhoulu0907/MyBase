@@ -3,6 +3,7 @@ import { InteractionRule } from './view';
 
 export interface GetPageSetIdReq {
   menuId: string;
+  isDev?: boolean;
 }
 
 export interface PageSet {
@@ -24,6 +25,7 @@ export interface SavePageSetReq {
 
 export interface LoadPageSetReq {
   id: string;
+  isDev?: boolean;
 }
 
 export interface CreatePageSetReq {
@@ -43,6 +45,7 @@ export interface GetAppIdByPageSetIdReq {
 
 export interface GetPageSetMainMetaDataReq {
   pageSetId: string;
+  isDev?: boolean;
 }
 
 export interface GetPageListByAppIdReq {

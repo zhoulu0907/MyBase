@@ -1,4 +1,4 @@
-import { Button, Form, List, Card } from '@arco-design/web-react';
+import { Button, Form, List, Card, Empty } from '@arco-design/web-react';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -87,16 +87,7 @@ const XCard = memo(
     let queryData: object = {};
     let scrollLoad = false;
 
-    const [cardData, setCardData] = useState<any[]>(runtime ? [] : [
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' },
-      { key1: '1', key2: '2' }
-    ]);
+    const [cardData, setCardData] = useState<any[]>([]);
     const [cardTotal, setCardTotal] = useState<number>(0);
     const [cardPageNo, setCardPageNo] = useState<number>(1);
 
@@ -199,8 +190,8 @@ const XCard = memo(
 
       const { list, total } = res;
 
-      let newCardData= [];
-      for(let item of (list || [])){
+      let newCardData = [];
+      for (let item of (list || [])) {
         const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
@@ -404,36 +395,36 @@ const XCard = memo(
               bordered={false}
               dataSource={cardData}
               grid={{ span: getSpan(), gutter: [20, 20] }}
+              noDataElement={<div style={{ padding: '10px 0 20px' }}><Empty /></div>}
               render={(item, index) => {
-                console.log('itrm',item,coverField)
                 return (
-                <Card
-                  className="card"
-                  bordered={false}
-                  cover={
-                    coverField ? (
-                      <img
-                        style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
-                        src={item[coverField]}
-                        alt=""
-                      />
-                    ) : undefined
-                  }
-                >
-                  <Card.Meta
-                    title={titleField ? renderItem(item, titleField, index, true) : undefined}
-                    description={
-                      showFields ? (
-                        <>
-                          {columns?.map((ele, i) => (
-                            <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
-                          ))}
-                        </>
+                  <Card
+                    className="card"
+                    bordered={false}
+                    cover={
+                      coverField ? (
+                        <img
+                          style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
+                          src={item[coverField]}
+                          alt=""
+                        />
                       ) : undefined
                     }
-                  />
-                </Card>
-              )
+                  >
+                    <Card.Meta
+                      title={titleField ? renderItem(item, titleField, index, true) : undefined}
+                      description={
+                        showFields ? (
+                          <>
+                            {columns?.map((ele, i) => (
+                              <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
+                            ))}
+                          </>
+                        ) : undefined
+                      }
+                    />
+                  </Card>
+                )
               }}
               onReachBottom={(currentPage) => {
                 if (currentPage < cardTotal) {

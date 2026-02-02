@@ -266,7 +266,7 @@ const EditModal: React.FC<EditModalProps> = ({ initData, visible, onOk, onCancel
           {scheduleStrategy === ETL_SCHEDULE_STRATEGY.MANUALLY && (
             <Row>
               <Form.Item label="手动更新规则">
-                点击数据流卡片上的“<span style={{ color: '#00B42A' }}>立即更新</span>”按钮进行手动更新
+                点击数据流卡片上的“<span style={{ color: 'rgb(var(--primary-6))' }}>立即更新</span>”按钮进行手动更新
               </Form.Item>
             </Row>
           )}

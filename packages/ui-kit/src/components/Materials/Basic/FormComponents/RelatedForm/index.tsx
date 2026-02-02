@@ -8,13 +8,14 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import '../index.css';
 import { type XRelatedFormConfig } from './schema';
 
-const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     dataField,
     // relatedFormDataField,
     placeholder,
     tooltip,
+    tooltipPosition,
     status,
     layout,
     runtime = true
@@ -59,7 +60,10 @@ const XRelatedForm = memo((props: XRelatedFormConfig & { runtime?: boolean; deta
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.RELATED_FORM}_${nanoid()}`
         }
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
         style={{

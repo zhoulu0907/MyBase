@@ -2,11 +2,28 @@
   width: 100vw;
   height: 100vh;
 }
+#ai-genapp-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+#copilot-container {
+  position: absolute;
+  top: 0px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+  pointer-events: none;
+}
 
 .react-grid-item.react-grid-placeholder {
   background: lightblue !important;
 }
-.pc-color-picker-size-default {
+.pc-color-picker {
   padding: 4px;
 }
 

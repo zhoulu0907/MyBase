@@ -5,6 +5,7 @@ import {
   getSecurityConfigItems
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
+import { TENANT_SECURITY_UPDATE, hasPermission } from '@onebase/common';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -103,9 +104,11 @@ const SecurityPage: React.FC<SecurityPageProps> = ({}) => {
       <div className={styles.content}>
         <div className={styles.contentHeader}>
           <div className={styles.contentTitle}>配置项</div>
-          <Button type="primary" onClick={handleUpdate}>
-            更新配置
-          </Button>
+          {hasPermission(TENANT_SECURITY_UPDATE) && (
+            <Button type="primary" onClick={handleUpdate}>
+              更新配置
+            </Button>
+          )}
         </div>
         <div className={styles.contentBody}>
           <div className={styles.contentBodyItem}>

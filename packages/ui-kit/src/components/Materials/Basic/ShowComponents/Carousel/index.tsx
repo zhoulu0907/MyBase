@@ -6,13 +6,14 @@ import styles from './index.module.css';
 import { type XCarouselConfig } from './schema';
 import { getFileUrlById } from '@onebase/platform-center';
 
-const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
+const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     status,
     verify,
     layout,
     tooltip,
+    tooltipPosition,
     autoplay,
     interval = 3,
     fillStyle,
@@ -28,7 +29,10 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message:`${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

@@ -3,10 +3,11 @@ import { Button, Form, Select, Switch } from '@arco-design/web-react';
 import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
 import { AddMembers } from '@onebase/common';
 import { getDeptUser, getSimpleUserPage, type GetDeptUserReq } from '@onebase/platform-center';
-import { CONFIG_TYPES, getPopupContainer } from '@onebase/ui-kit';
+import { CONFIG_TYPES, DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, getPopupContainer } from '@onebase/ui-kit';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 import { registerConfigRenderer } from '../../registry';
+import { IconLaunch } from '@arco-design/web-react/icon';
 
 export interface DynamicUserDefaultConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[] | undefined) => void;
@@ -30,8 +31,13 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
   configs,
   id
 }) => {
+  const defaultValueConfigKey = item.key || 'defaultValueConfig';
+
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
-  const [formulaData, setFormulaData] = useState<string>('');
+  const [defaultValueConfig, setDefaultValueConfig] = useState({
+    type: '',
+    formulaValue: undefined
+  });
 
   const [userData, setUserData] = useState<any[]>([]);
   // 分页
@@ -59,6 +65,10 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
       getUserData('');
     }
   }, [selectedMembers]);
+
+  useEffect(() => {
+    setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+  }, [configs[defaultValueConfigKey]]);
 
   const debouncedSearch = useCallback(
     debounce((value) => {
@@ -104,14 +114,14 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
     setFetching(false);
   };
 
-  const handleFormulaConfirm = (formulaData: any, formattedFormula: string, params: any) => {
+  const handleChange = (key: string, value: boolean | string | number) => {
+    const newConfig = { ...configs[defaultValueConfigKey], [key]: value };
+    handlePropsChange(defaultValueConfigKey, newConfig);
+  };
+
+  const handleFormulaConfirm = (formulaData: any) => {
     setFormulaVisible(false);
-    // form.setFieldValue(
-    //   formulaFieldKey,
-    //   {formulaData: formulaData, formula: formattedFormula, parameters: params}
-    // );
-    setFormulaData('');
-    // setFormulaFieldKey('');
+    handleChange('formulaValue', formulaData);
   };
 
   const handleBtnSwitch = (checked: boolean) => {
@@ -193,12 +203,21 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
   return (
     <>
       <FormItem layout="vertical" labelAlign="left" label={'默认值'} style={{ marginBottom: '8px' }}>
-        <Select defaultValue={configs[item.key]} onChange={(value) => handlePropsChange(item.key, value)}>
-          <Select.Option value="custom">自定义</Select.Option>
-          <Select.Option value="formula">公式计算</Select.Option>
-        </Select>
+        <Select
+          getPopupContainer={getPopupContainer}
+          onChange={(value) => {
+            const newConfig = { ...configs[defaultValueConfigKey], type: value, formulaValue: '' };
+            handlePropsChange(defaultValueConfigKey, newConfig);
+          }}
+          value={defaultValueConfig?.type}
+          options={[
+            { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.CUSTOM], value: DEFAULT_VALUE_TYPES.CUSTOM },
+            { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.FORMULA], value: DEFAULT_VALUE_TYPES.FORMULA }
+            // { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.LINKAGE], value: DEFAULT_VALUE_TYPES.LINKAGE }
+          ]}
+        />
       </FormItem>
-      {configs[item.key] === 'custom' ? (
+      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.CUSTOM && (
         <FormItem>
           <Select
             placeholder="请选择"
@@ -223,10 +242,19 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
             ))}
           </Select>
         </FormItem>
-      ) : (
+      )}
+
+      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.FORMULA && (
         <FormItem>
           <Button long onClick={() => setFormulaVisible(true)}>
-            ƒx 编辑公式
+            {defaultValueConfig?.formulaValue ? (
+              <>
+                <span>已设置公式</span>
+                <IconLaunch />
+              </>
+            ) : (
+              <>ƒx 编辑公式</>
+            )}
           </Button>
         </FormItem>
       )}
@@ -255,7 +283,8 @@ const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
       )}
 
       <FormulaEditor
-        initialFormula={formulaData}
+        fieldName={configs?.label?.text}
+        initialFormula={defaultValueConfig?.formulaValue}
         visible={formulaVisible}
         onCancel={() => setFormulaVisible(false)}
         onConfirm={handleFormulaConfirm}

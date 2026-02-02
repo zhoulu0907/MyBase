@@ -159,7 +159,7 @@ const AppForm = (props: IProps) => {
       </Form.Item>
 
       <Form.Item field="description" label="应用描述" rules={[{ maxLength: 100, message: '应用描述超出限制' }]}>
-        <Input.TextArea placeholder="请填写应用介绍，简要说明核心功能或用途，帮助他人快速了解你的应用" />
+        <Input.TextArea placeholder="请填写应用介绍，简要说明核心功能或用途，帮助他人快速了解你的应用" autoSize={{ minRows: 5, maxRows: 5 }} />
       </Form.Item>
 
       {isEditModalVisible && (
