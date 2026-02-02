@@ -14,6 +14,7 @@ import { IconEdit, IconInfoCircle } from '@arco-design/web-react/icon';
 import { getDatasourceList, updateApplication, type Application, type UpdateApplicationReq } from '@onebase/app';
 import { hasPermission, PUBLISH_MODULE, TENANT_MENUS } from '@onebase/common';
 import { useEffect, useState } from 'react';
+import { ReactSVG } from 'react-svg';
 import EditAppModal from './components/EditAppModal';
 import styles from './index.module.less';
 
@@ -102,7 +103,7 @@ const BasicSetting = (props: IProps) => {
         <IconEdit
           onClick={() => setEditModalVisible(true)}
           style={{
-            color: '#009E9E',
+            color: 'rgb(var(--primary-6))',
             cursor: 'pointer'
           }}
         />
@@ -169,11 +170,45 @@ const BasicSetting = (props: IProps) => {
             <span className={styles.modeTitle}>模式特点</span>
             <Space>
               <span className={styles.modeSpec}>
-                <img src={checkSVG} />
+                <ReactSVG
+                  style={{ height: '24px', marginRight: '8px' }}
+                  src={checkSVG}
+                  beforeInjection={(svg) => {
+                    const fillColor = 'rgb(var(--primary-6))';
+                    const fillColor2 = 'rgb(var(--primary-1))';
+                    svg.querySelectorAll('*').forEach((el) => {
+                      if (el.getAttribute('fill') && el.getAttribute('fill') !== 'white') {
+                        el.setAttribute('fill', fillColor2);
+                      }
+                      if (el.getAttribute('stroke') === '#009E9E') {
+                        el.setAttribute('stroke', fillColor);
+                      }
+                    });
+                    svg.setAttribute('width', '24px');
+                    svg.setAttribute('height', '24px');
+                  }}
+                />
                 数据建模先行
               </span>
               <span className={styles.modeSpec}>
-                <img src={checkSVG} />
+                <ReactSVG
+                  style={{ height: '24px', marginRight: '8px' }}
+                  src={checkSVG}
+                  beforeInjection={(svg) => {
+                    const fillColor = 'rgb(var(--primary-6))';
+                    const fillColor2 = 'rgb(var(--primary-1))';
+                    svg.querySelectorAll('*').forEach((el) => {
+                      if (el.getAttribute('fill') && el.getAttribute('fill') !== 'white') {
+                        el.setAttribute('fill', fillColor2);
+                      }
+                      if (el.getAttribute('stroke') === '#009E9E') {
+                        el.setAttribute('stroke', fillColor);
+                      }
+                    });
+                    svg.setAttribute('width', '24px');
+                    svg.setAttribute('height', '24px');
+                  }}
+                />
                 元数据驱动表单生成
               </span>
             </Space>
@@ -184,7 +219,20 @@ const BasicSetting = (props: IProps) => {
             <Space>
               <Card bordered size="small" className={styles.modeConfig}>
                 <span className={styles.modeSpec}>
-                  <img src={dataSVG} />
+                  <ReactSVG
+                    style={{ height: '16px', marginRight: '8px' }}
+                    src={dataSVG}
+                    beforeInjection={(svg) => {
+                      const fillColor = 'rgb(var(--primary-6))';
+                      svg.querySelectorAll('*').forEach((el) => {
+                        if (el.getAttribute('fill') === '#009E9E') {
+                          el.setAttribute('fill', fillColor);
+                        }
+                      });
+                      svg.setAttribute('width', '16px');
+                      svg.setAttribute('height', '16px');
+                    }}
+                  />
                   数据建模
                 </span>
                 <div className={styles.modeDesc}>完善的数据资产管理</div>
@@ -192,7 +240,20 @@ const BasicSetting = (props: IProps) => {
 
               <Card bordered size="small" className={styles.modeConfig}>
                 <span className={styles.modeSpec}>
-                  <img src={pageDesignSVG} />
+                  <ReactSVG
+                    style={{ height: '16px', marginRight: '8px' }}
+                    src={pageDesignSVG}
+                    beforeInjection={(svg) => {
+                      const fillColor = 'rgb(var(--primary-6))';
+                      svg.querySelectorAll('*').forEach((el) => {
+                        if (el.getAttribute('fill') === '#009E9E') {
+                          el.setAttribute('fill', fillColor);
+                        }
+                      });
+                      svg.setAttribute('width', '16px');
+                      svg.setAttribute('height', '16px');
+                    }}
+                  />
                   页面设计
                 </span>
                 <div className={styles.modeDesc}>可视化界面创建表单</div>
@@ -224,7 +285,20 @@ const BasicSetting = (props: IProps) => {
                 <>
                   <Card bordered size="small" className={styles.modeConfig}>
                     <span className={styles.releaseModeSpec}>
-                      <img src={internalSVG} />
+                      <ReactSVG
+                        style={{ height: '16px', marginRight: '8px' }}
+                        src={internalSVG}
+                        beforeInjection={(svg) => {
+                          const fillColor = 'rgb(var(--primary-6))';
+                          svg.querySelectorAll('*').forEach((el) => {
+                            if (el.getAttribute('fill') === '#009E9E') {
+                              el.setAttribute('fill', fillColor);
+                            }
+                          });
+                          svg.setAttribute('width', '16px');
+                          svg.setAttribute('height', '16px');
+                        }}
+                      />
                       内部模式
                     </span>
                   </Card>

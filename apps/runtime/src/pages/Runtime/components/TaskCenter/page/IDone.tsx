@@ -40,7 +40,7 @@ const IDone: FC = ({ appId }: any) => {
           val = temp.label;
         }
         if (val === TaskStatusMap.SUBMITTED || val === TaskStatusMap.AGREED || val === TaskStatusMap.PASS) {
-          return <span style={{ color: '#00B42A' }}>{val}</span>;
+          return <span style={{ color: 'rgb(var(--primary-6))' }}>{val}</span>;
         } else if (
           val === TaskStatusMap.REJECTED ||
           val === TaskStatusMap.RETURNED ||

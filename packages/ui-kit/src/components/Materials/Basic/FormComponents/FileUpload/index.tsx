@@ -124,7 +124,7 @@ const XFileUpload = memo(
                 <div className="uplaodList-text-item-opera">
                   {detailMode && showDownload && (
                     <IconDownload
-                      style={{ color: '#009E9E' }}
+                      style={{ color: 'rgb(var(--primary-6))' }}
                       onClick={async (e) => {
                         e.stopPropagation();
 

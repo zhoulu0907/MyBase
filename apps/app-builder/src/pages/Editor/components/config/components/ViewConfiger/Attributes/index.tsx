@@ -3,9 +3,9 @@ import defaultTemplateDetailSVG from '@/assets/images/default_template_detail.sv
 import defaultTemplateEditSVG from '@/assets/images/default_template_edit.svg';
 import defaultTemplateThumbSVG from '@/assets/images/default_template_thumb.svg';
 import tickBlackSVG from '@/assets/images/tick_black.svg';
-import tickGreenSVG from '@/assets/images/tick_green.svg';
 import { Button, Checkbox, Form, Image, Space, Tag } from '@arco-design/web-react';
 import { usePageViewEditorSignal } from '@onebase/ui-kit';
+import { IconCheckCircleFill } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -125,16 +125,16 @@ const ViewAttributes = ({}: ViewAttributesProps) => {
             <div className={styles.header}>
               <div className={styles.viewTitle}>默认编辑视图</div>
               {isDefaultEditViewMode ? (
-                <Tag color="green">
+                <Tag color="green" style={{ backgroundColor: 'rgb(var(--primary-2))', color: 'rgb(var(--primary-6))' }}>
                   <div className={styles.viewTag}>
-                    <img src={tickGreenSVG} alt="基础设置" style={{ marginRight: '8px' }} />
+                    <IconCheckCircleFill style={{ marginRight: '8px' }} />
                     <div>默认</div>
                   </div>
                 </Tag>
               ) : (
                 <Tag color="gray">
                   <div className={styles.viewTag}>
-                    <img src={circleSVG} alt="基础设置" style={{ marginRight: '8px' }} />
+                    <IconCheckCircleFill style={{ marginRight: '8px' }} />
                     <div>非默认</div>
                   </div>
                 </Tag>
@@ -159,9 +159,9 @@ const ViewAttributes = ({}: ViewAttributesProps) => {
             <div className={styles.header}>
               <div className={styles.viewTitle}>默认详情视图</div>
               {isDefaultDetailViewMode ? (
-                <Tag color="green">
+                <Tag color="green" style={{ backgroundColor: 'rgb(var(--primary-2))', color: 'rgb(var(--primary-6))' }}>
                   <div className={styles.viewTag}>
-                    <img src={tickGreenSVG} alt="基础设置" style={{ marginRight: '8px' }} />
+                    <IconCheckCircleFill style={{ marginRight: '8px' }} />
                     <div>默认</div>
                   </div>
                 </Tag>

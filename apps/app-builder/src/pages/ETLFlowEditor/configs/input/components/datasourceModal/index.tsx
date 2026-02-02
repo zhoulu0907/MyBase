@@ -239,7 +239,7 @@ const DatasourceModal: React.FC<DatasourceModalProps> = ({ isModalVisible, onClo
                           onClick={() => handleTableSelect(table.uuid)}
                         >
                           <img src={selectedTableUUID === table.uuid ? TableIconActive : TableIcon} alt="table" />
-                          <div style={{ color: selectedTableUUID === table.uuid ? '#009e9e' : '#4e5969' }}>
+                          <div style={{ color: selectedTableUUID === table.uuid ? 'rgb(var(--primary-6))' : '#4e5969' }}>
                             {table.name}
                           </div>
                         </div>

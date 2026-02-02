@@ -58,11 +58,11 @@ const AppCard: React.FC<AppCardProps> = ({
   };
 
   const getTagColor = (item: Application) => {
-    return item.appStatus === 0 ? '#4E5969' : '#00B42A';
+    return item.appStatus === 0 ? '#4E5969' : 'rgb(var(--primary-6))';
   };
 
   const getTagBackgroundColor = (item: Application) => {
-    return item.appStatus === 0 ? '#F7F8FA' : '#E8FFEA';
+    return item.appStatus === 0 ? '#F7F8FA' : 'rgb(var(--primary-1))';
   };
 
   // 应用导出/下载弹窗
@@ -202,7 +202,7 @@ const AppCard: React.FC<AppCardProps> = ({
             <div className={styles.appDesc}>{item.description ?? '该应用暂无介绍。'}</div>
           </Tooltip>
           <div className={styles.appTags}>
-            <Tag color={getColor(item.publishModel)} className={styles.tag}>
+            <Tag className={ item.publishModel === 'inner'? styles.innerTag:styles.saasTag}>
               {getModel(item.publishModel)}
             </Tag>
             {item.tags && item.tags.length > 0 && <Divider type="vertical" style={{ margin: '0' }} />}
@@ -238,7 +238,7 @@ const AppCard: React.FC<AppCardProps> = ({
                       <img src={getFileUrlById(item.avatar)} alt="avatar" />
                     </Avatar>
                   ) : (
-                    <Avatar key={index} style={{ backgroundColor: '#009e9e' }}>
+                    <Avatar key={index} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
                       {item?.nickName?.charAt(0)}
                     </Avatar>
                   );

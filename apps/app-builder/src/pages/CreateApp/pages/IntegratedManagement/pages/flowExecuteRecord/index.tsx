@@ -217,11 +217,13 @@ const FlowExecuteRecordPage: React.FC = () => {
                     </div>
                     <div className={styles.cardItemContentValue}>
                       {item.type === 'rise' ? (
-                        <IconArrowUp style={{ color: '#24B28F' }} />
+                        <IconArrowUp style={{ color: 'rgb(var(--primary-6))' }} />
                       ) : (
                         <IconArrowDown style={{ color: '#F53F3F' }} />
                       )}
-                      <span style={{ padding: '0 4px', color: item.type === 'rise' ? '#24B28F' : '#F53F3F' }}>
+                      <span
+                        style={{ padding: '0 4px', color: item.type === 'rise' ? 'rgb(var(--primary-6))' : '#F53F3F' }}
+                      >
                         {item.value}%
                       </span>
                       <span>{item.describe}</span>
