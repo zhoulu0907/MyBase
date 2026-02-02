@@ -14,15 +14,21 @@ const SECTION_KEYS = {
 
 const ImageWorkbenchConfig = () => {
   const [activeKeys, setActiveKeys] = useState<string[]>([SECTION_KEYS.TITLE, SECTION_KEYS.CONTENT, SECTION_KEYS.JUMP]);
-  console.log('activeKeys', activeKeys);
+
   return (
     <WorkbenchAttributes
-      renderPanels={({ editData, renderEditItem }) => {
+      renderPanels={({ editData, renderEditItem, configs }) => {
         const imageItems = findItem(editData, 'image');
         const labelItems = findItem(editData, 'label');
         const fillItems = findItem(editData, 'fillStyle');
+        const jumpItems = findItem(editData, 'jumpType');
+        const jumpPageIdItems = findItem(editData, 'jumpPageId');
+        const jumpExternalUrlItems = findItem(editData, 'jumpExternalUrl');
 
-        console.log('editData', editData);
+        // 根据跳转类型判断显示哪个配置项
+        const jumpType = (configs?.jumpType as string) || 'internal';
+        const showJumpPageId = jumpType === 'internal' && jumpPageIdItems;
+        const showJumpExternalUrl = jumpType === 'external' && jumpExternalUrlItems;
 
         return (
           <Collapse
@@ -41,7 +47,9 @@ const ImageWorkbenchConfig = () => {
               {fillItems && <div>{renderEditItem(fillItems)}</div>}
             </CollapseItem>
             <CollapseItem header="跳转配置" name={SECTION_KEYS.JUMP} contentStyle={PanelContentStyle}>
-              {/* {labelItems && <div>{renderEditItem(labelItems)}</div>} */}
+              {jumpItems && <div>{renderEditItem(jumpItems)}</div>}
+              {showJumpPageId && <div>{renderEditItem(jumpPageIdItems)}</div>}
+              {showJumpExternalUrl && <div>{renderEditItem(jumpExternalUrlItems)}</div>}
             </CollapseItem>
           </Collapse>
         );

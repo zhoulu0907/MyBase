@@ -77,9 +77,9 @@ export interface XImageConfig extends ICommonBaseType {
   /**
    * 跳转
    */
-  jumpMode: string,
-  menuUuid: string,
-  link: string
+  jumpType: string,
+  jumpPageId: string,
+  jumpExternalUrl: string
 }
 
 const XImageWorkbench: XImageSchema = {
@@ -103,9 +103,9 @@ const XImageWorkbench: XImageSchema = {
       required: false,
       maxSize: 5
     },
-    jumpMode: 'internal',
-    menuUuid: '',
-    link: ''
+    jumpType: 'internal',
+    jumpPageId: '',
+    jumpExternalUrl: ''
   }
 };
 
