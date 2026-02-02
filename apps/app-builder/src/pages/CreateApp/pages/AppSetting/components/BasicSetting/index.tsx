@@ -102,7 +102,7 @@ const BasicSetting = (props: IProps) => {
         <IconEdit
           onClick={() => setEditModalVisible(true)}
           style={{
-            color: '#009E9E',
+            color: 'rgb(var(--primary-6))',
             cursor: 'pointer'
           }}
         />

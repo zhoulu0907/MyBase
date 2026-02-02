@@ -6,10 +6,9 @@ import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
-import SettingIcon from '@/assets/images/task_center/setting-on.svg';
 import { useAppStore } from '@/store';
 import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
-import { IconEyeInvisible, IconMoreVertical } from '@arco-design/web-react/icon';
+import { IconEyeInvisible, IconMoreVertical, IconSettings } from '@arco-design/web-react/icon';
 import {
   getPageSetId,
   menuSignal,
@@ -25,6 +24,11 @@ import { useSignals } from '@preact/signals-react/runtime';
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
+import ineedtodoSvg from '@/assets/images/task_center/willdo.svg';
+import ihavedoneSvg from '@/assets/images/task_center/idone.svg';
+import icreatedSvg from '@/assets/images/task_center/icreated.svg';
+import icopiedSvg from '@/assets/images/task_center/icopied.svg';
+import taskproxySvg from '@/assets/images/task_center/taskproxy.svg';
 import styles from './index.module.less';
 
 const MenuItem = Menu.Item;
@@ -97,6 +101,14 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
   const { tenantId } = useParams();
 
   const [popupVisible, setPopupVisible] = useState(false);
+
+  const taskIconList = [
+    { key: 'TASK-ineedtodo', value: ineedtodoSvg },
+    { key: 'TASK-ihavedone', value: ihavedoneSvg },
+    { key: 'TASK-icreated', value: icreatedSvg },
+    { key: 'TASK-icopied', value: icopiedSvg },
+    { key: 'TASK-taskproxy', value: taskproxySvg }
+  ];
 
   const dropList = (
     <Menu style={{ padding: '10px 5px', maxHeight: 'none' }}>
@@ -262,7 +274,24 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         <div className={styles.menuName}>
           {menuIcon.includes('TASK-') ? (
             // xxx-taskicon 是工作流程任务中心菜单的icon
-            <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px' }} />
+            // <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px',color:'rgb(var(--primary-6))' }} />
+            <ReactSVG
+              className={styles.menuIcon}
+              src={taskIconList.find((ele) => ele.key === menuIcon)?.value || 's'}
+              beforeInjection={(svg) => {
+                const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
+                svg.querySelectorAll('*').forEach((el) => {
+                  if (el.getAttribute('fill') === 'black' || el.getAttribute('fill') === '#4E5969') {
+                    el.setAttribute('fill', fillColor);
+                  }
+                  if (el.getAttribute('stroke') === 'black' || el.getAttribute('stroke') === '#4E5969') {
+                    el.setAttribute('stroke', fillColor);
+                  }
+                });
+                svg.setAttribute('width', '18px');
+                svg.setAttribute('height', '18px');
+              }}
+            />
           ) : (
             // 正常菜单 icon
             <ReactSVG
@@ -309,7 +338,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
             position="bl"
           >
             {menuType === MenuType.BPM ? (
-              <img src={SettingIcon} alt="" />
+              <IconSettings color="rgb(var(--primary-6))" style={{ stroke: 'rgb(var(--primary-6))' }} />
             ) : (
               <IconMoreVertical className={styles.moreIcon} onClick={(e) => e.stopPropagation()} />
             )}

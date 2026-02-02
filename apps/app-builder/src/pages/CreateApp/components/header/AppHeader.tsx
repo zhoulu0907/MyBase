@@ -5,7 +5,7 @@ import TabLastSelectBgSVG from '@/assets/images/tab_last_select_bg.svg';
 import TabMiddleSelectBgSVG from '@/assets/images/tab_select_bg.svg';
 import VisitIconSVG from '@/assets/images/visit.svg';
 import DynamicIcon from '@/components/DynamicIcon';
-
+import { ReactSVG } from 'react-svg';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import { logout } from '@/utils/session';
@@ -207,7 +207,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
                 return TabMiddleSelectBgSVG;
               }
             } else {
-              if (currentIndex >= activeIndex) return;
+              if (currentIndex >= activeIndex) return TabMiddleBgSVG;
               return info.key === tabsList[0] ? TabFirstBgSVG : TabMiddleBgSVG;
             }
           };
@@ -218,14 +218,22 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
               }}
             >
               {tabTitle}
-              <img
-                src={tabBg()}
+              <ReactSVG
                 style={{
                   position: 'absolute',
-                  top: '50%',
+                  top: 'calc(50% + 2px)',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
                   zIndex: -1
+                }}
+                src={tabBg()}
+                beforeInjection={(svg) => {
+                  const fillColor = 'rgb(var(--primary-6))';
+                  svg.querySelectorAll('*').forEach((el) => {
+                    if (el.getAttribute('fill') !== 'white' && el.getAttribute('fill') !== '#F7F8FA') {
+                      el.setAttribute('fill', fillColor);
+                    }
+                  });
                 }}
               />
             </span>

@@ -6,6 +6,13 @@ import NodeEditForm from './tabs/NodeEditForm';
 import DataRules from './tabs/DataRules';
 import DataMethods from './tabs/DataMethods';
 import Relations from './tabs/Relations';
+import { ReactSVG } from 'react-svg';
+import TabFirstSelectBgSVG from '@/assets/data_factory/tab_first.svg';
+import TabFirstBgSVG from '@/assets/data_factory/white_tab_first.svg';
+import TabLastSelectBgSVG from '@/assets/data_factory/tab_last.svg';
+import TabLastBgSVG from '@/assets/data_factory/white_tab_last.svg';
+import TabMiddleSelectBgSVG from '@/assets/data_factory/tab_middle.svg';
+import TabMiddleBgSVG from '@/assets/data_factory/white_tab_middle.svg';
 import styles from './index.module.less';
 
 const EditEntityDrawer: React.FC<{
@@ -93,7 +100,60 @@ const EditEntityDrawer: React.FC<{
       {/* 左侧Tab导航 */}
       {!isCollapsed && visible && !onlyShowEntity && (
         <div className={styles['tab-sidebar']}>
-          <Tabs activeTab={activeTab} onChange={changeTab} direction="vertical" className={styles['vertical-tabs']}>
+          <Tabs
+            activeTab={activeTab}
+            onChange={changeTab}
+            direction="vertical"
+            className={styles['vertical-tabs']}
+            renderTabTitle={(tabTitle, info) => {
+              const tabBg = () => {
+                if (info.isActive) {
+                  if (info.key === 'entity') {
+                    return TabFirstSelectBgSVG;
+                  } else if (info.key === 'method') {
+                    return TabLastSelectBgSVG;
+                  } else {
+                    return TabMiddleSelectBgSVG;
+                  }
+                } else {
+                  if (info.key === 'entity') {
+                    return TabFirstBgSVG;
+                  } else if (info.key === 'method') {
+                    return TabLastBgSVG;
+                  } else {
+                    return TabMiddleBgSVG;
+                  }
+                }
+              };
+              return (
+                <span
+                  style={{
+                    position: 'relative'
+                  }}
+                >
+                  {tabTitle}
+                  <ReactSVG
+                    style={{
+                      position: 'absolute',
+                      top: 'calc(50% + 2px)',
+                      left: '50%',
+                      transform: 'translate(-50%, -50%)',
+                      zIndex: -1
+                    }}
+                    src={tabBg()}
+                    beforeInjection={(svg) => {
+                      const fillColor = 'rgb(var(--primary-6))';
+                      svg.querySelectorAll('*').forEach((el) => {
+                        if (el.getAttribute('fill') !== 'white' && el.getAttribute('fill') !== '#F7F8FA') {
+                          el.setAttribute('fill', fillColor);
+                        }
+                      });
+                    }}
+                  />
+                </span>
+              );
+            }}
+          >
             <Tabs.TabPane key="entity" title="数据资产" />
             <Tabs.TabPane key="relation" title="关联关系" />
             <Tabs.TabPane key="rule" title="数据规则" />

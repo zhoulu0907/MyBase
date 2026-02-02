@@ -775,7 +775,7 @@ const PluginPage = () => {
                         return (
                           <div className={styles.card} key={`system-${index}`}>
                             <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: '16px' }}>
-                              <div className={styles.icon} style={{ backgroundColor: '#009E9E', flexShrink: 0 }}>
+                              <div className={styles.icon} style={{ backgroundColor: 'rgb(var(--primary-6))', flexShrink: 0 }}>
                                 <img
                                   src={externalUserSVG}
                                   style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }}

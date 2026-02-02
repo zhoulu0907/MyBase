@@ -202,7 +202,7 @@ const AppCard: React.FC<AppCardProps> = ({
             <div className={styles.appDesc}>{item.description ?? '该应用暂无介绍。'}</div>
           </Tooltip>
           <div className={styles.appTags}>
-            <Tag color={getColor(item.publishModel)} className={styles.tag}>
+            <Tag className={ item.publishModel === 'inner'? styles.innerTag:styles.saasTag}>
               {getModel(item.publishModel)}
             </Tag>
             {item.tags && item.tags.length > 0 && <Divider type="vertical" style={{ margin: '0' }} />}

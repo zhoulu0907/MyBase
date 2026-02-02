@@ -157,15 +157,6 @@ const EnterpriseAppPage: React.FC = () => {
     return '';
   };
 
-  const getColor = (model?: string) => {
-    if (model === 'inner') {
-      return 'cyan';
-    } else if (model === 'saas') {
-      return 'red';
-    }
-    return '';
-  };
-
   const handleClickButton = () => {
     navigate(`/onebase/${tenantId}/setting/application`);
   };
@@ -311,7 +302,7 @@ const EnterpriseAppPage: React.FC = () => {
                             <Tooltip content={item.appName}>
                               <div className={styles.myAppTitle}>{item.appName}</div>
                             </Tooltip>
-                            <Tag color={getColor(item.publishModel)} className={styles.tag}>
+                            <Tag className={ item.publishModel === 'inner'? styles.innerTag:styles.saasTag}>
                               {getModel(item.publishModel)}
                             </Tag>
                           </div>
