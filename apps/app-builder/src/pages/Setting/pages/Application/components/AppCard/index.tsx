@@ -58,11 +58,11 @@ const AppCard: React.FC<AppCardProps> = ({
   };
 
   const getTagColor = (item: Application) => {
-    return item.appStatus === 0 ? '#4E5969' : '#00B42A';
+    return item.appStatus === 0 ? '#4E5969' : 'rgb(var(--primary-6))';
   };
 
   const getTagBackgroundColor = (item: Application) => {
-    return item.appStatus === 0 ? '#F7F8FA' : '#E8FFEA';
+    return item.appStatus === 0 ? '#F7F8FA' : 'rgb(var(--primary-1))';
   };
 
   // 应用导出/下载弹窗
