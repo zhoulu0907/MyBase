@@ -57,7 +57,6 @@ export function getAllDownstreamNodeIds(
 }
 
 export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nodeData: any) => {
-
   console.log(curNodeId);
   console.log('graphData: ', graphData);
   console.log('nodeData: ', nodeData);
@@ -70,56 +69,66 @@ export const clearDownStreamNodeConfig = (curNodeId: string, graphData: any, nod
 };
 
 export const clearNodeConfig = (nodeId: string, nodeData: any) => {
-    const { setNodeData } = etlEditorSignal;
+  const { setNodeData } = etlEditorSignal;
 
-    const curNodeData = nodeData[nodeId];
+  const curNodeData = nodeData[nodeId];
 
-    switch (curNodeData.type) {
-      case ETLNodeType.INPUT_NODE:
-        break;
-      case ETLNodeType.OUTPUT_NODE:
-        curNodeData.config = {
-          ...curNodeData.config,
-          fields: []
-        };
-        curNodeData.output = {
-          verified: false
-        };
-        break;
-      case ETLNodeType.JOIN_NODE:
-        curNodeData.config = {
-          ...curNodeData.config,
-          leftNodeId: undefined,
-          rightNodeId: undefined,
-          joinType: '',
-          fieldPairs: [],
-          mappings: []
-        };
-        curNodeData.output = {
-          verified: false,
-          fields: []
-        };
-        break;
-      case ETLNodeType.UNION_NODE:
-        curNodeData.config = {
-          ...curNodeData.config,
-          data: [],
-          colTitles: []
-        };
-        curNodeData.output = {
-          verified: false,
-          fields: []
-        };
-        break;
-      case ETLNodeType.SQL_NODE:
-        break;
-      default:
-        break;
-    }
+  switch (curNodeData.type) {
+    case ETLNodeType.INPUT_NODE:
+      break;
+    case ETLNodeType.OUTPUT_NODE:
+      curNodeData.config = {
+        ...curNodeData.config,
+        fields: []
+      };
+      curNodeData.output = {
+        verified: false
+      };
+      break;
+    case ETLNodeType.JOIN_NODE:
+      curNodeData.config = {
+        ...curNodeData.config,
+        leftNodeId: undefined,
+        rightNodeId: undefined,
+        joinType: '',
+        fieldPairs: [],
+        mappings: []
+      };
+      curNodeData.output = {
+        verified: false,
+        fields: []
+      };
+      break;
+    case ETLNodeType.UNION_NODE:
+      curNodeData.config = {
+        ...curNodeData.config,
+        data: [],
+        colTitles: []
+      };
+      curNodeData.output = {
+        verified: false,
+        fields: []
+      };
+      break;
+    case ETLNodeType.SQL_NODE:
+      curNodeData.config = {
+        ...curNodeData.config,
+        showSQLValue: '',
+        sqlValue: '',
+        sqlVariables: {}
+      };
+      curNodeData.output = {
+        verified: false,
+        fields: []
+      };
+      break;
+    default:
+      break;
+  }
 
-    console.log('curNodeData: ', curNodeData);
-    setNodeData(nodeId, curNodeData);
-}
+  console.log('curNodeData: ', curNodeData);
+  setNodeData(nodeId, curNodeData);
+};
 
 export const setNodeDataAndResetDownstream = (
   payload: any,
