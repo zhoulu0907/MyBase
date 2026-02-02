@@ -25,7 +25,6 @@ import type {
   TBooleanDefaultType,
   TTextDefaultType
 } from '../../../types';
-import { WORKBENCH_CONFIG_TYPES } from '../../core/constants';
 import { jumpTypeConfig, jumpPageIdConfig, jumpExternalUrlConfig } from '../../config/commonConfig';
 
 export interface XImageSchema {

@@ -24,8 +24,9 @@ import type {
   IWbRichTextContentConfigType,
   TWbColorDefaultType
 } from '../../core/types';
-import { WORKBENCH_CONFIG_TYPES, WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
+import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
 import type { TWorkbenchStatusSelectKeyType } from '../../config/workbenchShared';
+import { labelNameConfig, richTextBgColorConfig, richTextContentConfig } from '../../config/commonConfig';
 
 export interface XRichTextSchema {
   editData: TXRichTextEditData;
@@ -82,21 +83,9 @@ export interface XRichTextConfig extends ICommonBaseWorkbenchType {
 const XRichText: XRichTextSchema = {
   editData: [
     ...workbenchBaseConfig,
-    {
-      key: 'label',
-      name: '标题名称',
-      type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'Wb_Color',
-      name: '背景颜色',
-      type: WORKBENCH_CONFIG_TYPES.WB_COLOR
-    },
-    {
-      key: 'Wb_RichTextContent',
-      name: '富文本内容',
-      type: WORKBENCH_CONFIG_TYPES.WB_RICH_TEXT_CONTENT
-    },
+    labelNameConfig,
+    richTextBgColorConfig,
+    richTextContentConfig,
     //  数据绑定
     ...workbenchDataFieldConfig,
     // 默认值

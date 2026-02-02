@@ -28,7 +28,16 @@ import {
   WORKBENCH_WIDTH_VALUES
 } from '../../core/constants';
 import { ALIGN_OPTIONS, ALIGN_VALUES } from '../../../constants';
-import { jumpTypeConfig, jumpPageIdConfig, jumpExternalUrlConfig } from '../../config/commonConfig';
+import {
+  buttonBackgroundColorConfig,
+  buttonLabelConfig,
+  buttonTextAlignConfig,
+  buttonTextColorConfig,
+  buttonTextSizeConfig,
+  jumpExternalUrlConfig,
+  jumpPageIdConfig,
+  jumpTypeConfig
+} from '../../config/commonConfig';
 export interface XButtonWorkbenchSchema {
   editData: TXButtonWorkbenchEditData;
   config: XButtonWorkbenchConfig;
@@ -108,34 +117,11 @@ export interface XButtonWorkbenchConfig extends ICommonBaseWorkbenchType {
 const XButtonWorkbench: XButtonWorkbenchSchema = {
   editData: [
     ...workbenchBaseConfig,
-    {
-      key: 'label',
-      name: '标题配置',
-      type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'backgroundColor',
-      name: '背景颜色',
-      type: WORKBENCH_CONFIG_TYPES.WB_COLOR
-    },
-    {
-      key: 'textColor',
-      name: '文本颜色',
-      type: WORKBENCH_CONFIG_TYPES.WB_COLOR
-    },
-    {
-      key: 'textSize',
-      name: '文本大小',
-      type: WORKBENCH_CONFIG_TYPES.WB_SLIDER,
-      min: 12,
-      max: 40,
-      step: 1
-    },
-    {
-      key: 'textAlign',
-      name: '文本对齐',
-      type: WORKBENCH_CONFIG_TYPES.WB_TEXT_ALIGN
-    },
+    buttonLabelConfig,
+    buttonBackgroundColorConfig,
+    buttonTextColorConfig,
+    buttonTextSizeConfig,
+    buttonTextAlignConfig,
     jumpTypeConfig,
     jumpPageIdConfig,
     jumpExternalUrlConfig
