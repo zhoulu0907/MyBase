@@ -1,4 +1,4 @@
-import { Form, Button, Image, Select } from '@arco-design/web-react';
+import { Form, Button, Image, Select, Switch } from '@arco-design/web-react';
 import { IconArrowLeft, IconSwap, IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { getPopupContainer } from '@onebase/ui-kit';
 import React, { useState, useEffect } from 'react';
@@ -34,6 +34,8 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
   const [isEditing, setIsEditing] = useState(false);
   const [currentComponent, setCurrentComponent] = useState((configs.componentName as string) || 'CanvasCardType1');
   const displayFields = (configs.displayFields as DisplayFieldsConfig) || {};
+  const hiddenDraft = (configs.hiddenDraft as boolean) || false;
+  const showAddBtn = (configs.showAddBtn as boolean) !== false;
 
   useEffect(() => {
     setCurrentComponent((configs.componentName as string) || 'CanvasCardType1');
@@ -429,6 +431,18 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
       </FormItem>
       <FormItem layout="vertical" labelAlign="left" label="显示字段" className={styles.formItem}>
         {currentComponent === 'CanvasCardType1' ? renderStyle1Fields() : renderStyle2Fields()}
+      </FormItem>
+      <FormItem layout="vertical" labelAlign="left" label="添加数据按钮" className={styles.formItem}>
+        <Switch
+          checked={showAddBtn}
+          onChange={(checked) => handlePropsChange('showAddBtn', checked)}
+        />
+      </FormItem>
+      <FormItem layout="vertical" labelAlign="left" label="草稿箱" className={styles.formItem}>
+        <Switch
+          checked={!hiddenDraft}
+          onChange={(checked) => handlePropsChange('hiddenDraft', !checked)}
+        />
       </FormItem>
     </div>
   );

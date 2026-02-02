@@ -56,6 +56,16 @@ export interface XCanvasCardConfig extends ICommonBaseType {
   componentName?: 'CanvasCardType1' | 'CanvasCardType2';
 
   /**
+   * 表名
+   */
+  tableName?: TTextDefaultType;
+
+  /**
+   * 元数据
+   */
+  metaData?: TTextDefaultType;
+
+  /**
    * 卡片配置
    */
   config?: {
@@ -107,11 +117,13 @@ const XCanvasCard: XCanvasCardSchema = {
     componentName: 'CanvasCardType1',
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
+    tableName: '',
+    metaData: '',
     config: {
       imageUrl: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=beautiful%20mountain%20lake%20reflection%20scenery&image_size=landscape_16_9',
       tags: ['标签标签', 'default', 'default'],
       title: '卡片标题字段',
-      content: '这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本',
+      content: '这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本',
       source: '华尔街日报',
       publishDate: '2026年1月11日 22:22',
       viewCount: '888'
