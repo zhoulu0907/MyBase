@@ -62,6 +62,12 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
      * @return
      */
     private boolean doFilter(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        // 简单匹配，防止 AntPathRequestMatcher 出现上下文路径问题
+        if (requestUri.contains("/plugins/static/")) {
+            return true;
+        }
+
         return systemRequestMatcher.matches(request)
                 || corpRequestMatcher.matches(request)
                 || corpFileRequestMatcher.matches(request)

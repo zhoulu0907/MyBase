@@ -32,19 +32,9 @@ public class FlowConnectorDO extends BaseAppEntity {
     private String description;
 
     /**
-     * 环境配置UUID
-     * <p>
-     * 关联到 flow_connector_env.env_uuid
-     * 用于引用该类型下的环境配置（URL、认证信息等）
-     */
-    @Column(value = "env_uuid")
-    private String envUuid;
-
-    /**
      * 连接器配置（JSON格式）
      * <p>
      * 存储连接器实例的补充配置参数
-     * 环境通用配置（URL、认证）已通过 env_uuid 引用
      */
     @Column(value = "config")
     private String config;
@@ -54,5 +44,17 @@ public class FlowConnectorDO extends BaseAppEntity {
      */
     @Column(value = "active_status")
     private Integer activeStatus;
+
+    /**
+     * 动作配置（JSON格式）
+     * <p>
+     * 使用 Formily Schema 存储连接器实例的动作配置
+     * 包含 actions 数组和 metadata 信息
+     *
+     * @author kanten
+     * @since 2026-01-29
+     */
+    @Column(value = "action_config")
+    private String actionConfig;
 
 }

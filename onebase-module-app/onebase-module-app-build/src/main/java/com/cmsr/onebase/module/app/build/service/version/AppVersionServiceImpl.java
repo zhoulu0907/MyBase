@@ -60,6 +60,7 @@ import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.export.MetadataExportDataDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -369,6 +370,17 @@ public class AppVersionServiceImpl implements AppVersionService {
         if (navigationJson != null) {
             configData.setNavigation(JsonUtils.parseObject(navigationJson, AppNavigationDO.class));
         }
+
+        String bpmJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_BPM));
+        if (bpmJson != null) {
+            configData.setBpmConfig(JsonUtils.parseObject(bpmJson, Object.class));
+        }
+
+        String metadataJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_METADATA));
+        if (metadataJson != null) {
+            configData.setMetaDataConfig(JsonUtils.parseObject(metadataJson, Object.class));
+        }
+
     }
 
     /**
@@ -378,12 +390,22 @@ public class AppVersionServiceImpl implements AppVersionService {
      * @return 导出记录ID
      */
     @Override
-    public Long exportApplicationVersion(Long versionId) {
-        Long applicationId = ApplicationManager.getRequiredApplicationId();
+    public Long exportApplicationVersion(Long versionId, Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
+        AppVersionDO versionDO = null;
         // 验证版本是否存在且属于当前应用
-        AppVersionDO versionDO = versionRepository.getById(versionId);
+        if (versionId.intValue() == VersionTypeEnum.BUILD.getValue()
+                || versionId.intValue() == VersionTypeEnum.RUNTIME.getValue()) {
+            versionDO = new AppVersionDO();
+            versionDO.setApplicationId(applicationId);
+            versionDO.setVersionType(versionId.intValue());
+        } else {
+            versionDO = ApplicationManager
+                    .withoutApplicationIdAndVersionTag(
+                            () -> versionRepository.getById(versionId));
+        }
+
         if (versionDO == null) {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_NOT_EXIST);
         }
@@ -481,7 +503,7 @@ public class AppVersionServiceImpl implements AppVersionService {
                                 () -> appDataManager.getApplicationVersionConfigData(applicationDO.getId(),
                                         versionTag));
 
-                appDataManager.writeConfigDataToZip(zos, configData, "config/");
+                appDataManager.writeConfigDataToZip(zos, configData, "");
 
                 zos.finish();
                 zipBytes = baos.toByteArray();
@@ -558,8 +580,8 @@ public class AppVersionServiceImpl implements AppVersionService {
      */
     @Override
     public PageResult<ExportPageRespVO> getExportPage(ExportPageReqVO pageReqVO) {
-        Long applicationId = ApplicationManager.getApplicationId();
-        PageResult<AppExportDO> pageResult = appExportRepository.selectPage(applicationId, pageReqVO.getExportStatus(),
+        PageResult<AppExportDO> pageResult = appExportRepository.selectPage(pageReqVO.getApplicationId(),
+                pageReqVO.getExportStatus(),
                 pageReqVO);
 
         if (pageResult.getList().isEmpty()) {
@@ -606,12 +628,10 @@ public class AppVersionServiceImpl implements AppVersionService {
      * 重试导出应用
      *
      * @param exportId  导出记录ID
-     * @param versionId 版本ID
      * @return 导出记录ID（返回原导出记录ID）
      */
     @Override
-    public Long retryExportApplication(Long exportId) {
-        Long applicationId = ApplicationManager.getRequiredApplicationId();
+    public Long retryExportApplication(Long exportId, Long applicationId) {
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(applicationId);
 
         // 查询导出记录并验证是否属于当前应用

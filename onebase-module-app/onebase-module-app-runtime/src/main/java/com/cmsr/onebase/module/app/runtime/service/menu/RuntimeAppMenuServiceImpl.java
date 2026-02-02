@@ -1,6 +1,22 @@
 package com.cmsr.onebase.module.app.runtime.service.menu;
 
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
 import com.cmsr.onebase.framework.common.enums.TerminalEnum;
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
@@ -15,19 +31,12 @@ import com.cmsr.onebase.module.app.core.enums.menu.MenuVisibleEnum;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
-import lombok.Setter;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.Setter;
 
 /**
  * @Author：huangjie
- * @Date：2025/7/23 13:40
+ *                  @Date：2025/7/23 13:40
  */
 @Setter
 @Service
@@ -55,7 +64,8 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
             terminalEnum = TerminalEnum.PC;
         }
         // 获取应用下所有可见的BPM类型菜单
-        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId, Set.of(MenuTypeEnum.BPM.getValue()));
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+                Set.of(MenuTypeEnum.BPM.getValue()));
         // 返回菜单
         return menuDOS.stream()
                 .filter(v -> {
@@ -72,7 +82,7 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
     }
 
     @Override
-    public List<MenuListRespVO> listApplicationMenu() {
+    public List<MenuListRespVO> listApplicationMenu(Boolean isDev) {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         Long applicationId = ApplicationManager.getRequiredApplicationId();
         LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
@@ -86,11 +96,18 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         // TODO 临时方案，后面要修改
         appAuthSecurityApi.cleanAuthCache(userId, applicationId);
         //
+
+        if (Boolean.TRUE.equals(isDev)) {
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
+
         List<Long> menuIds = appAuthSecurityApi.getVisibleMenuIds(userId, applicationId);
         if (CollectionUtils.isEmpty(menuIds)) {
             return Collections.emptyList();
         }
+
         List<AppMenuDO> menuDOS = appMenuRepository.listByIdsAndOrder(menuIds);
+
         menuDOS = menuDOS.stream().filter(
                 v -> {
                     if (terminalEnum == TerminalEnum.PC && MenuVisibleEnum.isVisible(v.getIsVisiblePc())) {
@@ -100,8 +117,7 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
                         return true;
                     }
                     return false;
-                }
-        ).toList();
+                }).toList();
         if (CollectionUtils.isEmpty(menuDOS)) {
             return Collections.emptyList();
         }
@@ -132,7 +148,6 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         return levelOneMenus;
     }
 
-
     private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<MenuListRespVO> listRespVOS) {
         LinkedList<MenuListRespVO> children = new LinkedList<>();
         for (MenuListRespVO respVO : listRespVOS) {
@@ -151,7 +166,8 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
     }
 
     private void enrichPagesetType(List<MenuListRespVO> menuListRespList) {
-        List<String> menuUuids = menuListRespList.stream().map(MenuListRespVO::getMenuUuid).collect(Collectors.toList());
+        List<String> menuUuids = menuListRespList.stream().map(MenuListRespVO::getMenuUuid)
+                .collect(Collectors.toList());
         Long applicationId = ApplicationManager.getApplicationId();
         List<AppResourcePagesetDO> pagesets = appPageSetRepository.findByMenuUuids(applicationId, menuUuids);
         if (CollectionUtils.isEmpty(menuUuids)) {
@@ -159,7 +175,8 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         }
         Map<String, Integer> pagesetTypeMap = pagesets.stream()
                 .filter(p -> p.getMenuUuid() != null && p.getPageSetType() != null)
-                .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType, (v1, v2) -> v1));
+                .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType,
+                        (v1, v2) -> v1));
         for (MenuListRespVO menuListRespVO : menuListRespList) {
             menuListRespVO.setPagesetType(pagesetTypeMap.get(menuListRespVO.getMenuUuid()));
         }
@@ -170,7 +187,8 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
         Long applicationId = ApplicationManager.getApplicationId();
         MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
-        menuPermissionVO.setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
+        menuPermissionVO
+                .setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
         menuPermissionVO.setFieldPermission(appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId));
         menuPermissionVO.setViewUuids(appAuthSecurityApi.getMenuViewUuids(userId, applicationId, menuId));
         return menuPermissionVO;

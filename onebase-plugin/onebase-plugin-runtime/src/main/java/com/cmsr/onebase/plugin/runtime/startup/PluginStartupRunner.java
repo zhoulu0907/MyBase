@@ -1,9 +1,12 @@
 package com.cmsr.onebase.plugin.runtime.startup;
 
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.plugin.core.dal.dataobject.PluginInfoDO;
 import com.cmsr.onebase.plugin.core.dal.database.PluginInfoRepository;
 import com.cmsr.onebase.plugin.runtime.loader.PluginFileManager;
 import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.tenant.TenantManager;
+
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -38,20 +41,25 @@ public class PluginStartupRunner implements ApplicationRunner {
         try {
             // 1. 查询所有状态为已启用的插件
             // 状态：0 关闭，1 开启
-            QueryWrapper queryWrapper = QueryWrapper.create()
-                    .eq(PluginInfoDO::getStatus, 1);
-            List<PluginInfoDO> enabledPlugins = pluginInfoRepository.list(queryWrapper);
 
-            if (enabledPlugins == null || enabledPlugins.isEmpty()) {
-                log.info("未发现已启用的插件，跳过加载。");
-                return;
-            }
+            TenantManager.withoutTenantCondition(() -> {
+                // 1. 查询所有状态为已启用的插件
+                // 状态：0 关闭，1 开启
+                QueryWrapper queryWrapper = QueryWrapper.create()
+                        .eq(PluginInfoDO::getStatus, 1);
+                List<PluginInfoDO> enabledPlugins = pluginInfoRepository.list(queryWrapper);
 
-            log.info("发现 {} 个已启用的插件，准备加载...", enabledPlugins.size());
+                if (enabledPlugins == null || enabledPlugins.isEmpty()) {
+                    log.info("未发现已启用的插件，跳过加载。");
+                    return;
+                }
 
-            for (PluginInfoDO plugin : enabledPlugins) {
-                loadPluginSafe(plugin);
-            }
+                log.info("发现 {} 个已启用的插件，准备加载...", enabledPlugins.size());
+
+                for (PluginInfoDO plugin : enabledPlugins) {
+                    loadPluginSafe(plugin);
+                }
+            });
 
             log.info("插件启动加载任务执行完成。");
         } catch (Exception e) {

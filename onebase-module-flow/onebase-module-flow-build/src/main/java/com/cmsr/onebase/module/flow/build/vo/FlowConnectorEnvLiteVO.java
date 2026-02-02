@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 /**
  * 连接器环境配置精简VO
  * <p>
- * 用于列表展示，不包含敏感配置信息（authConfig、extraConfig）
+ * 用于列表展示，不包含敏感配置信息（authConfig、config）
  *
  * @author zhoulu
  * @since 2026-01-23

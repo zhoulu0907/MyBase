@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
+import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +30,8 @@ import java.util.zip.ZipInputStream;
 @Slf4j
 public class PluginFileManager {
 
-    /**
-     * 后端插件存放目录
-     */
-    @Value("${onebase.plugin.backend-dir:plugins/backend}")
-    private String backendDir;
+    @Resource
+    private PluginProperties pluginProperties;
 
     /**
      * 临时目录
@@ -57,14 +55,19 @@ public class PluginFileManager {
     public void downloadAndExtractPlugin(String pluginId, String pluginVersion, Long packageFileId) {
         log.info("开始下载插件: pluginId={}, version={}, fileId={}", pluginId, pluginVersion, packageFileId);
 
-        // 1. 构建目标目录路径（直接放在backend目录下，不再创建子目录）
-        Path targetDir = Paths.get(backendDir);
+        // 1. 构建目标目录路径
+        Path backendTargetDir = Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getBackendDir());
+        Path frontendTargetDir = Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getFrontendDir(), "frontend-" + pluginId + "-" + pluginVersion);
+
         Path tempPath = Paths.get(tempDir, pluginId + "_" + pluginVersion + "_" + System.currentTimeMillis());
 
         try {
             // 2. 如果目标目录不存在，创建目录
-            if (!Files.exists(targetDir)) {
-                Files.createDirectories(targetDir);
+            if (!Files.exists(backendTargetDir)) {
+                Files.createDirectories(backendTargetDir);
+            }
+            if (!Files.exists(frontendTargetDir)) {
+                Files.createDirectories(frontendTargetDir);
             }
 
             // 3. 创建临时目录
@@ -81,9 +84,12 @@ public class PluginFileManager {
             Files.write(tempZipFile, content);
 
             // 6. 解压后端zip到目标目录
-            Path extractedZipPath = extractBackendZip(tempZipFile, targetDir);
+            Path extractedZipPath = extractBackendZip(tempZipFile, backendTargetDir);
 
-            // 7. 加载并启动插件
+            // 7. 解压前端zip到前端目标目录
+            extractFrontendZip(tempZipFile, frontendTargetDir);
+
+            // 8. 加载并启动插件
             if (extractedZipPath != null) {
                 log.info("插件下载解压成功，开始加载: path={}", extractedZipPath);
                 oneBasePluginManager.loadAndStartPlugin(extractedZipPath);
@@ -152,10 +158,18 @@ public class PluginFileManager {
      * @param pluginVersion 插件版本
      */
     public void cleanupPluginFiles(String pluginId, String pluginVersion) {
+        // 清理后端文件
         Path pluginDir = getPluginDir(pluginId, pluginVersion);
         if (Files.exists(pluginDir)) {
-            log.info("清理插件文件: {}", pluginDir);
+            log.info("清理插件后端文件: {}", pluginDir);
             FileUtil.del(pluginDir.toFile());
+        }
+
+        // 清理前端文件
+        Path frontendDir = Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getFrontendDir(), "frontend-" + pluginId + "-" + pluginVersion);
+        if (Files.exists(frontendDir)) {
+            log.info("清理插件前端文件: {}", frontendDir);
+            FileUtil.del(frontendDir.toFile());
         }
     }
 
@@ -168,25 +182,27 @@ public class PluginFileManager {
     public void cleanupPluginAllVersionFiles(String pluginId) {
         log.info("开始清理插件所有版本文件: pluginId={}", pluginId);
 
-        Path backendPath = Paths.get(backendDir);
-        if (!Files.exists(backendPath)) {
-            log.info("插件目录不存在，无需清理: {}", backendPath);
+        cleanupDirectory(Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getBackendDir()), pluginId);
+        cleanupDirectory(Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getFrontendDir()), pluginId);
+        
+        log.info("插件所有版本文件清理完成: pluginId={}", pluginId);
+    }
+
+    private void cleanupDirectory(Path rootDir, String pluginId) {
+        if (!Files.exists(rootDir)) {
             return;
         }
-
         try {
-            // 遍历backend目录，删除与pluginId相关的所有文件和目录
-            Files.list(backendPath).forEach(path -> {
+            Files.list(rootDir).forEach(path -> {
                 String fileName = path.getFileName().toString();
-                // 匹配以pluginId开头的文件或目录（如 onebase-plugin-ocr.zip, onebase-plugin-ocr/, onebase-plugin-ocr-backend.zip等）
+                // 匹配以pluginId开头的文件或目录
                 if (fileName.startsWith(pluginId) || fileName.contains(pluginId)) {
                     log.info("删除插件文件/目录: {}", path);
                     FileUtil.del(path.toFile());
                 }
             });
-            log.info("插件所有版本文件清理完成: pluginId={}", pluginId);
         } catch (IOException e) {
-            log.error("清理插件文件失败: pluginId={}", pluginId, e);
+            log.error("清理插件文件失败: root={}, pluginId={}", rootDir, pluginId, e);
         }
     }
 
@@ -198,7 +214,7 @@ public class PluginFileManager {
      * @return 插件目录路径
      */
     public Path getPluginDir(String pluginId, String pluginVersion) {
-        return Paths.get(backendDir, pluginId, pluginVersion);
+        return Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getBackendDir(), pluginId, pluginVersion);
     }
 
     /**
@@ -267,6 +283,61 @@ public class PluginFileManager {
             }
         }
         return extractedPath;
+    }
+
+    /**
+     * 从主ZIP中提取前端ZIP包并解压
+     *
+     * @param zipFile 主ZIP文件路径
+     * @param targetDir 前端目标目录 (e.g. plugins/frontend/{pluginId}/{version})
+     */
+    private void extractFrontendZip(Path zipFile, Path targetDir) throws IOException {
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                String entryName = entry.getName();
+
+                // 提取前端zip文件（文件名包含"frontend"且以".zip"结尾）
+                if (entryName.endsWith(".zip") && !entry.isDirectory() && entryName.toLowerCase().contains("frontend")) {
+                    log.info("发现前端插件包，开始解压: {}", entryName);
+                    // 前端包需要解压出内容到 targetDir
+                    // 这里需要先把 frontend.zip 提取出来，再解压它
+
+                    // 1. 提取 frontend.zip 到临时文件
+                    Path tempFrontendZip = Files.createTempFile("frontend-", ".zip");
+                    try (OutputStream os = new FileOutputStream(tempFrontendZip.toFile())) {
+                        IoUtil.copy(zis, os);
+                    }
+
+                    // 2. 解压 frontend.zip 到 targetDir
+                    try (ZipInputStream frontendZis = new ZipInputStream(new FileInputStream(tempFrontendZip.toFile()))) {
+                        ZipEntry feEntry;
+                        while ((feEntry = frontendZis.getNextEntry()) != null) {
+                            if (feEntry.isDirectory()) {
+                                continue;
+                            }
+                            Path targetFile = targetDir.resolve(feEntry.getName());
+                            // 防止Zip Slip
+                            if (!targetFile.normalize().startsWith(targetDir.normalize())) {
+                                throw new IOException("Zip entry is outside of the target dir: " + feEntry.getName());
+                            }
+                            Files.createDirectories(targetFile.getParent());
+                            try (OutputStream fos = new FileOutputStream(targetFile.toFile())) {
+                                IoUtil.copy(frontendZis, fos);
+                            }
+                            frontendZis.closeEntry();
+                        }
+                    } finally {
+                        FileUtil.del(tempFrontendZip.toFile());
+                    }
+
+                    log.info("前端插件包解压完成: {} -> {}", entryName, targetDir);
+                    // 只处理一个前端zip
+                    break;
+                }
+                zis.closeEntry();
+            }
+        }
     }
 
     /**

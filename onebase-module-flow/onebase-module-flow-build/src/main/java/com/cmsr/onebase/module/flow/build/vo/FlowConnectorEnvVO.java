@@ -50,8 +50,8 @@ public class FlowConnectorEnvVO implements Serializable {
     @Schema(description = "环境描述")
     private String description;
 
-    @Schema(description = "扩展配置")
-    private JsonNode extraConfig;
+    @Schema(description = "动作配置（JSON格式）")
+    private JsonNode config;
 
     @Schema(description = "启用状态")
     private Integer activeStatus;

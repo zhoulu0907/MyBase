@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * @Author：huangjie
- *                  @Date：2025/7/22 16:32
+ * @Date：2025/7/22 16:32
  */
 @Tag(name = "应用管理-版本管理")
 @RestController
@@ -87,16 +87,18 @@ public class AppVersionController {
     @GetMapping("/export")
     @Operation(summary = "导出应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Long> exportApplication(@RequestParam("versionId") Long versionId) {
-        Long exportId = appVersionService.exportApplicationVersion(versionId);
+    public CommonResult<Long> exportApplication(@RequestParam("versionId") Long versionId,
+            @RequestParam("applicationId") Long applicationId) {
+        Long exportId = appVersionService.exportApplicationVersion(versionId, applicationId);
         return CommonResult.success(exportId);
     }
 
     @PostMapping("/export/retry")
     @Operation(summary = "重试导出应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<Long> retryExportApplication(@RequestParam("exportId") Long exportId) {
-        Long retryExportId = appVersionService.retryExportApplication(exportId);
+    public CommonResult<Long> retryExportApplication(@RequestParam("exportId") Long exportId,
+            @RequestParam("applicationId") Long applicationId) {
+        Long retryExportId = appVersionService.retryExportApplication(exportId, applicationId);
         return CommonResult.success(retryExportId);
     }
 

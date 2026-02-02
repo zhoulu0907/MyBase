@@ -10,6 +10,17 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
+import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import org.pf4j.PluginState;
+import org.pf4j.PluginWrapper;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -31,6 +42,64 @@ public class PluginContextController {
 
     @Resource
     private PluginContextService pluginContextService;
+
+    @Resource
+    private OneBasePluginManager oneBasePluginManager;
+
+    @Resource
+    private PluginProperties pluginProperties;
+
+    @GetMapping("/manifest")
+    @Operation(summary = "获取所有可用插件的前端资源清单")
+    public CommonResult<List<Map<String, Object>>> getPluginManifest() {
+        List<Map<String, Object>> manifest = new ArrayList<>();
+        List<PluginWrapper> plugins = oneBasePluginManager.getPluginManager().getPlugins();
+
+        String contextPath = pluginProperties.getFrontendContextPath();
+        if (!contextPath.endsWith("/")) {
+            contextPath += "/";
+        }
+
+        for (PluginWrapper plugin : plugins) {
+            // 只处理已启动的插件
+            if (plugin.getPluginState() != PluginState.STARTED) {
+                continue;
+            }
+
+            String pluginId = plugin.getPluginId();
+            String version = plugin.getDescriptor().getVersion().toString();
+            String dirName = "frontend-" + pluginId + "-" + version;
+            
+            // 检查前端目录是否存在
+            Path frontendDir = Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getFrontendDir(), dirName);
+            if (!Files.exists(frontendDir)) {
+                continue;
+            }
+
+            Map<String, Object> info = new HashMap<>();
+            info.put("pluginId", pluginId);
+            info.put("version", version);
+            
+            // 构建访问基路径
+            String baseUrl = contextPath + dirName + "/";
+            info.put("baseUrl", baseUrl);
+
+            // 探测入口文件
+            if (Files.exists(frontendDir.resolve("remoteEntry.js"))) {
+                info.put("entry", "remoteEntry.js");
+                info.put("type", "module-federation");
+            } else if (Files.exists(frontendDir.resolve("index.html"))) {
+                info.put("entry", "index.html");
+                info.put("type", "iframe");
+            } else {
+                info.put("type", "static");
+            }
+
+            manifest.add(info);
+        }
+
+        return success(manifest);
+    }
 
     @GetMapping("/tenant-id")
     @Operation(summary = "获取当前租户ID")
