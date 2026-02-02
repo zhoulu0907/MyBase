@@ -274,10 +274,9 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
         <div className={styles.menuName}>
           {menuIcon.includes('TASK-') ? (
             // xxx-taskicon 是工作流程任务中心菜单的icon
-            // <i className={`iconfont ${menuIcon}`} style={{ marginRight: '16px',color:'rgb(var(--primary-6))' }} />
             <ReactSVG
               className={styles.menuIcon}
-              src={taskIconList.find((ele) => ele.key === menuIcon)?.value || 's'}
+              src={taskIconList.find((ele) => ele.key === menuIcon)?.value || ''}
               beforeInjection={(svg) => {
                 const fillColor = curMenu.value?.id === menuID ? 'rgb(var(--primary-6))' : '#333';
                 svg.querySelectorAll('*').forEach((el) => {
