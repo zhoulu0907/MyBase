@@ -135,7 +135,7 @@ const EditEntityDrawer: React.FC<{
                   <ReactSVG
                     style={{
                       position: 'absolute',
-                      top: 'calc(50% + 2px)',
+                      top: 'calc(50% + 3px)',
                       left: '50%',
                       transform: 'translate(-50%, -50%)',
                       zIndex: -1
