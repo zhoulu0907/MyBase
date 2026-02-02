@@ -53,7 +53,7 @@ const UploadAvatarComponent: React.FC<IUploadComponentProps> = ({
           }}
         />
       ) : (
-        <Avatar size={defaultAvatarSize} style={{ marginBottom: '12px', backgroundColor: '#009e9e' }}>
+        <Avatar size={defaultAvatarSize} style={{ marginBottom: '12px', backgroundColor: 'rgb(var(--primary-6))' }}>
           {defaultPlaceholder}
         </Avatar>
       )}

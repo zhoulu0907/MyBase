@@ -14,14 +14,13 @@ import {
   Tooltip,
   Typography
 } from '@arco-design/web-react';
-import { IconSearch, IconSettings } from '@arco-design/web-react/icon';
+import { IconSearch, IconSettings, IconArrowUp } from '@arco-design/web-react/icon';
 import { listApplication, type Application, type PageParam } from '@onebase/app';
 import { getCommonPaginationList, getRuntimeURL, hasPermission, TokenManager } from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import arrowRightUp from '@/assets/images/arrow-right-up.svg';
 import emptyApplicationSVG from '@/assets/images/tenantNoContent.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { PermissionButton } from '@/components/PermissionControl';
@@ -221,7 +220,7 @@ const EnterpriseAppPage: React.FC = () => {
           permission={ACTIONS.QUERY}
           type="outline"
           size="large"
-          icon={<img src={arrowRightUp} alt="create application" />}
+          icon={<IconArrowUp  style={{ fontSize: '20px',transform: 'rotate(45deg)' }} />}
           className={styles.createAppButton}
           onClick={handleClickButton}
           style={{ color: 'rgb(var(--primary-6))' }}
@@ -357,7 +356,7 @@ const EnterpriseAppPage: React.FC = () => {
                             style={{
                               color: item.themeColor || defaultTheme,
                               height: '22px',
-                              backgroundColor: ThemeColorMap[item.themeColor ?? defaultTheme]
+                              backgroundColor: ThemeColorMap[item.themeColor ?? 'rgb(var(--primary-2))']
                             }}
                           >
                             {tag.tagName}

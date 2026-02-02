@@ -238,7 +238,7 @@ const AppCard: React.FC<AppCardProps> = ({
                       <img src={getFileUrlById(item.avatar)} alt="avatar" />
                     </Avatar>
                   ) : (
-                    <Avatar key={index} style={{ backgroundColor: '#009e9e' }}>
+                    <Avatar key={index} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
                       {item?.nickName?.charAt(0)}
                     </Avatar>
                   );
