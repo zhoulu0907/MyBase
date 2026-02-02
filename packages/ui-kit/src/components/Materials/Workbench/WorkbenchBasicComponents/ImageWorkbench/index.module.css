@@ -23,7 +23,3 @@
     max-height: var(--maxHeight, none); 
   }
 }
-
-.pc-image-error {
-  border-radius: 8px;
-}
