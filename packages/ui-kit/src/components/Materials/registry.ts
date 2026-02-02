@@ -88,6 +88,7 @@ const COMPONENT_TYPE = {
   LIST_COLLAPSE: 'XCollapse',
   LIST_CAROUSEL: 'XCarousel',
   LIST: 'XList',
+  TREE: 'XTree',
   // 展示
   INFO_NOTICE: 'XInfoNotice',
   TEXT: 'XText',
@@ -419,6 +420,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     type: COMPONENT_TYPE.CARD,
     schema: cloneDeep(BasicSchema.XCard),
     template: { h: 48, w: 68, displayName: '卡片', icon: 'table_cp.svg', category: 'list' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.TREE]: {
+    type: COMPONENT_TYPE.TREE,
+    schema: cloneDeep(BasicSchema.XTree),
+    template: { h: 48, w: 68, displayName: '树形目录', icon: 'table_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
   },

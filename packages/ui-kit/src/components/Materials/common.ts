@@ -903,9 +903,9 @@ export const timeFormatConfig: ITimeFormatConfigType<TTimeTypeSelectKeyType> = {
   ]
 }
  export const dateTimeimeFormatConfig: any = {
-  key: 'dateFormat',
+  key: 'dateTimeFormat',
   name: '日期时间格式',
-  type: 'DateTimeFormat',
+  type: 'DateFormat',
   range: [
     { label: '年-月-日 时:分:秒', value: 'second' },
     { label: '年-月-日 时:分', value: 'minute' },
@@ -949,7 +949,7 @@ export const uploadButtonTypeConfig: IStatusConfigType<TUploadButtonType> = {
 
 export const showDownloadConfig: IBooleanConfigType = {
   key: 'showDownload',
-  name: '列表页支持下载',
+  name: '支持下载',
   type: 'SwitchInput'
 }
 

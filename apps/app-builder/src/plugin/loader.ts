@@ -51,6 +51,71 @@ export async function initPlugins() {
 
     // 6. 加载插件
     const pm = new PluginManager(context as any);
+
+    let loadedFromServer = false;
+    try {
+      const { getPluginManifestApi, getPluginConfigPlainApi } = await import('@onebase/platform-center');
+      const res = await getPluginManifestApi();
+      const manifest = res?.data || [];
+
+      if (Array.isArray(manifest) && manifest.length > 0) {
+        loadedFromServer = true;
+        // 1. 注册插件
+        for (const item of manifest) {
+           // 构造 resources
+           const resources: any = {};
+           const baseUrl = item.baseUrl.endsWith('/') ? item.baseUrl : `${item.baseUrl}/`;
+           const entry = item.entry || (item.type === 'iframe' ? 'index.html' : 'remoteEntry.js');
+           
+           if (item.type === 'iframe') {
+              resources.html = `${baseUrl}${entry}`;
+           } else {
+              // 假设是 JS 入口
+              resources.js = `${baseUrl}${entry}`;
+           }
+ 
+           pm.registerPlugin({
+             name: item.pluginId,
+             version: item.version,
+             displayName: item.pluginId, // 暂时使用 ID 作为显示名称
+             type: item.type,
+             resources: resources,
+             routePrefix: `/${item.pluginId}`, // 默认路由前缀
+             ...item
+           } as any);
+        }
+
+        // 2. 加载并集成
+        for (const item of manifest) {
+           try {
+             // 获取配置
+             let config = {};
+             try {
+               const confRes = await getPluginConfigPlainApi({ pluginId: item.pluginId, pluginVersion: item.version });
+               config = confRes?.data || {};
+             } catch (err) {
+               console.warn(`[Plugin Loader] Failed to fetch config for ${item.pluginId}`, err);
+             }
+ 
+             const p = await pm.loadPlugin(item.pluginId);
+             if (p) {
+               // 如果插件实例支持 setConfig，注入配置
+               if (typeof (p as any).setConfig === 'function') {
+                 (p as any).setConfig(config);
+               }
+               await pluginBridge.integratePlugin(p, sdk);
+             }
+           } catch (err) {
+             console.error(`[Plugin Loader] Failed to load plugin ${item.pluginId}`, err);
+           }
+        }
+      }
+    } catch (e) {
+      console.warn('[Plugin Loader] Failed to load from server, falling back to local config:', e);
+    }
+
+    if (loadedFromServer) return;
+
     const configPlugins = ((window as any)?.global_config?.PLUGINS) || [];
 
     if (Array.isArray(configPlugins) && configPlugins.length > 0) {

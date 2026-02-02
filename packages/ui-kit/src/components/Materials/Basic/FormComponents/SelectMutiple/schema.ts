@@ -94,7 +94,9 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
+    checkedLimit: TBooleanDefaultType;
     maxChecked: TNumberDefaultType;
+    minChecked: TNumberDefaultType;
   };
 
   /**
@@ -153,7 +155,9 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     },
     verify: {
       required: false,
-      maxChecked: 3
+      checkedLimit: false,
+      minChecked: 0,
+      maxChecked: 3,
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],

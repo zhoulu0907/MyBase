@@ -42,7 +42,6 @@ const PluginPage = () => {
   const [configVisible, setConfigVisible] = useState<boolean>(false);
   const [configPlugin, setConfigPlugin] = useState<PluginItem | null>(null);
   const [configContent, setConfigContent] = useState<string>('');
-  const [configTemplates, setConfigTemplates] = useState<any[]>([]); // Store raw config templates
   const [editVisible, setEditVisible] = useState<boolean>(false);
   const configForm = useMemo(() => createForm(), []); // Create Formily form instance
   const [currentPluginDetail, setCurrentPluginDetail] = useState<PluginDetailRespVO | null>(null);
@@ -307,135 +306,93 @@ const PluginPage = () => {
                 }
             }
             
-            // Store raw config templates if available
-            if (displayData && displayData.configTemplates) {
-                setConfigTemplates(displayData.configTemplates);
-                
-                // Initial values from template (defaults)
-                const initialValues: Record<string, any> = {};
-                displayData.configTemplates.forEach((tpl: any) => {
-                    if (tpl.configKey && tpl.configValue !== undefined) {
-                        initialValues[tpl.configKey] = tpl.configValue;
-                    }
-                });
-
-                // Fetch saved config values
-                try {
-                    const detailRes = await getPluginConfigDetailApi({
-                        pluginId: plugin.pluginId,
-                        pluginVersion: plugin.pluginVersion
-                    });
-                    
-                    let savedConfigs: Record<string, any> = {};
-                    if (detailRes && (detailRes.code === 200 || detailRes.code === 0) && detailRes.data && detailRes.data.configs) {
-                        savedConfigs = detailRes.data.configs;
-                    } else if (detailRes && detailRes.configs) {
-                         // Direct data response case
-                        savedConfigs = detailRes.configs;
-                    }
-
-                    // Merge saved values into initialValues
-                    // Handle dot notation keys from savedConfigs (e.g. "baidu.apiKey")
-                    // and unflatten them into nested objects for Formily if needed.
-                    // However, Formily usually expects values matching the schema structure.
-                    // If the schema is nested, we need nested values.
-                    
-                    // Helper to unflatten dot notation keys to nested object
-                    const unflatten = (data: Record<string, any>) => {
-                        const result: Record<string, any> = {};
-                        for (const key in data) {
-                             let value = data[key];
-                             // Check if value is wrapped in configValue object
-                             if (value && typeof value === 'object' && 'configValue' in value) {
-                                 value = value.configValue;
-                             }
-                             
-                             if (value === undefined || value === null) continue;
-
-                             const parts = key.split('.');
-                             let current = result;
-                             for (let i = 0; i < parts.length - 1; i++) {
-                                 const part = parts[i];
-                                 if (!current[part]) current[part] = {};
-                                 current = current[part];
-                             }
-                             current[parts[parts.length - 1]] = value;
-                        }
-                        return result;
-                    };
-
-                    // We don't use savedValues directly, we merge into mergedValues first
-                    // const savedValues = unflatten(savedConfigs);
-                    
-                    const mergedValues = { ...initialValues };
-                    Object.keys(savedConfigs).forEach(key => {
-                        if (savedConfigs[key]?.configValue !== undefined) {
-                            mergedValues[key] = savedConfigs[key].configValue;
-                        }
-                    });
-                    
-                    const finalValues = unflatten(mergedValues);
-                    
-                    configForm.setInitialValues(finalValues);
-                    configForm.setValues(finalValues);
-
-                } catch (err) {
-                    console.error('Failed to fetch config detail', err);
-                    // Fallback to template defaults if detail fetch fails
-                    // But we need to unflatten template defaults too if they are dot-notation
-                    const unflattenedDefaults = (() => {
-                         const result: Record<string, any> = {};
-                         for (const key in initialValues) {
-                             const value = initialValues[key];
-                             const parts = key.split('.');
-                             let current = result;
-                             for (let i = 0; i < parts.length - 1; i++) {
-                                 const part = parts[i];
-                                 if (!current[part]) current[part] = {};
-                                 current = current[part];
-                             }
-                             current[parts[parts.length - 1]] = value;
-                         }
-                         return result;
-                    })();
-                    
-                    configForm.setInitialValues(unflattenedDefaults);
-                    configForm.setValues(unflattenedDefaults);
-                }
-            } else {
-                setConfigTemplates([]);
-                configForm.reset();
-            }
-
             // Check for pluginConfigInfo field and use it if available
-            if (displayData && typeof displayData === 'object' && 'pluginConfigInfo' in displayData) {
+            if (displayData && typeof displayData === 'object' && 'pluginConfigInfo' in displayData && displayData.pluginConfigInfo) {
                 try {
                     const configInfo = displayData.pluginConfigInfo;
                     // If it's a string, try to parse it to format it nicely
                     if (typeof configInfo === 'string') {
-                         const parsed = JSON.parse(configInfo);
-                         setConfigContent(JSON.stringify(parsed, null, 2));
+                         try {
+                            const parsed = JSON.parse(configInfo);
+                            setConfigContent(JSON.stringify(parsed, null, 2));
+                         } catch (e) {
+                            setConfigContent(configInfo);
+                         }
                     } else {
-                         setConfigContent(JSON.stringify(configInfo, null, 2));
+                         setConfigContent(JSON.stringify(configInfo, null, 2) || '');
                     }
                 } catch (e) {
                     // Fallback to raw string if parsing fails
-                    setConfigContent(String(displayData.pluginConfigInfo));
+                    setConfigContent(String(displayData.pluginConfigInfo || ''));
                 }
             } else {
                 // Fallback to displaying the whole data
                 const content = typeof displayData === 'string' ? displayData : JSON.stringify(displayData, null, 2);
-                setConfigContent(content);
+                setConfigContent(content || '');
+            }
+
+            // Fetch saved config values
+            try {
+                const detailRes = await getPluginConfigDetailApi({
+                    pluginId: plugin.pluginId,
+                    pluginVersion: plugin.pluginVersion
+                });
+                
+                let savedConfigs: Record<string, any> = {};
+                if (detailRes && (detailRes.code === 200 || detailRes.code === 0) && detailRes.data && detailRes.data.configs) {
+                    savedConfigs = detailRes.data.configs;
+                } else if (detailRes && detailRes.configs) {
+                        // Direct data response case
+                    savedConfigs = detailRes.configs;
+                }
+
+                // Helper to unflatten dot notation keys to nested object
+                const unflatten = (data: Record<string, any>) => {
+                    const result: Record<string, any> = {};
+                    for (const key in data) {
+                            let value = data[key];
+                            // Check if value is wrapped in configValue object
+                            if (value && typeof value === 'object' && 'configValue' in value) {
+                                value = value.configValue;
+                            }
+                            
+                            if (value === undefined || value === null) continue;
+
+                            const parts = key.split('.');
+                            let current = result;
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                const part = parts[i];
+                                if (!current[part]) current[part] = {};
+                                current = current[part];
+                            }
+                            current[parts[parts.length - 1]] = value;
+                    }
+                    return result;
+                };
+
+                const mergedValues: Record<string, any> = {};
+                Object.keys(savedConfigs).forEach(key => {
+                    if (savedConfigs[key]?.configValue !== undefined) {
+                        mergedValues[key] = savedConfigs[key].configValue;
+                    }
+                });
+                
+                const finalValues = unflatten(mergedValues);
+                
+                configForm.setInitialValues(finalValues);
+                configForm.setValues(finalValues);
+
+            } catch (err) {
+                console.error('Failed to fetch config detail', err);
+                configForm.reset();
             }
         } catch (e) {
             console.error(e);
             setConfigContent('');
-            setConfigTemplates([]);
             configForm.reset();
         }
     } else {
         setConfigContent('');
-        setConfigTemplates([]);
         configForm.reset();
     }
   };
@@ -443,7 +400,6 @@ const PluginPage = () => {
     setConfigVisible(false);
     setConfigPlugin(null);
     setConfigContent('');
-    setConfigTemplates([]);
     configForm.reset();
   };
 
@@ -464,21 +420,10 @@ const PluginPage = () => {
               Object.keys(data).forEach(key => {
                   const value = data[key];
                   const fullKey = prefix ? `${prefix}.${key}` : key;
-                  const template = configTemplates.find(t => t.configKey === fullKey);
                   
-                  // Case 1: Key exists in templates -> Use it directly
-                  if (template) {
-                      configs[fullKey] = {
-                          configValue: value,
-                          valueType: template.valueType || 'normal'
-                      };
-                  } 
-                  // Case 2: Value is an object and not in templates -> Recurse
-                  else if (value && typeof value === 'object' && !Array.isArray(value)) {
+                  if (value && typeof value === 'object' && !Array.isArray(value)) {
                       collectConfigs(value, fullKey);
-                  }
-                  // Case 3: Primitive value not in templates -> Add as normal config
-                  else {
+                  } else {
                        configs[fullKey] = {
                           configValue: value,
                           valueType: 'normal'
@@ -1074,7 +1019,9 @@ const PluginPage = () => {
               let schema = null;
               try {
                   schema = configContent ? JSON.parse(configContent) : null;
-              } catch(e) {}
+              } catch(e) {
+                  console.error('Schema parse error:', e);
+              }
               
               if (schema && typeof schema === 'object' && (schema.properties || schema.type === 'object')) {
                    return (
@@ -1083,6 +1030,24 @@ const PluginPage = () => {
                        </div>
                    );
               }
+
+              // Fallback display if schema is invalid or parsing failed
+              return (
+                  <div style={{ padding: '16px', color: 'var(--color-text-3)', textAlign: 'center' }}>
+                      {configContent ? (
+                          <div style={{ textAlign: 'left' }}>
+                              <p style={{ marginBottom: 8 }}>无法渲染表单，原始配置如下：</p>
+                              <Input.TextArea 
+                                  value={configContent} 
+                                  autoSize={{ minRows: 10, maxRows: 20 }} 
+                                  readOnly 
+                              />
+                          </div>
+                      ) : (
+                          <span>暂无配置信息</span>
+                      )}
+                  </div>
+              );
           })()}
         </div>
       </Drawer>

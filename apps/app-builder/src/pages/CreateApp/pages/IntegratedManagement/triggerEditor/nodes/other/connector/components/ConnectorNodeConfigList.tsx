@@ -14,6 +14,8 @@ interface ConnectorNodeConfigListProps {
 }
 
 export const ConnectorNodeConfigList: React.FC<ConnectorNodeConfigListProps> = ({ nodeConfigList, form, onSelect }) => {
+  const selectedNodeCode = form.getFieldValue('nodeConfigCode');
+
   const handleSelect = (nodeCode: string) => {
     form.setFieldValue('nodeConfigCode', nodeCode);
     onSelect?.(nodeCode);
@@ -29,25 +31,30 @@ export const ConnectorNodeConfigList: React.FC<ConnectorNodeConfigListProps> = (
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-      {nodeConfigList.map((config) => (
-        <div
-          key={config.nodeCode}
-          role="button"
-          tabIndex={0}
-          style={{
-            border: '1px solid #e5e6eb',
-            borderRadius: 8,
-            padding: 16,
-            minWidth: 160,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center'
-          }}
-          onClick={() => handleSelect(config.nodeCode)}
-        >
-          <div>{config.nodeName}</div>
-        </div>
-      ))}
+      {nodeConfigList.map((config) => {
+        const isSelected = selectedNodeCode === config.nodeCode;
+        return (
+          <div
+            key={config.nodeCode}
+            role="button"
+            tabIndex={0}
+            style={{
+              border: isSelected ? '2px solid #165dff' : '1px solid #e5e6eb',
+              borderRadius: 8,
+              padding: 16,
+              minWidth: 160,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: isSelected ? '#f2f3ff' : 'transparent',
+              transition: 'all 0.2s'
+            }}
+            onClick={() => handleSelect(config.nodeCode)}
+          >
+            <div>{config.nodeName}</div>
+          </div>
+        );
+      })}
     </div>
   );
 };

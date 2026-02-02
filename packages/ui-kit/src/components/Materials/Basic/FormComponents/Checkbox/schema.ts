@@ -5,7 +5,6 @@ import {
   dataFieldConfig,
   directionConfig,
   layoutConfig,
-  alignConfig,
   statusConfig,
   widthConfig,
   labelConfig,
@@ -42,8 +41,8 @@ import type {
   TBooleanDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
+  TNumberDefaultType,
   TTextDefaultType,
-  IAlignConfigType,
   TRadioDefaultType,
   ICommonConfigType,
   IDefaultValueConfigType
@@ -63,7 +62,6 @@ export type TXInputCheckboxEditData = Array<
   | ICheckboxDataConfigType
   | IVerifyConfigType
   | IStatusConfigType<TStatusSelectKeyType>
-  | IAlignConfigType<TAlignSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
   | ICommonConfigType
@@ -106,6 +104,9 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    checkedLimit: TBooleanDefaultType;
+    maxChecked: TNumberDefaultType;
+    minChecked: TNumberDefaultType;
   };
 
   /**
@@ -151,8 +152,6 @@ const XCheckbox: XInputCheckboxSchema = {
     verifyConfig,
     // 显示状态
     statusConfig,
-    // 对齐方式
-    alignConfig,
     // 布局方式
     layoutConfig,
     // 字段宽度
@@ -174,6 +173,9 @@ const XCheckbox: XInputCheckboxSchema = {
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
       required: false,
+      checkedLimit: false,
+      minChecked: 0,
+      maxChecked: 3,
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],

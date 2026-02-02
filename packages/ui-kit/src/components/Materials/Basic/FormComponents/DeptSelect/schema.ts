@@ -3,7 +3,6 @@ import {
   baseDefault,
   dataFieldConfig,
   defaultValueModeConfig,
-  labelColSpanConfig,
   layoutConfig,
   selectScopeConfig,
   statusConfig,
@@ -14,10 +13,10 @@ import {
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
+  type TAlignSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -37,14 +36,13 @@ import type {
   ITextAreaConfigType,
   ITextConfigType,
   ITooltipConfigType,
-  IVerifyConfigType,
   IWidthConfigType,
   ICommonConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  TRadioDefaultType
 } from '../../../types';
 
 export interface XInputDeptSelectSchema {
@@ -70,10 +68,10 @@ export type TXInputDeptSelectEditData = Array<
 
 export interface XInputDeptSelectConfig extends ICommonBaseType {
   /**
-   * 输入框标题
-   * text：标题
-   * display：是否显示
-   */
+  * 输入框标题
+  * text：标题
+  * display：是否显示
+  */
   label: {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
@@ -90,12 +88,6 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 组件状态：可用、隐藏、只读
-   * 可选值: 'default' | 'hidden' | 'readonly'
-   */
-  status?: TSelectDefaultType<TStatusSelectKeyType>;
-
-  /**
    * 默认值方式
    */
   defaultValueMode?: TTextDefaultType;
@@ -106,9 +98,13 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   defaultDeptValue?: TTextDefaultType;
 
   /**
-   * 多选模式
-   */
-  // multipleMode?: TBooleanDefaultType;
+  * required：是否必填，未填写时提交报错
+  * noRepeat：是否不允许重复
+  */
+  verify: {
+    required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
+  };
 
   /**
    * 可选范围switch
@@ -121,34 +117,26 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   selectScope?: TTextDefaultType[];
 
   /**
-   * 字段宽度
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
    */
-  width: TSelectDefaultType<TWidthSelectKeyType>;
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
 
   /**
-   * required：是否必填，未填写时提交报错
-   * noRepeat：是否不允许重复
+   * 内容对齐方式：左、中、右
+   * 可选值: 'left' | 'center' | 'right'
    */
-  verify: {
-    required: TBooleanDefaultType;
-    noRepeat?: TBooleanDefaultType;
-  };
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
 
   /**
    * 表单的布局：水平、垂直（默认）
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
-
   /**
-   * 标题宽度
+   * 字段宽度
    */
-  labelColSpan?: TNumberDefaultType;
-
-  /**
-   * 隐藏时是否提交数据，开启后隐藏状态仍会保存值
-   */
-  saveWithHidden?: TBooleanDefaultType;
+  width: TRadioDefaultType<TWidthSelectKeyType>;
 }
 
 const XDeptSelect: XInputDeptSelectSchema = {
@@ -158,21 +146,13 @@ const XDeptSelect: XInputDeptSelectSchema = {
     tooltipConfig,
     ...dataFieldConfig,
     defaultValueModeConfig,
-    // {
-    //   key: 'multipleMode',
-    //   name: '多选模式',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
     selectScopeConfig,
-    layoutConfig,
-    labelColSpanConfig,
-    // {
-    //   key: 'saveWithHidden',
-    //   name: '隐藏时提交数据',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
     verifyConfig,
+    // 显示状态
     statusConfig,
+    // 布局方式
+    layoutConfig,
+    // 字段宽度
     widthConfig
   ],
   config: {
@@ -187,12 +167,9 @@ const XDeptSelect: XInputDeptSelectSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     defaultValueMode: 'custom',
     defaultDeptValue: '',
-    // multipleMode: false,
     isSelectScope: false,
     selectScope: [],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    saveWithHidden: false,
-    labelColSpan: 200,
     verify: {
       required: false,
       noRepeat: false

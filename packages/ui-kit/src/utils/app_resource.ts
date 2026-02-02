@@ -23,7 +23,8 @@ import {
   useEditorSignalMap,
   useFormEditorSignal,
   useListEditorSignal,
-  usePageViewEditorSignal
+  usePageViewEditorSignal,
+  usePageSettingSignal
 } from 'src/signals';
 import { isBlank } from './common';
 
@@ -38,6 +39,9 @@ export interface SavePageSetParams {
   listColComponentsMap: {
     colComponents: Map<string, any[][]>;
   };
+  dataTitleType?: number;
+  redirectType?: number;
+  dataTitle?: string;
 }
 
 const processColComponent = (
@@ -217,10 +221,15 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
 
   console.log(loadPagesetResp);
 
+  const { dataTitleType, redirectType, dataTitle } = usePageSettingSignal;
+
   const savePageSetReq: SavePageSetReq = {
     id: pageSetId,
     pageSetName: '',
-    pages: loadPagesetResp.pages
+    pages: loadPagesetResp.pages,
+    dataTitleType: dataTitleType.value,
+    redirectType: redirectType.value,
+    dataTitle: dataTitle.value
   };
   const res = await savePageSet(savePageSetReq);
 
@@ -262,12 +271,26 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     setSubTableComponents: setListSubTableComponents
   } = useListEditorSignal;
 
+  const { setDataTitleType, setRedirectType, setDataTitle } = usePageSettingSignal;
+
   const loadPageSetReq: LoadPageSetReq = {
     id: pageSetId
   };
   const pageSet = await loadPageSet(loadPageSetReq);
   setCurPage(pageSet);
   console.log('载入页面集数据: ', pageSet);
+
+  if (pageSet.dataTitleType) {
+    setDataTitleType(pageSet.dataTitleType);
+  }
+  if (pageSet.redirectType) {
+    setRedirectType(pageSet.redirectType);
+  }
+  if (pageSet.dataTitle) {
+    setDataTitle(pageSet.dataTitle);
+  } else if (pageSet.dataTitleType === 1) {
+    setDataTitle('规则：发起人发起的页面名称 示例：小贝发起的工时填报');
+  }
 
   //   //   如果allowViewUuids不为空，则过滤掉不在allowViewUuids中的视图
   //   if (allowViewUuids && allowViewUuids.length > 0) {

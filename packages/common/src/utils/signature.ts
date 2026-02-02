@@ -136,17 +136,6 @@ function buildSignatureString({
     timestamp
   });
 
-  console.info(
-    'canonicalQueryString:',
-    canonicalQueryString,
-    'canonicalBody:',
-    canonicalBody,
-    'canonicalHeaderString:',
-    canonicalHeaderString,
-    'appSecret:',
-    appSecret
-  );
-  
   const signatureBase = `${canonicalQueryString}${canonicalBody}${canonicalHeaderString}${appSecret}`;
 
   return {
@@ -275,6 +264,7 @@ export const generateSignature = (config: AxiosRequestConfig) => {
   const bodyPrep = isFormData
     ? { bodyForSignature: undefined }
     : prepareRequestBody(config.method as Method, config.data);
+  // const bodyPrep = prepareRequestBody(config.method as Method, config.data);
 
   const signature = generateApiSignature({
     appKey: appKey,

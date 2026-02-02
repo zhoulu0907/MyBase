@@ -18,7 +18,6 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     layout,
     selectScope,
     defaultDeptValue,
-    labelColSpan = 0,
     runtime = true,
     detailMode
   } = props;
