@@ -1,0 +1,29 @@
+.containerStyle {
+  width: 100%;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.imageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.imageHeaderTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.imageStyle {
+  img {
+    object-fit: var(--fit, contain);
+    max-height: var(--maxHeight, none); 
+  }
+}
+
+.pc-image-error {
+  border-radius: 8px;
+}
