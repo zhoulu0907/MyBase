@@ -1,4 +1,4 @@
-export const defaultTheme = '#4FAE7B';
+export const defaultTheme = 'rgb(var(--primary-6))';
 const applicationWidth = 332;
 const applicationHeight = 206;
 const applicationGutterX = 24;

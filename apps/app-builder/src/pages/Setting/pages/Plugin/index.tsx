@@ -775,7 +775,7 @@ const PluginPage = () => {
                         return (
                           <div className={styles.card} key={`system-${index}`}>
                             <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, gap: '16px' }}>
-                              <div className={styles.icon} style={{ backgroundColor: '#009E9E', flexShrink: 0 }}>
+                              <div className={styles.icon} style={{ backgroundColor: 'rgb(var(--primary-6))', flexShrink: 0 }}>
                                 <img
                                   src={externalUserSVG}
                                   style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }}
@@ -967,7 +967,7 @@ const PluginPage = () => {
                           render: (text: string, record: PluginVersionVO) => (
                             <Space>
                                <span>{text || (record as any).pluginVersion}</span>
-                               {record.status === 1 && <span style={{ color: '#00B42A', backgroundColor: '#E8FFEA', padding: '2px 8px', borderRadius: '2px', fontSize: '12px' }}>已生效</span>}
+                               {record.status === 1 && <span style={{ color: 'rgb(var(--primary-6))', backgroundColor: 'rgb(var(--primary-1))', padding: '2px 8px', borderRadius: '2px', fontSize: '12px' }}>已生效</span>}
                                {record.status === 0 && <span style={{ color: '#86909C', backgroundColor: '#F2F3F5', padding: '2px 8px', borderRadius: '2px', fontSize: '12px' }}>已停用</span>}
                             </Space>
                           )

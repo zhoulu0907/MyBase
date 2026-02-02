@@ -96,7 +96,7 @@
     height: 0.96rem;
     align-items: center;
     border-radius: 50%;
-    background: linear-gradient(326deg, #009E9E 10.69%, #24B28F 56.88%, #00B42A 103.07%);
+    background: linear-gradient(326deg, rgb(var(--primary-6)) 10.69%, rgb(var(--primary-5)) 56.88%, rgb(var(--primary-3)) 103.07%);
     /* box-shadow: 0 4px 8px 0 rgba(0, 94, 115, 0.20); */
     position: fixed;
     bottom: 2.4rem;

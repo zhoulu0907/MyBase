@@ -21,11 +21,11 @@ export const NodeWrapperStyle = styled.div`
   height: auto;
 
   &.selected {
-    border: 2px solid #65bf73;
+    border: 2px solid rgb(var(--primary-6));
   }
 
   &.completedBorder {
-    border: 2px solid #00b42a;
+    border: 2px solid rgb(var(--primary-6));
   }
   &.processingBorder {
     border: 2px solid #165dff;

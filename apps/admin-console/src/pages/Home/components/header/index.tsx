@@ -65,7 +65,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     <Menu>
       <Menu.Item key="info" style={{ height: '60px' }}>
         <div className={styles.adminInformation}>
-          <Avatar size={32} style={{ backgroundColor: '#009E9E' }}>
+          <Avatar size={32} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
             {nickname?.charAt(0) || 'U'}
           </Avatar>
           <Typography.Text>{nickname}</Typography.Text>
@@ -90,7 +90,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
         <div className={styles.userInfo}>
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>
-              <Avatar size={32} style={{ backgroundColor: '#009E9E' }}>
+              <Avatar size={32} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
                 {nickname?.charAt(0) || 'U'}
               </Avatar>
             </div>
