@@ -48,7 +48,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
-          { required: verify?.required, message: `${label.text}是必填项` },
+          { required: verify?.required || verify?.checkedLimit && !!verify?.minChecked, message: `${label.text}是必填项` },
           {
             minLength: verify?.checkedLimit ? verify?.minChecked : undefined,
             maxLength: verify?.checkedLimit ? verify?.maxChecked : undefined
