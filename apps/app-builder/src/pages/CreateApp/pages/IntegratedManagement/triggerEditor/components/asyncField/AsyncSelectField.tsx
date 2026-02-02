@@ -122,6 +122,7 @@ const AsyncSelectField: React.FC<AsyncSelectFieldProps> = ({
     setLoading(true);
     try {
       const loadedOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+      console.log('loadedOptions: ', loadedOptions);
       setOptions(loadedOptions);
     } catch (error) {
       console.error('Failed to load field options:', error);
@@ -137,7 +138,11 @@ const AsyncSelectField: React.FC<AsyncSelectFieldProps> = ({
 
   return (
     <Form.Item field={fieldName}>
-      <Select placeholder="请选择静态值" options={options} loading={loading} />
+      <Select
+        placeholder="请选择静态值"
+        options={options.map((item) => ({ value: item.id, label: item.label }))}
+        loading={loading}
+      />
     </Form.Item>
   );
 };
