@@ -28,6 +28,7 @@ import {
   WORKBENCH_WIDTH_VALUES
 } from '../../core/constants';
 import { ALIGN_OPTIONS, ALIGN_VALUES } from '../../../constants';
+import { jumpTypeConfig, jumpPageIdConfig, jumpExternalUrlConfig } from '../../config/commonConfig';
 export interface XButtonWorkbenchSchema {
   editData: TXButtonWorkbenchEditData;
   config: XButtonWorkbenchConfig;
@@ -135,33 +136,9 @@ const XButtonWorkbench: XButtonWorkbenchSchema = {
       name: '文本对齐',
       type: WORKBENCH_CONFIG_TYPES.WB_TEXT_ALIGN
     },
-    {
-      key: 'jumpType',
-      name: '跳转目标',
-      type: WORKBENCH_CONFIG_TYPES.STATUS_RADIO,
-      range: [
-        {
-          key: 'internal',
-          text: '关联已有页面',
-          value: 'internal'
-        },
-        {
-          key: 'external',
-          text: '跳转外部链接',
-          value: 'external'
-        }
-      ]
-    },
-    {
-      key: 'jumpPageId',
-      name: '选择页面',
-      type: WORKBENCH_CONFIG_TYPES.WB_MENU_SELECTOR
-    },
-    {
-      key: 'jumpExternalUrl',
-      name: '外部链接',
-      type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT
-    }
+    jumpTypeConfig,
+    jumpPageIdConfig,
+    jumpExternalUrlConfig
   ],
   config: {
     ...workbenchBaseDefault,

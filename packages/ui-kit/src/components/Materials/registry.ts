@@ -107,7 +107,8 @@ const COMPONENT_TYPE = {
   BUTTON_WORKBENCH: 'XButtonWorkbench',
   WELCOME_CARD: 'XWelcomeCard',
   INFORMATION_LIST: 'XInformationList',
-  DATA_LIST: 'XDataList'
+  DATA_LIST: 'XDataList',
+  IMAGE_WORKBENCH: 'XImageWorkbench'
 } as const
 
 
@@ -560,6 +561,13 @@ const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescr
     type: COMPONENT_TYPE.DATA_LIST,
     schema: cloneDeep(workbenchSchema.XDataList),
     template: { h: 36, w: 118, displayName: '数据列表', icon: 'data_list_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.IMAGE_WORKBENCH]: {
+    type: COMPONENT_TYPE.IMAGE_WORKBENCH,
+    schema: cloneDeep(workbenchSchema.XImageWorkbench),
+    template: { h: 36, w: 118, displayName: '图片', icon: 'image_workbench_cp.svg', category: 'workbench' },
     fieldMap: [],
     entityMap: []
   }
