@@ -13,7 +13,7 @@ import {
   Tag
 } from '@arco-design/web-react';
 import { IconMore } from '@arco-design/web-react/icon';
-import { formatTimeYMDHMS } from '@onebase/common';
+import { formatTimeYMDHMS, hasAnyPermission, hasPermission, TENANT_CORP_PERMISSION as ACTIONS } from '@onebase/common';
 import {
   deleteCorpApi,
   disabledCorpApi,
@@ -93,18 +93,26 @@ const BusinessPage: React.FC = () => {
       title: '操作',
       render: (_: any, record: any) => (
         <Space size={4}>
-          <Button size="small" type="text" onClick={handleEdit.bind(null, record, 'basic')}>
-            编辑
-          </Button>
-          <Button size="small" type="text" onClick={onReviewInfo.bind(null, record, 'basic')}>
-            查看
-          </Button>
-          <Button size="small" type="text" onClick={handleEdit.bind(null, record, 'authorized')}>
-            应用授权
-          </Button>
-          <Dropdown trigger="click" droplist={actionMenu(record)} position="bl">
-            <Button size="small" type="text" icon={<IconMore />} />
-          </Dropdown>
+          {hasPermission(ACTIONS.UPDATE) && (
+            <Button size="small" type="text" onClick={handleEdit.bind(null, record, 'basic')}>
+              编辑
+            </Button>
+          )}
+          {hasPermission(ACTIONS.QUERY) && (
+            <Button size="small" type="text" onClick={onReviewInfo.bind(null, record, 'basic')}>
+              查看
+            </Button>
+          )}
+          {hasPermission(ACTIONS.APPAUTH) && (
+            <Button size="small" type="text" onClick={handleEdit.bind(null, record, 'authorized')}>
+              应用授权
+            </Button>
+          )}
+          {hasAnyPermission([ACTIONS.STATUS, ACTIONS.DELETE]) && (
+            <Dropdown trigger="click" droplist={actionMenu(record)} position="bl">
+              <Button size="small" type="text" icon={<IconMore />} />
+            </Dropdown>
+          )}
         </Space>
       )
     }
@@ -315,12 +323,16 @@ const BusinessPage: React.FC = () => {
   // 操作列下拉菜单
   const actionMenu = (record: cropItem) => (
     <Menu>
-      <Menu.Item key="disable" onClick={() => handleDisabled(record)}>
-        {convertName(record.status)}
-      </Menu.Item>
-      <Menu.Item key="delete" onClick={() => handleDelete(record)}>
-        删除
-      </Menu.Item>
+      {hasPermission(ACTIONS.STATUS) && (
+        <Menu.Item key="disable" onClick={() => handleDisabled(record)}>
+          {convertName(record.status)}
+        </Menu.Item>
+      )}
+      {hasPermission(ACTIONS.DELETE) && (
+        <Menu.Item key="delete" onClick={() => handleDelete(record)}>
+          删除
+        </Menu.Item>
+      )}
     </Menu>
   );
 
