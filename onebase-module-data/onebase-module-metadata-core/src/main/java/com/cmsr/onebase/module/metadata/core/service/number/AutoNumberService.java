@@ -95,11 +95,16 @@ public class AutoNumberService {
     public Map<String, String> generateDataNumbers(List<String> fieldIds, Map<String, Object> contextData) {
         Map<String, String> result = new HashMap<>();
         if (fieldIds == null || fieldIds.isEmpty()) {
+            log.debug("[自动编号] fieldIds 为空，跳过生成");
             return result;
         }
+        log.debug("[自动编号] 查询字段配置，fieldIds: {}", fieldIds);
         List<MetadataAutoNumberConfigDO> configs = configRepository.listEnabledByFieldIds(fieldIds);
+        log.debug("[自动编号] 查询到 {} 个启用的配置", configs == null ? 0 : configs.size());
         for (MetadataAutoNumberConfigDO config : configs) {
+            log.debug("[自动编号] 生成编号，fieldUuid: {}, configUuid: {}", config.getFieldUuid(), config.getConfigUuid());
             String number = generator.generate(config, contextData);
+            log.debug("[自动编号] 生成结果，fieldUuid: {}, number: {}", config.getFieldUuid(), number);
             result.put(config.getFieldUuid(), number);
         }
         return result;

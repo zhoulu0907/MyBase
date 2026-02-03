@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.tenant.core.util;
 
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.mybatisflex.core.tenant.TenantManager;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -72,10 +73,12 @@ public class TenantUtils {
         Boolean oldIgnore = TenantContextHolder.isIgnore();
         try {
             TenantContextHolder.setIgnore(true);
+            TenantManager.ignoreTenantCondition();
             // 执行逻辑
             runnable.run();
         } finally {
             TenantContextHolder.setIgnore(oldIgnore);
+            TenantManager.restoreTenantCondition();
         }
     }
 
@@ -89,12 +92,14 @@ public class TenantUtils {
         Boolean oldIgnore = TenantContextHolder.isIgnore();
         try {
             TenantContextHolder.setIgnore(true);
+            TenantManager.ignoreTenantCondition();
             // 执行逻辑
             return callable.call();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             TenantContextHolder.setIgnore(oldIgnore);
+            TenantManager.restoreTenantCondition();
         }
     }
 

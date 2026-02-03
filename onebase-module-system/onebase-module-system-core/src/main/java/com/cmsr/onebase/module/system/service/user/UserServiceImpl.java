@@ -164,7 +164,7 @@ public class UserServiceImpl implements UserService {
             }
             // 1.2 校验正确性
             validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
-                    createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
+                    createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds(), createReqVO.getUserType());
             // 1.3 校验角色权限
             validateRoleIds(createReqVO.getRoleIds());
 
@@ -225,7 +225,7 @@ public class UserServiceImpl implements UserService {
         // 校验用户名唯一
         validateUsernameUnique(null, userDO.getUsername());
         // 校验手机号唯一
-        validateMobileUnique(null, userDO.getMobile());
+        validateMobileUnique(null, userDO.getMobile(), userDO.getUserType());
         // 校验邮箱唯一
         validateEmailUnique(null, userDO.getEmail());
         // 检查用户是否超出租户用户数限制
@@ -234,6 +234,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void checkCorpAdminUser(AdminUserDO adminUserDO) {
+        if (adminUserDO.getUserType() == null) {
+            adminUserDO.setUserType(UserTypeEnum.CORP.getValue());
+        }
         validateCorpAdminUser(adminUserDO);
     }
 
@@ -241,6 +244,9 @@ public class UserServiceImpl implements UserService {
     @CacheEvict(value = RedisKeyConstants.USER_FIND_BY_DEPT_IDS, allEntries = true, beforeInvocation = true)
     public Long createCorpAdminUser(AdminUserDO userDO) {
 
+        if (userDO.getUserType() == null) {
+            userDO.setUserType(UserTypeEnum.CORP.getValue());
+        }
         // 验证企业管理员信息
         validateCorpAdminUser(userDO);
 
@@ -283,7 +289,7 @@ public class UserServiceImpl implements UserService {
         }
         //  校验正确性
         validateUserForCreateOrUpdate(null, createReqVO.getUsername(),
-                createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds());
+                createReqVO.getMobile(), createReqVO.getEmail(), createReqVO.getDeptId(), createReqVO.getPostIds(), UserTypeEnum.PLATFORM.getValue());
         // 密码解密
         createReqVO.setPassword(pwdEnHelper.decryptHexStr(createReqVO.getPassword()));
         // 弱密码校验
@@ -329,7 +335,7 @@ public class UserServiceImpl implements UserService {
             }
         });
         // 1.3 校验正确性
-        validateUserForCreateOrUpdate(null, registerReqVO.getUsername(), null, null, null, null);
+        validateUserForCreateOrUpdate(null, registerReqVO.getUsername(), null, null, null, null, registerReqVO.getUserType());
 
         // 密码解密
         registerReqVO.setPassword(pwdEnHelper.decryptHexStr(registerReqVO.getPassword()));
@@ -358,7 +364,7 @@ public class UserServiceImpl implements UserService {
     public void updateUser(UserUpdateReqVO updateReqVO) {
         // 1.1 校验正确性
         AdminUserDO oldUser = validateUserForCreateOrUpdate(updateReqVO.getId(), updateReqVO.getUsername(),
-                updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds());
+                updateReqVO.getMobile(), updateReqVO.getEmail(), updateReqVO.getDeptId(), updateReqVO.getPostIds(), updateReqVO.getUserType());
         checkTenantUserCountLimit(updateReqVO.getStatus(), oldUser);
         // 1.2 检查用户部门
         if (oldUser.getDeptId() != null && !oldUser.getDeptId().equals(updateReqVO.getDeptId())) {
@@ -430,11 +436,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserProfile(Long id, UserProfileUpdateReqVO reqVO) {
+    public void updateUserProfile(Long id, UserProfileUpdateReqVO reqVO, Integer userType) {
         // 校验正确性
         validateUserExists(id);
         validateEmailUnique(id, reqVO.getEmail());
-        validateMobileUnique(id, reqVO.getMobile());
+        validateMobileUnique(id, reqVO.getMobile(), userType);
         // 执行更新
         userDataRepository.update(BeanUtils.toBean(reqVO, AdminUserDO.class).setId(id));
     }
@@ -572,8 +578,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AdminUserDO getUserByMobile(String mobile) {
-        return userDataRepository.findByMobile(mobile);
+    public AdminUserDO getUserByMobile(String mobile, Integer userType) {
+        return userDataRepository.findByMobile(mobile, userType);
     }
 
     @Override
@@ -693,13 +699,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private AdminUserDO validateUserForCreateOrUpdate(Long id, String username, String mobile, String email,
-                                                      Long deptId, Set<Long> postIds) {
+                                                      Long deptId, Set<Long> postIds, Integer userType) {
         // 校验用户存在
         AdminUserDO user = validateUserExists(id);
         // 校验用户名唯一
         validateUsernameUnique(id, username);
         // 校验手机号唯一
-        validateMobileUnique(id, mobile);
+        validateMobileUnique(id, mobile, userType);
         // 校验邮箱唯一
         validateEmailUnique(id, email);
         // 校验部门处于开启状态
@@ -761,11 +767,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @VisibleForTesting
-    void validateMobileUnique(Long id, String mobile) {
+    void validateMobileUnique(Long id, String mobile, Integer userType) {
         if (StrUtil.isBlank(mobile)) {
             return;
         }
-        AdminUserDO user = userDataRepository.findByMobile(mobile);
+        AdminUserDO user = userDataRepository.findByMobile(mobile, userType);
 
         if (user == null) {
             return;
@@ -825,7 +831,7 @@ public class UserServiceImpl implements UserService {
             // 2.1.2 校验，判断是否有不符合的原因
             try {
                 validateUserForCreateOrUpdate(null, null, importUser.getMobile(), importUser.getEmail(),
-                        importUser.getDeptId(), null);
+                        importUser.getDeptId(), null, importUser.getUserType());
             } catch (ServiceException ex) {
                 respVO.getFailureUsernames().put(importUser.getUsername(), ex.getMessage());
                 return;
@@ -1261,7 +1267,7 @@ public class UserServiceImpl implements UserService {
         // 校验用户存在
         AdminUserDO user = validateUserExists(id);
         // 校验手机号唯一
-        validateMobileUnique(null, mobile);
+        validateMobileUnique(null, mobile, UserTypeEnum.THIRD.getValue());
         // 校验邮箱唯一
         validateEmailUnique(id, email);
         return user;
@@ -1354,7 +1360,7 @@ public class UserServiceImpl implements UserService {
         // 1.1 校验账户配合
         validateTenantUserCountMaxLimit();
         // 1.2 校验手机号唯一
-        validateMobileUnique(null, reqVO.getMobile());
+        validateMobileUnique(null, reqVO.getMobile(), UserTypeEnum.THIRD.getValue());
         // 1.3 验证app存在
         checkAppAndGetTenantId(reqVO.getAppId());
         // 1.4 新增用户

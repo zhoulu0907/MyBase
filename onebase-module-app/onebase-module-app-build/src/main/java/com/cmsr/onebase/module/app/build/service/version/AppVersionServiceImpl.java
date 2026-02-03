@@ -60,6 +60,7 @@ import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
+import com.cmsr.onebase.module.metadata.api.datasource.dto.export.MetadataExportDataDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -279,6 +280,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             transactionTemplate.executeWithoutResult(transactionStatus -> {
                 // 删除现有的开发版本数据（version_tag 为 0）
                 appDataManager.deleteApplicationVersionData(applicationId, VersionTagEnum.BUILD.getValue());
+                appDataManager.deleteAuthRole(applicationId);
 
                 // 导入配置数据到开发版本
                 appDataManager.saveApplicationVersionConfigData(applicationId, existingApp.getAppUid(),
@@ -369,6 +371,17 @@ public class AppVersionServiceImpl implements AppVersionService {
         if (navigationJson != null) {
             configData.setNavigation(JsonUtils.parseObject(navigationJson, AppNavigationDO.class));
         }
+
+        String bpmJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_BPM));
+        if (bpmJson != null) {
+            configData.setBpmConfig(JsonUtils.parseObject(bpmJson, Object.class));
+        }
+
+        String metadataJson = ZipUtils.toUtf8String(entryMap.get(CONFIG_METADATA));
+        if (metadataJson != null) {
+            configData.setMetaDataConfig(JsonUtils.parseObject(metadataJson, Object.class));
+        }
+
     }
 
     /**
@@ -491,7 +504,7 @@ public class AppVersionServiceImpl implements AppVersionService {
                                 () -> appDataManager.getApplicationVersionConfigData(applicationDO.getId(),
                                         versionTag));
 
-                appDataManager.writeConfigDataToZip(zos, configData, "config/");
+                appDataManager.writeConfigDataToZip(zos, configData, "");
 
                 zos.finish();
                 zipBytes = baos.toByteArray();
@@ -616,7 +629,6 @@ public class AppVersionServiceImpl implements AppVersionService {
      * 重试导出应用
      *
      * @param exportId  导出记录ID
-     * @param versionId 版本ID
      * @return 导出记录ID（返回原导出记录ID）
      */
     @Override

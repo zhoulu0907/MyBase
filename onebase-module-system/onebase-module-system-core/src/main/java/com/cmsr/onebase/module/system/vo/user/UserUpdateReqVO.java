@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.system.vo.user;
 
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.validation.InEnum;
 import com.cmsr.onebase.framework.common.validation.Mobile;
 import com.cmsr.onebase.module.system.framework.operatelog.core.DeptParseFunction;
 import com.cmsr.onebase.module.system.framework.operatelog.core.PostParseFunction;
@@ -69,5 +71,9 @@ public class UserUpdateReqVO {
     @Schema(description = "用户头像", example = "https://www.cmsr.com")
     @DiffLogField(name = "用户头像")
     private String avatar;
+
+    @Schema(description = "类型", example = "1")
+    @InEnum(value= UserTypeEnum.class, message = "用户类型不正确：{value}")
+    private Integer userType;
 
 }

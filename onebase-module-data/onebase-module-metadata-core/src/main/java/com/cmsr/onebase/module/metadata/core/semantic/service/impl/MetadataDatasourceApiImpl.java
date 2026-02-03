@@ -177,7 +177,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     }
 
     @Override
-    public MetadataExportDataDTO exportDatasource(Long applicationId, Long versionTag) {
+    public Object exportDatasource(Long applicationId, Long versionTag) {
         log.info("开始导出数据源，applicationId: {}, versionTag: {}", applicationId, versionTag);
         MetadataExportDataDTO exportData = new MetadataExportDataDTO();
 
@@ -525,19 +525,28 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, MetadataExportDataDTO exportData, DatasourceImportReqDTO reqDTO) {
-        if (exportData == null) {
+    public void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object importData, DatasourceImportReqDTO reqDTO) {
+        // 将Object转换为MetadataExportDataDTO
+        MetadataExportDataDTO exportData;
+        if (importData == null) {
             log.warn("导入数据为空，跳过导入");
+            return;
+        } else if (importData instanceof MetadataExportDataDTO) {
+            exportData = (MetadataExportDataDTO) importData;
+        } else {
+            String json = JsonUtils.toJsonString(importData);
+            exportData = JsonUtils.parseObject(json, MetadataExportDataDTO.class);
+        }
+        if (exportData == null) {
+            log.warn("解析导入数据失败，跳过导入");
             return;
         }
 
         log.info("开始导入数据源，newApplicationId: {}, appUid: {}, tenantId: {}, versionTag: {}",
                 newApplicationId, appUid, tenantId, versionTag);
 
-        //String configJson = JsonUtils.toJsonString(datasourceConfig);
-        //MetadataExportDataDTO exportData = JsonUtils.parseObject(configJson, MetadataExportDataDTO.class);
-        if (exportData == null || exportData.getDatasource() == null) {
-            log.warn("解析导入数据失败或数据源为空，跳过导入");
+        if (exportData.getDatasource() == null) {
+            log.warn("数据源信息为空，跳过导入");
             return;
         }
 
@@ -1004,10 +1013,65 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         }
 
         if (field.getDefaultValue() != null && !field.getDefaultValue().isEmpty()) {
-            def.append(" DEFAULT '").append(field.getDefaultValue()).append("'");
+            String defaultValue = field.getDefaultValue();
+            // 对于特殊的默认值（如时间戳函数、数字等）不加引号
+            if (isSpecialDefaultValue(defaultValue)) {
+                def.append(" DEFAULT ").append(normalizeDefaultValue(defaultValue));
+            } else {
+                def.append(" DEFAULT '").append(defaultValue).append("'");
+            }
         }
 
         return def.toString();
+    }
+
+    /**
+     * 判断是否为特殊的默认值（不需要加引号的值）
+     *
+     * @param defaultValue 默认值
+     * @return 是否为特殊默认值
+     */
+    private boolean isSpecialDefaultValue(String defaultValue) {
+        if (defaultValue == null || defaultValue.isEmpty()) {
+            return false;
+        }
+        String upperValue = defaultValue.toUpperCase().trim();
+        // 时间戳相关函数
+        if (upperValue.contains("CURRENT_TIMESTAMP") || upperValue.contains("NOW()") 
+                || upperValue.contains("CURRENT_DATE") || upperValue.contains("CURRENT_TIME")) {
+            return true;
+        }
+        // 纯数字（包括小数和负数）
+        if (upperValue.matches("^-?\\d+(\\.\\d+)?$")) {
+            return true;
+        }
+        // NULL 值
+        if ("NULL".equals(upperValue)) {
+            return true;
+        }
+        // 布尔值
+        if ("TRUE".equals(upperValue) || "FALSE".equals(upperValue)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 标准化默认值（去除引号等）
+     *
+     * @param defaultValue 原始默认值
+     * @return 标准化后的默认值
+     */
+    private String normalizeDefaultValue(String defaultValue) {
+        if (defaultValue == null) {
+            return "NULL";
+        }
+        String value = defaultValue.trim();
+        // 移除可能存在的外层引号
+        if ((value.startsWith("'") && value.endsWith("'")) || (value.startsWith("\"") && value.endsWith("\""))) {
+            value = value.substring(1, value.length() - 1);
+        }
+        return value;
     }
     //todo metadata_field_type_mapping 表中有存字段类型和数据库类型的映射关系，可以改为从该表中读取映射关系，而不是写死在代码中
     private String mapFieldTypeToDbType(String fieldType, Integer dataLength, Integer decimalPlaces, String datasourceType, java.util.List<FieldTypeMappingDO> typeMappings) {

@@ -9,4 +9,7 @@ public class LoadPageSetReqVO {
     @Schema(description = "页面集id", requiredMode = Schema.RequiredMode.REQUIRED, example = "xxx")
     @NotNull(message = "页面集id不能为空")
     private Long id;
+
+    @Schema(description = "是否是开发模式", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Boolean isDev;
 }

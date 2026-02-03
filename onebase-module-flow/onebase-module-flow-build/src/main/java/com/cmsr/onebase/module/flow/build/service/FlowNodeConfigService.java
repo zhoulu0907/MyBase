@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.flow.api.vo.NodeTypeInfoVO;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorTypeListVO;
 import com.cmsr.onebase.module.flow.build.vo.NodeConfigVO;
 import com.cmsr.onebase.module.flow.core.vo.PageNodeConfigReqVO;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.List;
 
@@ -31,4 +32,14 @@ public interface FlowNodeConfigService {
      * Get connector type info by node code (with full Schema)
      */
     NodeTypeInfoVO getNodeTypeInfo(String nodeCode);
+
+    /**
+     * 查询连接器类型动作配置模板
+     * <p>
+     * 从 flow_node_config.action_config 获取 Formily Schema 模板
+     *
+     * @param typeCode 连接器类型编码（对应 nodeCode）
+     * @return 动作配置模板 JSON
+     */
+    JsonNode getActionSchemaTemplate(String typeCode);
 }

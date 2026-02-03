@@ -46,6 +46,10 @@ public class ConnectorConfigHelper {
      */
     public List<JsonNode> getActions(String configJson) {
         List<JsonNode> actions = new ArrayList<>();
+        if (configJson == null || configJson.trim().isEmpty()) {
+            log.warn("配置为空，返回空列表");
+            return actions;
+        }
         try {
             JsonNode root = objectMapper.readTree(configJson);
             JsonNode actionsNode = root.get(ACTIONS_KEY);
@@ -71,6 +75,9 @@ public class ConnectorConfigHelper {
      * @return 动作配置，不存在返回 null
      */
     public JsonNode findAction(String configJson, String actionId) {
+        if (configJson == null || configJson.trim().isEmpty()) {
+            return null;
+        }
         try {
             JsonNode root = objectMapper.readTree(configJson);
             JsonNode actionsNode = root.get(ACTIONS_KEY);

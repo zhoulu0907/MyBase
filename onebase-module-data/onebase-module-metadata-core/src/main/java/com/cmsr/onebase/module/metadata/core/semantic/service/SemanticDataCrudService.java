@@ -912,7 +912,7 @@ public class SemanticDataCrudService {
      * - 生成编码并写回原始值（rawValue）
      *
      * @param connector 连接器定义
-     * @param fields    字段值映射
+     * @param fields    字段值映射（key为fieldName）
      */
     private void applyConnectorAutoNumbers(SemanticRelationSchemaDTO connector, Map<String, SemanticFieldValueDTO<Object>> fields) {
         if (connector == null || fields == null) {
@@ -920,25 +920,77 @@ public class SemanticDataCrudService {
         }
         List<SemanticFieldSchemaDTO> attrs = connector.getRelationAttributes();
         if (attrs == null || attrs.isEmpty()) {
+            log.debug("[子表自动编号] 连接器 {} 没有字段属性", connector.getTargetEntityTableName());
             return;
         }
-        List<String> fieldIds = attrs.stream()
+        
+        // 打印所有字段及其类型，便于调试
+        if (log.isDebugEnabled()) {
+            for (SemanticFieldSchemaDTO attr : attrs) {
+                log.debug("[子表自动编号] 字段: {}, fieldUuid: {}, fieldType: {}, fieldTypeEnum: {}", 
+                    attr.getFieldName(), attr.getFieldUuid(), attr.getFieldType(), attr.getFieldTypeEnum());
+            }
+        }
+        
+        List<String> fieldUuids = attrs.stream()
                 .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
                 .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
-        if (fieldIds.isEmpty()) {
+        if (fieldUuids.isEmpty()) {
+            log.debug("[子表自动编号] 连接器 {} 没有 AUTO_CODE 类型字段", connector.getTargetEntityTableName());
             return;
         }
-        Map<String, Object> raw = new HashMap<>();
+        log.debug("[子表自动编号] 连接器 {} 找到 AUTO_CODE 字段 UUIDs: {}", connector.getTargetEntityTableName(), fieldUuids);
+        
+        // 构建 fieldUuid -> fieldName 的映射
+        Map<String, String> uuidToNameMap = new HashMap<>();
+        for (SemanticFieldSchemaDTO attr : attrs) {
+            if (attr.getFieldUuid() != null && attr.getFieldName() != null) {
+                uuidToNameMap.put(attr.getFieldUuid(), attr.getFieldName());
+            }
+        }
+        
+        // 构建上下文数据：将字段名映射到 "field_" + fieldUuid 格式的key
+        // 用于支持 FIELD_REF 类型规则项获取引用字段的值
+        Map<String, Object> contextData = new HashMap<>();
         for (Map.Entry<String, SemanticFieldValueDTO<Object>> e : fields.entrySet()) {
             SemanticFieldValueDTO<Object> v = e.getValue();
-            raw.put(e.getKey(), v == null ? null : v.getRawValue());
+            contextData.put(e.getKey(), v == null ? null : v.getRawValue());
         }
-        Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldIds, raw);
+        for (SemanticFieldSchemaDTO attr : attrs) {
+            String fieldName = attr.getFieldName();
+            String fieldUuid = attr.getFieldUuid();
+            if (fieldName != null && fieldUuid != null && contextData.containsKey(fieldName)) {
+                contextData.put("field_" + fieldUuid, contextData.get(fieldName));
+            }
+        }
+        
+        Map<String, String> autoNumbers = autoNumberService.generateDataNumbers(fieldUuids, contextData);
+        log.debug("[子表自动编号] 连接器 {} 生成的自动编号: {}", connector.getTargetEntityTableName(), autoNumbers);
+        
+        // 遍历生成的自动编号，根据fieldUuid找到对应的fieldName，再更新fields map
         for (Map.Entry<String, String> e : autoNumbers.entrySet()) {
-            SemanticFieldValueDTO<Object> v = fields.get(e.getKey());
-            if (v != null) {
-                v.setRawValue(e.getValue());
+            String fieldUuid = e.getKey();
+            String generatedNumber = e.getValue();
+            String fieldName = uuidToNameMap.get(fieldUuid);
+            
+            log.debug("[子表自动编号] 处理字段 fieldUuid={}, fieldName={}, generatedNumber={}", 
+                fieldUuid, fieldName, generatedNumber);
+            
+            if (fieldName != null) {
+                SemanticFieldValueDTO<Object> v = fields.get(fieldName);
+                if (v != null) {
+                    log.debug("[子表自动编号] 更新已存在字段 {} 的值为 {}", fieldName, generatedNumber);
+                    v.setRawValue(generatedNumber);
+                } else {
+                    // 如果fields中不存在该字段，创建一个新的字段值并添加
+                    log.debug("[子表自动编号] 创建新字段 {} 并设置值为 {}", fieldName, generatedNumber);
+                    SemanticFieldValueDTO<Object> newFieldValue = new SemanticFieldValueDTO<>(AUTO_CODE);
+                    newFieldValue.setFieldUuid(fieldUuid);
+                    newFieldValue.setFieldName(fieldName);
+                    newFieldValue.setRawValue(generatedNumber);
+                    fields.put(fieldName, newFieldValue);
+                }
             }
         }
     }

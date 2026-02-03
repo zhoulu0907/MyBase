@@ -4,7 +4,6 @@ import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefau
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceImportReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 
-import com.cmsr.onebase.module.metadata.api.datasource.dto.export.MetadataExportDataDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,13 +48,27 @@ public interface MetadataDatasourceApi {
     Object getDatasource(@PathVariable("id") Long id);
 
     /**
-     * TODO(biantianyu): 实现导入导出接口
-     * */
+     * 导出数据源信息
+     *
+     * @param applicationId 应用ID
+     * @param versionTag 版本标签
+     * @return 导出的数据源配置信息
+     */
     @Operation(summary = "导出数据源信息")
-    MetadataExportDataDTO exportDatasource(Long applicationId, Long versionTag);
+    Object exportDatasource(Long applicationId, Long versionTag);
 
+    /**
+     * 导入数据源信息
+     *
+     * @param newApplicationId 新应用ID
+     * @param appUid 应用UID
+     * @param tenantId 租户ID
+     * @param versionTag 版本标签
+     * @param importData 导入的数据源配置信息
+     * @param reqDTO 导入请求参数
+     */
     @Operation(summary = "导入数据源信息")
-    void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, MetadataExportDataDTO importData, DatasourceImportReqDTO reqDTO);
+    void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object importData, DatasourceImportReqDTO reqDTO);
 
 
 }

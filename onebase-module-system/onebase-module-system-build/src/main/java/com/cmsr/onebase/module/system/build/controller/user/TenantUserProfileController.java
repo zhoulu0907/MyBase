@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.build.controller.user;
 
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.module.system.vo.user.UserProfileRespVO;
@@ -66,7 +67,7 @@ public class TenantUserProfileController {
     @Operation(summary = "修改用户个人信息")
     @PreAuthorize("@ss.hasPermission('tenant:profile:query')")
     public CommonResult<Boolean> updateUserProfile(@Valid @RequestBody UserProfileUpdateReqVO reqVO) {
-        userService.updateUserProfile(getLoginUserId(), reqVO);
+        userService.updateUserProfile(getLoginUserId(), reqVO, UserTypeEnum.TENANT.getValue());
         return success(true);
     }
 
