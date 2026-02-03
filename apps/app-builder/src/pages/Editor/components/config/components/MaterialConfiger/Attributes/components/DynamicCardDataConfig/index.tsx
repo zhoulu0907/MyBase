@@ -53,8 +53,8 @@ export const hiddenSearchFieldTypes = [
   ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
   ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
   ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE,
-  ENTITY_FIELD_TYPE.FILE,
-  ENTITY_FIELD_TYPE.IMAGE
+  ENTITY_FIELD_TYPE.FILE.VALUE,
+  ENTITY_FIELD_TYPE.IMAGE.VALUE
 ];
 
 const DynamicCardDataConfig = ({ handlePropsChange, handleMultiPropsChange, item, configs }: Props) => {
