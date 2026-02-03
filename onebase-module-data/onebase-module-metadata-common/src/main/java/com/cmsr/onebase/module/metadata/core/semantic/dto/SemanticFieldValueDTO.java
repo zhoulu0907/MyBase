@@ -1,11 +1,14 @@
+
 package com.cmsr.onebase.module.metadata.core.semantic.dto;
 
 import java.math.BigDecimal;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.Date;
@@ -73,6 +76,13 @@ public class SemanticFieldValueDTO<T> {
             }
             return formatScalarForJson(raw);
         }
+        // 修复：RefType类型返回{id, name}结构
+        if (raw instanceof com.cmsr.onebase.module.metadata.core.semantic.type.RefType ref) {
+            Map<String, Object> refMap = new HashMap<>();
+            refMap.put("id", ref.getId());
+            refMap.put("name", ref.getName());
+            return refMap;
+        }
         return formatScalarForJson(raw);
     }
 
@@ -80,7 +90,7 @@ public class SemanticFieldValueDTO<T> {
         if (v == null) return null;
         if (v instanceof LocalDate d) return d.toString();
         if (v instanceof LocalDateTime dt) return dt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        if (v instanceof RefType) return v;
+        // RefType类型在getRawValueForJson已处理，这里直接返回
         return v;
     }
 
