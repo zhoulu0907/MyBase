@@ -158,6 +158,10 @@ public class AppDataManager {
         navigationRepository.deleteAllApplicationData(applicationId);
     }
 
+    public void deleteAuthRole(Long applicationId){
+        authRoleRepository.deleteAllApplicationData(applicationId);
+    }
+
     /**
      * 获取应用版本配置数据
      *
