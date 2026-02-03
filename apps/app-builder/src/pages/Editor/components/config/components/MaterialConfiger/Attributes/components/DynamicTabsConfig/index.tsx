@@ -116,6 +116,7 @@ const DynamicTabsConfig: React.FC<DynamicTabsConfigProps> = ({
                         shape="circle"
                         size="mini"
                         status="danger"
+                        disabled={tabsConfig?.length < 2}
                         // className={styles.tableColumnItemButton}
                         onClick={() => {
                           const newList = [...tabsConfig];
