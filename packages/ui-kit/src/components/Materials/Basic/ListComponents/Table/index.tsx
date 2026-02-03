@@ -478,7 +478,7 @@ const XTable = memo(
       // TODO(mickey): 考虑模糊查询和范围查询
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && !Array.isArray(value)) {
           if (value?.id == undefined || value?.id == null || value?.id == '') {
             return;
           }
@@ -489,7 +489,7 @@ const XTable = memo(
             nodeType: 'CONDITION',
             fieldName: key,
             operator: VALIDATION_TYPE.EQUALS,
-            fieldValue: typeof value === 'object' ? [value?.id] : [value]
+            fieldValue: Array.isArray(value) ? value : (typeof value === 'object' ? [value?.id] : [value])
           });
         }
       });
