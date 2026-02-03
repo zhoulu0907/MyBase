@@ -37,7 +37,7 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
 
   return (
     <Tabs
-      className="XPreviewTabsLayout"
+      className={pageType === EDITOR_TYPES.LIST_EDITOR ? "XPreviewTabsLayout listPreviewTabsLayout": "XPreviewTabsLayout"}
       activeTab={activeTab}
       type={type}
       tabPosition={tabPosition}
