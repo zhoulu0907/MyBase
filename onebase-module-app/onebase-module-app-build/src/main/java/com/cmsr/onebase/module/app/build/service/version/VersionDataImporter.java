@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.app.build.service.version;
 
 import java.util.List;
 
+import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.util.CollectionUtils;
 
 import com.cmsr.onebase.framework.orm.entity.BaseAppEntity;
