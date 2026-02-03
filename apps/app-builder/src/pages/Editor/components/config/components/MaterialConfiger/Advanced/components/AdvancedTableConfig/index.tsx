@@ -59,7 +59,7 @@ export interface AdvancedTableOperationConfigProps {
 
 const openTypeOptions = [
   { label: '侧边栏', value: RedirectMethod.DRAWER },
-  { label: '新页签', value: RedirectMethod.NEW_TAB }
+  // { label: '新页签', value: RedirectMethod.NEW_TAB }
 ];
 
 // 按钮显示方式
