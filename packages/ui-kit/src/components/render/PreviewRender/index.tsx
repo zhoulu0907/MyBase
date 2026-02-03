@@ -126,7 +126,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
     // 预览状态下首行tooltip位置控制
-    const previewTooltipPosition = preview ? tooltipPosition : 'top'
+    const previewTooltipPosition = preview ? tooltipPosition : 'top';
     const baseProps: any = { cpName: cpId, id: cpId, pageSetType, tooltipPosition: previewTooltipPosition, ...componentConfig };
 
     if (descriptor) {
@@ -138,6 +138,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         baseProps.pageType = pageType;
         baseProps.showFromPageData = showFromPageData;
         baseProps.detailMode = detailMode;
+        baseProps.refresh = refresh;
       }
       if (descriptor.template.category === 'list') {
         baseProps.runtime = runtime;

@@ -50,7 +50,7 @@ export default function DictionaryTable({
   return (
     <>
       <div className={s.tableHeader}>
-        <Button permission={ACTIONS.CREATE} type="primary" onClick={onBatchConfig}>
+        <Button permission={ACTIONS.UPDATE} type="primary" onClick={onBatchConfig}>
           字典值配置
         </Button>
         <Input.Search

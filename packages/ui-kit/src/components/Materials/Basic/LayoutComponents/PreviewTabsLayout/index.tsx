@@ -9,8 +9,8 @@ import type { XTabsLayoutConfig } from './schema';
 
 const TabPane = Tabs.TabPane;
 
-const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boolean, showFromPageData?: Function }) => {
-  const { id, defaultValue = [], type, colCount, tabPosition, pageType, detailMode, showFromPageData } = props;
+const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boolean, showFromPageData?: Function; refresh?: number; }) => {
+  const { id, defaultValue = [], type, colCount, tabPosition, pageType, detailMode, showFromPageData, refresh } = props;
   useSignals();
 
   const {
@@ -88,6 +88,7 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
                           pageComponentSchema={pageComponentSchemas[cp.id]}
                           showFromPageData={showFromPageData}
                           runtime={true}
+                          refresh={refresh}
                           detailMode={detailMode}
                         />
                       </div>
