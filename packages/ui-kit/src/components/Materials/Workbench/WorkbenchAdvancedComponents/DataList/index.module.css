@@ -1,3 +1,10 @@
+.containerStyle {
+  width: 100%;
+  padding: 16px;
+  border-radius: 8;
+  box-sizing: border-box;
+}
+
 .container {
   width: 100%;
   min-height: 120px;

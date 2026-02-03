@@ -1,3 +1,10 @@
+.containerStyle {
+  width: 100%;
+  /* padding: 16px; */
+  border-radius: 8;
+  box-sizing: border-box;
+}
+
 .welcomeCard {
   position: relative;
   border-radius: 8px;
