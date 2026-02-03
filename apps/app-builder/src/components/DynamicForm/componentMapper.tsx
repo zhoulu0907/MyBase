@@ -11,22 +11,22 @@ import {
   Select,
   Slider,
   Space,
-  Switch,
-  TimePicker,
-  TreeSelect,
-  Upload,
   Steps,
+  Switch,
   Table,
   Tabs,
-} from "@arco-design/web-react";
-import { IconDelete, IconPlus } from "@arco-design/web-react/icon";
-import { connect, mapProps, RecursionField, useField, useFieldSchema, useForm, observer } from "@formily/react";
-import React from "react";
-import ReactCodeMirror from "@uiw/react-codemirror";
-import { json } from "@codemirror/lang-json";
+  TimePicker,
+  TreeSelect,
+  Upload
+} from '@arco-design/web-react';
+import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
+import { json } from '@codemirror/lang-json';
+import { Decoration, EditorView, MatchDecorator, ViewPlugin } from '@codemirror/view';
+import { connect, mapProps, observer, RecursionField, useField, useFieldSchema, useForm } from '@formily/react';
+import ReactCodeMirror from '@uiw/react-codemirror';
+import React from 'react';
 import { AuthSettingsCard, KeyValueList } from './AuthComponents';
 import { TokenAuthPanel } from './TokenAuthPanel';
-import { MatchDecorator, ViewPlugin, Decoration, EditorView } from "@codemirror/view";
 
 // 通用的 mapProps 辅助函数
 type MapPropsOptions = {
@@ -65,9 +65,9 @@ const createFormilyComponent = <T extends React.ComponentType<any>>(Component: T
 
 // 使用 connect 包装 Arco Design 组件，使其兼容 Formily
 // Formily 会自动传递 value 和 onChange，我们只需要确保它们正确映射到 Arco 组件
-const FormilyInput = createFormilyComponent(Input, { defaultValue: "" });
-const FormilyPassword = createFormilyComponent(Input.Password, { defaultValue: "" });
-const FormilyInputPassword = createFormilyComponent(Input.Password, { defaultValue: "" });
+const FormilyInput = createFormilyComponent(Input, { defaultValue: '' });
+const FormilyPassword = createFormilyComponent(Input.Password, { defaultValue: '' });
+const FormilyInputPassword = createFormilyComponent(Input.Password, { defaultValue: '' });
 const FormilyInputNumber = createFormilyComponent(InputNumber);
 const FormilyTextArea = createFormilyComponent(Input.TextArea, { defaultValue: '' });
 
@@ -111,7 +111,6 @@ const FormilySwitch = createFormilyComponent(Switch, {
 const FormilyRadio = createFormilyComponent(Radio.Group);
 // 兼容 x-component: "Radio.Group" 的写法
 (FormilyRadio as any).Group = FormilyRadio;
-
 
 // Radio.Group 组件需要特殊处理 enum 选项
 const RadioInner: React.FC<any> = (props: any) => {
@@ -172,14 +171,12 @@ const FormilyTreeSelect = createFormilyComponent(TreeSelect);
 const StepNav: React.FC<any> = observer((props) => {
   const form = useForm();
   const stepsProp = props.steps as { key: string; title: string }[] | undefined;
-  const steps =
-    stepsProp ||
-    [
-      { key: "basic", title: "基础信息" },
-      { key: "input", title: "入参配置" },
-      { key: "output", title: "出参配置" },
-      { key: "test", title: "接口调试" },
-    ];
+  const steps = stepsProp || [
+    { key: 'basic', title: '基础信息' },
+    { key: 'input', title: '入参配置' },
+    { key: 'output', title: '出参配置' },
+    { key: 'test', title: '接口调试' }
+  ];
 
   const currentKey = (form.values as any)?.currentStep || steps[0].key;
   const currentIndex = Math.max(
@@ -189,7 +186,7 @@ const StepNav: React.FC<any> = observer((props) => {
 
   React.useEffect(() => {
     if (!(form.values as any)?.currentStep) {
-      form.setValuesIn("currentStep", steps[0].key);
+      form.setValuesIn('currentStep', steps[0].key);
     }
   }, [form, steps]);
 
@@ -199,7 +196,7 @@ const StepNav: React.FC<any> = observer((props) => {
       onChange={(index) => {
         const item = steps[index - 1];
         if (item) {
-          form.setValuesIn("currentStep", item.key);
+          form.setValuesIn('currentStep', item.key);
         }
       }}
     >
@@ -229,61 +226,44 @@ const ParamsTableInner: React.FC<any> = () => {
 
   const columns = [
     {
-      title: "字段 Key",
-      dataIndex: "key",
+      title: '字段 Key',
+      dataIndex: 'key',
       render: (value: any, _record: any, index: number) => (
-        <Input
-          value={value}
-          onChange={(v) => setRow(index, { key: v })}
-        />
-      ),
+        <Input value={value} onChange={(v) => setRow(index, { key: v })} />
+      )
     },
     {
-      title: "字段名称",
-      dataIndex: "label",
+      title: '字段名称',
+      dataIndex: 'label',
       render: (value: any, _record: any, index: number) => (
-        <Input
-          value={value}
-          onChange={(v) => setRow(index, { label: v })}
-        />
-      ),
+        <Input value={value} onChange={(v) => setRow(index, { label: v })} />
+      )
     },
     {
-      title: "字段类型",
-      dataIndex: "type",
+      title: '字段类型',
+      dataIndex: 'type',
       render: (value: any, _record: any, index: number) => (
-        <Select
-          value={value}
-          onChange={(v) => setRow(index, { type: v })}
-        >
+        <Select value={value} onChange={(v) => setRow(index, { type: v })}>
           <Select.Option value="string">string</Select.Option>
           <Select.Option value="number">number</Select.Option>
           <Select.Option value="boolean">boolean</Select.Option>
         </Select>
-      ),
+      )
     },
     {
-      title: "字段描述",
-      dataIndex: "description",
+      title: '字段描述',
+      dataIndex: 'description',
       render: (value: any, _record: any, index: number) => (
-        <Input
-          value={value}
-          onChange={(v) => setRow(index, { description: v })}
-        />
-      ),
+        <Input value={value} onChange={(v) => setRow(index, { description: v })} />
+      )
     },
     {
-      title: "操作",
-      dataIndex: "operation",
+      title: '操作',
+      dataIndex: 'operation',
       render: (_value: any, _record: any, index: number) => (
-        <Button
-          type="text"
-          status="danger"
-          icon={<IconDelete />}
-          onClick={() => removeRow(index)}
-        />
-      ),
-    },
+        <Button type="text" status="danger" icon={<IconDelete />} onClick={() => removeRow(index)} />
+      )
+    }
   ];
 
   return (
@@ -303,15 +283,15 @@ const ParamsTableInner: React.FC<any> = () => {
             ...data,
             {
               _id: Date.now() + Math.random().toString(36).slice(2),
-              key: "",
-              label: "",
-              type: "string",
-              description: "",
-            },
+              key: '',
+              label: '',
+              type: 'string',
+              description: ''
+            }
           ];
           field.setValue(next);
         }}
-        style={{ width: "100%", marginTop: 8 }}
+        style={{ width: '100%', marginTop: 8 }}
       >
         添加
       </Button>
@@ -322,10 +302,10 @@ const ParamsTableInner: React.FC<any> = () => {
 const ConnectorParamsInner: React.FC<any> = observer(() => {
   const form = useForm();
 
-  const headers = (form.getValuesIn("inputGroup.headers") || []) as any[];
-  const queryParams = (form.getValuesIn("inputGroup.queryParams") || []) as any[];
-  const pathParams = (form.getValuesIn("inputGroup.pathParams") || []) as any[];
-  const bodyRaw = form.getValuesIn("inputGroup.body") as any;
+  const headers = (form.getValuesIn('inputGroup.headers') || []) as any[];
+  const queryParams = (form.getValuesIn('inputGroup.queryParams') || []) as any[];
+  const pathParams = (form.getValuesIn('inputGroup.pathParams') || []) as any[];
+  const bodyRaw = form.getValuesIn('inputGroup.body') as any;
 
   type Row = {
     id: string;
@@ -347,7 +327,7 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
       id,
       name: variableName,
       label: usage,
-      location: `${source}变量`,
+      location: `${source}变量`
     });
   };
 
@@ -357,19 +337,19 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
         id: `header-${item.key}`,
         name: item.key,
         label: item.label,
-        location: "HTTP请求头",
+        location: 'HTTP请求头'
       });
     }
 
     if (item) {
       Object.keys(item).forEach((k) => {
         const v = (item as any)[k];
-        if (typeof v === "string") {
+        if (typeof v === 'string') {
           const regexp = /\$\{([^}]+)\}/g;
           let match: RegExpExecArray | null;
           while ((match = regexp.exec(v))) {
             const varName = match[1];
-            addVariableRow("HTTP请求头", varName, item.key ? `${item.key}.${k}` : k);
+            addVariableRow('HTTP请求头', varName, item.key ? `${item.key}.${k}` : k);
           }
         }
       });
@@ -382,19 +362,19 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
         id: `query-${item.key}`,
         name: item.key,
         label: item.label,
-        location: "URL查询参数",
+        location: 'URL查询参数'
       });
     }
 
     if (item) {
       Object.keys(item).forEach((k) => {
         const v = (item as any)[k];
-        if (typeof v === "string") {
+        if (typeof v === 'string') {
           const regexp = /\$\{([^}]+)\}/g;
           let match: RegExpExecArray | null;
           while ((match = regexp.exec(v))) {
             const varName = match[1];
-            addVariableRow("URL查询参数", varName, item.key ? `${item.key}.${k}` : k);
+            addVariableRow('URL查询参数', varName, item.key ? `${item.key}.${k}` : k);
           }
         }
       });
@@ -407,19 +387,19 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
         id: `path-${item.key}`,
         name: item.key,
         label: item.label,
-        location: "URL路径参数",
+        location: 'URL路径参数'
       });
     }
 
     if (item) {
       Object.keys(item).forEach((k) => {
         const v = (item as any)[k];
-        if (typeof v === "string") {
+        if (typeof v === 'string') {
           const regexp = /\$\{([^}]+)\}/g;
           let match: RegExpExecArray | null;
           while ((match = regexp.exec(v))) {
             const varName = match[1];
-            addVariableRow("URL路径参数", varName, item.key ? `${item.key}.${k}` : k);
+            addVariableRow('URL路径参数', varName, item.key ? `${item.key}.${k}` : k);
           }
         }
       });
@@ -430,7 +410,7 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
     if (value === null || value === undefined) {
       return;
     }
-    if (typeof value === "object" && !Array.isArray(value)) {
+    if (typeof value === 'object' && !Array.isArray(value)) {
       Object.keys(value).forEach((key) => {
         const nextPath = prefix ? `${prefix}.${key}` : key;
         addBodyParams(nextPath, value[key]);
@@ -444,21 +424,21 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
       });
       return;
     }
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       const regexp = /\$\{([^}]+)\}/g;
       let match: RegExpExecArray | null;
       while ((match = regexp.exec(value))) {
         const varName = match[1];
-        addVariableRow("HTTP请求体", varName, prefix);
+        addVariableRow('HTTP请求体', varName, prefix);
       }
     }
     // Body keys are structural and should not be treated as parameters unless they contain variables
   };
 
-  if (typeof bodyRaw === "string" && bodyRaw.trim()) {
+  if (typeof bodyRaw === 'string' && bodyRaw.trim()) {
     try {
       const parsed = JSON.parse(bodyRaw);
-      addBodyParams("", parsed);
+      addBodyParams('', parsed);
     } catch {
       // ignore invalid json
     }
@@ -466,28 +446,20 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
 
   const columns = [
     {
-      title: "参数名",
-      dataIndex: "name",
+      title: '参数名',
+      dataIndex: 'name'
     },
     {
-      title: "来源",
-      dataIndex: "location",
+      title: '来源',
+      dataIndex: 'location'
     },
     {
-      title: "说明",
-      dataIndex: "label",
-    },
+      title: '说明',
+      dataIndex: 'label'
+    }
   ];
 
-  return (
-    <Table
-      size="small"
-      pagination={false}
-      columns={columns}
-      data={rows}
-      rowKey={(record) => record.id}
-    />
-  );
+  return <Table size="small" pagination={false} columns={columns} data={rows} rowKey={(record) => record.id} />;
 });
 
 // ArrayItems 组件 - 支持动态增减数组项
@@ -565,25 +537,16 @@ const ArrayItemsInner: React.FC<any> = () => {
 
 export const FormilyArrayItems = connect(ArrayItemsInner, mapProps());
 
-export const FormilyStepNav = connect(
-  StepNav,
-  mapProps()
-);
+export const FormilyStepNav = connect(StepNav, mapProps());
 
-export const FormilyParamsTable = connect(
-  ParamsTableInner,
-  mapProps()
-);
+export const FormilyParamsTable = connect(ParamsTableInner, mapProps());
 
-export const FormilyConnectorParamsTable = connect(
-  ConnectorParamsInner,
-  mapProps()
-);
+export const FormilyConnectorParamsTable = connect(ConnectorParamsInner, mapProps());
 
 const SectionTitleInner: React.FC<any> = (props) => {
   const field = useField();
   const title = props.title || field.title;
-  
+
   return (
     <div
       style={{
@@ -601,22 +564,17 @@ const SectionTitleInner: React.FC<any> = (props) => {
   );
 };
 
-export const FormilySectionTitle = connect(
-  SectionTitleInner,
-  mapProps()
-);
+export const FormilySectionTitle = connect(SectionTitleInner, mapProps());
 
 const StepActionsInner: React.FC<any> = observer((props) => {
   const form = useForm();
   const stepsProp = props.steps as { key: string; title: string }[] | undefined;
-  const steps =
-    stepsProp ||
-    [
-      { key: "basic", title: "基础信息" },
-      { key: "input", title: "入参配置" },
-      { key: "output", title: "出参配置" },
-      { key: "test", title: "接口调试" },
-    ];
+  const steps = stepsProp || [
+    { key: 'basic', title: '基础信息' },
+    { key: 'input', title: '入参配置' },
+    { key: 'output', title: '出参配置' },
+    { key: 'test', title: '接口调试' }
+  ];
 
   const currentKey = (form.values as any)?.currentStep || steps[0].key;
   const currentIndex = Math.max(
@@ -630,7 +588,7 @@ const StepActionsInner: React.FC<any> = observer((props) => {
         disabled={currentIndex === 0}
         onClick={() => {
           if (currentIndex > 0) {
-            form.setValuesIn("currentStep", steps[currentIndex - 1].key);
+            form.setValuesIn('currentStep', steps[currentIndex - 1].key);
           }
         }}
       >
@@ -642,7 +600,7 @@ const StepActionsInner: React.FC<any> = observer((props) => {
         onClick={() => {
           if (currentIndex < steps.length - 1) {
             // TODO: Validate current step fields before proceeding
-            form.setValuesIn("currentStep", steps[currentIndex + 1].key);
+            form.setValuesIn('currentStep', steps[currentIndex + 1].key);
           }
         }}
       >
@@ -652,10 +610,7 @@ const StepActionsInner: React.FC<any> = observer((props) => {
   );
 });
 
-export const FormilyStepActions = connect(
-  StepActionsInner,
-  mapProps()
-);
+export const FormilyStepActions = connect(StepActionsInner, mapProps());
 
 const FormilyTabsInner: React.FC<any> = observer((props) => {
   const schema = useFieldSchema();
@@ -679,7 +634,7 @@ export const FormilyTabs = connect(FormilyTabsInner);
 
 const HorizontalLayoutInner: React.FC<any> = observer((props) => {
   const schema = useFieldSchema();
-  
+
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
       <RecursionField schema={schema} onlyRenderProperties />
@@ -694,28 +649,31 @@ const variableMatcher = new MatchDecorator({
   regexp: /\$\{([^}]+)\}/g,
   decoration: Decoration.mark({
     attributes: {
-      style: "color: #1677ff; background: #e6f4ff; border-radius: 2px; padding: 0 2px; border: 1px solid #91caff;"
+      style: 'color: #1677ff; background: #e6f4ff; border-radius: 2px; padding: 0 2px; border: 1px solid #91caff;'
     }
   })
 });
 
-const variablePlugin = ViewPlugin.fromClass(class {
-  placeholders: any
-  constructor(view: EditorView) {
-    this.placeholders = variableMatcher.createDeco(view)
+const variablePlugin = ViewPlugin.fromClass(
+  class {
+    placeholders: any;
+    constructor(view: EditorView) {
+      this.placeholders = variableMatcher.createDeco(view);
+    }
+    update(update: any) {
+      this.placeholders = variableMatcher.updateDeco(update, this.placeholders);
+    }
+  },
+  {
+    decorations: (instance) => instance.placeholders
   }
-  update(update: any) {
-    this.placeholders = variableMatcher.updateDeco(update, this.placeholders)
-  }
-}, {
-  decorations: instance => instance.placeholders
-});
+);
 
 const JsonEditorInner: React.FC<any> = (props) => {
   const { value, onChange, ...rest } = props;
   return (
     <ReactCodeMirror
-      value={typeof value === 'string' ? value : (value ? JSON.stringify(value, null, 2) : '')}
+      value={typeof value === 'string' ? value : value ? JSON.stringify(value, null, 2) : ''}
       height="300px"
       extensions={[json(), variablePlugin]}
       onChange={(val) => {
@@ -732,7 +690,7 @@ export const FormilyJsonEditor = connect(
   JsonEditorInner,
   mapProps((props) => {
     return {
-      ...props,
+      ...props
     };
   })
 );
