@@ -279,6 +279,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                     preview={preview}
                     showFromPageData={showFromPageData}
                     pageSetType={pagesetType}
+                    pageType={pageType}
                   />
                 </div>
               )}

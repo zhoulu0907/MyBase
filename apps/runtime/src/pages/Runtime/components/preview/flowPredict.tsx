@@ -1,6 +1,7 @@
 import { useEffect, useState, type FC } from 'react';
 import { Steps, Avatar } from '@arco-design/web-react';
 import { fetchFlowPredict } from '@onebase/app/src/services/app_runtime';
+import { getCorpResourceById } from '@onebase/common';
 // import styles from './index.module.less';
 import './flow.less'
 
@@ -21,7 +22,7 @@ const FlowPredict = ({ businessUuid, entityParam }: any) => {
       <div className='predictBox'>
         <Avatar.Group>
           {imgArr.map((item:any) => {
-            return item?.img ? <Avatar><img src={item.img} alt='' /></Avatar> : <Avatar>{item?.text}</Avatar>
+            return item?.img ? <Avatar><img src={getCorpResourceById(item.img)} alt='' /></Avatar> : <Avatar>{item?.text}</Avatar>
           })}
         </Avatar.Group>
         <div className='predictText'>

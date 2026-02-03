@@ -642,7 +642,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     <Button
                       type="text"
                       size="small"
-                      status="success"
                       style={{ padding: '0 4px' }}
                       icon={<IconEdit />}
                     ></Button>

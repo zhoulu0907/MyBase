@@ -62,8 +62,8 @@ export const createPagesRuntimeSignal = () => {
     flows.value = [];
   };
 
-  const rowDataType = signal<string>('');
-  const setRowDataType = (newRowDataType: string) => {
+  const rowDataType = signal<string | number>('');
+  const setRowDataType = (newRowDataType: string | number) => {
     rowDataType.value = newRowDataType;
   }
 
