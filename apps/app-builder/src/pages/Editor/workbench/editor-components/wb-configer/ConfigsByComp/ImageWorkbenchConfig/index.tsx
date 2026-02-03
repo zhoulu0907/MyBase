@@ -43,7 +43,7 @@ const ImageWorkbenchConfig = () => {
               {labelItems && <div>{renderEditItem(labelItems)}</div>}
             </CollapseItem>
             <CollapseItem header="图片配置" name={SECTION_KEYS.CONTENT} contentStyle={PanelContentStyle}>
-              {imageItems && <div>{renderEditItem(imageItems)}</div>}
+              {imageItems && <div className={styles.imageConfig}>{renderEditItem(imageItems)}</div>}
               {fillItems && <div>{renderEditItem(fillItems)}</div>}
             </CollapseItem>
             <CollapseItem header="跳转配置" name={SECTION_KEYS.JUMP} contentStyle={PanelContentStyle}>
