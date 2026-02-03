@@ -16,7 +16,7 @@ import {
   Typography
 } from '@arco-design/web-react';
 import { getApplicationSimple, type Application, type PageParam } from '@onebase/app';
-import { TENANT_PROFILE_PERMISSION as ACTIONS, hasPermission /* UserPermissionManager */ } from '@onebase/common';
+import { TENANT_PROFILE_PERMISSION as ACTIONS, hasPermission, hasAnyPermission } from '@onebase/common';
 import type { CorpDetailResponse, DictData, PostSimpleRespVO, RoleSimpleRespVO } from '@onebase/platform-center';
 import { getCorpListApi, getDictDataByType, getLoginedUser, getFileUrlById } from '@onebase/platform-center';
 import { appIconMap } from '@onebase/ui-kit';
@@ -263,9 +263,11 @@ const ProfilePage: React.FC = () => {
 
           {/* 右上角编辑按钮 */}
           <Col flex="none">
-            <Button type="secondary" onClick={handleGoEditPage}>
-              编辑
-            </Button>
+            {hasAnyPermission([ACTIONS.UPDATE, ACTIONS.RESETPWD]) && (
+              <Button type="secondary" onClick={handleGoEditPage}>
+                编辑
+              </Button>
+            )}
           </Col>
         </Row>
 
