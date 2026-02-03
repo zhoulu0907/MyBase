@@ -140,6 +140,17 @@ public class FlowConnectorController {
         return CommonResult.success(template);
     }
 
+    @Operation(summary = "保存连接器环境配置",
+              description = "保存新的环境配置到 connector.config，如果环境已存在则拒绝")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @PutMapping("/{id}/environments")
+    public CommonResult<Boolean> saveEnvironmentConfig(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid SaveEnvironmentConfigReqVO reqVO) {
+        Boolean result = connectorService.saveEnvironmentConfig(id, reqVO);
+        return CommonResult.success(result);
+    }
+
     // ==================== 动作管理接口 ====================
 
     @Operation(summary = "查询连接器动作清单")
