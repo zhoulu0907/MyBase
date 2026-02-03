@@ -47,4 +47,14 @@ public interface FlowErrorCodeConstants {
      * 动作配置模板为空
      */
     ErrorCode ACTION_CONFIG_EMPTY = new ErrorCode(1123792, "动作配置模板为空");
+
+    /**
+     * 环境配置已存在
+     */
+    ErrorCode ENV_ALREADY_EXISTS = new ErrorCode(1123793, "环境配置已存在");
+
+    /**
+     * 环境配置格式无效
+     */
+    ErrorCode INVALID_ENV_CONFIG = new ErrorCode(1123794, "环境配置格式无效");
 }
