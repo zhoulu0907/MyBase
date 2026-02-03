@@ -23,8 +23,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,16 +35,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.mybatisflex.core.paginate.Page;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 @Slf4j
 @Setter
@@ -216,10 +209,10 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     public String jsonNodeToString(JsonNode jsonNode) {
-        if (jsonNode == null || jsonNode instanceof NullNode) {
+        if (jsonNode == null || jsonNode.isNull()) {
             return null;
         }
-        if (jsonNode instanceof TextNode) {
+        if (jsonNode.isTextual()) {
             return jsonNode.asText();
         }
         return JsonUtils.toJsonString(jsonNode);
@@ -511,14 +504,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         log.info("getActionSchema success, connectorId: {}, actionCode: {}", connectorId, actionCode);
         return schema;
-    }
-    
-    /**
-     * 辅助方法：安全获取 JSON 字段文本值
-     */
-    private String getJsonText(JsonNode node, String fieldName) {
-        JsonNode field = node.get(fieldName);
-        return (field != null && !field.isNull()) ? field.asText() : null;
     }
 
     @Override
@@ -900,61 +885,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     public Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO) {
         log.info("saveEnvironmentConfig start, connectorId: {}", connectorId);
 
-        // 1. 查询连接器实例
+        // 1. 查询并验证连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
         if (connector == null) {
             log.warn("Connector not found, id: {}", connectorId);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 解析现有 config
-        String configJson = connector.getConfig();
-        ObjectNode rootConfig;
-        if (StringUtils.isBlank(configJson)) {
-            // 创建新的 config 结构
-            rootConfig = objectMapper.createObjectNode();
-            rootConfig.putObject("properties");
-            rootConfig.putObject("_metadata");
-        } else {
-            try {
-                rootConfig = (ObjectNode) objectMapper.readTree(configJson);
-            } catch (JsonProcessingException e) {
-                log.error("Failed to parse config JSON, connectorId: {}", connectorId, e);
-                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
-            }
-        }
-
+        // 2. 解析或创建根配置
+        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
         ObjectNode properties = rootConfig.withObject("properties");
 
-        // 3. 解析请求配置，提取环境信息
-        // 请求格式: {"envMode": "create", "envConfig": {"basicInfo": {"envName": "UAT环境配置", ...}, "authInfo": {...}}}
-        // reqVO.getConfig() 已经是 config 对象了
-        JsonNode configNode = reqVO.getConfig();
-        if (configNode == null || !configNode.isObject()) {
-            log.warn("Invalid config format, config node is null or not object");
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
-        }
-
-        // 提取 envName 作为 key
-        JsonNode envConfigNode = configNode.get("envConfig");
-        if (envConfigNode == null || !envConfigNode.isObject()) {
-            log.warn("Invalid config format, envConfig node is null or not object");
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
-        }
-
-        JsonNode basicInfoNode = envConfigNode.get("basicInfo");
-        if (basicInfoNode == null || !basicInfoNode.isObject()) {
-            log.warn("Invalid config format, basicInfo node is null or not object");
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
-        }
-
-        JsonNode envNameNode = basicInfoNode.get("envName");
-        if (envNameNode == null || envNameNode.isNull()) {
-            log.warn("Invalid config format, envName is null");
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
-        }
-
-        String envName = envNameNode.asText();
+        // 3. 从请求中提取环境名称
+        String envName = extractEnvNameFromConfig(reqVO.getConfig());
 
         // 4. 检查环境是否已存在
         if (properties.has(envName)) {
@@ -962,28 +905,98 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_ALREADY_EXISTS);
         }
 
-        // 5. 添加新环境配置（将整个 config 对象存储）
-        properties.set(envName, configNode);
+        // 5. 添加新环境配置
+        properties.set(envName, reqVO.getConfig());
 
-        // 6. 更新 metadata
-        ObjectNode metadata = rootConfig.withObject("_metadata");
-        int currentVersion = metadata.has("version") ? metadata.get("version").asInt() : 0;
-        metadata.put("version", currentVersion + 1);
-        metadata.put("updatedAt", Instant.now().toString());
+        // 6. 更新元数据版本
+        updateMetadataVersion(rootConfig);
 
         // 7. 保存到数据库
-        String newConfigJson;
-        try {
-            newConfigJson = objectMapper.writeValueAsString(rootConfig);
-        } catch (JsonProcessingException e) {
-            log.error("Failed to serialize config JSON, connectorId: {}", connectorId, e);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
-        }
-
-        connector.setConfig(newConfigJson);
+        connector.setConfig(toJsonString(rootConfig));
         connectorRepository.updateById(connector);
 
         log.info("saveEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
         return Boolean.TRUE;
+    }
+
+    /**
+     * 解析或创建根配置对象
+     *
+     * @param configJson 现有配置JSON，可能为空
+     * @return 根配置对象，包含 properties 和 _metadata 节点
+     */
+    private ObjectNode parseOrCreateRootConfig(String configJson) {
+        ObjectNode rootConfig;
+        if (StringUtils.isBlank(configJson)) {
+            rootConfig = objectMapper.createObjectNode();
+            rootConfig.putObject("properties");
+            rootConfig.putObject("_metadata");
+        } else {
+            try {
+                rootConfig = (ObjectNode) objectMapper.readTree(configJson);
+            } catch (JsonProcessingException e) {
+                log.error("Failed to parse config JSON", e);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+            }
+        }
+        return rootConfig;
+    }
+
+    /**
+     * 从配置节点中提取环境名称
+     * <p>
+     * 配置格式: {"envMode": "...", "envConfig": {"basicInfo": {"envName": "..."}}}
+     *
+     * @param configNode 配置节点
+     * @return 环境名称
+     */
+    private String extractEnvNameFromConfig(JsonNode configNode) {
+        if (configNode == null || !configNode.isObject()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        JsonNode envConfigNode = configNode.get("envConfig");
+        if (envConfigNode == null || !envConfigNode.isObject()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        JsonNode basicInfoNode = envConfigNode.get("basicInfo");
+        if (basicInfoNode == null || !basicInfoNode.isObject()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        JsonNode envNameNode = basicInfoNode.get("envName");
+        if (envNameNode == null || envNameNode.isNull()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        return envNameNode.asText();
+    }
+
+    /**
+     * 更新配置元数据版本号
+     *
+     * @param rootConfig 根配置对象
+     */
+    private void updateMetadataVersion(ObjectNode rootConfig) {
+        ObjectNode metadata = rootConfig.withObject("_metadata");
+        int currentVersion = metadata.has("version") ? metadata.get("version").asInt() : 0;
+        metadata.put("version", currentVersion + 1);
+        metadata.put("updatedAt", Instant.now().toString());
+    }
+
+    /**
+     * 将 JsonNode 序列化为 JSON 字符串
+     *
+     * @param node JSON 节点
+     * @return JSON 字符串
+     */
+    private String toJsonString(JsonNode node) {
+        try {
+            return objectMapper.writeValueAsString(node);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize JSON", e);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
     }
 }
