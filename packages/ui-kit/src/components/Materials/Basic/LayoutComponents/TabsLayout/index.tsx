@@ -46,6 +46,13 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean; detail
     }
   }, [defaultValue, id, layoutSubComponents, setLayoutSubComponents]);
 
+  useEffect(()=>{
+    const isActive = defaultValue?.some(ele=>ele.key===activeTab)
+    if(!isActive && defaultValue?.length){
+      setActiveTab(defaultValue[0]?.key)
+    }
+  },[defaultValue])
+
   return (
     <Tabs
       className="XTabsLayout"
