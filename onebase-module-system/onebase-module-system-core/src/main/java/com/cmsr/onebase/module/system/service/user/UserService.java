@@ -436,4 +436,12 @@ public interface UserService {
      * @return
      */
     long getInnerUserCountByStatus(Integer status);
+
+    /**
+     * 根据token获得用户信息
+     *
+     * @param accessToken 访问令牌
+     * @return 用户信息
+     */
+    UserSimpleRespVO getUserInfoByToken(String accessToken);
 }

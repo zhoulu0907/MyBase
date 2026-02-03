@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.system.runtime.controller.oauth2;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.system.service.oauth2.OAuth2UserService;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class systemOauth2UserController {
 
     @Resource
-    private OAuth2UserService oauth2UserService;
+    private UserService userService;
 
     @PostMapping("/get")
     @Operation(summary = "获取用户信息")
@@ -37,7 +37,7 @@ public class systemOauth2UserController {
     @ApiSignIgnore
     CommonResult<UserSimpleRespVO> getUser(@RequestParam("access_token") String accessToken) {
 
-        return CommonResult.success(oauth2UserService.getUserInfoByToken(accessToken));
+        return CommonResult.success(userService.getUserInfoByToken(accessToken));
     };
 
 }
