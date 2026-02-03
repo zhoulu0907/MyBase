@@ -12,7 +12,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { AuthSettingsCard } from '../../../../../../../../../components/DynamicForm/AuthComponents';
 import { componentMap, FormilyFormItem } from '../../../../../../../../../components/DynamicForm/componentMapper';
-// import { mockConnConfig } from '../../../../../../../../../mocks/connectorSchemas';
+
 import styles from './index.module.less';
 
 interface ConnectorEnvConfigProps {
