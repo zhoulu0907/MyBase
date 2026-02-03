@@ -705,7 +705,7 @@ public class UserServiceImpl implements UserService {
         // 校验用户名唯一
         validateUsernameUnique(id, username);
         // 校验手机号唯一
-        if(user.getUserType() != null && userType == null){
+        if(user != null && userType == null){
             userType = user.getUserType();
         }
         validateMobileUnique(id, mobile, userType);
