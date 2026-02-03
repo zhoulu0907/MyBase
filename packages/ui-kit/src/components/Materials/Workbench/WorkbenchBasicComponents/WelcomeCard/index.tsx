@@ -55,10 +55,11 @@ const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) =>
   }, [theme]);
 
   const cardHeight = theme === WORKBENCH_THEME_OPTIONS.THEME_3 ? '150px' : '96px';
+  const ratio = theme === WORKBENCH_THEME_OPTIONS.THEME_3 ? 271 / 150 : 271 / 96; // 保持宽高比
 
   return (
     <div style={containerStyle}>
-      <div className={styles.welcomeCard} style={{ height: cardHeight }}>
+      <div className={styles.welcomeCard} style={{ minHeight: cardHeight, aspectRatio: ratio }}>
         <img src={backgroundImage} alt="background" className={styles.backgroundImage} />
 
         <div className={styles.welcomeCardContentWrapper}>
