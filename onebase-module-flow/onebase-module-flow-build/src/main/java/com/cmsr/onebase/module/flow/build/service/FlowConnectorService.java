@@ -108,6 +108,18 @@ public interface FlowConnectorService {
      */
     EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId);
 
+    /**
+     * 保存连接器环境配置
+     * <p>
+     * 将新的环境配置添加到 flow_connector.config.properties 中
+     * 如果环境已存在则拒绝保存
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO 环境配置请求
+     * @return 保存是否成功
+     */
+    Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
     // ==================== 动作管理接口 ====================
 
     /**
