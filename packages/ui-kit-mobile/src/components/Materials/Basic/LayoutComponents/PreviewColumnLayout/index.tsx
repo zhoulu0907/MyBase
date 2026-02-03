@@ -54,7 +54,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolea
             {colComponents[index] &&
               colComponents[index].map((cp: GridItem) => (
                 <Fragment key={cp.id}>
-                  {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  {pageComponentSchemas[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                     <div
                       key={cp.id}
                       data-cp-type={cp.type}

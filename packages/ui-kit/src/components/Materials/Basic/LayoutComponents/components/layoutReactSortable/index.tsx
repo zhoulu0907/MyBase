@@ -556,7 +556,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
               {/* 操作按钮 */}
               {curComponentID === cp.id && showDeleteButton && (
                 <div className="operationArea">
-                  {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                     <>
                       <div
                         className="copyButton"
