@@ -23,6 +23,9 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean; detail
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
 
   useEffect(() => {
+    if(!id){
+      return;
+    }
     // 1. 从 props/state 中获取当前列的最新数据。
     const currentColumns = layoutSubComponents[id] || [];
     const newLength = defaultValue.length;
@@ -44,7 +47,7 @@ const XTabsLayout = memo((props: XTabsLayoutConfig & { runtime?: boolean; detail
 
       setLayoutSubComponents(id, updatedColumns);
     }
-  }, [defaultValue, id, layoutSubComponents, setLayoutSubComponents]);
+  }, [defaultValue, id, layoutSubComponents]);
 
   useEffect(()=>{
     const isActive = defaultValue?.some(ele=>ele.key===activeTab)
