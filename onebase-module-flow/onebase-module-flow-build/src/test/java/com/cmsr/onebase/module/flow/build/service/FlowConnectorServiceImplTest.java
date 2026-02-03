@@ -5,14 +5,17 @@ import com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorActionVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvConfigTemplateVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvironmentConfigVO;
+import com.cmsr.onebase.module.flow.build.vo.SaveEnvironmentConfigReqVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
+import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -20,7 +23,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -380,5 +385,107 @@ class FlowConnectorServiceImplTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
         verify(connectorRepository).getById(connectorId);
+    }
+
+    // ==================== saveEnvironmentConfig 测试用例 ====================
+
+    @Test
+    void testSaveEnvironmentConfig_Success() throws Exception {
+        // 准备测试数据
+        Long connectorId = 1L;
+        String existingConfig = "{\"properties\":{\"DEV\":{\"type\":\"object\"}},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(existingConfig);
+
+        // Mock repository 行为
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        // 准备请求 - 使用 ObjectMapper 创建包含 properties 的 JsonNode
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+        String uatConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+        JsonNode uatConfig = new ObjectMapper().readTree(uatConfigJson);
+
+        // 调试：打印 JsonNode 的内容
+        System.out.println("uatConfig: " + uatConfig);
+        System.out.println("uatConfig.isObject(): " + uatConfig.isObject());
+        System.out.println("uatConfig.has('properties'): " + uatConfig.has("properties"));
+        System.out.println("uatConfig.get('properties'): " + uatConfig.get("properties"));
+
+        config.put("UAT", uatConfig);
+        reqVO.setConfig(config);
+
+        // 执行测试
+        Boolean result = connectorService.saveEnvironmentConfig(connectorId, reqVO);
+
+        // 验证结果
+        assertTrue(result);
+        verify(connectorRepository).updateById(any(FlowConnectorDO.class));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_ConnectorNotFound() {
+        Long connectorId = 999L;
+        when(connectorRepository.getById(connectorId)).thenReturn(null);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(Map.of());
+
+        // 执行测试并验证异常
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveEnvironmentConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS, exception.getCode());
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_EnvAlreadyExists() throws Exception {
+        Long connectorId = 1L;
+        String existingConfig = "{\"properties\":{\"DEV\":{\"type\":\"object\"}},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(existingConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+        String devConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+        JsonNode devConfig = new ObjectMapper().readTree(devConfigJson);
+        config.put("DEV", devConfig);
+        reqVO.setConfig(config);
+
+        // 执行测试并验证异常
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveEnvironmentConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.ENV_ALREADY_EXISTS, exception.getCode());
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_EmptyConfig() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+        String uatConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+        JsonNode uatConfig = new ObjectMapper().readTree(uatConfigJson);
+        config.put("UAT", uatConfig);
+        reqVO.setConfig(config);
+
+        // 执行测试
+        Boolean result = connectorService.saveEnvironmentConfig(connectorId, reqVO);
+
+        assertTrue(result);
     }
 }

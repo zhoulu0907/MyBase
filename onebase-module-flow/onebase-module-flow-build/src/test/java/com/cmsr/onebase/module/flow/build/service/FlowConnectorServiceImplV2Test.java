@@ -56,8 +56,6 @@ class FlowConnectorServiceImplV2Test {
     private ObjectMapper objectMapper;
     private FlowConnectorDO testConnector;
     private String testConfig;
-    private SaveActionReqVO saveActionReqVO;
-    private UpdateActionReqVO updateActionReqVO;
 
     /**
      * 初始化测试数据
