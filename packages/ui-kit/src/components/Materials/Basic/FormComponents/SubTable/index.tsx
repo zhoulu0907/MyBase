@@ -576,7 +576,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                       {pageComponentSchemas[cp.id]?.config.label.text ||
                         pageComponentSchemas[cp.id]?.config.displayName}
                       {pageComponentSchemas[cp.id]?.config?.tooltip && (
-                        <Tooltip content={pageComponentSchemas[cp.id].config.tooltip}>
+                        <Tooltip content={pageComponentSchemas[cp.id]?.config.tooltip}>
                           <IconQuestionCircle style={{ marginLeft: '4px', color: 'var(--color-text-4)' }} />
                         </Tooltip>
                       )}

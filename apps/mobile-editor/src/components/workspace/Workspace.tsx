@@ -763,7 +763,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
 
                     {curComponentID === cp.id && showDeleteButton && (
                       <div className={styles.operationArea}>
-                        {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                           <>
                             <div
                               className={styles.copyButton}

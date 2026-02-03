@@ -44,7 +44,7 @@ const ListEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
     return (
       listComponents?.map((cp: GridItem) => (
         <Fragment key={cp.id}>
-          {listPageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+          {listPageComponentSchemas[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
             <div
               key={cp.id}
               className={styles.componentItem}
