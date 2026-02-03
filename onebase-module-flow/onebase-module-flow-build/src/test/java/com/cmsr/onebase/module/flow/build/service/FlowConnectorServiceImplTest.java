@@ -438,7 +438,7 @@ class FlowConnectorServiceImplTest {
             connectorService.saveEnvironmentConfig(connectorId, reqVO);
         });
 
-        assertEquals(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS, exception.getCode());
+        assertEquals(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS.getCode(), exception.getCode());
     }
 
     @Test
@@ -463,7 +463,7 @@ class FlowConnectorServiceImplTest {
             connectorService.saveEnvironmentConfig(connectorId, reqVO);
         });
 
-        assertEquals(FlowErrorCodeConstants.ENV_ALREADY_EXISTS, exception.getCode());
+        assertEquals(FlowErrorCodeConstants.ENV_ALREADY_EXISTS.getCode(), exception.getCode());
     }
 
     @Test
@@ -484,6 +484,137 @@ class FlowConnectorServiceImplTest {
         reqVO.setConfig(config);
 
         // 执行测试
+        Boolean result = connectorService.saveEnvironmentConfig(connectorId, reqVO);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_InvalidConfigFormat() throws Exception {
+        Long connectorId = 1L;
+        String existingConfig = "{\"properties\":{},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(existingConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+        String invalidConfigJson = "{\"type\":\"string\"}";
+        JsonNode invalidConfig = new ObjectMapper().readTree(invalidConfigJson);
+        config.put("DEV", invalidConfig);
+        reqVO.setConfig(config);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveEnvironmentConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_ENV_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_MultipleEnvironments() throws Exception {
+        Long connectorId = 1L;
+        String existingConfig = "{\"properties\":{},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(existingConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+
+        String devConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+        String testConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+        String prodConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+
+        config.put("DEV", new ObjectMapper().readTree(devConfigJson));
+        config.put("TEST", new ObjectMapper().readTree(testConfigJson));
+        config.put("PROD", new ObjectMapper().readTree(prodConfigJson));
+        reqVO.setConfig(config);
+
+        Boolean result = connectorService.saveEnvironmentConfig(connectorId, reqVO);
+
+        assertTrue(result);
+        verify(connectorRepository).updateById(any(FlowConnectorDO.class));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_ConfigParsingError() throws Exception {
+        Long connectorId = 1L;
+        String invalidJson = "{invalid json}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(invalidJson);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+        String uatConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+        JsonNode uatConfig = new ObjectMapper().readTree(uatConfigJson);
+        config.put("UAT", uatConfig);
+        reqVO.setConfig(config);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveEnvironmentConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_WithExistingMetadata() throws Exception {
+        Long connectorId = 1L;
+        String existingConfig = "{\"properties\":{\"DEV\":{\"type\":\"object\"}},\"_metadata\":{\"version\":2,\"updatedBy\":\"admin\"}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(existingConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+        String uatConfigJson = "{\"type\":\"object\",\"properties\":{\"apiUrl\":{\"type\":\"string\"}}}";
+        JsonNode uatConfig = new ObjectMapper().readTree(uatConfigJson);
+        config.put("UAT", uatConfig);
+        reqVO.setConfig(config);
+
+        Boolean result = connectorService.saveEnvironmentConfig(connectorId, reqVO);
+
+        assertTrue(result);
+        verify(connectorRepository).updateById(argThat(doArg -> {
+            try {
+                String updatedConfig = doArg.getConfig();
+                return updatedConfig != null && updatedConfig.contains("UAT");
+            } catch (Exception e) {
+                return false;
+            }
+        }));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_UpdateFailure() throws Exception {
+        Long connectorId = 1L;
+        String existingConfig = "{\"properties\":{},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setConfig(existingConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(false);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        Map<String, JsonNode> config = new HashMap<>();
+        String uatConfigJson = "{\"type\":\"object\",\"properties\":{}}";
+        JsonNode uatConfig = new ObjectMapper().readTree(uatConfigJson);
+        config.put("UAT", uatConfig);
+        reqVO.setConfig(config);
+
         Boolean result = connectorService.saveEnvironmentConfig(connectorId, reqVO);
 
         assertTrue(result);
