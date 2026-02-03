@@ -349,8 +349,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
         if (connector == null) {
-            log.warn("Connector not found, id: {}", connectorId);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+            log.warn("Connector not found, id: {}, returning empty list", connectorId);
+            return new ArrayList<>();
         }
 
         // 2. 获取 config 字段
