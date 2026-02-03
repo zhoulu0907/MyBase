@@ -124,14 +124,91 @@ public class ConnectorConfigParser {
     }
 
     /**
-     * 从 Formily Schema 节点解析环境配置信息
+     * 从环境配置节点解析环境配置信息
+     * <p>
+     * 新格式：从 envConfig.basicInfo 和 envConfig.authInfo 中提取
+     *
+     * @param envSchemaNode 环境配置节点（properties[envName] 的值）
+     * @param envCode      环境编码（作为 properties 的 key）
+     * @param typeCode     连接器类型编号
+     * @return 环境配置VO，解析失败返回null
+     */
+    private FlowConnectorEnvLiteVO parseEnvSchemaNode(JsonNode envSchemaNode, String envCode, String typeCode) {
+        try {
+            FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
+
+            // 新格式：envSchemaNode 包含 envMode 和 envConfig
+            // 从 envConfig 中提取 basicInfo 和 authInfo
+            JsonNode envConfigNode = envSchemaNode.get("envConfig");
+            if (envConfigNode == null || !envConfigNode.isObject()) {
+                log.warn("envConfig node is null or not object, envCode: {}", envCode);
+                // 尝试旧格式（Formily Schema）
+                return parseLegacyEnvSchemaNode(envSchemaNode, envCode, typeCode);
+            }
+
+            // 从 basicInfo 提取环境信息
+            JsonNode basicInfoNode = envConfigNode.get("basicInfo");
+            if (basicInfoNode != null && basicInfoNode.isObject()) {
+                // 环境名称
+                JsonNode envNameNode = basicInfoNode.get("envName");
+                if (envNameNode != null && !envNameNode.isNull()) {
+                    vo.setEnvName(envNameNode.asText());
+                }
+
+                // 环境编码
+                JsonNode envCodeNode = basicInfoNode.get("envCode");
+                if (envCodeNode != null && !envCodeNode.isNull()) {
+                    vo.setEnvCode(envCodeNode.asText());
+                }
+
+                // 环境 URL
+                JsonNode baseUrlNode = basicInfoNode.get("baseUrl");
+                if (baseUrlNode != null && !baseUrlNode.isNull()) {
+                    vo.setEnvUrl(baseUrlNode.asText());
+                }
+            }
+
+            // 从 authInfo 提取认证方式
+            JsonNode authInfoNode = envConfigNode.get("authInfo");
+            if (authInfoNode != null && authInfoNode.isObject()) {
+                JsonNode authTypeNode = authInfoNode.get("authType");
+                if (authTypeNode != null && !authTypeNode.isNull()) {
+                    vo.setAuthType(authTypeNode.asText());
+                }
+            }
+
+            // 从 envMode 提取模式信息
+            JsonNode envModeNode = envSchemaNode.get("envMode");
+            if (envModeNode != null && !envModeNode.isNull()) {
+                String envMode = envModeNode.asText();
+                vo.setDescription("模式: " + envMode);
+            }
+
+            // 设置连接器类型编号
+            vo.setTypeCode(typeCode);
+
+            // 设置默认值
+            vo.setCreateTime(LocalDateTime.now());
+            vo.setActiveStatus(1); // 默认启用
+
+            log.info("成功解析环境配置，envCode: {}, envName: {}", vo.getEnvCode(), vo.getEnvName());
+            return vo;
+
+        } catch (Exception e) {
+            log.error("解析环境 Schema 节点失败，envCode: {}", envCode, e);
+            return null;
+        }
+    }
+
+    /**
+     * 从旧版 Formily Schema 节点解析环境配置信息（兼容旧格式）
      *
      * @param envSchemaNode 环境的 Formily Schema 节点
      * @param envCode      环境编码
      * @param typeCode     连接器类型编号
      * @return 环境配置VO，解析失败返回null
      */
-    private FlowConnectorEnvLiteVO parseEnvSchemaNode(JsonNode envSchemaNode, String envCode, String typeCode) {
+    private FlowConnectorEnvLiteVO parseLegacyEnvSchemaNode(JsonNode envSchemaNode, String envCode, String typeCode) {
         try {
             FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
 
@@ -185,7 +262,7 @@ public class ConnectorConfigParser {
             return vo;
 
         } catch (Exception e) {
-            log.error("解析环境 Schema 节点失败，envCode: {}", envCode, e);
+            log.error("解析旧版环境 Schema 节点失败，envCode: {}", envCode, e);
             return null;
         }
     }
