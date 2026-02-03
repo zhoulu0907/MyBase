@@ -436,11 +436,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserProfile(Long id, UserProfileUpdateReqVO reqVO, Integer userType) {
+    public void updateUserProfile(Long id, UserProfileUpdateReqVO reqVO) {
         // 校验正确性
-        validateUserExists(id);
+        AdminUserDO adminUser = validateUserExists(id);
         validateEmailUnique(id, reqVO.getEmail());
-        validateMobileUnique(id, reqVO.getMobile(), userType);
+        validateMobileUnique(id, reqVO.getMobile(), adminUser.getUserType());
         // 执行更新
         userDataRepository.update(BeanUtils.toBean(reqVO, AdminUserDO.class).setId(id));
     }
@@ -705,6 +705,9 @@ public class UserServiceImpl implements UserService {
         // 校验用户名唯一
         validateUsernameUnique(id, username);
         // 校验手机号唯一
+        if(user.getUserType() != null && userType == null){
+            userType = user.getUserType();
+        }
         validateMobileUnique(id, mobile, userType);
         // 校验邮箱唯一
         validateEmailUnique(id, email);

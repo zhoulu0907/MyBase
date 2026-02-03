@@ -67,7 +67,7 @@ public class CorpUserProfileController {
     @Operation(summary = "修改用户个人信息")
     @PreAuthorize("@ss.hasPermission('corp:profile:update')")
     public CommonResult<Boolean> updateUserProfile(@Valid @RequestBody UserProfileUpdateReqVO reqVO) {
-        userService.updateUserProfile(getLoginUserId(), reqVO, UserTypeEnum.CORP.getValue());
+        userService.updateUserProfile(getLoginUserId(), reqVO);
         return success(true);
     }
 
