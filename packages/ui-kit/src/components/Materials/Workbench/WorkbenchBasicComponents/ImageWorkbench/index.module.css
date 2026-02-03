@@ -18,8 +18,10 @@
 }
 
 .imageStyle {
+  max-height: 300px;
+  border-radius: 8px;
   img {
     object-fit: var(--fit, contain);
-    max-height: var(--maxHeight, none); 
+    max-height: 300px;
   }
 }

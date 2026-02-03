@@ -64,10 +64,6 @@ export interface XImageConfig extends ICommonBaseType {
    */
   fillStyle?: TSelectDefaultType<TFillSelectKeyType>;
 
-  /**
-   * 最大限制高度（px）
-   */
-  maxHeight?: TNumberDefaultType;
   imageConfig: string;
   verify: {
     required: boolean;
@@ -98,7 +94,6 @@ const XImageWorkbench: XImageSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     imageConfig: '',
-    maxHeight: undefined,
     verify: {
       required: false,
       maxSize: 5

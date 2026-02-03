@@ -7,7 +7,7 @@ import { useJump } from '../../hooks/useJump';
 import styles from './index.module.css';
 
 const XImageWorkbench = memo((props: XImageConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { label, status, fillStyle, maxHeight, runtime = true, imageConfig, jumpType, jumpPageId, jumpExternalUrl } = props;
+  const { label, status, fillStyle, runtime = true, imageConfig, jumpType, jumpPageId, jumpExternalUrl } = props;
   const { handleJump } = useJump();
   const handleImgClick = () => {
     if (!runtime) return;
@@ -37,14 +37,11 @@ const XImageWorkbench = memo((props: XImageConfig & { runtime?: boolean; detailM
       <Image
         className={styles.imageStyle}
         width={'100%'}
-        height={300}
-        preview={runtime}
+        preview={false}
         src={getFileUrlById(imageConfig)}
         style={
           {
             objectFit: fillStyle,
-            maxHeight: maxHeight,
-            borderRadius: 8,
             opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
           } as React.CSSProperties
         }
