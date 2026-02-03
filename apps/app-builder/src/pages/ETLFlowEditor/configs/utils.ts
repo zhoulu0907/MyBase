@@ -155,14 +155,17 @@ export const handlePreviewData = async (
 ) => {
   const nodes = graphData.nodes?.map((node: any) => {
     if (node.id === curNode.id) {
-      return curNode;
+      const fieldPairs = curNode.config?.fieldPairs?.filter((ele:any)=>ele.leftFieldFqn && ele.rightFieldFqn)
+      const newCurNode = {...curNode,config:{...curNode.config,fieldPairs: fieldPairs || []}}
+      return newCurNode;
     }
+    const fieldPairs = nodeData[node.id].config?.fieldPairs?.filter((ele:any)=>ele.leftFieldFqn && ele.rightFieldFqn)
     return {
       id: node.id,
       title: nodeData[node.id].title || '',
       description: nodeData[node.id].description || '',
       type: node.type,
-      config: nodeData[node.id].config || {},
+      config: {...nodeData[node.id].config, fieldPairs: fieldPairs || []},
       output: nodeData[node.id].output || {},
       meta: node.meta || {}
     };
