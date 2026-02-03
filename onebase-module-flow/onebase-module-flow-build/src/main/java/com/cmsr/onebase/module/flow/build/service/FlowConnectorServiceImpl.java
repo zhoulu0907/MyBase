@@ -898,7 +898,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO) {
-        log.info("saveEnvironmentConfig start, connectorId: {}, envCount: {}", connectorId, reqVO.getConfig().size());
+        log.info("saveEnvironmentConfig start, connectorId: {}", connectorId);
 
         // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -926,34 +926,52 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         ObjectNode properties = rootConfig.withObject("properties");
 
-        // 3. 遍历请求中的每个环境配置
-        for (Map.Entry<String, JsonNode> entry : reqVO.getConfig().entrySet()) {
-            String envCode = entry.getKey();
-            JsonNode envConfig = entry.getValue();
-
-            // 3a. 检查环境是否已存在
-            if (properties.has(envCode)) {
-                log.warn("Environment already exists, connectorId: {}, envCode: {}", connectorId, envCode);
-                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_ALREADY_EXISTS);
-            }
-
-            // 3b. 校验 envConfig 格式
-            if (!envConfig.isObject() || !envConfig.has("properties")) {
-                log.warn("Invalid env config format, connectorId: {}, envCode: {}", connectorId, envCode);
-                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
-            }
-
-            // 4. 添加新环境配置
-            properties.set(envCode, envConfig);
+        // 3. 解析请求配置，提取环境信息
+        // 请求格式: {"envMode": "create", "envConfig": {"basicInfo": {"envName": "UAT环境配置", ...}, "authInfo": {...}}}
+        // reqVO.getConfig() 已经是 config 对象了
+        JsonNode configNode = reqVO.getConfig();
+        if (configNode == null || !configNode.isObject()) {
+            log.warn("Invalid config format, config node is null or not object");
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
         }
 
-        // 5. 更新 metadata
+        // 提取 envName 作为 key
+        JsonNode envConfigNode = configNode.get("envConfig");
+        if (envConfigNode == null || !envConfigNode.isObject()) {
+            log.warn("Invalid config format, envConfig node is null or not object");
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        JsonNode basicInfoNode = envConfigNode.get("basicInfo");
+        if (basicInfoNode == null || !basicInfoNode.isObject()) {
+            log.warn("Invalid config format, basicInfo node is null or not object");
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        JsonNode envNameNode = basicInfoNode.get("envName");
+        if (envNameNode == null || envNameNode.isNull()) {
+            log.warn("Invalid config format, envName is null");
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        String envName = envNameNode.asText();
+
+        // 4. 检查环境是否已存在
+        if (properties.has(envName)) {
+            log.warn("Environment already exists, connectorId: {}, envName: {}", connectorId, envName);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_ALREADY_EXISTS);
+        }
+
+        // 5. 添加新环境配置（将整个 config 对象存储）
+        properties.set(envName, configNode);
+
+        // 6. 更新 metadata
         ObjectNode metadata = rootConfig.withObject("_metadata");
         int currentVersion = metadata.has("version") ? metadata.get("version").asInt() : 0;
         metadata.put("version", currentVersion + 1);
         metadata.put("updatedAt", Instant.now().toString());
 
-        // 6. 保存到数据库
+        // 7. 保存到数据库
         String newConfigJson;
         try {
             newConfigJson = objectMapper.writeValueAsString(rootConfig);
@@ -965,7 +983,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connector.setConfig(newConfigJson);
         connectorRepository.updateById(connector);
 
-        log.info("saveEnvironmentConfig success, connectorId: {}", connectorId);
+        log.info("saveEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
         return Boolean.TRUE;
     }
 }

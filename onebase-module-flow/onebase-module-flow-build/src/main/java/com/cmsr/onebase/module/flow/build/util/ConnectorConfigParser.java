@@ -60,6 +60,8 @@ public class ConnectorConfigParser {
      * 从配置 JSON 中解析环境配置列表
      * <p>
      * 支持空字符串和 null 输入，返回空列表
+     * <p>
+     * 从 flow_connector.config 的 properties 字段中解析环境配置
      *
      * @param configJson 配置 JSON 字符串
      * @param typeCode   连接器类型编号
@@ -83,23 +85,30 @@ public class ConnectorConfigParser {
             }
             log.debug("解析 JSON 成功，root keys: {}", fields);
 
-            JsonNode environmentsNode = root.get(ENVIRONMENTS_KEY);
+            // 从 properties 字段获取环境配置
+            JsonNode propertiesNode = root.get("properties");
 
-            if (environmentsNode == null) {
-                log.warn("config 中未找到 environments 字段，可用字段: {}", fields);
+            if (propertiesNode == null) {
+                log.warn("config 中未找到 properties 字段，可用字段: {}", fields);
                 return new ArrayList<>();
             }
 
-            if (!environmentsNode.isArray()) {
-                log.warn("environments 字段不是数组类型，实际类型: {}", environmentsNode.getNodeType());
+            if (!propertiesNode.isObject()) {
+                log.warn("properties 字段不是对象类型，实际类型: {}", propertiesNode.getNodeType());
                 return new ArrayList<>();
             }
 
-            log.info("找到 environments 数组，长度: {}", environmentsNode.size());
+            log.info("找到 properties 对象，字段数: {}", propertiesNode.size());
 
             List<FlowConnectorEnvLiteVO> result = new ArrayList<>();
-            for (JsonNode envNode : environmentsNode) {
-                FlowConnectorEnvLiteVO vo = parseEnvironmentNode(envNode, typeCode);
+            // 遍历 properties 中的每个环境配置（DEV、TEST、PROD 等）
+            Iterator<String> envCodes = propertiesNode.fieldNames();
+            while (envCodes.hasNext()) {
+                String envCode = envCodes.next();
+                JsonNode envSchemaNode = propertiesNode.get(envCode);
+
+                // 从 Formily Schema 中提取环境信息
+                FlowConnectorEnvLiteVO vo = parseEnvSchemaNode(envSchemaNode, envCode, typeCode);
                 if (vo != null) {
                     result.add(vo);
                 }
@@ -111,6 +120,73 @@ public class ConnectorConfigParser {
         } catch (JsonProcessingException e) {
             log.error("解析环境配置失败，configJson: {}", configJson, e);
             return new ArrayList<>();
+        }
+    }
+
+    /**
+     * 从 Formily Schema 节点解析环境配置信息
+     *
+     * @param envSchemaNode 环境的 Formily Schema 节点
+     * @param envCode      环境编码
+     * @param typeCode     连接器类型编号
+     * @return 环境配置VO，解析失败返回null
+     */
+    private FlowConnectorEnvLiteVO parseEnvSchemaNode(JsonNode envSchemaNode, String envCode, String typeCode) {
+        try {
+            FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
+
+            // 使用环境编码作为环境名称
+            vo.setEnvCode(envCode);
+
+            // 从 x-api-meta 提取信息
+            JsonNode apiMetaNode = envSchemaNode.get("x-api-meta");
+            if (apiMetaNode != null && !apiMetaNode.isNull()) {
+                // 提取 API 路径作为环境 URL
+                JsonNode pathNode = apiMetaNode.get("path");
+                if (pathNode != null && !pathNode.isNull()) {
+                    vo.setEnvUrl(pathNode.asText());
+                }
+
+                // 提取方法描述作为描述
+                JsonNode methodNode = apiMetaNode.get("method");
+                JsonNode summaryNode = apiMetaNode.get("summary");
+                if (summaryNode != null && !summaryNode.isNull()) {
+                    String desc = summaryNode.asText();
+                    if (methodNode != null && !methodNode.isNull()) {
+                        desc = methodNode.asText() + " " + desc;
+                    }
+                    vo.setDescription(desc);
+                } else if (methodNode != null && !methodNode.isNull()) {
+                    vo.setDescription(methodNode.asText());
+                }
+            }
+
+            // 从 title 字段提取环境名称（如果没有则使用 envCode）
+            JsonNode titleNode = envSchemaNode.get("title");
+            if (titleNode != null && !titleNode.isNull()) {
+                vo.setEnvName(titleNode.asText());
+            } else {
+                vo.setEnvName(envCode);
+            }
+
+            // 从 description 字段提取描述（如果没有则从 x-api-meta 提取）
+            JsonNode descNode = envSchemaNode.get("description");
+            if (descNode != null && !descNode.isNull() && vo.getDescription() == null) {
+                vo.setDescription(descNode.asText());
+            }
+
+            // 设置连接器类型编号
+            vo.setTypeCode(typeCode);
+
+            // 设置默认值
+            vo.setCreateTime(LocalDateTime.now());
+            vo.setActiveStatus(1); // 默认启用
+
+            return vo;
+
+        } catch (Exception e) {
+            log.error("解析环境 Schema 节点失败，envCode: {}", envCode, e);
+            return null;
         }
     }
 
