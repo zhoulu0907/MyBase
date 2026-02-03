@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -70,38 +71,29 @@ public class ConnectorConfigParser {
     public List<FlowConnectorEnvLiteVO> parseEnvironments(String configJson, String typeCode) {
         if (configJson == null || configJson.trim().isEmpty()) {
             log.debug("configJson 为空");
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         try {
             JsonNode root = objectMapper.readTree(configJson);
-
-            // 获取所有字段名用于日志
-            Iterator<String> fieldNames = root.fieldNames();
-            StringBuilder fields = new StringBuilder();
-            while (fieldNames.hasNext()) {
-                if (fields.length() > 0) fields.append(", ");
-                fields.append(fieldNames.next());
-            }
-            log.debug("解析 JSON 成功，root keys: {}", fields);
+            log.debug("解析 JSON 成功，root keys: {}", collectFieldNames(root));
 
             // 从 properties 字段获取环境配置
             JsonNode propertiesNode = root.get("properties");
-
             if (propertiesNode == null) {
-                log.warn("config 中未找到 properties 字段，可用字段: {}", fields);
-                return new ArrayList<>();
+                log.warn("config 中未找到 properties 字段，可用字段: {}", collectFieldNames(root));
+                return Collections.emptyList();
             }
 
             if (!propertiesNode.isObject()) {
                 log.warn("properties 字段不是对象类型，实际类型: {}", propertiesNode.getNodeType());
-                return new ArrayList<>();
+                return Collections.emptyList();
             }
 
             log.info("找到 properties 对象，字段数: {}", propertiesNode.size());
 
-            List<FlowConnectorEnvLiteVO> result = new ArrayList<>();
             // 遍历 properties 中的每个环境配置（DEV、TEST、PROD 等）
+            List<FlowConnectorEnvLiteVO> result = new ArrayList<>();
             Iterator<String> envCodes = propertiesNode.fieldNames();
             while (envCodes.hasNext()) {
                 String envCode = envCodes.next();
@@ -119,8 +111,26 @@ public class ConnectorConfigParser {
 
         } catch (JsonProcessingException e) {
             log.error("解析环境配置失败，configJson: {}", configJson, e);
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
+    }
+
+    /**
+     * 收集 JsonNode 的所有字段名用于日志
+     *
+     * @param node JSON 节点
+     * @return 逗号分隔的字段名字符串
+     */
+    private String collectFieldNames(JsonNode node) {
+        Iterator<String> fieldNames = node.fieldNames();
+        StringBuilder sb = new StringBuilder();
+        while (fieldNames.hasNext()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(fieldNames.next());
+        }
+        return sb.toString();
     }
 
     /**
@@ -199,67 +209,6 @@ public class ConnectorConfigParser {
     }
 
     /**
-     * 解析单个环境配置节点
-     *
-     * @param envNode  环境配置节点
-     * @param typeCode 连接器类型编号
-     * @return 环境配置VO，解析失败返回null
-     */
-    private FlowConnectorEnvLiteVO parseEnvironmentNode(JsonNode envNode, String typeCode) {
-        try {
-            FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
-
-            // 解析环境名称
-            JsonNode envNameNode = envNode.get("envName");
-            if (envNameNode != null && !envNameNode.isNull()) {
-                vo.setEnvName(envNameNode.asText());
-            }
-
-            // 解析环境编码
-            JsonNode envCodeNode = envNode.get("envCode");
-            if (envCodeNode != null && !envCodeNode.isNull()) {
-                vo.setEnvCode(envCodeNode.asText());
-            }
-
-            // 解析环境URL
-            JsonNode envUrlNode = envNode.get("envUrl");
-            if (envUrlNode != null && !envUrlNode.isNull()) {
-                vo.setEnvUrl(envUrlNode.asText());
-            }
-
-            // 解析认证方式
-            JsonNode authTypeNode = envNode.get("authType");
-            if (authTypeNode != null && !authTypeNode.isNull()) {
-                vo.setAuthType(authTypeNode.asText());
-            }
-
-            // 解析描述
-            JsonNode descNode = envNode.get("description");
-            if (descNode != null && !descNode.isNull()) {
-                vo.setDescription(descNode.asText());
-            }
-
-            // 解析启用状态
-            JsonNode activeNode = envNode.get("active");
-            if (activeNode != null && !activeNode.isNull()) {
-                vo.setActiveStatus(activeNode.asBoolean() ? 1 : 0);
-            }
-
-            // 设置连接器类型编号
-            vo.setTypeCode(typeCode);
-
-            // 设置默认值
-            vo.setCreateTime(LocalDateTime.now());
-
-            return vo;
-
-        } catch (Exception e) {
-            log.error("解析环境配置节点失败", e);
-            return null;
-        }
-    }
-
-    /**
      * 从配置 JSON 中解析指定环境的配置 Schema
      * <p>
      * 从 flow_connector.config 的 properties 中提取 properties[envCode] 的值
@@ -288,7 +237,7 @@ public class ConnectorConfigParser {
             JsonNode envSchemaNode = propertiesNode.get(envCode);
             if (envSchemaNode == null || envSchemaNode.isNull()) {
                 log.warn("环境配置不存在，envCode: {}, 可用环境: {}", envCode,
-                        getFieldNames(propertiesNode));
+                        collectFieldNames(propertiesNode));
                 throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envCode=" + envCode));
             }
 
@@ -299,20 +248,5 @@ public class ConnectorConfigParser {
             log.error("解析配置 JSON 失败，configJson: {}", configJson, e);
             throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envCode=" + envCode));
         }
-    }
-
-    /**
-     * 获取 JsonNode 的所有字段名，用于错误提示
-     *
-     * @param node JsonNode 节点
-     * @return 字段名列表
-     */
-    private List<String> getFieldNames(JsonNode node) {
-        List<String> names = new ArrayList<>();
-        Iterator<String> it = node.fieldNames();
-        while (it.hasNext()) {
-            names.add(it.next());
-        }
-        return names;
     }
 }
