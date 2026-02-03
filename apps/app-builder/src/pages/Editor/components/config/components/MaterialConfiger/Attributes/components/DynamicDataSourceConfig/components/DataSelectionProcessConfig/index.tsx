@@ -117,6 +117,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       setFilterCondition(configs[SUB_ATTR_KEY.FILTERCONDITION]);
       setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.fieldName);
       setSortValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.sortBy);
+      tableConfig.metaData = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].entityUuid;
       tableConfig.tableName = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].tableName;
       handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
     }
