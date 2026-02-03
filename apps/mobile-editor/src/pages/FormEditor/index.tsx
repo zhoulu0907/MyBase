@@ -29,7 +29,7 @@ const FormEditor: React.FC<FormEditorProps & { instanceId: string }> = ({ instan
     const { components: formComponents, pageComponentSchemas: formPageComponentSchemas } = props;
     return formComponents?.map((cp: GridItem) => (
       <Fragment key={cp.id}>
-        {formPageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+        {formPageComponentSchemas[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
           <div
             key={cp.id}
             className={styles.componentItem}
