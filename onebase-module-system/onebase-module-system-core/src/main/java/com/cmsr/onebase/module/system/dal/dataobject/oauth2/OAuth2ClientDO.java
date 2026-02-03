@@ -21,21 +21,48 @@ import lombok.Data;
 public class OAuth2ClientDO extends BaseEntity {
 
     // 字段常量
+
+    public static final String NAME                          = "name";
+    public static final String CONTACT_USER                  = "contact_user";
+    public static final String CONTACT_EMAIL                 = "contact_email";
+    public static final String REDIRECT_URIS                 = "redirect_uris";
+
     public static final String CLIENT_ID                     = "client_id";
     public static final String SECRET                        = "secret";
-    public static final String NAME                          = "name";
     public static final String LOGO                          = "logo";
     public static final String DESCRIPTION                   = "description";
     public static final String STATUS                        = "status";
     public static final String ACCESS_TOKEN_VALIDITY_SECONDS = "access_token_validity_seconds";
     public static final String REFRESH_TOKEN_VALIDITY_SECONDS= "refresh_token_validity_seconds";
-    public static final String REDIRECT_URIS                 = "redirect_uris";
+
     public static final String AUTHORIZED_GRANT_TYPES        = "authorized_grant_types";
     public static final String SCOPES                        = "scopes";
     public static final String AUTO_APPROVE_SCOPES           = "auto_approve_scopes";
     public static final String AUTHORITIES                   = "authorities";
     public static final String RESOURCE_IDS                  = "resource_ids";
     public static final String ADDITIONAL_INFORMATION        = "additional_information";
+
+    /**
+     * 客户端名称
+     */
+    @Column(value = NAME)
+    private String clientName;
+    /**
+     * 联系人
+     */
+    @Column(value = CONTACT_USER)
+    private String contactUser; // Changed from private String contactUser;
+    /**
+     * 联系邮箱
+     */
+    @Column(value = CONTACT_EMAIL)
+    private String contactEmail;
+    /**
+     * 可重定向的 URI 地址
+     */
+    @Column(value = REDIRECT_URIS)
+    private List<String> redirectUris;
+
 
     /**
      * 客户端编号
@@ -79,11 +106,6 @@ public class OAuth2ClientDO extends BaseEntity {
      */
     @Column(value = REFRESH_TOKEN_VALIDITY_SECONDS)
     private Integer refreshTokenValiditySeconds;
-    /**
-     * 可重定向的 URI 地址
-     */
-    @Column(value = REDIRECT_URIS)
-    private List<String> redirectUris;
     /**
      * 授权类型（模式）
      *

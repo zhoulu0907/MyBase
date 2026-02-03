@@ -38,7 +38,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
 
     @Override
     public Long createOAuth2Client(OAuth2ClientSaveReqVO createReqVO) {
-        validateClientIdExists(null, createReqVO.getClientId());
+        // validateClientIdExists(null, createReqVO.getClientId());
         // 插入
         OAuth2ClientDO client = BeanUtils.toBean(createReqVO, OAuth2ClientDO.class);
         oauth2ClientDataRepository.insert(client);
@@ -52,7 +52,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // 校验存在
         validateOAuth2ClientExists(updateReqVO.getId());
         // 校验 Client 未被占用
-        validateClientIdExists(updateReqVO.getId(), updateReqVO.getClientId());
+        // validateClientIdExists(updateReqVO.getId(), updateReqVO.getClientId());
 
         // 更新
         OAuth2ClientDO updateObj = BeanUtils.toBean(updateReqVO, OAuth2ClientDO.class);
@@ -138,6 +138,8 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
             throw exception(OAUTH2_CLIENT_EXISTS);
         }
     }
+
+
 
     @VisibleForTesting
     void validateOAuth2ClientExists(Long id) {

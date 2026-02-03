@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.build.controller.oauth2;
 
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.lang.Assert;
@@ -201,7 +202,9 @@ public class OAuth2OpenController {
      *
      * 因为前后端分离，Axios 无法很好的处理 302 重定向，所以和 Spring Security OAuth 略有不同，返回结果是重定向的 URL，剩余交给前端处理
      */
-    @PostMapping("/authorize")
+    @ApiSignIgnore
+    @PermitAll
+    @PostMapping("/authorize/code")
     @Operation(summary = "申请授权", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【提交】调用")
     @Parameters({
             @Parameter(name = "response_type", required = true, description = "响应类型", example = "code"),

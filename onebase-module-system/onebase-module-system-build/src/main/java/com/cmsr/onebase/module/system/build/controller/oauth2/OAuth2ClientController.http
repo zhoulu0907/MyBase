@@ -5,9 +5,11 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "id": "1",
-  "secret": "admin123",
-  "name": "用户Gsp",
+  "clientName": "onebase-client",
+  "contactUser": "admin",
+  "contactEmail": "admin@example.com",
+  "redirectUris": ["https://www.aaa.com"],
+
   "logo": "https://www.aaa.com/images/favicon.ico",
   "description": "我是描述",
   "status": 0,
@@ -19,7 +21,8 @@ tenant-id: {{adminTenantId}}
   "scopes": ["user_info"],
   "authorities": ["system:user:query"],
   "resource_ids": ["1024"],
-  "additionalInformation": "{}"
+  "additionalInformation": "{}",
+  "secret": "admin123"
 }
 
 ### 请求 /update 接口 => 更新 OAuth2 客户端
