@@ -137,13 +137,11 @@ public class ConnectorConfigParser {
         try {
             FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
 
-            // 新格式：envSchemaNode 包含 envMode 和 envConfig
             // 从 envConfig 中提取 basicInfo 和 authInfo
             JsonNode envConfigNode = envSchemaNode.get("envConfig");
             if (envConfigNode == null || !envConfigNode.isObject()) {
-                log.warn("envConfig node is null or not object, envCode: {}", envCode);
-                // 尝试旧格式（Formily Schema）
-                return parseLegacyEnvSchemaNode(envSchemaNode, envCode, typeCode);
+                log.warn("envConfig node is null or not object, envCode: {}, skipping", envCode);
+                return null;
             }
 
             // 从 basicInfo 提取环境信息
@@ -196,73 +194,6 @@ public class ConnectorConfigParser {
 
         } catch (Exception e) {
             log.error("解析环境 Schema 节点失败，envCode: {}", envCode, e);
-            return null;
-        }
-    }
-
-    /**
-     * 从旧版 Formily Schema 节点解析环境配置信息（兼容旧格式）
-     *
-     * @param envSchemaNode 环境的 Formily Schema 节点
-     * @param envCode      环境编码
-     * @param typeCode     连接器类型编号
-     * @return 环境配置VO，解析失败返回null
-     */
-    private FlowConnectorEnvLiteVO parseLegacyEnvSchemaNode(JsonNode envSchemaNode, String envCode, String typeCode) {
-        try {
-            FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
-
-            // 使用环境编码作为环境名称
-            vo.setEnvCode(envCode);
-
-            // 从 x-api-meta 提取信息
-            JsonNode apiMetaNode = envSchemaNode.get("x-api-meta");
-            if (apiMetaNode != null && !apiMetaNode.isNull()) {
-                // 提取 API 路径作为环境 URL
-                JsonNode pathNode = apiMetaNode.get("path");
-                if (pathNode != null && !pathNode.isNull()) {
-                    vo.setEnvUrl(pathNode.asText());
-                }
-
-                // 提取方法描述作为描述
-                JsonNode methodNode = apiMetaNode.get("method");
-                JsonNode summaryNode = apiMetaNode.get("summary");
-                if (summaryNode != null && !summaryNode.isNull()) {
-                    String desc = summaryNode.asText();
-                    if (methodNode != null && !methodNode.isNull()) {
-                        desc = methodNode.asText() + " " + desc;
-                    }
-                    vo.setDescription(desc);
-                } else if (methodNode != null && !methodNode.isNull()) {
-                    vo.setDescription(methodNode.asText());
-                }
-            }
-
-            // 从 title 字段提取环境名称（如果没有则使用 envCode）
-            JsonNode titleNode = envSchemaNode.get("title");
-            if (titleNode != null && !titleNode.isNull()) {
-                vo.setEnvName(titleNode.asText());
-            } else {
-                vo.setEnvName(envCode);
-            }
-
-            // 从 description 字段提取描述（如果没有则从 x-api-meta 提取）
-            JsonNode descNode = envSchemaNode.get("description");
-            if (descNode != null && !descNode.isNull() && vo.getDescription() == null) {
-                vo.setDescription(descNode.asText());
-            }
-
-            // 设置连接器类型编号
-            vo.setTypeCode(typeCode);
-
-            // 设置默认值
-            vo.setCreateTime(LocalDateTime.now());
-            vo.setActiveStatus(1); // 默认启用
-
-            return vo;
-
-        } catch (Exception e) {
-            log.error("解析旧版环境 Schema 节点失败，envCode: {}", envCode, e);
             return null;
         }
     }
