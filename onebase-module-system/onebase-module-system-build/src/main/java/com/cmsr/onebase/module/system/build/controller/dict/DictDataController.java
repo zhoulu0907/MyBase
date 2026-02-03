@@ -170,7 +170,7 @@ public class DictDataController {
 
     @PostMapping("/batch-operate")
     @Operation(summary = "批量操作字典数据（批量新增、更新、删除）")
-    @PreAuthorize("@ss.hasPermission('tenant:dict:write')")
+    @PreAuthorize("@ss.hasPermission('tenant:dict:update')")
     public CommonResult<DictDataBatchRespVO> batchOperateDictData(@Valid @RequestBody DictDataBatchReqVO batchReqVO) {
         DictDataBatchRespVO result = dictDataService.batchOperateDictData(batchReqVO);
         return success(result);
