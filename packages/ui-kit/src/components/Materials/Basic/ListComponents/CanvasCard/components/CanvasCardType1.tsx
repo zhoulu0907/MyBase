@@ -24,8 +24,6 @@ interface CanvasCardType1Props extends XCanvasCardConfig {
   fieldList?: Array<{ fieldName: string; displayName: string }>;
 }
 
-const TAG_COLORS = ['pink', 'purple', 'arcoblue', 'cyan'];
-
 const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
   const { status, runtime = true, record, displayFields, fieldList = [], tableName } = props;
   const { curMenu } = menuSignal;

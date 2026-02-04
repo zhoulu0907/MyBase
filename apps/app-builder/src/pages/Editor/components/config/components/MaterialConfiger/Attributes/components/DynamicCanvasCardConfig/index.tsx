@@ -61,6 +61,24 @@ const hiddenFieldTypes = [
   ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
 ];
 
+const FIELD_TYPE_CONFIG = {
+  MAIN_IMAGE: [ENTITY_FIELD_TYPE.IMAGE.VALUE],
+  AVATAR: [ENTITY_FIELD_TYPE.IMAGE.VALUE],
+  CATEGORY_TAGS: [ENTITY_FIELD_TYPE.SELECT.VALUE, ENTITY_FIELD_TYPE.MULTI_SELECT.VALUE],
+  MAIN_TITLE: [ENTITY_FIELD_TYPE.TEXT.VALUE, ENTITY_FIELD_TYPE.AUTO_CODE.VALUE],
+  CARD_CONTENT: [
+    ENTITY_FIELD_TYPE.TEXT.VALUE,
+    ENTITY_FIELD_TYPE.LONG_TEXT.VALUE,
+    ENTITY_FIELD_TYPE.ADDRESS.VALUE,
+    ENTITY_FIELD_TYPE.AUTO_CODE.VALUE,
+    ENTITY_FIELD_TYPE.EMAIL.VALUE,
+    ENTITY_FIELD_TYPE.PHONE.VALUE,
+    ENTITY_FIELD_TYPE.URL.VALUE
+  ],
+  COUNT_HINT: [ENTITY_FIELD_TYPE.NUMBER.VALUE],
+  CARD_FIELDS: []
+};
+
 const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
   if (a.isSystemField !== b.isSystemField) {
     return a.isSystemField ? 1 : -1;
@@ -167,16 +185,17 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
   const handleFieldChange = (fieldPath: string, value: string | string[]) => {
     const newDisplayFields: DisplayFieldsConfig = { ...displayFields };
     const keys = fieldPath.split('.');
-    let current: DisplayFieldsConfig | string[] | string = newDisplayFields;
+    let current: DisplayFieldsConfig | string[] = newDisplayFields;
 
     for (let i = 0; i < keys.length - 1; i++) {
-      if (!current[keys[i]]) {
-        current[keys[i]] = Array.isArray(current[keys[i - 1]]) ? [] : {};
+      const key = keys[i];
+      if (!current[key as keyof typeof current]) {
+        current[key as keyof typeof current] = Array.isArray(current) ? [] : {};
       }
-      current = current[keys[i]] as DisplayFieldsConfig | string[];
+      current = current[key as keyof typeof current] as DisplayFieldsConfig | string[];
     }
 
-    current[keys[keys.length - 1]] = value;
+    (current as Record<string, unknown>)[keys[keys.length - 1]] = value;
     setDisplayFields(newDisplayFields);
     handlePropsChange('displayFields', newDisplayFields);
   };
@@ -187,13 +206,14 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
     let current: DisplayFieldsConfig | string[] = newDisplayFields;
 
     for (let i = 0; i < keys.length - 1; i++) {
-      if (!current[keys[i]]) {
-        current[keys[i]] = Array.isArray(current[keys[i - 1]]) ? [] : {};
+      const key = keys[i];
+      if (!current[key as keyof typeof current]) {
+        current[key as keyof typeof current] = Array.isArray(current) ? [] : {};
       }
-      current = current[keys[i]] as DisplayFieldsConfig | string[];
+      current = current[key as keyof typeof current] as DisplayFieldsConfig | string[];
     }
 
-    const array = (current as string[])[keys[keys.length - 1]] || [];
+    const array = (current as Record<string, string[]>)[keys[keys.length - 1]] || [];
     if (array.length < maxCount) {
       (current as Record<string, unknown>)[keys[keys.length - 1]] = [...array, ''];
       setDisplayFields(newDisplayFields);
@@ -207,18 +227,28 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
     let current: DisplayFieldsConfig | string[] = newDisplayFields;
 
     for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]] as DisplayFieldsConfig | string[];
+      const key = keys[i];
+      current = current[key as keyof typeof current] as DisplayFieldsConfig | string[];
     }
 
-    const array = (current as string[])[keys[keys.length - 1]] || [];
-    (current as Record<string, unknown>)[keys[keys.length - 1]] = array.filter((_: unknown, i: number) => i !== index);
+    const array = (current as Record<string, string[]>)[keys[keys.length - 1]] || [];
+    (current as Record<string, unknown>)[keys[keys.length - 1]] = array.filter((_: string, i: number) => i !== index);
     setDisplayFields(newDisplayFields);
     handlePropsChange('displayFields', newDisplayFields);
   };
 
-  const renderFieldOptions = () => {
+  const renderFieldOptions = (allowedTypes?: string[], excludedTypes?: string[]) => {
     return fieldList
       .sort(sortEntityFields)
+      .filter((item: MetadataEntityField) => {
+        if (allowedTypes && allowedTypes.length > 0 && !allowedTypes.includes(item.fieldType)) {
+          return false;
+        }
+        if (excludedTypes && excludedTypes.length > 0 && excludedTypes.includes(item.fieldType)) {
+          return false;
+        }
+        return true;
+      })
       .map((item: MetadataEntityField) => (
         <Select.Option key={item.fieldName} value={item.fieldName} disabled={item?.disabled}>
           {item.displayName}
@@ -287,7 +317,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('mainImage', value)}
           >
-            {renderFieldOptions()}
+            {renderFieldOptions(FIELD_TYPE_CONFIG.MAIN_IMAGE)}
           </Select>
         </FormItem>
 
@@ -305,7 +335,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
                     handleFieldChange('categoryTags', newTags);
                   }}
                 >
-                  {renderFieldOptions()}
+                  {renderFieldOptions(FIELD_TYPE_CONFIG.CATEGORY_TAGS)}
                 </Select>
                 {index >= 1 && (
                   <Button
@@ -336,7 +366,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('mainTitle', value)}
           >
-            {renderFieldOptions()}
+            {renderFieldOptions(FIELD_TYPE_CONFIG.MAIN_TITLE)}
           </Select>
         </FormItem>
 
@@ -347,7 +377,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('cardContent', value)}
           >
-            {renderFieldOptions()}
+            {renderFieldOptions(FIELD_TYPE_CONFIG.CARD_CONTENT)}
           </Select>
         </FormItem>
 
@@ -365,7 +395,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
                     handleFieldChange('auxiliaryInfo', newInfo);
                   }}
                 >
-                  {renderFieldOptions()}
+                  {renderFieldOptions(undefined, [ENTITY_FIELD_TYPE.FILE.VALUE, ENTITY_FIELD_TYPE.IMAGE.VALUE])}
                 </Select>
                 {index >= 0 && (
                   <Button
@@ -396,7 +426,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('countHint', value)}
           >
-            {renderFieldOptions()}
+            {renderFieldOptions(FIELD_TYPE_CONFIG.COUNT_HINT)}
           </Select>
         </FormItem>
       </div>
@@ -416,7 +446,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('avatar', value)}
           >
-            {renderFieldOptions()}
+            {renderFieldOptions(FIELD_TYPE_CONFIG.AVATAR)}
           </Select>
         </FormItem>
 
@@ -427,7 +457,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('mainTitle', value)}
           >
-            {renderFieldOptions()}
+            {renderFieldOptions(FIELD_TYPE_CONFIG.MAIN_TITLE)}
           </Select>
         </FormItem>
 
@@ -445,7 +475,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
                     handleFieldChange('categoryTags', newTags);
                   }}
                 >
-                  {renderFieldOptions()}
+                  {renderFieldOptions(FIELD_TYPE_CONFIG.CATEGORY_TAGS)}
                 </Select>
                 {index >= 0 && (
                   <Button
