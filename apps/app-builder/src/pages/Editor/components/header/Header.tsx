@@ -47,6 +47,7 @@ import {
   startLoadWorkbenchPageSet,
   startSavePageSet,
   startSaveWorkbenchPageSet,
+  getComponentValidate,
   useAppEntityStore,
   useFlowPageEditorSignal,
   useFormEditorSignal,
@@ -55,6 +56,7 @@ import {
   usePageViewEditorSignal,
   useWorkbenchEditorSignal,
   usePageSettingSignal,
+  usePageComponentValidateSignal,
   type SavePageSetParams,
   type SaveWorkbenchPageSetParams
 } from '@onebase/ui-kit';
@@ -155,6 +157,8 @@ export default function EditorHeader() {
 
   const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
     useWorkbenchEditorSignal;
+
+  const { loadPageComponentValidate } = usePageComponentValidateSignal;
 
   const { batchSetAppDict } = menuDictSignal;
 
@@ -404,6 +408,8 @@ export default function EditorHeader() {
 
     const appResp = await getApplication(appReq);
     const curAppInfo = {
+      id: appResp.id,
+      appCode: appResp.appCode,
       iconName: appResp.iconName,
       iconColor: appResp.iconColor,
       appName: appResp.appName,
@@ -499,6 +505,39 @@ export default function EditorHeader() {
 
     // 表单和列表使用原有保存逻辑
     console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId} curViewId: ${curViewId.value}`);
+
+    // 表单、列表进行schema数据校验
+    let newValidate: { [key: string]: boolean } = {};
+    let flag = false;
+
+    const formKeys = Object.keys(formPageComponentSchemas.value);
+    formKeys.forEach((ele) => {
+      const type = formPageComponentSchemas.value[ele]?.type;
+      const config = formPageComponentSchemas.value[ele]?.config;
+      if (config && type) {
+        const result = getComponentValidate(type, config);
+        newValidate[ele] = result;
+        if (result === false && !flag) {
+          flag = true;
+          Message.warning('检测到部分组件的必填配置项尚未完成设置');
+        }
+      }
+    });
+    const listKeys = Object.keys(listPageComponentSchemas.value);
+    listKeys.forEach((ele) => {
+      const type = listPageComponentSchemas.value[ele]?.type;
+      const config = listPageComponentSchemas.value[ele]?.config;
+      if (config && type) {
+        const result = getComponentValidate(type, config);
+        newValidate[ele] = result;
+        if (result === false && !flag) {
+          flag = true;
+          Message.warning('检测到部分组件的必填配置项尚未完成设置');
+        }
+      }
+    });
+    // 组件校验状态
+    loadPageComponentValidate(newValidate);
 
     const savePageSetParams: SavePageSetParams = {
       pageSetId: pageSetId,

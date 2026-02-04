@@ -1,6 +1,12 @@
 import { Form, Input, Tooltip } from '@arco-design/web-react';
 import { IconCopy } from '@arco-design/web-react/icon';
-import { getComponentSchema, hasComponentSchema, usePageEditorSignal } from '@onebase/ui-kit';
+import {
+  getComponentSchema,
+  getComponentValidate,
+  hasComponentSchema,
+  usePageEditorSignal,
+  usePageComponentValidateSignal
+} from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -28,6 +34,8 @@ const Attributes = ({ cpID }: ConfigsProps) => {
     pageComponentSchemas
   } = usePageEditorSignal();
 
+  const { setPageComponentValidate } = usePageComponentValidateSignal;
+
   const [editData, setEditData] = useState<any>([]);
   const [configs, setConfigs] = useState<any>({});
   const [isInSubTable, setIsInSubTable] = useState<boolean>(false);
@@ -41,14 +49,18 @@ const Attributes = ({ cpID }: ConfigsProps) => {
   };
 
   const updateSchema = (configUpdates?: Record<string, any>, layoutUpdates?: Record<string, any>) => {
+    const type = resolveType();
+    const config = {
+      ...curComponentSchema.config,
+      ...(configUpdates || {})
+    };
+    const status = getComponentValidate(type, config);
+    setPageComponentValidate(cpID, status);
     const next = {
       id: cpID,
-      type: resolveType(),
+      type,
       editData: curComponentSchema.editData,
-      config: {
-        ...curComponentSchema.config,
-        ...(configUpdates || {})
-      },
+      config,
       layout: layoutUpdates ? { ...curComponentSchema.layout, ...layoutUpdates } : curComponentSchema.layout
     };
     setCurComponentSchema(next);

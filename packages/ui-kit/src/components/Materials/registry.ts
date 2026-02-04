@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash-es'
 import type { ComponentType as ReactComponentType } from 'react'
 import { FormComp, LayoutComp, ListComp, ShowComp } from './Basic'
 import { baseSchema as BasicSchema } from './Basic/schema'
+import { baseValidate as BaseValidate } from './Basic/validate'
 import type { ComponentType } from './componentTypes'
 import { WorkbenchComp } from './Workbench'
 import { workbenchSchema } from './Workbench/schema/schema'
@@ -33,6 +34,7 @@ interface ComponentTemplate {
 export interface ComponentDescriptor {
   type: ComponentType
   schema: any
+  validate?: any
   template: ComponentTemplate
   fieldMap?: string[]
   entityMap?: string[]
@@ -110,7 +112,6 @@ const COMPONENT_TYPE = {
   DATA_LIST: 'XDataList'
 } as const
 
-
 /**
  * 基础组件注册表（不包含工作台组件）
  */
@@ -139,6 +140,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.INPUT_TEXT]: {
     type: COMPONENT_TYPE.INPUT_TEXT,
     schema: cloneDeep(BasicSchema.XInputText),
+    validate: BaseValidate.XInputText,
     template: { h: 36, w: 118, displayName: '单行文本', icon: 'text_input_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.TEXT.VALUE,
