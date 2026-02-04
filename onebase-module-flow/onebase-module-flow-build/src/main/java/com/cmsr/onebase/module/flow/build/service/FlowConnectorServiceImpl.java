@@ -491,20 +491,10 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 3. 转换为 VO
         List<ConnectorActionVO> result = new ArrayList<>();
         for (JsonNode action : actions) {
-            // 安全获取字段值
-            String actionCode = getString(action, "actionCode");
-            if (actionCode == null) {
-                log.warn("Action missing actionCode, skipping: {}", action);
-                continue; // 跳过没有 actionCode 的动作
-            }
-
             ConnectorActionVO vo = ConnectorActionVO.builder()
-                    .actionCode(actionCode)
                     .actionName(getString(action, "actionName"))
                     .description(getString(action, "description"))
                     .status(getString(action, "status"))
-                    .version(getInt(action, "version"))
-                    .updateTime(connector.getUpdateTime())
                     .build();
             result.add(vo);
         }
@@ -574,28 +564,42 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 查找动作 - 从 action_config 字段读取
-        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
-        if (action == null) {
+        // 2. 从 action_config.properties 按 actionCode（作为动作名称key）查找
+        String actionConfig = connector.getActionConfig();
+        if (actionConfig == null || actionConfig.trim().isEmpty()) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
-        // 3. 转换为 VO - 使用安全的字段访问方法
-        ConnectorActionVO vo = ConnectorActionVO.builder()
-                .actionCode(actionCode)
-                .actionName(getString(action, "actionName"))
-                .description(getString(action, "description"))
-                .status(getString(action, "status"))
-                .version(getInt(action, "version"))
-                .basicInfo(action.has("基础信息") && action.get("基础信息") != null ? action.get("基础信息") : null)
-                .inputConfig(action.has("入参配置") && action.get("入参配置") != null ? action.get("入参配置") : null)
-                .outputConfig(action.has("出参配置") && action.get("出参配置") != null ? action.get("出参配置") : null)
-                .debugConfig(action.has("调试配置") && action.get("调试配置") != null ? action.get("调试配置") : null)
-                .updateTime(connector.getUpdateTime())
-                .build();
+        try {
+            JsonNode root = objectMapper.readTree(actionConfig);
+            JsonNode properties = root.get("properties");
+            if (properties == null || !properties.has(actionCode)) {
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+            }
 
-        log.info("getActionDetail success, connectorId: {}, actionCode: {}", connectorId, actionCode);
-        return vo;
+            JsonNode actionNode = properties.get(actionCode);
+
+            // 3. 从 basic 对象获取描述信息
+            JsonNode basicNode = actionNode.get("basic");
+            String description = basicNode != null ? getString(basicNode, "description") : null;
+
+            // 4. 构建返回 VO - 字段映射：basic→basicInfo, request→inputConfig, response→outputConfig, debug→debugConfig
+            ConnectorActionVO vo = ConnectorActionVO.builder()
+                    .actionName(actionCode)
+                    .description(description)
+                    .status(getString(actionNode, "status"))
+                    .basicInfo(actionNode.get("basic"))
+                    .inputConfig(actionNode.get("request"))
+                    .outputConfig(actionNode.get("response"))
+                    .debugConfig(actionNode.get("debug"))
+                    .build();
+
+            log.info("getActionDetail success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+            return vo;
+        } catch (Exception e) {
+            log.error("Parse action_config failed", e);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+        }
     }
 
     @Override
