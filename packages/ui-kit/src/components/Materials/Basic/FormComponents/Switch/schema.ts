@@ -163,7 +163,7 @@ const XSwitch: XInputSwitchSchema = {
       formulaValue: ''
     },
     fillText: {
-      display: true,
+      display: false,
       checkedText: '',
       uncheckedText: ''
     },
