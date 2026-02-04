@@ -189,11 +189,11 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "获取动作详情")
-    @GetMapping("/{connectorId}/actions/{actionCode}")
+    @GetMapping("/{connectorId}/actions/{actionName}")
     public CommonResult<ConnectorActionVO> getActionDetail(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        ConnectorActionVO action = connectorService.getActionDetail(connectorId, actionCode);
+            @PathVariable String actionName) {
+        ConnectorActionVO action = connectorService.getActionDetail(connectorId, actionName);
         return CommonResult.success(action);
     }
 
@@ -202,72 +202,72 @@ public class FlowConnectorController {
     public CommonResult<String> saveActionDraft(
             @PathVariable Long connectorId,
             @RequestBody @Valid CreateConnectorActionReqVO createVO) {
-        String actionCode = connectorService.saveActionDraft(connectorId, createVO);
-        return CommonResult.success(actionCode);
+        String actionName = connectorService.saveActionDraft(connectorId, createVO);
+        return CommonResult.success(actionName);
     }
 
     @Operation(summary = "更新动作草稿")
-    @PutMapping("/{connectorId}/actions/{actionCode}")
+    @PutMapping("/{connectorId}/actions/{actionName}")
     public CommonResult<Boolean> updateActionDraft(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode,
+            @PathVariable String actionName,
             @RequestBody @Valid UpdateConnectorActionReqVO updateVO) {
-        connectorService.updateActionDraft(connectorId, actionCode, updateVO);
+        connectorService.updateActionDraft(connectorId, actionName, updateVO);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "发布动作")
-    @PutMapping("/{connectorId}/actions/{actionCode}/publish")
+    @PutMapping("/{connectorId}/actions/{actionName}/publish")
     public CommonResult<Boolean> publishAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        connectorService.publishAction(connectorId, actionCode);
+            @PathVariable String actionName) {
+        connectorService.publishAction(connectorId, actionName);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "下架动作")
-    @PutMapping("/{connectorId}/actions/{actionCode}/offline")
+    @PutMapping("/{connectorId}/actions/{actionName}/offline")
     public CommonResult<Boolean> offlineAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        connectorService.offlineAction(connectorId, actionCode);
+            @PathVariable String actionName) {
+        connectorService.offlineAction(connectorId, actionName);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "重新上线动作")
-    @PutMapping("/{connectorId}/actions/{actionCode}/republish")
+    @PutMapping("/{connectorId}/actions/{actionName}/republish")
     public CommonResult<Boolean> republishAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        connectorService.republishAction(connectorId, actionCode);
+            @PathVariable String actionName) {
+        connectorService.republishAction(connectorId, actionName);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "复制动作")
-    @PostMapping("/{connectorId}/actions/{actionCode}/copy")
+    @PostMapping("/{connectorId}/actions/{actionName}/copy")
     public CommonResult<String> copyAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        String newActionCode = connectorService.copyAction(connectorId, actionCode);
-        return CommonResult.success(newActionCode);
+            @PathVariable String actionName) {
+        String newActionName = connectorService.copyAction(connectorId, actionName);
+        return CommonResult.success(newActionName);
     }
 
     @Operation(summary = "删除动作")
-    @DeleteMapping("/{connectorId}/actions/{actionCode}/delete")
+    @DeleteMapping("/{connectorId}/actions/{actionName}/delete")
     public CommonResult<Boolean> deleteAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        connectorService.deleteAction(connectorId, actionCode);
+            @PathVariable String actionName) {
+        connectorService.deleteAction(connectorId, actionName);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "校验动作是否可发布")
-    @PostMapping("/{connectorId}/actions/{actionCode}/validate")
+    @PostMapping("/{connectorId}/actions/{actionName}/validate")
     public CommonResult<Boolean> validateActionForPublish(
             @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
+            @PathVariable String actionName) {
         ActionConfigHelper.ValidationResult result =
-                connectorService.validateActionForPublish(connectorId, actionCode);
+                connectorService.validateActionForPublish(connectorId, actionName);
         return CommonResult.success(result.isValid());
     }
 }

@@ -157,17 +157,17 @@ public interface FlowConnectorService {
      * 获取动作详情
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
+     * @param actionName  动作名称
      * @return 动作详情
      */
-    ConnectorActionVO getActionDetail(Long connectorId, String actionCode);
+    ConnectorActionVO getActionDetail(Long connectorId, String actionName);
 
     /**
      * 保存动作草稿
      *
      * @param connectorId 连接器ID
      * @param createVO    创建请求
-     * @return 创建的动作编码
+     * @return 创建的动作名称
      */
     String saveActionDraft(Long connectorId, CreateConnectorActionReqVO createVO);
 
@@ -175,38 +175,38 @@ public interface FlowConnectorService {
      * 更新动作草稿
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
+     * @param actionName  动作名称
      * @param updateVO    更新请求
      */
-    void updateActionDraft(Long connectorId, String actionCode, UpdateConnectorActionReqVO updateVO);
+    void updateActionDraft(Long connectorId, String actionName, UpdateConnectorActionReqVO updateVO);
 
     /**
      * 发布动作
      * <p>
      * 业务规则：
      * - 校验所有步骤配置是否完整
-     * - 完整性校验通过后更新状态为 published，版本号+1
+     * - 完整性校验通过后更新状态为 published
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
+     * @param actionName  动作名称
      */
-    void publishAction(Long connectorId, String actionCode);
+    void publishAction(Long connectorId, String actionName);
 
     /**
      * 下架动作
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
+     * @param actionName  动作名称
      */
-    void offlineAction(Long connectorId, String actionCode);
+    void offlineAction(Long connectorId, String actionName);
 
     /**
      * 重新上线动作
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
+     * @param actionName  动作名称
      */
-    void republishAction(Long connectorId, String actionCode);
+    void republishAction(Long connectorId, String actionName);
 
     /**
      * 复制动作
@@ -216,10 +216,10 @@ public interface FlowConnectorService {
      * - 复制的动作状态为 draft
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
-     * @return 新复制的动作编码
+     * @param actionName  动作名称
+     * @return 新复制的动作名称
      */
-    String copyAction(Long connectorId, String actionCode);
+    String copyAction(Long connectorId, String actionName);
 
     /**
      * 删除动作
@@ -229,16 +229,16 @@ public interface FlowConnectorService {
      * - 如被引用则抛出异常并返回引用信息
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
+     * @param actionName  动作名称
      */
-    void deleteAction(Long connectorId, String actionCode);
+    void deleteAction(Long connectorId, String actionName);
 
     /**
      * 校验动作是否可发布
      *
      * @param connectorId 连接器ID
-     * @param actionCode  动作编码
+     * @param actionName  动作名称
      * @return 校验结果
      */
-    ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionCode);
+    ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionName);
 }
