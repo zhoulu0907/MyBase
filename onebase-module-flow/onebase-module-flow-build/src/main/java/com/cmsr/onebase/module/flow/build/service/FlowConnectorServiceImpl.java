@@ -530,26 +530,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public JsonNode getActionSchema(Long connectorId, String actionCode) {
-        log.info("getActionSchema start, connectorId: {}, actionCode: {}", connectorId, actionCode);
-
-        // 1. 查询连接器
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-
-        // 2. 获取 Formily Schema
-        JsonNode schema = actionConfigHelper.getActionSchema(connector.getActionConfig(), actionCode);
-        if (schema == null) {
-            throw new RuntimeException("动作不存在: " + actionCode);
-        }
-
-        log.info("getActionSchema success, connectorId: {}, actionCode: {}", connectorId, actionCode);
-        return schema;
-    }
-
-    @Override
     public ConnectorActionVO getActionDetail(Long connectorId, String actionCode) {
         log.info("getActionDetail start, connectorId: {}, actionCode: {}", connectorId, actionCode);
 

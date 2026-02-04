@@ -158,15 +158,6 @@ public interface FlowConnectorService {
     ConnectorActionVO getActionDetail(Long connectorId, String actionCode);
 
     /**
-     * 获取动作的 Formily Schema
-     *
-     * @param connectorId 连接器ID
-     * @param actionCode  动作编码
-     * @return Formily Schema JsonNode
-     */
-    JsonNode getActionSchema(Long connectorId, String actionCode);
-
-    /**
      * 保存动作草稿
      *
      * @param connectorId 连接器ID

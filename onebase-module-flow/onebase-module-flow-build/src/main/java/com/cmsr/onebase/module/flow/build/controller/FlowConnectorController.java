@@ -196,15 +196,6 @@ public class FlowConnectorController {
         return CommonResult.success(action);
     }
 
-    @Operation(summary = "获取动作的 Formily Schema")
-    @GetMapping("/{connectorId}/action-schema/{actionCode}")
-    public CommonResult<JsonNode> getActionSchema(
-            @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        JsonNode schema = connectorService.getActionSchema(connectorId, actionCode);
-        return CommonResult.success(schema);
-    }
-
     @Operation(summary = "保存动作草稿")
     @PostMapping("/{connectorId}/actions")
     public CommonResult<String> saveActionDraft(
