@@ -119,6 +119,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.COLUMN_LAYOUT]: {
     type: COMPONENT_TYPE.COLUMN_LAYOUT,
     schema: cloneDeep(BasicSchema.XColumnLayout),
+    validate: BaseValidate.XColumnLayout,
     template: { h: 36, w: 118, displayName: '分栏布局', icon: 'col_layout_cp.svg', category: 'layout' },
     fieldMap: [],
     entityMap: []
@@ -126,6 +127,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.TABS_LAYOUT]: {
     type: COMPONENT_TYPE.TABS_LAYOUT,
     schema: cloneDeep(BasicSchema.XTabsLayout),
+    validate: BaseValidate.XTabsLayout,
     template: { h: 36, w: 118, displayName: '页签组件', icon: 'tabs_layout_cp.svg', category: 'layout' },
     fieldMap: [],
     entityMap: []
@@ -133,6 +135,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.COLLAPSE_LAYOUT]: {
     type: COMPONENT_TYPE.COLLAPSE_LAYOUT,
     schema: cloneDeep(BasicSchema.XCollapseLayout),
+    validate: BaseValidate.XCollapseLayout,
     template: { h: 36, w: 118, displayName: '分组布局', icon: 'colpase_layout_cp.svg', category: 'layout' },
     fieldMap: [],
     entityMap: []
@@ -161,6 +164,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.INPUT_TEXTAREA]: {
     type: COMPONENT_TYPE.INPUT_TEXTAREA,
     schema: cloneDeep(BasicSchema.XInputTextArea),
+    validate: BaseValidate.XInputTextArea,
     template: { h: 36, w: 118, displayName: '多行文本', icon: 'textarea_input_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.TEXT.VALUE,
@@ -174,6 +178,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.STATIC_TEXT]: {
     type: COMPONENT_TYPE.STATIC_TEXT,
     schema: cloneDeep(BasicSchema.XStaticText),
+    validate: BaseValidate.XStaticText,
     template: { h: 36, w: 118, displayName: '静态文本', icon: 'static_text_cp.svg', category: 'form' },
     fieldMap: [],
     entityMap: []
@@ -181,6 +186,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.RICH_TEXT]: {
     type: COMPONENT_TYPE.RICH_TEXT,
     schema: cloneDeep(BasicSchema.XRichText),
+    validate: BaseValidate.XRichText,
     template: { h: 36, w: 118, displayName: '富文本', icon: 'rich_text_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.TEXT.VALUE,
@@ -191,6 +197,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.INPUT_EMAIL]: {
     type: COMPONENT_TYPE.INPUT_EMAIL,
     schema: cloneDeep(BasicSchema.XInputEmail),
+    validate: BaseValidate.XInputEmail,
     template: { h: 36, w: 118, displayName: '邮箱', icon: 'email_input_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.EMAIL.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.EMAIL.VALUE]
@@ -198,6 +205,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.INPUT_PHONE]: {
     type: COMPONENT_TYPE.INPUT_PHONE,
     schema: cloneDeep(BasicSchema.XInputPhone),
+    validate: BaseValidate.XInputPhone,
     template: { h: 36, w: 118, displayName: '电话', icon: 'phone_input_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.PHONE.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.PHONE.VALUE]
@@ -205,6 +213,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.INPUT_NUMBER]: {
     type: COMPONENT_TYPE.INPUT_NUMBER,
     schema: cloneDeep(BasicSchema.XInputNumber),
+    validate: BaseValidate.XInputNumber,
     template: { h: 36, w: 118, displayName: '数字录入', icon: 'number_input_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE]
@@ -212,6 +221,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.DATE_PICKER]: {
     type: COMPONENT_TYPE.DATE_PICKER,
     schema: cloneDeep(BasicSchema.XDatePicker),
+    validate: BaseValidate.XDatePicker,
     template: { h: 36, w: 118, displayName: '日期', icon: 'date_picker_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.DATE.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.DATE.VALUE]
@@ -219,6 +229,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.DATE_RANGE_PICKER]: {
     type: COMPONENT_TYPE.DATE_RANGE_PICKER,
     schema: cloneDeep(BasicSchema.XDateRangePicker),
+    validate: BaseValidate.XDateRangePicker,
     template: { h: 36, w: 118, displayName: '日期区间', icon: 'date_picker_cp.svg', category: 'form' },
     fieldMap: [],
     entityMap: []
@@ -226,6 +237,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.DATE_TIME_PICKER]: {
     type: COMPONENT_TYPE.DATE_TIME_PICKER,
     schema: cloneDeep(BasicSchema.XDateTimePicker),
+    validate: BaseValidate.XDateTimePicker,
     template: { h: 36, w: 118, displayName: '日期时间', icon: 'time_picker_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.DATETIME.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.DATETIME.VALUE]
@@ -233,6 +245,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.TIME_PICKER]: {
     type: COMPONENT_TYPE.TIME_PICKER,
     schema: cloneDeep(BasicSchema.XTimePicker),
+    validate: BaseValidate.XTimePicker,
     template: { h: 36, w: 118, displayName: '时间', icon: 'time_picker_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.TIME.VALUE,
@@ -243,6 +256,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.SWITCH]: {
     type: COMPONENT_TYPE.SWITCH,
     schema: cloneDeep(BasicSchema.XSwitch),
+    validate: BaseValidate.XSwitch,
     template: { h: 36, w: 118, displayName: '开关', icon: 'switch_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.BOOLEAN.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.BOOLEAN.VALUE]
@@ -250,6 +264,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.RADIO]: {
     type: COMPONENT_TYPE.RADIO,
     schema: cloneDeep(BasicSchema.XRadio),
+    validate: BaseValidate.XRadio,
     template: { h: 36, w: 118, displayName: '单选框', icon: 'radio_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.RADIO.VALUE,
@@ -260,6 +275,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.CHECKBOX]: {
     type: COMPONENT_TYPE.CHECKBOX,
     schema: cloneDeep(BasicSchema.XCheckbox),
+    validate: BaseValidate.XCheckbox,
     template: { h: 36, w: 118, displayName: '复选框', icon: 'checkbox_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.CHECKBOX.VALUE,
@@ -270,6 +286,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.SELECT_ONE]: {
     type: COMPONENT_TYPE.SELECT_ONE,
     schema: cloneDeep(BasicSchema.XSelectOne),
+    validate: BaseValidate.XSelectOne,
     template: { h: 36, w: 118, displayName: '下拉单选', icon: 'select_one_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.RADIO.VALUE,
@@ -280,6 +297,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.SELECT_MUTIPLE]: {
     type: COMPONENT_TYPE.SELECT_MUTIPLE,
     schema: cloneDeep(BasicSchema.XSelectMutiple),
+    validate: BaseValidate.XSelectMutiple,
     template: { h: 36, w: 118, displayName: '下拉多选', icon: 'select_mutiple_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.CHECKBOX.VALUE,
@@ -290,6 +308,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.USER_SELECT]: {
     type: COMPONENT_TYPE.USER_SELECT,
     schema: cloneDeep(BasicSchema.XUserSelect),
+    validate: BaseValidate.XUserSelect,
     template: { h: 36, w: 118, displayName: '人员选择', icon: 'user_select_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.USER.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.USER.VALUE]
@@ -297,6 +316,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.USER_MULTIPLE_SELECT]: {
     type: COMPONENT_TYPE.USER_MULTIPLE_SELECT,
     schema: cloneDeep(BasicSchema.XUserSelect),
+    validate: BaseValidate.XUserSelect,
     template: { h: 36, w: 118, displayName: '人员多选', icon: 'user_select_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.MULTI_USER.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.MULTI_USER.VALUE]
@@ -304,6 +324,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.DEPT_SELECT]: {
     type: COMPONENT_TYPE.DEPT_SELECT,
     schema: cloneDeep(BasicSchema.XDeptSelect),
+    validate: BaseValidate.XDeptSelect,
     template: { h: 36, w: 118, displayName: '部门选择', icon: 'dept_select_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.DEPARTMENT.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.DEPARTMENT.VALUE]
@@ -311,6 +332,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.DEPT_MULTIPLE_SELECT]: {
     type: COMPONENT_TYPE.DEPT_MULTIPLE_SELECT,
     schema: cloneDeep(BasicSchema.XDeptSelect),
+    validate: BaseValidate.XDeptSelect,
     template: { h: 36, w: 118, displayName: '部门多选', icon: 'dept_select_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE]
@@ -318,6 +340,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.FILE_UPLOAD]: {
     type: COMPONENT_TYPE.FILE_UPLOAD,
     schema: cloneDeep(BasicSchema.XFileUpload),
+    validate: BaseValidate.XFileUpload,
     template: { h: 36, w: 118, displayName: '文件上传', icon: 'upload_file_cp.svg', category: 'form' },
     fieldMap: [
       ENTITY_FIELD_TYPE.FILE.VALUE,
@@ -328,6 +351,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.IMG_UPLOAD]: {
     type: COMPONENT_TYPE.IMG_UPLOAD,
     schema: cloneDeep(BasicSchema.XImgUpload),
+    validate: BaseValidate.XImgUpload,
     template: { h: 36, w: 118, displayName: '图片上传', icon: 'upload_image_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.IMAGE.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.IMAGE.VALUE]
@@ -335,6 +359,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.AUTO_CODE]: {
     type: COMPONENT_TYPE.AUTO_CODE,
     schema: cloneDeep(BasicSchema.XAutoCode),
+    validate: BaseValidate.XAutoCode,
     template: { h: 36, w: 118, displayName: '自动编号', icon: 'readonly_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.AUTO_CODE.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.AUTO_CODE.VALUE]
@@ -342,6 +367,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.RELATED_FORM]: {
     type: COMPONENT_TYPE.RELATED_FORM,
     schema: cloneDeep(BasicSchema.XRelatedForm),
+    validate: BaseValidate.XRelatedForm,
     template: { h: 36, w: 118, displayName: '关联表单', icon: 'related_form_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.RELATION.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.RELATION.VALUE]
@@ -349,6 +375,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.SUB_TABLE]: {
     type: COMPONENT_TYPE.SUB_TABLE,
     schema: cloneDeep(BasicSchema.XSubTable),
+    validate: BaseValidate.XSubTable,
     template: { h: 36, w: 118, displayName: '子表单', icon: 'sub_table_cp.svg', category: 'form' },
     fieldMap: [],
     entityMap: []
@@ -356,6 +383,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.DATA_SELECT]: {
     type: COMPONENT_TYPE.DATA_SELECT,
     schema: cloneDeep(BasicSchema.XDataSelect),
+    validate: BaseValidate.XDataSelect,
     template: { h: 36, w: 118, displayName: '数据选择', icon: 'data_select_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.DATA_SELECTION.VALUE],
     entityMap: [
@@ -366,6 +394,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.RATE]: {
     type: COMPONENT_TYPE.RATE,
     schema: cloneDeep(BasicSchema.XRate),
+    validate: BaseValidate.XRate,
     template: { h: 36, w: 118, displayName: '评分', icon: 'number_input_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.NUMBER.VALUE, ENTITY_FIELD_TYPE.RATE.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.RATE.VALUE]
@@ -373,6 +402,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.CHECK_ITEM]: {
     type: COMPONENT_TYPE.CHECK_ITEM,
     schema: cloneDeep(BasicSchema.XCheckItem),
+    validate: BaseValidate.XCheckItem,
     template: { h: 36, w: 118, displayName: '检查项', icon: 'number_input_cp.svg', category: 'form' },
     fieldMap: [ENTITY_FIELD_TYPE.BOOLEAN.VALUE, ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE],
     entityMap: [ENTITY_FIELD_TYPE.CHECK_ITEM.VALUE]
@@ -380,6 +410,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.TABLE]: {
     type: COMPONENT_TYPE.TABLE,
     schema: cloneDeep(BasicSchema.XTable),
+    validate: BaseValidate.XTable,
     template: { h: 48, w: 68, displayName: '表格', icon: 'table_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -387,6 +418,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.CALENDAR]: {
     type: COMPONENT_TYPE.CALENDAR,
     schema: cloneDeep(BasicSchema.XCalendar),
+    validate: BaseValidate.XCalendar,
     template: { h: 48, w: 68, displayName: '日历', icon: 'calendar_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -394,6 +426,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.TIMELINE]: {
     type: COMPONENT_TYPE.TIMELINE,
     schema: cloneDeep(BasicSchema.XTimeline),
+    validate: BaseValidate.XTimeline,
     template: { h: 48, w: 68, displayName: '时间轴', icon: 'timeline_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -401,6 +434,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.LIST_COLLAPSE]: {
     type: COMPONENT_TYPE.LIST_COLLAPSE,
     schema: cloneDeep(BasicSchema.XCollapse),
+    validate: BaseValidate.XCollapse,
     template: { h: 48, w: 68, displayName: '看板', icon: 'kanban_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -408,6 +442,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.LIST_CAROUSEL]: {
     type: COMPONENT_TYPE.LIST_CAROUSEL,
     schema: cloneDeep(BasicSchema.XCarousel),
+    validate: BaseValidate.XCarousel,
     template: { h: 48, w: 68, displayName: '图片轮播', icon: 'carousel_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -415,6 +450,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.LIST]: {
     type: COMPONENT_TYPE.LIST,
     schema: cloneDeep(BasicSchema.XList),
+    validate: BaseValidate.XList,
     template: { h: 48, w: 68, displayName: '画布列表', icon: 'canvas_list_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -422,6 +458,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
    [COMPONENT_TYPE.CARD]: {
     type: COMPONENT_TYPE.CARD,
     schema: cloneDeep(BasicSchema.XCard),
+    validate: BaseValidate.XCard,
     template: { h: 48, w: 68, displayName: '卡片', icon: 'table_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -429,6 +466,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.TREE]: {
     type: COMPONENT_TYPE.TREE,
     schema: cloneDeep(BasicSchema.XTree),
+    validate: BaseValidate.XTree,
     template: { h: 48, w: 68, displayName: '树形目录', icon: 'table_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
@@ -436,6 +474,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.INFO_NOTICE]: {
     type: COMPONENT_TYPE.INFO_NOTICE,
     schema: cloneDeep(BasicSchema.XInfoNotice),
+    validate: BaseValidate.XInfoNotice,
     template: { h: 48, w: 68, displayName: '信息公告', icon: 'info_notice_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -443,6 +482,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.TEXT]: {
     type: COMPONENT_TYPE.TEXT,
     schema: cloneDeep(BasicSchema.XText),
+    validate: BaseValidate.XText,
     template: { h: 48, w: 68, displayName: '静态文本', icon: 'static_text_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -450,6 +490,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.IMAGE]: {
     type: COMPONENT_TYPE.IMAGE,
     schema: cloneDeep(BasicSchema.XImage),
+    validate: BaseValidate.XImage,
     template: { h: 48, w: 68, displayName: '静态图片', icon: 'static_image_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -457,6 +498,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.FILE]: {
     type: COMPONENT_TYPE.FILE,
     schema: cloneDeep(BasicSchema.XFile),
+    validate: BaseValidate.XFile,
     template: { h: 48, w: 68, displayName: '静态文件', icon: 'static_file_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -464,6 +506,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.WEB_VIEW]: {
     type: COMPONENT_TYPE.WEB_VIEW,
     schema: cloneDeep(BasicSchema.XWebView),
+    validate: BaseValidate.XWebView,
     template: { h: 48, w: 68, displayName: '网页组件', icon: 'web_component_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -471,6 +514,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.DIVIDER]: {
     type: COMPONENT_TYPE.DIVIDER,
     schema: cloneDeep(BasicSchema.XDivider),
+    validate: BaseValidate.XDivider,
     template: { h: 36, w: 118, displayName: '分割线', icon: 'divider_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -478,6 +522,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.ALERT]: {
     type: COMPONENT_TYPE.ALERT,
     schema: cloneDeep(BasicSchema.XAlert),
+    validate: BaseValidate.XAlert,
     template: { h: 36, w: 118, displayName: '提示框', icon: 'placeholder_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -485,6 +530,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.PLACEHOLDER]: {
     type: COMPONENT_TYPE.PLACEHOLDER,
     schema: cloneDeep(BasicSchema.XPlaceholder),
+    validate: BaseValidate.XPlaceholder,
     template: { h: 36, w: 118, displayName: '占位符', icon: 'placeholder_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
@@ -492,6 +538,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
   [COMPONENT_TYPE.CAROUSEL_FORM]: {
     type: COMPONENT_TYPE.CAROUSEL_FORM,
     schema: cloneDeep(BasicSchema.XCarouselForm),
+    validate: BaseValidate.XCarouselForm,
     template: { h: 36, w: 118, displayName: '轮播图', icon: 'carousel_cp.svg', category: 'show' },
     fieldMap: [],
     entityMap: []
