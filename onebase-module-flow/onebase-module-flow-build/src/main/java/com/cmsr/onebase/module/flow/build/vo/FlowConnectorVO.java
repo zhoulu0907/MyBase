@@ -37,9 +37,6 @@ public class FlowConnectorVO {
     @Schema(description = "连接器创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "环境UUID")
-    private String envUuid;
-
     @Schema(description = "环境名称")
     private String envName;
 

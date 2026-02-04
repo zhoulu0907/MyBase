@@ -43,4 +43,8 @@ public class UserImportExcelVO {
     @DictFormat(DictTypeConstants.COMMON_STATUS)
     private Integer status;
 
+    @ExcelProperty(value = "用户类型", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.USER_TYPE)
+    private Integer userType;
+
 }

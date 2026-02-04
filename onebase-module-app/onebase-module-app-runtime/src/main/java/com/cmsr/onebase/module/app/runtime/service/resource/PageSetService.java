@@ -8,11 +8,11 @@ import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
 
 public interface PageSetService {
 
-    Long getPageSetId(Long menuId);
+    Long getPageSetId(Long menuId, Boolean isDev);
 
     Long getAppId(Long pageSetId);
 
-    String getMainMetadata(Long pageSetId);
+    String getMainMetadata(Long pageSetId, Boolean isDev);
 
     LoadPageSetRespVO loadPageSet(LoadPageSetReqVO loadPageSetReqVO);
 

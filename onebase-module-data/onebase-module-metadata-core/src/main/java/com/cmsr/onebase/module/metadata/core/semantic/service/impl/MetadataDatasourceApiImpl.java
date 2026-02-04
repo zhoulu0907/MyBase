@@ -7,8 +7,10 @@ import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceImportReqDT
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.export.*;
 import com.cmsr.onebase.module.metadata.core.config.MetadataConfig;
+import com.cmsr.onebase.module.metadata.core.dal.database.*;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataAppAndDatasourceDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.FieldTypeMappingDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.field.MetadataEntityFieldOptionDO;
@@ -16,8 +18,6 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.*;
-import com.cmsr.onebase.module.metadata.core.dal.database.*;
-import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.FieldTypeMappingDO;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -103,9 +103,9 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
             // 将配置转换为JSON字符串
             String configJson = String.format(
-                "{\"host\":\"%s\",\"port\":%d,\"database\":\"%s\",\"username\":\"%s\",\"password\":\"%s\"}",
-                config.get("host"), config.get("port"), config.get("database"),
-                config.get("username"), config.get("password")
+                    "{\"host\":\"%s\",\"port\":%d,\"database\":\"%s\",\"username\":\"%s\",\"password\":\"%s\"}",
+                    config.get("host"), config.get("port"), config.get("database"),
+                    config.get("username"), config.get("password")
             );
 
             // 调用 core 模块的基础服务，使用MetadataConfig中配置的数据源类型
@@ -550,6 +550,9 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
             return;
         }
 
+        // 先删除已有的编辑态数据，避免唯一约束冲突
+        deleteApplicationVersionData(newApplicationId, versionTag);
+
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
 
         // 1. 导入数据源 - 使用默认配置创建
@@ -919,12 +922,12 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
     private String buildDefaultDatasourceConfig() {
         return String.format(
-            "{\"host\":\"%s\",\"port\":%d,\"database\":\"%s\",\"username\":\"%s\",\"password\":\"%s\"}",
-            metadataConfig.getDefaultDatasourceHost(),
-            metadataConfig.getDefaultDatasourcePort(),
-            metadataConfig.getDefaultDatasourceDatabase(),
-            metadataConfig.getDefaultDatasourceUsername(),
-            metadataConfig.getDefaultDatasourcePassword()
+                "{\"host\":\"%s\",\"port\":%d,\"database\":\"%s\",\"username\":\"%s\",\"password\":\"%s\"}",
+                metadataConfig.getDefaultDatasourceHost(),
+                metadataConfig.getDefaultDatasourcePort(),
+                metadataConfig.getDefaultDatasourceDatabase(),
+                metadataConfig.getDefaultDatasourceUsername(),
+                metadataConfig.getDefaultDatasourcePassword()
         );
     }
 
@@ -933,8 +936,8 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     }
 
     private void createPhysicalTablesAndColumns(java.util.List<MetadataBusinessEntityDO> entities,
-                                                  java.util.List<MetadataEntityFieldDO> fields,
-                                                  MetadataDatasourceDO datasource) {
+                                                java.util.List<MetadataEntityFieldDO> fields,
+                                                MetadataDatasourceDO datasource) {
         if (CollectionUtils.isEmpty(entities)) {
             return;
         }
@@ -1037,7 +1040,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         }
         String upperValue = defaultValue.toUpperCase().trim();
         // 时间戳相关函数
-        if (upperValue.contains("CURRENT_TIMESTAMP") || upperValue.contains("NOW()") 
+        if (upperValue.contains("CURRENT_TIMESTAMP") || upperValue.contains("NOW()")
                 || upperValue.contains("CURRENT_DATE") || upperValue.contains("CURRENT_TIME")) {
             return true;
         }
@@ -1073,6 +1076,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         }
         return value;
     }
+
     //todo metadata_field_type_mapping 表中有存字段类型和数据库类型的映射关系，可以改为从该表中读取映射关系，而不是写死在代码中
     private String mapFieldTypeToDbType(String fieldType, Integer dataLength, Integer decimalPlaces, String datasourceType, java.util.List<FieldTypeMappingDO> typeMappings) {
         if (fieldType == null) {
@@ -1090,14 +1094,14 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
             if (dbType != null) {
                 // 特殊处理需要长度和精度的类型
-                if (("STRING".equalsIgnoreCase(fieldType) || "TEXT".equalsIgnoreCase(fieldType)) 
-                        && !dbType.contains("(") 
+                if (("STRING".equalsIgnoreCase(fieldType) || "TEXT".equalsIgnoreCase(fieldType))
+                        && !dbType.contains("(")
                         && (dbType.toUpperCase().contains("CHAR") || dbType.toUpperCase().contains("VARCHAR"))) {
                     int len = (dataLength != null && dataLength > 0) ? dataLength : 255;
                     return dbType + "(" + len + ")";
                 }
-                
-                if (("DECIMAL".equalsIgnoreCase(fieldType) || "NUMBER".equalsIgnoreCase(fieldType)) 
+
+                if (("DECIMAL".equalsIgnoreCase(fieldType) || "NUMBER".equalsIgnoreCase(fieldType))
                         && !dbType.contains("(")) {
                     int precision = (dataLength != null && dataLength > 0) ? dataLength : 18;
                     int scale = (decimalPlaces != null && decimalPlaces >= 0) ? decimalPlaces : 2;
@@ -1129,5 +1133,46 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
             case "JSON" -> isPostgres ? "JSONB" : "JSON";
             default -> "VARCHAR(255)";
         };
+    }
+
+    //@Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteApplicationVersionData(Long applicationId, Long versionTag) {
+        log.info("开始删除元数据版本数据，applicationId: {}, versionTag: {}", applicationId, versionTag);
+
+        // 1. 删除子表非空验证
+        metadataValidationChildNotEmptyRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 2. 删除格式验证
+        metadataValidationFormatRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 3. 删除范围验证
+        metadataValidationRangeRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 4. 删除长度验证
+        metadataValidationLengthRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 5. 删除唯一验证
+        metadataValidationUniqueRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 6. 删除必填验证
+        metadataValidationRequiredRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 7. 删除验证规则定义
+        metadataValidationRuleDefinitionRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 8. 删除验证规则组
+        metadataValidationRuleGroupRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 9. 删除自动编号规则项
+        metadataAutoNumberRuleItemRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 10. 删除自动编号配置
+        metadataAutoNumberConfigRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 11. 删除实体关系
+        metadataEntityRelationshipRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 12. 删除字段选项
+        metadataEntityFieldOptionRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 13. 删除实体字段
+        metadataEntityFieldRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 14. 删除业务实体
+        metadataBusinessEntityRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 15. 删除应用与数据源关联
+        metadataAppAndDatasourceRepository.deleteApplicationVersionData(applicationId, versionTag);
+        // 16. 删除数据源
+        metadataDatasourceRepository.deleteApplicationVersionData(applicationId, versionTag);
+
+        log.info("删除元数据版本数据完成，applicationId: {}, versionTag: {}", applicationId, versionTag);
     }
 }

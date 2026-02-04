@@ -8,6 +8,7 @@ import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
 import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
@@ -129,7 +130,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     public AdminUserDO mobileAuthenticate(String mobile, String password) {
         final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
         // 校验账号是否存在
-        AdminUserDO user = userService.getUserByMobile(mobile);
+        AdminUserDO user = userService.getUserByMobile(mobile, UserTypeEnum.CORP.getValue());
         checkUserPsdAndStatus(mobile, password, user, logTypeEnum);
 
         return user;
@@ -298,7 +299,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
                 throw exception(AUTH_REGISTER_CAPTCHA_CODE_ERROR, response.getRepMsg());
             }
             // 校验手机号是否存在
-            if (userService.getUserByMobile(reqVO.getMobile()) == null) {
+            if (userService.getUserByMobile(reqVO.getMobile(), reqVO.getUserType()) == null) {
                 throw exception(AUTH_MOBILE_NOT_EXISTS);
             }
 
@@ -313,7 +314,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         smsCodeApi.useSmsCode(AuthConvert.INSTANCE.convert(reqVO, SmsSceneEnum.ADMIN_MEMBER_LOGIN.getScene(), getClientIP())).checkError();
 
         // 获得用户信息
-        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile());
+        AdminUserDO user = userService.getUserByMobile(reqVO.getMobile(), reqVO.getUserType());
         if (user == null) {
             throw exception(USER_NOT_EXISTS);
         }

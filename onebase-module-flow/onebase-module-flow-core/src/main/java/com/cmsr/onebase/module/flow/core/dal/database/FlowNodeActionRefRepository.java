@@ -35,6 +35,24 @@ public class FlowNodeActionRefRepository extends ServiceImpl<FlowNodeActionRefMa
     }
 
     /**
+     * 查询指定连接器的多个动作的所有引用
+     *
+     * @param connectorId 连接器ID
+     * @param actionIds   动作ID列表
+     * @return 引用列表
+     */
+    public List<FlowNodeActionRefDO> findByConnectorIdAndActionIds(Long connectorId, List<String> actionIds) {
+        if (actionIds == null || actionIds.isEmpty()) {
+            return List.of();
+        }
+        QueryWrapper query = QueryWrapper.create()
+                .where(FLOW_NODE_ACTION_REF.CONNECTOR_ID.eq(connectorId))
+                .and(FLOW_NODE_ACTION_REF.ACTION_ID.in(actionIds))
+                .and(FLOW_NODE_ACTION_REF.DELETED.eq(0));
+        return list(query);
+    }
+
+    /**
      * 查询指定连接器的所有动作引用
      *
      * @param connectorId 连接器ID

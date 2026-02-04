@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.runtime.controller.corp.user;
 
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
@@ -66,7 +67,7 @@ public class CorpUserProfileController {
     @Operation(summary = "修改用户个人信息")
     @PreAuthorize("@ss.hasPermission('corp:profile:update')")
     public CommonResult<Boolean> updateUserProfile(@Valid @RequestBody UserProfileUpdateReqVO reqVO) {
-        userService.updateUserProfile(getLoginUserId(), reqVO);
+        userService.updateUserProfile(getLoginUserId(), reqVO, UserTypeEnum.CORP.getValue());
         return success(true);
     }
 

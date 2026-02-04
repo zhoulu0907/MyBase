@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
 import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -58,6 +59,17 @@ public class FlowConnectorController {
         return CommonResult.success(Boolean.TRUE);
     }
 
+    @Operation(summary = "更新连接器基本信息",
+              description = "只更新描述信息，自动检测变化")
+    @Parameter(name = "id", description = "连接器ID", required = true)
+    @PutMapping("/{id}/base-info")
+    public CommonResult<Boolean> updateBaseInfo(
+            @PathVariable Long id,
+            @RequestBody @Valid UpdateFlowConnectorReqVO updateVO) {
+        Boolean updated = connectorService.updateBaseInfo(id, updateVO);
+        return CommonResult.success(updated);
+    }
+
     @Operation(summary = "删除连接器")
     @DeleteMapping("/{id}")
     public CommonResult<Boolean> deleteConnector(@PathVariable Long id) {
@@ -73,7 +85,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "启用/禁用连接器实例",
-              description = "启用操作要求实例必须已配置环境信息（envUuid不为空），禁用操作无限制")
+              description = "启用或禁用连接器实例")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @Parameter(name = "activeStatus", description = "启用状态（0-禁用，1-启用）", required = true, example = "1")
     @PutMapping("/{id}/status")
@@ -90,6 +102,52 @@ public class FlowConnectorController {
     @GetMapping("/by-type/{typeCode}")
     public CommonResult<List<FlowConnectorVO>> listByType(@PathVariable String typeCode) {
         List<FlowConnectorVO> result = connectorService.listByType(typeCode);
+        return CommonResult.success(result);
+    }
+
+    // ==================== 环境配置接口 ====================
+
+    @Operation(summary = "查询连接器的环境配置列表",
+              description = "从flow_connector.config字段解析环境配置信息")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @GetMapping("/{id}/environments")
+    public CommonResult<List<FlowConnectorEnvLiteVO>> getEnvironments(
+            @Parameter(description = "连接器实例ID", required = true, example = "1")
+            @PathVariable Long id) {
+        List<FlowConnectorEnvLiteVO> environments = connectorService.getEnvironments(id);
+        return CommonResult.success(environments);
+    }
+
+    @Operation(summary = "查询连接器的指定环境配置信息",
+              description = "从flow_connector.config的properties中解析出指定环境的Formily Schema")
+    @Parameter(name = "id", description = "连接器实例ID（主键）", required = true, example = "1")
+    @Parameter(name = "envCode", description = "环境编码（如DEV、TEST、PROD）", required = true, example = "PROD")
+    @GetMapping("/{id}/environment-config")
+    public CommonResult<EnvironmentConfigVO> getEnvironmentConfig(
+            @PathVariable("id") Long id,
+            @RequestParam("envCode") @NotBlank(message = "环境编码不能为空") String envCode) {
+
+        EnvironmentConfigVO config = connectorService.getEnvironmentConfig(id, envCode);
+        return CommonResult.success(config);
+    }
+
+    @Operation(summary = "获取环境配置模板",
+              description = "获取连接器类型对应的环境配置 Formily Schema 模板，用于创建环境信息")
+    @Parameter(name = "id", description = "连接器实例ID", required = true)
+    @GetMapping("/{id}/env-config-template")
+    public CommonResult<EnvConfigTemplateVO> getEnvConfigTemplate(@PathVariable Long id) {
+        EnvConfigTemplateVO template = connectorService.getEnvConfigTemplate(id);
+        return CommonResult.success(template);
+    }
+
+    @Operation(summary = "保存连接器环境配置",
+              description = "保存新的环境配置到 connector.config，如果环境已存在则拒绝")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @PostMapping("/{id}/save-env")
+    public CommonResult<Boolean> saveEnvironmentConfig(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid SaveEnvironmentConfigReqVO reqVO) {
+        Boolean result = connectorService.saveEnvironmentConfig(id, reqVO);
         return CommonResult.success(result);
     }
 
@@ -121,12 +179,21 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "获取动作详情")
-    @GetMapping("/{connectorId}/actions/{actionId}")
+    @GetMapping("/{connectorId}/actions/{actionCode}")
     public CommonResult<ConnectorActionVO> getActionDetail(
             @PathVariable Long connectorId,
-            @PathVariable String actionId) {
-        ConnectorActionVO action = connectorService.getActionDetail(connectorId, actionId);
+            @PathVariable String actionCode) {
+        ConnectorActionVO action = connectorService.getActionDetail(connectorId, actionCode);
         return CommonResult.success(action);
+    }
+
+    @Operation(summary = "获取动作的 Formily Schema")
+    @GetMapping("/{connectorId}/action-schema/{actionCode}")
+    public CommonResult<JsonNode> getActionSchema(
+            @PathVariable Long connectorId,
+            @PathVariable String actionCode) {
+        JsonNode schema = connectorService.getActionSchema(connectorId, actionCode);
+        return CommonResult.success(schema);
     }
 
     @Operation(summary = "保存动作草稿")
@@ -134,72 +201,72 @@ public class FlowConnectorController {
     public CommonResult<String> saveActionDraft(
             @PathVariable Long connectorId,
             @RequestBody @Valid CreateConnectorActionReqVO createVO) {
-        String actionId = connectorService.saveActionDraft(connectorId, createVO);
-        return CommonResult.success(actionId);
+        String actionCode = connectorService.saveActionDraft(connectorId, createVO);
+        return CommonResult.success(actionCode);
     }
 
     @Operation(summary = "更新动作草稿")
-    @PutMapping("/{connectorId}/actions/{actionId}")
+    @PutMapping("/{connectorId}/actions/{actionCode}")
     public CommonResult<Boolean> updateActionDraft(
             @PathVariable Long connectorId,
-            @PathVariable String actionId,
+            @PathVariable String actionCode,
             @RequestBody @Valid UpdateConnectorActionReqVO updateVO) {
-        connectorService.updateActionDraft(connectorId, actionId, updateVO);
+        connectorService.updateActionDraft(connectorId, actionCode, updateVO);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "发布动作")
-    @PutMapping("/{connectorId}/actions/{actionId}/publish")
+    @PutMapping("/{connectorId}/actions/{actionCode}/publish")
     public CommonResult<Boolean> publishAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionId) {
-        connectorService.publishAction(connectorId, actionId);
+            @PathVariable String actionCode) {
+        connectorService.publishAction(connectorId, actionCode);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "下架动作")
-    @PutMapping("/{connectorId}/actions/{actionId}/offline")
+    @PutMapping("/{connectorId}/actions/{actionCode}/offline")
     public CommonResult<Boolean> offlineAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionId) {
-        connectorService.offlineAction(connectorId, actionId);
+            @PathVariable String actionCode) {
+        connectorService.offlineAction(connectorId, actionCode);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "重新上线动作")
-    @PutMapping("/{connectorId}/actions/{actionId}/republish")
+    @PutMapping("/{connectorId}/actions/{actionCode}/republish")
     public CommonResult<Boolean> republishAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionId) {
-        connectorService.republishAction(connectorId, actionId);
+            @PathVariable String actionCode) {
+        connectorService.republishAction(connectorId, actionCode);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "复制动作")
-    @PostMapping("/{connectorId}/actions/{actionId}/copy")
+    @PostMapping("/{connectorId}/actions/{actionCode}/copy")
     public CommonResult<String> copyAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionId) {
-        String newActionId = connectorService.copyAction(connectorId, actionId);
-        return CommonResult.success(newActionId);
+            @PathVariable String actionCode) {
+        String newActionCode = connectorService.copyAction(connectorId, actionCode);
+        return CommonResult.success(newActionCode);
     }
 
     @Operation(summary = "删除动作")
-    @DeleteMapping("/{connectorId}/actions/{actionId}")
+    @DeleteMapping("/{connectorId}/actions/{actionCode}/delete")
     public CommonResult<Boolean> deleteAction(
             @PathVariable Long connectorId,
-            @PathVariable String actionId) {
-        connectorService.deleteAction(connectorId, actionId);
+            @PathVariable String actionCode) {
+        connectorService.deleteAction(connectorId, actionCode);
         return CommonResult.success(Boolean.TRUE);
     }
 
     @Operation(summary = "校验动作是否可发布")
-    @PostMapping("/{connectorId}/actions/{actionId}/validate")
+    @PostMapping("/{connectorId}/actions/{actionCode}/validate")
     public CommonResult<Boolean> validateActionForPublish(
             @PathVariable Long connectorId,
-            @PathVariable String actionId) {
-        ConnectorConfigHelper.ValidationResult result =
-                connectorService.validateActionForPublish(connectorId, actionId);
+            @PathVariable String actionCode) {
+        ActionConfigHelper.ValidationResult result =
+                connectorService.validateActionForPublish(connectorId, actionCode);
         return CommonResult.success(result.isValid());
     }
 }

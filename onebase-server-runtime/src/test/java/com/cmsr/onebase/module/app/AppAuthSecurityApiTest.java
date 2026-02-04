@@ -84,7 +84,7 @@ public class AppAuthSecurityApiTest {
 
     @Test
     public void testListApplicationMenu() {
-        List<MenuListRespVO> menuListRespVOS = runtimeAppMenuService.listApplicationMenu();
+        List<MenuListRespVO> menuListRespVOS = runtimeAppMenuService.listApplicationMenu(false);
         System.out.println(menuListRespVOS);
     }
 

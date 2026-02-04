@@ -64,7 +64,7 @@ public class EtlTableRepository extends BaseAppRepository<EtlTableMapper, EtlTab
 
     public List<EtlTableDO> findAllByDatasource(String datasourceUuid, Boolean writable) {
         QueryWrapper queryWrapper = query().eq(EtlTableDO::getDatasourceUuid, datasourceUuid)
-                .eq(EtlTableDO::getTableType, "table", writable)
+                .eq(EtlTableDO::getTableType, "table")
                 .orderBy(EtlTableDO::getTableName, true);
         return list(queryWrapper);
     }
