@@ -161,6 +161,17 @@ public class FlowConnectorController {
         return CommonResult.success(template);
     }
 
+    @Operation(summary = "保存连接器动作配置",
+              description = "保存新的动作配置到 connector.action_config，如果动作已存在则拒绝")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @PostMapping("/{id}/save-action")
+    public CommonResult<Boolean> saveActionConfig(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid SaveActionConfigReqVO reqVO) {
+        Boolean result = connectorService.saveActionConfig(id, reqVO);
+        return CommonResult.success(result);
+    }
+
     @Operation(summary = "查询连接器动作清单")
     @GetMapping("/{id}/actions")
     public CommonResult<List<String>> getActions(@PathVariable Long id) {
