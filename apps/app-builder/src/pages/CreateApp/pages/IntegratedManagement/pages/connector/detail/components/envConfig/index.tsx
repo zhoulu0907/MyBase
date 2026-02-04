@@ -529,7 +529,8 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
 
   const handleCreateEnvSave = async () => {
     try {
-      await createEnvForm.validate();
+      // TODO(好心人): 需要验证表单是否符合要求:)
+      //   await createEnvForm.validate();
       const values = createEnvForm.values;
       console.log(values);
       setSaveLoading(true);
