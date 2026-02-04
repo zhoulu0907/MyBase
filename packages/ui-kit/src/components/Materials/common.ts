@@ -61,6 +61,7 @@ import type {
     IWidthConfigType,
     ITreeDataConfigType,
     TTextDefaultType,
+    IUploadButtonConfigType,
 } from './types';
 
 // ==================== 基础与通用 ====================
@@ -935,7 +936,9 @@ export const numberFormatConfig: INumberFormatConfigType = {
 export const stepConfig: INumberConfigType = {
   key: 'step',
   name: '数字步长',
-  type: 'NumberInput'
+  type: 'NumberInput',
+  min: 0,
+  max: 1000000
 }
 
 export const textDefaultValueConfig: ITextConfigType = {
@@ -948,6 +951,12 @@ export const buttonNameConfig: ITextConfigType = {
   key: 'buttonName',
   name: '按钮名称',
   type: 'TextInput'
+}
+
+export const uploadButtonConfig: IUploadButtonConfigType = {
+  key: 'uploadButton',
+  name: '按钮名称',
+  type: 'UploadButton'
 }
 
 export const uploadButtonTypeConfig: IStatusConfigType<TUploadButtonType> = {

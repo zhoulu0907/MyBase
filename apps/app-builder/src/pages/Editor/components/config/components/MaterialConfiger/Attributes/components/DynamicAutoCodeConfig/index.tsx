@@ -69,7 +69,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
     const mainEntityTree = mainEntity.fields
       .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
       .map((field: AppEntityField) => ({
-        value: field.id,
+        value: field.fieldUuid,
         label: field.displayName
       }));
 
@@ -79,14 +79,14 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
       children: entity.fields
         .filter((field: AppEntityField) => !FilterEntityFields.includes(field.fieldName))
         .map((field: AppEntityField) => ({
-          value: field.id,
+          value: field.fieldUuid,
           label: field.displayName
         }))
     }));
 
     setEntityTree([
       {
-        value: mainEntity.entityId,
+        value: mainEntity.entityUuid,
         label: mainEntity.entityName,
         children: mainEntityTree
       },
@@ -139,7 +139,7 @@ const DynamicAutoCodeConfig: React.FC<DynamicAutoCodeConfigProps> = ({
               className={styles.ruleInput}
               options={entityTree}
               animation
-              value={findFieldPath(rule.format, entityTree)}
+              value={findFieldPath(rule.refFieldUuid, entityTree)}
             />
           </>
         );

@@ -26,12 +26,13 @@ import '../index.css';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
-const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   // ===== 外部 props begin =====
   const {
     label,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
     defaultValueConfig,
     rateConfig,
@@ -85,7 +86,10 @@ const XRate = memo((props: XRateConfig & { runtime?: boolean; detailMode?: boole
         }
         field={fieldId}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}

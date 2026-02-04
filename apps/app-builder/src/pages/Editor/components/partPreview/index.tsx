@@ -123,29 +123,68 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
   }, [editMode.value, visible]);
 
   const getFormContent = () => {
-    return formComponents.value.map((cp: GridItem) => (
-      <Fragment key={cp.id}>
-        {formPageComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-          <div
-            key={cp.id}
-            className={styles.componentItem}
-            style={{
-              width: `calc(${getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-              margin: '4px'
-            }}
-          >
-            <PreviewRender
-              cpId={cp.id}
-              cpType={cp.type}
-              pageComponentSchema={formPageComponentSchemas.value[cp.id]}
-              runtime={true}
-              preview={true}
-            />
-          </div>
-        )}
-      </Fragment>
-    ));
+    // 计算第一行索引
+    let accumulatedWidth = 0;
+    const firstRowIndices = new Set<number>();
+
+    for (let i = 0; i < formComponents.value.length; i++) {
+      const cp = formComponents.value[i];
+      const schema = formPageComponentSchemas.value[cp.id];
+
+      // 检查组件是否隐藏，隐藏的组件不参与第一行计算
+      if (schema?.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
+        continue;
+      }
+
+      const widthStr = schema?.config?.width;
+
+      // 从 "25%" 中提取数字，处理可能的边界情况
+      let widthValue = 0;
+      if (widthStr && typeof widthStr === 'string') {
+        const numStr = widthStr.replace('%', '').trim();
+        widthValue = parseFloat(numStr) || 0;
+      }
+
+      // 如果累加宽度加上当前宽度不超过 100%，说明还在第一行
+      if (accumulatedWidth + widthValue <= 100) {
+        firstRowIndices.add(i);
+        accumulatedWidth += widthValue;
+      } else {
+        // 超过 100%，说明已经到第二行了
+        break;
+      }
+    }
+
+    return formComponents.value.map((cp: GridItem, index: number) => {
+      const isFirstRow = firstRowIndices.has(index);
+      const tooltipPosition = isFirstRow ? 'right' : 'top';
+
+      return (
+        <Fragment key={cp.id}>
+          {formPageComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+            <div
+              key={cp.id}
+              className={styles.componentItem}
+              style={{
+                width: `calc(${getComponentWidth(formPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                margin: '4px'
+              }}
+            >
+              <PreviewRender
+                cpId={cp.id}
+                cpType={cp.type}
+                pageComponentSchema={formPageComponentSchemas.value[cp.id]}
+                runtime={true}
+                preview={true}
+                tooltipPosition={tooltipPosition}
+              />
+            </div>
+          )}
+        </Fragment>
+      );
+    });
   };
+
   return (
     <Drawer
       placement="bottom"

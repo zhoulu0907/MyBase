@@ -117,6 +117,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       setFilterCondition(configs[SUB_ATTR_KEY.FILTERCONDITION]);
       setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.fieldName);
       setSortValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.sortBy);
+      tableConfig.metaData = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].entityUuid;
       tableConfig.tableName = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].tableName;
       handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
     }
@@ -170,8 +171,26 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
     // const next = value && value !== echoField ? [value] : [];
     const next = value ? [value] : [];
     setSelected(next);
-    handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, next);
-    handleOptionsChange();
+    const selectableOptions =
+      isDropdown && echoField
+        ? displayFieldOptions || []
+        :  displayFieldOptions || [];
+    const header = selectableOptions.reduce((fields: any[], option: any) => {
+      if (selected.includes(option.fieldName)) {
+        fields.push({
+          title: option.displayName,
+          dataIndex: option.fieldName
+        });
+      }
+      return fields;
+    }, []);
+    setTableHeader(header);
+    tableConfig.columns = header;
+
+    handleMultiPropsChange?.([
+      { key: SUB_ATTR_KEY.SELECTDATAFIELDS, value: next },
+      { key: SUB_ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig }
+    ]);
   };
 
   const handlSortFieldValueChange = (value: string) => {

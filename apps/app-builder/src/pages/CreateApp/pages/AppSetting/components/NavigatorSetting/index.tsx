@@ -133,7 +133,7 @@ const NavigatorSetting = (props: IProps) => {
             <Radio value={'SIDEBAR'}>
               {({ checked }) => (
                 <>
-                  <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}>
                     <img className={styles.radioLayout} src={webLayout1} alt="" />
                   </div>
                   <div className={styles.radioTips}>侧边导航</div>
@@ -143,7 +143,7 @@ const NavigatorSetting = (props: IProps) => {
             <Radio value={'TOPBAR'}>
               {({ checked }) => (
                 <>
-                  <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}>
                     <img className={styles.radioLayout} src={webLayout2} alt="" />
                   </div>
                   <div className={styles.radioTips}>顶部导航</div>
@@ -153,7 +153,7 @@ const NavigatorSetting = (props: IProps) => {
             <Radio value={'TREE'}>
               {({ checked }) => (
                 <>
-                  <div className={styles.radioContainer} style={{ borderColor: checked ? '#009E9E' : 'transparent' }}>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}>
                     <img className={styles.radioLayout} src={webLayout3} alt="" />
                   </div>
                   <div className={styles.radioTips}>厂字导航</div>
@@ -203,7 +203,7 @@ const NavigatorSetting = (props: IProps) => {
                 <>
                   <div
                     className={styles.radioMobileContainer}
-                    style={{ borderColor: checked ? '#009E9E' : 'transparent' }}
+                    style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}
                   >
                     <img className={styles.radioLayout} src={mobileLayout1} alt="" />
                   </div>
@@ -216,7 +216,7 @@ const NavigatorSetting = (props: IProps) => {
                 <>
                   <div
                     className={styles.radioMobileContainer}
-                    style={{ borderColor: checked ? '#009E9E' : 'transparent' }}
+                    style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}
                   >
                     <img className={styles.radioLayout} src={mobileLayout2} alt="" />
                   </div>

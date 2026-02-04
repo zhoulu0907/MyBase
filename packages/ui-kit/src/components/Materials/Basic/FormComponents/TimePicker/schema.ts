@@ -5,7 +5,6 @@ import {
   layoutConfig,
   statusConfig,
   widthConfig,
-  alignConfig,
   timeRangeConfig,
   labelConfig,
   placeholderConfig,
@@ -13,7 +12,6 @@ import {
   defaultTimeValueConfig,
   timeFormatConfig,
   verifyConfig,
-  securityConfig,
   type ICommonBaseType,
   type TTimeTypeSelectKeyType,
   type TLayoutSelectKeyType,
@@ -24,7 +22,6 @@ import {
 import {
   ALIGN_VALUES,
   ALIGN_OPTIONS,
-  CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -50,7 +47,6 @@ import type {
   IWidthConfigType,
   ICommonConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType,
@@ -132,6 +128,7 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
   };
 
   /**
@@ -151,16 +148,6 @@ export interface XInputTimePickerConfig extends ICommonBaseType {
    * 可选值: 'vertical' | 'horizontal'
    */
   layout?: TLayoutSelectKeyType;
-
-  /**
-   * 安全
-   * display：开启
-   * type：掩码类型
-   */
-  security: {
-    display: TBooleanDefaultType;
-    type?: TTextDefaultType;
-  };
 
   /**
    * 字段宽度
@@ -183,11 +170,8 @@ const XTimePicker: XInputTimePickerSchema = {
     verifyConfig,
     // 显示状态
     statusConfig,
-    // 对齐方式
-    // alignConfig,
     // 布局方式
     layoutConfig,
-    securityConfig,
     // 字段宽度
     widthConfig
   ],
@@ -215,14 +199,11 @@ const XTimePicker: XInputTimePickerSchema = {
     },
     verify: {
       required: false,
+      noRepeat: false
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
-    security: {
-      display: false,
-      type: ''
-    },
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
   }
 };

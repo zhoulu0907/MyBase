@@ -4,6 +4,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   getWorkbenchComponentSchema,
+  hasWorkbenchComponentSchema,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { WORKBENCH_DEFAULT_WIDTHS } from '../utils/constants';
@@ -129,24 +130,46 @@ export function useWorkbenchHandlers({
 
     console.log(`拖入工作台组件 ${cpID},类型 ${itemType}, 名称 ${itemDisplayName}`);
 
-    // 如果组件已存在, 则不进行创建
+    // 校验组件类型是否有效
+    if (!itemType) {
+      console.error('组件类型为空，无法创建组件');
+      return;
+    }
+
+    // 校验组件类型是否为有效的工作台组件类型
+    if (!hasWorkbenchComponentSchema(itemType)) {
+      console.error(`无效的工作台组件类型: ${itemType}`);
+      return;
+    }
+
+    // 如果组件已存在且类型匹配, 则不进行创建
     if (cpID) {
       const cpSchema = wbComponentSchemas[cpID];
       if (cpSchema && cpSchema.config && cpSchema.editData) {
-        console.log(`组件 ${cpID} 已存在，不进行创建`);
-        const completeSchema = {
-          id: cpID,
-          type: itemType || '',
-          displayName: itemDisplayName || '',
-          ...cpSchema
-        } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
-        setCurComponentID(cpID);
-        setCurComponentSchema(completeSchema);
-        setShowDeleteButton(false);
-        return;
+        // 检查组件类型是否匹配，如果不匹配则创建新组件
+        const existingType = (cpSchema as any).type || '';
+        if (existingType && existingType !== itemType) {
+          console.log(`组件 ${cpID} 已存在但类型不匹配（${existingType} !== ${itemType}），创建新组件`);
+          // 类型不匹配，继续创建新组件
+        } else {
+          console.log(`组件 ${cpID} 已存在，不进行创建`);
+          // 确保使用正确的类型（优先使用 itemType，如果不存在则使用已保存的 schema 中的类型）
+          const schemaType = itemType || existingType || '';
+          const completeSchema = {
+            id: cpID,
+            type: schemaType,
+            displayName: itemDisplayName || '',
+            ...cpSchema
+          } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
+          setCurComponentID(cpID);
+          setCurComponentSchema(completeSchema);
+          setShowDeleteButton(false);
+          return;
+        }
       }
     }
 
+    // 使用正确的类型创建 schema
     const schema = getWorkbenchComponentSchema(itemType as WorkbenchComponentType) as WorkbenchComponentSchema;
     schema.config.cpName = itemDisplayName || undefined;
     schema.config.id = cpID ? cpID : undefined;
@@ -162,7 +185,7 @@ export function useWorkbenchHandlers({
       setWbComponentSchemas(cpID, schema);
       const completeSchema = {
         id: cpID,
-        type: itemType || '',
+        type: itemType,
         displayName: itemDisplayName || '',
         ...schema
       } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };

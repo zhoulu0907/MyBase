@@ -17,12 +17,13 @@ import './index.css';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
-const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   // ===== 外部 props begin =====
   const {
     label,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
     defaultValue,
     verify,
@@ -231,7 +232,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
         }
         field={fieldName}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -266,7 +270,10 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
       field={fieldName}
       layout={layout}
-      tooltip={tooltip}
+      tooltip={ tooltip && {
+        content: tooltip,
+        position: tooltipPosition
+      }}
       labelCol={layout === 'horizontal' ? { span: 10 } : {}}
       rules={[{ required: verify?.required }]}
       hidden={false}

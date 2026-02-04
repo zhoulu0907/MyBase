@@ -13,13 +13,14 @@ import { useFormFieldWatch } from '../useFormField';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
-const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   // ===== 外部 props begin =====
   const {
     label,
     placeholder,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
     defaultValueConfig,
     verify,
@@ -87,7 +88,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
           dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_NUMBER}_${nanoid()}`
         }
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
           {
@@ -107,10 +111,10 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         ) : (
           <InputNumber
             placeholder={placeholder}
-            step={step}
+            step={step || undefined}
             min={verify?.numberLimit ? verify?.min : undefined}
             max={verify?.numberLimit ? verify?.max : undefined}
-            precision={showPrecision ? precision : 0}
+            precision={showPrecision ? precision : undefined}
             formatter={(value) => {
               return useThousandsSeparator ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : value.toString();
             }}

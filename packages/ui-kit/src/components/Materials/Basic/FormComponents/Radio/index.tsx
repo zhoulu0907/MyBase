@@ -11,11 +11,12 @@ import type { XInputRadioConfig } from './schema';
 
 const RadioGroup = Radio.Group;
 
-const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     label,
     dataField,
     tooltip,
+    tooltipPosition,
     status,
     defaultValueConfig,
     verify,
@@ -61,7 +62,10 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
         }
         field={fieldId}
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[{ required: verify?.required, message: `${label.text}是必填项` }]}
         hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
@@ -85,7 +89,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
             }}
           >
             {options.map((ele, index: number) => (
-              <Radio key={index} value={ele.value}>
+              <Radio key={index} value={ele.id}>
                 {ele.colorType ? <Tag color={ele.colorType}>{ele.label}</Tag> : <span>{ele.label}</span>}
               </Radio>
             ))}

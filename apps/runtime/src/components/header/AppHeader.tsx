@@ -1,6 +1,6 @@
 import BuildingLine from '@/assets/images/building-line.svg';
-import LogoAvatarSVG from '@/assets/images/ob_logo.svg';
-import { DynamicIcon } from '@/components/DynamicIcon';
+// import LogoAvatarSVG from '@/assets/images/ob_logo.svg';
+// import { DynamicIcon } from '@/components/DynamicIcon';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 
 import { useI18n } from '@/hooks/useI18n';
@@ -10,12 +10,13 @@ import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-re
 import { IconExport } from '@arco-design/web-react/icon';
 import { getApplication, type GetApplicationReq } from '@onebase/app';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import { CodeType, getCorpDetailByIdApiInCorp, getPermissionInfo } from '@onebase/platform-center';
-import { appIconMap } from '@onebase/ui-kit';
+import { CodeType, getCorpDetailByIdApiInCorp, getPermissionInfo, type CorpDetailResponse } from '@onebase/platform-center';
+// import { appIconMap } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
 import TenantLogo from '../TenantLogo';
+import { useSignals } from '@preact/signals-react/runtime';
 
 const { Header } = Layout;
 
@@ -24,6 +25,7 @@ interface HeaderProps {
 }
 
 const AppHeader: React.FC<HeaderProps> = ({ className }) => {
+  useSignals();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useI18n();
@@ -63,7 +65,7 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
   };
 
   const maskMobile = (value: string) => {
-    let reg = /(\d{3})\d{4}(\d{4})/;
+    const reg = /(\d{3})\d{4}(\d{4})/;
     const formatMobile = value.replace(reg, '$1****$2');
     return formatMobile;
   };
@@ -73,14 +75,14 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
     if (tokenInfo?.corpId) {
       const tenantInfoRes = await getCorpDetailByIdApiInCorp(tokenInfo?.corpId);
       setTenantInfoFromSession(tenantInfoRes);
-    } else if (curAppInfo) {
+    } else if (curAppInfo.value) {
       const tenantInfo = {
         iconColor: curAppInfo.value.iconColor,
         iconName: curAppInfo.value.iconName,
         appName: curAppInfo.value.appName,
         appCode: curAppInfo.value.appCode
       };
-      setTenantInfoFromSession(tenantInfo);
+      setTenantInfoFromSession(tenantInfo as CorpDetailResponse);
     }
     UserPermissionManager.setUserPermissionInfo(res);
     const mobile = res.user?.mobile;

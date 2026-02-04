@@ -117,7 +117,7 @@ const ETLFlowCard: React.FC<ETLFlowCardProps> = ({ data, handleEdit, handleDelet
             <span>{data.targetTable}</span>
           </div>
           {/* <div className={styles.cardBodyRowSyncDone}>
-            <IconCheckCircleFill style={{ fontSize: '12px', color: '#00B42A', marginRight: '4px' }} />
+            <IconCheckCircleFill style={{ fontSize: '12px', color: 'rgb(var(--primary-6))', marginRight: '4px' }} />
             数据同步完成
           </div> */}
         </div>

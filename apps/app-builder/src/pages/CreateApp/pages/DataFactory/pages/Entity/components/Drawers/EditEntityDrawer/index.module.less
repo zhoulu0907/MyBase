@@ -69,35 +69,10 @@
     background-size: contain !important;
     background-position: center !important;
     .flex-center() !important;
-
-    &:first-child {
-      background: url('@/assets/data_factory/white_tab_first.svg') no-repeat;
-    }
-    &:nth-child(2),
-    &:nth-child(3) {
-      background: url('@/assets/data_factory/white_tab_middle.svg') no-repeat;
-    }
-    &:nth-child(4) {
-      background: url('@/assets/data_factory/white_tab_last.svg') no-repeat;
-    }
   }
 
   :global(.pc-tabs-header-title-text::before) {
     display: none !important;
-  }
-
-  :global(.pc-tabs-header-title-active) {
-    background-position: center;
-    &:first-child {
-      background: url('@/assets/data_factory/tab_first.svg') no-repeat;
-    }
-    &:nth-child(2),
-    &:nth-child(3) {
-      background: url('@/assets/data_factory/tab_middle.svg') no-repeat;
-    }
-    &:nth-child(4) {
-      background: url('@/assets/data_factory/tab_last.svg') no-repeat;
-    }
   }
 
   :global(.pc-tabs-header-title-text) {

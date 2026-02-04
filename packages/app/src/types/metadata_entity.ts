@@ -84,6 +84,7 @@ export interface ChildEntity {
 export interface AppEntityField extends MetadataEntityField {
   id: string;
   fieldId: string; // 字段ID
+  fieldUuid: string;
   fieldName: string; // 字段名称
   fieldType: string; // 字段类型，如 BIGINT、VARCHAR、INT、DECIMAL、TIMESTAMP、TEXT、NUMBER 等
   isSystemField: number; // 是否是系统字段

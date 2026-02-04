@@ -10,8 +10,8 @@ import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/con
 import './index.css';
 import { type XColumnLayoutConfig } from './schema';
 
-const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolean }) => {
-  const { colCount, id, pageType, detailMode } = props;
+const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolean,showFromPageData?: Function; refresh?: number; }) => {
+  const { colCount, id, pageType, detailMode, showFromPageData, refresh } = props;
 
   useSignals();
 
@@ -59,7 +59,7 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolea
             {colComponents[index] &&
               colComponents[index].map((cp: GridItem) => (
                 <Fragment key={cp.id}>
-                  {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  {pageComponentSchemas[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                     <div
                       key={cp.id}
                       data-cp-type={cp.type}
@@ -84,7 +84,9 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolea
                         cpId={cp.id}
                         cpType={cp.type}
                         pageComponentSchema={pageComponentSchemas[cp.id]}
+                        showFromPageData={showFromPageData}
                         runtime={true}
+                        refresh={refresh}
                         detailMode={detailMode}
                       />
                     </div>

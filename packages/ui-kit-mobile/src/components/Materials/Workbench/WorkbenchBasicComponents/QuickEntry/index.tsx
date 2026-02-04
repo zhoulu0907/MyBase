@@ -167,7 +167,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       }));
       
       return (
-        <Tabs defaultActiveTab={0} tabs={tabs}>
+        <Tabs defaultActiveTab={0} tabs={tabs} type="line-divide" className={styles.quickEntryTabs}>
           {groups.map((group, groupIndex) => (
             <div className={styles.quickEntryItems} key={group.groupName || `group-${groupIndex}`}>
               {group.entries?.map((item) => {

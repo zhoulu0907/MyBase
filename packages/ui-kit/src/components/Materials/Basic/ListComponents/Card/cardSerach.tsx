@@ -108,7 +108,7 @@ const CardSearch = memo((props: CardSearchConfig) => {
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
-      case FORM_COMPONENT_TYPES.INPUT_TEXTAREA:
+      case FORM_COMPONENT_TYPES.INPUT_TEXT_AREA:
         return (
           <FormComp.XInputTextArea
             cpName={cpId}
@@ -300,7 +300,7 @@ const CardSearch = memo((props: CardSearchConfig) => {
       {(onSearch || onReset) && (
         <>
           {Array.from({ length: placeholderCount }).map((_, i) => (
-            <div key={`placeholder-${i}`} className="searchItem placeholder" />
+            <div key={`placeholder-${i}`} className="searchItem searchItemPlaceholder" />
           ))}
           <div className={`searchItem searchActions ${placeholderCount === 3 ? 'searchActions-alone' : ''}`}>
             <Form.Item label={<span className={'labelText'}></span>}>

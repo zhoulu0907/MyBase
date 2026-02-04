@@ -1,3 +1,4 @@
+import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import { pluginBridge } from '@/plugin/bridge';
 import ExecuteFlows from '@/utils/flow';
 import { Form, Message, Modal } from '@arco-design/web-react';
@@ -8,6 +9,7 @@ import {
   dataMethodDetailV2,
   dataMethodUpdateV2,
   getEntityFieldsWithChildren,
+  getFormDetail,
   getPageSetId,
   getPageSetMetaData,
   listPageView,
@@ -16,7 +18,6 @@ import {
   queryFlowExecForm,
   TRIGGER_EVENTS,
   updateDraft,
-  getFormDetail,
   type AppEntityField,
   type DetailMethodV2Params,
   type GetPageSetIdReq,
@@ -49,7 +50,6 @@ interface PreviewProps {
   menuUuid: string;
   pageSetType: PageType;
 }
-
 
 enum PageTypeMap {
   list = 'list'
@@ -92,6 +92,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const [isAdd, setAdd] = useState(false);
 
   const [dashboardId, setDashboardId] = useState<string>('');
+  const isRuntimeDev = useIsRuntimeDev();
 
   const dashboardType = 'dashboard';
   const resourceUrl = getDashBoardURL();
@@ -107,7 +108,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
-    const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId });
+    const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId, isDev: isRuntimeDev });
     console.log('pageSetId: ', pageSetId);
     console.log('mainMetaDataId: ', mainMetaDataId);
     setMainMetaData(mainMetaData);
@@ -136,13 +137,19 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     }
   };
 
+  const handleGetPageSetId = async (menuId: string, isDev: boolean) => {
+    const req: GetPageSetIdReq = { menuId: menuId, isDev };
+    const res = await getPageSetId(req);
+    setPageSetId(res);
+  };
+
   useEffect(() => {
     if (menuId) {
-      handleGetPageSetId(menuId);
+      handleGetPageSetId(menuId, isRuntimeDev);
       setEditTargetId('');
       resetFlows();
     }
-  }, [menuId]);
+  }, [menuId, isRuntimeDev]);
 
   useEffect(() => {
     // 获取详情数据
@@ -171,12 +178,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       return;
     }
   }, [pageSetId]);
-
-  const handleGetPageSetId = async (menuId: string) => {
-    const req: GetPageSetIdReq = { menuId: menuId };
-    const res = await getPageSetId(req);
-    setPageSetId(res);
-  };
 
   // 收集信息弹窗
   const [inputParams, setInputParams] = useState<any>({});
@@ -325,7 +326,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           res = draftId
             ? await updateDraft(tableName, menuId, { ...req, id: draftId })
             : await createDraft(tableName, menuId, req);
-          Message.success('保存草稿成功');
         } else {
           if (curPage?.value?.pageSetType === PageType.BPM) {
             const reqFlow = {

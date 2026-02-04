@@ -58,7 +58,7 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
       e.stopPropagation();
       const newValue = !switchChecked;
       setSwitchChecked(newValue);
-      form.setFieldValue(fieldId, newValue);
+      form?.setFieldValue(fieldId, newValue);
     }
   }
 

@@ -1,7 +1,6 @@
+import { getConnectorTypeInfo } from '@onebase/app';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { getConnectorTypeInfo, getEnvList } from '@onebase/app';
-import { mockConnConfig } from '../../../../../../../mocks/connectorSchemas';
 
 interface ConnectorWizardState {
   // 当前步骤 (0-4)
@@ -67,24 +66,24 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
       connectorType: {
         nodeCode: '',
         nodeName: '',
-        version: '',
+        version: ''
       },
       schemas: {
         conn_config: null,
-        action_config: null,
+        action_config: null
       },
       formData: {
         basicInfo: {
           connectorName: '',
-          description: '',
+          description: ''
         },
         conn_config: {},
         action_config: {},
         relatedFlows: [],
-        requestLogs: [],
+        requestLogs: []
       },
       ui: {
-        isLoading: false,
+        isLoading: false
       },
 
       envList: [],
@@ -100,7 +99,7 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
 
       updateFormData: (data) =>
         set((state) => ({
-          formData: { ...state.formData, ...data },
+          formData: { ...state.formData, ...data }
         })),
 
       fetchSchemas: async (nodeCode) => {
@@ -117,18 +116,18 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
             set({
               schemas: {
                 conn_config: res.conn_config || null,
-                action_config: res.action_config || null,
+                action_config: res.action_config || null
               },
-              ui: { isLoading: false },
+              ui: { isLoading: false }
             });
           } else {
             // 后端未返回有效 schema，使用 mock schema 用于开发测试
             set({
               schemas: {
-                conn_config: mockConnConfig,
-                action_config: null,
+                conn_config: {},
+                action_config: null
               },
-              ui: { isLoading: false },
+              ui: { isLoading: false }
             });
           }
         } catch (error) {
@@ -151,13 +150,13 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
 
           // MOCK 数据 - 后端 API 开发前使用
           // 模拟延迟，让加载状态可见
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
           const mockEnvList = [
             { id: 'env-001', name: '测试环境', url: 'https://test.example.com' },
             { id: 'env-002', name: '开发环境', url: 'https://dev.example.com' },
             { id: 'env-003', name: '预发布环境', url: 'https://staging.example.com' },
-            { id: 'env-004', name: '生产环境', url: 'https://prod.example.com' },
+            { id: 'env-004', name: '生产环境', url: 'https://prod.example.com' }
           ];
 
           set({ envList: mockEnvList });
@@ -177,11 +176,11 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
             conn_config: {},
             action_config: {},
             relatedFlows: [],
-            requestLogs: [],
+            requestLogs: []
           },
           ui: { isLoading: false, error: undefined },
-          envList: [],
-        }),
+          envList: []
+        })
     }),
     {
       name: 'connector-wizard-storage',
@@ -190,8 +189,8 @@ export const useConnectorWizardStore = create<ConnectorWizardStore>()(
         connectorType: state.connectorType,
         schemas: state.schemas,
         formData: state.formData,
-        envList: state.envList,
-      }),
+        envList: state.envList
+      })
     }
   )
 );

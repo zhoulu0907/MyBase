@@ -15,13 +15,14 @@ import { useFormFieldWatch } from '../useFormField';
 const TextArea = Input.TextArea;
 
 // ===== 组件定义 begin =====
-const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean }) => {
+const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   // ===== 外部 props begin =====
   const {
     label,
     dataField,
     placeholder,
     tooltip,
+    tooltipPosition,
     status,
     defaultValueConfig,
     verify,
@@ -56,10 +57,13 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
           label.text && <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>{label.text}</span>
         }
         field={
-          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXTAREA}_${nanoid()}`
+          dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.INPUT_TEXT_AREA}_${nanoid()}`
         }
         layout={layout}
-        tooltip={tooltip}
+        tooltip={ tooltip && {
+          content: tooltip,
+          position: tooltipPosition
+        }}
         labelCol={layout === 'horizontal' ? { span: 10 } : {}}
         rules={[
           { required: verify?.required, message: `${label.text}是必填项` },

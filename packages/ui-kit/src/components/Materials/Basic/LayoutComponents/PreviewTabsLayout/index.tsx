@@ -9,8 +9,8 @@ import type { XTabsLayoutConfig } from './schema';
 
 const TabPane = Tabs.TabPane;
 
-const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boolean }) => {
-  const { id, defaultValue = [], type, colCount, tabPosition, pageType, detailMode } = props;
+const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boolean, showFromPageData?: Function; refresh?: number; }) => {
+  const { id, defaultValue = [], type, colCount, tabPosition, pageType, detailMode, showFromPageData, refresh } = props;
   useSignals();
 
   const {
@@ -37,7 +37,7 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
 
   return (
     <Tabs
-      className="XPreviewTabsLayout"
+      className={pageType === EDITOR_TYPES.LIST_EDITOR ? "XPreviewTabsLayout listPreviewTabsLayout": "XPreviewTabsLayout"}
       activeTab={activeTab}
       type={type}
       tabPosition={tabPosition}
@@ -63,7 +63,7 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
               {colComponents[index] &&
                 colComponents[index]?.map((cp: GridItem) => (
                   <Fragment key={cp.id}>
-                    {pageComponentSchemas[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    {pageComponentSchemas[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                       <div
                         key={cp.id}
                         data-cp-type={cp.type}
@@ -86,7 +86,9 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
                           cpId={cp.id}
                           cpType={cp.type}
                           pageComponentSchema={pageComponentSchemas[cp.id]}
+                          showFromPageData={showFromPageData}
                           runtime={true}
+                          refresh={refresh}
                           detailMode={detailMode}
                         />
                       </div>

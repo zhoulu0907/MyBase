@@ -53,6 +53,7 @@ import RichTextEditorWorkbenchIcon from '@/assets/images/cp/rich_text_editor_wor
 import ButtonWorkbenchIcon from '@/assets/images/cp/button_workbench_cp.svg';
 
 import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
+import DataListIcon from '@/assets/images/cp/data_list_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
@@ -116,7 +117,8 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'button_workbench_cp.svg': <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
 
   // 工作台高级组件
-  'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />
+  'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
+  'data_list_cp.svg': <img src={DataListIcon} alt="XDataList" />
 };
 
 // TODO 图标更新
@@ -183,5 +185,6 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XButtonWorkbench: <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
 
   // 工作台高级组件
-  XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />
+  XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
+  XDataList: <img src={DataListIcon} alt="XDataList" />
 };

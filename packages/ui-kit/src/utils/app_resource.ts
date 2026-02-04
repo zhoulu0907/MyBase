@@ -23,8 +23,8 @@ import {
   useEditorSignalMap,
   useFormEditorSignal,
   useListEditorSignal,
-  usePageViewEditorSignal,
-  usePageSettingSignal
+  usePageSettingSignal,
+  usePageViewEditorSignal
 } from 'src/signals';
 import { isBlank } from './common';
 
@@ -245,10 +245,11 @@ export interface LoadPageSetParams {
   pageSetId: string;
   runtime?: boolean;
   allowViewUuids?: string[];
+  isDev?: boolean;
 }
 
 export async function startLoadPageSet(params: LoadPageSetParams) {
-  const { pageSetId, allowViewUuids } = params;
+  const { pageSetId, allowViewUuids, isDev } = params;
 
   const { setPageViews, curViewId, setCurViewId } = usePageViewEditorSignal;
 
@@ -274,7 +275,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
   const { setDataTitleType, setRedirectType, setDataTitle } = usePageSettingSignal;
 
   const loadPageSetReq: LoadPageSetReq = {
-    id: pageSetId
+    id: pageSetId,
+    isDev: isDev
   };
   const pageSet = await loadPageSet(loadPageSetReq);
   setCurPage(pageSet);
