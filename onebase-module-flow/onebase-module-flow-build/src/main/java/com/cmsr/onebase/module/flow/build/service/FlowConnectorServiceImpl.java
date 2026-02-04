@@ -625,7 +625,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         action.put("actionCode", actionCode);
         action.put("actionName", createVO.getActionName());
         action.put("description", createVO.getDescription());
-        action.put("status", "draft");
+        action.put("status", "2");
         action.put("version", 1);
 
         // 添加四步配置
@@ -716,8 +716,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         // 3. 验证当前状态
         String currentStatus = getString(action, "status");
-        if (!"draft".equals(currentStatus) && !"offline".equals(currentStatus)) {
-            throw new RuntimeException("只有草稿或下架状态的动作才能发布");
+        if (!"2".equals(currentStatus)) {
+            throw new RuntimeException("只有下架状态的动作才能发布");
         }
 
         // 4. 校验完整性
@@ -729,7 +729,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 5. 更新状态和版本
         ObjectNode mutableAction = (ObjectNode) action;
         int newVersion = action.has("version") ? action.get("version").asInt() + 1 : 1;
-        mutableAction.put("status", "published");
+        mutableAction.put("status", "1");
         mutableAction.put("version", newVersion);
 
         // 6. 保存配置
@@ -759,13 +759,13 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         // 3. 验证状态
         String status = getString(action, "status");
-        if (!"published".equals(status)) {
+        if (!"1".equals(status)) {
             throw new RuntimeException("只有已发布的动作才能下架");
         }
 
         // 4. 更新状态
         ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "offline");
+        mutableAction.put("status", "2");
 
         String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
@@ -793,7 +793,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         // 3. 验证状态
         String status = getString(action, "status");
-        if (!"offline".equals(status)) {
+        if (!"2".equals(status)) {
             throw new RuntimeException("只有已下架的动作才能重新上线");
         }
 
@@ -805,7 +805,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         // 5. 更新状态
         ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "published");
+        mutableAction.put("status", "1");
 
         String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
@@ -845,7 +845,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 5. 复制动作配置
         ObjectNode newAction = originalAction.deepCopy();
         newAction.put("actionName", newName);
-        newAction.put("status", "draft");
+        newAction.put("status", "2");
 
         // 6. 添加到配置
         String updatedConfig = actionConfigHelper.addAction(connector.getActionConfig(), newAction);

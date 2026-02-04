@@ -25,7 +25,7 @@ public class ConnectorActionVO {
     @Schema(description = "动作描述", example = "通过HTTP GET获取用户信息")
     private String description;
 
-    @Schema(description = "状态", example = "1-published；2-unpublished")
+    @Schema(description = "状态", example = "1-published；2-offline")
     private String status;
 
     @Schema(description = "基础信息配置")
