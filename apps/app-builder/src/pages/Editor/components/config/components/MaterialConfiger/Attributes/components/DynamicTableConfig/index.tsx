@@ -218,7 +218,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
 
   return (
     <>
-      <FormItem layout="vertical" labelAlign="left" label="数据" className={styles.formItem}>
+      <FormItem layout="vertical" labelAlign="left" label="数据" required className={styles.formItem}>
         <Select
           placeholder={`请选择${item.name}`}
           value={configs[item.key]}
@@ -245,7 +245,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       </FormItem>
 
       {/* 表头配置 */}
-      <FormItem layout="vertical" labelAlign="left" label={'表头配置'} className={styles.formItem}>
+      <FormItem layout="vertical" labelAlign="left" label={'表头配置'} required className={styles.formItem}>
         <Form.List field={`${id}-${columnsKey}`}>
           {(_fields, { remove }) => (
             <div className={styles.tableColumnList}>

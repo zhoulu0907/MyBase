@@ -986,7 +986,8 @@ export const colorConfig: IColorConfigType = {
 export const contentConfig: ITextConfigType = {
   key: 'content',
   name: '文本内容',
-  type: 'TextInput'
+  type: 'TextInput',
+  required: true,
 }
 
 export const titleTextConfig: ITextConfigType = {
@@ -998,7 +999,8 @@ export const titleTextConfig: ITextConfigType = {
 export const webViewUrlConfig: ITextConfigType = {
   key: 'webViewUrl',
   name: '网页链接',
-  type: 'TextInput'
+  type: 'TextInput',
+  required: true
 }
 
 export const bgColorConfig: IColorConfigType = {
