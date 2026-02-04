@@ -35,7 +35,7 @@ public class OAuth2ClientController {
     @PermitAll
     @PostMapping("/create")
     @Operation(summary = "创建 OAuth2 客户端")
-    @PreAuthorize("@ss.hasPermission('tenant:oauth2-client:create')")
+//    @PreAuthorize("@ss.hasPermission('tenant:oauth2-client:create')")
     public CommonResult<Long> createOAuth2Client(@Valid @RequestBody OAuth2ClientSaveReqVO createReqVO) {
         return success(oAuth2ClientService.createOAuth2Client(createReqVO));
     }

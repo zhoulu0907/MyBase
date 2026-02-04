@@ -1,28 +1,16 @@
 ### 请求 /create 接口 => 创建 OAuth2 客户端
-POST {{baseUrl}}/system/oauth2-client/create
+POST {{baseUrl}}/system/oauth2/client/create
 Content-Type: application/json
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "clientName": "onebase-client",
-  "contactUser": "admin",
-  "contactEmail": "admin@example.com",
+  "name": "onebase-client2",
+  "contactUser": "admin2",
+  "contactEmail": "admin2@example.com",
   "redirectUris": ["https://www.aaa.com"],
-
   "logo": "https://www.aaa.com/images/favicon.ico",
-  "description": "我是描述",
-  "status": 0,
-  "accessTokenValiditySeconds": 180,
-  "refreshTokenValiditySeconds": 8640,
-  "redirectUris": ["https://www.aaa.com"],
-  "autoApprove": true,
-  "authorizedGrantTypes": ["password"],
-  "scopes": ["user_info"],
-  "authorities": ["system:user:query"],
-  "resource_ids": ["1024"],
-  "additionalInformation": "{}",
-  "secret": "admin123"
+  "description": "我是描述"
 }
 
 ### 请求 /update 接口 => 更新 OAuth2 客户端

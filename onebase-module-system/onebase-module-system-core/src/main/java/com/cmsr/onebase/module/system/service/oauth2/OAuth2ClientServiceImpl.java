@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.system.vo.oauth.OAuth2ClientSaveReqVO;
 import com.cmsr.onebase.module.system.dal.database.OAuth2ClientDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.util.oauth2.OAuth2ClientUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -41,6 +43,15 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // validateClientIdExists(null, createReqVO.getClientId());
         // 插入
         OAuth2ClientDO client = BeanUtils.toBean(createReqVO, OAuth2ClientDO.class);
+        client.setClientId(OAuth2ClientUtils.generateClientId());
+        client.setSecret(OAuth2ClientUtils.generateClientSecret());
+        client.setStatus(CommonStatusEnum.ENABLE.getStatus());
+        client.setAccessTokenValiditySeconds(180);
+        client.setRefreshTokenValiditySeconds(8640);
+        client.setAuthorizedGrantTypes(CollUtil.newArrayList("authorization_code","refresh_token"));
+        client.setScopes(CollUtil.newArrayList("user.read,true"));
+        client.setAuthorities(CollUtil.newArrayList("system:user:query"));
+        client.setResourceIds(CollUtil.newArrayList("1024"));
         oauth2ClientDataRepository.insert(client);
         return client.getId();
     }

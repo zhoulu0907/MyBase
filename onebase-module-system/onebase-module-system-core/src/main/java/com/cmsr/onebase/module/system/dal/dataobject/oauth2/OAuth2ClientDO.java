@@ -5,6 +5,7 @@ import java.util.List;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.orm.entity.BaseEntity;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.dal.flex.typehandler.ListStringTypeHandler;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2GrantTypeEnum;
 
 import com.mybatisflex.annotation.Table;
@@ -43,10 +44,11 @@ public class OAuth2ClientDO extends BaseEntity {
     public static final String ADDITIONAL_INFORMATION        = "additional_information";
 
     /**
-     * 客户端名称
+     * 应用名
      */
     @Column(value = NAME)
-    private String clientName;
+    private String name;
+
     /**
      * 联系人
      */
@@ -60,9 +62,8 @@ public class OAuth2ClientDO extends BaseEntity {
     /**
      * 可重定向的 URI 地址
      */
-    @Column(value = REDIRECT_URIS)
+    @Column(value = REDIRECT_URIS, typeHandler = ListStringTypeHandler.class)
     private List<String> redirectUris;
-
 
     /**
      * 客户端编号
@@ -74,11 +75,7 @@ public class OAuth2ClientDO extends BaseEntity {
      */
     @Column(value = SECRET)
     private String secret;
-    /**
-     * 应用名
-     */
-    @Column(value = NAME)
-    private String name;
+
     /**
      * 应用图标
      */
@@ -111,29 +108,29 @@ public class OAuth2ClientDO extends BaseEntity {
      *
      * 枚举 {@link OAuth2GrantTypeEnum}
      */
-    @Column(value = AUTHORIZED_GRANT_TYPES)
+    @Column(value = AUTHORIZED_GRANT_TYPES, typeHandler = ListStringTypeHandler.class)
     private List<String> authorizedGrantTypes;
     /**
      * 授权范围
      */
-    @Column(value = SCOPES)
+    @Column(value = SCOPES, typeHandler = ListStringTypeHandler.class)
     private List<String> scopes;
     /**
      * 自动授权的 Scope
      *
      * code 授权时，如果 scope 在这个范围内，则自动通过
      */
-    @Column(value = AUTO_APPROVE_SCOPES)
+    @Column(value = AUTO_APPROVE_SCOPES, typeHandler = ListStringTypeHandler.class)
     private List<String> autoApproveScopes;
     /**
      * 权限
      */
-    @Column(value = AUTHORITIES)
+    @Column(value = AUTHORITIES, typeHandler = ListStringTypeHandler.class)
     private List<String> authorities;
     /**
      * 资源
      */
-    @Column(value = RESOURCE_IDS)
+    @Column(value = RESOURCE_IDS, typeHandler = ListStringTypeHandler.class)
     private List<String> resourceIds;
     /**
      * 附加信息，JSON 格式
