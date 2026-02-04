@@ -13,11 +13,11 @@ import {
   STATUS_VALUES,
   useEditorSignalMap,
   useFormEditorSignal,
+  ENTITY_FIELD_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { forwardRef, Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 
 interface PreviewProps {
   pageSetId: string;
@@ -183,24 +183,35 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   // 提交表单
   const getFormValues = async () => {
     const fields = form.getFieldsValue();
+    console.log(fields, FORM_COMPONENT_TYPES);
+
     const formData = {} as any;
-    const subFormData = [] as any;
+    const subFormData: Record<string, any[]> = {};
     Object.entries(fields).forEach(([key, value]) => {
       // 处理主表逻辑
       const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldName == key);
       if (field) {
-        console.log('field: ', field);
-        formData[field.fieldName] = value || '';
+        if (field.fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE || field.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE) {
+          // 图片、文件上传 数据处理 转换成后端需要的数据
+          formData[field.fieldName] = (value || []).map((ele: any) => {
+            return { name: ele.name, id: ele.response?.fileId || ele.id };
+          });
+        } else {
+          formData[field.fieldName] = value;
+        }
       }
 
-      if (key.startsWith(FORM_COMPONENT_TYPES.SUB_TABLE)) {
-        const subEntityUuid = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[key]?.config
-          ?.subTable;
-        const subTableName = subEntities.value.find((ele: any) => ele.childEntityUuid == subEntityUuid)?.childTableName;
+      // 判断是子表
+      const subEntity = subEntities.value.find((ele: any) => ele.childTableName == key);
+      // 处理子表逻辑
+      if (subEntity) {
+        const subTableName = subEntity.childTableName;
 
         //   过滤空行
         const subTableRows = [] as any;
-        for (const item of value as any[]) {
+        subFormData[subTableName] = subTableRows;
+
+        for (const item of value) {
           if (Object.values(item).every((v: any) => v === undefined)) {
             return;
           }
@@ -208,7 +219,18 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
           let temp: any = {};
           for (let key of keys) {
             const newKey = key.slice(key.lastIndexOf('.') + 1);
-            temp[newKey] = item[key];
+            const subField = (subEntity?.childFields || []).find((f: AppEntityField) => f.fieldName == key);
+            if (
+              subField?.fieldType === ENTITY_FIELD_TYPE.IMAGE.VALUE ||
+              subField?.fieldType === ENTITY_FIELD_TYPE.FILE.VALUE
+            ) {
+              // 图片、文件上传 数据处理 转换成后端需要的数据
+              temp[newKey] = (item[key] || []).map((ele: any) => {
+                return { name: ele.name, id: ele.response?.fileId };
+              });
+            } else {
+              temp[newKey] = item[key];
+            }
           }
           subTableRows.push(temp);
         }
@@ -276,7 +298,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                         margin: '4px'
                       }}
                     >
-                      <ErrorBoundary FallbackComponent={() => <div style={{ display: 'none' }}>组件错误</div>}>
                         <PreviewRender
                           cpId={cp.id}
                           cpType={cp.type}
@@ -287,7 +308,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                             setPageType(EDITOR_TYPES.FORM_EDITOR);
                           }}
                         />
-                      </ErrorBoundary>
                     </div>
                   )}
                 </Fragment>
