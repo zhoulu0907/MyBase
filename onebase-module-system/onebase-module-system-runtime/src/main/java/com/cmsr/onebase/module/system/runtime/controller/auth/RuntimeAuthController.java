@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.runtime.controller.auth;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
@@ -64,7 +65,7 @@ public class RuntimeAuthController {
     @PermitAll
     @Operation(summary = "外部用户登录（SaaS模式，手机号登录）")
     public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO, HttpServletResponse response) {
-        AuthLoginRespVO loginRespVO = runtimeAuthService.appMobileLogin(reqVO);
+        AuthLoginRespVO loginRespVO = runtimeAuthService.appMobileLogin(reqVO, UserTypeEnum.CORP.getValue());
         // 设置Cookie
         response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
                 securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
@@ -76,7 +77,7 @@ public class RuntimeAuthController {
     @PermitAll
     @Operation(summary = "企业登录（手机号）")
     public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO, HttpServletResponse response) {
-        AuthLoginRespVO loginRespVO = runtimeAuthService.corpLogin(reqVO);
+        AuthLoginRespVO loginRespVO = runtimeAuthService.corpLogin(reqVO, UserTypeEnum.CORP.getValue());
         // 设置Cookie
         response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
                 securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
@@ -88,7 +89,7 @@ public class RuntimeAuthController {
     @PermitAll
     @Operation(summary = "第三方用户登录（手机号）")
     public CommonResult<ThirdAuthLoginRespVO> thirdLogin(@RequestBody @Valid ThirdAuthLoginReqVO reqVO) {
-        return success(runtimeAuthService.thirdLogin(reqVO));
+        return success(runtimeAuthService.thirdLogin(reqVO, UserTypeEnum.THIRD.getValue()));
     }
 
     @PostMapping("/logout")

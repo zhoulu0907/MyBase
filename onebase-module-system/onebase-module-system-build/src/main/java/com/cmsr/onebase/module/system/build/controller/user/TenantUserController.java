@@ -57,7 +57,6 @@ public class TenantUserController {
     @Operation(summary = "修改用户")
     @PreAuthorize("@ss.hasPermission('tenant:user:update')")
     public CommonResult<Boolean> updateUser(@Valid @RequestBody UserUpdateReqVO reqVO) {
-        if (reqVO.getUserType() == null) reqVO.setUserType(UserTypeEnum.TENANT.getValue());
         userService.updateUser(reqVO);
         return success(true);
     }
