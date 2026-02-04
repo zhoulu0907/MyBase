@@ -519,11 +519,13 @@ const XLoadMore = memo(
           if (changeKey === searchItems[0].value) {
             queryData.value[changeKey] = changedValues[changeKey];
             // 第一个改变了
-            handleSearch();
+            if (changedValues[changeKey] !== null) {
+              handleSearch();
+            }
           }
         }
-      }, 200),
-      []
+      }, 800),
+      [handleSearch]
     );
 
     const getTopSearch = () => {

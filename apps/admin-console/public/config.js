@@ -1,4 +1,7 @@
 window.global_config = {
+  // 主题配置：'default' | 'tiangong' | 'lingji'
+  THEME: 'lingji',
+
   // BASE_URL: 'http://localhost:9524',
   ENVIRONMENT: 'platform',
   APP_KEY: 'onebase',
