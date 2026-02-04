@@ -441,6 +441,49 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         return vo;
     }
 
+    @Override
+    public ActionConfigTemplateVO getActionConfigTemplate(Long connectorId) {
+        log.info("getActionConfigTemplate start, connectorId: {}", connectorId);
+
+        // 1. 查询连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, connectorId: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 通过 typeCode (= nodeCode) 查询节点配置
+        String nodeCode = connector.getTypeCode();
+        FlowNodeConfigDO nodeConfig = flowNodeConfigRepository.findByNodeCode(nodeCode);
+
+        // 3. 校验动作配置模板存在
+        if (nodeConfig == null) {
+            log.warn("Node config not found for typeCode: {}", nodeCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXISTS, nodeCode);
+        }
+
+        // 4. 提取并解析 action_config
+        String actionConfigStr = nodeConfig.getActionConfig();
+        if (StringUtils.isBlank(actionConfigStr)) {
+            log.warn("action_config is empty for typeCode: {}", nodeCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_CONFIG_EMPTY);
+        }
+
+        JsonNode actionConfigSchema;
+        try {
+            actionConfigSchema = objectMapper.readTree(actionConfigStr);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to parse action_config for typeCode: {}, error: {}", nodeCode, e.getMessage());
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+
+        // 5. 构造返回结果
+        ActionConfigTemplateVO vo = new ActionConfigTemplateVO();
+        vo.setSchema(actionConfigSchema);
+        log.info("getActionConfigTemplate success, connectorId: {}, typeCode: {}", connectorId, nodeCode);
+        return vo;
+    }
+
     // ==================== 动作管理方法实现 ====================
 
     @Override
