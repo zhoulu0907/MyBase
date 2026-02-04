@@ -931,6 +931,45 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         return Boolean.TRUE;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO) {
+        log.info("saveActionConfig start, connectorId: {}", connectorId);
+
+        // 1. 查询并验证连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, connectorId: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 解析或创建 action_config 根配置
+        ObjectNode rootActionConfig = parseOrCreateActionRootConfig(connector.getActionConfig());
+        ObjectNode properties = rootActionConfig.withObject("properties");
+
+        // 3. 从请求中提取动作编码（actionCode）
+        String actionCode = extractActionCodeFromConfig(reqVO.getActionConfig());
+
+        // 4. 检查动作是否已存在
+        if (properties.has(actionCode)) {
+            log.warn("Action already exists, connectorId: {}, actionCode: {}", connectorId, actionCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS, actionCode);
+        }
+
+        // 5. 添加新动作配置
+        properties.set(actionCode, reqVO.getActionConfig());
+
+        // 6. 更新元数据版本
+        updateActionMetadataVersion(rootActionConfig);
+
+        // 7. 保存到数据库
+        connector.setActionConfig(toJsonString(rootActionConfig));
+        connectorRepository.updateById(connector);
+
+        log.info("saveActionConfig success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        return Boolean.TRUE;
+    }
+
     /**
      * 解析或创建根配置对象
      *
@@ -995,6 +1034,71 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         int currentVersion = metadata.has("version") ? metadata.get("version").asInt() : 0;
         metadata.put("version", currentVersion + 1);
         metadata.put("updatedAt", Instant.now().toString());
+    }
+
+    /**
+     * 从动作配置中提取动作编码
+     * <p>
+     * 配置格式: {"basic": {"actionName": "hahaha1"}, ...}
+     *
+     * @param configNode 动作配置节点
+     * @return 动作编码（actionName）
+     */
+    private String extractActionCodeFromConfig(JsonNode configNode) {
+        if (configNode == null || !configNode.isObject()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ACTION_CONFIG);
+        }
+
+        JsonNode basicNode = configNode.get("basic");
+        if (basicNode == null || !basicNode.isObject()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ACTION_CONFIG);
+        }
+
+        JsonNode actionNameNode = basicNode.get("actionName");
+        if (actionNameNode == null || actionNameNode.isNull()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ACTION_CONFIG);
+        }
+
+        return actionNameNode.asText();
+    }
+
+    /**
+     * 解析或创建 action_config 根配置对象
+     *
+     * @param actionConfigJson 现有动作配置JSON，可能为空
+     * @return 根配置对象，包含 properties 和 _metadata 节点
+     */
+    private ObjectNode parseOrCreateActionRootConfig(String actionConfigJson) {
+        ObjectNode rootConfig;
+        if (StringUtils.isBlank(actionConfigJson)) {
+            // 首次创建：构建标准的 Formily Schema 格式
+            rootConfig = objectMapper.createObjectNode();
+            rootConfig.put("type", "object");
+            rootConfig.put("title", "连接器动作配置");
+            rootConfig.putObject("properties");
+            rootConfig.putObject("_metadata");
+        } else {
+            try {
+                rootConfig = (ObjectNode) objectMapper.readTree(actionConfigJson);
+            } catch (JsonProcessingException e) {
+                log.error("Failed to parse action_config JSON", e);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+            }
+        }
+        return rootConfig;
+    }
+
+    /**
+     * 更新动作配置元数据版本号
+     *
+     * @param rootConfig 根配置对象
+     */
+    private void updateActionMetadataVersion(ObjectNode rootConfig) {
+        ObjectNode metadata = rootConfig.withObject("_metadata");
+
+        long currentVersion = metadata.path("version").asLong(0);
+        metadata.put("version", currentVersion + 1);
+        metadata.put("lastModified", LocalDateTime.now().toString());
     }
 
     /**
