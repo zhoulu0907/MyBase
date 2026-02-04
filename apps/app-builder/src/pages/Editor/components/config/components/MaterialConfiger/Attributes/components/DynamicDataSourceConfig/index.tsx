@@ -221,7 +221,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     <>
       <div className={styles.dataSourceContainer}>
         {/* 选择数据源 */}
-        <FormItem layout="vertical" labelAlign="left" label={'数据源'} className={styles.formItem}>
+        <FormItem layout="vertical" labelAlign="left" label={'数据源'} required className={styles.formItem}>
           <Select
             placeholder="请选择"
             value={configs[item.key].entityUuid}
@@ -279,7 +279,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                   )}
                 />
               </FormItem> */}
-                <FormItem layout="vertical" labelAlign="left" label={'回显字段'} className={styles.formItem}>
+                <FormItem layout="vertical" labelAlign="left" label={'回显字段'} required className={styles.formItem}>
                   <Select
                     value={configs[ATTR_KEY.DISPLAYFIELDS]?.[0]?.value}
                     onChange={(e) => handleEchoFieldChange(e)}

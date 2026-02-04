@@ -172,6 +172,8 @@ export default function EditorHeader() {
   const [activeTab, setActiveTab] = useState('');
   const [pageSetId, setPageSetId] = useState('');
 
+  const [saveLoading, setSaveLoading] = useState(false)
+
   const [appName, setAppName] = useState('未命名应用');
   const [appIcon, setAppIcon] = useState('');
   const [iconColor, setIconColor] = useState('');
@@ -484,8 +486,10 @@ export default function EditorHeader() {
   //   };
 
   const handleSavePageSet = async (exit?: boolean) => {
+    setSaveLoading(true);
     if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
-      onFlowSave();
+      await onFlowSave();
+      setSaveLoading(false)
       return;
     }
 
@@ -500,6 +504,7 @@ export default function EditorHeader() {
       };
 
       await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
+      setSaveLoading(false)
       return;
     }
 
@@ -556,6 +561,7 @@ export default function EditorHeader() {
     console.log('savePageSetParams: ', savePageSetParams);
 
     startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
+    setSaveLoading(false)
     if (exit) {
       backToPageManager();
     }
@@ -768,6 +774,7 @@ export default function EditorHeader() {
         )}
         <Button
           type="primary"
+          loading={saveLoading}
           onClick={() => {
             handleSavePageSet();
           }}
@@ -866,6 +873,7 @@ export default function EditorHeader() {
               </Button>
               <Button
                 type="primary"
+                loading={saveLoading}
                 onClick={() => {
                   handleSavePageSet(true);
                 }}
