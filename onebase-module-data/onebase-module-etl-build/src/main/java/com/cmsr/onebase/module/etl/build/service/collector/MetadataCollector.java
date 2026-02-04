@@ -31,15 +31,19 @@ public class MetadataCollector {
             // 1. collect catalog（某些数据库如MySQL可能返回null）
             Catalog catalog = temporary.metadata().catalog();
             String catalogName = catalog != null ? catalog.getName() : null;
-            catalogData.setName(catalogName);
             // 2. collect schema（某些数据库可能返回null）
             Schema schema = temporary.metadata().schema();
             String schemaName = schema != null ? schema.getName() : null;
+            // 3. 对于MySQL等数据库，catalog为null时使用schema名称作为catalog名称
+            if (catalogName == null && schemaName != null) {
+                catalogName = schemaName;
+            }
+            catalogData.setName(catalogName);
             SchemaData schemaData = new SchemaData();
             schemaData.setCatalogName(catalogName);
             schemaData.setName(schemaName);
             catalogData.getSchemas().add(schemaData);
-            // 3. collect tables - 采集所有类型的表（包括普通表和视图）
+            // 4. collect tables - 采集所有类型的表（包括普通表和视图）
             LinkedHashMap<String, Table<?>> tables = temporary.metadata().tables();
             for (Table<?> table : tables.values()) {
                 TableData tableData = new TableData();
