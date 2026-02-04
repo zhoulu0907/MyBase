@@ -28,13 +28,13 @@ public class MetadataCollector {
             DataSourceHolder.reg(runnerKey, datasource);
             AnylineService<?> temporary = ServiceProxy.service(runnerKey);
             CatalogData catalogData = new CatalogData();
-            // 1. collect catalog
+            // 1. collect catalog（某些数据库如MySQL可能返回null）
             Catalog catalog = temporary.metadata().catalog();
-            String catalogName = catalog.getName();
+            String catalogName = catalog != null ? catalog.getName() : null;
             catalogData.setName(catalogName);
-            // 2. collect schema
+            // 2. collect schema（某些数据库可能返回null）
             Schema schema = temporary.metadata().schema();
-            String schemaName = schema.getName();
+            String schemaName = schema != null ? schema.getName() : null;
             SchemaData schemaData = new SchemaData();
             schemaData.setCatalogName(catalogName);
             schemaData.setName(schemaName);
