@@ -11,6 +11,8 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTyp
 import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO;
 import com.cmsr.onebase.module.metadata.core.enums.RelationshipTypeEnum;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
@@ -70,6 +72,9 @@ public class SemanticRefResolver {
 
     @Resource
     private MetadataEntityFieldCoreService metadataEntityFieldCoreService;
+
+    @Resource
+    private MetadataEntityRelationshipRepository metadataEntityRelationshipRepository;
 
     /**
      * 对实体值进行语义增强
@@ -605,6 +610,8 @@ public class SemanticRefResolver {
 
     /**
      * 构建数据选择关系的元信息缓存
+     * <p>
+     * 同时处理主表的数据选择连接器和子表中的数据选择字段关系
      *
      * @param entity 实体Schema
      * @return 源字段ID到目标表/主键/显示字段等元信息的映射
@@ -612,24 +619,117 @@ public class SemanticRefResolver {
     private Map<String, DataSelectMeta> buildDataSelectMeta(SemanticEntitySchemaDTO entity) {
         Map<String, DataSelectMeta> map = new HashMap<>();
         if (entity == null || entity.getConnectors() == null) return map;
+        
+        // 收集需要查询关系的子表实体UUID
+        Set<String> subtableEntityUuids = new HashSet<>();
+        
         for (SemanticRelationSchemaDTO c : entity.getConnectors()) {
             if (log.isDebugEnabled()) {
                 log.debug("connector: {}", c);
             }
             if (c == null || c.getRelationshipType() == null) continue;
-            if (!RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) continue;
-            String pkField = getPrimaryKeyNameFromConnector(c);
-            String selectFieldUuid = c.getSelectFieldUuid() == null ? null : c.getSelectFieldUuid();
-            String selectFieldName = getFieldNameByUuidFromConnector(c, selectFieldUuid);
-            String sourceKeyFieldUuid = c.getSourceKeyFieldUuid() == null ? null : c.getSourceKeyFieldUuid();
-            if (selectFieldUuid == null || pkField == null) continue;
-            DataSelectMeta meta = new DataSelectMeta();
-            meta.tableName = c.getTargetEntityTableName();
-            meta.pkField = pkField;
-            meta.selectFieldName = selectFieldName;
-            map.put(sourceKeyFieldUuid, meta);
+            
+            // 处理主表的数据选择连接器
+            if (RelationshipTypeEnum.isDataSelectRelationship(c.getRelationshipType().getRelationshipType())) {
+                String pkField = getPrimaryKeyNameFromConnector(c);
+                String selectFieldUuid = c.getSelectFieldUuid() == null ? null : c.getSelectFieldUuid();
+                String selectFieldName = getFieldNameByUuidFromConnector(c, selectFieldUuid);
+                String sourceKeyFieldUuid = c.getSourceKeyFieldUuid() == null ? null : c.getSourceKeyFieldUuid();
+                if (selectFieldUuid == null || pkField == null) continue;
+                DataSelectMeta meta = new DataSelectMeta();
+                meta.tableName = c.getTargetEntityTableName();
+                meta.pkField = pkField;
+                meta.selectFieldName = selectFieldName;
+                map.put(sourceKeyFieldUuid, meta);
+            }
+            
+            // 收集子表实体UUID，用于后续查询子表的数据选择关系
+            if (RelationshipTypeEnum.isSubtableRelationship(c.getRelationshipType().getRelationshipType())) {
+                if (c.getTargetEntityUuid() != null) {
+                    subtableEntityUuids.add(c.getTargetEntityUuid());
+                }
+            }
         }
+        
+        // 查询子表的数据选择关系并构建元信息
+        if (!subtableEntityUuids.isEmpty() && metadataEntityRelationshipRepository != null) {
+            for (String subtableEntityUuid : subtableEntityUuids) {
+                List<MetadataEntityRelationshipDO> subtableRelationships = 
+                    metadataEntityRelationshipRepository.getRelationshipsByEntityUuid(subtableEntityUuid);
+                if (subtableRelationships == null) continue;
+                
+                for (MetadataEntityRelationshipDO rel : subtableRelationships) {
+                    if (rel == null || rel.getRelationshipType() == null) continue;
+                    if (!RelationshipTypeEnum.isDataSelectRelationship(rel.getRelationshipType())) continue;
+                    
+                    String sourceKeyFieldUuid = rel.getSourceFieldUuid();
+                    String selectFieldUuid = rel.getSelectFieldUuid();
+                    if (sourceKeyFieldUuid == null || selectFieldUuid == null) continue;
+                    
+                    // 查询目标表名和显示字段名
+                    String targetTableName = null;
+                    String pkField = "id";
+                    String selectFieldName = null;
+                    
+                    // 通过selectFieldUuid获取字段信息
+                    if (metadataEntityFieldCoreService != null) {
+                        MetadataEntityFieldDO selectField = metadataEntityFieldCoreService.getEntityFieldByUuid(selectFieldUuid);
+                        if (selectField != null) {
+                            selectFieldName = selectField.getFieldName();
+                        }
+                        // 通过目标字段UUID获取目标实体的表名
+                        if (rel.getTargetFieldUuid() != null) {
+                            MetadataEntityFieldDO targetField = metadataEntityFieldCoreService.getEntityFieldByUuid(rel.getTargetFieldUuid());
+                            if (targetField != null && targetField.getEntityUuid() != null) {
+                                // 从主表connectors中查找目标表名
+                                for (SemanticRelationSchemaDTO c : entity.getConnectors()) {
+                                    if (c != null && rel.getTargetEntityUuid() != null 
+                                        && rel.getTargetEntityUuid().equals(c.getTargetEntityUuid())) {
+                                        targetTableName = c.getTargetEntityTableName();
+                                        break;
+                                    }
+                                }
+                                // 如果在主表connectors中找不到，直接查询
+                                if (targetTableName == null) {
+                                    targetTableName = getTableNameByEntityUuid(rel.getTargetEntityUuid());
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (targetTableName == null) continue;
+                    
+                    DataSelectMeta meta = new DataSelectMeta();
+                    meta.tableName = targetTableName;
+                    meta.pkField = pkField;
+                    meta.selectFieldName = selectFieldName;
+                    map.put(sourceKeyFieldUuid, meta);
+                    
+                    if (log.isDebugEnabled()) {
+                        log.debug("添加子表数据选择元信息: sourceKeyFieldUuid={}, targetTableName={}, selectFieldName={}", 
+                            sourceKeyFieldUuid, targetTableName, selectFieldName);
+                    }
+                }
+            }
+        }
+        
         return map;
+    }
+    
+    /**
+     * 根据实体UUID获取表名
+     */
+    private String getTableNameByEntityUuid(String entityUuid) {
+        if (entityUuid == null || dynamicMetadataRepository == null) return null;
+        try {
+            Row row = dynamicMetadataRepository.selectMainById("metadata_business_entity", "entity_uuid", entityUuid, false, null);
+            if (row != null) {
+                return row.getString("table_name");
+            }
+        } catch (Exception e) {
+            log.warn("获取实体表名失败: entityUuid={}", entityUuid, e);
+        }
+        return null;
     }
 
     /**
