@@ -42,6 +42,7 @@ import type {
     ITableButtonConfigType,
     ITableDataConfigType,
     ICardDataConfigType,
+    ICanvasCardConfigType,
     IDataSortByConfigType,
     IDataFilterConfigType,
     ICoverImageConfigType,
@@ -469,6 +470,12 @@ export const treeDataConfig: ITreeDataConfigType = {
   key: 'metaData',
   name: '数据绑定',
   type: 'TreeData'
+};
+
+export const canvasCardConfig: ICanvasCardConfigType = {
+  key: 'componentName',
+  name: '样式库',
+  type: 'CanvasCardConfig'
 };
 
 export const keyDataConfig: ITableDataConfigType = {

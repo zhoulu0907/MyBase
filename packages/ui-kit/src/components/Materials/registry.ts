@@ -89,6 +89,7 @@ const COMPONENT_TYPE = {
   LIST_CAROUSEL: 'XCarousel',
   LIST: 'XList',
   TREE: 'XTree',
+  CANVAS_CARD: 'XCanvasCard',
   // 展示
   INFO_NOTICE: 'XInfoNotice',
   TEXT: 'XText',
@@ -428,6 +429,13 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     type: COMPONENT_TYPE.TREE,
     schema: cloneDeep(BasicSchema.XTree),
     template: { h: 48, w: 68, displayName: '树形目录', icon: 'table_cp.svg', category: 'list' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.CANVAS_CARD]: {
+    type: COMPONENT_TYPE.CANVAS_CARD,
+    schema: cloneDeep(BasicSchema.XCanvasCard),
+    template: { h: 48, w: 68, displayName: '画布卡片', icon: 'table_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
   },

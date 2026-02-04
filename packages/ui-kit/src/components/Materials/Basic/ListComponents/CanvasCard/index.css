@@ -1,0 +1,225 @@
+.canvas-card-container {
+  padding: 16px 20px;
+}
+
+.canvas-card-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.headerActions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+
+  .addButton {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 17px;
+  }
+}
+
+.XCanvasCard {
+  transition: all 0.3s ease;
+  width: 100%;
+  margin: 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.XCanvasCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.canvas-card-image {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.canvas-card-body {
+  display: flex;
+  gap: 10px;
+}
+
+.canvas-card-content-wrapper {
+  flex: 1;
+  height: 129px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.canvas-card-tags {
+  margin-bottom: 0;
+}
+
+.canvas-card-tag {
+  margin-right: 8px;
+}
+
+.canvas-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 0 !important;
+  color: #333;
+}
+
+.canvas-card-content {
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 0 !important;
+  color: #666;
+  height: 48px;
+  overflow: hidden;
+}
+
+.canvas-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.canvas-card-meta {
+  font-size: 12px;
+  color: #999;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.canvas-card-meta .arco-text {
+  margin-right: 16px;
+}
+
+.canvas-card-stats {
+  font-size: 12px;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .canvas-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .canvas-card-meta {
+    gap: 12px;
+  }
+}
+
+/* Type 2 Card Styles */
+.canvas-card-body-type2 {
+  display: flex;
+  gap: 20px;
+  padding: 16px;
+}
+
+.canvas-card-image-type2 {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.canvas-card-content-wrapper-type2 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.canvas-card-header-type2 {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.canvas-card-title-type2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.canvas-card-tags-type2 {
+  display: flex;
+  gap: 8px;
+}
+
+.canvas-card-tag-type2 {
+  font-size: 12px;
+}
+
+.canvas-card-fields-type2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.canvas-card-field-item {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  width: calc(33.333% - 8px);
+  min-width: 150px;
+}
+
+.canvas-card-field-item .arco-text {
+  font-size: 14px;
+}
+
+.canvas-card-field-item .arco-text:first-child {
+  color: #86909C;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .canvas-card-body-type2 {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .canvas-card-header-type2 {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .canvas-card-field-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* Card List Styles */
+.canvas-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.canvas-card-item {
+  transition: all 0.3s ease;
+}
+
+.canvas-card-item:hover {
+  transform: translateY(-2px);
+}
+
+.canvas-card-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #999;
+  font-size: 14px;
+}
