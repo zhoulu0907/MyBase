@@ -1,23 +1,8 @@
-import { type XInputTextConfig } from './schema';
+import { type XPlaceholderConfig } from './schema';
 
-const XInputTextValidate = (props: XInputTextConfig): boolean => {
-    // 标题
-    if (props.label?.display && !props.label.text) {
-        return false;
-    }
-    // 数据绑定
-    if (!props.dataField || props.dataField.length === 0) {
-        return false;
-    }
-    // 校验
-    if (props.verify.lengthLimit && !props.verify.minLength && props.verify.minLength !== 0 && !props.verify.maxLength) {
-        return false;
-    }
-    // 安全
-    if (props.security?.display && !props.security.type) {
-        return false;
-    }
+const XPlaceholderValidate = (props: XPlaceholderConfig): boolean => {
+    
     return true;
 }
 
-export default XInputTextValidate;
+export default XPlaceholderValidate;
