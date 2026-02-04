@@ -61,15 +61,6 @@ public interface FlowConnectorService {
     List<String> getActionsById(Long id);
 
     /**
-     * Get action value by connector ID and action name
-     *
-     * @param id the connector ID
-     * @param actionName the action name
-     * @return action value as JsonNode
-     */
-    JsonNode getActionValueById(Long id, String actionName);
-
-    /**
      * 启用/禁用连接器实例
      *
      * @param id           连接器实例ID

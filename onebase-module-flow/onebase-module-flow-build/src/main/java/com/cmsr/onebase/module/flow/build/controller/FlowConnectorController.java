@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -167,15 +166,6 @@ public class FlowConnectorController {
     public CommonResult<List<String>> getActions(@PathVariable Long id) {
         List<String> actions = connectorService.getActionsById(id);
         return CommonResult.success(actions);
-    }
-
-    @Operation(summary = "查询指定动作配置内容")
-    @GetMapping("/{id}/action-value")
-    public CommonResult<JsonNode> getActionValue(
-            @PathVariable Long id,
-            @RequestParam("actionName") @NotBlank(message = "动作名称不能为空") String actionName) {
-        JsonNode actionValue = connectorService.getActionValueById(id, actionName);
-        return CommonResult.success(actionValue);
     }
 
     @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表")

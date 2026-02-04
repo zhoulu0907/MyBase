@@ -229,17 +229,6 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         return parseActionsFromConnector(connector, id.toString());
     }
 
-    @Override
-    public JsonNode getActionValueById(Long id, String actionName) {
-        log.info("getActionValueById start, id: {}, actionName: {}", id, actionName);
-        FlowConnectorDO connector = connectorRepository.getById(id);
-        if (connector == null) {
-            log.warn("Connector not found, id: {}", id);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
-        }
-        return parseActionValueFromConnector(connector, actionName, id.toString());
-    }
-
     /**
      * 从连接器对象解析动作列表（私有辅助方法，避免重复查询）
      *
