@@ -514,8 +514,54 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public List<ConnectorActionVO> getActionInfos(Long connectorId) {
-        return getActionList(connectorId);
+    public List<ConnectorActionLiteVO> getActionInfos(Long connectorId) {
+        log.info("getActionInfos start, connectorId: {}", connectorId);
+
+        // 1. 查询连接器
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 从 action_config.properties 对象提取动作列表
+        List<ConnectorActionLiteVO> result = new ArrayList<>();
+        String actionConfig = connector.getActionConfig();
+        if (actionConfig == null || actionConfig.trim().isEmpty()) {
+            log.info("action_config is empty, return empty list");
+            return result;
+        }
+
+        try {
+            JsonNode root = objectMapper.readTree(actionConfig);
+            JsonNode properties = root.get("properties");
+            if (properties == null || !properties.isObject()) {
+                return result;
+            }
+
+            // 遍历 properties，key 作为 actionName
+            Iterator<String> actionNames = properties.fieldNames();
+            while (actionNames.hasNext()) {
+                String actionName = actionNames.next();
+                JsonNode actionNode = properties.get(actionName);
+                String status = getString(actionNode, "status");
+
+                // 从 basic.description 获取描述
+                JsonNode basicNode = actionNode.get("basic");
+                String description = basicNode != null ? getString(basicNode, "description") : null;
+
+                ConnectorActionLiteVO vo = ConnectorActionLiteVO.builder()
+                        .actionName(actionName)
+                        .description(description)
+                        .status(status)
+                        .build();
+                result.add(vo);
+            }
+        } catch (Exception e) {
+            log.error("Parse action_config failed", e);
+        }
+
+        log.info("getActionInfos success, connectorId: {}, count: {}", connectorId, result.size());
+        return result;
     }
 
     @Override

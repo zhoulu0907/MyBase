@@ -145,11 +145,13 @@ public interface FlowConnectorService {
 
     /**
      * 获取连接器的动作配置列表
+     * <p>
+     * 返回精简版信息，只包含列表页必需的字段
      *
      * @param connectorId 连接器ID
-     * @return 动作配置列表
+     * @return 动作配置列表（精简版）
      */
-    List<ConnectorActionVO> getActionInfos(Long id);
+    List<ConnectorActionLiteVO> getActionInfos(Long id);
 
     /**
      * 获取动作详情

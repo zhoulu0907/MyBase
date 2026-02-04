@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser;
 import com.cmsr.onebase.module.flow.build.vo.ActionConfigTemplateVO;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorActionVO;
+import com.cmsr.onebase.module.flow.build.vo.ConnectorActionLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvConfigTemplateVO;
 import com.cmsr.onebase.module.flow.build.vo.SaveActionConfigReqVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvironmentConfigVO;
@@ -362,7 +363,7 @@ class FlowConnectorServiceImplTest {
         when(connectorRepository.getById(connectorId)).thenReturn(connector);
 
         // When - 不应该抛出异常，返回空列表
-        List<ConnectorActionVO> result = connectorService.getActionInfos(connectorId);
+        List<ConnectorActionLiteVO> result = connectorService.getActionInfos(connectorId);
 
         // Then - 返回空列表而不是抛出异常
         assertNotNull(result);
@@ -381,7 +382,7 @@ class FlowConnectorServiceImplTest {
         when(connectorRepository.getById(connectorId)).thenReturn(connector);
 
         // When - 不应该抛出异常，返回空列表
-        List<ConnectorActionVO> result = connectorService.getActionInfos(connectorId);
+        List<ConnectorActionLiteVO> result = connectorService.getActionInfos(connectorId);
 
         // Then - 返回空列表而不是抛出异常
         assertNotNull(result);

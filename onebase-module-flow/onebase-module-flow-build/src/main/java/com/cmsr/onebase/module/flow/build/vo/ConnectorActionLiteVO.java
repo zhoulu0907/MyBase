@@ -28,18 +28,12 @@ public class ConnectorActionLiteVO implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    @Schema(description = "动作编码", example = "getUserInfo")
-    private String actionCode;
-
-    @Schema(description = "动作名称", example = "获取用户信息")
+    @Schema(description = "动作名称", example = "getUserInfo")
     private String actionName;
 
-    @Schema(description = "状态", example = "published")
+    @Schema(description = "动作描述", example = "获取用户信息")
+    private String description;
+
+    @Schema(description = "状态", example = "1-published；2-unpublished")
     private String status;
-
-    @Schema(description = "版本号", example = "2")
-    private Integer version;
-
-    @Schema(description = "创建时间", example = "2026-01-25T10:00:00")
-    private LocalDateTime createTime;
 }

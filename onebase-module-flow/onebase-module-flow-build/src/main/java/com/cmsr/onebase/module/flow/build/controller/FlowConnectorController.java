@@ -179,12 +179,12 @@ public class FlowConnectorController {
         return CommonResult.success(actions);
     }
 
-    @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表")
+    @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表（精简版）")
     @GetMapping("/{id}/action-infos")
-    public CommonResult<List<ConnectorActionVO>> getActionInfos(
+    public CommonResult<List<ConnectorActionLiteVO>> getActionInfos(
             @Parameter(description = "连接器实例ID", required = true, example = "1")
             @PathVariable Long id) {
-        List<ConnectorActionVO> actions = connectorService.getActionInfos(id);
+        List<ConnectorActionLiteVO> actions = connectorService.getActionInfos(id);
         return CommonResult.success(actions);
     }
 
