@@ -11,7 +11,7 @@ interface Props {
 
 const DynamicTextInputConfig = ({ handlePropsChange, item, configs }: Props) => {
   return (
-    <Form.Item className={styles.formItem} label={item.name}>
+    <Form.Item className={styles.formItem} label={item.name} required={item.required || false}>
       <Input
         placeholder={`请输入${item.name}`}
         value={configs[item.key]}

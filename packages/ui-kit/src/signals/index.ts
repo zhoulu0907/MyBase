@@ -6,3 +6,4 @@ export * from './pageview_editor';
 export * from './page_setting';
 export * from './store_entity';
 export * from './workbench_editor';
+export * from './page_schema_validate';

@@ -27,6 +27,7 @@ import {
   useEditorSignalMap,
   usePageEditorSignal,
   usePageViewEditorSignal,
+  usePageComponentValidateSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   type GridItem
@@ -96,6 +97,8 @@ export default function EditorWorkspace() {
   const components = isFormEditor ? useFormEditorSignal.components.value : useListEditorSignal.components.value;
 
   const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
+
+  const { pageComponentValidate } = usePageComponentValidateSignal;
 
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
@@ -418,7 +421,7 @@ export default function EditorWorkspace() {
                         ...schema.config.selectedDataSource,
                         entityUuid: field.dataSelectionConfig?.targetEntityUuid,
                         tableName: field.dataSelectionConfig?.targetTableName,
-                        entityName: field.dataSelectionConfig?.targetFieldName,
+                        entityName: field.dataSelectionConfig?.targetFieldName
                       };
                       // 回显字段  name
                       schema.config.displayFields = field.dataSelectionConfig?.targetFieldName
@@ -515,7 +518,7 @@ export default function EditorWorkspace() {
                         ...subSchema.config.selectedDataSource,
                         entityUuid: ele.dataSelectionConfig?.targetEntityUuid,
                         tableName: ele.dataSelectionConfig?.targetTableName,
-                        entityName: ele.dataSelectionConfig?.targetFieldName,
+                        entityName: ele.dataSelectionConfig?.targetFieldName
                       };
 
                       // 回显字段  name
@@ -653,7 +656,7 @@ export default function EditorWorkspace() {
                       ...schema.config.selectedDataSource,
                       entityUuid: currentField.dataSelectionConfig?.targetEntityUuid,
                       tableName: currentField.dataSelectionConfig?.targetTableName,
-                      entityName: currentField.dataSelectionConfig?.targetFieldName,
+                      entityName: currentField.dataSelectionConfig?.targetFieldName
                     };
                     // 回显字段  name
                     schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
@@ -709,7 +712,12 @@ export default function EditorWorkspace() {
                     width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                     borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
                     borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
-                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
+                    background:
+                      pageComponentValidate.value?.[cp.id] === false
+                        ? 'rgb(var(--red-1))'
+                        : curComponentID === cp.id
+                          ? 'rgb(var(--primary-1))'
+                          : '',
                     margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {

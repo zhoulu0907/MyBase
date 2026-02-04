@@ -47,7 +47,7 @@ const DynamicImageConfig: React.FC<DynamicImageConfigProps> = ({ handlePropsChan
   };
 
   return (
-    <Form.Item layout="vertical" labelAlign="left" label={'图片配置'} className={styles.formItem}>
+    <Form.Item layout="vertical" labelAlign="left" label={'图片配置'} required className={styles.formItem}>
       <div className={styles.imagesTips}>支持jpg、jpeg、png、gif格式，单张{maxSizeMB}MB以内。</div>
 
       <div className={styles.imagesList}>

@@ -96,6 +96,13 @@ export interface ICardDataConfigType extends ICommonConfigType {
   type: typeof CONFIG_TYPES.CARD_DATA;
 }
 
+export interface ICanvasCardConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CANVAS_CARD_CONFIG;
+  advanced?: boolean;
+}
+
 export interface IDataSortByConfigType extends ICommonConfigType {
   key: string;
   name: string;

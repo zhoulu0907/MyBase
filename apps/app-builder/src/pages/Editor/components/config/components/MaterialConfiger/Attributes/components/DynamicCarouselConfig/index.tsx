@@ -83,7 +83,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
   });
 
   return (
-    <FormItem layout="vertical" labelAlign="left" label={'图片配置'} className={styles.formItem}>
+    <FormItem layout="vertical" labelAlign="left" label={'图片配置'} required className={styles.formItem}>
       <div className={styles.imagesTips}>
         支持jpg、jpeg、png、gif格式，单张{maxSizeMB}MB以内。{carouselConfig.length}/{maxCount}
       </div>

@@ -188,7 +188,7 @@ const DynamicCardDataConfig = ({ handlePropsChange, handleMultiPropsChange, item
 
   return (
     <>
-      <Form.Item layout="vertical" labelAlign="left" className={styles.formItem} label="数据绑定">
+      <Form.Item layout="vertical" labelAlign="left" required className={styles.formItem} label="数据绑定">
         <Select
           placeholder="请选择数据"
           value={configs?.metaData}
@@ -218,6 +218,7 @@ const DynamicCardDataConfig = ({ handlePropsChange, handleMultiPropsChange, item
 
       <Form.Item
         className={styles.formItem}
+        required
         label={
           <>
             <span>显示字段</span>
