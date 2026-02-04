@@ -160,30 +160,26 @@
 
 .canvas-card-fields-type2 {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
-.canvas-card-field-row {
-  display: flex;
-  gap: 20px;
-}
-
-.canvas-card-field {
+.canvas-card-field-item {
   display: flex;
   flex-direction: row;
-  gap: 20px;
+  gap: 8px;
   align-items: center;
-  width: 180px;
+  width: calc(33.333% - 8px);
+  min-width: 150px;
 }
 
-.canvas-card-field .arco-text {
+.canvas-card-field-item .arco-text {
   font-size: 14px;
 }
 
-.canvas-card-field .arco-text:first-child {
+.canvas-card-field-item .arco-text:first-child {
   color: #86909C;
-  min-width: 60px;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -201,4 +197,29 @@
     flex-direction: column;
     gap: 12px;
   }
+}
+
+/* Card List Styles */
+.canvas-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.canvas-card-item {
+  transition: all 0.3s ease;
+}
+
+.canvas-card-item:hover {
+  transform: translateY(-2px);
+}
+
+.canvas-card-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #999;
+  font-size: 14px;
 }

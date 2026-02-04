@@ -21,6 +21,17 @@ import type {
     ICanvasCardConfigType
 } from '../../../types';
 
+export type DisplayFieldsConfig = {
+  mainImage?: string;
+  categoryTags?: string[];
+  mainTitle?: string;
+  cardContent?: string;
+  auxiliaryInfo?: string[];
+  countHint?: string;
+  avatar?: string;
+  cardFields?: string[];
+}
+
 export interface XCanvasCardSchema {
   editData: TXCanvasCardEditData;
   config: XCanvasCardConfig;
@@ -66,44 +77,14 @@ export interface XCanvasCardConfig extends ICommonBaseType {
   metaData?: TTextDefaultType;
 
   /**
-   * 卡片配置
+   * 显示字段配置
    */
-  config?: {
-      /**
-       * 图片 URL
-       */
-      imageUrl?: string;
-      
-      /**
-       * 标签列表
-       */
-      tags?: string[];
-      
-      /**
-       * 卡片标题
-       */
-      title?: string;
-      
-      /**
-       * 卡片内容
-       */
-      content?: string;
-      
-      /**
-       * 来源
-       */
-      source?: string;
-      
-      /**
-       * 发布日期
-       */
-      publishDate?: string;
-      
-      /**
-       * 浏览量
-       */
-      viewCount?: string;
-    };
+  displayFields?: DisplayFieldsConfig;
+
+  /**
+   * 页面类型
+   */
+  pageSetType?: number;
 }
 
 const XCanvasCard: XCanvasCardSchema = {
@@ -119,14 +100,15 @@ const XCanvasCard: XCanvasCardSchema = {
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     tableName: '',
     metaData: '',
-    config: {
-      imageUrl: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=beautiful%20mountain%20lake%20reflection%20scenery&image_size=landscape_16_9',
-      tags: ['标签标签', 'default', 'default'],
-      title: '卡片标题字段',
-      content: '这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本这是一段长文本',
-      source: '华尔街日报',
-      publishDate: '2026年1月11日 22:22',
-      viewCount: '888'
+    displayFields: {
+      mainImage: '',
+      categoryTags: [''],
+      mainTitle: '',
+      cardContent: '',
+      auxiliaryInfo: [],
+      countHint: '',
+      avatar: '',
+      cardFields: ['', '', '', '']
     }
   }
 };

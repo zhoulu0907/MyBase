@@ -1,6 +1,21 @@
 import { Form, Button, Image, Select, Switch } from '@arco-design/web-react';
 import { IconArrowLeft, IconSwap, IconDelete, IconPlus } from '@arco-design/web-react/icon';
-import { getPopupContainer } from '@onebase/ui-kit';
+import {
+  FilterEntityFields,
+  getEntityFields,
+  type MetadataEntityField,
+  type MetadataEntityPair,
+  type AppEntity,
+  menuSignal,
+  PageType
+} from '@onebase/app';
+import {
+  CONFIG_TYPES,
+  ENTITY_FIELD_TYPE,
+  getPopupContainer,
+  useAppEntityStore,
+  SELECT_OPTIONS_BPM
+} from '@onebase/ui-kit';
 import React, { useState, useEffect } from 'react';
 import styles from './index.module.less';
 import { registerConfigRenderer } from '../../registry';
@@ -10,8 +25,11 @@ import CanvasCardType2Image from '@/assets/images/cp/CanvasCardType2.png';
 const FormItem = Form.Item;
 
 export interface DynamicCanvasCardConfigProps {
+  handleMultiPropsChange: (updates: { key: string; value: string | number | boolean | unknown[] }[]) => void;
   handlePropsChange: (key: string, value: string | number | boolean | unknown[]) => void;
+  item?: any;
   configs: Record<string, unknown>;
+  id?: string;
 }
 
 interface FieldConfig {
@@ -30,12 +48,43 @@ interface DisplayFieldsConfig {
   cardFields?: string[];
 }
 
-const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handlePropsChange, configs }) => {
+const hiddenFieldTypes = [
+  ENTITY_FIELD_TYPE.RELATION.VALUE,
+  ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+  ENTITY_FIELD_TYPE.ARRAY.VALUE,
+  ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+  ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+  ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+  ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
+];
+
+const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
+  if (a.isSystemField !== b.isSystemField) {
+    return a.isSystemField ? 1 : -1;
+  }
+  return 0;
+};
+
+const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handleMultiPropsChange, handlePropsChange, configs }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentComponent, setCurrentComponent] = useState((configs.componentName as string) || 'CanvasCardType1');
-  const displayFields = (configs.displayFields as DisplayFieldsConfig) || {};
+  const [displayFields, setDisplayFields] = useState<DisplayFieldsConfig>((configs.displayFields as DisplayFieldsConfig) || {});
   const hiddenDraft = (configs.hiddenDraft as boolean) || false;
   const showAddBtn = (configs.showAddBtn as boolean) !== false;
+
+  const { mainEntity, subEntities } = useAppEntityStore();
+  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
+  const [entityUuid, setEntityUuid] = useState<string>('');
+  const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
+  const [initialized, setInitialized] = useState(false);
+
+  const tableNameKey = 'tableName';
+  const metaDataKey = 'metaData';
+
+  const { curMenu } = menuSignal;
 
   useEffect(() => {
     setCurrentComponent((configs.componentName as string) || 'CanvasCardType1');
@@ -44,80 +93,137 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
   useEffect(() => {
     const componentName = (configs.componentName as string) || 'CanvasCardType1';
     const currentDisplayFields = (configs.displayFields as DisplayFieldsConfig) || {};
-    const newDisplayFields = { ...currentDisplayFields };
+    setDisplayFields(currentDisplayFields);
+  }, [configs.componentName, configs.displayFields]);
 
-    if (componentName === 'CanvasCardType1') {
-      if (!newDisplayFields.categoryTags || newDisplayFields.categoryTags.length < 1) {
-        newDisplayFields.categoryTags = [''];
-      }
-      if (!newDisplayFields.auxiliaryInfo) {
-        newDisplayFields.auxiliaryInfo = [];
-      }
-    } else if (componentName === 'CanvasCardType2') {
-      if (!newDisplayFields.categoryTags) {
-        newDisplayFields.categoryTags = [];
-      }
-      if (!newDisplayFields.cardFields || newDisplayFields.cardFields.length < 4) {
-        newDisplayFields.cardFields = ['', '', '', ''];
-      }
+  useEffect(() => {
+    if (configs[metaDataKey] && configs[metaDataKey] !== entityUuid) {
+      setEntityUuid(configs[metaDataKey] as string);
+    } else if (!entityUuid && configs[metaDataKey]) {
+      setEntityUuid(configs[metaDataKey] as string);
     }
+  }, [configs[metaDataKey], entityUuid]);
 
-    handlePropsChange('displayFields', newDisplayFields);
-  }, [configs.componentName]);
+  useEffect(() => {
+    const syncEntityList = () => {
+      if (!mainEntity) {
+        return;
+      }
+
+      const newEntityList: MetadataEntityPair[] = [];
+      if (mainEntity) {
+        newEntityList.push({
+          entityId: mainEntity.entityId,
+          entityUuid: mainEntity.entityUuid,
+          tableName: mainEntity.tableName,
+          entityName: mainEntity.entityName
+        });
+      }
+      if (subEntities) {
+        newEntityList.push(
+          ...subEntities.entities.map((entity: AppEntity) => ({
+            entityId: entity.entityId,
+            entityUuid: entity.entityUuid,
+            tableName: entity.tableName,
+            entityName: entity.entityName
+          }))
+        );
+      }
+
+      setEntityList(newEntityList);
+      setInitialized(true);
+    };
+
+    syncEntityList();
+  }, [mainEntity, subEntities]);
+
+  useEffect(() => {
+    if (entityUuid && initialized && fieldList.length === 0) {
+      getFieldList();
+    }
+  }, [entityUuid, initialized, fieldList.length]);
+
+  const getFieldList = async () => {
+    const res = await getEntityFields({ entityUuid });
+
+    res.forEach((item: MetadataEntityField) => {
+      if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
+        item.disabled = true;
+      }
+    });
+
+    const newFieldList = res
+      .filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName))
+      .concat(curMenu?.value?.pagesetType === PageType.BPM ? SELECT_OPTIONS_BPM : []);
+
+    setFieldList(newFieldList);
+  };
 
   const handleStyleChange = (componentName: string) => {
-    console.log('handleStyleChange called with:', componentName);
     setCurrentComponent(componentName);
     handlePropsChange('componentName', componentName);
   };
 
   const handleFieldChange = (fieldPath: string, value: string | string[]) => {
-    const newDisplayFields = { ...displayFields };
+    const newDisplayFields: DisplayFieldsConfig = { ...displayFields };
     const keys = fieldPath.split('.');
-    let current: any = newDisplayFields;
+    let current: DisplayFieldsConfig | string[] | string = newDisplayFields;
 
     for (let i = 0; i < keys.length - 1; i++) {
       if (!current[keys[i]]) {
         current[keys[i]] = Array.isArray(current[keys[i - 1]]) ? [] : {};
       }
-      current = current[keys[i]];
+      current = current[keys[i]] as DisplayFieldsConfig | string[];
     }
 
     current[keys[keys.length - 1]] = value;
+    setDisplayFields(newDisplayFields);
     handlePropsChange('displayFields', newDisplayFields);
   };
 
   const handleAddArrayField = (fieldPath: string, maxCount: number) => {
-    const newDisplayFields = { ...displayFields };
+    const newDisplayFields: DisplayFieldsConfig = { ...displayFields };
     const keys = fieldPath.split('.');
-    let current: any = newDisplayFields;
+    let current: DisplayFieldsConfig | string[] = newDisplayFields;
 
     for (let i = 0; i < keys.length - 1; i++) {
       if (!current[keys[i]]) {
         current[keys[i]] = Array.isArray(current[keys[i - 1]]) ? [] : {};
       }
-      current = current[keys[i]];
+      current = current[keys[i]] as DisplayFieldsConfig | string[];
     }
 
-    const array = current[keys[keys.length - 1]] || [];
+    const array = (current as string[])[keys[keys.length - 1]] || [];
     if (array.length < maxCount) {
-      current[keys[keys.length - 1]] = [...array, ''];
+      (current as Record<string, unknown>)[keys[keys.length - 1]] = [...array, ''];
+      setDisplayFields(newDisplayFields);
       handlePropsChange('displayFields', newDisplayFields);
     }
   };
 
   const handleRemoveArrayField = (fieldPath: string, index: number) => {
-    const newDisplayFields = { ...displayFields };
+    const newDisplayFields: DisplayFieldsConfig = { ...displayFields };
     const keys = fieldPath.split('.');
-    let current: any = newDisplayFields;
+    let current: DisplayFieldsConfig | string[] = newDisplayFields;
 
     for (let i = 0; i < keys.length - 1; i++) {
-      current = current[keys[i]];
+      current = current[keys[i]] as DisplayFieldsConfig | string[];
     }
 
-    const array = current[keys[keys.length - 1]] || [];
-    current[keys[keys.length - 1]] = array.filter((_: unknown, i: number) => i !== index);
+    const array = (current as string[])[keys[keys.length - 1]] || [];
+    (current as Record<string, unknown>)[keys[keys.length - 1]] = array.filter((_: unknown, i: number) => i !== index);
+    setDisplayFields(newDisplayFields);
     handlePropsChange('displayFields', newDisplayFields);
+  };
+
+  const renderFieldOptions = () => {
+    return fieldList
+      .sort(sortEntityFields)
+      .map((item: MetadataEntityField) => (
+        <Select.Option key={item.fieldName} value={item.fieldName} disabled={item?.disabled}>
+          {item.displayName}
+        </Select.Option>
+      ));
   };
 
   const renderStylePreview = () => {
@@ -181,9 +287,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('mainImage', value)}
           >
-            <Select.Option value="field1">字段1</Select.Option>
-            <Select.Option value="field2">字段2</Select.Option>
-            <Select.Option value="field3">字段3</Select.Option>
+            {renderFieldOptions()}
           </Select>
         </FormItem>
 
@@ -201,9 +305,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
                     handleFieldChange('categoryTags', newTags);
                   }}
                 >
-                  <Select.Option value="field1">字段1</Select.Option>
-                  <Select.Option value="field2">字段2</Select.Option>
-                  <Select.Option value="field3">字段3</Select.Option>
+                  {renderFieldOptions()}
                 </Select>
                 {index >= 1 && (
                   <Button
@@ -234,9 +336,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('mainTitle', value)}
           >
-            <Select.Option value="field1">字段1</Select.Option>
-            <Select.Option value="field2">字段2</Select.Option>
-            <Select.Option value="field3">字段3</Select.Option>
+            {renderFieldOptions()}
           </Select>
         </FormItem>
 
@@ -247,9 +347,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('cardContent', value)}
           >
-            <Select.Option value="field1">字段1</Select.Option>
-            <Select.Option value="field2">字段2</Select.Option>
-            <Select.Option value="field3">字段3</Select.Option>
+            {renderFieldOptions()}
           </Select>
         </FormItem>
 
@@ -267,9 +365,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
                     handleFieldChange('auxiliaryInfo', newInfo);
                   }}
                 >
-                  <Select.Option value="field1">字段1</Select.Option>
-                  <Select.Option value="field2">字段2</Select.Option>
-                  <Select.Option value="field3">字段3</Select.Option>
+                  {renderFieldOptions()}
                 </Select>
                 {index >= 0 && (
                   <Button
@@ -300,9 +396,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('countHint', value)}
           >
-            <Select.Option value="field1">字段1</Select.Option>
-            <Select.Option value="field2">字段2</Select.Option>
-            <Select.Option value="field3">字段3</Select.Option>
+            {renderFieldOptions()}
           </Select>
         </FormItem>
       </div>
@@ -322,9 +416,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('avatar', value)}
           >
-            <Select.Option value="field1">字段1</Select.Option>
-            <Select.Option value="field2">字段2</Select.Option>
-            <Select.Option value="field3">字段3</Select.Option>
+            {renderFieldOptions()}
           </Select>
         </FormItem>
 
@@ -335,9 +427,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             getPopupContainer={getPopupContainer}
             onChange={(value) => handleFieldChange('mainTitle', value)}
           >
-            <Select.Option value="field1">字段1</Select.Option>
-            <Select.Option value="field2">字段2</Select.Option>
-            <Select.Option value="field3">字段3</Select.Option>
+            {renderFieldOptions()}
           </Select>
         </FormItem>
 
@@ -355,9 +445,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
                     handleFieldChange('categoryTags', newTags);
                   }}
                 >
-                  <Select.Option value="field1">字段1</Select.Option>
-                  <Select.Option value="field2">字段2</Select.Option>
-                  <Select.Option value="field3">字段3</Select.Option>
+                  {renderFieldOptions()}
                 </Select>
                 {index >= 0 && (
                   <Button
@@ -395,9 +483,7 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
                     handleFieldChange('cardFields', newFields);
                   }}
                 >
-                  <Select.Option value="field1">字段1</Select.Option>
-                  <Select.Option value="field2">字段2</Select.Option>
-                  <Select.Option value="field3">字段3</Select.Option>
+                  {renderFieldOptions()}
                 </Select>
                 {index >= 4 && (
                   <Button
@@ -426,6 +512,29 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
 
   return (
     <div>
+      <FormItem layout="vertical" labelAlign="left" label="数据" className={styles.formItem}>
+        <Select
+          placeholder="请选择数据实体"
+          value={entityUuid || undefined}
+          getPopupContainer={getPopupContainer}
+          onChange={(value) => {
+            const selectedEntity = entityList.find((item) => item.entityUuid === value);
+            handleMultiPropsChange([
+              { key: metaDataKey, value: value },
+              { key: tableNameKey, value: selectedEntity?.tableName || '' }
+            ]);
+
+            setEntityUuid(value);
+          }}
+        >
+          {entityList.map((item) => (
+            <Select.Option key={item.entityUuid} value={item.entityUuid}>
+              {item.entityName}
+            </Select.Option>
+          ))}
+        </Select>
+      </FormItem>
+
       <FormItem layout="vertical" labelAlign="left" label="样式库" className={styles.formItem}>
         {isEditing ? renderStyleSelection() : renderStylePreview()}
       </FormItem>
@@ -448,8 +557,14 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
   );
 };
 
-registerConfigRenderer('CanvasCardConfig', ({ handlePropsChange, configs }) => (
-  <DynamicCanvasCardConfig handlePropsChange={handlePropsChange} configs={configs} />
-));
-
 export default DynamicCanvasCardConfig;
+
+registerConfigRenderer(CONFIG_TYPES.CANVAS_CARD_CONFIG, ({ id, handleMultiPropsChange, handlePropsChange, item, configs }) => (
+  <DynamicCanvasCardConfig
+    id={id}
+    handleMultiPropsChange={handleMultiPropsChange}
+    handlePropsChange={handlePropsChange}
+    item={item}
+    configs={configs}
+  />
+));

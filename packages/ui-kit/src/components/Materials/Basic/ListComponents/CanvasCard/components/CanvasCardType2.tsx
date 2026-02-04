@@ -1,29 +1,162 @@
-import { Card, Image, Tag, Typography } from '@arco-design/web-react';
-import { memo } from 'react';
+import { Card, Image, Tag, Typography, Avatar } from '@arco-design/web-react';
+import { memo, useEffect, useState } from 'react';
+import { attachmentDownload, menuSignal } from '@onebase/app';
 import type { XCanvasCardConfig } from '../schema';
 import '../index.css';
 
-const { Text } = Typography;
+const { Text, Paragraph } = Typography;
 
-const CanvasCardType2 = memo((props: XCanvasCardConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { status, runtime = true, config } = props;
-  const {
-    imageUrl = 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cartoon%20character%20avatar&image_size=portrait_square',
-    tags = ['标签1', '标签2', '标签3'],
-    title = '主标题'
-  } = config || {};
+const DEFAULT_IMAGE = '/CanvasCardType2Pic.png';
+
+interface CanvasCardType2Props extends XCanvasCardConfig {
+  runtime?: boolean;
+  detailMode?: boolean;
+  record?: Record<string, unknown>;
+  displayFields?: {
+    avatar?: string;
+    mainTitle?: string;
+    categoryTags?: string[];
+    cardFields?: string[];
+  };
+  fieldList?: Array<{ fieldName: string; displayName: string }>;
+}
+
+const TAG_COLORS = ['pink', 'purple', 'arcoblue', 'cyan'];
+
+const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
+  const { status, runtime = true, record, displayFields, fieldList = [], tableName } = props;
+  const { curMenu } = menuSignal;
+  const [avatarUrl, setAvatarUrl] = useState(DEFAULT_IMAGE);
   
-  // 为 tag 变量添加类型注解
-  const typedTags: string[] = tags;
+  const getFieldValue = (fieldName?: string): string => {
+    if (!fieldName || !record) return '';
+    const value = record[fieldName];
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object') return (value as any).id || '';
+    return String(value);
+  };
+
+  const getFieldDisplayName = (fieldName?: string): string => {
+    if (!fieldName) return '';
+    const field = fieldList.find(f => f.fieldName === fieldName);
+    const displayName = field?.displayName || fieldName;
+    return `{${displayName}}`;
+  };
+
+  const renderFieldPreview = (fieldName?: string, defaultValue?: string) => {
+    if (!fieldName) return defaultValue || '';
+    return getFieldDisplayName(fieldName);
+  };
+
+  const renderContent = (fieldName?: string, defaultValue?: string) => {
+    if (runtime && record && fieldName) {
+      const value = getFieldValue(fieldName);
+      if (value) return value;
+      return '';
+    }
+    return defaultValue || '';
+  };
+
+  const getFieldName = (fieldName?: string): string => {
+    if (!fieldName) return '';
+    const field = fieldList.find(f => f.fieldName === fieldName);
+    return field?.displayName || fieldName;
+  };
+  
+  useEffect(() => {
+    const loadAvatar = async () => {
+      const avatarField = displayFields?.avatar;
+      if (runtime && record && avatarField && curMenu.value?.id && tableName) {
+        const fieldValue = record[avatarField];
+        let fileId = '';
+        
+        if (Array.isArray(fieldValue) && fieldValue.length > 0) {
+          fileId = fieldValue[0]?.id || '';
+        } else if (typeof fieldValue === 'object' && fieldValue !== null) {
+          fileId = (fieldValue as any).id || '';
+        } else if (typeof fieldValue === 'string') {
+          fileId = fieldValue;
+        }
+        
+        if (fileId) {
+          try {
+            const lastIndexOf = avatarField.lastIndexOf('.');
+            const curFieldName = lastIndexOf === -1 ? avatarField : avatarField.slice(lastIndexOf + 1);
+            const param = {
+              menuId: curMenu.value?.id,
+              id: (record as any).id || '',
+              fieldName: curFieldName,
+              fileId: fileId
+            };
+            const url = await attachmentDownload(tableName, param);
+            if (url) {
+              setAvatarUrl(url);
+            }
+          } catch (error) {
+            console.error('加载头像失败:', error);
+          }
+        }
+      }
+    };
+    
+    loadAvatar();
+  }, [runtime, record, displayFields, tableName, curMenu.value?.id]);
+
+  const cardFields = displayFields?.cardFields || [];
+
+  const renderCardFields = () => {
+    const renderList = cardFields.filter((field: string) => field);
+    if (renderList.length > 0) {
+      return (
+        <div className="canvas-card-fields-type2">
+          {renderList.map((fieldName: string, index: number) => (
+            <div key={index} className="canvas-card-field-item">
+              <Text type="secondary">{getFieldName(fieldName)}</Text>
+              <Text>{renderContent(fieldName, renderFieldPreview(fieldName, ''))}</Text>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderTags = () => {
+    const categoryTags = displayFields?.categoryTags || [];
+    const renderList = categoryTags.filter((tag: string) => tag);
+
+    const TAG_COLORS = ['pinkpurple', 'arcoblue', 'cyan'];
+
+    if (renderList.length > 0) {
+      const filteredList = runtime && record 
+        ? renderList.filter(tagField => {
+            const tagValue = getFieldValue(tagField);
+            return tagValue && tagValue.trim() !== '';
+          })
+        : renderList;
+
+      if (filteredList.length > 0) {
+        return filteredList.map((tagField: string, index: number) => {
+          const tagValue = runtime && record ? getFieldValue(tagField) : '';
+          return (
+            <Tag key={index} className="canvas-card-tag-type2" color={TAG_COLORS[index % TAG_COLORS.length]}>
+              {tagValue || renderFieldPreview(tagField, `标签${index + 1}`)}
+            </Tag>
+          );
+        });
+      }
+    }
+    return null;
+  };
 
   return (
     <div className="canvas-card-body-type2">
       <div className="canvas-card-image-type2">
         <Image
-          src={imageUrl}
+          src={avatarUrl}
           alt="card image"
-          width={80}
-          height={80}
+          width={72}
+          height={72}
           style={{ '--fit': 'cover' } as React.CSSProperties}
           preview={false}
         />
@@ -32,63 +165,14 @@ const CanvasCardType2 = memo((props: XCanvasCardConfig & { runtime?: boolean; de
       <div className="canvas-card-content-wrapper-type2">
         <div className="canvas-card-header-type2">
           <Text className="canvas-card-title-type2">
-            {title}
+            {renderContent(displayFields?.mainTitle, renderFieldPreview(displayFields?.mainTitle, ''))}
           </Text>
           <div className="canvas-card-tags-type2">
-            {typedTags.map((tag, index) => (
-              <Tag
-                key={index}
-                className="canvas-card-tag-type2"
-                color={index === 0 ? 'red' : index === 1 ? 'blue' : index === 2 ? 'green' : undefined}
-              >
-                {tag}
-              </Tag>
-            ))}
+            {renderTags()}
           </div>
         </div>
         
-        <div className="canvas-card-fields-type2">
-          <div className="canvas-card-field-row">
-            <div className="canvas-card-field">
-              <Text type="secondary">字段1</Text>
-              <Text>{'字段1'}</Text>
-            </div>
-            <div className="canvas-card-field">
-              <Text type="secondary">字段2</Text>
-              <Text>{'字段2'}</Text>
-            </div>
-            <div className="canvas-card-field">
-              <Text type="secondary">字段3</Text>
-              <Text>{'字段3'}</Text>
-            </div>
-          </div>
-          
-          <div className="canvas-card-field-row">
-            <div className="canvas-card-field">
-              <Text type="secondary">字段4</Text>
-              <Text>{'字段4'}</Text>
-            </div>
-            <div className="canvas-card-field">
-              <Text type="secondary">字段5</Text>
-              <Text>{'字段5'}</Text>
-            </div>
-            <div className="canvas-card-field">
-              <Text type="secondary">字段6</Text>
-              <Text>{'字段6'}</Text>
-            </div>
-          </div>
-          
-          <div className="canvas-card-field-row">
-            <div className="canvas-card-field">
-              <Text type="secondary">字段7</Text>
-              <Text>{'字段7'}</Text>
-            </div>
-            <div className="canvas-card-field">
-              <Text type="secondary">字段8</Text>
-              <Text>{'字段8'}</Text>
-            </div>
-          </div>
-        </div>
+        {renderCardFields()}
       </div>
     </div>
   );
