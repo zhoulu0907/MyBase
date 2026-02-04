@@ -8,7 +8,6 @@ import com.cmsr.onebase.module.flow.build.vo.*;
 import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
-import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -153,20 +152,31 @@ public class FlowConnectorController {
 
     // ==================== 动作管理接口 ====================
 
+    @Operation(summary = "获取动作配置模板",
+              description = "获取连接器类型对应的动作配置 Formily Schema 模板，用于创建动作信息")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @GetMapping("/{id}/action-config-template")
+    public CommonResult<ActionConfigTemplateVO> getActionConfigTemplate(@PathVariable Long id) {
+        ActionConfigTemplateVO template = connectorService.getActionConfigTemplate(id);
+        return CommonResult.success(template);
+    }
+
+    @Operation(summary = "保存连接器动作配置",
+              description = "保存新的动作配置到 connector.action_config，如果动作已存在则拒绝")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @PostMapping("/{id}/save-action")
+    public CommonResult<Boolean> saveActionConfig(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid SaveActionConfigReqVO reqVO) {
+        Boolean result = connectorService.saveActionConfig(id, reqVO);
+        return CommonResult.success(result);
+    }
+
     @Operation(summary = "查询连接器动作清单")
     @GetMapping("/{id}/actions")
     public CommonResult<List<String>> getActions(@PathVariable Long id) {
         List<String> actions = connectorService.getActionsById(id);
         return CommonResult.success(actions);
-    }
-
-    @Operation(summary = "查询指定动作配置内容")
-    @GetMapping("/{id}/action-value")
-    public CommonResult<JsonNode> getActionValue(
-            @PathVariable Long id,
-            @RequestParam("actionName") @NotBlank(message = "动作名称不能为空") String actionName) {
-        JsonNode actionValue = connectorService.getActionValueById(id, actionName);
-        return CommonResult.success(actionValue);
     }
 
     @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表")
@@ -185,15 +195,6 @@ public class FlowConnectorController {
             @PathVariable String actionCode) {
         ConnectorActionVO action = connectorService.getActionDetail(connectorId, actionCode);
         return CommonResult.success(action);
-    }
-
-    @Operation(summary = "获取动作的 Formily Schema")
-    @GetMapping("/{connectorId}/action-schema/{actionCode}")
-    public CommonResult<JsonNode> getActionSchema(
-            @PathVariable Long connectorId,
-            @PathVariable String actionCode) {
-        JsonNode schema = connectorService.getActionSchema(connectorId, actionCode);
-        return CommonResult.success(schema);
     }
 
     @Operation(summary = "保存动作草稿")

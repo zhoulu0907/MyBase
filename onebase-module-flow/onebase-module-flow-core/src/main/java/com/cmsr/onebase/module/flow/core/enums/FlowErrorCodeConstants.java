@@ -57,4 +57,14 @@ public interface FlowErrorCodeConstants {
      * 环境配置格式无效
      */
     ErrorCode INVALID_ENV_CONFIG = new ErrorCode(1123794, "环境配置格式无效");
+
+    /**
+     * 动作已存在
+     */
+    ErrorCode ACTION_ALREADY_EXISTS = new ErrorCode(1123795, "动作已存在：actionCode={}");
+
+    /**
+     * 动作配置格式无效
+     */
+    ErrorCode INVALID_ACTION_CONFIG = new ErrorCode(1123796, "动作配置格式无效，缺少必填字段");
 }

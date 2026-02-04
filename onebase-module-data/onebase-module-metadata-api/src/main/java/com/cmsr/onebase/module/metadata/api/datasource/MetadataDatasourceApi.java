@@ -48,7 +48,7 @@ public interface MetadataDatasourceApi {
     Object getDatasource(@PathVariable("id") Long id);
 
     /**
-     * 导出数据源信息
+     * 导出元数据
      *
      * @param applicationId 应用ID
      * @param versionTag 版本标签
@@ -58,7 +58,7 @@ public interface MetadataDatasourceApi {
     Object exportDatasource(Long applicationId, Long versionTag);
 
     /**
-     * 导入数据源信息
+     * 导入元数据
      *
      * @param newApplicationId 新应用ID
      * @param appUid 应用UID
@@ -70,5 +70,15 @@ public interface MetadataDatasourceApi {
     @Operation(summary = "导入数据源信息")
     void importDatasource(Long newApplicationId, String appUid, Long tenantId, Long versionTag, Object importData, DatasourceImportReqDTO reqDTO);
 
+    /**
+     * 删除应用版本数据
+     * <p>
+     * 删除指定应用和版本标签下的所有元数据（包含数据源、实体、字段、验证规则等16张表的数据）
+     *
+     * @param applicationId 应用ID
+     * @param versionTag 版本标签
+     */
+    //@Operation(summary = "删除应用版本数据")
+    //void deleteApplicationVersionData(Long applicationId, Long versionTag);
 
 }

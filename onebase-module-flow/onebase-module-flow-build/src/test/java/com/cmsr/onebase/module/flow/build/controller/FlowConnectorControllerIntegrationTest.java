@@ -2,9 +2,12 @@ package com.cmsr.onebase.module.flow.build.controller;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
+import com.cmsr.onebase.module.flow.build.vo.SaveActionConfigReqVO;
 import com.cmsr.onebase.module.flow.build.vo.SaveEnvironmentConfigReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -38,6 +41,9 @@ class FlowConnectorControllerIntegrationTest {
     private FlowConnectorRepository connectorRepository;
 
     @Autowired
+    private FlowNodeConfigRepository flowNodeConfigRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private Long testConnectorId;
@@ -52,6 +58,13 @@ class FlowConnectorControllerIntegrationTest {
         connector.setConfig("{\"type\":\"HTTP\",\"properties\":{}}");
         connectorRepository.save(connector);
         testConnectorId = connector.getId();
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("HTTP");
+        nodeConfig.setNodeName("HTTP连接器");
+        nodeConfig.setActionConfig("{\"type\":\"object\",\"properties\":{\"actionName\":{\"type\":\"string\",\"title\":\"动作名称\"},\"method\":{\"type\":\"string\",\"enum\":[\"GET\",\"POST\"],\"title\":\"请求方法\"}}}");
+        nodeConfig.setActiveStatus(1);
+        flowNodeConfigRepository.save(nodeConfig);
     }
 
     @Test
@@ -263,6 +276,367 @@ class FlowConnectorControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").exists())
                 .andExpect(jsonPath("$.code").exists())
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.msg").exists());
+    }
+
+    // ==================== getActionConfigTemplate 集成测试 ====================
+
+    @Test
+    void testGetActionConfigTemplate_Success() throws Exception {
+        mockMvc.perform(get("/flow/connector/{id}/action-config-template", testConnectorId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.schema").exists())
+                .andExpect(jsonPath("$.data.schema.type").value("object"))
+                .andExpect(jsonPath("$.data.schema.properties").exists())
+                .andExpect(jsonPath("$.data.schema.properties.actionName").exists())
+                .andExpect(jsonPath("$.data.schema.properties.method").exists());
+    }
+
+    @Test
+    void testGetActionConfigTemplate_ConnectorNotFound() throws Exception {
+        mockMvc.perform(get("/flow/connector/{id}/action-config-template", 999999L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123784))
+                .andExpect(jsonPath("$.msg", containsString("连接器不存在")));
+    }
+
+    @Test
+    void testGetActionConfigTemplate_NodeConfigNotExists() throws Exception {
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setConnectorUuid("test-unknown-type-" + System.currentTimeMillis());
+        connector.setConnectorName("测试未知类型连接器");
+        connector.setTypeCode("UNKNOWN_TYPE");
+        connector.setDescription("用于测试未知类型连接器");
+        connector.setConfig("{\"type\":\"UNKNOWN_TYPE\",\"properties\":{}}");
+        connectorRepository.save(connector);
+        Long unknownConnectorId = connector.getId();
+
+        mockMvc.perform(get("/flow/connector/{id}/action-config-template", unknownConnectorId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123790))
+                .andExpect(jsonPath("$.msg", containsString("节点配置不存在")));
+    }
+
+    @Test
+    void testGetActionConfigTemplate_ActionConfigEmpty() throws Exception {
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setConnectorUuid("test-empty-action-" + System.currentTimeMillis());
+        connector.setConnectorName("测试空动作配置连接器");
+        connector.setTypeCode("EMPTY_ACTION");
+        connector.setDescription("用于测试空动作配置");
+        connector.setConfig("{\"type\":\"EMPTY_ACTION\",\"properties\":{}}");
+        connectorRepository.save(connector);
+        Long emptyActionConnectorId = connector.getId();
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("EMPTY_ACTION");
+        nodeConfig.setNodeName("空动作配置节点");
+        nodeConfig.setActionConfig("");
+        nodeConfig.setActiveStatus(1);
+        flowNodeConfigRepository.save(nodeConfig);
+
+        mockMvc.perform(get("/flow/connector/{id}/action-config-template", emptyActionConnectorId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123791))
+                .andExpect(jsonPath("$.msg", containsString("动作配置为空")));
+    }
+
+    @Test
+    void testGetActionConfigTemplate_InvalidActionConfigFormat() throws Exception {
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setConnectorUuid("test-invalid-action-" + System.currentTimeMillis());
+        connector.setConnectorName("测试无效动作配置连接器");
+        connector.setTypeCode("INVALID_ACTION");
+        connector.setDescription("用于测试无效动作配置格式");
+        connector.setConfig("{\"type\":\"INVALID_ACTION\",\"properties\":{}}");
+        connectorRepository.save(connector);
+        Long invalidActionConnectorId = connector.getId();
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("INVALID_ACTION");
+        nodeConfig.setNodeName("无效动作配置节点");
+        nodeConfig.setActionConfig("{invalid json format}");
+        nodeConfig.setActiveStatus(1);
+        flowNodeConfigRepository.save(nodeConfig);
+
+        mockMvc.perform(get("/flow/connector/{id}/action-config-template", invalidActionConnectorId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123785))
+                .andExpect(jsonPath("$.msg", containsString("连接器配置无效")));
+    }
+
+    @Test
+    void testGetActionConfigTemplate_ValidateResponseStructure() throws Exception {
+        mockMvc.perform(get("/flow/connector/{id}/action-config-template", testConnectorId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.code").exists())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.schema").exists())
+                .andExpect(jsonPath("$.msg").exists());
+    }
+
+    @Test
+    void testGetActionConfigTemplate_ComplexSchema() throws Exception {
+        String complexSchema = "{\n" +
+                "  \"type\": \"object\",\n" +
+                "  \"properties\": {\n" +
+                "    \"actionName\": {\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"title\": \"动作名称\",\n" +
+                "      \"description\": \"请输入动作名称\"\n" +
+                "    },\n" +
+                "    \"method\": {\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"enum\": [\"GET\", \"POST\", \"PUT\", \"DELETE\"],\n" +
+                "      \"title\": \"请求方法\",\n" +
+                "      \"default\": \"GET\"\n" +
+                "    },\n" +
+                "    \"timeout\": {\n" +
+                "      \"type\": \"number\",\n" +
+                "      \"title\": \"超时时间(毫秒)\",\n" +
+                "      \"minimum\": 1000,\n" +
+                "      \"maximum\": 60000\n" +
+                "    },\n" +
+                "    \"description\": {\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"title\": \"描述\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"required\": [\"actionName\", \"method\"]\n" +
+                "}";
+
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setConnectorUuid("test-complex-schema-" + System.currentTimeMillis());
+        connector.setConnectorName("测试复杂Schema连接器");
+        connector.setTypeCode("COMPLEX_SCHEMA");
+        connector.setDescription("用于测试复杂Schema");
+        connector.setConfig("{\"type\":\"COMPLEX_SCHEMA\",\"properties\":{}}");
+        connectorRepository.save(connector);
+        Long complexConnectorId = connector.getId();
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("COMPLEX_SCHEMA");
+        nodeConfig.setNodeName("复杂Schema节点");
+        nodeConfig.setActionConfig(complexSchema);
+        nodeConfig.setActiveStatus(1);
+        flowNodeConfigRepository.save(nodeConfig);
+
+        mockMvc.perform(get("/flow/connector/{id}/action-config-template", complexConnectorId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data.schema").exists())
+                .andExpect(jsonPath("$.data.schema.type").value("object"))
+                .andExpect(jsonPath("$.data.schema.properties").exists())
+                .andExpect(jsonPath("$.data.schema.properties.actionName").exists())
+                .andExpect(jsonPath("$.data.schema.properties.method").exists())
+                .andExpect(jsonPath("$.data.schema.properties.timeout").exists())
+                .andExpect(jsonPath("$.data.schema.properties.description").exists())
+                .andExpect(jsonPath("$.data.schema.required").isArray())
+                .andExpect(jsonPath("$.data.schema.required[0]").value("actionName"))
+                .andExpect(jsonPath("$.data.schema.required[1]").value("method"));
+    }
+
+    // ==================== saveActionConfig 集成测试 ====================
+
+    @Test
+    void testSaveActionConfig_Success() throws Exception {
+        String actionConfigJson = "{\n" +
+                "  \"basic\": {\n" +
+                "    \"actionName\": \"testAction1\",\n" +
+                "    \"description\": \"测试动作1\"\n" +
+                "  },\n" +
+                "  \"requestHeaders\": [],\n" +
+                "  \"requestBody\": [],\n" +
+                "  \"queryParams\": [],\n" +
+                "  \"pathParams\": []\n" +
+                "}";
+
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        FlowConnectorDO updatedConnector = connectorRepository.getById(testConnectorId);
+        org.junit.jupiter.api.Assertions.assertNotNull(updatedConnector.getActionConfig());
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("testAction1"));
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("\"type\":\"object\""));
+    }
+
+    @Test
+    void testSaveActionConfig_ConnectorNotFound() throws Exception {
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"testAction\",\"description\":\"测试\"}}";
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", 999999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123784))
+                .andExpect(jsonPath("$.msg", containsString("连接器不存在")));
+    }
+
+    @Test
+    void testSaveActionConfig_ActionAlreadyExists() throws Exception {
+        String existingActionConfig = "{\"type\":\"object\",\"properties\":{\"existingAction\":{\"basic\":{\"actionName\":\"existingAction\",\"description\":\"已有动作\"}},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = connectorRepository.getById(testConnectorId);
+        connector.setActionConfig(existingActionConfig);
+        connectorRepository.updateById(connector);
+
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"existingAction\",\"description\":\"重复动作\"}}";
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123795))
+                .andExpect(jsonPath("$.msg", containsString("动作已存在")));
+    }
+
+    @Test
+    void testSaveActionConfig_NullActionConfig() throws Exception {
+        String requestBody = "{\"actionConfig\":null}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testSaveActionConfig_MissingActionConfig() throws Exception {
+        String requestBody = "{}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testSaveActionConfig_MissingBasic() throws Exception {
+        String invalidConfigJson = "{\"requestHeaders\":[]}";
+        String requestBody = "{\"actionConfig\":" + invalidConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123796))
+                .andExpect(jsonPath("$.msg", containsString("动作配置格式无效")));
+    }
+
+    @Test
+    void testSaveActionConfig_MissingActionName() throws Exception {
+        String invalidConfigJson = "{\"basic\":{\"description\":\"缺少actionName\"}}";
+        String requestBody = "{\"actionConfig\":" + invalidConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123796))
+                .andExpect(jsonPath("$.msg", containsString("动作配置格式无效")));
+    }
+
+    @Test
+    void testSaveActionConfig_AddMultipleActions() throws Exception {
+        String action1Json = "{\"basic\":{\"actionName\":\"action1\",\"description\":\"第一个动作\"}}";
+        String requestBody1 = "{\"actionConfig\":" + action1Json + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        String action2Json = "{\"basic\":{\"actionName\":\"action2\",\"description\":\"第二个动作\"}}";
+        String requestBody2 = "{\"actionConfig\":" + action2Json + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody2))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        FlowConnectorDO updatedConnector = connectorRepository.getById(testConnectorId);
+        String actionConfig = updatedConnector.getActionConfig();
+        org.junit.jupiter.api.Assertions.assertTrue(actionConfig.contains("action1"));
+        org.junit.jupiter.api.Assertions.assertTrue(actionConfig.contains("action2"));
+    }
+
+    @Test
+    void testSaveActionConfig_ComplexActionConfig() throws Exception {
+        String complexActionConfigJson = "{\n" +
+                "  \"basic\": {\n" +
+                "    \"actionName\": \"complexAction\",\n" +
+                "    \"description\": \"复杂动作配置\"\n" +
+                "  },\n" +
+                "  \"requestHeaders\": [\n" +
+                "    {\n" +
+                "      \"name\": \"Content-Type\",\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"required\": true\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"requestBody\": [\n" +
+                "    {\n" +
+                "      \"name\": \"bodyParam\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"queryParams\": [\n" +
+                "    {\n" +
+                "      \"name\": \"page\",\n" +
+                "      \"type\": \"number\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"pathParams\": [\n" +
+                "    {\n" +
+                "      \"name\": \"id\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        String requestBody = "{\"actionConfig\":" + complexActionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        FlowConnectorDO updatedConnector = connectorRepository.getById(testConnectorId);
+        org.junit.jupiter.api.Assertions.assertNotNull(updatedConnector.getActionConfig());
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("complexAction"));
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("requestHeaders"));
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("queryParams"));
+    }
+
+    @Test
+    void testSaveActionConfig_ValidateResponseStructure() throws Exception {
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"testAction\",\"description\":\"测试\"}}";
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.code").exists())
+                .andExpect(jsonPath("$.code").value(0))
                 .andExpect(jsonPath("$.data").exists())
                 .andExpect(jsonPath("$.msg").exists());
     }

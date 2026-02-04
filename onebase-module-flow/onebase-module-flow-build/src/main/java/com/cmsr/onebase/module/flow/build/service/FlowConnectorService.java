@@ -61,15 +61,6 @@ public interface FlowConnectorService {
     List<String> getActionsById(Long id);
 
     /**
-     * Get action value by connector ID and action name
-     *
-     * @param id the connector ID
-     * @param actionName the action name
-     * @return action value as JsonNode
-     */
-    JsonNode getActionValueById(Long id, String actionName);
-
-    /**
      * 启用/禁用连接器实例
      *
      * @param id           连接器实例ID
@@ -109,6 +100,16 @@ public interface FlowConnectorService {
     EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId);
 
     /**
+     * 获取动作配置模板
+     * <p>
+     * 根据连接器实例获取其类型对应的动作配置 Formily Schema 模板
+     *
+     * @param connectorId 连接器实例ID
+     * @return 动作配置模板 VO
+     */
+    ActionConfigTemplateVO getActionConfigTemplate(Long connectorId);
+
+    /**
      * 保存连接器环境配置
      * <p>
      * 将新的环境配置添加到 flow_connector.config.properties 中
@@ -119,6 +120,18 @@ public interface FlowConnectorService {
      * @return 保存是否成功
      */
     Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
+    /**
+     * 保存连接器动作配置
+     * <p>
+     * 将新的动作配置添加到 flow_connector.action_config.properties 中
+     * 如果动作已存在则拒绝保存
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO      动作配置请求
+     * @return 保存是否成功
+     */
+    Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO);
 
     // ==================== 动作管理接口 ====================
 
@@ -146,15 +159,6 @@ public interface FlowConnectorService {
      * @return 动作详情
      */
     ConnectorActionVO getActionDetail(Long connectorId, String actionCode);
-
-    /**
-     * 获取动作的 Formily Schema
-     *
-     * @param connectorId 连接器ID
-     * @param actionCode  动作编码
-     * @return Formily Schema JsonNode
-     */
-    JsonNode getActionSchema(Long connectorId, String actionCode);
 
     /**
      * 保存动作草稿

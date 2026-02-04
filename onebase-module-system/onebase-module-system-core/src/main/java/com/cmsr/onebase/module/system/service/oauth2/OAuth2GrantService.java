@@ -59,7 +59,7 @@ public interface OAuth2GrantService {
      * @param state 状态
      * @return 访问令牌
      */
-    OAuth2AccessTokenDO grantAuthorizationCodeForAccessToken(String clientId, String code,
+    OAuth2AccessTokenDO grantAuthorizationCodeForAccessToken(String runMode, String clientId, String code,
                                                              String redirectUri, String state);
 
     /**

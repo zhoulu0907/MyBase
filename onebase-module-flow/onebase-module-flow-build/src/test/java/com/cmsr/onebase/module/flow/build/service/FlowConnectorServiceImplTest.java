@@ -2,8 +2,10 @@ package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser;
+import com.cmsr.onebase.module.flow.build.vo.ActionConfigTemplateVO;
 import com.cmsr.onebase.module.flow.build.vo.ConnectorActionVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvConfigTemplateVO;
+import com.cmsr.onebase.module.flow.build.vo.SaveActionConfigReqVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvironmentConfigVO;
 import com.cmsr.onebase.module.flow.build.vo.SaveEnvironmentConfigReqVO;
 import com.cmsr.onebase.module.flow.build.vo.UpdateFlowConnectorReqVO;
@@ -618,5 +620,472 @@ class FlowConnectorServiceImplTest {
         Boolean result = connectorService.saveEnvironmentConfig(connectorId, reqVO);
 
         assertTrue(result);
+    }
+
+    // ==================== getActionConfigTemplate 测试用例 ====================
+
+    @Test
+    void testGetActionConfigTemplate_success() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("HTTP");
+        String actionConfigJson = "{\"type\":\"object\",\"properties\":{\"actionName\":{\"type\":\"string\"}}}";
+        nodeConfig.setActionConfig(actionConfigJson);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        ActionConfigTemplateVO result = connectorService.getActionConfigTemplate(connectorId);
+
+        assertNotNull(result);
+        assertNotNull(result.getSchema());
+        assertEquals("object", result.getSchema().get("type").asText());
+        verify(connectorRepository).getById(connectorId);
+        verify(flowNodeConfigRepository).findByNodeCode("HTTP");
+    }
+
+    @Test
+    void testGetActionConfigTemplate_connectorNotExists() {
+        Long connectorId = 999L;
+        when(connectorRepository.getById(connectorId)).thenReturn(null);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.getActionConfigTemplate(connectorId);
+        });
+
+        assertEquals(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS.getCode(), exception.getCode());
+        verify(connectorRepository).getById(connectorId);
+    }
+
+    @Test
+    void testGetActionConfigTemplate_nodeConfigNotExists() {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("UNKNOWN");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("UNKNOWN")).thenReturn(null);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.getActionConfigTemplate(connectorId);
+        });
+
+        assertEquals(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXISTS.getCode(), exception.getCode());
+        verify(flowNodeConfigRepository).findByNodeCode("UNKNOWN");
+    }
+
+    @Test
+    void testGetActionConfigTemplate_actionConfigEmpty() {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("HTTP");
+        nodeConfig.setActionConfig("");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.getActionConfigTemplate(connectorId);
+        });
+
+        assertEquals(FlowErrorCodeConstants.ACTION_CONFIG_EMPTY.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testGetActionConfigTemplate_actionConfigNull() {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("HTTP");
+        nodeConfig.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.getActionConfigTemplate(connectorId);
+        });
+
+        assertEquals(FlowErrorCodeConstants.ACTION_CONFIG_EMPTY.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testGetActionConfigTemplate_invalidActionConfigFormat() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("HTTP");
+        nodeConfig.setActionConfig("{invalid json}");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.getActionConfigTemplate(connectorId);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testGetActionConfigTemplate_complexSchema() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+
+        String complexSchema = "{\n" +
+                "  \"type\": \"object\",\n" +
+                "  \"properties\": {\n" +
+                "    \"actionName\": {\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"title\": \"动作名称\"\n" +
+                "    },\n" +
+                "    \"method\": {\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"enum\": [\"GET\", \"POST\", \"PUT\", \"DELETE\"],\n" +
+                "      \"title\": \"请求方法\"\n" +
+                "    },\n" +
+                "    \"timeout\": {\n" +
+                "      \"type\": \"number\",\n" +
+                "      \"title\": \"超时时间(毫秒)\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"required\": [\"actionName\", \"method\"]\n" +
+                "}";
+
+        FlowNodeConfigDO nodeConfig = new FlowNodeConfigDO();
+        nodeConfig.setNodeCode("HTTP");
+        nodeConfig.setActionConfig(complexSchema);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(flowNodeConfigRepository.findByNodeCode("HTTP")).thenReturn(nodeConfig);
+
+        ActionConfigTemplateVO result = connectorService.getActionConfigTemplate(connectorId);
+
+        assertNotNull(result);
+        assertNotNull(result.getSchema());
+        assertEquals("object", result.getSchema().get("type").asText());
+        assertNotNull(result.getSchema().get("properties"));
+        assertEquals("string", result.getSchema().get("properties").get("actionName").get("type").asText());
+        assertEquals("GET", result.getSchema().get("properties").get("method").get("enum").get(0).asText());
+    }
+
+    // ==================== saveActionConfig 测试用例 ====================
+
+    @Test
+    void testSaveActionConfig_Success_FirstTime() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+        connector.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"testAction\",\"description\":\"测试动作\"},\"requestHeaders\":[],\"requestBody\":[],\"queryParams\":[],\"pathParams\":[]}";
+        JsonNode actionConfig = objectMapper.readTree(actionConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        Boolean result = connectorService.saveActionConfig(connectorId, reqVO);
+
+        assertTrue(result);
+        verify(connectorRepository).updateById(argThat(conn ->
+            conn.getActionConfig() != null &&
+            conn.getActionConfig().contains("testAction") &&
+            conn.getActionConfig().contains("\"type\":\"object\"")
+        ));
+    }
+
+    @Test
+    void testSaveActionConfig_Success_AddToExisting() throws Exception {
+        Long connectorId = 1L;
+        String existingActionConfig = "{\"type\":\"object\",\"title\":\"连接器动作配置\",\"properties\":{\"existingAction\":{\"basic\":{\"actionName\":\"existingAction\",\"description\":\"已有动作\"}},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+        connector.setActionConfig(existingActionConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String newActionConfigJson = "{\"basic\":{\"actionName\":\"newAction\",\"description\":\"新动作\"},\"requestHeaders\":[],\"requestBody\":[],\"queryParams\":[],\"pathParams\":[]}";
+        JsonNode actionConfig = objectMapper.readTree(newActionConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        Boolean result = connectorService.saveActionConfig(connectorId, reqVO);
+
+        assertTrue(result);
+        verify(connectorRepository).updateById(argThat(conn ->
+            conn.getActionConfig().contains("newAction") &&
+            conn.getActionConfig().contains("existingAction")
+        ));
+    }
+
+    @Test
+    void testSaveActionConfig_ConnectorNotFound() {
+        Long connectorId = 999L;
+        when(connectorRepository.getById(connectorId)).thenReturn(null);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"testAction\",\"description\":\"测试\"}}";
+        try {
+            JsonNode actionConfig = objectMapper.readTree(actionConfigJson);
+            reqVO.setActionConfig(actionConfig);
+        } catch (Exception e) {
+            fail("Failed to parse JSON");
+        }
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveActionConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveActionConfig_ActionAlreadyExists() throws Exception {
+        Long connectorId = 1L;
+        String existingActionConfig = "{\"type\":\"object\",\"properties\":{\"duplicateAction\":{\"basic\":{\"actionName\":\"duplicateAction\"}},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+        connector.setActionConfig(existingActionConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String duplicateActionConfigJson = "{\"basic\":{\"actionName\":\"duplicateAction\",\"description\":\"重复动作\"}}";
+        JsonNode actionConfig = objectMapper.readTree(duplicateActionConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveActionConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveActionConfig_NullActionConfig() {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        reqVO.setActionConfig(null);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveActionConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_ACTION_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveActionConfig_MissingBasic() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String invalidConfigJson = "{\"requestHeaders\":[]}";
+        JsonNode actionConfig = objectMapper.readTree(invalidConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveActionConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_ACTION_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveActionConfig_MissingActionName() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String invalidConfigJson = "{\"basic\":{\"description\":\"缺少actionName\"}}";
+        JsonNode actionConfig = objectMapper.readTree(invalidConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveActionConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_ACTION_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveActionConfig_NullActionName() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String invalidConfigJson = "{\"basic\":{\"actionName\":null}}";
+        JsonNode actionConfig = objectMapper.readTree(invalidConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveActionConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_ACTION_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveActionConfig_InvalidJsonFormat() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setActionConfig("{invalid json}");
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String validActionConfigJson = "{\"basic\":{\"actionName\":\"testAction\"}}";
+        JsonNode actionConfig = objectMapper.readTree(validActionConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> {
+            connectorService.saveActionConfig(connectorId, reqVO);
+        });
+
+        assertEquals(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG.getCode(), exception.getCode());
+    }
+
+    @Test
+    void testSaveActionConfig_ComplexActionConfig() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+        connector.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String complexActionConfigJson = "{\n" +
+                "  \"basic\": {\n" +
+                "    \"actionName\": \"complexAction\",\n" +
+                "    \"description\": \"复杂动作配置\"\n" +
+                "  },\n" +
+                "  \"requestHeaders\": [\n" +
+                "    {\n" +
+                "      \"name\": \"Content-Type\",\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"required\": true\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"requestBody\": [\n" +
+                "    {\n" +
+                "      \"name\": \"bodyParam\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"queryParams\": [\n" +
+                "    {\n" +
+                "      \"name\": \"page\",\n" +
+                "      \"type\": \"number\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"pathParams\": [\n" +
+                "    {\n" +
+                "      \"name\": \"id\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        JsonNode actionConfig = objectMapper.readTree(complexActionConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        Boolean result = connectorService.saveActionConfig(connectorId, reqVO);
+
+        assertTrue(result);
+        verify(connectorRepository).updateById(argThat(conn ->
+            conn.getActionConfig().contains("complexAction") &&
+            conn.getActionConfig().contains("requestHeaders") &&
+            conn.getActionConfig().contains("queryParams")
+        ));
+    }
+
+    @Test
+    void testSaveActionConfig_UpdateFailure() throws Exception {
+        Long connectorId = 1L;
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setActionConfig(null);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(false);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"testAction\",\"description\":\"测试\"}}";
+        JsonNode actionConfig = objectMapper.readTree(actionConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        Boolean result = connectorService.saveActionConfig(connectorId, reqVO);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void testSaveActionConfig_MultipleActions() throws Exception {
+        Long connectorId = 1L;
+        String existingActionConfig = "{\"type\":\"object\",\"properties\":{\"action1\":{\"basic\":{\"actionName\":\"action1\"}},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = new FlowConnectorDO();
+        connector.setId(connectorId);
+        connector.setTypeCode("HTTP");
+        connector.setActionConfig(existingActionConfig);
+
+        when(connectorRepository.getById(connectorId)).thenReturn(connector);
+        when(connectorRepository.updateById(any())).thenReturn(true);
+
+        SaveActionConfigReqVO reqVO = new SaveActionConfigReqVO();
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"action2\",\"description\":\"第二个动作\"}}";
+        JsonNode actionConfig = objectMapper.readTree(actionConfigJson);
+        reqVO.setActionConfig(actionConfig);
+
+        Boolean result = connectorService.saveActionConfig(connectorId, reqVO);
+
+        assertTrue(result);
+        verify(connectorRepository).updateById(argThat(conn ->
+            conn.getActionConfig().contains("action1") &&
+            conn.getActionConfig().contains("action2")
+        ));
     }
 }
