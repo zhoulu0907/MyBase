@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorEnvDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
+import com.cmsr.onebase.module.flow.core.enums.ConnectorActionStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ActionNameGenerator;
@@ -625,7 +626,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         action.put("actionCode", actionCode);
         action.put("actionName", createVO.getActionName());
         action.put("description", createVO.getDescription());
-        action.put("status", "2");
+        action.put("status", ConnectorActionStatusEnum.OFFLINE.getCodeAsString());
         action.put("version", 1);
 
         // 添加四步配置
@@ -715,10 +716,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 3. 验证当前状态
-        String currentStatus = getString(action, "status");
-        if (!"2".equals(currentStatus)) {
-            throw new RuntimeException("只有下架状态的动作才能发布");
-        }
+        validateActionStatusForPublish(action);
 
         // 4. 校验完整性
         ActionConfigHelper.ValidationResult validation = actionConfigHelper.validateActionCompleteness(action);
@@ -729,7 +727,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 5. 更新状态和版本
         ObjectNode mutableAction = (ObjectNode) action;
         int newVersion = action.has("version") ? action.get("version").asInt() + 1 : 1;
-        mutableAction.put("status", "1");
+        mutableAction.put("status", ConnectorActionStatusEnum.PUBLISHED.getCodeAsString());
         mutableAction.put("version", newVersion);
 
         // 6. 保存配置
@@ -758,14 +756,11 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 3. 验证状态
-        String status = getString(action, "status");
-        if (!"1".equals(status)) {
-            throw new RuntimeException("只有已发布的动作才能下架");
-        }
+        validateActionStatusForOffline(action);
 
         // 4. 更新状态
         ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "2");
+        mutableAction.put("status", ConnectorActionStatusEnum.OFFLINE.getCodeAsString());
 
         String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
@@ -792,10 +787,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 3. 验证状态
-        String status = getString(action, "status");
-        if (!"2".equals(status)) {
-            throw new RuntimeException("只有已下架的动作才能重新上线");
-        }
+        validateActionStatusForPublish(action);
 
         // 4. 校验完整性
         ActionConfigHelper.ValidationResult validation = actionConfigHelper.validateActionCompleteness(action);
@@ -805,7 +797,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         // 5. 更新状态
         ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "1");
+        mutableAction.put("status", ConnectorActionStatusEnum.PUBLISHED.getCodeAsString());
 
         String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
@@ -845,7 +837,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 5. 复制动作配置
         ObjectNode newAction = originalAction.deepCopy();
         newAction.put("actionName", newName);
-        newAction.put("status", "2");
+        newAction.put("status", ConnectorActionStatusEnum.OFFLINE.getCodeAsString());
 
         // 6. 添加到配置
         String updatedConfig = actionConfigHelper.addAction(connector.getActionConfig(), newAction);
@@ -902,6 +894,36 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     // ==================== 辅助方法 ====================
+
+    /**
+     * 验证动作状态是否可以发布
+     * <p>
+     * 只有已下架(offline)状态的动作才能发布
+     *
+     * @param action 动作配置节点
+     * @throws RuntimeException 当状态不符合时抛出异常
+     */
+    private void validateActionStatusForPublish(JsonNode action) {
+        String currentStatus = getString(action, "status");
+        if (!ConnectorActionStatusEnum.isOffline(currentStatus)) {
+            throw new RuntimeException("只有下架状态的动作才能发布");
+        }
+    }
+
+    /**
+     * 验证动作状态是否可以下架
+     * <p>
+     * 只有已发布(published)状态的动作才能下架
+     *
+     * @param action 动作配置节点
+     * @throws RuntimeException 当状态不符合时抛出异常
+     */
+    private void validateActionStatusForOffline(JsonNode action) {
+        String status = getString(action, "status");
+        if (!ConnectorActionStatusEnum.isPublished(status)) {
+            throw new RuntimeException("只有已发布的动作才能下架");
+        }
+    }
 
     /**
      * 从 JsonNode 安全获取字符串值
