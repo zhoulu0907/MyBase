@@ -10,7 +10,9 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRowValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
+import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityRelationshipRepository;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldOptionDTO;
@@ -75,6 +77,9 @@ public class SemanticRefResolver {
 
     @Resource
     private MetadataEntityRelationshipRepository metadataEntityRelationshipRepository;
+
+    @Resource
+    private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
 
     /**
      * 对实体值进行语义增强
@@ -718,13 +723,18 @@ public class SemanticRefResolver {
     
     /**
      * 根据实体UUID获取表名
+     *
+     * @param entityUuid 实体UUID
+     * @return 表名，获取失败返回null
      */
     private String getTableNameByEntityUuid(String entityUuid) {
-        if (entityUuid == null || dynamicMetadataRepository == null) return null;
+        if (entityUuid == null || metadataBusinessEntityCoreService == null) {
+            return null;
+        }
         try {
-            Row row = dynamicMetadataRepository.selectMainById("metadata_business_entity", "entity_uuid", entityUuid, false, null);
-            if (row != null) {
-                return row.getString("table_name");
+            MetadataBusinessEntityDO entity = metadataBusinessEntityCoreService.getBusinessEntityByUuid(entityUuid);
+            if (entity != null) {
+                return entity.getTableName();
             }
         } catch (Exception e) {
             log.warn("获取实体表名失败: entityUuid={}", entityUuid, e);
