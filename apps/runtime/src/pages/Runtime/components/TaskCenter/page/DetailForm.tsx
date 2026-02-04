@@ -18,7 +18,6 @@ import {
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import { forwardRef, Fragment, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
 
 interface PreviewProps {
   pageSetId: string;
@@ -299,7 +298,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                         margin: '4px'
                       }}
                     >
-                      <ErrorBoundary FallbackComponent={() => <div style={{ display: 'none' }}>组件错误</div>}>
                         <PreviewRender
                           cpId={cp.id}
                           cpType={cp.type}
@@ -310,7 +308,6 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
                             setPageType(EDITOR_TYPES.FORM_EDITOR);
                           }}
                         />
-                      </ErrorBoundary>
                     </div>
                   )}
                 </Fragment>

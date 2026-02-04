@@ -37,14 +37,12 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
       const loadData = async () => {
         setLoading(true);
         try {
-          console.info('定位错误 9');
           await startLoadPageSet({
             pageSetId,
             runtime: true,
             isDev,
             allowViewUuids: menuPermission.value?.viewUuids || []
           });
-          console.info('定位错误 10');
         } finally {
           // 数据加载完成后，延迟一小段时间确保组件已更新
           setTimeout(() => {
