@@ -153,6 +153,15 @@ public class FlowConnectorController {
 
     // ==================== 动作管理接口 ====================
 
+    @Operation(summary = "获取动作配置模板",
+              description = "获取连接器类型对应的动作配置 Formily Schema 模板，用于创建动作信息")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @GetMapping("/{id}/action-config-template")
+    public CommonResult<ActionConfigTemplateVO> getActionConfigTemplate(@PathVariable Long id) {
+        ActionConfigTemplateVO template = connectorService.getActionConfigTemplate(id);
+        return CommonResult.success(template);
+    }
+
     @Operation(summary = "查询连接器动作清单")
     @GetMapping("/{id}/actions")
     public CommonResult<List<String>> getActions(@PathVariable Long id) {
