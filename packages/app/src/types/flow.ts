@@ -254,7 +254,13 @@ export interface ListConnectorByTypeReq {
 }
 
 export interface ListConnectorActionReq {
+  pageNo: number;
+  pageSize: number;
   id: string;
+}
+
+export interface SaveConnectorActionReq {
+  actionConfig: any;
 }
 
 export interface GetActionValueReq {

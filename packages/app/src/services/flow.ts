@@ -10,6 +10,7 @@ import {
   ListConnectorByTypeReq,
   ListScriptActionReq,
   RenameFlowMgmtReq,
+  SaveConnectorActionReq,
   UpdateConnectInstanceReq,
   UpdateFlowMgmtDefinitionReq,
   UpdateScriptActionReq
@@ -160,8 +161,16 @@ export const listConnectorByType = (params: ListConnectorByTypeReq) => {
   return flowService.get(`/connector/by-type/${params.typeCode}`);
 };
 
-export const listConnectorAction = (params: ListConnectorActionReq) => {
+export const listConnectorActions = (params: ListConnectorActionReq) => {
   return flowService.get(`/connector/${params.id}/actions`);
+};
+
+export const listConnectorActionInfos = (params: ListConnectorActionReq) => {
+  return flowService.get(`/connector/${params.id}/action-infos`);
+};
+
+export const saveConnectorAction = (id: string, params: SaveConnectorActionReq) => {
+  return flowService.post(`/connector/${id}/save-action`, params);
 };
 
 export const getActionValue = (id: string, params: GetActionValueReq) => {
