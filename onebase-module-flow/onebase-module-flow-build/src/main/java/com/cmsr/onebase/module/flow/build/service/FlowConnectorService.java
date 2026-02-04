@@ -109,6 +109,16 @@ public interface FlowConnectorService {
     EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId);
 
     /**
+     * 获取动作配置模板
+     * <p>
+     * 根据连接器实例获取其类型对应的动作配置 Formily Schema 模板
+     *
+     * @param connectorId 连接器实例ID
+     * @return 动作配置模板 VO
+     */
+    ActionConfigTemplateVO getActionConfigTemplate(Long connectorId);
+
+    /**
      * 保存连接器环境配置
      * <p>
      * 将新的环境配置添加到 flow_connector.config.properties 中
