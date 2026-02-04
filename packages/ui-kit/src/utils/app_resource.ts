@@ -102,7 +102,7 @@ const processListColComponents = (
   return colComponents;
 };
 
-export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Function) {
+export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Function,message?:string) {
   const {
     formComponents,
     formPageComponentSchemas,
@@ -234,7 +234,7 @@ export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Fu
   const res = await savePageSet(savePageSetReq);
 
   if (res) {
-    Message.success('保存成功');
+    Message.success(message || '保存成功');
     onSuccess?.();
   }
 

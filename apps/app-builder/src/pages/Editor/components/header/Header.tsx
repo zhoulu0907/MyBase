@@ -172,7 +172,7 @@ export default function EditorHeader() {
   const [activeTab, setActiveTab] = useState('');
   const [pageSetId, setPageSetId] = useState('');
 
-  const [saveLoading, setSaveLoading] = useState(false)
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const [appName, setAppName] = useState('未命名应用');
   const [appIcon, setAppIcon] = useState('');
@@ -489,7 +489,7 @@ export default function EditorHeader() {
     setSaveLoading(true);
     if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
       await onFlowSave();
-      setSaveLoading(false)
+      setSaveLoading(false);
       return;
     }
 
@@ -504,7 +504,7 @@ export default function EditorHeader() {
       };
 
       await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
-      setSaveLoading(false)
+      setSaveLoading(false);
       return;
     }
 
@@ -524,7 +524,6 @@ export default function EditorHeader() {
         newValidate[ele] = result;
         if (result === false && !flag) {
           flag = true;
-          Message.warning('检测到部分组件的必填配置项尚未完成设置');
         }
       }
     });
@@ -537,7 +536,6 @@ export default function EditorHeader() {
         newValidate[ele] = result;
         if (result === false && !flag) {
           flag = true;
-          Message.warning('检测到部分组件的必填配置项尚未完成设置');
         }
       }
     });
@@ -560,8 +558,9 @@ export default function EditorHeader() {
 
     console.log('savePageSetParams: ', savePageSetParams);
 
-    startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED));
-    setSaveLoading(false)
+    const message = flag ? '保存成功，有组件的必填配置未完成，请检查' : undefined;
+    startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED), message);
+    setSaveLoading(false);
     if (exit) {
       backToPageManager();
     }
