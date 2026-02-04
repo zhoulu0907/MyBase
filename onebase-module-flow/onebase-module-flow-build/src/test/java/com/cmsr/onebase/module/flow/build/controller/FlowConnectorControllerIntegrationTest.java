@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.build.controller;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
+import com.cmsr.onebase.module.flow.build.vo.SaveActionConfigReqVO;
 import com.cmsr.onebase.module.flow.build.vo.SaveEnvironmentConfigReqVO;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
@@ -438,5 +439,205 @@ class FlowConnectorControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.schema.required").isArray())
                 .andExpect(jsonPath("$.data.schema.required[0]").value("actionName"))
                 .andExpect(jsonPath("$.data.schema.required[1]").value("method"));
+    }
+
+    // ==================== saveActionConfig 集成测试 ====================
+
+    @Test
+    void testSaveActionConfig_Success() throws Exception {
+        String actionConfigJson = "{\n" +
+                "  \"basic\": {\n" +
+                "    \"actionName\": \"testAction1\",\n" +
+                "    \"description\": \"测试动作1\"\n" +
+                "  },\n" +
+                "  \"requestHeaders\": [],\n" +
+                "  \"requestBody\": [],\n" +
+                "  \"queryParams\": [],\n" +
+                "  \"pathParams\": []\n" +
+                "}";
+
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        FlowConnectorDO updatedConnector = connectorRepository.getById(testConnectorId);
+        org.junit.jupiter.api.Assertions.assertNotNull(updatedConnector.getActionConfig());
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("testAction1"));
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("\"type\":\"object\""));
+    }
+
+    @Test
+    void testSaveActionConfig_ConnectorNotFound() throws Exception {
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"testAction\",\"description\":\"测试\"}}";
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", 999999L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123784))
+                .andExpect(jsonPath("$.msg", containsString("连接器不存在")));
+    }
+
+    @Test
+    void testSaveActionConfig_ActionAlreadyExists() throws Exception {
+        String existingActionConfig = "{\"type\":\"object\",\"properties\":{\"existingAction\":{\"basic\":{\"actionName\":\"existingAction\",\"description\":\"已有动作\"}},\"_metadata\":{\"version\":1}}";
+        FlowConnectorDO connector = connectorRepository.getById(testConnectorId);
+        connector.setActionConfig(existingActionConfig);
+        connectorRepository.updateById(connector);
+
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"existingAction\",\"description\":\"重复动作\"}}";
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123795))
+                .andExpect(jsonPath("$.msg", containsString("动作已存在")));
+    }
+
+    @Test
+    void testSaveActionConfig_NullActionConfig() throws Exception {
+        String requestBody = "{\"actionConfig\":null}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testSaveActionConfig_MissingActionConfig() throws Exception {
+        String requestBody = "{}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testSaveActionConfig_MissingBasic() throws Exception {
+        String invalidConfigJson = "{\"requestHeaders\":[]}";
+        String requestBody = "{\"actionConfig\":" + invalidConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123796))
+                .andExpect(jsonPath("$.msg", containsString("动作配置格式无效")));
+    }
+
+    @Test
+    void testSaveActionConfig_MissingActionName() throws Exception {
+        String invalidConfigJson = "{\"basic\":{\"description\":\"缺少actionName\"}}";
+        String requestBody = "{\"actionConfig\":" + invalidConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123796))
+                .andExpect(jsonPath("$.msg", containsString("动作配置格式无效")));
+    }
+
+    @Test
+    void testSaveActionConfig_AddMultipleActions() throws Exception {
+        String action1Json = "{\"basic\":{\"actionName\":\"action1\",\"description\":\"第一个动作\"}}";
+        String requestBody1 = "{\"actionConfig\":" + action1Json + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        String action2Json = "{\"basic\":{\"actionName\":\"action2\",\"description\":\"第二个动作\"}}";
+        String requestBody2 = "{\"actionConfig\":" + action2Json + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody2))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        FlowConnectorDO updatedConnector = connectorRepository.getById(testConnectorId);
+        String actionConfig = updatedConnector.getActionConfig();
+        org.junit.jupiter.api.Assertions.assertTrue(actionConfig.contains("action1"));
+        org.junit.jupiter.api.Assertions.assertTrue(actionConfig.contains("action2"));
+    }
+
+    @Test
+    void testSaveActionConfig_ComplexActionConfig() throws Exception {
+        String complexActionConfigJson = "{\n" +
+                "  \"basic\": {\n" +
+                "    \"actionName\": \"complexAction\",\n" +
+                "    \"description\": \"复杂动作配置\"\n" +
+                "  },\n" +
+                "  \"requestHeaders\": [\n" +
+                "    {\n" +
+                "      \"name\": \"Content-Type\",\n" +
+                "      \"type\": \"string\",\n" +
+                "      \"required\": true\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"requestBody\": [\n" +
+                "    {\n" +
+                "      \"name\": \"bodyParam\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"queryParams\": [\n" +
+                "    {\n" +
+                "      \"name\": \"page\",\n" +
+                "      \"type\": \"number\"\n" +
+                "    }\n" +
+                "  ],\n" +
+                "  \"pathParams\": [\n" +
+                "    {\n" +
+                "      \"name\": \"id\",\n" +
+                "      \"type\": \"string\"\n" +
+                "    }\n" +
+                "  ]\n" +
+                "}";
+        String requestBody = "{\"actionConfig\":" + complexActionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        FlowConnectorDO updatedConnector = connectorRepository.getById(testConnectorId);
+        org.junit.jupiter.api.Assertions.assertNotNull(updatedConnector.getActionConfig());
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("complexAction"));
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("requestHeaders"));
+        org.junit.jupiter.api.Assertions.assertTrue(updatedConnector.getActionConfig().contains("queryParams"));
+    }
+
+    @Test
+    void testSaveActionConfig_ValidateResponseStructure() throws Exception {
+        String actionConfigJson = "{\"basic\":{\"actionName\":\"testAction\",\"description\":\"测试\"}}";
+        String requestBody = "{\"actionConfig\":" + actionConfigJson + "}";
+
+        mockMvc.perform(post("/flow/connector/{id}/save-action", testConnectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists())
+                .andExpect(jsonPath("$.code").exists())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.msg").exists());
     }
 }
