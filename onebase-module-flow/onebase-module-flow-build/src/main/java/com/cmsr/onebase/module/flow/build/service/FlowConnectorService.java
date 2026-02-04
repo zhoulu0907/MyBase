@@ -121,6 +121,18 @@ public interface FlowConnectorService {
      */
     Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
 
+    /**
+     * 保存连接器动作配置
+     * <p>
+     * 将新的动作配置添加到 flow_connector.action_config.properties 中
+     * 如果动作已存在则拒绝保存
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO      动作配置请求
+     * @return 保存是否成功
+     */
+    Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO);
+
     // ==================== 动作管理接口 ====================
 
     /**
