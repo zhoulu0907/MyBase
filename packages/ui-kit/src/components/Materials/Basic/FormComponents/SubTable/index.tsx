@@ -19,8 +19,6 @@ import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/con
 import { v4 as uuidv4 } from 'uuid';
 import { ENTITY_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import {
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE,
   DEFAULT_VALUE_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES
@@ -173,10 +171,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
       // 是否唯一：1-是，0-不是 isUnique
+      const noRepeat =
+        currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
+        noRepeat
       };
 
       // 字段约束配置（长度/正则） constraints

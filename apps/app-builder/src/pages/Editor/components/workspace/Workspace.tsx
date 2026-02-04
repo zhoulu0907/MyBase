@@ -404,10 +404,12 @@ export default function EditorWorkspace() {
                     schema.config.tooltip = field.description;
                     // 是否必填：1-是，0-不是 isRequired
                     // 是否唯一：1-是，0-不是 isUnique
+                    const noRepeat =
+                      field.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                     schema.config.verify = {
                       ...schema.config.verify,
                       required: field.isRequired,
-                      noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
+                      noRepeat
                     };
 
                     // 字段约束配置（长度/正则） constraints
@@ -477,7 +479,7 @@ export default function EditorWorkspace() {
                       field.isSystemField !== 1
                   );
                   // 子表单的每个表单项配置
-                  let subFieldComponents: any = [];
+                  const subFieldComponents: any = [];
                   for (let ele of subFieldList) {
                     const subType = COMPONENT_MAP[ele.fieldType];
                     if (!subType) {
@@ -499,10 +501,12 @@ export default function EditorWorkspace() {
                     }
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
+                    const noRepeat =
+                      ele.isUnique === 1 ? true : (typeof subSchema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                     subSchema.config.verify = {
                       ...subSchema.config.verify,
                       required: ele.isRequired,
-                      noRepeat: typeof subSchema.config?.verify?.noRepeat === 'boolean' ? ele.isUnique === 1 : undefined
+                      noRepeat
                     };
 
                     // 字段约束配置（长度/正则） constraints
@@ -635,11 +639,12 @@ export default function EditorWorkspace() {
                   schema.config.tooltip = currentField.description;
                   // 是否必填：1-是，0-不是 isRequired
                   // 是否唯一：1-是，0-不是 isUnique
+                  const noRepeat =
+                    currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                   schema.config.verify = {
                     ...schema.config.verify,
                     required: currentField.isRequired,
-                    noRepeat:
-                      typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
+                    noRepeat
                   };
 
                   // 字段约束配置（长度/正则） constraints
