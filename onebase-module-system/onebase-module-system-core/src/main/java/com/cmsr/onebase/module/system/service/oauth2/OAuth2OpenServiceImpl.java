@@ -83,7 +83,7 @@ public class OAuth2OpenServiceImpl implements OAuth2OpenService {
         OAuth2AccessTokenDO accessTokenDO;
         switch (grantTypeEnum) {
             case AUTHORIZATION_CODE:
-                accessTokenDO = oauth2GrantService.grantAuthorizationCodeForAccessToken(client.getClientId(), code, redirectUri, state);
+                accessTokenDO = oauth2GrantService.grantAuthorizationCodeForAccessToken(null,client.getClientId(), code, redirectUri, state);
                 break;
             case PASSWORD:
                 accessTokenDO = oauth2GrantService.grantPassword(username, password, client.getClientId(), scopes);
