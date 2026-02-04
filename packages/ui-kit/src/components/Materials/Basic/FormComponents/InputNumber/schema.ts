@@ -221,7 +221,7 @@ const XInputNumber: XInputNumberSchema = {
       showPercent: false,
       useThousandsSeparator: false
     },
-    step: undefined,
+    step: 1,
     verify: {
       required: false,
       numberLimit: false,
