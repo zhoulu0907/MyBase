@@ -355,7 +355,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                         wbComponentSchemas.value[cp.id],
                         cp.type as WorkbenchComponentType
                       )} - 8px)`,
-                      margin: '10px'
+                      margin: '10px 0'
                     }}
                   >
                     <PreviewRender
