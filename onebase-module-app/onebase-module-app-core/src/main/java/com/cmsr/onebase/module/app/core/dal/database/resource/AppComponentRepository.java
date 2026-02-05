@@ -1,8 +1,11 @@
 package com.cmsr.onebase.module.app.core.dal.database.resource;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourceComponentDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppResourceComponentMapper;
+import com.cmsr.onebase.module.app.core.enums.resource.PageEnum;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourceComponentTableDef.APP_RESOURCE_COMPONENT;
+import static com.cmsr.onebase.module.app.core.dal.dataobject.table.AppResourcePageTableDef.APP_RESOURCE_PAGE;
 
 @Repository
 public class AppComponentRepository extends BaseBizRepository<AppResourceComponentMapper, AppResourceComponentDO> {
@@ -33,6 +37,29 @@ public class AppComponentRepository extends BaseBizRepository<AppResourceCompone
         QueryWrapper queryWrapper = query()
                 .where(APP_RESOURCE_COMPONENT.APPLICATION_ID.eq(applicationId))
                 .where(APP_RESOURCE_COMPONENT.PAGE_UUID.in(pageUuids));
+        return this.list(queryWrapper);
+    }
+
+    /**
+     * 仅查询属于列表页（page_type = list）的组件：通过 JOIN 限定组件所属页面为列表页
+     *
+     * @param applicationId 应用ID
+     * @return 仅列表页下的组件列表，按 component_index 排序
+     */
+    public List<AppResourceComponentDO> findByAppIdOnlyListPageComponents(Long applicationId) {
+        QueryWrapper queryWrapper = query()
+                .select(APP_RESOURCE_COMPONENT.ALL_COLUMNS)
+                .from(APP_RESOURCE_COMPONENT)
+                .innerJoin(APP_RESOURCE_PAGE)
+                .on(APP_RESOURCE_COMPONENT.PAGE_UUID.eq(APP_RESOURCE_PAGE.PAGE_UUID)
+                        .and(APP_RESOURCE_COMPONENT.APPLICATION_ID.eq(APP_RESOURCE_PAGE.APPLICATION_ID))
+                        .and(APP_RESOURCE_COMPONENT.VERSION_TAG.eq(APP_RESOURCE_PAGE.VERSION_TAG))
+                        .and(APP_RESOURCE_COMPONENT.VERSION_TAG.eq(ApplicationManager.getVersionTag()))
+                )
+                        .and(APP_RESOURCE_COMPONENT.COMPONENT_TYPE.eq("XTable"))
+                .where(APP_RESOURCE_COMPONENT.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGE.PAGE_TYPE.eq(PageEnum.LIST.getValue()))
+                .orderBy(APP_RESOURCE_COMPONENT.COMPONENT_INDEX, true);
         return this.list(queryWrapper);
     }
 
