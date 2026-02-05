@@ -1,8 +1,9 @@
 .containerStyle {
   width: 100%;
   /* padding: 16px; */
-  border-radius: 8;
+  border-radius: 8px;
   box-sizing: border-box;
+  background-color: #fff;
 }
 
 .welcomeCard {

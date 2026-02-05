@@ -1,7 +1,6 @@
 import { Resizable, type ResizeCallbackData } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { useRef, useEffect, useState } from 'react';
-import { WORKBENCH_COMPONENT_TYPES } from '@onebase/ui-kit';
 import { useWorkbenchResize } from '../../../hooks/use-workbench-resize';
 import { parseWidthToPixel } from '../../../utils/width-utils';
 import { MIN_WIDTH_PERCENTAGE } from '../../../utils/constants';

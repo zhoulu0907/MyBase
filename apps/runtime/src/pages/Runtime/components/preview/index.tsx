@@ -234,8 +234,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
             return;
           }
           const keys = Object.keys(item);
-          let temp: any = {};
-          for (let key of keys) {
+          const temp: any = {};
+          for (const key of keys) {
             const newKey = key.slice(key.lastIndexOf('.') + 1);
             const subField = (subEntity?.childFields || []).find((f: AppEntityField) => f.fieldName == key);
             if (
@@ -476,6 +476,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setTimeout(() => setRefresh(Date.now()), 150);
   };
 
+  const getBGcolor = { backgroundColor: pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? '#f2f3f5' : '#fff' };
+
   React.useEffect(() => {
     pluginBridge.registerContext({ form });
     return () => {
@@ -484,8 +486,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [form]);
 
   return (
-    <div className={`${styles.previewPage} runtime-preview-formpage`}>
-      <div className={styles.content}>
+    <div className={`${styles.previewPage} runtime-preview-formpage`} style={getBGcolor}>
+      <div className={styles.content} style={getBGcolor}>
         {pageType === EDITOR_TYPES.WORKBENCH_EDITOR && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
 
         {(pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.FORM_EDITOR) && (
