@@ -5022,7 +5022,7 @@ function _typeof(o) {
 
     // 检查是否为负数
     if (number < 0) {
-      return "数字须大于0!";
+      return "数字须大于0";
     }
 
     // 检查金额是否过大（限制小于1万亿）
@@ -5091,6 +5091,9 @@ function _typeof(o) {
       // 处理角
       if (jiao > 0) {
         decimalStr += cnNums[jiao] + cnDecUnits[0];
+      } else if (jiao === 0 && fen > 0) {
+        // 角位为0但分位不为0时，需要添加"零"
+        decimalStr += "零";
       }
       
       // 处理分
