@@ -8,10 +8,7 @@ import com.cmsr.onebase.module.system.framework.operatelog.core.PostParseFunctio
 import com.cmsr.onebase.module.system.framework.operatelog.core.SexParseFunction;
 import com.mzt.logapi.starter.annotation.DiffLogField;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.util.Set;
@@ -21,6 +18,7 @@ import java.util.Set;
 public class UserUpdateReqVO {
 
     @Schema(description = "用户编号", example = "1024")
+    @NotNull(message = "用户编号不能为空")
     private Long id;
 
     @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")

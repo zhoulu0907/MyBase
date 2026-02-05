@@ -57,4 +57,29 @@ public interface FlowErrorCodeConstants {
      * 环境配置格式无效
      */
     ErrorCode INVALID_ENV_CONFIG = new ErrorCode(1123794, "环境配置格式无效");
+
+    /**
+     * 动作已存在
+     */
+    ErrorCode ACTION_ALREADY_EXISTS = new ErrorCode(1123795, "动作已存在：actionCode={}");
+
+    /**
+     * 动作配置格式无效
+     */
+    ErrorCode INVALID_ACTION_CONFIG = new ErrorCode(1123796, "动作配置格式无效，缺少必填字段");
+
+    /**
+     * 动作未配置调试信息
+     */
+    ErrorCode ACTION_DEBUG_NOT_EXISTS = new ErrorCode(1123797, "动作未配置调试信息");
+
+    /**
+     * 调试配置URL不能为空
+     */
+    ErrorCode DEBUG_URL_REQUIRED = new ErrorCode(1123798, "调试配置的URL不能为空");
+
+    /**
+     * 调试配置方法不能为空
+     */
+    ErrorCode DEBUG_METHOD_REQUIRED = new ErrorCode(1123799, "调试配置的请求方法不能为空");
 }

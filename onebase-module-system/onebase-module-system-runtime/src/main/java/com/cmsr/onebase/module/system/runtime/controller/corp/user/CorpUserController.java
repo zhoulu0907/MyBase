@@ -51,7 +51,6 @@ public class CorpUserController {
     @Operation(summary = "修改用户")
     @PreAuthorize("@ss.hasPermission('corp:user:update')")
     public CommonResult<Boolean> updateUser(@Valid @RequestBody UserUpdateReqVO reqVO) {
-        if (reqVO.getUserType() == null) reqVO.setUserType(UserTypeEnum.CORP.getValue());
         userService.updateUser(reqVO);
         return success(true);
     }

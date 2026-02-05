@@ -90,7 +90,7 @@ public interface UserService {
      * @param id    用户编号
      * @param reqVO 用户个人信息
      */
-    void updateUserProfile(Long id, @Valid UserProfileUpdateReqVO reqVO, Integer userType);
+    void updateUserProfile(Long id, @Valid UserProfileUpdateReqVO reqVO);
 
     /**
      * 修改用户个人密码
@@ -436,4 +436,12 @@ public interface UserService {
      * @return
      */
     long getInnerUserCountByStatus(Integer status);
+
+    /**
+     * 根据token获得用户信息
+     *
+     * @param accessToken 访问令牌
+     * @return 用户信息
+     */
+    UserSimpleRespVO getUserInfoByToken(String accessToken);
 }
