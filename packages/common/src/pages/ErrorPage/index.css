@@ -6,11 +6,8 @@
   align-items: center;
   justify-content: flex-start;
 
-  /* 渐变背景色 */
-  /* 动态蓝白渐变背景动画 */
-  background: linear-gradient(135deg, #e0f2ff 0%, #9fd4fd 50%, #ffffff 100%);
+  background: #FFFFFF;
   background-size: 200% 200%;
-  animation: gradientBG 10s ease-in-out infinite;
 
   @keyframes gradientBG {
     0% {
