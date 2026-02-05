@@ -13,6 +13,9 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberRule
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberStateRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberResetLogRepository;
 import com.cmsr.onebase.module.metadata.core.enums.AutoNumberItemTypeEnum;
+import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberRuleEngine;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberStateDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberResetLogDO;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 /**
  * 自动编号配置 Build Service 实现类
@@ -48,6 +52,9 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
 
     @Resource
     private MetadataIdUuidConverter idUuidConverter;
+
+    @Resource
+    private AutoNumberRuleEngine autoNumberRuleEngine;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -145,6 +152,7 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
         
         // 2. 查找或创建配置
         MetadataAutoNumberConfigDO config = configRepository.findByFieldUuid(fieldUuid);
+        MetadataAutoNumberConfigDO oldConfigSnapshot = config;
         boolean isNew = (config == null);
         if (isNew) {
             config = new MetadataAutoNumberConfigDO();
@@ -176,6 +184,16 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
             configRepository.save(config);
         } else {
             configRepository.updateById(config);
+        }
+
+        // 6.1 根据“修改开始值后下一条生效”重置序号状态
+        if (!isNew && oldConfigSnapshot != null
+                && oldConfigSnapshot.getInitialValue() != null
+                && config.getInitialValue() != null
+                && !oldConfigSnapshot.getInitialValue().equals(config.getInitialValue())
+                && config.getResetOnInitialChange() != null
+                && config.getResetOnInitialChange() == 1) {
+            resetSequenceStateOnInitialChange(oldConfigSnapshot, config);
         }
         
         // 7. 删除旧的规则项
@@ -216,6 +234,46 @@ public class AutoNumberConfigBuildServiceImpl implements AutoNumberConfigBuildSe
                 fieldUuid, config.getId(), rules.size());
         
         return config.getId();
+    }
+
+    /**
+     * 初始值变更后重置序号状态，使下一条记录从新初始值开始
+     *
+     * @param oldConfig 旧配置快照
+     * @param newConfig 新配置
+     */
+    private void resetSequenceStateOnInitialChange(MetadataAutoNumberConfigDO oldConfig,
+                                                   MetadataAutoNumberConfigDO newConfig) {
+        String periodKey = autoNumberRuleEngine.generatePeriodKey(
+                newConfig.getResetCycle(), LocalDateTime.now());
+
+        MetadataAutoNumberStateDO state = stateRepository.findOneByPeriod(newConfig.getConfigUuid(), periodKey);
+        Long prevValue = state != null ? state.getCurrentValue() : null;
+        Long nextValue = newConfig.getInitialValue() - 1;
+
+        if (state == null) {
+            state = new MetadataAutoNumberStateDO();
+            state.setConfigUuid(newConfig.getConfigUuid());
+            state.setPeriodKey(periodKey);
+            state.setCurrentValue(nextValue);
+            state.setApplicationId(newConfig.getApplicationId());
+            stateRepository.save(state);
+        } else {
+            MetadataAutoNumberStateDO update = new MetadataAutoNumberStateDO();
+            update.setId(state.getId());
+            update.setCurrentValue(nextValue);
+            stateRepository.updateById(update);
+        }
+
+        MetadataAutoNumberResetLogDO resetLog = new MetadataAutoNumberResetLogDO();
+        resetLog.setConfigId(newConfig.getId());
+        resetLog.setPeriodKey(periodKey);
+        resetLog.setPrevValue(prevValue);
+        resetLog.setNextValue(nextValue + 1);
+        resetLog.setResetReason("修改初始值后生效");
+        resetLog.setApplicationId(newConfig.getApplicationId());
+        resetLog.setResetTime(LocalDateTime.now());
+        resetLogRepository.save(resetLog);
     }
 
     @Override
