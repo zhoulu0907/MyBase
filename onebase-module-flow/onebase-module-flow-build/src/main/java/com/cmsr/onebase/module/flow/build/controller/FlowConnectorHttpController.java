@@ -43,7 +43,7 @@ public class FlowConnectorHttpController {
         return success(connectorHttpService.createHttpAction(createReqVO));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @Operation(summary = "更新HTTP动作")
     @PreAuthorize("@ss.hasPermission('flow:connector:http:update')")
     public CommonResult<Boolean> updateHttpAction(@Valid @RequestBody UpdateHttpActionReqVO updateReqVO) {
@@ -51,7 +51,7 @@ public class FlowConnectorHttpController {
         return success(true);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     @Operation(summary = "删除HTTP动作")
     @Parameter(name = "id", description = "HTTP动作ID", required = true)
     @PreAuthorize("@ss.hasPermission('flow:connector:http:delete')")

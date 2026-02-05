@@ -1000,7 +1000,26 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO) {
-        log.info("saveActionConfig start, connectorId: {}", connectorId);
+        return saveOrUpdateActionConfigInternal(connectorId, reqVO.getActionConfig(), true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig) {
+        return saveOrUpdateActionConfigInternal(connectorId, actionConfig, false);
+    }
+
+    /**
+     * 保存或更新动作配置的内部通用方法
+     *
+     * @param connectorId 连接器ID
+     * @param actionConfig 动作配置
+     * @param isNew 是否为新建操作（true=新建需检查不存在，false=更新需检查存在）
+     * @return 保存结果
+     */
+    private Boolean saveOrUpdateActionConfigInternal(Long connectorId, JsonNode actionConfig, boolean isNew) {
+        String operation = isNew ? "saveActionConfig" : "updateActionConfig";
+        log.info("{} start, connectorId: {}", operation, connectorId);
 
         // 1. 查询并验证连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -1013,17 +1032,26 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         ObjectNode rootActionConfig = parseOrCreateActionRootConfig(connector.getActionConfig());
         ObjectNode properties = rootActionConfig.withObject("properties");
 
-        // 3. 从请求中提取动作编码（actionCode）
-        String actionCode = extractActionCodeFromConfig(reqVO.getActionConfig());
+        // 3. 从配置中提取动作名称
+        String actionName = extractActionCodeFromConfig(actionConfig);
 
-        // 4. 检查动作是否已存在
-        if (properties.has(actionCode)) {
-            log.warn("Action already exists, connectorId: {}, actionCode: {}", connectorId, actionCode);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS, actionCode);
+        // 4. 校验动作是否存在
+        if (isNew) {
+            // 新建：检查是否已存在
+            if (properties.has(actionName)) {
+                log.warn("Action already exists, connectorId: {}, actionName: {}", connectorId, actionName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS, actionName);
+            }
+        } else {
+            // 更新：检查是否不存在
+            if (!properties.has(actionName)) {
+                log.warn("Action not found for update, connectorId: {}, actionName: {}", connectorId, actionName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+            }
         }
 
-        // 5. 添加新动作配置
-        properties.set(actionCode, reqVO.getActionConfig());
+        // 5. 保存动作配置
+        properties.set(actionName, actionConfig);
 
         // 6. 更新元数据版本
         updateActionMetadataVersion(rootActionConfig);
@@ -1032,7 +1060,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connector.setActionConfig(toJsonString(rootActionConfig));
         connectorRepository.updateById(connector);
 
-        log.info("saveActionConfig success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        log.info("{} success, connectorId: {}, actionName: {}", operation, connectorId, actionName);
         return Boolean.TRUE;
     }
 

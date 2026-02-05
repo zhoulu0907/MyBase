@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 @Tag(name = "连接器", description = "连接器接口")
 @RestController
 @RequestMapping("/flow/connector")
@@ -50,7 +52,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "更新连接器")
-    @PutMapping("/{id}")
+    @PostMapping("/{id}/update")
     public CommonResult<Boolean> updateConnector(@PathVariable Long id, @RequestBody @Valid UpdateFlowConnectorReqVO updateVO) {
         // 确保updateVO中的id与路径参数一致
         updateVO.setId(id);
@@ -61,7 +63,7 @@ public class FlowConnectorController {
     @Operation(summary = "更新连接器基本信息",
               description = "只更新描述信息，自动检测变化")
     @Parameter(name = "id", description = "连接器ID", required = true)
-    @PutMapping("/{id}/base-info")
+    @PostMapping("/{id}/update-base-info")
     public CommonResult<Boolean> updateBaseInfo(
             @PathVariable Long id,
             @RequestBody @Valid UpdateFlowConnectorReqVO updateVO) {
@@ -70,7 +72,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "删除连接器")
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}/delete")
     public CommonResult<Boolean> deleteConnector(@PathVariable Long id) {
         connectorService.deleteById(id);
         return CommonResult.success(Boolean.TRUE);
@@ -87,7 +89,7 @@ public class FlowConnectorController {
               description = "启用或禁用连接器实例")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @Parameter(name = "activeStatus", description = "启用状态（0-禁用，1-启用）", required = true, example = "1")
-    @PutMapping("/{id}/status")
+    @PostMapping("/{id}/update-status")
     public CommonResult<Boolean> updateStatus(
             @PathVariable Long id,
             @RequestParam("activeStatus") Integer activeStatus) {
@@ -172,6 +174,19 @@ public class FlowConnectorController {
         return CommonResult.success(result);
     }
 
+    @Operation(summary = "更新连接器动作配置",
+              description = "更新指定动作名称的动作配置，动作必须已存在")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @Parameter(name = "actionName", description = "动作名称", required = true, example = "动作1")
+    @PostMapping("/{id}/actions/{actionName}/update-config")
+    public CommonResult<Boolean> updateActionConfig(
+            @PathVariable("id") Long id,
+            @PathVariable("actionName") String actionName,
+            @RequestBody JsonNode actionConfig) {
+        Boolean result = connectorService.updateActionConfig(id, actionName, actionConfig);
+        return CommonResult.success(result);
+    }
+
     @Operation(summary = "查询连接器动作清单")
     @GetMapping("/{id}/actions")
     public CommonResult<List<String>> getActions(@PathVariable Long id) {
@@ -207,7 +222,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "更新动作草稿")
-    @PutMapping("/{connectorId}/actions/{actionName}")
+    @PostMapping("/{connectorId}/actions/{actionName}/update-draft")
     public CommonResult<Boolean> updateActionDraft(
             @PathVariable Long connectorId,
             @PathVariable String actionName,
@@ -217,7 +232,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "发布动作")
-    @PutMapping("/{connectorId}/actions/{actionName}/publish")
+    @PostMapping("/{connectorId}/actions/{actionName}/publish")
     public CommonResult<Boolean> publishAction(
             @PathVariable Long connectorId,
             @PathVariable String actionName) {
@@ -226,7 +241,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "下架动作")
-    @PutMapping("/{connectorId}/actions/{actionName}/offline")
+    @PostMapping("/{connectorId}/actions/{actionName}/offline")
     public CommonResult<Boolean> offlineAction(
             @PathVariable Long connectorId,
             @PathVariable String actionName) {
@@ -235,7 +250,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "重新上线动作")
-    @PutMapping("/{connectorId}/actions/{actionName}/republish")
+    @PostMapping("/{connectorId}/actions/{actionName}/republish")
     public CommonResult<Boolean> republishAction(
             @PathVariable Long connectorId,
             @PathVariable String actionName) {
@@ -253,7 +268,7 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "删除动作")
-    @DeleteMapping("/{connectorId}/actions/{actionName}/delete")
+    @PostMapping("/{connectorId}/actions/{actionName}/delete")
     public CommonResult<Boolean> deleteAction(
             @PathVariable Long connectorId,
             @PathVariable String actionName) {
