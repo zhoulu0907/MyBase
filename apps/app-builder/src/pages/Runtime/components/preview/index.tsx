@@ -254,7 +254,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
 
   return (
     <div className={styles.previewPage}>
-      <div className={styles.content}>
+      <div
+        className={styles.content}
+        style={{ backgroundColor: pageType == EDITOR_TYPES.WORKBENCH_EDITOR ? '#f2f3f5' : '#fff' }}
+      >
         {loading ? (
           <div className={styles.loading}>
             <Spin size={40} tip="加载中..." />
@@ -352,7 +355,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
                         wbComponentSchemas.value[cp.id],
                         cp.type as WorkbenchComponentType
                       )} - 8px)`,
-                      margin: '4px'
+                      margin: '10px'
                     }}
                   >
                     <PreviewRender

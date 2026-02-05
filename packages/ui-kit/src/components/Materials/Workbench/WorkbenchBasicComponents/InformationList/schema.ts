@@ -18,11 +18,11 @@ import {
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
   WORKBENCH_CONFIG_TYPES,
-  DATA_CONFIG_RANGE,
   WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType, INumberConfigType } from '../../core/types';
 import { IInformationListContentConfigType } from '../../core/types';
+import { dataCountConfig, labelNameConfig, showMoreConfig, showMoreLinkConfig, themeConfig } from '../../config/commonConfig';
 
 export interface XInformationListSchema {
   editData: TXInformationListEditData;
@@ -128,28 +128,13 @@ const InformationListContentConfig: IInformationListContentConfigType = {
 };
 
 const XInformationList: XInformationListSchema = {
-  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, InformationListContentConfig, {
-    key: 'label',
-    name: '标题名称',
-    type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-  },
-  {
-    key: 'theme',
-    name: '样式库',
-    type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
-  }, {
-    key: 'dataCount',
-    name: '数据条数',
-    type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT,
-  }, {
-    key: 'showMore',
-    name: '查看更多',
-    type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT,
-  }, {
-    key: 'showMoreLink',
-    name: '查看更多链接',
-    type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT,
-  }],
+  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, InformationListContentConfig,
+    labelNameConfig,
+    themeConfig,
+    dataCountConfig,
+    showMoreConfig,
+    showMoreLinkConfig
+  ],
   config: {
     ...workbenchBaseDefault,
     componentName: 'InformationList',

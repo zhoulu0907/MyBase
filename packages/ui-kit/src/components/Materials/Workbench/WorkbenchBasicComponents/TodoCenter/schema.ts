@@ -23,6 +23,7 @@ import {
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../core/types';
 import { IDataConfigConfigType, IThemeConfigType } from '../../core/types';
+import { labelNameConfig, themeConfig, dataConfigConfig } from '../../config/commonConfig';
 
 export interface XTodoCenterSchema {
   editData: TXTodoCenterEditData;
@@ -57,22 +58,11 @@ export interface XTodoCenterConfig extends ICommonBaseWorkbenchType {
 }
 
 const XTodoCenter: XTodoCenterSchema = {
-  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, {
-    key: 'label',
-    name: '标题名称',
-    type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-  }, 
-  {
-    key: 'dataConfig',
-    name: '数据内容配置',
-    type: WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG,
-    range: DATA_CONFIG_RANGE
-  },
-  {
-    key: 'theme',
-    name: '样式库',
-    type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
-  }],
+  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig,
+    labelNameConfig,
+    dataConfigConfig,
+    themeConfig
+  ],
   config: {
     ...workbenchBaseDefault,
     componentName: 'TodoCenter',

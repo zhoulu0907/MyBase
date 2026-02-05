@@ -287,7 +287,7 @@ const Runtime: React.FC = () => {
             }}
           />
         </Sider>
-        <Content className={styles.content}>
+        <Content className={styles.content} id="runtime-content">
           {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (

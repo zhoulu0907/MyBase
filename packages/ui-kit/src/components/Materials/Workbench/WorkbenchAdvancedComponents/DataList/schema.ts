@@ -16,11 +16,11 @@ import {
   WORKBENCH_STATUS_OPTIONS,
   WORKBENCH_STATUS_VALUES,
   WORKBENCH_WIDTH_OPTIONS,
-  WORKBENCH_WIDTH_VALUES,
-  WORKBENCH_CONFIG_TYPES
+  WORKBENCH_WIDTH_VALUES
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IWbCheckInputConfigType, ITableConfigType } from '../../core/types';
 import { IDataConfigConfigType } from '../../core/types';
+import { labelNameConfig, tableUUidConfig } from '../../config/commonConfig';
 
 export interface XDataListSchema {
   editData: TXDataListEditData;
@@ -50,15 +50,10 @@ export interface XDataListConfig extends ICommonBaseWorkbenchType {
 }
 
 const XDataList: XDataListSchema = {
-  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, {
-    key: 'label',
-    name: '标题名称',
-    type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-  }, {
-    key: 'tableUUid',
-    name: '表格配置',
-    type: WORKBENCH_CONFIG_TYPES.WB_TABLE_CONFIG
-  }],
+  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig,
+    labelNameConfig,
+    tableUUidConfig
+  ],
   
   config: {
     ...workbenchBaseDefault,

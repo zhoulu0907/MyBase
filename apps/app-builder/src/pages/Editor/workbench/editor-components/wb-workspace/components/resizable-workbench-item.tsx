@@ -1,7 +1,6 @@
 import { Resizable, type ResizeCallbackData } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { useRef, useEffect, useState } from 'react';
-import { WORKBENCH_COMPONENT_TYPES } from '@onebase/ui-kit';
 import { useWorkbenchResize } from '../../../hooks/use-workbench-resize';
 import { parseWidthToPixel } from '../../../utils/width-utils';
 import { MIN_WIDTH_PERCENTAGE } from '../../../utils/constants';
@@ -102,10 +101,6 @@ export function ResizableWorkbenchItem({
     onSelect();
   };
 
-  const isWelcomeCard = componentType === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD || componentType === 'XWelcomeCard';
-
-  // 欢迎卡片不允许调整宽度，不显示手柄
-  // 其他组件正常显示手柄，允许调整宽度
   return (
     <div ref={containerRef} className={styles.resizableWorkbenchItemWrapper} style={{ width: `${localWidth}` }}>
       <Resizable
@@ -116,24 +111,22 @@ export function ResizableWorkbenchItem({
         minConstraints={[minWidth, 0]}
         maxConstraints={[maxWidth, 0]}
         handle={
-          isWelcomeCard ? undefined : (
-            <span
-              className={`${styles.resizeHandle} ${styles.resizeHandleRight}`}
-              data-resize-handle="true"
-              onMouseDown={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onDragStart={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ pointerEvents: 'auto' }}
-            />
-          )
+          <span
+            className={`${styles.resizeHandle} ${styles.resizeHandleRight}`}
+            data-resize-handle="true"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onDragStart={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+            onClick={(e) => e.stopPropagation()}
+            style={{ pointerEvents: 'auto' }}
+          />
         }
-        resizeHandles={isWelcomeCard ? [] : ['e']}
+        resizeHandles={['e']}
       >
         <div
           className={styles.resizableWorkbenchItem}
