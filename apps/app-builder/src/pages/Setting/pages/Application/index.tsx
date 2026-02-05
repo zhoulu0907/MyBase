@@ -40,6 +40,7 @@ import AppCard from './components/AppCard';
 import { appOptions, calculateMaxItems, createTimeOptions, statusOptions } from './const';
 import styles from './index.module.less';
 import { PermissionButton as Button } from '@/components/PermissionControl';
+import aiCreateSVG from '@/assets/images/ai_create.svg';
 
 const Option = Select.Option;
 
@@ -268,28 +269,33 @@ const AppManagement: React.FC = () => {
               pointerEvents: applicationEmpty ? 'auto' : 'unset'
             }}
           >
-            <Button
-              type="primary"
-              size="large"
-              permission={ACTIONS.CREATE}
-              icon={<IconPlus fontSize={16} />}
-              onClick={() => {
-                setCreateVisible(true);
-              }}
-            >
-              创建应用
-            </Button>
-            {/* TODO(ai)：当前仅ai测试账号可见 */}
-            {tenantId === '156421901678804992' && userPermissionInfo?.user?.id?.toString() === '156421901678804997' && (
+            <div className={styles.cteateBtn}>
               <Button
                 type="primary"
                 size="large"
                 permission={ACTIONS.CREATE}
-                onClick={() => navigate('/aigen/chat')}
+                icon={<IconPlus fontSize={16} />}
+                onClick={() => {
+                  setCreateVisible(true);
+                }}
               >
-                AI生成应用
+                创建应用
               </Button>
-            )}
+              {/* TODO(ai)：当前仅ai测试账号可见 */}
+              {tenantId === '156421901678804992' &&
+                userPermissionInfo?.user?.id?.toString() === '156421901678804997' && (
+                  <Button
+                    type="primary"
+                    size="large"
+                    permission={ACTIONS.CREATE}
+                    onClick={() => navigate('/aigen/chat')}
+                    className={styles.aiCteateApp}
+                    icon={<img src={aiCreateSVG} />}
+                  >
+                    AI生成应用
+                  </Button>
+                )}
+            </div>
 
             {/* 筛选下拉框 */}
             <div>
