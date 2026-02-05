@@ -186,7 +186,6 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({ editActionN
     try {
       const params: any = { debug: combined.debug };
       const res = await debugAction(params);
-      // eslint-disable-next-line no-console
       console.log('debugAction result: ', res);
       setDebugResult(res);
       Message.success('调试成功');
@@ -265,9 +264,7 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({ editActionN
                 fontSize: 12
               }}
             >
-              {typeof debugResult === 'string'
-                ? debugResult
-                : JSON.stringify(debugResult, null, 2)}
+              {typeof debugResult === 'string' ? debugResult : JSON.stringify(debugResult, null, 2)}
             </pre>
           </div>
         )}
