@@ -259,7 +259,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                           className={styles.componentItem}
                           style={{
                             width: `calc(${getWorkbenchComponentWidth(wbComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                            margin: '10px 0'
+                            margin: '8px'
                           }}
                         >
                           <PreviewRender

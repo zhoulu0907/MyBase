@@ -49,7 +49,7 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
               className={styles.componentItem}
               style={{
                 width: `calc(${getWorkbenchComponentWidth(sanitizedSchema, cp.type as WorkbenchComponentType)} - 8px)`,
-                margin: '10px 0'
+                margin: '8px'
               }}
             >
               <PreviewRender
