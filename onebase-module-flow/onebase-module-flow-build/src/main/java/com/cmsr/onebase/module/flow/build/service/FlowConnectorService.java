@@ -257,10 +257,10 @@ public interface FlowConnectorService {
     /**
      * 调试HTTP连接器动作
      * <p>
-     * 从传入的 actionConfig 中解析 debug 配置并执行HTTP请求
+     * 接收debug配置信息并执行HTTP请求
      *
-     * @param actionConfig 动作配置（包含debug节点）
+     * @param reqVO 调试请求VO（包含url、method、headers等调试信息）
      * @return 执行响应结果
      */
-    ExecuteHttpActionRespVO debugHttpAction(JsonNode actionConfig);
+    ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO);
 }

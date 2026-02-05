@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -1211,24 +1212,58 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public ExecuteHttpActionRespVO debugHttpAction(JsonNode actionConfig) {
-        log.info("调试HTTP动作开始");
+    public ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO) {
+        log.info("调试HTTP动作开始，URL: {}, Method: {}", reqVO.getUrl(), reqVO.getMethod());
 
-        // 1. 验证actionConfig不为空
-        if (actionConfig == null || actionConfig.isEmpty()) {
-            throw new IllegalArgumentException("动作配置不能为空");
+        // 1. 构建debug配置节点（从ReqVO转换）
+        ObjectNode debugConfig = objectMapper.createObjectNode();
+        debugConfig.put("url", reqVO.getUrl());
+        debugConfig.put("method", reqVO.getMethod());
+
+        // 2. 转换requestHeaders（只保留key和fieldValue）
+        if (reqVO.getRequestHeaders() != null && !reqVO.getRequestHeaders().isEmpty()) {
+            ArrayNode headersArray = debugConfig.putArray("requestHeaders");
+            for (HttpParamFieldVO field : reqVO.getRequestHeaders()) {
+                ObjectNode headerNode = headersArray.addObject();
+                headerNode.put("key", field.getKey());
+                headerNode.put("fieldValue", field.getFieldValue());
+            }
         }
 
-        // 2. 验证debug配置存在（必填）
-        JsonNode debugConfig = actionConfig.get("debug");
-        if (debugConfig == null || debugConfig.isEmpty() || !debugConfig.has("url")) {
-            throw new IllegalArgumentException("动作配置中未找到debug调试信息，无法执行");
+        // 3. 转换queryParams（只保留key和fieldValue）
+        if (reqVO.getQueryParams() != null && !reqVO.getQueryParams().isEmpty()) {
+            ArrayNode queryParamsArray = debugConfig.putArray("queryParams");
+            for (HttpParamFieldVO field : reqVO.getQueryParams()) {
+                ObjectNode queryNode = queryParamsArray.addObject();
+                queryNode.put("key", field.getKey());
+                queryNode.put("fieldValue", field.getFieldValue());
+            }
         }
 
-        // 3. 构建HTTP请求（从debug配置获取所有参数）
+        // 4. 转换pathParams（只保留key和fieldValue）
+        if (reqVO.getPathParams() != null && !reqVO.getPathParams().isEmpty()) {
+            ArrayNode pathParamsArray = debugConfig.putArray("pathParams");
+            for (HttpParamFieldVO field : reqVO.getPathParams()) {
+                ObjectNode pathNode = pathParamsArray.addObject();
+                pathNode.put("key", field.getKey());
+                pathNode.put("fieldValue", field.getFieldValue());
+            }
+        }
+
+        // 5. 转换requestBody（只保留key和fieldValue）
+        if (reqVO.getRequestBody() != null && !reqVO.getRequestBody().isEmpty()) {
+            ArrayNode bodyArray = debugConfig.putArray("requestBody");
+            for (HttpParamFieldVO field : reqVO.getRequestBody()) {
+                ObjectNode bodyNode = bodyArray.addObject();
+                bodyNode.put("key", field.getKey());
+                bodyNode.put("fieldValue", field.getFieldValue());
+            }
+        }
+
+        // 6. 构建HTTP请求（从debug配置获取所有参数）
         HttpRequest request = buildHttpRequest(debugConfig);
 
-        // 4. 执行HTTP请求
+        // 7. 执行HTTP请求
         long startTime = System.currentTimeMillis();
         try {
             HttpServiceResponse response = httpExecuteService.execute(request);

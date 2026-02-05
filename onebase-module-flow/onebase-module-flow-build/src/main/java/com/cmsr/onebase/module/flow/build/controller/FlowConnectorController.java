@@ -287,11 +287,11 @@ public class FlowConnectorController {
     }
 
     @Operation(summary = "调试HTTP连接器动作",
-            description = "从传入的actionConfig中解析debug配置并执行HTTP请求")
+            description = "直接传入debug配置信息执行HTTP请求")
     @PostMapping("/debug-http-action")
     public CommonResult<ExecuteHttpActionRespVO> debugHttpAction(
-            @RequestBody @Valid SaveActionConfigReqVO reqVO) {
-        ExecuteHttpActionRespVO result = connectorService.debugHttpAction(reqVO.getActionConfig());
+            @RequestBody @Valid DebugHttpActionReqVO reqVO) {
+        ExecuteHttpActionRespVO result = connectorService.debugHttpAction(reqVO);
         return CommonResult.success(result);
     }
 }
