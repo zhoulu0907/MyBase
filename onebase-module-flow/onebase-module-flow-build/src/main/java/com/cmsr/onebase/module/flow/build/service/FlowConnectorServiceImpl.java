@@ -499,6 +499,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
                     .actionName(getString(action, "actionName"))
                     .description(getString(action, "description"))
                     .status(getString(action, "status"))
+                    .createTime(getString(action, "createTime"))
+                    .updateTime(getString(action, "updateTime"))
                     .build();
             result.add(vo);
         }
@@ -543,10 +545,16 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
                 JsonNode basicNode = actionNode.get("basic");
                 String description = basicNode != null ? getString(basicNode, "description") : null;
 
+                // 获取时间字段
+                String createTime = getString(actionNode, "createTime");
+                String updateTime = getString(actionNode, "updateTime");
+
                 ConnectorActionLiteVO vo = ConnectorActionLiteVO.builder()
                         .actionName(actionName)
                         .description(description)
                         .status(status)
+                        .createTime(createTime)
+                        .updateTime(updateTime)
                         .build();
                 result.add(vo);
             }
@@ -587,11 +595,17 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             JsonNode basicNode = actionNode.get("basic");
             String description = basicNode != null ? getString(basicNode, "description") : null;
 
+            // 获取时间字段
+            String createTime = getString(actionNode, "createTime");
+            String updateTime = getString(actionNode, "updateTime");
+
             // 4. 构建返回 VO - 字段映射：basic→basicInfo, request→inputConfig, response→outputConfig, debug→debugConfig
             ConnectorActionVO vo = ConnectorActionVO.builder()
                     .actionName(actionName)
                     .description(description)
                     .status(getString(actionNode, "status"))
+                    .createTime(createTime)
+                    .updateTime(updateTime)
                     .basicInfo(actionNode.get("basic"))
                     .inputConfig(actionNode.get("request"))
                     .outputConfig(actionNode.get("response"))
