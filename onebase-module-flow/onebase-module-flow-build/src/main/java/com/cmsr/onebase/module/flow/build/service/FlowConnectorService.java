@@ -255,13 +255,12 @@ public interface FlowConnectorService {
     ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionName);
 
     /**
-     * 执行HTTP连接器动作
+     * 调试HTTP连接器动作
      * <p>
-     * 从 action_config 的 debug 配置中获取所有参数执行HTTP请求
+     * 从传入的 actionConfig 中解析 debug 配置并执行HTTP请求
      *
-     * @param connectorId 连接器ID
-     * @param actionName  动作名称
+     * @param actionConfig 动作配置（包含debug节点）
      * @return 执行响应结果
      */
-    ExecuteHttpActionRespVO executeHttpAction(Long connectorId, String actionName);
+    ExecuteHttpActionRespVO debugHttpAction(JsonNode actionConfig);
 }

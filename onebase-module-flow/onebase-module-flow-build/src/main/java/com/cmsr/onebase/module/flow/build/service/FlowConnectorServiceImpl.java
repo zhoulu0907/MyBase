@@ -1211,66 +1211,36 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public ExecuteHttpActionRespVO executeHttpAction(Long connectorId, String actionName) {
-        log.info("执行HTTP动作开始，connectorId: {}, actionName: {}", connectorId, actionName);
+    public ExecuteHttpActionRespVO debugHttpAction(JsonNode actionConfig) {
+        log.info("调试HTTP动作开始");
 
-        // 1. 验证连接器存在
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        // 1. 验证actionConfig不为空
+        if (actionConfig == null || actionConfig.isEmpty()) {
+            throw new IllegalArgumentException("动作配置不能为空");
         }
 
-        // 2. 加载动作配置
-        JsonNode actionConfig = loadActionConfig(connector, actionName);
-        if (actionConfig == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
-        }
-
-        // 3. 验证debug配置存在（必填）
+        // 2. 验证debug配置存在（必填）
         JsonNode debugConfig = actionConfig.get("debug");
         if (debugConfig == null || debugConfig.isEmpty() || !debugConfig.has("url")) {
-            throw new IllegalArgumentException("该动作未配置调试信息，无法执行");
+            throw new IllegalArgumentException("动作配置中未找到debug调试信息，无法执行");
         }
 
-        // 4. 构建HTTP请求（从debug配置获取所有参数）
+        // 3. 构建HTTP请求（从debug配置获取所有参数）
         HttpRequest request = buildHttpRequest(debugConfig);
 
-        // 5. 执行HTTP请求
+        // 4. 执行HTTP请求
         long startTime = System.currentTimeMillis();
         try {
             HttpServiceResponse response = httpExecuteService.execute(request);
             long duration = System.currentTimeMillis() - startTime;
 
-            log.info("执行HTTP动作成功，connectorId: {}, actionName: {}, 耗时: {}ms", connectorId, actionName, duration);
+            log.info("调试HTTP动作成功，耗时: {}ms", duration);
             return buildSuccessResponse(response, request, duration);
 
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            log.error("执行HTTP动作失败，connectorId: {}, actionName: {}", connectorId, actionName, e);
+            log.error("调试HTTP动作失败", e);
             return buildErrorResponse(e, request, duration);
-        }
-    }
-
-    /**
-     * 加载动作配置
-     */
-    private JsonNode loadActionConfig(FlowConnectorDO connector, String actionName) {
-        try {
-            String actionConfigJson = connector.getActionConfig();
-            if (StringUtils.isBlank(actionConfigJson)) {
-                return null;
-            }
-
-            JsonNode rootConfig = objectMapper.readTree(actionConfigJson);
-            JsonNode properties = rootConfig.get("properties");
-            if (properties == null || !properties.has(actionName)) {
-                return null;
-            }
-
-            return properties.get(actionName);
-        } catch (JsonProcessingException e) {
-            log.error("解析动作配置失败，connectorId: {}, actionName: {}", connector.getId(), actionName, e);
-            return null;
         }
     }
 
