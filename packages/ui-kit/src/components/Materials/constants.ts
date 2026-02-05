@@ -391,6 +391,25 @@ export const TABS_POSITION_VALUES = {
   [TABS_POSITION_OPTIONS.RIGHT]: 'right'
 } as const;
 
+// 步骤条样式常量
+export const STEPS_TYPE_OPTIONS = {
+  DEFAULT: 'default',
+  NAVIGATION: 'navigation',
+  ARROW: 'arrow',
+  DOT: 'dot'
+} as const;
+
+// 步骤条标签位置常量
+export const STEPS_LABEL_PLACEMENT_OPTIONS = {
+  HORIZONTAL: 'horizontal',
+  VERTICAL: 'vertical'
+} as const;
+
+export const STEPS_LABEL_PLACEMENT_VALUES = {
+  [STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL]: 'horizontal',
+  [STEPS_LABEL_PLACEMENT_OPTIONS.VERTICAL]: 'vertical'
+} as const;
+
 // 折叠选项常量
 export const COLLAPSED_OPTIONS = {
   EXPOSED: '展开',

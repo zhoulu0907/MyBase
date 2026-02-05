@@ -1,0 +1,215 @@
+.XStepsLayout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .stepsContainer {
+    width: 100%;
+    padding: 16px;
+    background: #fff;
+    border-radius: 8px;
+  }
+
+  .contentContainer {
+    width: 100%;
+    flex: 1;
+    min-height: 200px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stepContent {
+    width: 100%;
+    height: 100%;
+    display: none;
+
+    &.active {
+      display: block;
+    }
+
+    .sortableWrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    .placeholder {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      align-content: center;
+      background: #F7F8FA;
+      color: #86909C;
+      font-size: 14px;
+      font-weight: 400;
+      border-radius: 8px;
+      user-select: none;
+      pointer-events: none;
+      transition: opacity 0.15s ease, visibility 0.15s ease;
+      opacity: 1;
+      visibility: visible;
+      z-index: 1;
+    }
+
+    .sortableWrapper.drag-over .placeholder {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .content {
+      height: 100%;
+      min-height: 200px;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      padding-top: 18px;
+    }
+
+    .componentItem {
+      cursor: move;
+      box-sizing: border-box;
+      border: 1px dashed transparent;
+      border-radius: 8px;
+      transition: border-color 0.2s ease;
+      position: relative;
+
+      & .operationArea {
+        pointer-events: auto !important;
+      }
+
+      &:hover {
+        border-color: rgb(var(--primary-6));
+      }
+    }
+
+    .operationArea {
+      position: absolute;
+      top: -18px;
+      right: 16px;
+      height: 24px;
+      padding: 4px;
+      border: 1px solid #e5e6eb;
+      border-radius: 8px;
+      box-sizing: border-box;
+      background-color: #fff;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+
+      .divider {
+        margin: 0 4px;
+      }
+
+      .copyButton,
+      .deleteButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 16px;
+        color: #4e5969;
+        background-color: #fff;
+
+        &:hover {
+          transform: scale(1.1);
+        }
+      }
+
+      .deleteButton {
+        color: #f53f3f;
+      }
+    }
+  }
+
+  .buttonContainer {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px;
+    background: #fff;
+    border-radius: 8px;
+  }
+}
+
+.XPreviewStepsLayout {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .stepsContainer {
+    width: 100%;
+    padding: 16px;
+    background: #fff;
+    border-radius: 8px;
+  }
+
+  .contentContainer {
+    width: 100%;
+    flex: 1;
+    min-height: 200px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stepContent {
+    width: 100%;
+    height: 100%;
+    display: none;
+
+    &.active {
+      display: block;
+    }
+
+    .content {
+      height: 100%;
+      min-height: 200px;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      padding-top: 18px;
+    }
+
+    .componentItem {
+      cursor: pointer;
+      box-sizing: border-box;
+      border: 1px dashed transparent;
+      border-radius: 8px;
+      transition: border-color 0.2s ease;
+      position: relative;
+
+      &:hover {
+        border-color: rgb(var(--primary-6));
+      }
+    }
+  }
+
+  .buttonContainer {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px;
+    background: #fff;
+    border-radius: 8px;
+  }
+
+  &.listPreviewStepsLayout {
+    .stepContent {
+      .content {
+        padding-top: 0;
+      }
+    }
+  }
+}

@@ -706,6 +706,64 @@ export const tabsPositionConfig: ITabsPositionConfigType<TTabsPositionSelectKeyT
     }
   ]
 };
+
+// ==================== 步骤条 ====================
+export const stepsConfig: ITabsConfigType = {
+  key: 'steps',
+  name: '多步骤显示',
+  type: 'Tabs'
+};
+
+// 步骤条样式
+export type TStepsTypeSelectKeyType = 'default' | 'navigation' | 'arrow' | 'dot';
+export const stepsTypeConfig: ITabsTypeConfigType<TStepsTypeSelectKeyType> = {
+  key: 'type',
+  name: '步骤条样式',
+  type: 'TabsType',
+  range: [
+    {
+      key: 'default',
+      label: 'default',
+      value: 'default'
+    },
+    {
+      key: 'navigation',
+      label: 'navigation',
+      value: 'navigation'
+    },
+    {
+      key: 'arrow',
+      label: 'arrow',
+      value: 'arrow'
+    },
+    {
+      key: 'dot',
+      label: 'dot',
+      value: 'dot'
+    }
+  ]
+};
+
+// 步骤条标签位置
+export type TStepsLabelPlacementSelectKeyType = 'horizontal' | 'vertical';
+export const stepsLabelPlacementConfig: ITabsPositionConfigType<TStepsLabelPlacementSelectKeyType> = {
+  key: 'labelPlacement',
+  name: '标签位置',
+  type: 'TabsPosition',
+  range: [
+    {
+      key: '水平',
+      label: '水平',
+      value: 'horizontal'
+    },
+    {
+      key: '垂直',
+      label: '垂直',
+      value: 'vertical'
+    }
+  ]
+};
+
 // ==================== 图片与文件 ====================
 export const imageConfig: IImageConfigType = {
   key: 'image',

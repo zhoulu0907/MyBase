@@ -473,6 +473,37 @@ export interface ITabsPositionConfigType<KeyType> extends ICommonConfigType {
   }>;
 }
 
+// 步骤条组件类型
+export interface IStepsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS;
+}
+
+// 步骤条样式
+export interface IStepsTypeConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_TYPE;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 步骤条标签位置
+export interface IStepsLabelPlacementConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_POSITION;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
 // 折叠配置
 export interface ICollapsedConfigType<KeyType> extends ICommonConfigType {
   key: string;

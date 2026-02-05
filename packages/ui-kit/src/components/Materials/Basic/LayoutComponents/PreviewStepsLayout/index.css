@@ -1,0 +1,73 @@
+.XPreviewStepsLayout {
+  max-width: 100%;
+  border: 1px solid transparent;
+  overflow: visible;
+
+  .stepsContainer {
+    width: 100%;
+    padding: 16px;
+    background: #fff;
+    border-radius: 8px;
+  }
+
+  .contentContainer {
+    width: 100%;
+    flex: 1;
+    min-height: 200px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .stepContent {
+    width: 100%;
+    height: 100%;
+    display: none;
+
+    &.active {
+      display: block;
+    }
+
+    .content {
+      height: 100%;
+      min-height: 200px;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      padding-top: 18px;
+    }
+
+    .componentItem {
+      cursor: pointer;
+      box-sizing: border-box;
+      border: 1px dashed transparent;
+      border-radius: 8px;
+      transition: border-color 0.2s ease;
+      position: relative;
+
+      &:hover {
+        border-color: rgb(var(--primary-6));
+      }
+    }
+  }
+
+  .buttonContainer {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px;
+    background: #fff;
+    border-radius: 8px;
+  }
+
+  &.listPreviewStepsLayout {
+    .stepContent {
+      .content {
+        padding-top: 0;
+      }
+    }
+  }
+}

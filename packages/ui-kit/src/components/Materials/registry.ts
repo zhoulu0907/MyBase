@@ -49,9 +49,11 @@ const COMPONENT_TYPE = {
   COLUMN_LAYOUT: 'XColumnLayout',
   TABS_LAYOUT: 'XTabsLayout',
   COLLAPSE_LAYOUT: 'XCollapseLayout',
+  STEPS_LAYOUT: 'XStepsLayout',
   PREVIEW_COLUMN_LAYOUT: 'XPreviewColumnLayout',
   PREVIEW_TABS_LAYOUT: 'XPreviewTabsLayout',
   PREVIEW_COLLAPSE_LAYOUT: 'XPreviewCollapseLayout',
+  PREVIEW_STEPS_LAYOUT: 'XPreviewStepsLayout',
   // 表单
   INPUT_TEXT: 'XInputText',
   INPUT_TEXTAREA: 'XInputTextArea',
@@ -138,6 +140,14 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     schema: cloneDeep(BasicSchema.XCollapseLayout),
     validate: BaseValidate.XCollapseLayout,
     template: { h: 36, w: 118, displayName: '分组布局', icon: 'colpase_layout_cp.svg', category: 'layout' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.STEPS_LAYOUT]: {
+    type: COMPONENT_TYPE.STEPS_LAYOUT,
+    schema: cloneDeep(BasicSchema.XStepsLayout),
+    validate: BaseValidate.XStepsLayout,
+    template: { h: 36, w: 118, displayName: '步骤条', icon: 'steps_layout_cp.svg', category: 'layout' },
     fieldMap: [],
     entityMap: []
   },

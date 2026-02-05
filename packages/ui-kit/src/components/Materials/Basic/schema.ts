@@ -28,6 +28,7 @@ import XCheckItem from './FormComponents/CheckItem/schema';
 import XCollapseLayout from './LayoutComponents/CollapseLayout/schema';
 import XColumnLayout from './LayoutComponents/ColumnLayout/schema';
 import XTabsLayout from './LayoutComponents/TabsLayout/schema';
+import XStepsLayout from './LayoutComponents/StepsLayout/schema';
 import XCalendar from './ListComponents/Calendar/schema';
 import XCarousel from './ListComponents/Carousel/schema';
 import XCollapse from './ListComponents/Collapse/schema';
@@ -89,6 +90,7 @@ export const baseSchema = {
   XColumnLayout,
   XCollapseLayout,
   XTabsLayout,
+  XStepsLayout,
 
   XAlert,
   XInfoNotice,
