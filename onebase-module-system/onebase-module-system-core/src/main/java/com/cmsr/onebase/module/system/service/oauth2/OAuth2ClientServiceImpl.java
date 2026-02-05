@@ -35,6 +35,11 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Validated
 @Slf4j
 public class OAuth2ClientServiceImpl implements OAuth2ClientService {
+    public static final String USER_READ = "user.read";
+    public static final String USER_WRITE = "user.write";
+    public static final String AUTHORIZATION_CODE = "authorization_code";
+    public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String SYSTEM_USER_QUERY = "system:user:query";
     @Resource
     private OAuth2ClientDataRepository oauth2ClientDataRepository;
 
@@ -43,16 +48,17 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // validateClientIdExists(null, createReqVO.getClientId());
         // 插入
         OAuth2ClientDO client = BeanUtils.toBean(createReqVO, OAuth2ClientDO.class);
+
         client.setClientId(OAuth2ClientUtils.generateClientId());
         client.setSecret(OAuth2ClientUtils.generateClientSecret());
         client.setStatus(CommonStatusEnum.ENABLE.getStatus());
         client.setAccessTokenValiditySeconds(180);
         client.setRefreshTokenValiditySeconds(8640);
-        client.setAuthorizedGrantTypes(CollUtil.newArrayList("authorization_code","refresh_token"));
-        client.setScopes(CollUtil.newArrayList("user.read","user.write"));
-        client.setAuthorities(CollUtil.newArrayList("system:user:query"));
-        client.setResourceIds(CollUtil.newArrayList("1024"));
-        client.setAutoApproveScopes(CollUtil.newArrayList("user.read","user.write"));
+        client.setAuthorizedGrantTypes(CollUtil.newArrayList(AUTHORIZATION_CODE, REFRESH_TOKEN));
+        client.setScopes(CollUtil.newArrayList(USER_READ,USER_WRITE));
+        client.setAuthorities(CollUtil.newArrayList(SYSTEM_USER_QUERY));
+        client.setAutoApproveScopes(CollUtil.newArrayList(USER_READ,USER_WRITE));
+
         oauth2ClientDataRepository.insert(client);
         return client.getId();
     }
