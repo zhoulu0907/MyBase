@@ -5,13 +5,6 @@ import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTI
 import type { XDataListConfig } from './schema';
 import styles from './index.module.css';
 
-const containerStyle: CSSProperties = {
-  width: '100%',
-  padding: '16px',
-  borderRadius: 8,
-  boxSizing: 'border-box'
-};
-
 const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
   const { status, runtime, label, tableUuid } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
@@ -40,7 +33,7 @@ const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
   }
 
   return (
-    <div style={containerStyle}>
+    <div className={styles.containerStyle}>
       <div className={styles.dataListHeader}>
         {label?.display && (
           <span className={styles.dataListHeaderTitle}>{label?.text}</span>

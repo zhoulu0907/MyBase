@@ -26,6 +26,7 @@ import type {
   TTextDefaultType
 } from '../../core/types';
 import type { ICarouselContentConfigType, IVerifyConfigType } from '../../core/types';
+import { labelNameConfig, autoplayConfig, intervalConfig } from '../../config/commonConfig';
 import SlideOne from '@/assets/workbench/carousel/slide-1.svg';
 import SlideTwo from '@/assets/workbench/carousel/slide-2.svg';
 import { FILL_OPTIONS, FILL_VALUES } from '@/components/Materials/constants';
@@ -176,21 +177,9 @@ const XCarousel: XCarouselSchema = {
   editData: [
     ...workbenchBaseConfig,
     carouselContentConfig,
-    {
-      key: 'label',
-      name: '标题名称',
-      type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-    },
-    {
-      key: 'autoplay',
-      name: '自动轮播',
-      type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
-    },
-    {
-      key: 'interval',
-      name: '轮播间隔',
-      type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT
-    },
+    labelNameConfig,
+    autoplayConfig,
+    intervalConfig,
     fillConfig
   ],
   config: {

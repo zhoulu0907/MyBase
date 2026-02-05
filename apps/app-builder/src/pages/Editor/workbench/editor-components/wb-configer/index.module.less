@@ -95,3 +95,43 @@
     text-align: center;
   }
 }
+
+
+.imageConfig {
+  :global(.pc-form-item-control-children div:first-child) {
+    color: #525967;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  :global(.pc-form-item-control-children div:last-child) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+
+    & > div {
+      width: 132px;
+      height: 80px;
+      overflow: hidden;
+      border-radius: 4px;
+      position: relative;
+      pointer-events: none;
+    }
+
+    img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    svg {
+      position: absolute;
+      right: 4px;
+      font-size: 14px;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 3px;
+      background-color: rgba(0, 0, 0, 0.5);
+      pointer-events: auto;
+    }
+  }
+}

@@ -1,3 +1,12 @@
+.containerStyle {
+  width: 100%;
+  min-height: 120px;
+  padding: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
 .todoListHeader {
   display: flex;
   align-items: center;
