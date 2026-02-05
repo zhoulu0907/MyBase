@@ -292,7 +292,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     @Override
     @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_SAAS_SUB_TYPE, bizNo = "{{#user.id}}",
             success = LOGIN_USER_SAAS_SUCCESS)
-    public AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO) {
+    public AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO, Integer userType) {
         // 校验验证码
         mobileValidateCaptcha(reqVO);
 
@@ -308,7 +308,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             // 解密原文
             reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
             // 使用手机密码，进行登录
-            AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), UserTypeEnum.CORP.getValue());
+            AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), userType);
 
             //验证登录账户是否有权限登录该应用
             checkPermission(reqVO.getAppId(), user.getId());
@@ -338,7 +338,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
 
     @Override
-    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO) {
+    public AuthLoginRespVO corpLogin(CorpAuthLoginReqVO reqVO, Integer userType) {
         // 1.校验验证码
         mobileValidateCaptcha(reqVO);
 
@@ -351,7 +351,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         // 2.1 解密原文
         reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
         // 2.2 使用账号密码，进行登录
-        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), UserTypeEnum.CORP.getValue());
+        AdminUserDO user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), userType);
         if (!Objects.equals(UserTypeEnum.CORP.getValue(), user.getUserType())) {
             throw exception(AUTH_VERIFY_NO_CORP_LOGIN_ERROR);
         }
@@ -394,7 +394,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
 
 
     @Override
-    public ThirdAuthLoginRespVO thirdLogin(ThirdAuthLoginReqVO reqVO) {
+    public ThirdAuthLoginRespVO thirdLogin(ThirdAuthLoginReqVO reqVO, Integer userType) {
 
         // 校验验证码
         thirdValidateCaptcha(reqVO);
@@ -414,12 +414,12 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
                 //  解密原文
                 reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
                 // 使用手机密码，进行登录
-                user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), UserTypeEnum.THIRD.getValue());
+                user = mobileAuthenticate(reqVO.getMobile(), reqVO.getPassword(), userType);
 
             } else if (LongTypeEnum.VERIFYCODE.getCode().equals(reqVO.getLoginType())) {
                 // 使用手机验证码，进行登录
                 validateVerfiyCode(reqVO);
-                user = thirdAuthenticate(reqVO.getMobile(), reqVO.getVerifyCode(), UserTypeEnum.THIRD.getValue());
+                user = thirdAuthenticate(reqVO.getMobile(), reqVO.getVerifyCode(), userType);
                 if (null == user) {
                     //如果未注册，直接返回，首次注册为true
                     ThirdAuthLoginRespVO thirdAuthLoginRespVO = new ThirdAuthLoginRespVO();

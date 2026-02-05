@@ -38,7 +38,7 @@ public interface RuntimeAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO);
+    AuthLoginRespVO appMobileLogin(AppMobileLoginReqVO reqVO, Integer userType);
 
     /**
      * 刷新访问令牌
@@ -69,7 +69,7 @@ public interface RuntimeAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
+    AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO, Integer userType);
 
     /**
      * 账号登录
@@ -77,7 +77,7 @@ public interface RuntimeAuthService {
      * @param reqVO 登录信息
      * @return 登录结果
      */
-    ThirdAuthLoginRespVO thirdLogin(@Valid ThirdAuthLoginReqVO reqVO);
+    ThirdAuthLoginRespVO thirdLogin(@Valid ThirdAuthLoginReqVO reqVO, Integer userType);
     /**
      * 忘记密码
      *

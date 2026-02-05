@@ -44,11 +44,16 @@ import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasou
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldOptionBuildService;
 import com.cmsr.onebase.module.metadata.build.service.field.MetadataEntityFieldConstraintBuildService;
 import com.cmsr.onebase.module.metadata.build.service.number.AutoNumberConfigBuildService;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberResetLogDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberStateDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberConfigDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberResetLogRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataAutoNumberStateRepository;
 import com.cmsr.onebase.module.metadata.core.enums.BusinessEntityTypeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.BooleanStatusEnum;
 import com.cmsr.onebase.module.metadata.core.enums.CommonStatusEnum;
+import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberRuleEngine;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -75,6 +80,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 import org.springframework.util.StringUtils;
 
@@ -116,6 +122,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     private AutoNumberConfigBuildService autoNumberConfigBuildService;
     @Resource
     private AutoNumberRuleBuildService autoNumberRuleBuildService;
+    @Resource
+    private MetadataAutoNumberStateRepository autoNumberStateRepository;
+    @Resource
+    private MetadataAutoNumberResetLogRepository autoNumberResetLogRepository;
+    @Resource
+    private AutoNumberRuleEngine autoNumberRuleEngine;
     @Resource
     private MetadataComponentFieldTypeBuildService componentFieldTypeService;
     @Resource
@@ -2797,6 +2809,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             MetadataAutoNumberConfigDO savedConfig = autoNumberConfigBuildService.getByFieldId(fieldUuid);
             String configUuid = savedConfig != null ? savedConfig.getConfigUuid() : null;
 
+            // 如果勾选“修改开始值后下一条生效”，且初始值发生变化，则重置序号状态
+            if (existingConfig != null && savedConfig != null
+                    && existingConfig.getInitialValue() != null
+                    && savedConfig.getInitialValue() != null
+                    && !existingConfig.getInitialValue().equals(savedConfig.getInitialValue())
+                    && savedConfig.getResetOnInitialChange() != null
+                    && savedConfig.getResetOnInitialChange() == 1) {
+                resetAutoNumberStateOnInitialChange(savedConfig);
+            }
+
             // 处理其他类型规则项（TEXT/DATE/FIELD_REF）到RuleItem表
             if (!otherRules.isEmpty() && savedConfig != null) {
                 // 获取现有规则项，按 ID 建立映射
@@ -2923,6 +2945,44 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
         // 3. 无法解析
         return null;
+    }
+
+    /**
+     * 初始值变更后重置序号状态，使下一条记录从新初始值开始
+     *
+     * @param config 最新自动编号配置
+     */
+    private void resetAutoNumberStateOnInitialChange(MetadataAutoNumberConfigDO config) {
+        String periodKey = autoNumberRuleEngine.generatePeriodKey(
+                config.getResetCycle(), LocalDateTime.now());
+
+        MetadataAutoNumberStateDO state = autoNumberStateRepository.findOneByPeriod(config.getConfigUuid(), periodKey);
+        Long prevValue = state != null ? state.getCurrentValue() : null;
+        Long nextValue = config.getInitialValue() - 1;
+
+        if (state == null) {
+            state = new MetadataAutoNumberStateDO();
+            state.setConfigUuid(config.getConfigUuid());
+            state.setPeriodKey(periodKey);
+            state.setCurrentValue(nextValue);
+            state.setApplicationId(config.getApplicationId());
+            autoNumberStateRepository.save(state);
+        } else {
+            MetadataAutoNumberStateDO update = new MetadataAutoNumberStateDO();
+            update.setId(state.getId());
+            update.setCurrentValue(nextValue);
+            autoNumberStateRepository.updateById(update);
+        }
+
+        MetadataAutoNumberResetLogDO resetLog = new MetadataAutoNumberResetLogDO();
+        resetLog.setConfigId(config.getId());
+        resetLog.setPeriodKey(periodKey);
+        resetLog.setPrevValue(prevValue);
+        resetLog.setNextValue(nextValue + 1);
+        resetLog.setResetReason("修改初始值后生效");
+        resetLog.setApplicationId(config.getApplicationId());
+        resetLog.setResetTime(LocalDateTime.now());
+        autoNumberResetLogRepository.save(resetLog);
     }
 
     /**

@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.exception.ServiceException;
+import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
@@ -27,6 +28,7 @@ import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -43,6 +45,7 @@ import com.cmsr.onebase.module.system.enums.user.CreateSourceEnum;
 import com.cmsr.onebase.module.system.enums.user.UserStatusEnum;
 import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.onebase.module.system.service.dept.DeptService;
+import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.post.PostService;
@@ -113,6 +116,9 @@ public class UserServiceImpl implements UserService {
     @Lazy
     @Resource
     private RoleService roleService;
+
+    @Resource
+    private OAuth2TokenService oauth2TokenService ;
 
     @Resource
     private SecurityConfigApi securityConfigApi;
@@ -436,11 +442,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUserProfile(Long id, UserProfileUpdateReqVO reqVO, Integer userType) {
+    public void updateUserProfile(Long id, UserProfileUpdateReqVO reqVO) {
         // 校验正确性
-        validateUserExists(id);
+        AdminUserDO adminUser = validateUserExists(id);
         validateEmailUnique(id, reqVO.getEmail());
-        validateMobileUnique(id, reqVO.getMobile(), userType);
+        validateMobileUnique(id, reqVO.getMobile(), adminUser.getUserType());
         // 执行更新
         userDataRepository.update(BeanUtils.toBean(reqVO, AdminUserDO.class).setId(id));
     }
@@ -705,6 +711,9 @@ public class UserServiceImpl implements UserService {
         // 校验用户名唯一
         validateUsernameUnique(id, username);
         // 校验手机号唯一
+        if(user != null && userType == null){
+            userType = user.getUserType();
+        }
         validateMobileUnique(id, mobile, userType);
         // 校验邮箱唯一
         validateEmailUnique(id, email);
@@ -1519,6 +1528,15 @@ public class UserServiceImpl implements UserService {
             // 6. 记录操作日志上下文
             LogRecordContext.putVariable("userIds", userIds);
         }
+    }
+
+    public UserSimpleRespVO getUserInfoByToken(String accessToken) {
+        OAuth2AccessTokenDO token = oauth2TokenService.getAccessToken(accessToken);
+        if (token == null) {
+            throw exception(GlobalErrorCodeConstants.UNAUTHORIZED);
+        }
+        AdminUserDO user = userDataRepository.getById(token.getUserId());
+        return BeanUtils.toBean(user, UserSimpleRespVO.class);
     }
 
 }

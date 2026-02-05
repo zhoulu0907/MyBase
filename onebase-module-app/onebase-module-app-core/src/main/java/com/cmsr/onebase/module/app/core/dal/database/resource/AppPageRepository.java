@@ -102,4 +102,17 @@ public class AppPageRepository extends BaseBizRepository<AppResourcePageMapper, 
                 .where(APP_RESOURCE_PAGE.PAGE_UUID.eq(pageUuid));
         return this.getOneAs(queryWrapper, PageRespDTO.class);
     }
+
+    /**
+     * 根据应用ID查询 page_type 为 list 的所有页面
+     *
+     * @param applicationId 应用ID
+     * @return page_type 为 list 的页面列表
+     */
+    public List<AppResourcePageDO> findListPagesByAppId(Long applicationId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_RESOURCE_PAGE.APPLICATION_ID.eq(applicationId))
+                .where(APP_RESOURCE_PAGE.PAGE_TYPE.eq(PageEnum.LIST.getValue()));
+        return list(queryWrapper);
+    }
 }
