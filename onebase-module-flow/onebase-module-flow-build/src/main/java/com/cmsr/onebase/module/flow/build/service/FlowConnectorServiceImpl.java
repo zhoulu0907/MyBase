@@ -1006,8 +1006,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig) {
-        return saveOrUpdateActionConfigInternal(connectorId, actionConfig, false);
+    public Boolean updateActionConfig(Long connectorId, String actionName, SaveActionConfigReqVO reqVO) {
+        return saveOrUpdateActionConfigInternal(connectorId, reqVO.getActionConfig(), false);
     }
 
     /**
