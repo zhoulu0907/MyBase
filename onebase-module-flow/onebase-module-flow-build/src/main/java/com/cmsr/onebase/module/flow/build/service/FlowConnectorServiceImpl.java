@@ -1051,13 +1051,37 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             }
         }
 
-        // 5. 保存动作配置
-        properties.set(actionName, actionConfig);
+        // 5. 添加时间戳字段
+        String currentTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        ObjectNode actionConfigWithTimestamp;
+        if (actionConfig.isObject()) {
+            actionConfigWithTimestamp = (ObjectNode) actionConfig;
+        } else {
+            actionConfigWithTimestamp = objectMapper.createObjectNode();
+            actionConfigWithTimestamp.setAll((ObjectNode) actionConfig);
+        }
 
-        // 6. 更新元数据版本
+        if (isNew) {
+            // 新建：设置createTime和updateTime
+            actionConfigWithTimestamp.put("createTime", currentTime);
+            actionConfigWithTimestamp.put("updateTime", currentTime);
+        } else {
+            // 更新：只更新updateTime，保留原createTime
+            JsonNode existingAction = properties.get(actionName);
+            String existingCreateTime = existingAction != null && existingAction.has("createTime")
+                    ? existingAction.get("createTime").asText()
+                    : currentTime;
+            actionConfigWithTimestamp.put("createTime", existingCreateTime);
+            actionConfigWithTimestamp.put("updateTime", currentTime);
+        }
+
+        // 6. 保存动作配置
+        properties.set(actionName, actionConfigWithTimestamp);
+
+        // 7. 更新元数据版本
         updateActionMetadataVersion(rootActionConfig);
 
-        // 7. 保存到数据库
+        // 8. 保存到数据库
         connector.setActionConfig(toJsonString(rootActionConfig));
         connectorRepository.updateById(connector);
 
