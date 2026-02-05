@@ -11,8 +11,10 @@ import {
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
+  ConnectorActionStatusText,
   deleteScriptAction,
   listConnectorActionInfos,
+  type ConnectorActionStatus,
   type ListConnectorActionReq,
   type ScriptActionItem
 } from '@onebase/app';
@@ -132,6 +134,14 @@ const ScriptActionListPage: React.FC = () => {
       render: (createTime: number) => {
         return <span>{dayjs(createTime).format('YYYY-MM-DD HH:mm:ss')}</span>;
       }
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 100,
+      render: (status: ConnectorActionStatus) => (
+        <span>{ConnectorActionStatusText[status] ?? '-'}</span>
+      )
     },
     {
       title: <div style={{ textAlign: 'center', width: '90%' }}>操作</div>,
