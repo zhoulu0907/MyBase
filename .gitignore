@@ -143,3 +143,5 @@ LOG_FILE_IS_UNDEFINED
 
 ### docs ###
 docs/
+/cursor_mac_id_modifier.sh
+/temp_bloomberg_scraper.py
