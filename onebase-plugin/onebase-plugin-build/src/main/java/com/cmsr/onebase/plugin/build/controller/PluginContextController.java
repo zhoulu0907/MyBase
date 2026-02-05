@@ -2,16 +2,19 @@ package com.cmsr.onebase.plugin.build.controller;
 
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.plugin.build.service.PluginConfigService;
+import com.cmsr.onebase.plugin.build.service.PluginInfoService;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginConfigDetailRespVO;
+import com.cmsr.onebase.plugin.core.constant.PluginStatusConstants;
+import com.cmsr.onebase.plugin.core.dal.database.PluginInfoRepository;
+import com.cmsr.onebase.plugin.core.dal.dataobject.PluginInfoDO;
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
-import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
+import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import org.pf4j.PluginState;
-import org.pf4j.PluginWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,13 +35,17 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/plugin/context")
 @Validated
+@Slf4j
 public class PluginContextController {
 
     @Resource
     private PluginConfigService pluginConfigService;
 
     @Resource
-    private OneBasePluginManager oneBasePluginManager;
+    private PluginInfoService pluginInfoService;
+
+    @Resource
+    private PluginInfoRepository pluginInfoRepository;
 
     @Resource
     private PluginProperties pluginProperties;
@@ -64,30 +71,43 @@ public class PluginContextController {
     @Operation(summary = "获取所有可用插件的前端资源清单")
     public CommonResult<List<Map<String, Object>>> getPluginManifest() {
         List<Map<String, Object>> manifest = new ArrayList<>();
-        List<PluginWrapper> plugins = oneBasePluginManager.getPluginManager().getPlugins();
+        // 从数据库获取已启用的插件列表
+        List<PluginInfoDO> plugins = pluginInfoRepository.list(
+                QueryWrapper.create().eq(PluginInfoDO::getStatus, PluginStatusConstants.ENABLED)
+        );
 
         String contextPath = pluginProperties.getFrontendContextPath();
         if (!contextPath.endsWith("/")) {
             contextPath += "/";
         }
 
-        for (PluginWrapper plugin : plugins) {
-            if (plugin.getPluginState() != PluginState.STARTED) {
-                continue;
-            }
+        for (PluginInfoDO plugin : plugins) {
             String pluginId = plugin.getPluginId();
-            String version = plugin.getDescriptor().getVersion().toString();
+            String version = plugin.getPluginVersion();
             String dirName = "frontend-" + pluginId + "-" + version;
 
             Path frontendDir = Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getFrontendDir(), dirName);
             if (!Files.exists(frontendDir)) {
-                continue;
+                // 尝试懒加载提取前端资源
+                try {
+                    pluginInfoService.preparePluginFrontend(plugin);
+                } catch (Exception e) {
+                    log.error("懒加载提取前端资源失败: pluginId={}, version={}", pluginId, version, e);
+                }
+
+                if (!Files.exists(frontendDir)) {
+                    continue;
+                }
             }
 
             Map<String, Object> info = new HashMap<>();
             info.put("pluginId", pluginId);
             info.put("version", version);
             String baseUrl = contextPath + dirName + "/";
+            // 检查是否存在嵌套frontend目录
+            if (Files.exists(frontendDir.resolve("frontend"))) {
+                baseUrl += "frontend/";
+            }
             info.put("baseUrl", baseUrl);
 
             if (Files.exists(frontendDir.resolve("remoteEntry.js"))) {
@@ -96,6 +116,12 @@ public class PluginContextController {
             } else if (Files.exists(frontendDir.resolve("index.html"))) {
                 info.put("entry", "index.html");
                 info.put("type", "iframe");
+            } else if (Files.exists(frontendDir.resolve("frontend/index.html"))) {
+                info.put("entry", "frontend/index.html");
+                info.put("type", "iframe");
+            } else if (Files.exists(frontendDir.resolve("frontend/remoteEntry.js"))) {
+                info.put("entry", "frontend/remoteEntry.js");
+                info.put("type", "module-federation");
             } else {
                 info.put("type", "static");
             }

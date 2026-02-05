@@ -1,9 +1,8 @@
 package com.cmsr.onebase.plugin.runtime.loader;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
+import com.cmsr.onebase.plugin.common.util.PluginPackageUtil;
 import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
 import com.cmsr.onebase.plugin.runtime.manager.OneBasePluginManager;
 import jakarta.annotation.Resource;
@@ -12,12 +11,11 @@ import org.pf4j.PluginState;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.stream.Stream;
 
 /**
  * 插件文件管理器
@@ -84,10 +82,10 @@ public class PluginFileManager {
             Files.write(tempZipFile, content);
 
             // 6. 解压后端zip到目标目录
-            Path extractedZipPath = extractBackendZip(tempZipFile, backendTargetDir);
+            Path extractedZipPath = PluginPackageUtil.extractBackendZip(tempZipFile, backendTargetDir);
 
             // 7. 解压前端zip到前端目标目录
-            extractFrontendZip(tempZipFile, frontendTargetDir);
+            PluginPackageUtil.extractFrontendZip(tempZipFile, frontendTargetDir);
 
             // 8. 加载并启动插件
             if (extractedZipPath != null) {
@@ -104,7 +102,7 @@ public class PluginFileManager {
             throw new RuntimeException("下载加载插件失败", e);
         } finally {
             // 清理临时目录
-            FileUtil.del(tempPath.toFile());
+            PluginPackageUtil.deleteFile(tempPath);
         }
     }
 
@@ -162,14 +160,14 @@ public class PluginFileManager {
         Path pluginDir = getPluginDir(pluginId, pluginVersion);
         if (Files.exists(pluginDir)) {
             log.info("清理插件后端文件: {}", pluginDir);
-            FileUtil.del(pluginDir.toFile());
+            PluginPackageUtil.deleteFile(pluginDir);
         }
 
         // 清理前端文件
         Path frontendDir = Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getFrontendDir(), "frontend-" + pluginId + "-" + pluginVersion);
         if (Files.exists(frontendDir)) {
             log.info("清理插件前端文件: {}", frontendDir);
-            FileUtil.del(frontendDir.toFile());
+            PluginPackageUtil.deleteFile(frontendDir);
         }
     }
 
@@ -192,13 +190,13 @@ public class PluginFileManager {
         if (!Files.exists(rootDir)) {
             return;
         }
-        try {
-            Files.list(rootDir).forEach(path -> {
+        try (Stream<Path> list = Files.list(rootDir)) {
+            list.forEach(path -> {
                 String fileName = path.getFileName().toString();
                 // 匹配以pluginId开头的文件或目录
                 if (fileName.startsWith(pluginId) || fileName.contains(pluginId)) {
                     log.info("删除插件文件/目录: {}", path);
-                    FileUtil.del(path.toFile());
+                    PluginPackageUtil.deleteFile(path);
                 }
             });
         } catch (IOException e) {
@@ -238,105 +236,6 @@ public class PluginFileManager {
         } catch (Exception e) {
             log.error("从MinIO下载文件失败: fileId={}", fileId, e);
             throw new RuntimeException("下载文件失败", e);
-        }
-    }
-
-    /**
-     * 从主ZIP中提取后端ZIP包
-     * <p>
-     * 插件包结构：主zip包含前端zip、后端zip、两个json文件
-     * 后端zip文件名通常包含"backend"或以"-backend.zip"结尾
-     * </p>
-     *
-     * @param zipFile 主ZIP文件路径
-     * @param targetDir 目标目录
-     * @return 提取出的后端ZIP文件路径，如果未找到返回null
-     */
-    private Path extractBackendZip(Path zipFile, Path targetDir) throws IOException {
-        Path extractedPath = null;
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                String entryName = entry.getName();
-
-                // 提取后端zip文件（文件名包含"backend"或以".zip"结尾且不包含"frontend"）
-                if (entryName.endsWith(".zip") && !entry.isDirectory()) {
-                    String lowerName = entryName.toLowerCase();
-                    // 优先匹配包含backend的zip，否则跳过包含frontend的zip
-                    if (lowerName.contains("backend") || !lowerName.contains("frontend")) {
-                        Path targetFile = targetDir.resolve(Paths.get(entryName).getFileName());
-                        log.info("解压后端插件包: {} -> {}", entryName, targetFile);
-
-                        Files.createDirectories(targetFile.getParent());
-                        try (OutputStream os = new FileOutputStream(targetFile.toFile())) {
-                            IoUtil.copy(zis, os);
-                        }
-                        extractedPath = targetFile;
-                        // 只提取一个后端zip
-                        if (lowerName.contains("backend")) {
-                            break;
-                        }
-                    }
-                }
-
-                zis.closeEntry();
-            }
-        }
-        return extractedPath;
-    }
-
-    /**
-     * 从主ZIP中提取前端ZIP包并解压
-     *
-     * @param zipFile 主ZIP文件路径
-     * @param targetDir 前端目标目录 (e.g. plugins/frontend/{pluginId}/{version})
-     */
-    private void extractFrontendZip(Path zipFile, Path targetDir) throws IOException {
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(zipFile.toFile()))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                String entryName = entry.getName();
-
-                // 提取前端zip文件（文件名包含"frontend"且以".zip"结尾）
-                if (entryName.endsWith(".zip") && !entry.isDirectory() && entryName.toLowerCase().contains("frontend")) {
-                    log.info("发现前端插件包，开始解压: {}", entryName);
-                    // 前端包需要解压出内容到 targetDir
-                    // 这里需要先把 frontend.zip 提取出来，再解压它
-
-                    // 1. 提取 frontend.zip 到临时文件
-                    Path tempFrontendZip = Files.createTempFile("frontend-", ".zip");
-                    try (OutputStream os = new FileOutputStream(tempFrontendZip.toFile())) {
-                        IoUtil.copy(zis, os);
-                    }
-
-                    // 2. 解压 frontend.zip 到 targetDir
-                    try (ZipInputStream frontendZis = new ZipInputStream(new FileInputStream(tempFrontendZip.toFile()))) {
-                        ZipEntry feEntry;
-                        while ((feEntry = frontendZis.getNextEntry()) != null) {
-                            if (feEntry.isDirectory()) {
-                                continue;
-                            }
-                            Path targetFile = targetDir.resolve(feEntry.getName());
-                            // 防止Zip Slip
-                            if (!targetFile.normalize().startsWith(targetDir.normalize())) {
-                                throw new IOException("Zip entry is outside of the target dir: " + feEntry.getName());
-                            }
-                            Files.createDirectories(targetFile.getParent());
-                            try (OutputStream fos = new FileOutputStream(targetFile.toFile())) {
-                                IoUtil.copy(frontendZis, fos);
-                            }
-                            frontendZis.closeEntry();
-                        }
-                    } finally {
-                        FileUtil.del(tempFrontendZip.toFile());
-                    }
-
-                    log.info("前端插件包解压完成: {} -> {}", entryName, targetDir);
-                    // 只处理一个前端zip
-                    break;
-                }
-                zis.closeEntry();
-            }
         }
     }
 
@@ -390,8 +289,8 @@ public class PluginFileManager {
      * @return ZIP文件路径，未找到返回null
      */
     private Path findPluginZip(Path pluginDir) {
-        try {
-            return Files.list(pluginDir)
+        try (Stream<Path> stream = Files.list(pluginDir)) {
+            return stream
                     .filter(p -> p.toString().endsWith(".zip"))
                     .findFirst()
                     .orElse(null);
