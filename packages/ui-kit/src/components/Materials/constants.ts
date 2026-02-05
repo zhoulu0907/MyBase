@@ -147,6 +147,10 @@ export const CONFIG_TYPES = {
   GROUP_FILTER: 'GroupFilter',
   // 画布卡片配置
   CANVAS_CARD_CONFIG: 'CanvasCardConfig',
+  // 指标卡样式库
+  INDICATOR_CARD_STYLE: 'IndicatorCardStyle',
+  // 指标配置
+  INDICATOR_CARD_CONFIG: 'IndicatorCardConfig'
 } as const;
 
 // 状态选项常量
@@ -686,3 +690,12 @@ export const SELECT_OPTIONS_BPM = [
   { value: 'bpm_status', displayName: '流程状态', fieldName: 'bpm_status', fieldType: 'SELECT' },
   { value: 'bpm_current_node', displayName: '当前节点', fieldName: 'bpm_current_node', fieldType: 'SELECT' }
 ] as any;
+
+// 指标卡
+export const INDICATOR_CARD_STYLE_TYPE = {
+  ONE:'one',
+  TWO:'two',
+  THREE:'three',
+  FOUR:'four',
+  FIVE:'five',
+}

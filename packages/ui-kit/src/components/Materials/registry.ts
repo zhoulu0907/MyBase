@@ -13,6 +13,7 @@ import { baseValidate as BaseValidate } from './Basic/validate'
 import type { ComponentType } from './componentTypes'
 import { WorkbenchComp } from './Workbench'
 import { workbenchSchema } from './Workbench/schema/schema'
+import { INDICATOR_CARD_STYLE_TYPE } from './constants'
 
 /** 组件分类类型 */
 type ComponentCategory = 'layout' | 'form' | 'list' | 'show' | 'workbench'
@@ -92,6 +93,7 @@ const COMPONENT_TYPE = {
   LIST: 'XList',
   TREE: 'XTree',
   CANVAS_CARD: 'XCanvasCard',
+  INDICATOR_CARD: 'XIndicatorCard',
   // 展示
   INFO_NOTICE: 'XInfoNotice',
   TEXT: 'XText',
@@ -476,6 +478,14 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     type: COMPONENT_TYPE.CANVAS_CARD,
     schema: cloneDeep(BasicSchema.XCanvasCard),
     template: { h: 48, w: 68, displayName: '画布卡片', icon: 'table_cp.svg', category: 'list' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.INDICATOR_CARD]: {
+    type: COMPONENT_TYPE.INDICATOR_CARD,
+    schema: cloneDeep(BasicSchema.XIndicatorCard),
+    validate: BaseValidate.XIndicatorCard,
+    template: { h: 48, w: 68, displayName: '指标卡', icon: 'table_cp.svg', category: 'list' },
     fieldMap: [],
     entityMap: []
   },
