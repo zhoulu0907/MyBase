@@ -1,7 +1,7 @@
-import { Button, Message, Steps } from '@arco-design/web-react';
+import { Button, Message, Spin, Steps } from '@arco-design/web-react';
 import { createForm } from '@formily/core';
 import { createSchemaField, FormProvider } from '@formily/react';
-import { saveConnectorAction, type SaveConnectorActionReq } from '@onebase/app';
+import { debugAction, getConnectorActionInfo, saveConnectorAction, type SaveConnectorActionReq } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useMemo, useState } from 'react';
 import { componentMap, FormilyFormItem } from '../../../../../../../../components/DynamicForm/componentMapper';
@@ -15,7 +15,12 @@ import { step2Schema } from './step2';
 import { step3Schema } from './step3';
 import { step4Schema } from './step4';
 
-export interface CreateHTTPActionPageProps {}
+export interface CreateHTTPActionPageProps {
+  /** 编辑时传入动作名称（或动作标识），会调用 getConnectorActionInfo 拉取并回显 */
+  editActionName?: string;
+  /** 返回列表（如点击返回或完成后的回调） */
+  onSuccess?: () => void;
+}
 
 const SchemaField = createSchemaField({
   components: {
@@ -34,8 +39,37 @@ const STEP_LIST = [
   { key: 'debug', title: '动作调试' }
 ];
 
-const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = () => {
+/** 将接口返回的 actionConfig 转为表单 values */
+function actionConfigToFormValues(config: Record<string, unknown>): Record<string, unknown> {
+  const basic = (config.basicInfo ?? {}) as Record<string, unknown>;
+  const request = (config.inputConfig ?? {}) as Record<string, unknown>;
+  const response = (config.outputConfig ?? {}) as Record<string, unknown>;
+  const debug = (config.debugConfig ?? {}) as Record<string, unknown>;
+
+  return {
+    basic,
+    tabs: {
+      requestHeaders: request.requestHeaders ?? [],
+      requestBody: request.requestBody ?? [],
+      queryParams: request.queryParams ?? [],
+      pathParams: request.pathParams ?? [],
+      responseHeaders: response.responseHeaders ?? [],
+      responseBody: response.responseBody ?? []
+    },
+    url: debug.url ?? '',
+    method: debug.method ?? 'GET',
+    debugParamsTabs: {
+      requestHeaders: debug.requestHeaders ?? [],
+      requestBody: debug.requestBody ?? [],
+      queryParams: debug.queryParams ?? [],
+      pathParams: debug.pathParams ?? []
+    }
+  };
+}
+
+const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({ editActionName, onSuccess }) => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [editLoading, setEditLoading] = useState(false);
   const form = useMemo(
     () =>
       createForm({
@@ -47,6 +81,25 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = () => {
   const STEP_SCHEMAS = [step1Schema, step2Schema, step3Schema, step4Schema];
   const currentSchema = STEP_SCHEMAS[currentStep] ?? step1Schema;
   const isLastStep = currentStep === STEP_LIST.length - 1;
+  const isEditMode = Boolean(editActionName);
+
+  // 编辑模式：拉取动作详情并回显
+  useEffect(() => {
+    if (!editActionName) return;
+    const connectorId = getHashQueryParam('id');
+    if (!connectorId) return;
+    setEditLoading(true);
+    getConnectorActionInfo(connectorId, editActionName)
+      .then((res: any) => {
+        console.log(res);
+        const values = actionConfigToFormValues(res);
+        form.setValues(values);
+      })
+      .catch((e: unknown) => {
+        Message.error((e as Error)?.message ?? '获取动作详情失败');
+      })
+      .finally(() => setEditLoading(false));
+  }, [editActionName, form]);
 
   const getTabsData = (values: Record<string, unknown>) => {
     const tabs = values.tabs as Record<string, unknown> | undefined;
@@ -78,12 +131,13 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = () => {
   }, [currentStep, form]);
 
   const [saveLoading, setSaveLoading] = useState(false);
+  const [debugLoading, setDebugLoading] = useState(false);
+  const [debugResult, setDebugResult] = useState<unknown>(null);
 
-  const handleFinish = async () => {
-    const values = form.values as Record<string, unknown>;
+  const buildActionConfig = (values: Record<string, unknown>) => {
     const fromTabs = getTabsData(values);
     const debugTabs = (values.debugParamsTabs ?? {}) as Record<string, unknown>;
-    const combined = {
+    return {
       // 步骤1：基础信息
       basic: values.basic ?? {},
       // 步骤2：请求头 / 请求体 / 查询参数 / 路径参数（可编辑）
@@ -109,6 +163,43 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = () => {
         pathParams: debugTabs.pathParams ?? []
       }
     };
+  };
+
+  const handleDebug = async () => {
+    const values = form.values as Record<string, unknown>;
+    const connectorId = getHashQueryParam('id');
+    if (!connectorId) {
+      Message.error('缺少连接器 ID');
+      return;
+    }
+
+    const basic = (values.basic ?? {}) as { actionName?: string };
+    const actionName = basic.actionName || editActionName;
+    if (!actionName) {
+      Message.error('请先填写动作名称');
+      return;
+    }
+
+    const combined = buildActionConfig(values);
+
+    setDebugLoading(true);
+    try {
+      const params: any = { debug: combined.debug };
+      const res = await debugAction(params);
+      // eslint-disable-next-line no-console
+      console.log('debugAction result: ', res);
+      setDebugResult(res);
+      Message.success('调试成功');
+    } catch (e) {
+      Message.error((e as Error)?.message ?? '调试失败');
+    } finally {
+      setDebugLoading(false);
+    }
+  };
+
+  const handleFinish = async () => {
+    const values = form.values as Record<string, unknown>;
+    const combined = buildActionConfig(values);
     const connectorId = getHashQueryParam('id');
     if (!connectorId) {
       Message.error('缺少连接器 ID');
@@ -128,26 +219,59 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = () => {
 
   return (
     <div className={styles.createScriptActionPage}>
-      <Steps current={currentStep + 1} style={{ marginBottom: 24 }}>
-        {STEP_LIST.map((item) => (
-          <Steps.Step key={item.key} title={item.title} />
-        ))}
-      </Steps>
-      <FormProvider form={form}>
-        <SchemaField key={currentStep} schema={currentSchema} />
-        <div className={styles.stepFooter}>
-          <Button disabled={currentStep === 0} onClick={() => setCurrentStep((s) => s - 1)}>
-            上一步
-          </Button>
-          <Button
-            type="primary"
-            loading={saveLoading}
-            onClick={isLastStep ? handleFinish : () => setCurrentStep((s) => s + 1)}
-          >
-            {isLastStep ? '完成' : '下一步'}
-          </Button>
-        </div>
-      </FormProvider>
+      <Spin loading={editLoading} style={{ width: '100%' }} tip="加载动作详情...">
+        <Steps current={currentStep + 1} style={{ marginBottom: 24 }}>
+          {STEP_LIST.map((item) => (
+            <Steps.Step key={item.key} title={item.title} />
+          ))}
+        </Steps>
+        <FormProvider form={form}>
+          <SchemaField key={currentStep} schema={currentSchema} />
+          <div className={styles.stepFooter}>
+            <Button disabled={currentStep === 0} onClick={() => setCurrentStep((s) => s - 1)}>
+              上一步
+            </Button>
+            <Button
+              type="primary"
+              loading={saveLoading}
+              onClick={isLastStep ? handleFinish : () => setCurrentStep((s) => s + 1)}
+            >
+              {isLastStep ? '完成' : '下一步'}
+            </Button>
+            {currentStep === 3 && (
+              <Button type="default" loading={debugLoading} onClick={handleDebug}>
+                调试
+              </Button>
+            )}
+            {isEditMode && onSuccess && (
+              <Button type="text" onClick={onSuccess}>
+                返回
+              </Button>
+            )}
+          </div>
+        </FormProvider>
+
+        {/* 展示debug的结果 */}
+        {currentStep === 3 && debugResult != null && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ fontWeight: 500, marginBottom: 8 }}>调试结果</div>
+            <pre
+              style={{
+                maxHeight: 260,
+                overflow: 'auto',
+                background: '#f5f5f5',
+                padding: 12,
+                borderRadius: 4,
+                fontSize: 12
+              }}
+            >
+              {typeof debugResult === 'string'
+                ? debugResult
+                : JSON.stringify(debugResult, null, 2)}
+            </pre>
+          </div>
+        )}
+      </Spin>
     </div>
   );
 };
