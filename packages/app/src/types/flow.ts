@@ -327,3 +327,15 @@ export interface ConnectorItem {
   };
   canEdit: boolean;
 }
+
+/** 连接器动作状态：1 已发布，2 未发布 */
+export enum ConnectorActionStatus {
+  Published = 1,
+  Unpublished = 2
+}
+
+/** 连接器动作状态文案 */
+export const ConnectorActionStatusText: Record<ConnectorActionStatus, string> = {
+  [ConnectorActionStatus.Published]: '已发布',
+  [ConnectorActionStatus.Unpublished]: '未发布'
+};
