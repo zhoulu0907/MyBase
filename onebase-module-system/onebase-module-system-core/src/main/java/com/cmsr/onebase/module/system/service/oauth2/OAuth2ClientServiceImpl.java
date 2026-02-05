@@ -49,9 +49,10 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         client.setAccessTokenValiditySeconds(180);
         client.setRefreshTokenValiditySeconds(8640);
         client.setAuthorizedGrantTypes(CollUtil.newArrayList("authorization_code","refresh_token"));
-        client.setScopes(CollUtil.newArrayList("user.read,true"));
+        client.setScopes(CollUtil.newArrayList("user.read","user.write"));
         client.setAuthorities(CollUtil.newArrayList("system:user:query"));
         client.setResourceIds(CollUtil.newArrayList("1024"));
+        client.setAutoApproveScopes(CollUtil.newArrayList("user.read","user.write"));
         oauth2ClientDataRepository.insert(client);
         return client.getId();
     }
