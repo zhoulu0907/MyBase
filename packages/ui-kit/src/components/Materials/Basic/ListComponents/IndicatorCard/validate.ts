@@ -5,6 +5,7 @@ const XIndicatorCardValidate = (props: XIndicatorCardConfig): boolean => {
     if (props.label?.display && !props.label.text) {
         return false;
     }
+    // 指标配置 indicatorList
    
     return true;
 }
