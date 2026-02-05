@@ -1213,17 +1213,18 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     public ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO) {
-        log.info("调试HTTP动作开始，URL: {}, Method: {}", reqVO.getUrl(), reqVO.getMethod());
+        DebugHttpActionReqVO.DebugConfig debug = reqVO.getDebug();
+        log.info("调试HTTP动作开始，URL: {}, Method: {}", debug.getUrl(), debug.getMethod());
 
         // 1. 构建debug配置节点（从ReqVO转换）
         ObjectNode debugConfig = objectMapper.createObjectNode();
-        debugConfig.put("url", reqVO.getUrl());
-        debugConfig.put("method", reqVO.getMethod());
+        debugConfig.put("url", debug.getUrl());
+        debugConfig.put("method", debug.getMethod());
 
         // 2. 转换requestHeaders（只保留key和fieldValue）
-        if (reqVO.getRequestHeaders() != null && !reqVO.getRequestHeaders().isEmpty()) {
+        if (debug.getRequestHeaders() != null && !debug.getRequestHeaders().isEmpty()) {
             ArrayNode headersArray = debugConfig.putArray("requestHeaders");
-            for (HttpParamFieldVO field : reqVO.getRequestHeaders()) {
+            for (HttpParamFieldVO field : debug.getRequestHeaders()) {
                 ObjectNode headerNode = headersArray.addObject();
                 headerNode.put("key", field.getKey());
                 headerNode.put("fieldValue", field.getFieldValue());
@@ -1231,9 +1232,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 3. 转换queryParams（只保留key和fieldValue）
-        if (reqVO.getQueryParams() != null && !reqVO.getQueryParams().isEmpty()) {
+        if (debug.getQueryParams() != null && !debug.getQueryParams().isEmpty()) {
             ArrayNode queryParamsArray = debugConfig.putArray("queryParams");
-            for (HttpParamFieldVO field : reqVO.getQueryParams()) {
+            for (HttpParamFieldVO field : debug.getQueryParams()) {
                 ObjectNode queryNode = queryParamsArray.addObject();
                 queryNode.put("key", field.getKey());
                 queryNode.put("fieldValue", field.getFieldValue());
@@ -1241,9 +1242,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 4. 转换pathParams（只保留key和fieldValue）
-        if (reqVO.getPathParams() != null && !reqVO.getPathParams().isEmpty()) {
+        if (debug.getPathParams() != null && !debug.getPathParams().isEmpty()) {
             ArrayNode pathParamsArray = debugConfig.putArray("pathParams");
-            for (HttpParamFieldVO field : reqVO.getPathParams()) {
+            for (HttpParamFieldVO field : debug.getPathParams()) {
                 ObjectNode pathNode = pathParamsArray.addObject();
                 pathNode.put("key", field.getKey());
                 pathNode.put("fieldValue", field.getFieldValue());
@@ -1251,9 +1252,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 5. 转换requestBody（只保留key和fieldValue）
-        if (reqVO.getRequestBody() != null && !reqVO.getRequestBody().isEmpty()) {
+        if (debug.getRequestBody() != null && !debug.getRequestBody().isEmpty()) {
             ArrayNode bodyArray = debugConfig.putArray("requestBody");
-            for (HttpParamFieldVO field : reqVO.getRequestBody()) {
+            for (HttpParamFieldVO field : debug.getRequestBody()) {
                 ObjectNode bodyNode = bodyArray.addObject();
                 bodyNode.put("key", field.getKey());
                 bodyNode.put("fieldValue", field.getFieldValue());
