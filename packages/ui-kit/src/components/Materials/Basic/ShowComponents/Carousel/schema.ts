@@ -18,7 +18,6 @@ import {
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   FILL_OPTIONS,
   FILL_VALUES,
   LAYOUT_OPTIONS,
@@ -148,7 +147,7 @@ const XCarousel: XCarouselSchema = {
     autoplayConfig,
     carouselIntervalConfig,
     fillConfig,
-    verifyConfig,
+    // verifyConfig,
     statusConfig,
     layoutConfig,
     widthConfig
@@ -161,7 +160,7 @@ const XCarousel: XCarouselSchema = {
     },
     tooltip: '',
     carouselConfig: [],
-    autoplay: false,
+    autoplay: true,
     interval: 3,
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     verify: {
