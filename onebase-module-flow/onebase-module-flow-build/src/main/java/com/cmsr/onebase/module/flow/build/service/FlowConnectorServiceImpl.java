@@ -33,13 +33,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.cmsr.onebase.module.flow.component.external.service.HttpRequest;
+import com.cmsr.onebase.module.flow.component.external.service.HttpServiceResponse;
+import com.cmsr.onebase.module.flow.context.graph.nodes.HttpNodeData;
 import com.mybatisflex.core.paginate.Page;
 
 @Slf4j
@@ -64,6 +63,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Autowired
     private ActionConfigHelper actionConfigHelper;
+
+    @Autowired
+    private com.cmsr.onebase.module.flow.component.external.service.HttpExecuteService httpExecuteService;
 
     @Override
     public PageResult<FlowConnectorLiteVO> pageConnectors(PageConnectorReqVO pageReqVO) {
@@ -1178,5 +1180,276 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             log.error("Failed to serialize JSON", e);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
         }
+    }
+
+    @Override
+    public ExecuteHttpActionRespVO executeHttpAction(Long connectorId, String actionName) {
+        log.info("执行HTTP动作开始，connectorId: {}, actionName: {}", connectorId, actionName);
+
+        // 1. 验证连接器存在
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 加载动作配置
+        JsonNode actionConfig = loadActionConfig(connector, actionName);
+        if (actionConfig == null) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+        }
+
+        // 3. 验证debug配置存在（必填）
+        JsonNode debugConfig = actionConfig.get("debug");
+        if (debugConfig == null || debugConfig.isEmpty() || !debugConfig.has("url")) {
+            throw new IllegalArgumentException("该动作未配置调试信息，无法执行");
+        }
+
+        // 4. 构建HTTP请求（从debug配置获取所有参数）
+        HttpRequest request = buildHttpRequest(debugConfig);
+
+        // 5. 执行HTTP请求
+        long startTime = System.currentTimeMillis();
+        try {
+            HttpServiceResponse response = httpExecuteService.execute(request);
+            long duration = System.currentTimeMillis() - startTime;
+
+            log.info("执行HTTP动作成功，connectorId: {}, actionName: {}, 耗时: {}ms", connectorId, actionName, duration);
+            return buildSuccessResponse(response, request, duration);
+
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.error("执行HTTP动作失败，connectorId: {}, actionName: {}", connectorId, actionName, e);
+            return buildErrorResponse(e, request, duration);
+        }
+    }
+
+    /**
+     * 加载动作配置
+     */
+    private JsonNode loadActionConfig(FlowConnectorDO connector, String actionName) {
+        try {
+            String actionConfigJson = connector.getActionConfig();
+            if (StringUtils.isBlank(actionConfigJson)) {
+                return null;
+            }
+
+            JsonNode rootConfig = objectMapper.readTree(actionConfigJson);
+            JsonNode properties = rootConfig.get("properties");
+            if (properties == null || !properties.has(actionName)) {
+                return null;
+            }
+
+            return properties.get(actionName);
+        } catch (JsonProcessingException e) {
+            log.error("解析动作配置失败，connectorId: {}, actionName: {}", connector.getId(), actionName, e);
+            return null;
+        }
+    }
+
+    /**
+     * 构建HTTP请求 - 从debug配置获取所有参数
+     */
+    private HttpRequest buildHttpRequest(JsonNode debugConfig) {
+        HttpRequest request = new HttpRequest();
+
+        // 1. 设置URL和方法（从debug，必填）
+        String url = getString(debugConfig, "url");
+        String method = getString(debugConfig, "method");
+        if (StringUtils.isBlank(url)) {
+            throw new IllegalArgumentException("调试配置的URL不能为空");
+        }
+        if (StringUtils.isBlank(method)) {
+            throw new IllegalArgumentException("调试配置的请求方法不能为空");
+        }
+        request.setUrl(url);
+        request.setMethod(method);
+
+        // 2. 处理路径参数（从debug配置获取）
+        JsonNode debugPathParams = debugConfig.get("pathParams");
+        if (debugPathParams != null && debugPathParams.isArray() && debugPathParams.size() > 0) {
+            Map<String, Object> pathParams = new LinkedHashMap<>();
+            for (JsonNode paramNode : debugPathParams) {
+                String key = getString(paramNode, "key");
+                String value = getString(paramNode, "fieldValue");
+                if (key != null && value != null) {
+                    pathParams.put(key, value);
+                }
+            }
+            if (!pathParams.isEmpty()) {
+                String resolvedUrl = replacePathVariables(url, pathParams);
+                request.setUrl(resolvedUrl);
+            }
+        }
+
+        // 3. 构建请求头（从debug配置获取）
+        List<HttpNodeData.Header> headers = buildHeaders(debugConfig);
+        request.setHeaders(headers);
+
+        // 4. 构建查询参数（从debug配置获取）
+        String urlWithQuery = buildUrlWithQuery(debugConfig, request.getUrl());
+        request.setUrl(urlWithQuery);
+
+        // 5. 构建请求体（从debug配置获取）
+        String body = buildRequestBody(debugConfig);
+        if (body != null) {
+            request.setBodyContent(body);
+        }
+
+        // 6. 设置超时和重试（测试模式）
+        request.setTimeout(5000);
+        request.setRetry(0);
+
+        return request;
+    }
+
+    /**
+     * 构建请求头 - 从debug配置获取
+     */
+    private List<HttpNodeData.Header> buildHeaders(JsonNode debugConfig) {
+        List<HttpNodeData.Header> headers = new ArrayList<>();
+
+        JsonNode debugHeaders = debugConfig.get("requestHeaders");
+        if (debugHeaders != null && debugHeaders.isArray()) {
+            for (JsonNode headerNode : debugHeaders) {
+                String key = getString(headerNode, "key");
+                String value = getString(headerNode, "fieldValue");
+                if (key != null && value != null) {
+                    HttpNodeData.Header header = new HttpNodeData.Header();
+                    header.setKey(key);
+                    header.setValue(value);
+                    headers.add(header);
+                }
+            }
+        }
+
+        return headers;
+    }
+
+    /**
+     * 路径变量替换
+     */
+    private String replacePathVariables(String url, Map<String, Object> pathParams) {
+        if (url == null || pathParams == null || pathParams.isEmpty()) {
+            return url;
+        }
+
+        String result = url;
+        for (Map.Entry<String, Object> entry : pathParams.entrySet()) {
+            String placeholder = "${" + entry.getKey() + "}";
+            String value = String.valueOf(entry.getValue());
+            result = result.replace(placeholder, value);
+        }
+        return result;
+    }
+
+    /**
+     * 构建带查询参数的URL（从debug配置获取）
+     */
+    private String buildUrlWithQuery(JsonNode debugConfig, String url) {
+        if (url == null) {
+            return url;
+        }
+
+        Map<String, String> queryParams = new LinkedHashMap<>();
+
+        JsonNode debugQueryParams = debugConfig.get("queryParams");
+        if (debugQueryParams != null && debugQueryParams.isArray()) {
+            for (JsonNode paramNode : debugQueryParams) {
+                String key = getString(paramNode, "key");
+                String value = getString(paramNode, "fieldValue");
+                if (key != null && value != null) {
+                    queryParams.put(key, value);
+                }
+            }
+        }
+
+        if (queryParams.isEmpty()) {
+            return url;
+        }
+
+        String query = queryParams.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.joining("&"));
+
+        return url + (url.contains("?") ? "&" : "?") + query;
+    }
+
+    /**
+     * 构建请求体（从debug配置获取）
+     */
+    private String buildRequestBody(JsonNode debugConfig) {
+        JsonNode debugBody = debugConfig.get("requestBody");
+        if (debugBody == null || !debugBody.isArray() || debugBody.size() == 0) {
+            return null;
+        }
+
+        // 构建JSON格式的请求体
+        Map<String, Object> bodyMap = new LinkedHashMap<>();
+        for (JsonNode paramNode : debugBody) {
+            String key = getString(paramNode, "key");
+            String value = getString(paramNode, "fieldValue");
+            if (key != null && value != null) {
+                bodyMap.put(key, value);
+            }
+        }
+
+        if (bodyMap.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return objectMapper.writeValueAsString(bodyMap);
+        } catch (Exception e) {
+            log.error("构建请求体失败", e);
+            return null;
+        }
+    }
+
+    /**
+     * 构建成功响应
+     */
+    private ExecuteHttpActionRespVO buildSuccessResponse(HttpServiceResponse response, HttpRequest request, long duration) {
+        return ExecuteHttpActionRespVO.builder()
+                .status("success")
+                .duration(duration)
+                .statusCode(response.getStatusCode())
+                .headers(response.getHeaders())
+                .body(response.getBody())
+                .rawBody(response.getRawBody())
+                .requestDetail(buildRequestDetail(request))
+                .message("执行成功")
+                .build();
+    }
+
+    /**
+     * 构建错误响应
+     */
+    private ExecuteHttpActionRespVO buildErrorResponse(Exception e, HttpRequest request, long duration) {
+        return ExecuteHttpActionRespVO.builder()
+                .status("fail")
+                .duration(duration)
+                .errorMessage(e.getMessage())
+                .requestDetail(buildRequestDetail(request))
+                .message("执行失败: " + e.getMessage())
+                .build();
+    }
+
+    /**
+     * 构建请求详情
+     */
+    private ExecuteHttpActionRespVO.RequestDetail buildRequestDetail(HttpRequest request) {
+        Map<String, String> headers = new HashMap<>();
+        if (request.getHeaders() != null) {
+            for (HttpNodeData.Header header : request.getHeaders()) {
+                headers.put(header.getKey(), header.getValue());
+            }
+        }
+
+        return ExecuteHttpActionRespVO.RequestDetail.builder()
+                .url(request.getUrl())
+                .method(request.getMethod())
+                .headers(headers)
+                .body(request.getBodyContent())
+                .build();
     }
 }
