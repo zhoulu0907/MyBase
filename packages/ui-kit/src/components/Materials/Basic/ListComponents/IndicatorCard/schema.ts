@@ -79,7 +79,7 @@ export interface XIndicatorCardConfig extends ICommonBaseType {
     calculateField: string;
     calculateType: string;
     // 数据过滤
-    condition: any[];
+    filterCondition: any[];
     // 格式
     precisionLimit: boolean;
     precision?: number;
@@ -152,10 +152,10 @@ const XIndicatorCard: XIndicatorCardSchema = {
         metaData: '',
         tableName: '',
         // 指标字段
-        calculateField: 'id',
+        calculateField: '',
         calculateType: INDICATOR_CALCULATE_TYPE.COUNT,
         // 数据过滤
-        condition: [],
+        filterCondition: [],
         // 格式
         precisionLimit: false,
         precision: 0,
@@ -193,10 +193,10 @@ const XIndicatorCard: XIndicatorCardSchema = {
         metaData: '',
         tableName: '',
         // 指标字段
-        calculateField: 'id',
+        calculateField: '',
         calculateType: INDICATOR_CALCULATE_TYPE.COUNT,
         // 数据过滤
-        condition: [],
+        filterCondition: [],
         // 格式
         precisionLimit: false,
         precision: 0,
@@ -234,10 +234,10 @@ const XIndicatorCard: XIndicatorCardSchema = {
         metaData: '',
         tableName: '',
         // 指标字段
-        calculateField: 'id',
+        calculateField: '',
         calculateType: INDICATOR_CALCULATE_TYPE.COUNT,
         // 数据过滤
-        condition: [],
+        filterCondition: [],
         // 格式
         precisionLimit: false,
         precision: 0,
@@ -275,10 +275,10 @@ const XIndicatorCard: XIndicatorCardSchema = {
         metaData: '',
         tableName: '',
         // 指标字段
-        calculateField: 'id',
+        calculateField: '',
         calculateType: INDICATOR_CALCULATE_TYPE.COUNT,
         // 数据过滤
-        condition: [],
+        filterCondition: [],
         // 格式
         precisionLimit: false,
         precision: 0,
