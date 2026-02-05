@@ -43,3 +43,9 @@
     }
   }
 }
+
+.XPreviewTabsLayout.listPreviewTabsLayout {
+  .pc-tabs .pc-tabs-content {
+    overflow: hidden !important;
+  }
+}

@@ -326,7 +326,6 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           res = draftId
             ? await updateDraft(tableName, menuId, { ...req, id: draftId })
             : await createDraft(tableName, menuId, req);
-          Message.success('保存草稿成功');
         } else {
           if (curPage?.value?.pageSetType === PageType.BPM) {
             const reqFlow = {

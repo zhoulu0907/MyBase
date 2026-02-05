@@ -14,12 +14,11 @@ import EditRender from 'src/components/render/EditRender';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { useAppEntityStore } from 'src/signals/store_entity';
+import { usePageComponentValidateSignal } from 'src/signals'
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
 import { ENTITY_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import {
-  COLOR_MODE_TYPES,
-  DEFAULT_OPTIONS_TYPE,
   DEFAULT_VALUE_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES
@@ -60,6 +59,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
     setSubTableComponents
   } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
   const { subTableDataLength } = pagesRuntimeSignal;
+    const { pageComponentValidate } = usePageComponentValidateSignal;
 
   // 判断拖拽的组件是否是表单组件（动态注册兼容插件）
   const isFormComponent = (type: string): boolean => {
@@ -171,10 +171,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
       // 是否唯一：1-是，0-不是 isUnique
+      const noRepeat =
+        currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
+        noRepeat
       };
 
       // 字段约束配置（长度/正则） constraints
@@ -563,7 +565,7 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     data-cp-id={cp.id}
                     className="subComponentItem"
                     style={{
-                      borderColor: curComponentID === cp.id ? '#4FAE7B' : 'transparent'
+                      borderColor: pageComponentValidate.value?.[cp.id] === false ? 'rgb(var(--red-6))' : curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent',
                     }}
                     onClick={(e) => {
                       onSubComponentClick(e, cp);
@@ -642,7 +644,6 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
                     <Button
                       type="text"
                       size="small"
-                      status="success"
                       style={{ padding: '0 4px' }}
                       icon={<IconEdit />}
                     ></Button>

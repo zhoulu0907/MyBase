@@ -80,15 +80,15 @@ export interface XTabsLayoutConfig extends ICommonBaseType {
 const defaultValue = [
   {
     title: '标签页1',
-    key: 1
+    key: '1'
   },
   {
     title: '标签页2',
-    key: 2
+    key: '2'
   },
   {
     title: '标签页3',
-    key: 3
+    key: '3'
   }
 ]
 

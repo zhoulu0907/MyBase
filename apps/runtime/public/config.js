@@ -1,4 +1,6 @@
 window.global_config = {
+  // 主题配置：'default' | 'tiangong' | 'lingji'
+  THEME: 'lingji',
   //   BASE_URL: 'http://localhost:48080/admin-api',
   // BASE_URL: 'http://10.0.104.41:25690/admin-api',
   ENVIRONMENT: 'runtime',

@@ -47,7 +47,7 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
 
     const res = await getDraftPage(tableName, menuId, { pageNo: draftPageNo, pageSize });
 
-    const { list = [], total = 0, pageNo = 1 } = res || {};
+    const { list = [], total = 0 } = res || {};
 
     // 参照 XTable 数据处理：补充 id/key，扁平化 data 便于列 render 使用
     const newTableData = (list || []).map((item: any) => {
@@ -66,15 +66,17 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
     setDraftTableData(newTableData);
     draftForm.setFieldsValue({ [tableName]: newTableData });
     setDraftTotal(total);
-    setDraftPageNo(pageNo);
-    setShowDraftModal(true);
   };
 
   const handleStash = () => {
     handleGetDrafts();
+    setShowDraftModal(true);
   };
 
-  // 组件挂载、tableName/menuId 变化或 refresh 变化时，重新获取草稿总数
+  useEffect(() => {
+    handleGetDrafts();
+  }, [draftPageNo]);
+
   useEffect(() => {
     fetchDraftTotal();
   }, [fetchDraftTotal, refresh]);
@@ -165,7 +167,7 @@ export const DraftBox: React.FC<DraftBoxProps> = ({ showFromPageData, tableColum
       {/* 草稿箱按钮 */}
       <div
         onClick={handleStash}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', gap: '8px' }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', gap: '8px', cursor: 'pointer' }}
       >
         <img src={draftBoxIcon} alt="draftBox" style={{ width: '14px', height: '14px' }} />
         草稿箱

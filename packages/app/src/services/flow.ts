@@ -10,6 +10,7 @@ import {
   ListConnectorByTypeReq,
   ListScriptActionReq,
   RenameFlowMgmtReq,
+  SaveConnectorActionReq,
   UpdateConnectInstanceReq,
   UpdateFlowMgmtDefinitionReq,
   UpdateScriptActionReq
@@ -160,8 +161,16 @@ export const listConnectorByType = (params: ListConnectorByTypeReq) => {
   return flowService.get(`/connector/by-type/${params.typeCode}`);
 };
 
-export const listConnectorAction = (params: ListConnectorActionReq) => {
+export const listConnectorActions = (params: ListConnectorActionReq) => {
   return flowService.get(`/connector/${params.id}/actions`);
+};
+
+export const listConnectorActionInfos = (params: ListConnectorActionReq) => {
+  return flowService.get(`/connector/${params.id}/action-infos`);
+};
+
+export const saveConnectorAction = (id: string, params: SaveConnectorActionReq) => {
+  return flowService.post(`/connector/${id}/save-action`, params);
 };
 
 export const getActionValue = (id: string, params: GetActionValueReq) => {
@@ -185,12 +194,8 @@ export const getConnectorTypeInfo = (nodeCode: string) => {
   return flowService.get(`/node-config/type-info?nodeCode=${nodeCode}`);
 };
 
-/**
- * 根据连接器类型获取环境配置列表
- * @param typeCode 连接器类型代码
- */
-export const getConnectorEnvByType = (typeCode: string) => {
-  return flowService.get(`/connector-env/by-type/${typeCode}`);
+export const getConnectorEnvList = (id: string) => {
+  return flowService.get(`/connector/${id}/environments`);
 };
 
 /**
@@ -201,10 +206,18 @@ export const getConnectorEnvDetail = (id: string) => {
   return flowService.get(`/connector-env/${id}`);
 };
 
+export const getEnvConfigTemplate = (id: string) => {
+  return flowService.get(`/connector/${id}/env-config-template`);
+};
+
 /**
  * 更新连接器环境配置
  * @param params 更新参数
  */
 export const updateConnectorEnv = (params: any) => {
   return flowService.post('/connector-env/update', params);
+};
+
+export const createConnectorEnv = (id: string, params: any) => {
+  return flowService.post(`/connector/${id}/save-env`, params);
 };

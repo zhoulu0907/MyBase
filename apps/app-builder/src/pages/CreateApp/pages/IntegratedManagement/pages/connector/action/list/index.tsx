@@ -10,12 +10,20 @@ import {
   type TableColumnProps
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { deleteScriptAction, listScriptAction, type ListScriptActionReq, type ScriptActionItem } from '@onebase/app';
+import {
+  ConnectorActionStatusText,
+  deleteScriptAction,
+  listConnectorActionInfos,
+  type ConnectorActionStatus,
+  type ListConnectorActionReq,
+  type ScriptActionItem
+} from '@onebase/app';
 import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import CreateScriptActionPage from '../create';
+
+import CreateHTTPActionPage from '../createHTTP';
 import styles from './index.module.less';
 
 /**
@@ -57,22 +65,22 @@ const ScriptActionListPage: React.FC = () => {
     const id = getHashQueryParam('id');
 
     if (id) {
-      const req: ListScriptActionReq = {
+      const req: ListConnectorActionReq = {
+        id: id,
         pageNo: pageNo,
-        pageSize: pageSize,
-        connectorId: id,
-        scriptName: actionName
+        pageSize: pageSize
       };
 
       const res = await getCommonPaginationList(
-        (param:any) => listScriptAction(param as ListScriptActionReq),
+        (param: any) => listConnectorActionInfos(param as ListConnectorActionReq),
         req,
         setPageNo
       );
 
+      console.log(res);
       if (res) {
-        setActionList(res.list || []);
-        setTotal(res.total || 0);
+        setActionList(res || []);
+        setTotal(res.length || 0);
         setLoading(false);
       }
     }
@@ -111,7 +119,7 @@ const ScriptActionListPage: React.FC = () => {
     },
     {
       title: '动作名称',
-      dataIndex: 'scriptName',
+      dataIndex: 'actionName',
       width: 200
     },
     {
@@ -121,11 +129,19 @@ const ScriptActionListPage: React.FC = () => {
     },
     {
       title: '创建时间',
-      dataIndex: 'createTime',
+      dataIndex: 'updateTime',
       width: 180,
       render: (createTime: number) => {
         return <span>{dayjs(createTime).format('YYYY-MM-DD HH:mm:ss')}</span>;
       }
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 100,
+      render: (status: ConnectorActionStatus) => (
+        <span>{ConnectorActionStatusText[status] ?? '-'}</span>
+      )
     },
     {
       title: <div style={{ textAlign: 'center', width: '90%' }}>操作</div>,
@@ -151,13 +167,15 @@ const ScriptActionListPage: React.FC = () => {
     <div className={styles.scriptActionListPage}>
       <div className={styles.title}>动作配置</div>
       {isCreate || editingScriptId ? (
-        <CreateScriptActionPage
-          editData={getEditingData()}
-          onSuccess={() => {
-            setIsCreate(false);
-            setEditingScriptId(null);
-          }}
-        />
+        // <CreateScriptActionPage
+        //   editData={getEditingData()}
+        //   onSuccess={() => {
+        //     setIsCreate(false);
+        //     setEditingScriptId(null);
+        //   }}
+        // />
+
+        <CreateHTTPActionPage />
       ) : (
         <>
           <div className={styles.header}>

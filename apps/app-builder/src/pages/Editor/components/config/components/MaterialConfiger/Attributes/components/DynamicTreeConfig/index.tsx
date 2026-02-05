@@ -221,7 +221,7 @@ const DynamicTreeConfig: React.FC<DynamicTreeConfigProps> = ({
   return (
     <div className={styles.dynamicTreeConfig}>
       {/* 数据源选择 */}
-      <FormItem layout="vertical" labelAlign="left" label="数据绑定" className={styles.formItem}>
+      <FormItem layout="vertical" labelAlign="left" label="数据绑定" required className={styles.formItem}>
         <Select
           placeholder="请选择数据源"
           value={configs[item.key]}

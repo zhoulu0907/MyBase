@@ -8,6 +8,7 @@ import { usePageViewEditorSignal } from '@onebase/ui-kit';
 import { IconCheckCircleFill } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
+import { ReactSVG } from 'react-svg';
 import styles from './index.module.less';
 
 const { useForm } = Form;
@@ -191,12 +192,28 @@ const ViewAttributes = ({}: ViewAttributesProps) => {
 
         <div className={styles.itemLabel}>视图布局</div>
         <div className={styles.templateWrapper}>
-          <Image
+          <ReactSVG
+            style={{ height: '64px' }}
+            src={defaultTemplateThumbSVG}
+            onClick={() => setPreviewTemplateImageVisible(true)}
+            beforeInjection={(svg) => {
+              const fillColor = 'rgb(var(--primary-6))';
+              svg.querySelectorAll('*').forEach((el) => {
+                if (el.getAttribute('fill') === '#009E9E') {
+                  el.setAttribute('fill', fillColor);
+                }
+                if (el.getAttribute('stroke') === '#009E9E') {
+                  el.setAttribute('stroke', fillColor);
+                }
+              });
+            }}
+          />
+          {/* <Image
             src={defaultTemplateThumbSVG}
             alt="默认模板"
             onClick={() => setPreviewTemplateImageVisible(true)}
             preview={false}
-          />
+          /> */}
           <Image.Preview
             src={editViewMode == 1 ? defaultTemplateEditSVG : defaultTemplateDetailSVG}
             visible={previewTemplateImageVisible}

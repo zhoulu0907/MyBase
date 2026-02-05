@@ -145,6 +145,8 @@ export const CONFIG_TYPES = {
   COVER_IMAGE: 'CoverImage',
   // 绑定分组筛选
   GROUP_FILTER: 'GroupFilter',
+  // 画布卡片配置
+  CANVAS_CARD_CONFIG: 'CanvasCardConfig',
 } as const;
 
 // 状态选项常量
