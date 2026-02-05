@@ -3,14 +3,13 @@ import {
   baseDefault,
   statusConfig,
   widthConfig,
-  fillConfig,
   fileConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType,
   type TFillSelectKeyType,
 } from '../../../common';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, FILL_VALUES, FILL_OPTIONS } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
 import type {
   IBooleanConfigType,
   IStatusConfigType,
@@ -51,11 +50,6 @@ export interface XFileConfig extends ICommonBaseType {
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   /**
-   * 填充方式
-   */
-  fillStyle?: TSelectDefaultType<TFillSelectKeyType>;
-
-  /**
    * 最大限制高度（px）
    */
   maxHeight?: TNumberDefaultType;
@@ -68,12 +62,11 @@ export interface XFileConfig extends ICommonBaseType {
 }
 
 const XFile: XFileSchema = {
-  editData: [...baseConfig, fileConfig, fillConfig, widthConfig, statusConfig],
+  editData: [...baseConfig, fileConfig, widthConfig, statusConfig],
   config: {
     ...baseDefault,
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     fileConfig:[],
     maxHeight: undefined,
     verify: {
