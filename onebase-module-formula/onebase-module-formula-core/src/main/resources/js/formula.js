@@ -5022,12 +5022,12 @@ function _typeof(o) {
 
     // 检查是否为负数
     if (number < 0) {
-      return "输入包含非法字符!"; // 输入包含非法字符!
+      return "数字须大于0!";
     }
 
     // 检查金额是否过大（限制小于1万亿）
     if (number >= 1000000000000) {
-      return "数额太大，转换金额上限小于1万亿!"; // 数额太大，转换金额上限小于1万亿!
+      return "数字超出范围（上限一万亿）";
     }
 
     try {
@@ -5040,19 +5040,15 @@ function _typeof(o) {
       var cnDecUnits = ["角", "分"];
 
       // 转换为字符串并分离整数和小数部分
-      var numberStr = number.toString();
+      var numberStr = number.toFixed(2); // 固定两位小数
       var parts = numberStr.split(".");
       var integerPart = parts[0];
-      var decimalPart = parts[1] || "";
+      var decimalPart = parts[1] || "00";
 
       // 处理整数部分
-      if (integerPart.length > 12) {
-        return "数额太大，转换金额上限小于1万亿!"; // 超过限制
-      }
-
       var integerStr = "";
       if (integerPart === "0") {
-        integerStr = "";
+        integerStr = "零";
       } else {
         var zeroCount = 0;
         var IntLen = integerPart.length;
@@ -5071,58 +5067,68 @@ function _typeof(o) {
               zeroCount = 0;
             }
             integerStr += cnNums[n];
-          }
-          
-          if (p != 0) { // 不是最后一位时才添加单位
+            
+            // 添加单位
             if (r !== 0) {
-              // 添加单位（拾、佰、仟）
               integerStr += cnIntRadice[r];
-            } else if (q > 0) {
-              // 添加单位（万、亿）
+            } else if (q > 0 && p !== 0) {
               integerStr += cnIntUnits[q];
             }
           }
+        }
+        
+        // 处理末尾的零
+        if (integerStr.endsWith("零")) {
+          integerStr = integerStr.slice(0, -1);
         }
       }
 
       // 处理小数部分
       var decimalStr = "";
-      if (decimalPart !== "") {
-        // 处理角（第一位小数）
-        if (decimalPart.length >= 1) {
-          var jiao = parseInt(decimalPart[0]);
-          decimalStr += cnNums[jiao] + cnDecUnits[0];
-        }
-        
-        // 处理分（第二位小数）
-        if (decimalPart.length >= 2) {
-          var fen = parseInt(decimalPart[1]);
-          decimalStr += cnNums[fen] + cnDecUnits[1];
-        }
+      var jiao = parseInt(decimalPart[0]);
+      var fen = parseInt(decimalPart[1]);
+      
+      // 处理角
+      if (jiao > 0) {
+        decimalStr += cnNums[jiao] + cnDecUnits[0];
+      }
+      
+      // 处理分
+      if (fen > 0) {
+        decimalStr += cnNums[fen] + cnDecUnits[1];
       }
 
       // 组合结果
       var result = "";
-      if (integerPart === "0" && decimalPart === "") {
+      
+      if (integerPart === "0" && decimalPart === "00") {
         result = "零元整";
       } else if (integerPart === "0") {
-        // 整数位为0时，不显示"零元"，只显示小数部分
-        result = decimalStr;
-      } else if (decimalPart === "") {
+        // 纯小数情况
+        if (jiao === 0 && fen > 0) {
+          result = "零" + cnNums[fen] + cnDecUnits[1];
+        } else if (jiao > 0 && fen === 0) {
+          result = cnNums[jiao] + cnDecUnits[0];
+        } else {
+          result = decimalStr;
+        }
+      } else if (decimalPart === "00") {
+        // 整数情况
         result = integerStr + "元整";
       } else {
+        // 既有整数又有小数
         result = integerStr + "元" + decimalStr;
       }
 
-      // 处理特殊情况
-      if (result.startsWith("壹拾")) {
+      // 特殊处理：壹拾开头的情况
+      if (result.startsWith("壹拾") && !result.startsWith("壹拾元")) {
         result = result.substring(1);
       }
 
-      // 替换连续的零
+      // 清理多余的零
       result = result.replace(/零+/g, "零");
       
-      // 删除末尾的零（但保留"零元"的情况）
+      // 删除末尾的零（但保留"零元整"的情况）
       if (result !== "零元整" && result.endsWith("零")) {
         result = result.substring(0, result.length - 1);
       }

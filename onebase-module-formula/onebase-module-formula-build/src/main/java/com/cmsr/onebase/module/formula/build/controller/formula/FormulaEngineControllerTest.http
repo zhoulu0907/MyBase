@@ -120,7 +120,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "RMBCAP(10.5)" }
+{ "formula": "RMBCAP(1.05)" }
 
 ### UUID
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -185,7 +185,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXEXTRACTALL(text,reg)",
+{ "formula": "REGEXEXTRACTALL('小明的电话号码是 13812345678, 小红的电话号码是13987654321','\\\\d{11}')",
   "parameters": {
     "text": "小明的电话号码是 13812345678, 小红的电话号码是13987654321",
     "reg": "\\d{11}"
