@@ -137,7 +137,7 @@ public interface UserService {
      * @param mobile 手机号
      * @return 用户对象信息
      */
-    AdminUserDO getUserByMobile(String mobile);
+    AdminUserDO getUserByMobile(String mobile, Integer userType);
 
     /**
      * 获得用户分页列表
@@ -436,4 +436,12 @@ public interface UserService {
      * @return
      */
     long getInnerUserCountByStatus(Integer status);
+
+    /**
+     * 根据token获得用户信息
+     *
+     * @param accessToken 访问令牌
+     * @return 用户信息
+     */
+    UserSimpleRespVO getUserInfoByToken(String accessToken);
 }

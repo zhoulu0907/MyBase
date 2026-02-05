@@ -1,12 +1,14 @@
 package com.cmsr.onebase.module.app.build.service.resource;
 
-import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
-import com.cmsr.onebase.module.app.core.provider.resource.ComponentServiceProvider;
-import lombok.Setter;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import com.cmsr.onebase.module.app.core.dto.resource.ComponentDTO;
+import com.cmsr.onebase.module.app.core.provider.resource.ComponentServiceProvider;
+
+import lombok.Setter;
 
 @Setter
 @Service
@@ -23,6 +25,11 @@ public class ComponentServiceImpl implements ComponentService {
     @Override
     public List<ComponentDTO> listComponentByPageUuid(String pageUuid) {
         return componentServiceProvider.listComponent(pageUuid);
+    }
+
+    @Override
+    public List<ComponentDTO> listComponentForListPages(Long applicationId) {
+        return componentServiceProvider.listComponentForListPages(applicationId);
     }
 
 }

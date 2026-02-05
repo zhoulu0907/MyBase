@@ -223,17 +223,23 @@ public class SemanticQueryConditionBuilder {
         if (v == null || type == null) { return v; }
         switch (type) {
             case ID:
-                    return Long.valueOf(String.valueOf(v).trim());
+                return Long.valueOf(String.valueOf(v).trim());
             case USER:
             case DEPARTMENT:
             case DATA_SELECTION:
                 // 使用 String 类型以兼容数据库中 text 类型的引用字段
                 return String.valueOf(v).trim();
             case NUMBER:
-            case AGGREGATE:
-                if (v instanceof BigDecimal) { return v; }
-                if (v instanceof Number) { return new BigDecimal(String.valueOf(((Number) v))); }
-                try { return new BigDecimal(String.valueOf(v).trim()); } catch (Exception e) { return null; }
+            case AGGREGATE: {
+                // 健壮处理：空字符串、null、非法数字直接返回null
+                String str = String.valueOf(v).trim();
+                if (str.isEmpty()) return null;
+                try {
+                    return new BigDecimal(str);
+                } catch (Exception e) {
+                    return null;
+                }
+            }
             case DATE:
                 if (v instanceof LocalDate) { return v; }
                 try { return LocalDate.parse(String.valueOf(v).trim()); } catch (Exception e) { return null; }

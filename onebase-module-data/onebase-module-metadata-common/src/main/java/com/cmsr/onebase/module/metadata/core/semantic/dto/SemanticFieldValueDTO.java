@@ -1,11 +1,14 @@
+
 package com.cmsr.onebase.module.metadata.core.semantic.dto;
 
 import java.math.BigDecimal;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.Date;
@@ -73,6 +76,13 @@ public class SemanticFieldValueDTO<T> {
             }
             return formatScalarForJson(raw);
         }
+        // 修复：RefType类型返回{id, name}结构
+        if (raw instanceof com.cmsr.onebase.module.metadata.core.semantic.type.RefType ref) {
+            Map<String, Object> refMap = new HashMap<>();
+            refMap.put("id", ref.getId());
+            refMap.put("name", ref.getName());
+            return refMap;
+        }
         return formatScalarForJson(raw);
     }
 
@@ -80,7 +90,7 @@ public class SemanticFieldValueDTO<T> {
         if (v == null) return null;
         if (v instanceof LocalDate d) return d.toString();
         if (v instanceof LocalDateTime dt) return dt.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        if (v instanceof RefType) return v;
+        // RefType类型在getRawValueForJson已处理，这里直接返回
         return v;
     }
 
@@ -442,15 +452,48 @@ public class SemanticFieldValueDTO<T> {
         throw err("非法的地理位置值", String.class);
     }
 
+    /**
+     * 解析日期字符串，支持多种格式
+     * 支持格式：yyyy-MM-dd、yyyy/MM/dd、yyyyMMdd、yyyy-MM（默认1日）、yyyy（默认1月1日）
+     *
+     * @param s 日期字符串
+     * @return 解析后的LocalDate，解析失败返回null
+     */
     private LocalDate parseLocalDate(String s) {
+        if (s == null || s.trim().isEmpty()) return null;
+        s = s.trim();
+        // 标准 ISO 格式
         try { return LocalDate.parse(s); } catch (Exception ignore) {}
-        String[] fmts = {"yyyy-MM-dd","yyyy/MM/dd","yyyyMMdd"};
-        for (String f : fmts) {
+        // 常用完整日期格式
+        String[] fullFmts = {"yyyy-MM-dd", "yyyy/MM/dd", "yyyyMMdd"};
+        for (String f : fullFmts) {
             try { return LocalDate.parse(s, DateTimeFormatter.ofPattern(f)); } catch (Exception ignore) {}
+        }
+        // 年月格式（默认为该月1日）
+        String[] yearMonthFmts = {"yyyy-MM", "yyyy/MM", "yyyyMM"};
+        for (String f : yearMonthFmts) {
+            try {
+                java.time.YearMonth ym = java.time.YearMonth.parse(s, DateTimeFormatter.ofPattern(f));
+                return ym.atDay(1);
+            } catch (Exception ignore) {}
+        }
+        // 仅年份格式（默认为该年1月1日）
+        if (s.matches("^\\d{4}$")) {
+            try {
+                int year = Integer.parseInt(s);
+                return LocalDate.of(year, 1, 1);
+            } catch (Exception ignore) {}
         }
         return null;
     }
 
+    /**
+     * 解析日期时间字符串，支持多种格式
+     * 支持格式：标准ISO、带时区、yyyy-MM-dd HH:mm:ss、yyyy-MM-dd HH:mm（无秒）等
+     *
+     * @param s 日期时间字符串
+     * @return 解析后的LocalDateTime，解析失败返回null
+     */
     private LocalDateTime parseLocalDateTime(String s) {
         if (s == null || s.isEmpty()) return null;
         // 标准 ISO 格式
@@ -459,16 +502,21 @@ public class SemanticFieldValueDTO<T> {
         try { return OffsetDateTime.parse(s).toLocalDateTime(); } catch (Exception ignore) {}
         // PostgreSQL timestamptz 格式：去除尾部时区偏移（如 +08、+08:00、-05:30）
         String normalized = s.replaceAll("[+-]\\d{2}(:\\d{2})?$", "").trim().replace('T', ' ');
-        // 灵活解析：支持可选微秒
+        // 灵活解析：支持可选秒和微秒（yyyy-MM-dd HH:mm 或 yyyy-MM-dd HH:mm:ss.SSSSSS）
         try {
             DateTimeFormatter flexible = new java.time.format.DateTimeFormatterBuilder()
-                .appendPattern("yyyy-MM-dd HH:mm:ss")
+                .appendPattern("yyyy-MM-dd HH:mm")
+                .optionalStart().appendPattern(":ss").optionalEnd()
                 .optionalStart().appendFraction(java.time.temporal.ChronoField.NANO_OF_SECOND, 0, 9, true).optionalEnd()
                 .toFormatter();
             return LocalDateTime.parse(normalized, flexible);
         } catch (Exception ignore) {}
-        // 其他格式
+        // 其他格式（带秒）
         for (String fmt : new String[]{"yyyy/MM/dd HH:mm:ss", "yyyyMMddHHmmss"}) {
+            try { return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(fmt)); } catch (Exception ignore) {}
+        }
+        // 其他格式（无秒）
+        for (String fmt : new String[]{"yyyy/MM/dd HH:mm", "yyyyMMddHHmm"}) {
             try { return LocalDateTime.parse(s, DateTimeFormatter.ofPattern(fmt)); } catch (Exception ignore) {}
         }
         // 时间戳

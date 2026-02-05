@@ -37,9 +37,6 @@ public class FlowConnectorLiteVO implements Serializable {
     @Schema(description = "连接器描述")
     private String description;
 
-    @Schema(description = "环境配置UUID")
-    private String envUuid;
-
     @Schema(description = "环境名称")
     private String envName;
 

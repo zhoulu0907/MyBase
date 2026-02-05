@@ -195,4 +195,32 @@ public class FlowNodeConfigServiceImpl implements FlowNodeConfigService {
         return vo;
     }
 
+    @Override
+    public JsonNode getActionSchemaTemplate(String typeCode) {
+        log.info("getActionSchemaTemplate start, typeCode: {}", typeCode);
+
+        // 1. 根据 typeCode 查询 flow_node_config
+        FlowNodeConfigDO nodeConfig = flowNodeConfigRepository.findByNodeCode(typeCode);
+        if (nodeConfig == null) {
+            log.warn("Node config not found, typeCode: {}", typeCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.NODE_CONFIG_NOT_EXIST);
+        }
+
+        // 2. 校验 action_config 是否为空
+        if (StringUtils.isBlank(nodeConfig.getActionConfig())) {
+            log.warn("Action config is empty, typeCode: {}", typeCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_CONFIG_EMPTY);
+        }
+
+        // 3. 解析并返回 action_config JSON
+        try {
+            JsonNode template = JsonUtils.parseTree(nodeConfig.getActionConfig());
+            log.info("getActionSchemaTemplate success, typeCode: {}", typeCode);
+            return template;
+        } catch (Exception e) {
+            log.warn("Failed to parse action_config JSON, typeCode: {}", typeCode, e);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+        }
+    }
+
 }

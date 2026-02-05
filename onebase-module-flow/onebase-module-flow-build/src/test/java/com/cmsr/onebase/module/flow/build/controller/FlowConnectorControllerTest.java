@@ -1,8 +1,11 @@
 package com.cmsr.onebase.module.flow.build.controller;
 
+import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.build.service.FlowConnectorService;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorVO;
+import com.cmsr.onebase.module.flow.build.vo.SaveEnvironmentConfigReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,11 +18,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.BAD_REQUEST;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -51,7 +62,9 @@ class FlowConnectorControllerTest {
      */
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new TestExceptionHandler())
+                .build();
 
         // 创建测试数据 - script类型连接器
         connectorVO = new FlowConnectorVO();
@@ -69,6 +82,52 @@ class FlowConnectorControllerTest {
 
         connectorVO.setApplicationId(158284491560812544L);
         connectorVO.setConnectorVersion("1.0.0");
+    }
+
+    /**
+     * 测试异常处理器，用于单元测试
+     */
+    static class TestExceptionHandler extends org.springframework.web.servlet.handler.HandlerExceptionResolverComposite {
+        public TestExceptionHandler() {
+            super.setExceptionResolvers(java.util.List.of(
+                new org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver() {
+                    @Override
+                    protected boolean shouldApplyTo(jakarta.servlet.http.HttpServletRequest request, Object handler) {
+                        return true;
+                    }
+
+                    @Override
+                    protected ModelAndView doResolveException(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler, Exception ex) {
+                        CommonResult<?> result;
+                        if (ex instanceof ServiceException) {
+                            ServiceException se = (ServiceException) ex;
+                            result = CommonResult.error(se.getCode(), se.getMessage());
+                        } else if (ex instanceof MissingServletRequestParameterException) {
+                            result = CommonResult.error(BAD_REQUEST.getCode(), String.format("请求参数缺失:%s", ((MissingServletRequestParameterException) ex).getParameterName()));
+                        } else if (ex instanceof MethodArgumentNotValidException) {
+                            MethodArgumentNotValidException me = (MethodArgumentNotValidException) ex;
+                            String errorMessage = me.getBindingResult().getFieldError() != null
+                                    ? me.getBindingResult().getFieldError().getDefaultMessage()
+                                    : "请求参数不正确";
+                            result = CommonResult.error(BAD_REQUEST.getCode(), String.format("请求参数不正确:%s", errorMessage));
+                        } else if (ex instanceof MethodArgumentTypeMismatchException) {
+                            result = CommonResult.error(BAD_REQUEST.getCode(), String.format("请求参数类型错误:%s", ex.getMessage()));
+                        } else if (ex instanceof NoHandlerFoundException) {
+                            result = CommonResult.error(BAD_REQUEST.getCode(), "请求地址不存在");
+                        } else {
+                            result = CommonResult.error(BAD_REQUEST.getCode(), ex.getMessage());
+                        }
+                        try {
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write(JsonUtils.toJsonString(result));
+                        } catch (java.io.IOException e) {
+                            // ignore
+                        }
+                        return new ModelAndView();
+                    }
+                }
+            ));
+        }
     }
 
     /**
@@ -422,5 +481,236 @@ class FlowConnectorControllerTest {
                 .andExpect(jsonPath("$.data.x-component-props.label").value("客户详情"));
 
         // verify(service).getActionValueByConnectorUuid(eq("test-connector-uuid"), eq("getCustomerDetail"));
+    }
+
+    // ==================== saveEnvironmentConfig 测试用例 ====================
+
+    @Test
+    void testSaveEnvironmentConfig_Success() throws Exception {
+        // Given
+        Long connectorId = 1L;
+        Map<String, JsonNode> configMap = new HashMap<>();
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode devConfig = factory.objectNode();
+        devConfig.put("type", "object");
+        devConfig.put("title", "DEV环境配置");
+        ObjectNode devProperties = factory.objectNode();
+        devProperties.put("host", factory.objectNode().put("type", "string").put("title", "主机地址"));
+        devConfig.set("properties", devProperties);
+        configMap.put("DEV", devConfig);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(configMap);
+
+        when(service.saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class)))
+                .thenReturn(Boolean.TRUE);
+
+        // When & Then
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtils.toJsonString(reqVO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        verify(service).saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_MultipleEnvironments() throws Exception {
+        // Given
+        Long connectorId = 1L;
+        Map<String, JsonNode> configMap = new HashMap<>();
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+
+        // DEV环境
+        ObjectNode devConfig = factory.objectNode();
+        devConfig.put("type", "object");
+        devConfig.put("title", "DEV环境配置");
+        ObjectNode devProperties = factory.objectNode();
+        devProperties.put("host", factory.objectNode().put("type", "string"));
+        devConfig.set("properties", devProperties);
+        configMap.put("DEV", devConfig);
+
+        // TEST环境
+        ObjectNode testConfig = factory.objectNode();
+        testConfig.put("type", "object");
+        testConfig.put("title", "TEST环境配置");
+        ObjectNode testProperties = factory.objectNode();
+        testProperties.put("host", factory.objectNode().put("type", "string"));
+        testConfig.set("properties", testProperties);
+        configMap.put("TEST", testConfig);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(configMap);
+
+        when(service.saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class)))
+                .thenReturn(Boolean.TRUE);
+
+        // When & Then
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtils.toJsonString(reqVO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        verify(service).saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_ConnectorNotFound() throws Exception {
+        // Given
+        Long connectorId = 999L;
+        Map<String, JsonNode> configMap = new HashMap<>();
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode devConfig = factory.objectNode();
+        devConfig.put("type", "object");
+        devConfig.put("title", "DEV环境配置");
+        ObjectNode devProperties = factory.objectNode();
+        devProperties.put("host", factory.objectNode().put("type", "string"));
+        devConfig.set("properties", devProperties);
+        configMap.put("DEV", devConfig);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(configMap);
+
+        when(service.saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class)))
+                .thenThrow(new ServiceException(1123784, "连接器不存在"));
+
+        // When & Then
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtils.toJsonString(reqVO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123784))
+                .andExpect(jsonPath("$.msg").value("连接器不存在"));
+
+        verify(service).saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_EnvironmentAlreadyExists() throws Exception {
+        // Given
+        Long connectorId = 1L;
+        Map<String, JsonNode> configMap = new HashMap<>();
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode devConfig = factory.objectNode();
+        devConfig.put("type", "object");
+        devConfig.put("title", "DEV环境配置");
+        ObjectNode devProperties = factory.objectNode();
+        devProperties.put("host", factory.objectNode().put("type", "string"));
+        devConfig.set("properties", devProperties);
+        configMap.put("DEV", devConfig);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(configMap);
+
+        when(service.saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class)))
+                .thenThrow(new ServiceException(1123793, "环境配置已存在"));
+
+        // When & Then
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtils.toJsonString(reqVO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123793))
+                .andExpect(jsonPath("$.msg").value("环境配置已存在"));
+
+        verify(service).saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_InvalidConfigFormat() throws Exception {
+        // Given
+        Long connectorId = 1L;
+        Map<String, JsonNode> configMap = new HashMap<>();
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+        ObjectNode invalidConfig = factory.objectNode();
+        invalidConfig.put("type", "string");
+        invalidConfig.put("title", "无效配置");
+        configMap.put("DEV", invalidConfig);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(configMap);
+
+        when(service.saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class)))
+                .thenThrow(new ServiceException(1123794, "环境配置格式无效"));
+
+        // When & Then
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtils.toJsonString(reqVO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(1123794))
+                .andExpect(jsonPath("$.msg").value("环境配置格式无效"));
+
+        verify(service).saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class));
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_EmptyConfig() throws Exception {
+        // Given
+        Long connectorId = 1L;
+        Map<String, JsonNode> emptyConfig = new HashMap<>();
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(emptyConfig);
+
+        // When & Then - 空配置应该触发 validation 失败
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtils.toJsonString(reqVO)))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).saveEnvironmentConfig(any(), any());
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_NullConfig() throws Exception {
+        // Given
+        Long connectorId = 1L;
+        String requestBody = "{}";
+
+        // When & Then - null config 应该触发 validation 失败
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).saveEnvironmentConfig(any(), any());
+    }
+
+    @Test
+    void testSaveEnvironmentConfig_ProductionEnvironment() throws Exception {
+        // Given
+        Long connectorId = 1L;
+        Map<String, JsonNode> configMap = new HashMap<>();
+        JsonNodeFactory factory = JsonNodeFactory.instance;
+
+        ObjectNode prodConfig = factory.objectNode();
+        prodConfig.put("type", "object");
+        prodConfig.put("title", "生产环境配置");
+        ObjectNode prodProperties = factory.objectNode();
+        prodProperties.put("apiUrl", factory.objectNode().put("type", "string").put("title", "API地址"));
+        prodProperties.put("timeout", factory.objectNode().put("type", "number").put("title", "超时时间"));
+        prodConfig.set("properties", prodProperties);
+        configMap.put("PROD", prodConfig);
+
+        SaveEnvironmentConfigReqVO reqVO = new SaveEnvironmentConfigReqVO();
+        reqVO.setConfig(configMap);
+
+        when(service.saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class)))
+                .thenReturn(Boolean.TRUE);
+
+        // When & Then
+        mockMvc.perform(put("/flow/connector/{id}/environments", connectorId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(JsonUtils.toJsonString(reqVO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(0))
+                .andExpect(jsonPath("$.data").value(true));
+
+        verify(service).saveEnvironmentConfig(eq(connectorId), any(SaveEnvironmentConfigReqVO.class));
     }
 }

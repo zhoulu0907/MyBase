@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.build.controller.user;
 
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.module.system.vo.user.UserProfileRespVO;

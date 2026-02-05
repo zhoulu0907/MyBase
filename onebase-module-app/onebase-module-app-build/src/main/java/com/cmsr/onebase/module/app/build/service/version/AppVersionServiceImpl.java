@@ -280,6 +280,7 @@ public class AppVersionServiceImpl implements AppVersionService {
             transactionTemplate.executeWithoutResult(transactionStatus -> {
                 // 删除现有的开发版本数据（version_tag 为 0）
                 appDataManager.deleteApplicationVersionData(applicationId, VersionTagEnum.BUILD.getValue());
+                appDataManager.deleteAuthRole(applicationId);
 
                 // 导入配置数据到开发版本
                 appDataManager.saveApplicationVersionConfigData(applicationId, existingApp.getAppUid(),

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.system.runtime.controller.corp.user;
 
 import cn.hutool.core.collection.CollUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;

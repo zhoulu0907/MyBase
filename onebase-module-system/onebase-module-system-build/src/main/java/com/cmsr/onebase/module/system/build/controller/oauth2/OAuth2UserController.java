@@ -25,6 +25,7 @@ import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserId;
+import static com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils.getLoginUserType;
 
 /**
  * 提供给外部应用调用为主

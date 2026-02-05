@@ -50,7 +50,7 @@ public class AppTest {
     public void testSimple() throws IOException {
         TenantContextHolder.setIgnore(true);
         RTSecurityContext.mockLoginUser(3386012505007460352L, 46699591748616192L);
-        List<MenuListRespVO> menuListRespVOS = runtimeAppMenuService.listApplicationMenu();
+        List<MenuListRespVO> menuListRespVOS = runtimeAppMenuService.listApplicationMenu(false);
         System.out.println(menuListRespVOS);
     }
 

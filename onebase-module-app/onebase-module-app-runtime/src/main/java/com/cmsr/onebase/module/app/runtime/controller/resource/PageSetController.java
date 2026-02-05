@@ -1,17 +1,24 @@
 package com.cmsr.onebase.module.app.runtime.controller.resource;
 
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.app.core.vo.resource.ListPageSetReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.ListPageSetRespVO;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetReqVO;
 import com.cmsr.onebase.module.app.core.vo.resource.LoadPageSetRespVO;
 import com.cmsr.onebase.module.app.runtime.service.resource.PageSetService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "应用资源管理-页面集管理")
 @RestController
@@ -24,8 +31,9 @@ public class PageSetController {
 
     @GetMapping("/id")
     @Operation(summary = "获取页面集id")
-    public CommonResult<Long> getPageSetCode(@RequestParam Long menuId) {
-        Long pageSetId = pageSetService.getPageSetId(menuId);
+    public CommonResult<Long> getPageSetCode(@RequestParam Long menuId,
+            @RequestParam(value = "isDev", required = false) Boolean isDev) {
+        Long pageSetId = pageSetService.getPageSetId(menuId, isDev);
         return CommonResult.success(pageSetId);
     }
 
@@ -37,8 +45,9 @@ public class PageSetController {
     }
 
     @GetMapping("/main_metadata")
-    public CommonResult<String> getMainMetadata(@RequestParam Long pageSetId) {
-        String mainMetadata = pageSetService.getMainMetadata(pageSetId);
+    public CommonResult<String> getMainMetadata(@RequestParam Long pageSetId,
+            @RequestParam(value = "isDev", required = false) Boolean isDev) {
+        String mainMetadata = pageSetService.getMainMetadata(pageSetId, isDev);
         return CommonResult.success(mainMetadata);
     }
 

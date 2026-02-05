@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.build.controller.user;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.excel.core.util.ExcelUtils;
@@ -47,6 +48,7 @@ public class TenantUserController {
     @Operation(summary = "新增用户")
     @PreAuthorize("@ss.hasPermission('tenant:user:create')")
     public CommonResult<Long> createUser(@Valid @RequestBody UserInsertReqVO reqVO) {
+        if (reqVO.getUserType() == null) reqVO.setUserType(UserTypeEnum.TENANT.getValue());
         Long id = userService.createUser(reqVO);
         return success(id);
     }
@@ -164,7 +166,7 @@ public class TenantUserController {
     @Operation(summary = "获得导入用户模板")
     public void importTemplate(HttpServletResponse response) throws IOException {
         // 手动创建导出 demo
-        List<UserImportExcelVO> list = Arrays.asList(UserImportExcelVO.builder().username("yunai").deptId(1L).email("yunai@aaa.com").mobile("15601691300").nickname("OneBase").status(CommonStatusEnum.ENABLE.getStatus()).sex(SexEnum.MALE.getSex()).build(), UserImportExcelVO.builder().username("yuanma").deptId(2L).email("yuanma@aaa.com").mobile("15601701300").nickname("源码").status(CommonStatusEnum.DISABLE.getStatus()).sex(SexEnum.FEMALE.getSex()).build());
+        List<UserImportExcelVO> list = Arrays.asList(UserImportExcelVO.builder().username("yunai").deptId(1L).email("yunai@aaa.com").mobile("15601691300").nickname("OneBase").status(CommonStatusEnum.ENABLE.getStatus()).sex(SexEnum.MALE.getSex()).userType(UserTypeEnum.TENANT.getValue()).build(), UserImportExcelVO.builder().username("yuanma").deptId(2L).email("yuanma@aaa.com").mobile("15601701300").nickname("源码").status(CommonStatusEnum.DISABLE.getStatus()).sex(SexEnum.FEMALE.getSex()).userType(UserTypeEnum.TENANT.getValue()).build());
         // 输出
         ExcelUtils.write(response, "用户导入模板.xls", "用户列表", UserImportExcelVO.class, list);
     }

@@ -31,7 +31,7 @@ public class AppAuthSecurityPermissionProvider {
         if (CollectionUtils.isEmpty(roleUuids)) {
             return Collections.emptyList();
         }
-        List<AppAuthPermissionDO> permissionDOS = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationCondition(() ->
+        List<AppAuthPermissionDO> permissionDOS = TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationIdAndVersionTag(() ->
                 appAuthPermissionRepository.findByAppIdAndRoleIds(applicationId, roleUuids)
         ));
         if (CollectionUtils.isEmpty(permissionDOS)) {

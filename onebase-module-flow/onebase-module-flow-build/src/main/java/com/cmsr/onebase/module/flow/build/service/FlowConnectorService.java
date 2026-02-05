@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.flow.build.service;
 import com.cmsr.onebase.framework.common.pojo.PageParam;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
 import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,6 +29,17 @@ public interface FlowConnectorService {
 
     void updateConnector(UpdateFlowConnectorReqVO updateVO);
 
+    /**
+     * 更新连接器基本信息
+     * <p>
+     * 只更新描述信息，自动检测变化。如果未发生变化则不执行数据库更新。
+     *
+     * @param connectorId 连接器ID
+     * @param updateVO    更新请求VO
+     * @return true=实际更新了，false=没有变化
+     */
+    Boolean updateBaseInfo(Long connectorId, UpdateFlowConnectorReqVO updateVO);
+
     void deleteById(Long connectorId);
 
     /**
@@ -49,28 +61,89 @@ public interface FlowConnectorService {
     List<String> getActionsById(Long id);
 
     /**
-     * Get action value by connector ID and action name
-     *
-     * @param id the connector ID
-     * @param actionName the action name
-     * @return action value as JsonNode
-     */
-    JsonNode getActionValueById(Long id, String actionName);
-
-    /**
      * 启用/禁用连接器实例
-     * <p>
-     * 启用前会检查实例是否已配置环境信息（envUuid不为空）
-     * <p>
-     * 业务规则：
-     * - 禁用操作：允许任何实例禁用
-     * - 启用操作：必须先配置环境信息，否则抛出 CONNECTOR_ENV_NOT_CONFIGURED 异常
      *
      * @param id           连接器实例ID
      * @param activeStatus 启用状态（0-禁用，1-启用）
-     * @throws ServiceException CONNECTOR_ENV_NOT_CONFIGURED - 启用时未配置环境
      */
     void updateActiveStatus(Long id, Integer activeStatus);
+
+    /**
+     * 查询连接器的环境配置列表
+     * <p>
+     * 从 flow_connector.config 字段解析环境配置信息
+     *
+     * @param connectorId 连接器ID
+     * @return 环境配置列表
+     */
+    List<FlowConnectorEnvLiteVO> getEnvironments(Long connectorId);
+
+    /**
+     * 查询连接器的指定环境配置信息
+     * <p>
+     * 从 flow_connector.config 的 properties 中解析指定环境的 Formily Schema
+     *
+     * @param connectorId 连接器实例ID（主键）
+     * @param envCode     环境编码（如 DEV、TEST、PROD）
+     * @return 环境配置 VO
+     */
+    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode);
+
+    /**
+     * 获取环境配置模板
+     * <p>
+     * 根据连接器实例获取其类型对应的环境配置 Formily Schema 模板
+     *
+     * @param connectorId 连接器实例ID
+     * @return 环境配置模板 VO
+     */
+    EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId);
+
+    /**
+     * 获取动作配置模板
+     * <p>
+     * 根据连接器实例获取其类型对应的动作配置 Formily Schema 模板
+     *
+     * @param connectorId 连接器实例ID
+     * @return 动作配置模板 VO
+     */
+    ActionConfigTemplateVO getActionConfigTemplate(Long connectorId);
+
+    /**
+     * 保存连接器环境配置
+     * <p>
+     * 将新的环境配置添加到 flow_connector.config.properties 中
+     * 如果环境已存在则拒绝保存
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO 环境配置请求
+     * @return 保存是否成功
+     */
+    Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
+    /**
+     * 保存连接器动作配置
+     * <p>
+     * 将新的动作配置添加到 flow_connector.action_config.properties 中
+     * 如果动作已存在则拒绝保存
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO      动作配置请求
+     * @return 保存是否成功
+     */
+    Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO);
+
+    /**
+     * 更新连接器动作配置
+     * <p>
+     * 更新指定动作名称的配置信息
+     *
+     * @param connectorId 连接器实例ID
+     * @param actionName  动作名称（作为properties的key）
+     * @param actionConfig 新的动作配置
+     * @return 更新是否成功
+     */
+    Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig);
 
     // ==================== 动作管理接口 ====================
 
@@ -84,27 +157,29 @@ public interface FlowConnectorService {
 
     /**
      * 获取连接器的动作配置列表
+     * <p>
+     * 返回精简版信息，只包含列表页必需的字段
      *
      * @param connectorId 连接器ID
-     * @return 动作配置列表
+     * @return 动作配置列表（精简版）
      */
-    List<ConnectorActionVO> getActionInfos(Long id);
+    List<ConnectorActionLiteVO> getActionInfos(Long id);
 
     /**
      * 获取动作详情
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
+     * @param actionName  动作名称
      * @return 动作详情
      */
-    ConnectorActionVO getActionDetail(Long connectorId, String actionId);
+    ConnectorActionVO getActionDetail(Long connectorId, String actionName);
 
     /**
      * 保存动作草稿
      *
      * @param connectorId 连接器ID
      * @param createVO    创建请求
-     * @return 创建的动作ID
+     * @return 创建的动作名称
      */
     String saveActionDraft(Long connectorId, CreateConnectorActionReqVO createVO);
 
@@ -112,38 +187,38 @@ public interface FlowConnectorService {
      * 更新动作草稿
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
+     * @param actionName  动作名称
      * @param updateVO    更新请求
      */
-    void updateActionDraft(Long connectorId, String actionId, UpdateConnectorActionReqVO updateVO);
+    void updateActionDraft(Long connectorId, String actionName, UpdateConnectorActionReqVO updateVO);
 
     /**
      * 发布动作
      * <p>
      * 业务规则：
      * - 校验所有步骤配置是否完整
-     * - 完整性校验通过后更新状态为 published，版本号+1
+     * - 完整性校验通过后更新状态为 published
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
+     * @param actionName  动作名称
      */
-    void publishAction(Long connectorId, String actionId);
+    void publishAction(Long connectorId, String actionName);
 
     /**
      * 下架动作
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
+     * @param actionName  动作名称
      */
-    void offlineAction(Long connectorId, String actionId);
+    void offlineAction(Long connectorId, String actionName);
 
     /**
      * 重新上线动作
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
+     * @param actionName  动作名称
      */
-    void republishAction(Long connectorId, String actionId);
+    void republishAction(Long connectorId, String actionName);
 
     /**
      * 复制动作
@@ -153,10 +228,10 @@ public interface FlowConnectorService {
      * - 复制的动作状态为 draft
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
-     * @return 新复制的动作ID
+     * @param actionName  动作名称
+     * @return 新复制的动作名称
      */
-    String copyAction(Long connectorId, String actionId);
+    String copyAction(Long connectorId, String actionName);
 
     /**
      * 删除动作
@@ -166,16 +241,26 @@ public interface FlowConnectorService {
      * - 如被引用则抛出异常并返回引用信息
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
+     * @param actionName  动作名称
      */
-    void deleteAction(Long connectorId, String actionId);
+    void deleteAction(Long connectorId, String actionName);
 
     /**
      * 校验动作是否可发布
      *
      * @param connectorId 连接器ID
-     * @param actionId    动作ID
+     * @param actionName  动作名称
      * @return 校验结果
      */
-    ConnectorConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionId);
+    ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionName);
+
+    /**
+     * 调试HTTP连接器动作
+     * <p>
+     * 接收debug配置信息并执行HTTP请求
+     *
+     * @param reqVO 调试请求VO（包含url、method、headers等调试信息）
+     * @return 执行响应结果
+     */
+    ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO);
 }

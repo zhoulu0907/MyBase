@@ -45,7 +45,7 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
     }
 
     @Override
-    public OAuth2AccessTokenDO grantAuthorizationCodeForAccessToken(String clientId, String code,
+    public OAuth2AccessTokenDO grantAuthorizationCodeForAccessToken(String runMode, String clientId, String code,
                                                                     String redirectUri, String state) {
         OAuth2CodeDO codeDO = oauth2CodeService.consumeAuthorizationCode(code);
         Assert.notNull(codeDO, "授权码不能为空"); // 防御性编程
@@ -64,8 +64,8 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
         }
 
         // 创建访问令牌
-        return oauth2TokenService.createAccessToken(codeDO.getUserId(), codeDO.getUserType(),
-                codeDO.getClientId(), codeDO.getScopes());
+        return oauth2TokenService.createAccessTokenWithMode(runMode,null,null, codeDO.getUserId(), codeDO.getUserType(),
+                codeDO.getClientId(), codeDO.getScopes(), null);
     }
 
     @Override

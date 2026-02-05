@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.runtime.controller.corp.user;
 
 import cn.hutool.core.collection.CollUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
@@ -41,6 +42,7 @@ public class CorpUserController {
     @Operation(summary = "新增用户")
     @PreAuthorize("@ss.hasPermission('corp:user:create')")
     public CommonResult<Long> createUser(@Valid @RequestBody UserInsertReqVO reqVO) {
+        if (reqVO.getUserType() == null) reqVO.setUserType(UserTypeEnum.CORP.getValue());
         Long id = userService.createUser(reqVO);
         return success(id);
     }
