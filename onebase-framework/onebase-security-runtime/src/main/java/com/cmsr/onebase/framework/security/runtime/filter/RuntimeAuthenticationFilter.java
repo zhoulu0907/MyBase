@@ -17,6 +17,7 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.runtime.service.AuthPermitService;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -58,8 +59,7 @@ public class RuntimeAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        String requestUri = request.getRequestURI();
-        if (requestUri.contains("/plugins/static/")) {
+        if (StaticResourceUtil.isStaticResource(request)) {
             chain.doFilter(request, response);
             return;
         }

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.plugin.build.config;
 
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -16,7 +17,7 @@ public class PluginSecurityConfiguration {
 
     @Bean
     public WebSecurityCustomizer pluginWebSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers(new AntPathRequestMatcher("/plugins/static/**"));
+        return (web) -> web.ignoring().requestMatchers(new AntPathRequestMatcher(StaticResourceUtil.PLUGIN_STATIC_PATTERN));
     }
 
     /**
@@ -30,7 +31,7 @@ public class PluginSecurityConfiguration {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain pluginStaticResourcesFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/plugins/static/**")
+                .securityMatcher(StaticResourceUtil.PLUGIN_STATIC_PATTERN)
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
