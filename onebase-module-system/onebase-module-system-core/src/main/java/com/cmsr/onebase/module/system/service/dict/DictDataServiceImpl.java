@@ -46,8 +46,6 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Slf4j
 public class DictDataServiceImpl implements DictDataService {
 
-    public static final  String TENANT                = "tenant";
-
     @Resource
     private DictTypeService dictTypeService;
 
@@ -133,11 +131,11 @@ public class DictDataServiceImpl implements DictDataService {
     @Override
     public void deleteDictDataByDictOwner(String dictOwnerType, Long dictOwnerId) {
         // 5. 删除租户级别字典Dict
-        List<DictTypeDO> dictTypeDOList = dictTypeRepository.findAllListByOwner(TENANT, dictOwnerId);
+        List<DictTypeDO> dictTypeDOList = dictTypeRepository.findAllListByOwner(dictOwnerType, dictOwnerId);
         // 5.1 删除字典类型对应的数据
         dictDataRepository.removeDictDataByType(dictTypeDOList.stream().map(DictTypeDO::getType).collect(Collectors.toList()));
         // 5.2 删除字典类型
-        dictTypeRepository.removeByDictOwnerId(TENANT,dictOwnerId);
+        dictTypeRepository.removeByDictOwnerId(dictOwnerType,dictOwnerId);
     }
 
     @Override
