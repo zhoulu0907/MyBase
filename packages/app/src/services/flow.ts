@@ -182,6 +182,10 @@ export const getActionValue = (id: string, params: GetActionValueReq) => {
   return flowService.get(`/connector/${id}/action-value`, params);
 };
 
+export const deleteHTTPAction = (id: string, actionName: string) => {
+  return flowService.post(`/connector/${id}/actions/${actionName}/delete`);
+};
+
 export const debugAction = (params: DebugActionReq) => {
   return flowService.post(`/connector/debug-http-action`, params);
 };

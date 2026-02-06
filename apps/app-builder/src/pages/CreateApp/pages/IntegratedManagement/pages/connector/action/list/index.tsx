@@ -12,7 +12,7 @@ import {
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   ConnectorActionStatusText,
-  deleteScriptAction,
+  deleteHTTPAction,
   listConnectorActionInfos,
   type ConnectorActionStatus,
   type ListConnectorActionReq,
@@ -90,9 +90,24 @@ const ScriptActionListPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (scriptId: string) => {
+  //   const handleDelete = async (scriptId: string) => {
+  //     try {
+  //       const res = await deleteScriptAction(scriptId);
+  //       if (res) {
+  //         Message.success('删除成功');
+  //         handleGetScriptActionList(searchActionName);
+  //       } else {
+  //         Message.error('删除失败');
+  //       }
+  //     } catch (error) {
+  //       Message.error('删除失败，请稍后重试');
+  //       console.error('删除动作失败:', error);
+  //     }
+  //   };
+
+  const handleDelete = async (connectorId: string, actionName: string) => {
     try {
-      const res = await deleteScriptAction(scriptId);
+      const res = await deleteHTTPAction(connectorId, actionName);
       if (res) {
         Message.success('删除成功');
         handleGetScriptActionList(searchActionName);
@@ -152,7 +167,7 @@ const ScriptActionListPage: React.FC = () => {
       dataIndex: 'operation',
       width: 150,
       fixed: 'right',
-      render: (_: any, record: ScriptActionItem) => (
+      render: (_: any, record: any) => (
         <Space>
           <Button
             type="text"
@@ -164,7 +179,11 @@ const ScriptActionListPage: React.FC = () => {
           >
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" content="删除后不可恢复" onOk={() => handleDelete(record.id)}>
+          <Popconfirm
+            title="确定删除吗？"
+            content="删除后不可恢复"
+            onOk={() => handleDelete(getHashQueryParam('id') || '', record.actionName)}
+          >
             <Button type="text" size="mini" status="danger">
               删除
             </Button>
