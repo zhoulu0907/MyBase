@@ -343,7 +343,13 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                   }}
                 />
               </FormItem> */}
-              <FormItem label={isDropdown ? '辅助字段' : '选择数据时的显示字段'}>
+              <FormItem
+                label={isDropdown ? '辅助字段' : '选择数据时的显示字段'}
+                tooltip={{
+                  content: '可配置辅助字段，结合回显字段，帮助用户选择关联数据',
+                  position: 'bottom'
+                }}
+              >
                 {/* <div>{JSON.stringify(displayFieldOptions)}</div> */}
                 {isDropdown ? (
                   <Select
