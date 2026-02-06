@@ -144,7 +144,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXMATCH('13812345679', '\d{11}' )"}
+{ "formula": "REGEXMATCH('13812345679', '\\\\d{11}' )"}
 
 
 ### AND
@@ -206,7 +206,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "CHAR(65)" }
+{ "formula": "CHAR(34)" }
 
 ### TEXTSPLIT
 POST {{baseUrl}}/formula/engine/execute-formula
