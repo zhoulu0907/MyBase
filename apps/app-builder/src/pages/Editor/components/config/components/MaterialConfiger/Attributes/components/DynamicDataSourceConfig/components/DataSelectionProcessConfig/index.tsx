@@ -1,4 +1,4 @@
-import { Button, Drawer, Form, Grid, Input, Radio, Select, Tree } from '@arco-design/web-react';
+import { Button, Drawer, Form, Grid, /* Input, Radio,  */ Select, Tree } from '@arco-design/web-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { IconCaretDown } from '@arco-design/web-react/icon';
@@ -16,8 +16,8 @@ interface DataSelectionProcessConfigProps extends DynamicSelectDataSourceConfigP
 
 const FormItem = Form.Item;
 const Option = Select.Option;
-const RadioGroup = Radio.Group;
-const maxFastFilterCount = 3;
+// const RadioGroup = Radio.Group;
+// const maxFastFilterCount = 3;
 
 const SUB_ATTR_KEY = {
   DEFAULTVALUE: 'defaultValue',
@@ -38,14 +38,14 @@ const sortOptions = [
   { value: 2, label: '降序' }
 ];
 
-const fastFilterOptions = [
-  { label: '单选按钮组', value: 'radioGroup' },
-  { label: '单行文本', value: 'singleText' },
-  { label: '提交时间', value: 'submitTime' },
-  { label: '多行文本', value: 'multiText' },
-  { label: '提交人', value: 'submitPerson' },
-  { label: '更新时间', value: 'updateDate' }
-];
+// const fastFilterOptions = [
+//   { label: '单选按钮组', value: 'radioGroup' },
+//   { label: '单行文本', value: 'singleText' },
+//   { label: '提交时间', value: 'submitTime' },
+//   { label: '多行文本', value: 'multiText' },
+//   { label: '提交人', value: 'submitPerson' },
+//   { label: '更新时间', value: 'updateDate' }
+// ];
 
 const treeData = [
   {
@@ -84,7 +84,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
   const [sortFieldValue, setSortFieldValue] = useState<string>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT].fieldName);
   const [sortValue, setSortValue] = useState<number>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT].sortBy);
 
-  const [isFastFilter, setIsFastFilter] = useState<boolean>(false);
+  // const [isFastFilter, setIsFastFilter] = useState<boolean>(false);
   const [fastFilters, setFastFilters] = useState<any[]>([]);
 
   // 回显字段：用于排除和预览显示
@@ -117,6 +117,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       setFilterCondition(configs[SUB_ATTR_KEY.FILTERCONDITION]);
       setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.fieldName);
       setSortValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.sortBy);
+      tableConfig.metaData = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].entityUuid;
       tableConfig.tableName = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].tableName;
       handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
     }
@@ -170,8 +171,26 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
     // const next = value && value !== echoField ? [value] : [];
     const next = value ? [value] : [];
     setSelected(next);
-    handlePropsChange(SUB_ATTR_KEY.SELECTDATAFIELDS, next);
-    handleOptionsChange();
+    const selectableOptions =
+      isDropdown && echoField
+        ? displayFieldOptions || []
+        :  displayFieldOptions || [];
+    const header = selectableOptions.reduce((fields: any[], option: any) => {
+      if (selected.includes(option.fieldName)) {
+        fields.push({
+          title: option.displayName,
+          dataIndex: option.fieldName
+        });
+      }
+      return fields;
+    }, []);
+    setTableHeader(header);
+    tableConfig.columns = header;
+
+    handleMultiPropsChange?.([
+      { key: SUB_ATTR_KEY.SELECTDATAFIELDS, value: next },
+      { key: SUB_ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig }
+    ]);
   };
 
   const handlSortFieldValueChange = (value: string) => {
@@ -315,7 +334,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
           </div>
           <div className={styles.rightColumn}>
             <Form layout="vertical">
-              <FormItem label="按钮文字">
+              {/* <FormItem label="按钮文字">
                 <Input
                   placeholder="请输入按钮文字"
                   value={configs[SUB_ATTR_KEY.DEFAULTVALUE]}
@@ -323,7 +342,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                     handlePropsChange(SUB_ATTR_KEY.DEFAULTVALUE, value);
                   }}
                 />
-              </FormItem>
+              </FormItem> */}
               <FormItem label={isDropdown ? '辅助字段' : '选择数据时的显示字段'}>
                 {/* <div>{JSON.stringify(displayFieldOptions)}</div> */}
                 {isDropdown ? (
@@ -334,7 +353,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
                     allowClear
                   >
                     {(displayFieldOptions || [])
-                      //   .filter((opt: any) => opt.fieldName !== echoField)
+                      .filter((opt: any) => opt.fieldName !== echoField)
                       .map((option: any) => (
                         <Option key={option.fieldName} value={option.fieldName}>
                           {option.displayName}

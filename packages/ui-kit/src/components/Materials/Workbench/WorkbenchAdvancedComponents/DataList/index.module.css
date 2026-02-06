@@ -1,0 +1,27 @@
+.containerStyle {
+  width: 100%;
+  padding: 16px;
+  border-radius: 8;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.container {
+  width: 100%;
+  min-height: 120px;
+  padding: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.dataListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dataListHeaderTitle {
+  font-size: 16px;
+  font-weight: 600;
+}

@@ -4,7 +4,7 @@ import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 import { isSystemUser } from '@/utils';
 import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
-import { IconDownload, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
+import { /* IconDownload, IconUpload, */ IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
 import {
   TENANT_USER_PERMISSION as ACTIONS,
@@ -303,7 +303,7 @@ export default function UserTable({
             <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
               编辑
             </Button>
-            <Button permission={ACTIONS.RESET} type="text" onClick={() => handleResetPassword(record)}>
+            <Button permission={ACTIONS.RESETPWD} type="text" onClick={() => handleResetPassword(record)}>
               重置密码
             </Button>
             {hasAllPermissions([ACTIONS.DELETE, ACTIONS.STATUS]) ? (
@@ -325,11 +325,11 @@ export default function UserTable({
               </Dropdown>
             ) : (
               <>
-                <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleStatusUpdate(record)}>
+                <Button permission={ACTIONS.STATUS} type="text" onClick={() => handleStatusUpdate(record)}>
                   {getStatusLabel(record.status === StatusEnum.DISABLE ? StatusEnum.ENABLE : StatusEnum.DISABLE)}
                 </Button>
                 <Button
-                  permission={ACTIONS.RESET}
+                  permission={ACTIONS.DELETE}
                   type="text"
                   disabled={isSystemUser(record)}
                   onClick={() => handleDelete(record)}
@@ -472,10 +472,10 @@ export default function UserTable({
       <div className={s.operationTop}>
         <div className={s.deptName}>{findNameById(deptTree, `${selectedDeptId}`)}</div>
         <Space>
-          <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.DIRECTOR)}>
+          <Button permission={ACTIONS.ADMIN} onClick={() => handleSetAdminOrDirector(UserRole.DIRECTOR)}>
             设置主管
           </Button>
-          <Button permission={ACTIONS.CREATE} onClick={() => handleSetAdminOrDirector(UserRole.ADMIN)}>
+          <Button permission={ACTIONS.ADMIN} onClick={() => handleSetAdminOrDirector(UserRole.ADMIN)}>
             设置部门接口人
           </Button>
         </Space>
@@ -485,12 +485,12 @@ export default function UserTable({
           <Button permission={ACTIONS.CREATE} type="primary" icon={<IconPlus />} onClick={handleCreate}>
             新建用户
           </Button>
-          <Button permission={ACTIONS.IMPORT} icon={<IconDownload />} onClick={handleImport}>
+          {/* <Button permission={ACTIONS.IMPORT} icon={<IconDownload />} onClick={handleImport}>
             导入
           </Button>
           <Button permission={ACTIONS.EXPORT} icon={<IconUpload />} onClick={handleExport}>
             导出
-          </Button>
+          </Button> */}
         </Space>
         <Space>
           <Select defaultValue={status} bordered={false} options={statusOptions} onChange={(val) => setStatus(val)} />

@@ -22,7 +22,12 @@ import {
   type DeleteApplicationReq,
   type PageParam
 } from '@onebase/app';
-import { getCommonPaginationList, getRuntimeURL, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
+import {
+  getCommonPaginationList,
+  getRuntimeURL,
+  TENANT_APP_PERMISSION as ACTIONS,
+  UserPermissionManager
+} from '@onebase/common';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -35,6 +40,7 @@ import AppCard from './components/AppCard';
 import { appOptions, calculateMaxItems, createTimeOptions, statusOptions } from './const';
 import styles from './index.module.less';
 import { PermissionButton as Button } from '@/components/PermissionControl';
+import aiCreateSVG from '@/assets/images/ai_create.svg';
 
 const Option = Select.Option;
 
@@ -76,6 +82,7 @@ const AppManagement: React.FC = () => {
 
   // option dropdown
   const [optionVisibleId, setOptionVisibleId] = useState('');
+  const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
 
   useEffect(() => {
     if (!appContainerRef.current) return;
@@ -132,9 +139,9 @@ const AppManagement: React.FC = () => {
         setTotal(res.total || 0);
         setLoading(false);
       }
-    }catch(error) {
-      console.log("error", error);
-    }finally {
+    } catch (error) {
+      console.log('error', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -262,17 +269,33 @@ const AppManagement: React.FC = () => {
               pointerEvents: applicationEmpty ? 'auto' : 'unset'
             }}
           >
-            <Button
-              type="primary"
-              size="large"
-              permission={ACTIONS.CREATE}
-              icon={<IconPlus fontSize={16} />}
-              onClick={() => {
-                setCreateVisible(true);
-              }}
-            >
-              创建应用
-            </Button>
+            <div className={styles.cteateBtn}>
+              <Button
+                type="primary"
+                size="large"
+                permission={ACTIONS.CREATE}
+                icon={<IconPlus fontSize={16} />}
+                onClick={() => {
+                  setCreateVisible(true);
+                }}
+              >
+                创建应用
+              </Button>
+              {/* TODO(ai)：当前仅ai测试账号可见 */}
+              {tenantId === '156421901678804992' &&
+                userPermissionInfo?.user?.id?.toString() === '156421901678804997' && (
+                  <Button
+                    type="primary"
+                    size="large"
+                    permission={ACTIONS.CREATE}
+                    onClick={() => navigate('/aigen/chat')}
+                    className={styles.aiCteateApp}
+                    icon={<img src={aiCreateSVG} />}
+                  >
+                    AI生成应用
+                  </Button>
+                )}
+            </div>
 
             {/* 筛选下拉框 */}
             <div>
@@ -336,7 +359,11 @@ const AppManagement: React.FC = () => {
                 <div className={styles.applicationEmpty}>
                   <img src={emptyApplicationSVG} alt="暂无应用" />
                   <Typography.Text type="secondary">还没有应用</Typography.Text>
-                  <Button className={styles.goCreateApplication} permission={ACTIONS.CREATE} onClick={() => setCreateVisible(true)}>
+                  <Button
+                    className={styles.goCreateApplication}
+                    permission={ACTIONS.CREATE}
+                    onClick={() => setCreateVisible(true)}
+                  >
                     去创建
                     <IconRight style={{ marginLeft: '4px' }} />
                   </Button>

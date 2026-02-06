@@ -1,12 +1,12 @@
 import '@arco-design/web-react/dist/css/arco.css';
 import '@arco-themes/react-cyansu-ob03/index.less';
-import '@onebase/ui-kit/src/theme.less';
+// import '@onebase/ui-kit/src/theme.less';
 
 import { ConfigProvider } from '@arco-design/web-react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import DynamicFormDebug from './index';
 import '../index.css';
+import DynamicFormDebug from './index';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

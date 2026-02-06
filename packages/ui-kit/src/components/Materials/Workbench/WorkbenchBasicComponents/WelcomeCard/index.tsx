@@ -10,13 +10,6 @@ import theme1Image from '@/assets/workbench/welcome-card/theme1.svg';
 import theme2Image from '@/assets/workbench/welcome-card/theme2.svg';
 import theme3Image from '@/assets/workbench/welcome-card/theme3.svg';
 
-const containerStyle: CSSProperties = {
-  width: '100%',
-  padding: '16px',
-  borderRadius: 8,
-  boxSizing: 'border-box'
-};
-
 const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) => {
   const { status, runtime, theme, userAvatar, userName, welcomeText, welcomeDesc } = props;
   
@@ -55,10 +48,11 @@ const XWelcomeCard = memo((props: XWelcomeCardConfig & { runtime?: boolean }) =>
   }, [theme]);
 
   const cardHeight = theme === WORKBENCH_THEME_OPTIONS.THEME_3 ? '150px' : '96px';
+  const ratio = theme === WORKBENCH_THEME_OPTIONS.THEME_3 ? 271 / 150 : 271 / 96; // 保持宽高比
 
   return (
-    <div style={containerStyle}>
-      <div className={styles.welcomeCard} style={{ height: cardHeight }}>
+    <div className={styles.containerStyle}>
+      <div className={styles.welcomeCard} style={{ minHeight: cardHeight, aspectRatio: ratio }}>
         <img src={backgroundImage} alt="background" className={styles.backgroundImage} />
 
         <div className={styles.welcomeCardContentWrapper}>

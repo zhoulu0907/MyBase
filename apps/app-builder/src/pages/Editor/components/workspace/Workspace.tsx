@@ -27,6 +27,7 @@ import {
   useEditorSignalMap,
   usePageEditorSignal,
   usePageViewEditorSignal,
+  usePageComponentValidateSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
   type GridItem
@@ -96,6 +97,8 @@ export default function EditorWorkspace() {
   const components = isFormEditor ? useFormEditorSignal.components.value : useListEditorSignal.components.value;
 
   const { pageViews, curViewId, setCurViewId, updatePageViewName } = usePageViewEditorSignal;
+
+  const { pageComponentValidate } = usePageComponentValidateSignal;
 
   const { editMode, setEditMode } = currentEditorSignal;
   const mobileEditorDragRef = useRef<MicroApp | null>(null);
@@ -401,10 +404,12 @@ export default function EditorWorkspace() {
                     schema.config.tooltip = field.description;
                     // 是否必填：1-是，0-不是 isRequired
                     // 是否唯一：1-是，0-不是 isUnique
+                    const noRepeat =
+                      field.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                     schema.config.verify = {
                       ...schema.config.verify,
                       required: field.isRequired,
-                      noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
+                      noRepeat
                     };
 
                     // 字段约束配置（长度/正则） constraints
@@ -416,7 +421,7 @@ export default function EditorWorkspace() {
                         ...schema.config.selectedDataSource,
                         entityUuid: field.dataSelectionConfig?.targetEntityUuid,
                         tableName: field.dataSelectionConfig?.targetTableName,
-                        entityName: field.dataSelectionConfig?.targetFieldName,
+                        entityName: field.dataSelectionConfig?.targetFieldName
                       };
                       // 回显字段  name
                       schema.config.displayFields = field.dataSelectionConfig?.targetFieldName
@@ -456,7 +461,7 @@ export default function EditorWorkspace() {
                   schema.config.label.text = cpName;
                   schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
                   schema.config.subTable = item.entityUuid;
-                  schema.config.tableName  = item.tableName;
+                  schema.config.tableName = item.tableName;
 
                   const props = {
                     id: cpID,
@@ -474,7 +479,7 @@ export default function EditorWorkspace() {
                       field.isSystemField !== 1
                   );
                   // 子表单的每个表单项配置
-                  let subFieldComponents: any = [];
+                  const subFieldComponents: any = [];
                   for (let ele of subFieldList) {
                     const subType = COMPONENT_MAP[ele.fieldType];
                     if (!subType) {
@@ -496,10 +501,12 @@ export default function EditorWorkspace() {
                     }
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
+                    const noRepeat =
+                      ele.isUnique === 1 ? true : (typeof subSchema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                     subSchema.config.verify = {
                       ...subSchema.config.verify,
                       required: ele.isRequired,
-                      noRepeat: typeof subSchema.config?.verify?.noRepeat === 'boolean' ? ele.isUnique === 1 : undefined
+                      noRepeat
                     };
 
                     // 字段约束配置（长度/正则） constraints
@@ -511,9 +518,9 @@ export default function EditorWorkspace() {
                         ...subSchema.config.selectedDataSource,
                         entityUuid: ele.dataSelectionConfig?.targetEntityUuid,
                         tableName: ele.dataSelectionConfig?.targetTableName,
-                        entityName: ele.dataSelectionConfig?.targetFieldName,
+                        entityName: ele.dataSelectionConfig?.targetFieldName
                       };
-                      
+
                       // 回显字段  name
                       subSchema.config.displayFields = ele.dataSelectionConfig?.targetFieldName
                         ? [
@@ -632,11 +639,12 @@ export default function EditorWorkspace() {
                   schema.config.tooltip = currentField.description;
                   // 是否必填：1-是，0-不是 isRequired
                   // 是否唯一：1-是，0-不是 isUnique
+                  const noRepeat =
+                    currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                   schema.config.verify = {
                     ...schema.config.verify,
                     required: currentField.isRequired,
-                    noRepeat:
-                      typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
+                    noRepeat
                   };
 
                   // 字段约束配置（长度/正则） constraints
@@ -648,7 +656,7 @@ export default function EditorWorkspace() {
                       ...schema.config.selectedDataSource,
                       entityUuid: currentField.dataSelectionConfig?.targetEntityUuid,
                       tableName: currentField.dataSelectionConfig?.targetTableName,
-                      entityName: currentField.dataSelectionConfig?.targetFieldName,
+                      entityName: currentField.dataSelectionConfig?.targetFieldName
                     };
                     // 回显字段  name
                     schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
@@ -704,7 +712,12 @@ export default function EditorWorkspace() {
                     width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
                     borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
                     borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
-                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
+                    background:
+                      pageComponentValidate.value?.[cp.id] === false
+                        ? 'rgb(var(--red-1))'
+                        : curComponentID === cp.id
+                          ? 'rgb(var(--primary-1))'
+                          : '',
                     margin: '4px'
                   }}
                   onClick={(e: React.MouseEvent<HTMLDivElement>) => {
@@ -736,7 +749,7 @@ export default function EditorWorkspace() {
 
                   {curComponentID === cp.id && showDeleteButton && (
                     <div className={styles.operationArea}>
-                      {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                         <>
                           <div
                             className={styles.copyButton}

@@ -4,7 +4,7 @@ import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { IconAdd, IconDelete } from '@arco-design/mobile-react/esm/icon';
-import { Cell, Collapse, Ellipsis, Form } from '@arco-design/mobile-react';
+import { Collapse, Ellipsis, Form } from '@arco-design/mobile-react';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import {
@@ -203,10 +203,12 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       schema.config.tooltip = currentField.description;
       // 是否必填：1-是，0-不是 isRequired
       // 是否唯一：1-是，0-不是 isUnique
+      const noRepeat =
+        currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
       schema.config.verify = {
         ...schema.config.verify,
         required: currentField.isRequired,
-        noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique : undefined
+        noRepeat
       };
 
       // 字段选项列表（单/多选字段专用） options

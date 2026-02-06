@@ -1,5 +1,6 @@
 import { AppHeader } from '@/components/header';
 import { useI18n } from '@/hooks/useI18n';
+import { initPlugins } from '@/plugin';
 import { Input, Layout, Tree } from '@arco-design/web-react';
 import { IconDown, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -21,9 +22,9 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
-import { initPlugins } from '@/plugin';
 import './components/TaskCenter/style/taskSide.less';
 
+import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
 import styles from './index.module.less';
 
@@ -54,6 +55,7 @@ const Runtime: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const isDev = useIsRuntimeDev();
 
   const [search] = useSearchParams();
   const curMenuId = search.get('curMenu');
@@ -94,9 +96,9 @@ const Runtime: React.FC = () => {
 
   useEffect(() => {
     if (appId) {
-      getMenuList(appId);
+      getMenuList(appId, isDev);
     }
-  }, [appId]);
+  }, [appId, isDev]);
 
   useEffect(() => {
     initPlugins();
@@ -147,10 +149,12 @@ const Runtime: React.FC = () => {
     return treeList;
   };
 
-  const getMenuList = async (appID: string) => {
+  const getMenuList = async (appID: string, isDevMode: boolean) => {
     const req: ListApplicationMenuReq = {
-      applicationId: appID
+      applicationId: appID,
+      isDev: isDevMode
     };
+
     const res = await listApplicationMenu(req);
     console.log(res);
     const bpmRes = await runtimeListApplicationBPMMenu(req);
@@ -283,7 +287,7 @@ const Runtime: React.FC = () => {
             }}
           />
         </Sider>
-        <Content className={styles.content}>
+        <Content className={styles.content} id="runtime-content">
           {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (

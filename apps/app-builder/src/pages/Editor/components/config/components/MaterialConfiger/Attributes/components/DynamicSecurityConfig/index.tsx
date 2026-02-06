@@ -97,6 +97,7 @@ const DynamicSecurityConfig = ({ handlePropsChange, item, configs }: Props) => {
           <Form.Item label="掩码方式" field="type" initialValue={configs[item.key]['type'] || undefined}>
             <Select
               getPopupContainer={getPopupContainer}
+              allowClear
               renderFormat={(option, value) => {
                 const item = securityOptions.find((ele) => ele.value === value);
                 // 自定义回显内容

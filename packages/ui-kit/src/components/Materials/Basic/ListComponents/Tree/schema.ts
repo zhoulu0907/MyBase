@@ -4,6 +4,7 @@ import {
   labelConfig,
   statusConfig,
   widthConfig,
+  treeDataConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TWidthSelectKeyType
@@ -15,19 +16,17 @@ import {
   WIDTH_VALUES
 } from '../../../constants';
 import type {
-  IBooleanConfigType,
   ICommonConfigType,
   ILabelConfigType,
-  INumberConfigType,
   IStatusConfigType,
-  ITableDataConfigType,
   ITextConfigType,
+  ITreeDataConfigType,
   IWidthConfigType,
-  TBooleanDefaultType,
-  TNumberDefaultType,
   TRadioDefaultType,
   TSelectDefaultType,
-  TTextDefaultType
+  TTextDefaultType,
+  TBooleanDefaultType,
+  TNumberDefaultType
 } from '../../../types';
 
 export interface XTreeSchema {
@@ -40,9 +39,7 @@ export type TXTreeEditData = Array<
   | ILabelConfigType
   | IWidthConfigType<TWidthSelectKeyType>
   | IStatusConfigType<TStatusSelectKeyType>
-  | IBooleanConfigType
-  | ITableDataConfigType
-  | INumberConfigType
+  | ITreeDataConfigType
   | ICommonConfigType
 >;
 
@@ -63,17 +60,16 @@ export interface XTreeConfig extends ICommonBaseType {
 
   defaultExpandLevel?: TNumberDefaultType;
 
-  border?: TBooleanDefaultType;
-
-  showLine?: TBooleanDefaultType;
-
-  hover?: TBooleanDefaultType;
-
   status?: TRadioDefaultType<TStatusSelectKeyType>;
 
   width: TSelectDefaultType<TWidthSelectKeyType>;
 
   saveWithHidden?: TBooleanDefaultType;
+
+  enableMinHeight?: TBooleanDefaultType;
+  enableMaxHeight?: TBooleanDefaultType;
+  minHeight?: TNumberDefaultType;
+  maxHeight?: TNumberDefaultType;
 }
 
 export interface TreeFieldConfig {
@@ -87,44 +83,7 @@ const XTree: XTreeSchema = {
   editData: [
     ...baseConfig,
     labelConfig,
-    /* {
-      key: 'metaData',
-      name: '数据绑定',
-      type: 'TableData',
-      advanced: false
-    },
-    {
-      key: 'treeFields',
-      name: '目录字段',
-      type: 'TreeFields',
-      advanced: false
-    },
-    {
-      key: 'defaultExpandLevel',
-      name: '默认展开层级',
-      type: 'NumberInput',
-      range: [1, 5],
-      step: 1,
-      advanced: false
-    }, 
-    {
-      key: 'border',
-      name: '显示边框',
-      type: 'SwitchInput',
-      advanced: true
-    },
-    {
-      key: 'showLine',
-      name: '显示连接线',
-      type: 'SwitchInput',
-      advanced: true
-    },
-    {
-      key: 'hover',
-      name: '鼠标悬浮效果',
-      type: 'SwitchInput',
-      advanced: true
-    },*/
+    treeDataConfig,
     widthConfig,
     statusConfig
   ],
@@ -138,9 +97,6 @@ const XTree: XTreeSchema = {
     tableName: '',
     treeFields: [],
     defaultExpandLevel: 2,
-    border: true,
-    showLine: true,
-    hover: true,
     saveWithHidden: false,
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],

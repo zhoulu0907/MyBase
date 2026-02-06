@@ -360,10 +360,12 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                       schema.config.tooltip = field.description;
                       // 是否必填：1-是，0-不是 isRequired
                       // 是否唯一：1-是，0-不是 isUnique
+                      const noRepeat =
+                        field.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                       schema.config.verify = {
                         ...schema.config.verify,
                         required: field.isRequired,
-                        noRepeat: field.isUnique
+                        noRepeat
                       };
 
                       // 字段选项列表（单/多选字段专用） options COMPONENT_MAP
@@ -460,7 +462,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                         field.isSystemField !== 1
                     );
                     // 子表单的每个表单项配置
-                    let subFieldComponents: any = [];
+                    const subFieldComponents: any = [];
                     for (let ele of subFieldList) {
                       const subType = COMPONENT_MAP[ele.fieldType];
                       if (!subType) {
@@ -482,10 +484,12 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                       }
                       // 字段描述 description
                       subSchema.config.tooltip = ele.description;
+                      const noRepeat =
+                        ele.isUnique === 1 ? true : (typeof subSchema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                       subSchema.config.verify = {
                         ...subSchema.config.verify,
                         required: ele.isRequired,
-                        noRepeat: ele.isUnique
+                        noRepeat
                       };
 
                       // 字段选项列表（单/多选字段专用） options
@@ -606,7 +610,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
 
                 // 子表字段不允许
                 if (
-                  (tableName && tableName !== mainEntity.tableName) ||
+                  (tableName && tableName !== mainEntity?.tableName) ||
                   itemType === ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
                   itemType === ENTITY_COMPONENT_TYPES.SUB_ENTITY
                 ) {
@@ -619,7 +623,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                   // 主表 字段组件
                   if (tableName && fieldName) {
                     // 获取当前字段数据源配置
-                    const currentField = mainEntity.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
+                    const currentField = mainEntity?.fields?.find((ele: AppEntityField) => ele.fieldName === fieldName);
                     if (currentField) {
                       // 数据长度 dataLength
                       // 小数位数 decimalPlaces
@@ -636,10 +640,12 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
                       schema.config.tooltip = currentField.description;
                       // 是否必填：1-是，0-不是 isRequired
                       // 是否唯一：1-是，0-不是 isUnique
+                      const noRepeat =
+                        currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
                       schema.config.verify = {
                         ...schema.config.verify,
                         required: currentField.isRequired,
-                        noRepeat: currentField.isUnique
+                        noRepeat
                       };
 
                       // 字段选项列表（单/多选字段专用） options
@@ -763,7 +769,7 @@ const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({ props, isListEditor =
 
                     {curComponentID === cp.id && showDeleteButton && (
                       <div className={styles.operationArea}>
-                        {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                           <>
                             <div
                               className={styles.copyButton}

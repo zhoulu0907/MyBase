@@ -12,6 +12,7 @@ import {
   labelConfig,
   tooltipConfig,
   verifyConfig,
+  uploadButtonConfig,
   type ICommonBaseType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
@@ -116,8 +117,12 @@ export interface XInputFileUploadConfig extends ICommonBaseType {
    */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
+    maxCountLimit: TBooleanDefaultType;
     maxCount: TNumberDefaultType;
+    maxSizeLimit: TBooleanDefaultType;
     maxSize: TNumberDefaultType;
+    fileFormatLimit: TBooleanDefaultType;
     fileFormat: TTextDefaultType;
   };
 
@@ -146,8 +151,9 @@ const XFileUpload: XInputFileUploadSchema = {
     tooltipConfig,
     ...dataFieldConfig,
     uploadMethodConfig,
-    buttonNameConfig,
-    uploadButtonTypeConfig,
+    uploadButtonConfig,
+    // buttonNameConfig,
+    // uploadButtonTypeConfig,
     showDownloadConfig,
     verifyConfig,
     statusConfig,
@@ -168,6 +174,10 @@ const XFileUpload: XInputFileUploadSchema = {
     showDownload: false,
     verify: {
       required: false,
+      noRepeat: false,
+      maxCountLimit: false,
+      maxSizeLimit: false,
+      fileFormatLimit: false,
       maxCount: 1,
       maxSize: 10,
       fileFormat: ''

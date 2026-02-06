@@ -34,7 +34,7 @@ const DynamicNumberFormatConfig = ({ handlePropsChange, item, configs }: Props) 
               max={10}
               precision={0}
               onChange={(value) => {
-                handlePropsChange(item.key, { ...configs[item.key], precision: value });
+                handlePropsChange(item.key, { ...configs[item.key], precision: value || 0 });
               }}
               style={{ width: 80 }}
             />
@@ -67,6 +67,7 @@ const DynamicNumberFormatConfig = ({ handlePropsChange, item, configs }: Props) 
               style={{ width: 80 }}
               size="mini"
               value={configs[item.key]['unitValue']}
+              status={configs[item.key]['showUnit'] && configs[item.key]['unitValue'] === '' ? 'error' : undefined}
               maxLength={10}
               onChange={(value) => {
                 handlePropsChange(item.key, { ...configs[item.key], unitValue: value });

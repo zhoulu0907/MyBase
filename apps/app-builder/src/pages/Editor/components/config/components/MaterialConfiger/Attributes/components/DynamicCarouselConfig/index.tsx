@@ -75,71 +75,67 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
     return res;
   };
 
-  console.log({
-    carouselConfig,
-    configs,
-    item,
-    id
-  });
-
   return (
-    <FormItem layout="vertical" labelAlign="left" label={'图片配置'} className={styles.formItem}>
+    <FormItem layout="vertical" labelAlign="left" label={'图片配置'} required className={styles.formItem}>
       <div className={styles.imagesTips}>
         支持jpg、jpeg、png、gif格式，单张{maxSizeMB}MB以内。{carouselConfig.length}/{maxCount}
       </div>
 
       <div className={styles.imagesList}>
-        <div className={styles.imageBox}>
-          <Upload
-            limit={maxCount}
-            listType="picture-card"
-            showUploadList={false}
-            beforeUpload={async (file) => {
-              if (!allowedFormats.includes(file.type)) {
-                Message.warning(`不支持该格式，仅支持 JPG / JPEG / PNG / GIF`);
-                return false;
-              }
-              // 校验大小
-              const isLtMax = file.size / 1024 / 1024 < maxSizeMB;
-              if (!isLtMax) {
-                Message.warning(`文件大小不能超过 ${maxSizeMB}MB`);
-                return false;
-              }
-            }}
-            customRequest={async (option) => {
-              const { onProgress, onError, onSuccess, file } = option;
-              try {
-                const fileId = await handleUpload(file, onProgress);
-                const uploadImgUrl = getFileUrlById(fileId);
-                if (uploadImgUrl !== '') {
-                  const newImageInfo = {
-                    fileId,
-                    text: '',
-                    url: ''
-                  };
-                  setCarouselConfig((prev) => [...prev, newImageInfo]);
-                  handlePropsChange(carouselKey, [...carouselConfig, newImageInfo]);
-                  onSuccess(newImageInfo);
-                } else {
+        {carouselConfig.length < maxCount && (
+          <div className={styles.imageBox}>
+            <Upload
+              limit={maxCount}
+              listType="picture-card"
+              showUploadList={false}
+              beforeUpload={async (file) => {
+                if (!allowedFormats.includes(file.type)) {
+                  Message.warning(`不支持该格式，仅支持 JPG / JPEG / PNG / GIF`);
+                  return false;
+                }
+                // 校验大小
+                const isLtMax = file.size / 1024 / 1024 < maxSizeMB;
+                if (!isLtMax) {
+                  Message.warning(`文件大小不能超过 ${maxSizeMB}MB`);
+                  return false;
+                }
+              }}
+              customRequest={async (option) => {
+                const { onProgress, onError, onSuccess, file } = option;
+                try {
+                  const fileId = await handleUpload(file, onProgress);
+                  const uploadImgUrl = getFileUrlById(fileId);
+                  if (uploadImgUrl !== '') {
+                    const newImageInfo = {
+                      fileId,
+                      text: '',
+                      url: ''
+                    };
+                    setCarouselConfig((prev) => [...prev, newImageInfo]);
+                    handlePropsChange(carouselKey, [...carouselConfig, newImageInfo]);
+                    onSuccess(newImageInfo);
+                    Message.success('上传成功');
+                  } else {
+                    onError({
+                      status: 'error',
+                      msg: '上传失败'
+                    });
+                  }
+                } catch (error) {
                   onError({
                     status: 'error',
                     msg: '上传失败'
                   });
                 }
-              } catch (error) {
-                onError({
-                  status: 'error',
-                  msg: '上传失败'
-                });
-              }
-            }}
-            style={{
-              width: '100%',
-              height: '100%',
-              pointerEvents: 'auto'
-            }}
-          />
-        </div>
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'auto'
+              }}
+            />
+          </div>
+        )}
 
         {carouselConfig.map((item, index) => (
           <Popover
@@ -174,8 +170,9 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
                   top: 28
                 }}
                 onClick={() => {
-                  setCarouselConfig((prev) => prev.filter((v) => v.image !== item.image));
-                  handlePropsChange(carouselKey, carouselConfig);
+                  const updateImages = carouselConfig.filter((v) => v.fileId !== item.fileId);
+                  setCarouselConfig(updateImages);
+                  handlePropsChange(carouselKey, updateImages);
                   Message.info(`删除成功`);
                 }}
               />

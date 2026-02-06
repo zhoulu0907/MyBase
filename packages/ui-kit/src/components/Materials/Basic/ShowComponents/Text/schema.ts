@@ -70,7 +70,7 @@ const XText: XTextSchema = {
   config: {
     ...baseDefault,
     content: '静态文本内容',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     color: ''
   }

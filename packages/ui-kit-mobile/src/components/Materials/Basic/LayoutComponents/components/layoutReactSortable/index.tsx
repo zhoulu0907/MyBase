@@ -100,10 +100,12 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
         schema.config.tooltip = currentField.description;
         // 是否必填：1-是，0-不是 isRequired
         // 是否唯一：1-是，0-不是 isUnique
+        const noRepeat =
+          currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
         schema.config.verify = {
           ...schema.config.verify,
           required: currentField.isRequired,
-          noRepeat: typeof schema.config?.verify?.noRepeat === 'boolean' ? currentField.isUnique === 1 : undefined
+          noRepeat
         };
 
         // 字段约束配置（长度/正则） constraints
@@ -190,11 +192,12 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           schema.config.tooltip = field.description;
           // 是否必填：1-是，0-不是 isRequired
           // 是否唯一：1-是，0-不是 isUnique
+          const noRepeat =
+            field.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
           schema.config.verify = {
             ...schema.config.verify,
             required: field.isRequired,
-            noRepeat:
-              typeof schema.config?.verify?.noRepeat === 'boolean' ? field.isUnique === 1 : undefined
+            noRepeat
           };
 
           // 字段约束配置（长度/正则） constraints
@@ -286,10 +289,12 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           }
           // 字段描述 description
           subSchema.config.tooltip = ele.description;
+          const noRepeat =
+            ele.isUnique === 1 ? true : (typeof subSchema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
           subSchema.config.verify = {
             ...subSchema.config.verify,
             required: ele.isRequired,
-            noRepeat: typeof subSchema.config?.verify?.noRepeat === 'boolean' ? ele.isUnique === 1 : undefined
+            noRepeat
           };
 
           // 字段约束配置（长度/正则） constraints
@@ -514,7 +519,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
             {/* 操作按钮 */}
             {curComponentID === cp.id && showDeleteButton && (
               <div className="operationArea">
-                {pageComponentSchemas[cp.id].config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
                   <>
                     <div
                       className="copyButton"

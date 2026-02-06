@@ -42,7 +42,7 @@ const XPlaceholder: XPlaceholderSchema = {
   ],
   config: {
     ...baseDefault,
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
   }
 };
 

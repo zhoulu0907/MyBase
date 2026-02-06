@@ -1,15 +1,16 @@
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Steps } from '@arco-design/web-react';
+import { Form, Spin, Steps } from '@arco-design/web-react';
+import { type Form as FormilyForm } from '@formily/core';
 import {
+  listConnectorActionInfos,
   listConnectorByType,
   listConnectorNodeConfig,
   type ConnectorNodeConfig,
   type FlowConnector
 } from '@onebase/app';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { type Form as FormilyForm } from '@formily/core';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FormContent, FormHeader, FormOutputs } from '../../../form-components';
 import { useIsSidebar, useNodeRenderContext } from '../../../hooks';
 import { type FlowNodeJSON } from '../../../typings';
@@ -58,26 +59,55 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
   const [connectorList, setConnectorList] = useState<FlowConnector[]>([]);
   const [selectedConnector, setSelectedConnector] = useState<FlowConnector | null>(null);
   const [selectedActionKey, setSelectedActionKey] = useState<string | null>(savedActionKey || null);
+  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+  const [actionsLoading, setActionsLoading] = useState(false);
   // 使用 ref 存储当前动作的参数值，用于在切换动作时保存
   const actionParamsRef = useRef<Record<string, any> | undefined>(undefined);
   // 使用 ref 存储 ActionFormConfig 的 form 实例，用于在保存时读取最新值
   const actionFormRef = useRef<FormilyForm | null>(null);
 
-  const actionItems = useMemo(() => {
-    const config = selectedConnector?.config;
-    if (!config) return [];
-    const properties = config.properties;
-    if (!properties || typeof properties !== 'object') return [];
+  // 使用 listConnectorActions 接口获取动作列表
+  useEffect(() => {
+    if (!selectedConnector?.id) {
+      setActionItems([]);
+      return;
+    }
+    setActionsLoading(true);
+    listConnectorActionInfos({
+      id: selectedConnector.id,
+      pageNo: 1,
+      pageSize: 500
+    })
+      .then((res: any) => {
+        const items: ActionItem[] = [];
+        const raw = res?.list ?? res?.records ?? res;
 
-    const actions = Object.entries(properties).map(([key, property]: [string, any]) => ({
-      key: key,
-      title: property.title,
-      description: property.description
-    }));
-
-    console.log('actions :', actions);
-    return actions;
-  }, [selectedConnector]);
+        if (raw?.properties && typeof raw.properties === 'object') {
+          Object.entries(raw.properties).forEach(([key, property]: [string, any]) => {
+            items.push({
+              key,
+              title: property?.title,
+              description: property?.description
+            });
+          });
+        } else if (Array.isArray(raw)) {
+          (raw as any[]).forEach((item) => {
+            items.push({
+              key: item.actionName ?? item.key ?? item.id,
+              title: item.title ?? item.actionName ?? item.name,
+              description: item.description
+            });
+          });
+        }
+        setActionItems(items);
+      })
+      .catch(() => {
+        setActionItems([]);
+      })
+      .finally(() => {
+        setActionsLoading(false);
+      });
+  }, [selectedConnector?.id]);
 
   const handleListConnectorNodeConfig = async () => {
     const res = await listConnectorNodeConfig();
@@ -221,7 +251,7 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
     console.log('saveActionParamsToSignal called, selectedActionKey:', selectedActionKey);
     console.log('actionParamsRef.current:', actionParamsRef.current);
     console.log('actionFormRef.current:', actionFormRef.current);
-    
+
     if (selectedActionKey) {
       // 优先从表单实例中读取最新值，如果没有则使用 ref 中的值
       let currentParams: Record<string, any> | undefined;
@@ -240,23 +270,23 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
         }
         console.log('Reading from signal:', currentParams);
       }
-      
+
       // 如果 currentParams 是 undefined，使用空对象（表示没有参数）
       const paramsToSave = currentParams !== undefined ? currentParams : {};
-      
+
       const nodeData = triggerEditorSignal.nodeData.value[node.id] || {};
       const currentActionParams = nodeData.actionParams || {};
       // 确保 currentActionParams 是对象格式
       const actionParamsObj =
         typeof currentActionParams === 'object' && !Array.isArray(currentActionParams) ? currentActionParams : {};
       actionParamsObj[selectedActionKey] = paramsToSave;
-      
+
       // 直接使用 triggerEditorSignal.setNodeData 保存
       triggerEditorSignal.setNodeData(node.id, {
         ...nodeData,
         actionParams: actionParamsObj
       });
-      
+
       // 同时更新表单值，保持同步
       payloadForm.setFieldValue('actionParams', actionParamsObj);
       console.log('Saved actionParams for', selectedActionKey, ':', actionParamsObj);
@@ -318,7 +348,9 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
             {/* 步骤3: 选择动作 */}
             {currentStep === 3 && (
               <div style={{ padding: '16px', minHeight: '200px' }}>
-                <ActionList items={actionItems} form={payloadForm} onSelect={handleActionSelect} />
+                <Spin loading={actionsLoading} style={{ width: '100%' }}>
+                  <ActionList items={actionItems} form={payloadForm} onSelect={handleActionSelect} />
+                </Spin>
               </div>
             )}
 

@@ -1,4 +1,5 @@
 export * from './app_resource';
+export * from './common';
 export * from './const';
 export * from './downloadFile';
 export * from './entityFieldConfig';
@@ -6,5 +7,5 @@ export * from './getPopupContainer';
 export * from './menuIcons';
 export * from './normalizeFormValues';
 export * from './security';
+export * from './theme';
 export * from './workbench_resource';
-export * from './common';

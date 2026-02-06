@@ -7,6 +7,7 @@ import { ReactSortable } from 'react-sortablejs';
 import { v4 as uuidv4 } from 'uuid';
 import type { WorkbenchItem } from '../types/workbench';
 import styles from './index.module.css';
+import { WORKBENCH_COMPONENT_TYPES } from '@/components/Materials/Workbench/core/componentTypes';
 
 interface ComponentListProps {
   items: WorkbenchItem[];
@@ -15,14 +16,16 @@ interface ComponentListProps {
 }
 
 export function ComponentList({ items, components, onItemsChange }: ComponentListProps) {
+  // 移动端组件库过滤数据列表组件
+  const displayComponents = components.filter((item) => item.type !== WORKBENCH_COMPONENT_TYPES.DATA_LIST);
 
-  if (components.length === 0) {
+  if (displayComponents.length === 0) {
     return <div className={styles.emptyTip}>暂无组件</div>;
   }
 
   return (
     <ReactSortable
-      list={items}
+      list={displayComponents}
       setList={onItemsChange}
       group={{
         name: COMPONENT_GROUP_NAME,
@@ -40,7 +43,7 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
         onItemsChange(items.map((item) => (item.type === cpType ? { ...item, id: e.item.id } : item)));
       }}
     >
-      {components.map((item) => (
+      {displayComponents.map((item) => (
         <MaterialCard
           key={item.type}
           id={item.id}

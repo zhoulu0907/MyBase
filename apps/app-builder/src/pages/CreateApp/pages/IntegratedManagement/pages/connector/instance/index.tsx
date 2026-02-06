@@ -1,10 +1,6 @@
 import { Button, Input, Message, Pagination, Select, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import {
-  deleteConnectInstance,
-  listAllConnectInstance,
-  type ConnectInstance
-} from '@onebase/app';
+import { deleteConnectInstance, listAllConnectInstance, type ConnectInstance } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -104,28 +100,31 @@ const ConnectorInstancesPage: React.FC = () => {
     <div className={styles.connectorInstancesPage}>
       <div className={styles.header}>
         <div className={styles.title}>连接器实例</div>
-      </div>
-      <div className={styles.searchContainer} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-        <Input.Search
-          allowClear
-          placeholder="请输入实例名称搜索"
-          style={{ width: 300 }}
-          onSearch={(val) => {
-            setKeyword(val);
-            // Trigger search logic here if needed (currently client - side filtering might be implemented or API call updated)
-          }}
-        />
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Select placeholder="全部类型" style={{ width: 120 }} allowClear>
-            {/* Options will be populated possibly from API */}
-          </Select>
-          <Select placeholder="全部状态" style={{ width: 120 }} allowClear>
-            <Select.Option value="enabled">已启用</Select.Option>
-            <Select.Option value="disabled">已禁用</Select.Option>
-          </Select>
-          <Button type="primary" icon={<IconPlus />} onClick={handleCreateInstance}>
-            创建实例
-          </Button>
+
+        <div
+          className={styles.searchContainer}
+          style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}
+        >
+          <Input.Search
+            allowClear
+            placeholder="请输入实例名称搜索"
+            style={{ width: 300 }}
+            onSearch={(val) => {
+              setKeyword(val);
+            }}
+          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Select placeholder="全部类型" style={{ width: 120 }} allowClear>
+              {/* Options will be populated possibly from API */}
+            </Select>
+            <Select placeholder="全部状态" style={{ width: 120 }} allowClear>
+              <Select.Option value="enabled">已启用</Select.Option>
+              <Select.Option value="disabled">已禁用</Select.Option>
+            </Select>
+            <Button type="primary" icon={<IconPlus />} onClick={handleCreateInstance}>
+              创建实例
+            </Button>
+          </div>
         </div>
       </div>
 

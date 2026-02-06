@@ -159,11 +159,11 @@ const XSwitch: XInputSwitchSchema = {
     dataField: [],
     defaultValueConfig: {
       type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: false,
+      customValue: true,
       formulaValue: ''
     },
     fillText: {
-      display: true,
+      display: false,
       checkedText: '',
       uncheckedText: ''
     },

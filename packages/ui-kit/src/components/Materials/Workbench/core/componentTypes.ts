@@ -79,6 +79,22 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
     icon: 'information_list_cp.svg',
     category: 'basic',
     size: { h: 36, w: 118 }
+  },
+  {
+    key: 'DATA_LIST',
+    type: 'XDataList',
+    displayName: '数据列表',
+    icon: 'data_list_cp.svg',
+    category: 'advanced',
+    size: { h: 36, w: 118 }
+  },
+  {
+    key: 'IMAGE_WORKBENCH',
+    type: 'XImageWorkbench',
+    displayName: '图片',
+    icon: 'image_workbench_cp.svg',
+    category: 'basic',
+    size: { h: 36, w: 118 }
   }
 ] as const;
 

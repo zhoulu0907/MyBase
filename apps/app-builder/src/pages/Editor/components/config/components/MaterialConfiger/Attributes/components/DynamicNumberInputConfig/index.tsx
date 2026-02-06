@@ -10,6 +10,11 @@ interface Props {
 }
 
 const DynamicNumberInputConfig = ({ handlePropsChange, item, configs }: Props) => {
+  // 自动轮播隐藏轮播间隔
+  if (!configs['autoplay'] && item.key === 'interval') {
+    return null;
+  }
+
   return (
     <Form.Item className={styles.formItem} label={item.name}>
       <InputNumber
@@ -20,9 +25,7 @@ const DynamicNumberInputConfig = ({ handlePropsChange, item, configs }: Props) =
         step={item.step}
         precision={item.precision}
         onChange={(value) => {
-          if (value >= 0) {
-            handlePropsChange(item.key, value);
-          }
+          handlePropsChange(item.key, value);
         }}
       />
     </Form.Item>

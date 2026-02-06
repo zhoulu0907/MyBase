@@ -3,20 +3,21 @@ import {
   baseDefault,
   dataFieldConfig,
   defaultValueModeConfig,
+  labelConfig,
   layoutConfig,
   selectScopeConfig,
   statusConfig,
-  widthConfig,
-  labelConfig,
   tooltipConfig,
   verifyConfig,
+  widthConfig,
   type ICommonBaseType,
+  type TAlignSelectKeyType,
   type TLayoutSelectKeyType,
   type TStatusSelectKeyType,
-  type TAlignSelectKeyType,
   type TWidthSelectKeyType
 } from '../../../common';
 import {
+  DEFAULT_VALUE_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
@@ -26,6 +27,7 @@ import {
 } from '../../../constants';
 import type {
   IBooleanConfigType,
+  ICommonConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
@@ -37,12 +39,11 @@ import type {
   ITextConfigType,
   ITooltipConfigType,
   IWidthConfigType,
-  ICommonConfigType,
   TBooleanDefaultType,
+  TRadioDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
-  TTextDefaultType,
-  TRadioDefaultType
+  TTextDefaultType
 } from '../../../types';
 
 export interface XInputDeptSelectSchema {
@@ -68,10 +69,10 @@ export type TXInputDeptSelectEditData = Array<
 
 export interface XInputDeptSelectConfig extends ICommonBaseType {
   /**
-  * 输入框标题
-  * text：标题
-  * display：是否显示
-  */
+   * 输入框标题
+   * text：标题
+   * display：是否显示
+   */
   label: {
     text: TTextDefaultType;
     display: TBooleanDefaultType;
@@ -90,7 +91,7 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   /**
    * 默认值方式
    */
-  defaultValueMode?: TTextDefaultType;
+  defaultValueMode?: any;
 
   /**
    * 部门默认值
@@ -98,9 +99,9 @@ export interface XInputDeptSelectConfig extends ICommonBaseType {
   defaultDeptValue?: TTextDefaultType;
 
   /**
-  * required：是否必填，未填写时提交报错
-  * noRepeat：是否不允许重复
-  */
+   * required：是否必填，未填写时提交报错
+   * noRepeat：是否不允许重复
+   */
   verify: {
     required: TBooleanDefaultType;
     noRepeat?: TBooleanDefaultType;
@@ -165,7 +166,10 @@ const XDeptSelect: XInputDeptSelectSchema = {
     tooltip: '',
     width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
-    defaultValueMode: 'custom',
+    defaultValueMode: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      formulaValue: ''
+    },
     defaultDeptValue: '',
     isSelectScope: false,
     selectScope: [],

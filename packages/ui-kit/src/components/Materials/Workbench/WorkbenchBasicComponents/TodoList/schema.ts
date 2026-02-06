@@ -17,12 +17,11 @@ import {
   WORKBENCH_STATUS_VALUES,
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
-  WORKBENCH_CONFIG_TYPES,
-  DATA_CONFIG_RANGE,
   WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../core/types';
 import { IDataConfigConfigType, IThemeConfigType, INumberConfigType } from '../../core/types';
+import { labelNameConfig, themeConfig, dataConfigConfig, dataCountConfig } from '../../config/commonConfig';
 
 // 待办事项数据结构
 export interface ITodoItem {
@@ -118,26 +117,12 @@ export interface XTodoListConfig extends ICommonBaseWorkbenchType {
 }
 
 const XTodoList: XTodoListSchema = {
-  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, {
-    key: 'label',
-    name: '标题名称',
-    type: WORKBENCH_CONFIG_TYPES.LABEL_INPUT
-  },
-  {
-    key: 'dataConfig',
-    name: '数据内容配置',
-    type: WORKBENCH_CONFIG_TYPES.WB_DATA_CONFIG,
-    range: DATA_CONFIG_RANGE
-  },
-  {
-    key: 'theme',
-    name: '样式库',
-    type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
-  }, {
-    key: 'dataCount',
-    name: '数据条数',
-    type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT,
-  }],
+  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig,
+    labelNameConfig,
+    dataConfigConfig,
+    themeConfig,
+    dataCountConfig
+  ],
   config: {
     ...workbenchBaseDefault,
     componentName: 'TodoList',

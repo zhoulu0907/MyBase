@@ -9,6 +9,8 @@ import ButtonWorkbenchConfig from './ButtonWorkbenchConfig';
 import WelcomeCardConfig from './WelcomeCardConfig';
 import TodoListConfig from './TodoListConfig';
 import InformationListConfig from './InformationListConfig';
+import DataListConfig from './DataListConfig';
+import ImageWorkbenchConfig from './ImageWorkbenchConfig';
 
 export {
   PageConfig,
@@ -19,5 +21,7 @@ export {
   ButtonWorkbenchConfig,
   WelcomeCardConfig,
   TodoListConfig,
-  InformationListConfig
+  InformationListConfig,
+  DataListConfig,
+  ImageWorkbenchConfig
 };

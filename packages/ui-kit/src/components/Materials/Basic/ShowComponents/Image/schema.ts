@@ -71,7 +71,7 @@ const XImage: XImageSchema = {
   editData: [...baseConfig, imageConfig, fillConfig, widthConfig, statusConfig],
   config: {
     ...baseDefault,
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     fillStyle: FILL_VALUES[FILL_OPTIONS.COVER],
     imageConfig: '',

@@ -51,8 +51,10 @@ import WelcomeCardIcon from '@/assets/images/cp/welcome_card_cp.svg';
 import InformationListIcon from '@/assets/images/cp/information_list_cp.svg';
 import RichTextEditorWorkbenchIcon from '@/assets/images/cp/rich_text_editor_workbench_cp.svg';
 import ButtonWorkbenchIcon from '@/assets/images/cp/button_workbench_cp.svg';
+import ImageWorkbenchIcon from '@/assets/images/cp/image_workbench_cp.svg';
 
 import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
+import DataListIcon from '@/assets/images/cp/data_list_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
@@ -114,9 +116,11 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'information_list_cp.svg': <img src={InformationListIcon} alt="XInformationList" />,
   'rich_text_editor_workbench_cp.svg': <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
   'button_workbench_cp.svg': <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
+  'image_workbench_cp.svg': <img src={ImageWorkbenchIcon} alt="XImageWorkbench" />,
 
   // 工作台高级组件
-  'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />
+  'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
+  'data_list_cp.svg': <img src={DataListIcon} alt="XDataList" />
 };
 
 // TODO 图标更新
@@ -181,7 +185,9 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XInformationList: <img src={InformationListIcon} alt="XInformationList" />,
   XRichTextEditorWorkbench: <img src={RichTextEditorWorkbenchIcon} alt="XRichTextEditorWorkbench" />,
   XButtonWorkbench: <img src={ButtonWorkbenchIcon} alt="XButtonWorkbench" />,
+  XImageWorkbench: <img src={ImageWorkbenchIcon} alt="XImageWorkbench" />,
 
   // 工作台高级组件
-  XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />
+  XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
+  XDataList: <img src={DataListIcon} alt="XDataList" />
 };

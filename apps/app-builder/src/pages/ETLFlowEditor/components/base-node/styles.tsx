@@ -14,7 +14,7 @@ export const NodeWrapperStyle = styled.div`
   border-radius: 8px;
 
   &.selected {
-    border: 2px solid #009e9e;
+    border: 2px solid rgb(var(--primary-6));
     border-radius: 8px;
   }
 

@@ -37,7 +37,7 @@ const DynamicFileConfig: React.FC<DynamicFileConfigProps> = ({ handlePropsChange
   };
 
   return (
-    <Form.Item layout="vertical" labelAlign="left" label={'文件配置'} className={styles.formItem}>
+    <Form.Item layout="vertical" labelAlign="left" label={'文件配置'} required className={styles.formItem}>
       <div>支持{maxSizeMB}MB以内。</div>
 
       <div className={styles.fileList}>

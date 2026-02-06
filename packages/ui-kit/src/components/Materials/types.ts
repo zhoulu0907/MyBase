@@ -83,10 +83,24 @@ export interface ITableDataConfigType extends ICommonConfigType {
   advanced?: boolean;
 }
 
+export interface ITreeDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TREE_DATA;
+  advanced?: boolean;
+}
+
 export interface ICardDataConfigType extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.CARD_DATA;
+}
+
+export interface ICanvasCardConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CANVAS_CARD_CONFIG;
+  advanced?: boolean;
 }
 
 export interface IDataSortByConfigType extends ICommonConfigType {

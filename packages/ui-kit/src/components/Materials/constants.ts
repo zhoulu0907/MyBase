@@ -46,6 +46,8 @@ export const CONFIG_TYPES = {
   TABLE_DATA: 'TableData',
   // 树字段配置
   TREE_FIELDS: 'TreeFields',
+  // 树数据配置
+  TREE_DATA: 'TreeData',
   // 表格分页数量
   TABLE_PAGE_SIZE: 'TablePageSize',
   // 图片、附件上传大小限制
@@ -143,6 +145,8 @@ export const CONFIG_TYPES = {
   COVER_IMAGE: 'CoverImage',
   // 绑定分组筛选
   GROUP_FILTER: 'GroupFilter',
+  // 画布卡片配置
+  CANVAS_CARD_CONFIG: 'CanvasCardConfig',
 } as const;
 
 // 状态选项常量

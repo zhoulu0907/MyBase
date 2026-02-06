@@ -147,11 +147,26 @@ const UserMembers = (props: IProps) => {
     setMemberLoading(true);
     try {
       if (!roleInfo?.id) return;
+
+      let deptType: CodeType;
+      let userType: number;
+
+      if (roleInfo.roleType === RoleType.ADMIN) {
+        deptType = CodeType.TENANT;
+        userType = RoleType.USER;
+      } else if (curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
+        deptType = CodeType.CORP;
+        userType = RoleType.CUSTOM;
+      } else {
+        deptType = CodeType.TENANT;
+        userType = RoleType.USER;
+      }
+
       const params: GetDeptUserReq = {
         roleId: roleInfo.id,
         deptId,
-        deptType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? CodeType.CORP : CodeType.TENANT,
-        userType: curAppInfo.publishModel === PUBLISH_MODULE.SASS ? RoleType.CUSTOM : RoleType.USER,
+        deptType,
+        userType,
         keywords
       };
       let res = [];

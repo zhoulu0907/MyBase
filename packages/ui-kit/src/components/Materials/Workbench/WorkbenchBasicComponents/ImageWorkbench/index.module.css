@@ -1,0 +1,28 @@
+.containerStyle {
+  width: 100%;
+  border-radius: 8px;
+  padding: 16px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.imageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.imageHeaderTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.imageStyle {
+  max-height: 300px;
+  border-radius: 8px;
+  img {
+    object-fit: var(--fit, contain);
+    max-height: 300px;
+  }
+}

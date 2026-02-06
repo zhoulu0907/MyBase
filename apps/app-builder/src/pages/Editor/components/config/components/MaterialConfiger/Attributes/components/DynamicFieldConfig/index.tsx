@@ -39,7 +39,7 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
   configs
 }) => {
   useSignals();
-  const { curComponentSchema, components, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
+  const { curComponentSchema, pageComponentSchemas, setPageComponentSchemas } = usePageEditorSignal();
   const { subTableComponents } = useFormEditorSignal;
   const { mainEntity, subEntities } = useAppEntityStore();
   const [entityTree, setEntityTree] = useState<any[]>([]);
@@ -139,14 +139,16 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
 
     if (isMainEntity && currentMainField) {
       // 主表
+      const noRepeat =
+        currentMainField.isUnique === 1 ? true : typeof configs.verify?.noRepeat === 'boolean' ? false : undefined;
       const newConfigs = {
         ...configs,
         defaultValue: currentMainField.defaultValue,
         tooltip: currentMainField.description,
         verify: {
           ...configs.verify,
-          required: currentMainField.isRequired,
-          noRepeat: currentMainField.isUnique
+          required: !!currentMainField.isRequired,
+          noRepeat
         },
         constraints: currentMainField.constraints,
         [item.key]: value
@@ -154,14 +156,16 @@ const DynamicFieldConfig: React.FC<DynamicFieldConfigProps> = ({
       handleConfigsChange(newConfigs);
     } else if (isSubEntity && currentSubField) {
       // 子表
+      const noRepeat =
+        currentSubField.isUnique === 1 ? true : typeof configs.verify?.noRepeat === 'boolean' ? false : undefined;
       const newConfigs = {
         ...configs,
         defaultValue: currentSubField.defaultValue,
         tooltip: currentSubField.description,
         verify: {
           ...configs.verify,
-          required: currentSubField.isRequired,
-          noRepeat: currentSubField.isUnique
+          required: !!currentSubField.isRequired,
+          noRepeat
         },
         constraints: currentSubField.constraints,
         [item.key]: value

@@ -3,8 +3,9 @@ import { Button, Form, Select, TreeSelect } from '@arco-design/web-react';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { getDeptList } from '@onebase/platform-center';
 import { listToTree } from '@onebase/common';
-import { getPopupContainer, CONFIG_TYPES } from '@onebase/ui-kit';
+import { getPopupContainer, CONFIG_TYPES, DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
+import { IconLaunch } from '@arco-design/web-react/icon';
 
 export interface DynamicDeptDefaultValueConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -22,10 +23,13 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
   configs,
   id
 }) => {
-  const [defaultValueMode, setDefaultValueMode] = useState(configs[item.key]);
+  const defaultValueConfigKey = item.key || 'defaultValueConfig';
+
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
-  // const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
-  const [formulaData, setFormulaData] = useState<string>('');
+  const [defaultValueConfig, setDefaultValueConfig] = useState({
+    type: '',
+    formulaValue: undefined
+  });
 
   // dept tree
   const [deptTree, setDeptTree] = useState<any[]>([]);
@@ -42,10 +46,9 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
     }
   }, [configs['selectScope'], deptTree]);
 
-  const handleModeChange = (value: string) => {
-    setDefaultValueMode(value);
-    handlePropsChange(item.key, value);
-  };
+  useEffect(() => {
+    setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+  }, [configs[defaultValueConfigKey]]);
 
   // 获取部门列表
   const fetchDeptList = async () => {
@@ -113,25 +116,35 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
     setDefaultValue(value);
   };
 
-  const handleFormulaConfirm = (formulaData: any, formattedFormula: string, params: any) => {
+  const handleFormulaValueChange = (key: string, value: boolean | string | number) => {
+    const newConfig = { ...configs[defaultValueConfigKey], [key]: value };
+    handlePropsChange(defaultValueConfigKey, newConfig);
+  };
+
+  const handleFormulaConfirm = (formulaData: any) => {
     setFormulaVisible(false);
-    // form.setFieldValue(
-    //   formulaFieldKey,
-    //   {formulaData: formulaData, formula: formattedFormula, parameters: params}
-    // );
-    setFormulaData('');
-    // setFormulaFieldKey('');
+    handleFormulaValueChange('formulaValue', formulaData);
   };
 
   return (
     <>
       <FormItem layout="vertical" labelAlign="left" label={'默认值'} style={{ marginBottom: '8px' }}>
-        <Select defaultValue={defaultValueMode} onChange={(value) => handleModeChange(value)}>
-          <Select.Option value="custom">自定义</Select.Option>
-          <Select.Option value="formula">公式计算</Select.Option>
-        </Select>
+        <Select
+          getPopupContainer={getPopupContainer}
+          onChange={(value) => {
+            const newConfig = { ...configs[defaultValueConfigKey], type: value, formulaValue: '' };
+            handlePropsChange(defaultValueConfigKey, newConfig);
+          }}
+          value={defaultValueConfig?.type}
+          options={[
+            { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.CUSTOM], value: DEFAULT_VALUE_TYPES.CUSTOM },
+            { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.FORMULA], value: DEFAULT_VALUE_TYPES.FORMULA }
+            // { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.LINKAGE], value: DEFAULT_VALUE_TYPES.LINKAGE }
+          ]}
+        />
       </FormItem>
-      {defaultValueMode === 'custom' ? (
+
+      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.CUSTOM && (
         <FormItem>
           <TreeSelect
             placeholder="请选择"
@@ -144,16 +157,26 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
             onChange={handleChange}
           />
         </FormItem>
-      ) : (
+      )}
+
+      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.FORMULA && (
         <FormItem>
           <Button long onClick={() => setFormulaVisible(true)}>
-            ƒx 编辑公式
+            {defaultValueConfig?.formulaValue ? (
+              <>
+                <span>已设置公式</span>
+                <IconLaunch />
+              </>
+            ) : (
+              <>ƒx 编辑公式</>
+            )}
           </Button>
         </FormItem>
       )}
 
       <FormulaEditor
-        initialFormula={formulaData}
+        fieldName={configs?.label?.text}
+        initialFormula={defaultValueConfig?.formulaValue}
         visible={formulaVisible}
         onCancel={() => setFormulaVisible(false)}
         onConfirm={handleFormulaConfirm}

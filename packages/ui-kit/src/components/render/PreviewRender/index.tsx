@@ -45,6 +45,8 @@ interface PreviewRenderProps {
   // 表格数据id
   recordId?: string;
   pageSetType?: PageType;
+
+  tooltipPosition?: string;
 }
 
 const PreviewRender: React.FC<PreviewRenderProps> = ({
@@ -59,7 +61,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   pageType,
   cpState,
   recordId,
-  pageSetType
+  pageSetType,
+  tooltipPosition
 }) => {
   // 获取组件配置，使用深拷贝确保每次都是新对象
   const [componentConfig, setComponentConfig] = useState(() => {
@@ -122,7 +125,9 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     const Impl: any = getComponentImpl(cpType as any, runtime) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
     if (!Impl) return <div>未知组件类型: {cpType}</div>;
 
-    const baseProps: any = { cpName: cpId, id: cpId, pageSetType, ...componentConfig };
+    // 预览状态下首行tooltip位置控制
+    const previewTooltipPosition = preview ? tooltipPosition : 'top';
+    const baseProps: any = { cpName: cpId, id: cpId, pageSetType, tooltipPosition: previewTooltipPosition, ...componentConfig };
 
     if (descriptor) {
       if (descriptor.template.category === 'form' || descriptor.template.category === 'show') {
@@ -131,7 +136,9 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
       }
       if (descriptor.template.category === 'layout') {
         baseProps.pageType = pageType;
+        baseProps.showFromPageData = showFromPageData;
         baseProps.detailMode = detailMode;
+        baseProps.refresh = refresh;
       }
       if (descriptor.template.category === 'list') {
         baseProps.runtime = runtime;

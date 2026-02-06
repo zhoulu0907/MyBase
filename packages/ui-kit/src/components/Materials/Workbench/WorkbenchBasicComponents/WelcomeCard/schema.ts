@@ -17,11 +17,11 @@ import {
   WORKBENCH_STATUS_VALUES,
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES,
-  WORKBENCH_CONFIG_TYPES,
   WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType, IWbCheckInputConfigType } from '../../core/types';
 import { IDataConfigConfigType } from '../../core/types';
+import { themeConfig, welcomeDescConfig, welcomeTextConfig } from '../../config/commonConfig';
 
 export interface XWelcomeCardSchema {
   editData: TXWelcomeCardEditData;
@@ -54,22 +54,14 @@ export interface XWelcomeCardConfig extends ICommonBaseWorkbenchType {
 }
 
 const XWelcomeCard: XWelcomeCardSchema = {
-  editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig, {
-    key: 'welcomeText',
-    name: '欢迎语',
-    type: WORKBENCH_CONFIG_TYPES.WB_CHECK_INPUT,
-    checkboxLabel: '显示用户名'
-  }, 
-  {
-    key: 'theme',
-    name: '样式库',
-    type: WORKBENCH_CONFIG_TYPES.WB_THEME_SELECTOR
-  },
-  {
-    key: 'welcomeDesc',
-    name: '辅助语',
-    type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT
-  }],
+  editData: [
+    ...workbenchBaseConfig,
+    workbenchStatusConfig,
+    workbenchWidthConfig,
+    welcomeTextConfig,
+    themeConfig,
+    welcomeDescConfig
+  ],
   
   config: {
     ...workbenchBaseDefault,

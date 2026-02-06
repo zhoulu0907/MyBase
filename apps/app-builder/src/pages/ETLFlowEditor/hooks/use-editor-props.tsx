@@ -70,13 +70,13 @@ export const useEditorProps = (nodeRegistries: FlowNodeRegistry[]) =>
         };
       },
       lineColor: {
-        hidden: 'var(--g-workflow-line-color-hidden,transparent)',
-        default: 'var(--g-workflow-line-color-default,#4d53e8)',
-        drawing: 'var(--g-workflow-line-color-drawing, #009E9E)',
-        hovered: 'var(--g-workflow-line-color-hover,#009E9E)',
-        selected: 'var(--g-workflow-line-color-selected,#009E9E)',
+        hidden: 'var(--g-workflow-line-color-hidden, transparent)',
+        default: 'var(--g-workflow-line-color-default, #4d53e8)',
+        drawing: 'var(--g-workflow-line-color-drawing, rgb(var(--primary-6)))',
+        hovered: 'var(--g-workflow-line-color-hover, rgb(var(--primary-6)))',
+        selected: 'var(--g-workflow-line-color-selected, rgb(var(--primary-6)))',
         error: 'var(--g-workflow-line-color-error,red)',
-        flowing: 'var(--g-workflow-line-color-flowing,#4d53e8)'
+        flowing: 'var(--g-workflow-line-color-flowing, #4d53e8)'
       },
       materials: {
         /**

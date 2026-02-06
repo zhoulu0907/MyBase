@@ -42,6 +42,7 @@ import type {
     ITableButtonConfigType,
     ITableDataConfigType,
     ICardDataConfigType,
+    ICanvasCardConfigType,
     IDataSortByConfigType,
     IDataFilterConfigType,
     ICoverImageConfigType,
@@ -58,7 +59,9 @@ import type {
     ITooltipConfigType,
     IVerifyConfigType,
     IWidthConfigType,
+    ITreeDataConfigType,
     TTextDefaultType,
+    IUploadButtonConfigType,
 } from './types';
 
 // ==================== 基础与通用 ====================
@@ -463,6 +466,18 @@ export const tableMetaDataConfig: ITableDataConfigType = {
   type: 'TableData'
 };
 
+export const treeDataConfig: ITreeDataConfigType = {
+  key: 'metaData',
+  name: '数据绑定',
+  type: 'TreeData'
+};
+
+export const canvasCardConfig: ICanvasCardConfigType = {
+  key: 'componentName',
+  name: '样式库',
+  type: 'CanvasCardConfig'
+};
+
 export const keyDataConfig: ITableDataConfigType = {
   key: 'keyData',
   name: '主键',
@@ -811,9 +826,10 @@ export const autoplayConfig: IBooleanConfigType = {
 
 export const carouselIntervalConfig: INumberConfigType = {
   key: 'interval',
-  name: '轮播间隔',
+  name: '轮播间隔（秒）',
   type: 'NumberInput',
-  step: 1
+  step: 1,
+  max: 200
 }
 
 // ==================== 默认值与格式 ====================
@@ -921,7 +937,9 @@ export const numberFormatConfig: INumberFormatConfigType = {
 export const stepConfig: INumberConfigType = {
   key: 'step',
   name: '数字步长',
-  type: 'NumberInput'
+  type: 'NumberInput',
+  min: 0,
+  max: 1000000
 }
 
 export const textDefaultValueConfig: ITextConfigType = {
@@ -934,6 +952,12 @@ export const buttonNameConfig: ITextConfigType = {
   key: 'buttonName',
   name: '按钮名称',
   type: 'TextInput'
+}
+
+export const uploadButtonConfig: IUploadButtonConfigType = {
+  key: 'uploadButton',
+  name: '按钮名称',
+  type: 'UploadButton'
 }
 
 export const uploadButtonTypeConfig: IStatusConfigType<TUploadButtonType> = {
@@ -963,7 +987,8 @@ export const colorConfig: IColorConfigType = {
 export const contentConfig: ITextConfigType = {
   key: 'content',
   name: '文本内容',
-  type: 'TextInput'
+  type: 'TextInput',
+  required: true,
 }
 
 export const titleTextConfig: ITextConfigType = {
@@ -975,7 +1000,8 @@ export const titleTextConfig: ITextConfigType = {
 export const webViewUrlConfig: ITextConfigType = {
   key: 'webViewUrl',
   name: '网页链接',
-  type: 'TextInput'
+  type: 'TextInput',
+  required: true
 }
 
 export const bgColorConfig: IColorConfigType = {
@@ -1349,6 +1375,9 @@ export const COMMON_CONFIG_GROUPS = {
   },
   security: {
     securityConfig
+  },
+  tree: {
+    treeDataConfig
   }
 } as const
 

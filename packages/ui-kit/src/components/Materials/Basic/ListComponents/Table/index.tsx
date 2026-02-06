@@ -42,12 +42,6 @@ import { renderCellText } from './renderCellText';
 import type { XTableConfig } from './schema';
 import TableSearch from './tableSerach';
 
-const leftPanelWidth = 318;
-const rightPanelWidth = 310;
-const canvasPaddingWidth = 40 + 32 + 10;
-const canvasMarginWidth = 10;
-const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth + canvasMarginWidth;
-
 type XTableSelectProps = {
   showSelect: boolean;
   defaultSelectedId?: string | number | null;
@@ -71,8 +65,8 @@ const XTable = memo(
   ) => {
     useSignals();
 
-    const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
-    const { menuPermission, canCreate, canEdit, canDelete } = menuPermissionSignal;
+    const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
+    const { canCreate, canEdit, canDelete } = menuPermissionSignal;
 
     const {
       curPage,
@@ -88,10 +82,7 @@ const XTable = memo(
     const hasOperationPermission = true;
 
     const {
-      id,
-      label,
       status,
-      defaultValue,
       metaData,
       tableName,
       searchItems,
@@ -433,13 +424,10 @@ const XTable = memo(
         newColumns = [indexColumn, ...newColumns];
       }
 
-      console.log('newColumns: ', newColumns);
       setFinalColumns(newColumns);
     };
 
     const handleCreate = () => {
-      console.log('点击新增');
-
       if (!runtime) {
         return;
       }
@@ -478,7 +466,7 @@ const XTable = memo(
       // TODO(mickey): 考虑模糊查询和范围查询
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
-        if (typeof value === 'object') {
+        if (typeof value === 'object' && !Array.isArray(value)) {
           if (value?.id == undefined || value?.id == null || value?.id == '') {
             return;
           }
@@ -489,7 +477,7 @@ const XTable = memo(
             nodeType: 'CONDITION',
             fieldName: key,
             operator: VALIDATION_TYPE.EQUALS,
-            fieldValue: typeof value === 'object' ? [value?.id] : [value]
+            fieldValue: Array.isArray(value) ? value : (typeof value === 'object' ? [value?.id] : [value])
           });
         }
       });
@@ -516,17 +504,14 @@ const XTable = memo(
       } else {
         res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
       }
-      console.log('res: ', res);
 
       const mainMetaData = await getEntityFieldsWithChildren(metaData);
-
-      console.log('mainMetaData: ', mainMetaData);
 
       const { list, total } = res;
 
       const newTableData = (list || []).map((item: any) => {
         const newItem = item;
-        Object.entries(newItem).forEach(([key, value]) => {
+        Object.entries(newItem).forEach(([key, _value]) => {
           // 优化：减少重复查找，提升可读性和性能
           if (Array.isArray(mainMetaData?.parentFields)) {
             const dataField = mainMetaData.parentFields.find(
@@ -561,8 +546,6 @@ const XTable = memo(
         };
       });
 
-      console.log('newTableData: ', newTableData);
-
       tableForm.setFieldsValue({ [mainMetaData.tableName]: newTableData });
       setTableData(newTableData);
       setTableTotal(total);
@@ -574,18 +557,14 @@ const XTable = memo(
       }
 
       const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST);
-      console.log('curFormPage: ', curFormPage);
       const pageId = curFormPage?.id;
 
       const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
-      console.log('flowRes: ', flowRes);
 
       const deleteFlows = (flowRes || []).filter(
         (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.DELETE)
       );
       setFlows(deleteFlows);
-
-      console.log('删除数据 id: ', id);
 
       const req: DeleteMethodV2Params = {
         id: id
@@ -704,9 +683,9 @@ const XTable = memo(
               scroll={{
                 x: 'max-content'
               }}
-              onRow={(record, index) => {
+              onRow={(record) => {
                 return {
-                  onClick: (event) => {
+                  onClick: () => {
                     handleRowClick(record);
                   },
                   onDoubleClick: () => {

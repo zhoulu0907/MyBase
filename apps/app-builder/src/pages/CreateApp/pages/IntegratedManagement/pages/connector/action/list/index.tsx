@@ -10,12 +10,20 @@ import {
   type TableColumnProps
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
-import { deleteScriptAction, listScriptAction, type ListScriptActionReq, type ScriptActionItem } from '@onebase/app';
+import {
+  ConnectorActionStatusText,
+  deleteHTTPAction,
+  listConnectorActionInfos,
+  type ConnectorActionStatus,
+  type ListConnectorActionReq,
+  type ScriptActionItem
+} from '@onebase/app';
 import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
-import CreateScriptActionPage from '../create';
+
+import CreateHTTPActionPage from '../createHTTP';
 import styles from './index.module.less';
 
 /**
@@ -57,30 +65,49 @@ const ScriptActionListPage: React.FC = () => {
     const id = getHashQueryParam('id');
 
     if (id) {
-      const req: ListScriptActionReq = {
+      const req: ListConnectorActionReq = {
+        id: id,
         pageNo: pageNo,
-        pageSize: pageSize,
-        connectorId: id,
-        scriptName: actionName
+        pageSize: pageSize
       };
 
       const res = await getCommonPaginationList(
-        (param:any) => listScriptAction(param as ListScriptActionReq),
+        (param: any) => listConnectorActionInfos(param as ListConnectorActionReq),
         req,
         setPageNo
       );
 
       if (res) {
-        setActionList(res.list || []);
-        setTotal(res.total || 0);
+        type RowItem = ScriptActionItem & { actionName?: string };
+        const list = (res || []).map((item: RowItem, index: number) => ({
+          ...item,
+          _rowKey: item.id ?? item.actionName ?? item.scriptName ?? `row-${index}`
+        }));
+        setActionList(list);
+        setTotal(list.length);
         setLoading(false);
       }
     }
   };
 
-  const handleDelete = async (scriptId: string) => {
+  //   const handleDelete = async (scriptId: string) => {
+  //     try {
+  //       const res = await deleteScriptAction(scriptId);
+  //       if (res) {
+  //         Message.success('删除成功');
+  //         handleGetScriptActionList(searchActionName);
+  //       } else {
+  //         Message.error('删除失败');
+  //       }
+  //     } catch (error) {
+  //       Message.error('删除失败，请稍后重试');
+  //       console.error('删除动作失败:', error);
+  //     }
+  //   };
+
+  const handleDelete = async (connectorId: string, actionName: string) => {
     try {
-      const res = await deleteScriptAction(scriptId);
+      const res = await deleteHTTPAction(connectorId, actionName);
       if (res) {
         Message.success('删除成功');
         handleGetScriptActionList(searchActionName);
@@ -93,13 +120,15 @@ const ScriptActionListPage: React.FC = () => {
     }
   };
 
-  const handleEdit = (record: ScriptActionItem) => {
-    setEditingScriptId(record.id);
-  };
-
-  const getEditingData = () => {
-    if (!editingScriptId || !actionList) return undefined;
-    return actionList.find((item) => item.id === editingScriptId);
+  const handleEdit = (record: ScriptActionItem & { actionName?: string }) => {
+    // 列表接口可能返回 id 或 actionCode，getConnectorActionInfo 需要 actionCode
+    console.log(record);
+    const actionName = record.id ?? record.actionName;
+    if (actionName) {
+      setEditingScriptId(actionName);
+    } else {
+      Message.warning('无法获取动作标识，请稍后重试');
+    }
   };
 
   const columns: TableColumnProps[] = [
@@ -111,7 +140,7 @@ const ScriptActionListPage: React.FC = () => {
     },
     {
       title: '动作名称',
-      dataIndex: 'scriptName',
+      dataIndex: 'actionName',
       width: 200
     },
     {
@@ -121,23 +150,40 @@ const ScriptActionListPage: React.FC = () => {
     },
     {
       title: '创建时间',
-      dataIndex: 'createTime',
+      dataIndex: 'updateTime',
       width: 180,
       render: (createTime: number) => {
         return <span>{dayjs(createTime).format('YYYY-MM-DD HH:mm:ss')}</span>;
       }
     },
     {
+      title: '状态',
+      dataIndex: 'status',
+      width: 100,
+      render: (status: ConnectorActionStatus) => <span>{ConnectorActionStatusText[status] ?? '-'}</span>
+    },
+    {
       title: <div style={{ textAlign: 'center', width: '90%' }}>操作</div>,
       dataIndex: 'operation',
       width: 150,
       fixed: 'right',
-      render: (_: any, record: ScriptActionItem) => (
+      render: (_: any, record: any) => (
         <Space>
-          <Button type="text" size="mini" onClick={() => handleEdit(record)}>
+          <Button
+            type="text"
+            size="mini"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(record);
+            }}
+          >
             编辑
           </Button>
-          <Popconfirm title="确定删除吗？" content="删除后不可恢复" onOk={() => handleDelete(record.id)}>
+          <Popconfirm
+            title="确定删除吗？"
+            content="删除后不可恢复"
+            onOk={() => handleDelete(getHashQueryParam('id') || '', record.actionName)}
+          >
             <Button type="text" size="mini" status="danger">
               删除
             </Button>
@@ -151,8 +197,8 @@ const ScriptActionListPage: React.FC = () => {
     <div className={styles.scriptActionListPage}>
       <div className={styles.title}>动作配置</div>
       {isCreate || editingScriptId ? (
-        <CreateScriptActionPage
-          editData={getEditingData()}
+        <CreateHTTPActionPage
+          editActionName={editingScriptId ?? undefined}
           onSuccess={() => {
             setIsCreate(false);
             setEditingScriptId(null);
@@ -177,7 +223,13 @@ const ScriptActionListPage: React.FC = () => {
           <div className={styles.content}>
             <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
               <div className={styles.tableContainer}>
-                <Table rowKey="id" columns={columns} data={actionList || []} pagination={false} loading={loading} />
+                <Table
+                  rowKey="_rowKey"
+                  columns={columns}
+                  data={actionList || []}
+                  pagination={false}
+                  loading={loading}
+                />
               </div>
             </Spin>
           </div>

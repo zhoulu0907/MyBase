@@ -20,14 +20,6 @@ const ICON_MAP: Record<string, string> = {
   showPending
 };
 
-const containerStyle: CSSProperties = {
-  width: '100%',
-  minHeight: 120,
-  borderRadius: 8,
-  padding: 16,
-  boxSizing: 'border-box'
-};
-
 const colorList = [
   '#FF7D00',
   '#165DFF',
@@ -78,7 +70,7 @@ const XTodoCenter = memo((props: XTodoCenterConfig & { runtime?: boolean }) => {
   }, [runtime]);
 
   return (
-    <div style={containerStyle}>
+    <div className={styles.containerStyle}>
 
       <div className={styles.todoCenterHeader}>
         {label?.display && (

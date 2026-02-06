@@ -208,7 +208,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
 
       <Table
         scroll={{
-          y: 300
+          y: 330
         }}
         columns={columns}
         data={list}

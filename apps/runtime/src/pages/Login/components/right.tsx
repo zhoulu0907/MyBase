@@ -211,8 +211,11 @@ const Right: React.FC = () => {
             navigate(`/onebase/${tenantId}/runtime/my-app`);
           } else {
             //saas模式 或者inner模式
-            // navigate(`/onebase/runtime/?appId=${appId}&tenantId=${tenantId}`);
-            navigate(`/onebase/${tenantId}/${appId}/runtime`);
+            if (getHashQueryParam('redirectURL')?.includes('runtime-dev')) {
+              navigate(`/onebase/${tenantId}/${appId}/runtime-dev`);
+            } else {
+              navigate(`/onebase/${tenantId}/${appId}/runtime`);
+            }
           }
         } else {
           // 跳转到首页
