@@ -82,8 +82,16 @@ public class SemanticQueryConditionBuilder {
             if (casted instanceof String) { return new QueryColumn(name).like(casted); }
             return new QueryColumn(name).eq(casted);
         } else if (op == SemanticOperatorEnum.EQUALS) {
+            // 当 fieldValue 包含多个值时，使用 IN 查询代替 EQ
+            if (values != null && values.size() > 1) {
+                return new QueryColumn(name).in(castValues(values, type));
+            }
             return new QueryColumn(name).eq(castValue(val, type));
         } else if (op == SemanticOperatorEnum.NOT_EQUALS) {
+            // 当 fieldValue 包含多个值时，使用 NOT IN 查询代替 NE
+            if (values != null && values.size() > 1) {
+                return new QueryColumn(name).notIn(castValues(values, type));
+            }
             return new QueryColumn(name).ne(castValue(val, type));
         } else if (op == SemanticOperatorEnum.GREATER_THAN) {
             return new QueryColumn(name).gt(castValue(val, type));
@@ -220,7 +228,9 @@ public class SemanticQueryConditionBuilder {
     }
 
     private Object castValue(Object v, SemanticFieldTypeEnum type) {
-        if (v == null || type == null) { return v; }
+        if (v == null) { return v; }
+        // 当字段类型未知时，统一转为 String，避免 PostgreSQL 类型不匹配（如 varchar = numeric）
+        if (type == null) { return String.valueOf(v); }
         switch (type) {
             case ID:
                 return Long.valueOf(String.valueOf(v).trim());
