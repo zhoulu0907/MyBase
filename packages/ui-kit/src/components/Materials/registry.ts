@@ -13,7 +13,6 @@ import { baseValidate as BaseValidate } from './Basic/validate'
 import type { ComponentType } from './componentTypes'
 import { WorkbenchComp } from './Workbench'
 import { workbenchSchema } from './Workbench/schema/schema'
-import { INDICATOR_CARD_STYLE_TYPE } from './constants'
 
 /** 组件分类类型 */
 type ComponentCategory = 'layout' | 'form' | 'list' | 'show' | 'workbench'

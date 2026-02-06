@@ -1,11 +1,31 @@
-import { Checkbox, Form, Input, Button, Grid, Modal, Select } from '@arco-design/web-react';
-import { IconDragDotVertical, IconEdit, IconDelete } from '@arco-design/web-react/icon';
+import {
+  Checkbox,
+  Form,
+  Input,
+  Button,
+  Grid,
+  Modal,
+  Select,
+  InputNumber,
+  Switch,
+  DatePicker,
+  Dropdown,
+  Menu,
+  ColorPicker,
+  Radio
+} from '@arco-design/web-react';
+import { IconDragDotVertical, IconEdit, IconDelete, IconLaunch, IconStarFill } from '@arco-design/web-react/icon';
 import { useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import {
   CONFIG_TYPES,
   ENTITY_FIELD_TYPE,
-  INDICATOR_CARD_STYLE_TYPE,
+  COMPONENT_FIELD_MAP,
+  COMPONENT_MAP,
+  STATUS_VALUES,
+  STATUS_OPTIONS,
+  WIDTH_VALUES,
+  WIDTH_OPTIONS,
   INDICATOR_CALCULATE_TYPE,
   INDICATOR_TIME_DEMENSION,
   INDICATOR_COMPARE_CALCULATE_METHOD,
@@ -14,6 +34,7 @@ import {
   useAppEntityStore
 } from '@onebase/ui-kit';
 import {
+  FieldType,
   VALIDATION_TYPE,
   getEntityFields,
   getFieldCheckTypeApi,
@@ -23,8 +44,11 @@ import {
 } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { registerConfigRenderer } from '../../registry';
+import AsyncDeptSelectField from './component/AsyncDeptSelectField';
+import AsyncSelectField from './component/AsyncSelectField';
+import AsyncUserSelectField from './component/AsyncUserSelectField';
+import { FormulaEditor } from '@/components/FormulaEditor';
 import styles from '../../index.module.less';
-import { read } from 'fs';
 
 interface Props {
   handlePropsChange: (key: string, value: any) => void;
@@ -60,6 +84,29 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
   // 字段列表
   const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
   const [validationTypes, setValidationTypes] = useState<EntityFieldValidationTypes[]>([]);
+  const [formulaData, setFormulaData] = useState<string>('');
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaKey, setFormulaKey] = useState<{ index: null | number; i: null | number }>({
+    index: null,
+    i: null
+  });
+
+  const opCodeOptions = [
+    {
+      label: '公式',
+      value: FieldType.FORMULA
+    },
+    {
+      label: '静态值',
+      value: FieldType.VALUE
+    },
+    {
+      label: '变量',
+      value: FieldType.VARIABLES
+    }
+  ];
+  // 图标下拉内容
+  const dropList = [{ lable: <IconStarFill />, value: 'IconStarFill' }];
 
   useEffect(() => {
     getEntityList();
@@ -108,18 +155,22 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
       }
     });
     setFieldList(res);
-    const fieldIds = res.map((ele:any)=>ele.fieldId)
-    debugger
-    getValidationTypes(fieldIds)
+    const fieldIds = res?.map((ele: any) => ele.id);
+    getValidationTypes(fieldIds, res);
   };
 
-  const getValidationTypes = async (fieldIds: string[]) => {
+  const getValidationTypes = async (fieldIds: string[], fields: MetadataEntityField[]) => {
     if (!fieldIds || fieldIds.length === 0) {
-      setValidationTypes([])
+      setValidationTypes([]);
       return;
     }
     const newValidationTypes = await getFieldCheckTypeApi(fieldIds);
+    newValidationTypes.forEach((item: EntityFieldValidationTypes) => {
+      const fieldName = fields.find((field) => field.id == item.fieldId)?.fieldName || '';
+      item.fieldKey = fieldName;
+    });
 
+    setValidationTypes(newValidationTypes);
   };
 
   const updateIndicator = () => {
@@ -129,7 +180,261 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
     setCurrentIndex(null);
     handlePropsChange(indicatorKey, newList);
     setModalVisible(false);
-    setCurrentIndicator({});
+  };
+
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
+    setFormulaVisible(false);
+    const filterCondition = [...currentIndicator.filterCondition];
+    filterCondition[formulaKey.index || 0].conditions[formulaKey.i || 0].value = formulaData;
+    setCurrentIndicator((prev: any) => ({
+      ...prev,
+      filterCondition: filterCondition
+    }));
+    setFormulaData('');
+  };
+
+  const openFormulaEditor = (item: any, index: number, i: number) => {
+    setFormulaVisible(true);
+    setFormulaKey({
+      index,
+      i
+    });
+    setFormulaData(item.value);
+  };
+
+  const StaticValueComponent = (item: any, fieldKey: string, op: string, index: number, i: number) => {
+    const fieldValidationType = validationTypes.find((cc) => cc.fieldKey == fieldKey);
+
+    if (
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.TEXT.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.LONG_TEXT.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.EMAIL.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.PHONE.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.URL.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.ADDRESS.VALUE
+    ) {
+      return (
+        <Input
+          value={item.value}
+          placeholder="请输入静态值"
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.NUMBER.VALUE) {
+      // 范围
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <Grid.Row gutter={8}>
+            <Grid.Col span={12}>
+              <InputNumber
+                value={item.value?.[0]}
+                style={{ width: '100%' }}
+                onChange={(value) => {
+                  const filterCondition = [...currentIndicator.filterCondition];
+                  filterCondition[index].conditions[i].value[0] = value;
+                  setCurrentIndicator((prev: any) => ({
+                    ...prev,
+                    filterCondition: filterCondition
+                  }));
+                }}
+              />
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <InputNumber
+                value={item.value?.[1]}
+                style={{ width: '100%' }}
+                onChange={(value) => {
+                  const filterCondition = [...currentIndicator.filterCondition];
+                  filterCondition[index].conditions[i].value[1] = value;
+                  setCurrentIndicator((prev: any) => ({
+                    ...prev,
+                    filterCondition: filterCondition
+                  }));
+                }}
+              />
+            </Grid.Col>
+          </Grid.Row>
+        );
+      }
+
+      return (
+        <InputNumber
+          value={item.value}
+          placeholder="请输入静态值"
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.BOOLEAN.VALUE) {
+      return (
+        <Switch
+          checked={item.value}
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.DATE.VALUE) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <DatePicker.RangePicker
+            value={item.value}
+            onChange={(value) => {
+              const filterCondition = [...currentIndicator.filterCondition];
+              filterCondition[index].conditions[i].value = value;
+              setCurrentIndicator((prev: any) => ({
+                ...prev,
+                filterCondition: filterCondition
+              }));
+            }}
+          />
+        );
+      }
+      return (
+        <DatePicker
+          placeholder="请输入静态值"
+          value={item.value}
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.DATETIME.VALUE) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <DatePicker.RangePicker
+            value={item.value}
+            showTime
+            onChange={(value) => {
+              const filterCondition = [...currentIndicator.filterCondition];
+              filterCondition[index].conditions[i].value = value;
+              setCurrentIndicator((prev: any) => ({
+                ...prev,
+                filterCondition: filterCondition
+              }));
+            }}
+          />
+        );
+      }
+
+      return (
+        <DatePicker
+          placeholder="请输入静态值"
+          showTime
+          value={item.value}
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    if (
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.RADIO.VALUE ||
+      fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.SELECT.VALUE
+    ) {
+      return (
+        <AsyncSelectField
+          value={item.value}
+          fieldName={'value'}
+          fieldKey={`${currentIndicator.tableName}.${fieldKey}`}
+          entityFieldValidationTypes={validationTypes}
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.USER.VALUE) {
+      return (
+        <AsyncUserSelectField
+          value={item.value}
+          fieldName={'value'}
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    if (fieldValidationType?.fieldTypeCode == ENTITY_FIELD_TYPE.DEPARTMENT.VALUE) {
+      return (
+        <AsyncDeptSelectField
+          value={item.value}
+          fieldName={'value'}
+          onChange={(value) => {
+            const filterCondition = [...currentIndicator.filterCondition];
+            filterCondition[index].conditions[i].value = value;
+            setCurrentIndicator((prev: any) => ({
+              ...prev,
+              filterCondition: filterCondition
+            }));
+          }}
+        />
+      );
+    }
+
+    return (
+      <Input
+        placeholder="请输入静态值"
+        value={item.value}
+        onChange={(value) => {
+          const filterCondition = [...currentIndicator.filterCondition];
+          filterCondition[index].conditions[i].value = value;
+          setCurrentIndicator((prev: any) => ({
+            ...prev,
+            filterCondition: filterCondition
+          }));
+        }}
+      />
+    );
   };
 
   return (
@@ -170,7 +475,7 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                   }
                 }}
               >
-                {indicatorList.map((_col: any, idx: number) => (
+                {indicatorList?.map((_col: any, idx: number) => (
                   <Grid.Row key={idx} gutter={[4, 16]} align="center">
                     <Grid.Col span={2}>
                       <IconDragDotVertical
@@ -220,21 +525,12 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
       <Modal
         visible={modalVisible}
         title="编辑指标"
-        onCancel={() => {
-          setModalVisible(false);
-          setCurrentIndicator({});
-        }}
+        onCancel={() => setModalVisible(false)}
+        unmountOnExit
         className={styles.indicatorModal}
         footer={
           <>
-            <Button
-              onClick={() => {
-                setModalVisible(false);
-                setCurrentIndicator({});
-              }}
-            >
-              取消
-            </Button>
+            <Button onClick={() => setModalVisible(false)}>取消</Button>
             <Button type="primary" onClick={updateIndicator}>
               确定
             </Button>
@@ -298,7 +594,7 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                   setCurrentIndicator((prev: any) => ({ ...prev, metaData: value, tableName, calculateField: 'id' }));
                 }}
               >
-                {entityList.map((item) => (
+                {entityList?.map((item) => (
                   <Select.Option key={item.entityUuid} value={item.entityUuid}>
                     {item.entityName}
                   </Select.Option>
@@ -319,7 +615,7 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                     }}
                   >
                     {fieldList
-                      .filter(
+                      ?.filter(
                         (item: MetadataEntityField) => item.fieldType && !hiddenFieldTypes.includes(item.fieldType)
                       )
                       .map((item: MetadataEntityField) => (
@@ -356,15 +652,29 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
           <Grid.Col span={24}>
             <Form.Item label="数据过滤">
               {currentIndicator.filterCondition?.map((ele: any, index: number) => (
-                <div key={index} className={styles.dataFilter}>
+                <div key={`filterCondition-${index}`} className={styles.dataFilter}>
                   <div className={styles.items}>
                     <div className={styles.tag}>且</div>
                     <div>
                       {ele.conditions?.map((item: any, i: number) => (
-                        <Grid.Row key={`${index}-${i}`} gutter={[8, 16]} align="center">
-                          <Grid.Col span={8}>
-                            <Select getPopupContainer={getPopupContainer} placeholder="请选择" value={item.fieldKey}>
-                              {fieldList.map((e: MetadataEntityField) => (
+                        <Grid.Row key={`${index}-${i}`} gutter={[8, 16]} align="center" style={{ width: '100%' }}>
+                          <Grid.Col span={6}>
+                            <Select
+                              getPopupContainer={getPopupContainer}
+                              placeholder="请选择"
+                              value={item.fieldKey}
+                              onChange={(value) => {
+                                const filterCondition = [...currentIndicator.filterCondition];
+                                filterCondition[index].conditions[i] = {
+                                  fieldKey: value,
+                                  op: undefined,
+                                  operatorType: undefined,
+                                  value: undefined
+                                };
+                                setCurrentIndicator((prev: any) => ({ ...prev, filterCondition: filterCondition }));
+                              }}
+                            >
+                              {fieldList?.map((e: MetadataEntityField) => (
                                 <Select.Option key={e.fieldName} value={e.fieldName}>
                                   {e.displayName}
                                 </Select.Option>
@@ -372,21 +682,102 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                             </Select>
                           </Grid.Col>
                           {/* 操作 */}
-                          <Grid.Col span={4}>
-                            <Select getPopupContainer={getPopupContainer} placeholder="请选择" value={item.op}>
+                          <Grid.Col span={5}>
+                            <Select
+                              getPopupContainer={getPopupContainer}
+                              placeholder="请选择"
+                              value={item.op}
+                              onChange={(value) => {
+                                const filterCondition = [...currentIndicator.filterCondition];
+                                filterCondition[index].conditions[i] = {
+                                  fieldKey: item.fieldKey,
+                                  op: value,
+                                  operatorType: undefined,
+                                  value: undefined
+                                };
+                                setCurrentIndicator((prev: any) => ({ ...prev, filterCondition: filterCondition }));
+                              }}
+                            >
                               {item.fieldKey &&
-                                fieldList.map((e: MetadataEntityField) => (
-                                  <Select.Option key={e.fieldName} value={e.fieldName}>
-                                    {e.displayName}
-                                  </Select.Option>
-                                ))}
+                                validationTypes
+                                  ?.find((cc) => cc.fieldKey == item.fieldKey)
+                                  ?.validationTypes?.map((operator: any) => (
+                                    <Select.Option key={operator.code} value={operator.code}>
+                                      {operator.name}
+                                    </Select.Option>
+                                  ))}
                             </Select>
                           </Grid.Col>
                           {/* 操作不为空和为空不需要选择操作类型 */}
                           {item.op !== VALIDATION_TYPE.IS_EMPTY && item.op !== VALIDATION_TYPE.IS_NOT_EMPTY && (
                             <>
-                              <Grid.Col span={3}>1</Grid.Col>
-                              <Grid.Col span={8}>1</Grid.Col>
+                              <Grid.Col span={5}>
+                                <Select
+                                  getPopupContainer={getPopupContainer}
+                                  value={item.operatorType}
+                                  disabled={item.op === undefined}
+                                  options={opCodeOptions}
+                                  onChange={(value) => {
+                                    const filterCondition = [...currentIndicator.filterCondition];
+                                    filterCondition[index].conditions[i] = {
+                                      fieldKey: item.fieldKey,
+                                      op: item.op,
+                                      operatorType: value,
+                                      value: item.op === VALIDATION_TYPE.RANGE ? [undefined, undefined] : undefined
+                                    };
+                                    setCurrentIndicator((prev: any) => ({
+                                      ...prev,
+                                      filterCondition: filterCondition
+                                    }));
+                                  }}
+                                ></Select>
+                              </Grid.Col>
+                              <Grid.Col span={7}>
+                                {item.operatorType === undefined && <Input placeholder="请输入" disabled />}
+
+                                {item.operatorType === FieldType.VALUE &&
+                                  StaticValueComponent(item, item.fieldKey, item.op, index, i)}
+
+                                {item.operatorType === FieldType.VARIABLES && (
+                                  <Select
+                                    getPopupContainer={getPopupContainer}
+                                    placeholder="请选择"
+                                    value={item.value}
+                                    onChange={(value) => {
+                                      const filterCondition = [...currentIndicator.filterCondition];
+                                      filterCondition[index].conditions[i].value = value;
+                                      setCurrentIndicator((prev: any) => ({
+                                        ...prev,
+                                        filterCondition: filterCondition
+                                      }));
+                                    }}
+                                  >
+                                    {fieldList
+                                      ?.filter((ele) => {
+                                        const fieldType = fieldList.find(
+                                          (e) => e.fieldName === item.fieldKey
+                                        )?.fieldType;
+                                        if (fieldType) {
+                                          const cpTypes = COMPONENT_FIELD_MAP[COMPONENT_MAP[fieldType]];
+                                          return cpTypes?.includes(ele.fieldType);
+                                        }
+                                        return true;
+                                      })
+                                      .map((e: MetadataEntityField) => (
+                                        <Select.Option key={e.fieldName} value={e.fieldName}>
+                                          {e.displayName}
+                                        </Select.Option>
+                                      ))}
+                                  </Select>
+                                )}
+
+                                {item.operatorType === FieldType.FORMULA && (
+                                  <Button onClick={() => openFormulaEditor(item, index, i)} long>
+                                    {item.value ? '已设置公式' : 'ƒx 编辑公式'}
+                                    {item.value ? <IconLaunch /> : ''}
+                                  </Button>
+                                )}
+                              </Grid.Col>
                             </>
                           )}
                           <Grid.Col span={1}>
@@ -412,7 +803,12 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                         style={{ marginTop: '10px' }}
                         onClick={() => {
                           const filterCondition = [...currentIndicator.filterCondition];
-                          filterCondition[index].conditions.push({});
+                          filterCondition[index].conditions.push({
+                            fieldKey: undefined,
+                            op: undefined,
+                            operatorType: undefined,
+                            value: undefined
+                          });
                           setCurrentIndicator((prev: any) => ({ ...prev, filterCondition }));
                         }}
                       >
@@ -425,7 +821,19 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
               <Button
                 type="text"
                 onClick={() => {
-                  const filterCondition = [...currentIndicator.filterCondition, { conditions: [{}] }];
+                  const filterCondition = [
+                    ...currentIndicator.filterCondition,
+                    {
+                      conditions: [
+                        {
+                          fieldKey: undefined,
+                          op: undefined,
+                          operatorType: undefined,
+                          value: undefined
+                        }
+                      ]
+                    }
+                  ];
                   setCurrentIndicator((prev: any) => ({ ...prev, filterCondition }));
                 }}
               >
@@ -434,22 +842,376 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
             </Form.Item>
           </Grid.Col>
         </Grid.Row>
+
+        {/* 格式、图标样式 */}
         <Grid.Row gutter={8}>
-          <Grid.Col span={12}></Grid.Col>
-          <Grid.Col span={12}></Grid.Col>
-        </Grid.Row>
-        <Grid.Row gutter={8}>
-          <Grid.Col span={12}></Grid.Col>
-          <Grid.Col span={12}></Grid.Col>
+          <Grid.Col span={12}>
+            <Form.Item label="格式">
+              <Grid.Row gutter={8} align="center">
+                <Grid.Col span={8}>
+                  <Checkbox
+                    checked={currentIndicator.precisionLimit}
+                    onChange={(value) => {
+                      setCurrentIndicator((prev: any) => ({ ...prev, precisionLimit: value }));
+                    }}
+                  >
+                    保留小数点
+                  </Checkbox>
+                </Grid.Col>
+                <Grid.Col span={12}>
+                  <InputNumber
+                    value={currentIndicator.precision}
+                    size="mini"
+                    min={0}
+                    max={10}
+                    precision={0}
+                    onChange={(value) => {
+                      setCurrentIndicator((prev: any) => ({ ...prev, precision: value }));
+                    }}
+                  />
+                </Grid.Col>
+              </Grid.Row>
+              <Grid.Row gutter={8} align="center">
+                <Grid.Col span={24}>
+                  <Checkbox
+                    checked={currentIndicator.percent}
+                    onChange={(value) => {
+                      setCurrentIndicator((prev: any) => ({ ...prev, percent: value }));
+                    }}
+                  >
+                    显示为百分比
+                  </Checkbox>
+                </Grid.Col>
+              </Grid.Row>
+
+              <Grid.Row gutter={8} align="center">
+                <Grid.Col span={8}>
+                  <Checkbox
+                    checked={currentIndicator.unitLimit}
+                    onChange={(value) => {
+                      setCurrentIndicator((prev: any) => ({ ...prev, unitLimit: value }));
+                    }}
+                  >
+                    显示单位
+                  </Checkbox>
+                </Grid.Col>
+                <Grid.Col span={12}>
+                  <Input
+                    size="mini"
+                    value={currentIndicator.unit}
+                    onChange={(value) => {
+                      setCurrentIndicator((prev: any) => ({ ...prev, unit: value }));
+                    }}
+                  />
+                </Grid.Col>
+              </Grid.Row>
+
+              <Grid.Row gutter={8} align="center">
+                <Grid.Col span={24}>
+                  <Checkbox
+                    checked={currentIndicator.thousandsSeparator}
+                    onChange={(value) => {
+                      setCurrentIndicator((prev: any) => ({ ...prev, thousandsSeparator: value }));
+                    }}
+                  >
+                    使用千分位分隔符
+                  </Checkbox>
+                </Grid.Col>
+              </Grid.Row>
+              <Grid.Row gutter={8} align="center">
+                <Grid.Col span={24}>
+                  <Checkbox
+                    checked={currentIndicator.absoluteValue}
+                    onChange={(value) => {
+                      setCurrentIndicator((prev: any) => ({ ...prev, absoluteValue: value }));
+                    }}
+                  >
+                    显示为绝对值
+                  </Checkbox>
+                </Grid.Col>
+              </Grid.Row>
+            </Form.Item>
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <Form.Item
+              label={
+                <>
+                  <span>
+                    图标样式<span style={{ color: 'red' }}> *</span>
+                  </span>
+                  <Checkbox
+                    style={{ float: 'right' }}
+                    checked={currentIndicator.icon?.display}
+                    onChange={(value) => {
+                      const icon = { ...currentIndicator.icon, display: value };
+                      setCurrentIndicator((prev: any) => ({ ...prev, icon }));
+                    }}
+                  ></Checkbox>
+                </>
+              }
+            >
+              <Grid.Row gutter={8} align="center">
+                <Grid.Col span={3}>
+                  <Dropdown
+                    droplist={
+                      <Menu>
+                        {dropList?.map((iconItem) => (
+                          <Menu.Item
+                            key={iconItem.value}
+                            onClick={() => {
+                              const icon = { ...currentIndicator.icon, name: iconItem.value };
+                              setCurrentIndicator((prev: any) => ({ ...prev, icon }));
+                            }}
+                          >
+                            <span style={{ fontSize: '16px' }}>{iconItem.lable}</span>
+                          </Menu.Item>
+                        ))}
+                      </Menu>
+                    }
+                  >
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        backgroundColor: 'var(--color-secondary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '20px',
+                        borderRadius: '4px'
+                      }}
+                    >
+                      {dropList.find((ele) => ele.value === currentIndicator.icon?.name)?.lable}
+                    </div>
+                  </Dropdown>
+                </Grid.Col>
+                <Grid.Col span={21}>
+                  <ColorPicker
+                    style={{ width: '100%' }}
+                    value={currentIndicator.icon?.color}
+                    showText
+                    onChange={(value) => {
+                      const icon = { ...currentIndicator.icon, color: value };
+                      setCurrentIndicator((prev: any) => ({ ...prev, icon }));
+                    }}
+                  />
+                </Grid.Col>
+              </Grid.Row>
+            </Form.Item>
+          </Grid.Col>
         </Grid.Row>
 
-        {currentIndicator.compareLimit && <></>}
+        {/* 背景颜色、同环比 */}
+        <Grid.Row gutter={8}>
+          <Grid.Col span={12}>
+            <Form.Item label="背景颜色">
+              <ColorPicker
+                style={{ width: '100%' }}
+                value={currentIndicator.backgroundColor}
+                showText
+                onChange={(value) => {
+                  setCurrentIndicator((prev: any) => ({ ...prev, backgroundColor: value }));
+                }}
+              />
+            </Form.Item>
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <Form.Item label="同环比">
+              <Switch
+                checked={currentIndicator.compareLimit}
+                onChange={(value) => {
+                  setCurrentIndicator((prev: any) => ({ ...prev, compareLimit: value }));
+                }}
+              />
+            </Form.Item>
+          </Grid.Col>
+        </Grid.Row>
+
+        {/* 同环比描述、时间字段、时间维度、计算方式、计算类型 */}
+        {currentIndicator.compareLimit && (
+          <Grid.Row gutter={8}>
+            <Grid.Col span={12}>
+              <Form.Item label="同环比描述" required>
+                <Input
+                  placeholder="请输入"
+                  value={currentIndicator.compareDescribe}
+                  onChange={(value) => {
+                    setCurrentIndicator((prev: any) => ({ ...prev, compareDescribe: value }));
+                  }}
+                />
+              </Form.Item>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <Form.Item label="时间字段" required>
+                <Select
+                  getPopupContainer={getPopupContainer}
+                  value={currentIndicator.timeField}
+                  onChange={(value) => {
+                    setCurrentIndicator((prev: any) => ({ ...prev, timeField: value }));
+                  }}
+                >
+                  {fieldList
+                    .filter(
+                      (ele) =>
+                        ele.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE ||
+                        ele.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE
+                    )
+                    .map((e: MetadataEntityField) => (
+                      <Select.Option key={e.fieldName} value={e.fieldName}>
+                        {e.displayName}
+                      </Select.Option>
+                    ))}
+                </Select>
+              </Form.Item>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <Form.Item label="时间维度" required>
+                <Select
+                  getPopupContainer={getPopupContainer}
+                  value={currentIndicator.timeDimension}
+                  onChange={(value) => {
+                    setCurrentIndicator((prev: any) => ({ ...prev, timeDimension: value }));
+                  }}
+                >
+                  {currentIndicator.timeField &&
+                    fieldList.find((ele) => ele.fieldName === currentIndicator.timeField)?.fieldType ===
+                      ENTITY_FIELD_TYPE.DATETIME.VALUE && (
+                      <Select.Option value={INDICATOR_TIME_DEMENSION.HOUR}>时</Select.Option>
+                    )}
+                  <Select.Option value={INDICATOR_TIME_DEMENSION.DAY}>天</Select.Option>
+                  <Select.Option value={INDICATOR_TIME_DEMENSION.WEEK}>周</Select.Option>
+                  <Select.Option value={INDICATOR_TIME_DEMENSION.MONTH}>月</Select.Option>
+                  <Select.Option value={INDICATOR_TIME_DEMENSION.YEAR}>年</Select.Option>
+                </Select>
+              </Form.Item>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <Form.Item label="计算方式" required>
+                <Select
+                  getPopupContainer={getPopupContainer}
+                  value={currentIndicator.compareCalculate}
+                  onChange={(value) => {
+                    setCurrentIndicator((prev: any) => ({ ...prev, compareCalculate: value }));
+                  }}
+                >
+                  <Select.Option value={INDICATOR_COMPARE_CALCULATE_METHOD.COMPARE}>环比</Select.Option>
+
+                  {currentIndicator.timeDimension === INDICATOR_TIME_DEMENSION.HOUR && (
+                    <Select.Option value={INDICATOR_COMPARE_CALCULATE_METHOD.COMPARE_DAY}>日同比</Select.Option>
+                  )}
+
+                  {(currentIndicator.timeDimension === INDICATOR_TIME_DEMENSION.HOUR ||
+                    currentIndicator.timeDimension === INDICATOR_TIME_DEMENSION.DAY) && (
+                    <Select.Option value={INDICATOR_COMPARE_CALCULATE_METHOD.COMPARE_WEEK}>周同比</Select.Option>
+                  )}
+
+                  {currentIndicator.timeDimension === INDICATOR_TIME_DEMENSION.DAY && (
+                    <Select.Option value={INDICATOR_COMPARE_CALCULATE_METHOD.COMPARE_MONTH}>月同比</Select.Option>
+                  )}
+
+                  {(currentIndicator.timeDimension === INDICATOR_TIME_DEMENSION.DAY ||
+                    currentIndicator.timeDimension === INDICATOR_TIME_DEMENSION.WEEK ||
+                    currentIndicator.timeDimension === INDICATOR_TIME_DEMENSION.MONTH) && (
+                    <Select.Option value={INDICATOR_COMPARE_CALCULATE_METHOD.COMPARE_YEAR}>年同比</Select.Option>
+                  )}
+                </Select>
+              </Form.Item>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <Form.Item label="计算类型" required>
+                <Select
+                  getPopupContainer={getPopupContainer}
+                  value={currentIndicator.compareCalculateType}
+                  onChange={(value) => {
+                    setCurrentIndicator((prev: any) => ({ ...prev, compareCalculateType: value }));
+                  }}
+                >
+                  <Select.Option value={INDICATOR_COMPARE_CALCULATE_TYPE.RATE}>差异率</Select.Option>
+                  <Select.Option value={INDICATOR_COMPARE_CALCULATE_TYPE.DIFFERENCE}>差值</Select.Option>
+                  <Select.Option value={INDICATOR_COMPARE_CALCULATE_TYPE.VALUE}>原始值</Select.Option>
+                </Select>
+              </Form.Item>
+            </Grid.Col>
+          </Grid.Row>
+        )}
 
         <Grid.Row gutter={8}>
-          <Grid.Col span={12}></Grid.Col>
-          <Grid.Col span={12}></Grid.Col>
+          <Grid.Col span={12}>
+            <Form.Item label="显示状态" required>
+              <Radio.Group
+                type="button"
+                value={currentIndicator.status}
+                onChange={(value) => {
+                  setCurrentIndicator((prev: any) => ({ ...prev, status: value }));
+                }}
+                style={{ width: '100%', display: 'flex' }}
+              >
+                <Radio
+                  style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}
+                  value={STATUS_VALUES[STATUS_OPTIONS.DEFAULT]}
+                >
+                  {STATUS_OPTIONS.DEFAULT}
+                </Radio>
+                <Radio
+                  style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}
+                  value={STATUS_VALUES[STATUS_OPTIONS.READONLY]}
+                >
+                  {STATUS_OPTIONS.READONLY}
+                </Radio>
+                <Radio
+                  style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}
+                  value={STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+                >
+                  {STATUS_OPTIONS.HIDDEN}
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <Form.Item label="卡片宽度">
+              <Radio.Group
+                type="button"
+                value={currentIndicator.width}
+                onChange={(value) => {
+                  setCurrentIndicator((prev: any) => ({ ...prev, width: value }));
+                }}
+                style={{ width: '100%', display: 'flex' }}
+              >
+                <Radio
+                  style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}
+                  value={WIDTH_VALUES[WIDTH_OPTIONS.QUARTER]}
+                >
+                  {WIDTH_OPTIONS.QUARTER}
+                </Radio>
+                <Radio
+                  style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}
+                  value={WIDTH_VALUES[WIDTH_OPTIONS.THIRD]}
+                >
+                  {WIDTH_OPTIONS.THIRD}
+                </Radio>
+                <Radio
+                  style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}
+                  value={WIDTH_VALUES[WIDTH_OPTIONS.HALF]}
+                >
+                  {WIDTH_OPTIONS.HALF}
+                </Radio>
+                <Radio
+                  style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}
+                  value={WIDTH_VALUES[WIDTH_OPTIONS.FULL]}
+                >
+                  整行
+                </Radio>
+              </Radio.Group>
+            </Form.Item>
+          </Grid.Col>
         </Grid.Row>
       </Modal>
+      <FormulaEditor
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
     </>
   );
 };
