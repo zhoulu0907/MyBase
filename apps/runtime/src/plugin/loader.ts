@@ -7,7 +7,12 @@ import { useAppEntityStore } from '@onebase/ui-kit';
 import { pluginBridge } from './bridge';
 import { PluginHostAPI } from './host-api';
 
+let isInitialized = false;
+
 export async function initPlugins() {
+  if (isInitialized) return;
+  isInitialized = true;
+
   try {
     ;(window as any).React = (window as any).React ?? (await import('react')).default;
     ;(window as any).ReactDOM = (window as any).ReactDOM ?? ReactDOM;
@@ -34,31 +39,69 @@ export async function initPlugins() {
       const { getRuntimePluginManifestApi, getRuntimePluginConfigApi } = await import('@onebase/platform-center');
       const res = await getRuntimePluginManifestApi();
       const manifest = res?.data || [];
-
+      
+      debugger
       if (Array.isArray(manifest) && manifest.length > 0) {
         loadedFromServer = true;
         
         // 1. 注册插件
         for (const item of manifest) {
-          // 构造 resources
-          const resources: any = {};
-          const baseUrl = item.baseUrl.endsWith('/') ? item.baseUrl : `${item.baseUrl}/`;
-          const entry = item.entry || (item.type === 'iframe' ? 'index.html' : 'remoteEntry.js');
+          let baseUrl = item.baseUrl;
+          if (!baseUrl.startsWith('http') && (window as any).global_config?.PLUGIN_URL) {
+             const prefix = (window as any).global_config.PLUGIN_URL.replace(/\/$/, '');
+             const path = baseUrl.startsWith('/') ? baseUrl : `/${baseUrl}`;
+             baseUrl = `${prefix}${path}`;
+          }
+          baseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+
+          let resources: any = {};
+          let displayName = item.pluginId;
+          let routePrefix = `/${item.pluginId}`;
+          let version = item.version;
+
+          // 如果是静态资源类型 (static)，尝试获取 frontend.manifest.json
+          if (item.type === 'static') {
+             try {
+                 const manifestUrl = `${baseUrl}frontend.manifest.json`;
+                 const manifestRes = await fetch(manifestUrl);
+                 if (manifestRes.ok) {
+                     const manifestData = await manifestRes.json();
+                     
+                     // 使用 manifest 中的元数据
+                     if (manifestData.displayName) displayName = manifestData.displayName;
+                     if (manifestData.routePrefix) routePrefix = manifestData.routePrefix;
+                     if (manifestData.version) version = manifestData.version;
+                     
+                     // 构造 JS/CSS 资源路径
+                     if (manifestData.entry) {
+                         if (manifestData.entry.js) resources.js = `${baseUrl}${manifestData.entry.js}`;
+                         if (manifestData.entry.css) resources.css = `${baseUrl}${manifestData.entry.css}`;
+                     }
+                 } else {
+                     console.warn(`[Plugin Loader] Failed to fetch frontend.manifest.json for ${item.pluginId}`);
+                 }
+             } catch (e) {
+                 console.warn(`[Plugin Loader] Error loading frontend.manifest.json for ${item.pluginId}:`, e);
+             }
+          } 
           
-          if (item.type === 'iframe') {
-             resources.html = `${baseUrl}${entry}`;
-          } else {
-             // 假设是 JS 入口
-             resources.js = `${baseUrl}${entry}`;
+          // 如果没有成功从 manifest 获取资源（或不是 static 类型），回退到默认逻辑
+          if (!resources.js && !resources.html) {
+              const entry = item.entry || (item.type === 'iframe' ? 'index.html' : 'remoteEntry.js');
+              if (item.type === 'iframe') {
+                 resources.html = `${baseUrl}${entry}`;
+              } else {
+                 resources.js = `${baseUrl}${entry}`;
+              }
           }
 
           pm.registerPlugin({
             name: item.pluginId,
-            version: item.version,
-            displayName: item.pluginId, // 暂时使用 ID 作为显示名称
+            version: version,
+            displayName: displayName,
             type: item.type,
             resources: resources,
-            routePrefix: `/${item.pluginId}`, // 默认路由前缀
+            routePrefix: routePrefix,
             ...item
           } as any);
         }
