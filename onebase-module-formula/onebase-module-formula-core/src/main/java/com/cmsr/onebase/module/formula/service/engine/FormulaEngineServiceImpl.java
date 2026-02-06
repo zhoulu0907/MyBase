@@ -136,7 +136,11 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
                     // 6. 执行公式
                     Value formulaResult = context.eval("js", formula);
-
+                    if (formula.startsWith("CHAR")) {
+                        // 将Value转换为字符串并进行Base64编码
+                        String resultStr = convertResult(formulaResult).toString();
+                        return java.util.Base64.getEncoder().encodeToString(resultStr.getBytes(StandardCharsets.UTF_8));
+                    }
                     return convertResult(formulaResult);
                 } finally {
                     context.leave();
