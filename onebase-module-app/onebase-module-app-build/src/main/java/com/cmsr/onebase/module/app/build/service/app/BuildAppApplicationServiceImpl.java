@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
+import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,6 +70,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
+    public static final String APP = "app";
     @Autowired
     private UidGenerator uidGenerator;
 
@@ -122,6 +124,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     @Resource
     private DashboardProjectApi dashboardProjectApi;
+
+    @Resource
+    private DictDataApi dictDataApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -382,6 +387,8 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
             applicationRepository.removeById(id);
             // 删除大屏
             dashboardProjectApi.removeDashboardByAppId(id);
+            // 删除应用级别字典Dict
+            dictDataApi.deleteDictDataByDictOwner(APP, id);
         });
     }
 

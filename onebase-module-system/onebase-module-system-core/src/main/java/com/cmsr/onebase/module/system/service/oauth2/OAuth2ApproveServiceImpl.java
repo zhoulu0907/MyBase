@@ -47,7 +47,7 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
 
     @Override
     @Transactional
-    @LogRecord(type = SYSTEM_OAUTH_TYPE, subType = SYSTEM_OAUTH_APPROVE_SUB_TYPE, bizNo = "{{#clientDO.id}}",
+    @LogRecord(type = SYSTEM_OAUTH_TYPE, subType = SYSTEM_OAUTH_APPROVE_SUB_TYPE, bizNo = "{{#client == null ? -1 : #client.id}}",
             success = SYSTEM_OAUTH_APPROVE_SUCCESS)
     public boolean checkForPreApproval(Long userId, Integer userType, String clientId, Collection<String> requestedScopes) {
         // 第一步，基于 Client 的自动授权计算，如果 scopes 都在自动授权中，则返回 true 通过
@@ -59,18 +59,22 @@ public class OAuth2ApproveServiceImpl implements OAuth2ApproveService {
             for (String scope : requestedScopes) {
                 saveApprove(userId, userType, clientId, scope, NumberUtils.INTEGER_ONE, expireTime);
             }
-            // 记录操作日志上下文
-            LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
-
-            LogRecordContext.putVariable("loginUser", loginUser);
-            LogRecordContext.putVariable("client", clientDO);
-            return true;
+             return true;
         }
 
         // 第二步，算上用户已经批准的授权。如果 scopes 都包含，则返回 true
         List<OAuth2ApproveDO> approveDOs = getApproveList(userId, userType, clientId);
         Set<String> scopes = convertSet(approveDOs, OAuth2ApproveDO::getScope,
                 approve -> approve.getApproved() != null && approve.getApproved() == NumberUtils.INTEGER_ONE); // 只保留未过期的 + 同意的
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        // 添加null检查，避免日志记录时出现空指针异常
+        if (loginUser != null) {
+            LogRecordContext.putVariable("loginUser", loginUser);
+        }
+        LogRecordContext.putVariable("client", clientDO);
+
         return CollUtil.containsAll(scopes, requestedScopes);
     }
 
