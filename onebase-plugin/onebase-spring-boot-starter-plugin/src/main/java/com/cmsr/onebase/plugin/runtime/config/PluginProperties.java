@@ -23,7 +23,7 @@ public class PluginProperties {
     /**
      * 插件目录路径
      */
-    private String pluginsDir = "plugins";
+    private String pluginsDir = "/opt/plugins";
 
     /**
      * 后端插件存放子目录

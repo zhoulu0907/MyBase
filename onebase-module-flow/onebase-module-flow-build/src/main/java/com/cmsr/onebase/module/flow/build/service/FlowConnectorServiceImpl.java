@@ -14,6 +14,7 @@ import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorEnvDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
+import com.cmsr.onebase.module.flow.core.enums.ConnectorActionStatusEnum;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
 import com.cmsr.onebase.module.flow.core.util.ActionNameGenerator;
@@ -22,6 +23,7 @@ import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,13 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.cmsr.onebase.module.flow.component.external.service.HttpRequest;
+import com.cmsr.onebase.module.flow.component.external.service.HttpServiceResponse;
+import com.cmsr.onebase.module.flow.context.graph.nodes.HttpNodeData;
 import com.mybatisflex.core.paginate.Page;
 
 @Slf4j
@@ -63,6 +64,9 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Autowired
     private ActionConfigHelper actionConfigHelper;
+
+    @Autowired
+    private com.cmsr.onebase.module.flow.component.external.service.HttpExecuteService httpExecuteService;
 
     @Override
     public PageResult<FlowConnectorLiteVO> pageConnectors(PageConnectorReqVO pageReqVO) {
@@ -491,20 +495,10 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 3. 转换为 VO
         List<ConnectorActionVO> result = new ArrayList<>();
         for (JsonNode action : actions) {
-            // 安全获取字段值
-            String actionCode = getString(action, "actionCode");
-            if (actionCode == null) {
-                log.warn("Action missing actionCode, skipping: {}", action);
-                continue; // 跳过没有 actionCode 的动作
-            }
-
             ConnectorActionVO vo = ConnectorActionVO.builder()
-                    .actionCode(actionCode)
                     .actionName(getString(action, "actionName"))
                     .description(getString(action, "description"))
                     .status(getString(action, "status"))
-                    .version(getInt(action, "version"))
-                    .updateTime(connector.getUpdateTime())
                     .build();
             result.add(vo);
         }
@@ -514,13 +508,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public List<ConnectorActionVO> getActionInfos(Long connectorId) {
-        return getActionList(connectorId);
-    }
-
-    @Override
-    public ConnectorActionVO getActionDetail(Long connectorId, String actionCode) {
-        log.info("getActionDetail start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public List<ConnectorActionLiteVO> getActionInfos(Long connectorId) {
+        log.info("getActionInfos start, connectorId: {}", connectorId);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -528,28 +517,93 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 查找动作 - 从 action_config 字段读取
-        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
-        if (action == null) {
+        // 2. 从 action_config.properties 对象提取动作列表
+        List<ConnectorActionLiteVO> result = new ArrayList<>();
+        String actionConfig = connector.getActionConfig();
+        if (actionConfig == null || actionConfig.trim().isEmpty()) {
+            log.info("action_config is empty, return empty list");
+            return result;
+        }
+
+        try {
+            JsonNode root = objectMapper.readTree(actionConfig);
+            JsonNode properties = root.get("properties");
+            if (properties == null || !properties.isObject()) {
+                return result;
+            }
+
+            // 遍历 properties，key 作为 actionName
+            Iterator<String> actionNames = properties.fieldNames();
+            while (actionNames.hasNext()) {
+                String actionName = actionNames.next();
+                JsonNode actionNode = properties.get(actionName);
+                String status = getString(actionNode, "status");
+
+                // 从 basic.description 获取描述
+                JsonNode basicNode = actionNode.get("basic");
+                String description = basicNode != null ? getString(basicNode, "description") : null;
+
+                ConnectorActionLiteVO vo = ConnectorActionLiteVO.builder()
+                        .actionName(actionName)
+                        .description(description)
+                        .status(status)
+                        .build();
+                result.add(vo);
+            }
+        } catch (Exception e) {
+            log.error("Parse action_config failed", e);
+        }
+
+        log.info("getActionInfos success, connectorId: {}, count: {}", connectorId, result.size());
+        return result;
+    }
+
+    @Override
+    public ConnectorActionVO getActionDetail(Long connectorId, String actionName) {
+        log.info("getActionDetail start, connectorId: {}, actionName: {}", connectorId, actionName);
+
+        // 1. 查询连接器
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 从 action_config.properties 按 actionCode（作为动作名称key）查找
+        String actionConfig = connector.getActionConfig();
+        if (actionConfig == null || actionConfig.trim().isEmpty()) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
-        // 3. 转换为 VO - 使用安全的字段访问方法
-        ConnectorActionVO vo = ConnectorActionVO.builder()
-                .actionCode(actionCode)
-                .actionName(getString(action, "actionName"))
-                .description(getString(action, "description"))
-                .status(getString(action, "status"))
-                .version(getInt(action, "version"))
-                .basicInfo(action.has("基础信息") && action.get("基础信息") != null ? action.get("基础信息") : null)
-                .inputConfig(action.has("入参配置") && action.get("入参配置") != null ? action.get("入参配置") : null)
-                .outputConfig(action.has("出参配置") && action.get("出参配置") != null ? action.get("出参配置") : null)
-                .debugConfig(action.has("调试配置") && action.get("调试配置") != null ? action.get("调试配置") : null)
-                .updateTime(connector.getUpdateTime())
-                .build();
+        try {
+            JsonNode root = objectMapper.readTree(actionConfig);
+            JsonNode properties = root.get("properties");
+            if (properties == null || !properties.has(actionName)) {
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+            }
 
-        log.info("getActionDetail success, connectorId: {}, actionCode: {}", connectorId, actionCode);
-        return vo;
+            JsonNode actionNode = properties.get(actionName);
+
+            // 3. 从 basic 对象获取描述信息
+            JsonNode basicNode = actionNode.get("basic");
+            String description = basicNode != null ? getString(basicNode, "description") : null;
+
+            // 4. 构建返回 VO - 字段映射：basic→basicInfo, request→inputConfig, response→outputConfig, debug→debugConfig
+            ConnectorActionVO vo = ConnectorActionVO.builder()
+                    .actionName(actionName)
+                    .description(description)
+                    .status(getString(actionNode, "status"))
+                    .basicInfo(actionNode.get("basic"))
+                    .inputConfig(actionNode.get("request"))
+                    .outputConfig(actionNode.get("response"))
+                    .debugConfig(actionNode.get("debug"))
+                    .build();
+
+            log.info("getActionDetail success, connectorId: {}, actionName: {}", connectorId, actionName);
+            return vo;
+        } catch (Exception e) {
+            log.error("Parse action_config failed", e);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+        }
     }
 
     @Override
@@ -575,7 +629,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         action.put("actionCode", actionCode);
         action.put("actionName", createVO.getActionName());
         action.put("description", createVO.getDescription());
-        action.put("status", "draft");
+        action.put("status", ConnectorActionStatusEnum.OFFLINE.getCodeAsString());
         action.put("version", 1);
 
         // 添加四步配置
@@ -603,8 +657,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateActionDraft(Long connectorId, String actionCode, UpdateConnectorActionReqVO updateVO) {
-        log.info("updateActionDraft start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public void updateActionDraft(Long connectorId, String actionName, UpdateConnectorActionReqVO updateVO) {
+        log.info("updateActionDraft start, connectorId: {}, actionName: {}", connectorId, actionName);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -613,7 +667,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionName);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
@@ -640,17 +694,17 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 4. 保存配置
-        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionCode, mutableAction);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("updateActionDraft success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        log.info("updateActionDraft success, connectorId: {}, actionName: {}", connectorId, actionName);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void publishAction(Long connectorId, String actionCode) {
-        log.info("publishAction start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public void publishAction(Long connectorId, String actionName) {
+        log.info("publishAction start, connectorId: {}, actionName: {}", connectorId, actionName);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -659,16 +713,13 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionName);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 验证当前状态
-        String currentStatus = getString(action, "status");
-        if (!"draft".equals(currentStatus) && !"offline".equals(currentStatus)) {
-            throw new RuntimeException("只有草稿或下架状态的动作才能发布");
-        }
+        validateActionStatusForPublish(action);
 
         // 4. 校验完整性
         ActionConfigHelper.ValidationResult validation = actionConfigHelper.validateActionCompleteness(action);
@@ -679,21 +730,21 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 5. 更新状态和版本
         ObjectNode mutableAction = (ObjectNode) action;
         int newVersion = action.has("version") ? action.get("version").asInt() + 1 : 1;
-        mutableAction.put("status", "published");
+        mutableAction.put("status", ConnectorActionStatusEnum.PUBLISHED.getCodeAsString());
         mutableAction.put("version", newVersion);
 
         // 6. 保存配置
-        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionCode, mutableAction);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("publishAction success, connectorId: {}, actionCode: {}, newVersion: {}", connectorId, actionCode, newVersion);
+        log.info("publishAction success, connectorId: {}, actionName: {}, newVersion: {}", connectorId, actionName, newVersion);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void offlineAction(Long connectorId, String actionCode) {
-        log.info("offlineAction start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public void offlineAction(Long connectorId, String actionName) {
+        log.info("offlineAction start, connectorId: {}, actionName: {}", connectorId, actionName);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -702,32 +753,29 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionName);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 验证状态
-        String status = getString(action, "status");
-        if (!"published".equals(status)) {
-            throw new RuntimeException("只有已发布的动作才能下架");
-        }
+        validateActionStatusForOffline(action);
 
         // 4. 更新状态
         ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "offline");
+        mutableAction.put("status", ConnectorActionStatusEnum.OFFLINE.getCodeAsString());
 
-        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionCode, mutableAction);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("offlineAction success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        log.info("offlineAction success, connectorId: {}, actionName: {}", connectorId, actionName);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void republishAction(Long connectorId, String actionCode) {
-        log.info("republishAction start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public void republishAction(Long connectorId, String actionName) {
+        log.info("republishAction start, connectorId: {}, actionName: {}", connectorId, actionName);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -736,16 +784,13 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionName);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
 
         // 3. 验证状态
-        String status = getString(action, "status");
-        if (!"offline".equals(status)) {
-            throw new RuntimeException("只有已下架的动作才能重新上线");
-        }
+        validateActionStatusForPublish(action);
 
         // 4. 校验完整性
         ActionConfigHelper.ValidationResult validation = actionConfigHelper.validateActionCompleteness(action);
@@ -755,19 +800,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
         // 5. 更新状态
         ObjectNode mutableAction = (ObjectNode) action;
-        mutableAction.put("status", "published");
+        mutableAction.put("status", ConnectorActionStatusEnum.PUBLISHED.getCodeAsString());
 
-        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionCode, mutableAction);
+        String updatedConfig = actionConfigHelper.updateAction(connector.getActionConfig(), actionName, mutableAction);
         connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("republishAction success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        log.info("republishAction success, connectorId: {}, actionName: {}", connectorId, actionName);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String copyAction(Long connectorId, String actionCode) {
-        log.info("copyAction start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public String copyAction(Long connectorId, String actionName) {
+        log.info("copyAction start, connectorId: {}, actionName: {}", connectorId, actionName);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -776,7 +821,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找原动作
-        JsonNode originalAction = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
+        JsonNode originalAction = actionConfigHelper.findAction(connector.getActionConfig(), actionName);
         if (originalAction == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
@@ -787,39 +832,31 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
                 .filter(a -> a.has("actionName") && a.get("actionName") != null && !a.get("actionName").isNull())
                 .map(a -> a.get("actionName").asText())
                 .collect(Collectors.toList());
-        List<String> existingCodes = existingActions.stream()
-                .filter(a -> a.has("actionCode") && a.get("actionCode") != null && !a.get("actionCode").isNull())
-                .map(a -> a.get("actionCode").asText())
-                .collect(Collectors.toList());
 
-        // 4. 生成唯一名称和编码
+        // 4. 生成唯一名称
         String originalName = getString(originalAction, "actionName");
-        String originalCode = actionCode;
         String newName = nameGenerator.generateCopyName(originalName, existingNames);
-        String newCode = nameGenerator.generateCopyCode(originalCode, existingCodes);
 
         // 5. 复制动作配置
         ObjectNode newAction = originalAction.deepCopy();
         newAction.put("actionName", newName);
-        newAction.put("actionCode", newCode);
-        newAction.put("status", "draft");
-        newAction.put("version", 1);
+        newAction.put("status", ConnectorActionStatusEnum.OFFLINE.getCodeAsString());
 
         // 6. 添加到配置
         String updatedConfig = actionConfigHelper.addAction(connector.getActionConfig(), newAction);
         connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("copyAction success, connectorId: {}, originalCode: {}, newCode: {}, newName: {}",
-                connectorId, actionCode, newCode, newName);
+        log.info("copyAction success, connectorId: {}, originalName: {}, newName: {}",
+                connectorId, originalName, newName);
 
-        return newCode;
+        return newName;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteAction(Long connectorId, String actionCode) {
-        log.info("deleteAction start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public void deleteAction(Long connectorId, String actionName) {
+        log.info("deleteAction start, connectorId: {}, actionName: {}", connectorId, actionName);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -828,16 +865,16 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 从配置中删除动作
-        String updatedConfig = actionConfigHelper.removeAction(connector.getActionConfig(), actionCode);
+        String updatedConfig = actionConfigHelper.removeAction(connector.getActionConfig(), actionName);
         connector.setActionConfig(updatedConfig);
         connectorRepository.updateById(connector);
 
-        log.info("deleteAction success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        log.info("deleteAction success, connectorId: {}, actionName: {}", connectorId, actionName);
     }
 
     @Override
-    public ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionCode) {
-        log.info("validateActionForPublish start, connectorId: {}, actionCode: {}", connectorId, actionCode);
+    public ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionName) {
+        log.info("validateActionForPublish start, connectorId: {}, actionName: {}", connectorId, actionName);
 
         // 1. 查询连接器
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -846,7 +883,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         }
 
         // 2. 查找动作
-        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionCode);
+        JsonNode action = actionConfigHelper.findAction(connector.getActionConfig(), actionName);
         if (action == null) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
@@ -854,12 +891,42 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         // 3. 校验完整性
         ActionConfigHelper.ValidationResult result = actionConfigHelper.validateActionCompleteness(action);
 
-        log.info("validateActionForPublish success, connectorId: {}, actionCode: {}, valid: {}",
-                connectorId, actionCode, result.isValid());
+        log.info("validateActionForPublish success, connectorId: {}, actionName: {}, valid: {}",
+                connectorId, actionName, result.isValid());
         return result;
     }
 
     // ==================== 辅助方法 ====================
+
+    /**
+     * 验证动作状态是否可以发布
+     * <p>
+     * 只有已下架(offline)状态的动作才能发布
+     *
+     * @param action 动作配置节点
+     * @throws RuntimeException 当状态不符合时抛出异常
+     */
+    private void validateActionStatusForPublish(JsonNode action) {
+        String currentStatus = getString(action, "status");
+        if (!ConnectorActionStatusEnum.isOffline(currentStatus)) {
+            throw new RuntimeException("只有下架状态的动作才能发布");
+        }
+    }
+
+    /**
+     * 验证动作状态是否可以下架
+     * <p>
+     * 只有已发布(published)状态的动作才能下架
+     *
+     * @param action 动作配置节点
+     * @throws RuntimeException 当状态不符合时抛出异常
+     */
+    private void validateActionStatusForOffline(JsonNode action) {
+        String status = getString(action, "status");
+        if (!ConnectorActionStatusEnum.isPublished(status)) {
+            throw new RuntimeException("只有已发布的动作才能下架");
+        }
+    }
 
     /**
      * 从 JsonNode 安全获取字符串值
@@ -934,7 +1001,26 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO) {
-        log.info("saveActionConfig start, connectorId: {}", connectorId);
+        return saveOrUpdateActionConfigInternal(connectorId, reqVO.getActionConfig(), true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig) {
+        return saveOrUpdateActionConfigInternal(connectorId, actionConfig, false);
+    }
+
+    /**
+     * 保存或更新动作配置的内部通用方法
+     *
+     * @param connectorId 连接器ID
+     * @param actionConfig 动作配置
+     * @param isNew 是否为新建操作（true=新建需检查不存在，false=更新需检查存在）
+     * @return 保存结果
+     */
+    private Boolean saveOrUpdateActionConfigInternal(Long connectorId, JsonNode actionConfig, boolean isNew) {
+        String operation = isNew ? "saveActionConfig" : "updateActionConfig";
+        log.info("{} start, connectorId: {}", operation, connectorId);
 
         // 1. 查询并验证连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -947,17 +1033,26 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         ObjectNode rootActionConfig = parseOrCreateActionRootConfig(connector.getActionConfig());
         ObjectNode properties = rootActionConfig.withObject("properties");
 
-        // 3. 从请求中提取动作编码（actionCode）
-        String actionCode = extractActionCodeFromConfig(reqVO.getActionConfig());
+        // 3. 从配置中提取动作名称
+        String actionName = extractActionCodeFromConfig(actionConfig);
 
-        // 4. 检查动作是否已存在
-        if (properties.has(actionCode)) {
-            log.warn("Action already exists, connectorId: {}, actionCode: {}", connectorId, actionCode);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS, actionCode);
+        // 4. 校验动作是否存在
+        if (isNew) {
+            // 新建：检查是否已存在
+            if (properties.has(actionName)) {
+                log.warn("Action already exists, connectorId: {}, actionName: {}", connectorId, actionName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS, actionName);
+            }
+        } else {
+            // 更新：检查是否不存在
+            if (!properties.has(actionName)) {
+                log.warn("Action not found for update, connectorId: {}, actionName: {}", connectorId, actionName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+            }
         }
 
-        // 5. 添加新动作配置
-        properties.set(actionCode, reqVO.getActionConfig());
+        // 5. 保存动作配置
+        properties.set(actionName, actionConfig);
 
         // 6. 更新元数据版本
         updateActionMetadataVersion(rootActionConfig);
@@ -966,7 +1061,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connector.setActionConfig(toJsonString(rootActionConfig));
         connectorRepository.updateById(connector);
 
-        log.info("saveActionConfig success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        log.info("{} success, connectorId: {}, actionName: {}", operation, connectorId, actionName);
         return Boolean.TRUE;
     }
 
@@ -1114,5 +1209,281 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             log.error("Failed to serialize JSON", e);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
         }
+    }
+
+    @Override
+    public ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO) {
+        DebugHttpActionReqVO.DebugConfig debug = reqVO.getDebug();
+        log.info("调试HTTP动作开始，URL: {}, Method: {}", debug.getUrl(), debug.getMethod());
+
+        // 1. 构建debug配置节点（从ReqVO转换）
+        ObjectNode debugConfig = objectMapper.createObjectNode();
+        debugConfig.put("url", debug.getUrl());
+        debugConfig.put("method", debug.getMethod());
+
+        // 2. 转换requestHeaders（只保留key和fieldValue）
+        if (debug.getRequestHeaders() != null && !debug.getRequestHeaders().isEmpty()) {
+            ArrayNode headersArray = debugConfig.putArray("requestHeaders");
+            for (HttpParamFieldVO field : debug.getRequestHeaders()) {
+                ObjectNode headerNode = headersArray.addObject();
+                headerNode.put("key", field.getKey());
+                headerNode.put("fieldValue", field.getFieldValue());
+            }
+        }
+
+        // 3. 转换queryParams（只保留key和fieldValue）
+        if (debug.getQueryParams() != null && !debug.getQueryParams().isEmpty()) {
+            ArrayNode queryParamsArray = debugConfig.putArray("queryParams");
+            for (HttpParamFieldVO field : debug.getQueryParams()) {
+                ObjectNode queryNode = queryParamsArray.addObject();
+                queryNode.put("key", field.getKey());
+                queryNode.put("fieldValue", field.getFieldValue());
+            }
+        }
+
+        // 4. 转换pathParams（只保留key和fieldValue）
+        if (debug.getPathParams() != null && !debug.getPathParams().isEmpty()) {
+            ArrayNode pathParamsArray = debugConfig.putArray("pathParams");
+            for (HttpParamFieldVO field : debug.getPathParams()) {
+                ObjectNode pathNode = pathParamsArray.addObject();
+                pathNode.put("key", field.getKey());
+                pathNode.put("fieldValue", field.getFieldValue());
+            }
+        }
+
+        // 5. 转换requestBody（只保留key和fieldValue）
+        if (debug.getRequestBody() != null && !debug.getRequestBody().isEmpty()) {
+            ArrayNode bodyArray = debugConfig.putArray("requestBody");
+            for (HttpParamFieldVO field : debug.getRequestBody()) {
+                ObjectNode bodyNode = bodyArray.addObject();
+                bodyNode.put("key", field.getKey());
+                bodyNode.put("fieldValue", field.getFieldValue());
+            }
+        }
+
+        // 6. 构建HTTP请求（从debug配置获取所有参数）
+        HttpRequest request = buildHttpRequest(debugConfig);
+
+        // 7. 执行HTTP请求
+        long startTime = System.currentTimeMillis();
+        try {
+            HttpServiceResponse response = httpExecuteService.execute(request);
+            long duration = System.currentTimeMillis() - startTime;
+
+            log.info("调试HTTP动作成功，耗时: {}ms", duration);
+            return buildSuccessResponse(response, request, duration);
+
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.error("调试HTTP动作失败", e);
+            return buildErrorResponse(e, request, duration);
+        }
+    }
+
+    /**
+     * 构建HTTP请求 - 从debug配置获取所有参数
+     */
+    private HttpRequest buildHttpRequest(JsonNode debugConfig) {
+        HttpRequest request = new HttpRequest();
+
+        // 1. 设置URL和方法（从debug，必填）
+        String url = getString(debugConfig, "url");
+        String method = getString(debugConfig, "method");
+        if (StringUtils.isBlank(url)) {
+            throw new IllegalArgumentException("调试配置的URL不能为空");
+        }
+        if (StringUtils.isBlank(method)) {
+            throw new IllegalArgumentException("调试配置的请求方法不能为空");
+        }
+        request.setUrl(url);
+        request.setMethod(method);
+
+        // 2. 处理路径参数（从debug配置获取）
+        JsonNode debugPathParams = debugConfig.get("pathParams");
+        if (debugPathParams != null && debugPathParams.isArray() && debugPathParams.size() > 0) {
+            Map<String, Object> pathParams = new LinkedHashMap<>();
+            for (JsonNode paramNode : debugPathParams) {
+                String key = getString(paramNode, "key");
+                String value = getString(paramNode, "fieldValue");
+                if (key != null && value != null) {
+                    pathParams.put(key, value);
+                }
+            }
+            if (!pathParams.isEmpty()) {
+                String resolvedUrl = replacePathVariables(url, pathParams);
+                request.setUrl(resolvedUrl);
+            }
+        }
+
+        // 3. 构建请求头（从debug配置获取）
+        List<HttpNodeData.Header> headers = buildHeaders(debugConfig);
+        request.setHeaders(headers);
+
+        // 4. 构建查询参数（从debug配置获取）
+        String urlWithQuery = buildUrlWithQuery(debugConfig, request.getUrl());
+        request.setUrl(urlWithQuery);
+
+        // 5. 构建请求体（从debug配置获取）
+        String body = buildRequestBody(debugConfig);
+        if (body != null) {
+            request.setBodyContent(body);
+        }
+
+        // 6. 设置超时和重试（测试模式）
+        request.setTimeout(5000);
+        request.setRetry(0);
+
+        return request;
+    }
+
+    /**
+     * 构建请求头 - 从debug配置获取
+     */
+    private List<HttpNodeData.Header> buildHeaders(JsonNode debugConfig) {
+        List<HttpNodeData.Header> headers = new ArrayList<>();
+
+        JsonNode debugHeaders = debugConfig.get("requestHeaders");
+        if (debugHeaders != null && debugHeaders.isArray()) {
+            for (JsonNode headerNode : debugHeaders) {
+                String key = getString(headerNode, "key");
+                String value = getString(headerNode, "fieldValue");
+                if (key != null && value != null) {
+                    HttpNodeData.Header header = new HttpNodeData.Header();
+                    header.setKey(key);
+                    header.setValue(value);
+                    headers.add(header);
+                }
+            }
+        }
+
+        return headers;
+    }
+
+    /**
+     * 路径变量替换
+     */
+    private String replacePathVariables(String url, Map<String, Object> pathParams) {
+        if (url == null || pathParams == null || pathParams.isEmpty()) {
+            return url;
+        }
+
+        String result = url;
+        for (Map.Entry<String, Object> entry : pathParams.entrySet()) {
+            String placeholder = "${" + entry.getKey() + "}";
+            String value = String.valueOf(entry.getValue());
+            result = result.replace(placeholder, value);
+        }
+        return result;
+    }
+
+    /**
+     * 构建带查询参数的URL（从debug配置获取）
+     */
+    private String buildUrlWithQuery(JsonNode debugConfig, String url) {
+        if (url == null) {
+            return url;
+        }
+
+        Map<String, String> queryParams = new LinkedHashMap<>();
+
+        JsonNode debugQueryParams = debugConfig.get("queryParams");
+        if (debugQueryParams != null && debugQueryParams.isArray()) {
+            for (JsonNode paramNode : debugQueryParams) {
+                String key = getString(paramNode, "key");
+                String value = getString(paramNode, "fieldValue");
+                if (key != null && value != null) {
+                    queryParams.put(key, value);
+                }
+            }
+        }
+
+        if (queryParams.isEmpty()) {
+            return url;
+        }
+
+        String query = queryParams.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.joining("&"));
+
+        return url + (url.contains("?") ? "&" : "?") + query;
+    }
+
+    /**
+     * 构建请求体（从debug配置获取）
+     */
+    private String buildRequestBody(JsonNode debugConfig) {
+        JsonNode debugBody = debugConfig.get("requestBody");
+        if (debugBody == null || !debugBody.isArray() || debugBody.size() == 0) {
+            return null;
+        }
+
+        // 构建JSON格式的请求体
+        Map<String, Object> bodyMap = new LinkedHashMap<>();
+        for (JsonNode paramNode : debugBody) {
+            String key = getString(paramNode, "key");
+            String value = getString(paramNode, "fieldValue");
+            if (key != null && value != null) {
+                bodyMap.put(key, value);
+            }
+        }
+
+        if (bodyMap.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return objectMapper.writeValueAsString(bodyMap);
+        } catch (Exception e) {
+            log.error("构建请求体失败", e);
+            return null;
+        }
+    }
+
+    /**
+     * 构建成功响应
+     */
+    private ExecuteHttpActionRespVO buildSuccessResponse(HttpServiceResponse response, HttpRequest request, long duration) {
+        return ExecuteHttpActionRespVO.builder()
+                .status("success")
+                .duration(duration)
+                .statusCode(response.getStatusCode())
+                .headers(response.getHeaders())
+                .body(response.getBody())
+                .rawBody(response.getRawBody())
+                .requestDetail(buildRequestDetail(request))
+                .message("执行成功")
+                .build();
+    }
+
+    /**
+     * 构建错误响应
+     */
+    private ExecuteHttpActionRespVO buildErrorResponse(Exception e, HttpRequest request, long duration) {
+        return ExecuteHttpActionRespVO.builder()
+                .status("fail")
+                .duration(duration)
+                .errorMessage(e.getMessage())
+                .requestDetail(buildRequestDetail(request))
+                .message("执行失败: " + e.getMessage())
+                .build();
+    }
+
+    /**
+     * 构建请求详情
+     */
+    private ExecuteHttpActionRespVO.RequestDetail buildRequestDetail(HttpRequest request) {
+        Map<String, String> headers = new HashMap<>();
+        if (request.getHeaders() != null) {
+            for (HttpNodeData.Header header : request.getHeaders()) {
+                headers.put(header.getKey(), header.getValue());
+            }
+        }
+
+        return ExecuteHttpActionRespVO.RequestDetail.builder()
+                .url(request.getUrl())
+                .method(request.getMethod())
+                .headers(headers)
+                .body(request.getBodyContent())
+                .build();
     }
 }

@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.signature.core.aop.ApiSignHelper;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,6 +35,8 @@ public class ApiSinatureFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         try {
+            
+
             // 检查当前请求的处理器是否添加了@ApiSignIgnore注解
             if (shouldVerifySignature(request)) {
                 // 如果有@ApiSignIgnore注解，则跳过签名校验
@@ -63,6 +66,11 @@ public class ApiSinatureFilter extends OncePerRequestFilter {
      * @return 是否需要校验签名
      */
     private boolean shouldVerifySignature(HttpServletRequest request) {
+        // 静态资源不进行签名校验
+        if (StaticResourceUtil.isStaticResource(request)) {
+            return false;
+        }
+
         try {
             HandlerExecutionChain handlerExecutionChain = requestMappingHandlerMapping.getHandler(request);
             if (handlerExecutionChain == null) {

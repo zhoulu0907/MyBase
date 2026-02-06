@@ -200,34 +200,30 @@ public class ActionConfigHelper {
 
     /**
      * 删除指定动作
+     * <p>
+     * 从 properties 对象中删除指定动作
      *
      * @param configJson 配置 JSON 字符串
-     * @param actionCode 动作编码
+     * @param actionName 动作名称（properties的key）
      * @return 更新后的配置 JSON 字符串
      */
-    public String removeAction(String configJson, String actionCode) {
+    public String removeAction(String configJson, String actionName) {
         try {
             JsonNode root = objectMapper.readTree(configJson);
             ObjectNode objectRoot = (ObjectNode) root;
-            JsonNode actionsNode = root.get(ACTIONS_KEY);
+            JsonNode propertiesNode = root.get(PROPERTIES_KEY);
 
-            if (actionsNode != null && actionsNode.isArray()) {
-                ArrayNode array = (ArrayNode) actionsNode;
-                for (int i = 0; i < array.size(); i++) {
-                    JsonNode action = array.get(i);
-                    JsonNode codeNode = action.get(ACTION_CODE_KEY);
-                    if (codeNode != null && !codeNode.isNull() && actionCode.equals(codeNode.asText())) {
-                        array.remove(i);
+            if (propertiesNode != null && propertiesNode.isObject() && propertiesNode.has(actionName)) {
+                // 从 properties 中删除动作
+                ((ObjectNode) propertiesNode).remove(actionName);
 
-                        // 更新元数据
-                        updateMetadata(objectRoot);
+                // 更新元数据
+                updateMetadata(objectRoot);
 
-                        return objectMapper.writeValueAsString(objectRoot);
-                    }
-                }
+                return objectMapper.writeValueAsString(objectRoot);
             }
 
-            throw new RuntimeException("动作不存在: " + actionCode);
+            throw new RuntimeException("动作不存在: " + actionName);
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException("配置更新失败", e);

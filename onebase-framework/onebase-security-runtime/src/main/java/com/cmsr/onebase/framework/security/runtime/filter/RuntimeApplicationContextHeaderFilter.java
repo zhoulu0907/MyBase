@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import com.cmsr.onebase.framework.security.runtime.service.AuthPermitService;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import jakarta.annotation.Resource;
@@ -64,7 +65,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
     private boolean doFilter(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
         // 简单匹配，防止 AntPathRequestMatcher 出现上下文路径问题
-        if (requestUri.contains("/plugins/static/")) {
+        if (StaticResourceUtil.isStaticResource(request)) {
             return true;
         }
 
