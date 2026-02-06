@@ -24,6 +24,7 @@ import {
   type PlatformTenantInfo
 } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
+import copy from 'copy-to-clipboard';
 import styles from './index.module.less';
 import Tags from './Tags';
 
@@ -303,7 +304,7 @@ const SpaceInfo: React.FC<{ onTenantInfoChange?: (info: PlatformTenantInfo) => v
                         className={styles.copyIcon}
                         onClick={(e) => {
                           e.stopPropagation(); // 阻止冒泡
-                          navigator.clipboard.writeText(fullWebsite || '-');
+                          copy(fullWebsite || '-');
                           Message.success('已复制');
                         }}
                       />
