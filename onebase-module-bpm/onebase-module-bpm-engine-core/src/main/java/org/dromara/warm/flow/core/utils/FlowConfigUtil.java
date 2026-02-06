@@ -18,6 +18,7 @@ package org.dromara.warm.flow.core.utils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import org.dromara.warm.flow.core.FlowEngine;
 import org.dromara.warm.flow.core.constant.ExceptionCons;
+import org.dromara.warm.flow.core.constant.FlowCons;
 import org.dromara.warm.flow.core.dto.FlowCombine;
 import org.dromara.warm.flow.core.entity.Definition;
 import org.dromara.warm.flow.core.entity.Node;
@@ -177,6 +178,9 @@ public class FlowConfigUtil {
             skip.setDefinitionId(definitionId);
             skip.setDefinitionUuid(definitionUuid);
             skip.setNowNodeType(node.getNodeType());
+            if (StringUtils.isNotEmpty(skip.getSkipCondition()) && !skip.getSkipCondition().startsWith(FlowCons.SPLIT_OB + FlowCons.SPLIT_AT)){
+                skip.setSkipCondition(FlowCons.SPLIT_OB + FlowCons.SPLIT_AT + skip.getSkipCondition());
+            }
             if (NodeType.isGateWaySerial(node.getNodeType())) {
                 String target = skip.getSkipCondition() + ":" + skip.getNextNodeCode();
                 AssertUtil.contains(gateWaySet, target, "[" + nodeName + "]" + ExceptionCons.SAME_CONDITION_NODE);

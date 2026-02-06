@@ -30,6 +30,16 @@ public interface BpmConstants {
     /**  flow variable 中entityId的key */
     String VAR_ENTITY_ID_KEY = "entityId";
 
+    // 业务表数据id
+    String VAR_ENTITY_DATA_ID_KEY = "entityDataId";
+
+    // 业务表数据id
+    String VAR_ENTITY_DATA_ID = "id";
+
+
+    // 流程实例扩展信息表id
+    String VAR_INSTANCE_ID_KEY = "instanceId";
+
     /**  flow variable 中entityId的key */
     String VAR_ENTITY_TABLE_NAME_KEY = "entityTableName";
 
@@ -51,4 +61,13 @@ public interface BpmConstants {
     String VAR_CC_USERS_KEY = "ccUsers";
 
     String AGENT_TITLE_PREFIX = "【代理审批】";
+
+    //OperatorType为公式时，value里面的是一个String和一个map，key分别为formulaData、parameters
+    String VAR_FORMULADATA_KEY = "formulaData";
+    String VAR_PARAMETERS_KEY = "parameters";
+
+    // OperatorType为静态值时，里面会存在一个map 两个key begin end
+    String VAR_BEGIN_KEY = "begin";
+    String VAR_END_KEY = "end";
+
 }

@@ -98,7 +98,19 @@
             <version>1.0.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <!-- 元数据模块 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
+        <!-- 公式模块api -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-formula-api</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
     <build>
         <!-- 设置构建的 jar 包名 -->

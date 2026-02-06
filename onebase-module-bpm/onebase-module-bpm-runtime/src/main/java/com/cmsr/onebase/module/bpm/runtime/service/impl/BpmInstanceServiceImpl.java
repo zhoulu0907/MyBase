@@ -298,6 +298,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
+        // - entityDataId：流程业务数据ID
+        variables.put(BpmConstants.VAR_ENTITY_DATA_ID_KEY, entityDataId);
+
         // 开启流程
         FlowParams flowParams = FlowParams.build()
                 //.handler(startProcessBo.getHandler())
@@ -306,7 +309,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 .flowStatus(businessStatus.getCode());
 
         Instance instance = insService.start(entityDataId, flowParams);
-
+        variables.put(BpmConstants.VAR_INSTANCE_ID_KEY, instance.getId());
         // 提交请求 自动往下走一个节点
         if (!reqVO.isDraft()) {
             List<Task> tasks = taskService.getByInsId(instance.getId());

@@ -632,7 +632,8 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
                     entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
                 }
-
+                variables.put(BpmConstants.VAR_ENTITY_TABLE_NAME_KEY, entityVO.getTableName());
+                variables.put(BpmConstants.VAR_INSTANCE_ID_KEY, task.getInstanceId());
                 // 基础 FlowParams（SAVE 不需要）
                 FlowParams baseParams = FlowParams.build()
                         .variable(variables)

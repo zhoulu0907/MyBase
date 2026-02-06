@@ -31,6 +31,7 @@ public class FlowCons {
     public static final String SPLIT_VERTICAL = "\\|";
     public static final String SPLIT_AND = "and";
     public static final String SPLIT_OR = "or";
+    public static final String SPLIT_OB = "ob";
 
     public static final Pattern LISTENER_PATTERN = Pattern.compile("^([^()]*)(.*)$");
 
