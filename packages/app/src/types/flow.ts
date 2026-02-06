@@ -263,6 +263,10 @@ export interface SaveConnectorActionReq {
   actionConfig: any;
 }
 
+export interface DebugActionReq {
+  debug: any;
+}
+
 export interface GetActionValueReq {
   actionName: string;
 }

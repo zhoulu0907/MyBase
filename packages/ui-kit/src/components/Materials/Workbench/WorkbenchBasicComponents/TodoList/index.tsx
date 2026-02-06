@@ -9,14 +9,6 @@ import type { XTodoListConfig, ITodoItem } from './schema';
 import { pendingListDefault } from './schema';
 import styles from './index.module.css';
 
-const containerStyle: CSSProperties = {
-  width: '100%',
-  minHeight: 120,
-  borderRadius: 8,
-  padding: 16,
-  boxSizing: 'border-box'
-};
-
 const statusMap: Record<string, string> = {
   timeout: '超时',
   normal: '正常',
@@ -112,7 +104,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
   }, [runtime, dataCount]);
 
   return (
-    <div style={containerStyle}>
+    <div className={styles.containerStyle}>
 
       <div className={styles.todoListHeader}>
         {label?.display && (

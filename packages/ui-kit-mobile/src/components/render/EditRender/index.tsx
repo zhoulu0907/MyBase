@@ -153,6 +153,8 @@ const ComponentEditRender: React.FC<ComponentRenderProps> = ({ cpId, cpType, pag
         return <WorkbenchComp.XTodoList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       case WORKBENCH_COMPONENT_TYPES.INFORMATION_LIST:
         return <WorkbenchComp.XInformationList cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+      case WORKBENCH_COMPONENT_TYPES.IMAGE_WORKBENCH:
+        return <WorkbenchComp.XImageWorkbench cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
       default:
         return <div>未知组件类型: {cpType}</div>;
     }

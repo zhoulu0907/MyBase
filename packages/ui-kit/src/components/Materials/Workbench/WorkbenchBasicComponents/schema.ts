@@ -5,6 +5,7 @@ import XInformationList from './InformationList/schema';
 import XTodoList from './TodoList/schema';
 import XWelcomeCard from './WelcomeCard/schema';
 import XButtonWorkbench from './ButtonWorkbench/schema';
+import XImageWorkbench from './ImageWorkbench/schema';
 
 const WorkbenchSchemaBasic = {
   XQuickEntry,
@@ -13,7 +14,8 @@ const WorkbenchSchemaBasic = {
   XInformationList,
   XTodoList,
   XWelcomeCard,
-  XButtonWorkbench
+  XButtonWorkbench,
+  XImageWorkbench
 };
 
 export default WorkbenchSchemaBasic;

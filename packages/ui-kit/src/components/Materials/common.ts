@@ -884,9 +884,10 @@ export const autoplayConfig: IBooleanConfigType = {
 
 export const carouselIntervalConfig: INumberConfigType = {
   key: 'interval',
-  name: '轮播间隔',
+  name: '轮播间隔（秒）',
   type: 'NumberInput',
-  step: 1
+  step: 1,
+  max: 200
 }
 
 // ==================== 默认值与格式 ====================
