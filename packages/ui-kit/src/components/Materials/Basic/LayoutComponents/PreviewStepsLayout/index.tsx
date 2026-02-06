@@ -23,7 +23,7 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
     setShowDeleteButton
   } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
 
-  const [current, setCurrent] = useState(0);
+  const [current, setCurrent] = useState(1);
   const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
 
   useEffect(() => {
@@ -37,13 +37,13 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
   }, [defaultValue, id, colComponents]);
 
   const handlePrev = () => {
-    if (current > 0) {
+    if (current > 1) {
       setCurrent(current - 1);
     }
   };
 
   const handleNext = () => {
-    if (current < defaultValue.length - 1) {
+    if (current < defaultValue.length) {
       setCurrent(current + 1);
     }
   };
@@ -75,8 +75,8 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
         {defaultValue?.map((step, index) => (
           <div
             key={step.key}
-            className={`stepContent ${current === index ? 'active' : ''}`}
-            style={{ display: current === index ? 'block' : 'none' }}
+            className={`stepContent ${current === index + 1 ? 'active' : ''}`}
+            style={{ display: current === index + 1 ? 'block' : 'none' }}
           >
             <ReactSortable
               id={`workspace-content-${id}`}
@@ -137,14 +137,14 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
           type="secondary"
           icon={<IconLeft />}
           onClick={handlePrev}
-          disabled={current === 0}
+          disabled={current === 1}
         >
           上一步
         </Button>
         <Button
           type="primary"
           onClick={handleNext}
-          disabled={current === defaultValue.length - 1}
+          disabled={current === defaultValue.length}
         >
           下一步
           <IconRight />

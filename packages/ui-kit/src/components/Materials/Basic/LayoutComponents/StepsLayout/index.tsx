@@ -46,13 +46,13 @@ const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; deta
   }, [defaultValue, id, layoutSubComponents]);
 
   const handlePrev = () => {
-    if (current > 0) {
+    if (current > 1) {
       setCurrent(current - 1);
     }
   };
 
   const handleNext = () => {
-    if (current < defaultValue.length - 1) {
+    if (current < defaultValue.length) {
       setCurrent(current + 1);
     }
   };
@@ -87,8 +87,8 @@ const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; deta
         {defaultValue?.map((step, index) => (
           <div
             key={step.key}
-            className={`stepContent ${current === index ? 'active' : ''}`}
-            style={{ display: current === index ? 'block' : 'none' }}
+            className={`stepContent ${current === index + 1 ? 'active' : ''}`}
+            style={{ display: current === index + 1 ? 'block' : 'none' }}
           >
             <LayoutReactSortable
               id={id}
@@ -107,14 +107,14 @@ const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; deta
           type="secondary"
           icon={<IconLeft />}
           onClick={handlePrev}
-          disabled={current === 0}
+          disabled={current === 1}
         >
           上一步
         </Button>
         <Button
           type="primary"
           onClick={handleNext}
-          disabled={current === defaultValue.length - 1}
+          disabled={current === defaultValue.length}
         >
           下一步
           <IconRight />

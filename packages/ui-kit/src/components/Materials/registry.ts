@@ -993,6 +993,9 @@ export function getComponentImpl(type: ComponentType, runtime?:boolean): ReactCo
       if(type === COMPONENT_TYPE.TABS_LAYOUT){
         return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_TABS_LAYOUT]
       }
+      if(type === COMPONENT_TYPE.STEPS_LAYOUT){
+        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_STEPS_LAYOUT]
+      }
     }
     return (LayoutComp as any)[type]
   }
