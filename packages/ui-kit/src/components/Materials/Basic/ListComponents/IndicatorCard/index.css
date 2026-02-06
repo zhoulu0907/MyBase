@@ -38,7 +38,11 @@
                     align-items: center;
 
                     .cardOneCompareType {
-                        padding: 0 6px;
+                        padding-left: 6px;
+                    }
+
+                    img {
+                        margin-right: 6px;
                     }
                 }
 
