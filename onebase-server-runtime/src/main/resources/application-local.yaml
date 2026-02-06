@@ -37,6 +37,8 @@ debug: false
 
 # OneBase配置项，设置当前项目所有自定义的配置
 onebase:
+  plugin:
+    plugins-dir: /opt/plugins # 插件目录路径
   sign:
     request-timeout: 86400 # 签名请求超时时间（秒）
   captcha:
