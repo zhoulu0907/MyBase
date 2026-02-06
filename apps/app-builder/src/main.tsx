@@ -11,6 +11,9 @@ import { ErrorBoundary } from 'react-error-boundary';
 import App from './App.tsx';
 import './i18n';
 import './index.css';
+import { initPlugins } from './plugin';
+
+initPlugins();
 
 registerMicroApps([
   {

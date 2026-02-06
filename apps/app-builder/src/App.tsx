@@ -3,7 +3,7 @@ import '@icon-park/react/styles/index.css';
 import { NotFoundPage, TokenManager } from '@onebase/common';
 import { useEffect } from 'react';
 import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch } from 'react-router-dom';
-import { initPlugins } from './plugin';
+// import { initPlugins } from './plugin';
 import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
@@ -33,9 +33,9 @@ function AppContent() {
   const match = useMatch('/onebase/:tenantId/*');
   const tenantId = match?.params.tenantId;
 
-  useEffect(() => {
-    initPlugins();
-  }, []);
+  // useEffect(() => {
+  //   initPlugins();
+  // }, []);
 
   useEffect(() => {
     if (tenantId) {

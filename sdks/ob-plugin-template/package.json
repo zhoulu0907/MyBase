@@ -1,12 +1,13 @@
 {
-  "name": "ob-plugin-template",
+  "name": "onebase-plugin-ocr",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.6",
   "type": "module",
   "scripts": {
     "dev": "vite serve src/dev --config vite.config.ts",
     "build": "tsc && vite build",
     "copy:umd": "cp -f dist/ob-plugin-template.umd.js public/ob-plugin-template.umd.js && cp -f dist/ob-plugin-template.css public/ob-plugin-template.css",
+    "build:umd": "npm run build && npm run copy:umd",
     "dev:umd": "npm run build && npm run copy:umd && vite serve src/dev --config vite.config.ts",
     "lint": "eslint .",
     "preview": "vite build && vite preview --port 3001"
