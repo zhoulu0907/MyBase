@@ -20,4 +20,6 @@ public interface AppResourceErrorCodeConstants {
 
     ErrorCode DASHBOARD_TEMPLATE_NOT_EXIST = new ErrorCode(20006, "大屏模板不存在");
 
+    ErrorCode PAGE_NOT_FOUND_OR_UNPUBLISHED = new ErrorCode(20007, "当前页面不存在或者未发布");
+
 }

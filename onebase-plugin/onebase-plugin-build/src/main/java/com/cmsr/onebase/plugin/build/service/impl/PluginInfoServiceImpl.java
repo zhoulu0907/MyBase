@@ -2,6 +2,7 @@ package com.cmsr.onebase.plugin.build.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -9,6 +10,13 @@ import com.cmsr.onebase.module.infra.api.file.FileApi;
 import com.cmsr.onebase.plugin.build.redis.PluginCommandPublisher;
 import com.cmsr.onebase.plugin.build.service.PluginInfoService;
 import com.cmsr.onebase.plugin.build.validator.PluginMetaValidator;
+import com.cmsr.onebase.plugin.common.util.PluginPackageUtil;
+import com.cmsr.onebase.plugin.runtime.config.PluginProperties;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import com.cmsr.onebase.plugin.build.validator.PluginZipValidator;
 import com.cmsr.onebase.plugin.build.validator.PluginZipValidator.PackageInfo;
 import com.cmsr.onebase.plugin.build.vo.req.PluginInfoPageReqVO;
@@ -70,6 +78,9 @@ public class PluginInfoServiceImpl implements PluginInfoService {
 
     @Resource
     private FileApi fileApi;
+
+    @Resource
+    private PluginProperties pluginProperties;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -365,6 +376,65 @@ public class PluginInfoServiceImpl implements PluginInfoService {
         );
 
         log.info("插件禁用成功: pluginId={}, version={}", pluginInfo.getPluginId(), pluginInfo.getPluginVersion());
+    }
+
+    @Override
+    public void preparePluginFrontend(PluginInfoDO plugin) {
+        String dirName = "frontend-" + plugin.getPluginId() + "-" + plugin.getPluginVersion();
+        Path frontendDir = Paths.get(pluginProperties.getPluginsDir(), pluginProperties.getFrontendDir(), dirName);
+
+        if (Files.exists(frontendDir)) {
+            return;
+        }
+
+        Long fileId = plugin.getPluginPackage();
+        if (fileId == null) {
+            log.warn("插件包文件ID为空: pluginId={}", plugin.getPluginId());
+            return;
+        }
+
+        log.info("开始提取插件前端资源: pluginId={}, fileId={}", plugin.getPluginId(), fileId);
+
+        CommonResult<byte[]> result = fileApi.getFileContentBytes(fileId);
+        if (!result.isSuccess() || result.getData() == null) {
+            log.error("下载插件文件失败: {}", result.getMsg());
+            return;
+        }
+
+        Path tempZipFile = null;
+        try {
+            tempZipFile = Files.createTempFile("plugin-frontend-", ".zip");
+            try (OutputStream os = Files.newOutputStream(tempZipFile)) {
+                os.write(result.getData());
+            }
+
+            PluginPackageUtil.extractFrontendZip(tempZipFile, frontendDir);
+            log.info("插件前端资源提取完成: {}", dirName);
+
+        } catch (IOException e) {
+            log.error("解压插件文件失败", e);
+        } finally {
+            if (tempZipFile != null) {
+                PluginPackageUtil.deleteFile(tempZipFile);
+            }
+        }
+    }
+
+    @Override
+    public void prepareAllPluginFrontends() {
+        log.info("开始检查并准备所有已启用插件的前端资源...");
+        List<PluginInfoDO> plugins = pluginInfoRepository.list(
+                QueryWrapper.create().eq(PluginInfoDO::getStatus, PluginStatusConstants.ENABLED)
+        );
+
+        for (PluginInfoDO plugin : plugins) {
+            try {
+                preparePluginFrontend(plugin);
+            } catch (Exception e) {
+                log.error("准备插件前端资源失败: pluginId={}", plugin.getPluginId(), e);
+            }
+        }
+        log.info("所有已启用插件前端资源准备完成");
     }
 
     /**

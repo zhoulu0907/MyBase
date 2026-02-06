@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -1000,7 +1001,26 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO) {
-        log.info("saveActionConfig start, connectorId: {}", connectorId);
+        return saveOrUpdateActionConfigInternal(connectorId, reqVO.getActionConfig(), true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig) {
+        return saveOrUpdateActionConfigInternal(connectorId, actionConfig, false);
+    }
+
+    /**
+     * 保存或更新动作配置的内部通用方法
+     *
+     * @param connectorId 连接器ID
+     * @param actionConfig 动作配置
+     * @param isNew 是否为新建操作（true=新建需检查不存在，false=更新需检查存在）
+     * @return 保存结果
+     */
+    private Boolean saveOrUpdateActionConfigInternal(Long connectorId, JsonNode actionConfig, boolean isNew) {
+        String operation = isNew ? "saveActionConfig" : "updateActionConfig";
+        log.info("{} start, connectorId: {}", operation, connectorId);
 
         // 1. 查询并验证连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -1013,17 +1033,26 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         ObjectNode rootActionConfig = parseOrCreateActionRootConfig(connector.getActionConfig());
         ObjectNode properties = rootActionConfig.withObject("properties");
 
-        // 3. 从请求中提取动作编码（actionCode）
-        String actionCode = extractActionCodeFromConfig(reqVO.getActionConfig());
+        // 3. 从配置中提取动作名称
+        String actionName = extractActionCodeFromConfig(actionConfig);
 
-        // 4. 检查动作是否已存在
-        if (properties.has(actionCode)) {
-            log.warn("Action already exists, connectorId: {}, actionCode: {}", connectorId, actionCode);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS, actionCode);
+        // 4. 校验动作是否存在
+        if (isNew) {
+            // 新建：检查是否已存在
+            if (properties.has(actionName)) {
+                log.warn("Action already exists, connectorId: {}, actionName: {}", connectorId, actionName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_ALREADY_EXISTS, actionName);
+            }
+        } else {
+            // 更新：检查是否不存在
+            if (!properties.has(actionName)) {
+                log.warn("Action not found for update, connectorId: {}, actionName: {}", connectorId, actionName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+            }
         }
 
-        // 5. 添加新动作配置
-        properties.set(actionCode, reqVO.getActionConfig());
+        // 5. 保存动作配置
+        properties.set(actionName, actionConfig);
 
         // 6. 更新元数据版本
         updateActionMetadataVersion(rootActionConfig);
@@ -1032,7 +1061,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connector.setActionConfig(toJsonString(rootActionConfig));
         connectorRepository.updateById(connector);
 
-        log.info("saveActionConfig success, connectorId: {}, actionCode: {}", connectorId, actionCode);
+        log.info("{} success, connectorId: {}, actionName: {}", operation, connectorId, actionName);
         return Boolean.TRUE;
     }
 
@@ -1183,66 +1212,71 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public ExecuteHttpActionRespVO executeHttpAction(Long connectorId, String actionName) {
-        log.info("执行HTTP动作开始，connectorId: {}, actionName: {}", connectorId, actionName);
+    public ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO) {
+        DebugHttpActionReqVO.DebugConfig debug = reqVO.getDebug();
+        log.info("调试HTTP动作开始，URL: {}, Method: {}", debug.getUrl(), debug.getMethod());
 
-        // 1. 验证连接器存在
-        FlowConnectorDO connector = connectorRepository.getById(connectorId);
-        if (connector == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        // 1. 构建debug配置节点（从ReqVO转换）
+        ObjectNode debugConfig = objectMapper.createObjectNode();
+        debugConfig.put("url", debug.getUrl());
+        debugConfig.put("method", debug.getMethod());
+
+        // 2. 转换requestHeaders（只保留key和fieldValue）
+        if (debug.getRequestHeaders() != null && !debug.getRequestHeaders().isEmpty()) {
+            ArrayNode headersArray = debugConfig.putArray("requestHeaders");
+            for (HttpParamFieldVO field : debug.getRequestHeaders()) {
+                ObjectNode headerNode = headersArray.addObject();
+                headerNode.put("key", field.getKey());
+                headerNode.put("fieldValue", field.getFieldValue());
+            }
         }
 
-        // 2. 加载动作配置
-        JsonNode actionConfig = loadActionConfig(connector, actionName);
-        if (actionConfig == null) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
+        // 3. 转换queryParams（只保留key和fieldValue）
+        if (debug.getQueryParams() != null && !debug.getQueryParams().isEmpty()) {
+            ArrayNode queryParamsArray = debugConfig.putArray("queryParams");
+            for (HttpParamFieldVO field : debug.getQueryParams()) {
+                ObjectNode queryNode = queryParamsArray.addObject();
+                queryNode.put("key", field.getKey());
+                queryNode.put("fieldValue", field.getFieldValue());
+            }
         }
 
-        // 3. 验证debug配置存在（必填）
-        JsonNode debugConfig = actionConfig.get("debug");
-        if (debugConfig == null || debugConfig.isEmpty() || !debugConfig.has("url")) {
-            throw new IllegalArgumentException("该动作未配置调试信息，无法执行");
+        // 4. 转换pathParams（只保留key和fieldValue）
+        if (debug.getPathParams() != null && !debug.getPathParams().isEmpty()) {
+            ArrayNode pathParamsArray = debugConfig.putArray("pathParams");
+            for (HttpParamFieldVO field : debug.getPathParams()) {
+                ObjectNode pathNode = pathParamsArray.addObject();
+                pathNode.put("key", field.getKey());
+                pathNode.put("fieldValue", field.getFieldValue());
+            }
         }
 
-        // 4. 构建HTTP请求（从debug配置获取所有参数）
+        // 5. 转换requestBody（只保留key和fieldValue）
+        if (debug.getRequestBody() != null && !debug.getRequestBody().isEmpty()) {
+            ArrayNode bodyArray = debugConfig.putArray("requestBody");
+            for (HttpParamFieldVO field : debug.getRequestBody()) {
+                ObjectNode bodyNode = bodyArray.addObject();
+                bodyNode.put("key", field.getKey());
+                bodyNode.put("fieldValue", field.getFieldValue());
+            }
+        }
+
+        // 6. 构建HTTP请求（从debug配置获取所有参数）
         HttpRequest request = buildHttpRequest(debugConfig);
 
-        // 5. 执行HTTP请求
+        // 7. 执行HTTP请求
         long startTime = System.currentTimeMillis();
         try {
             HttpServiceResponse response = httpExecuteService.execute(request);
             long duration = System.currentTimeMillis() - startTime;
 
-            log.info("执行HTTP动作成功，connectorId: {}, actionName: {}, 耗时: {}ms", connectorId, actionName, duration);
+            log.info("调试HTTP动作成功，耗时: {}ms", duration);
             return buildSuccessResponse(response, request, duration);
 
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            log.error("执行HTTP动作失败，connectorId: {}, actionName: {}", connectorId, actionName, e);
+            log.error("调试HTTP动作失败", e);
             return buildErrorResponse(e, request, duration);
-        }
-    }
-
-    /**
-     * 加载动作配置
-     */
-    private JsonNode loadActionConfig(FlowConnectorDO connector, String actionName) {
-        try {
-            String actionConfigJson = connector.getActionConfig();
-            if (StringUtils.isBlank(actionConfigJson)) {
-                return null;
-            }
-
-            JsonNode rootConfig = objectMapper.readTree(actionConfigJson);
-            JsonNode properties = rootConfig.get("properties");
-            if (properties == null || !properties.has(actionName)) {
-                return null;
-            }
-
-            return properties.get(actionName);
-        } catch (JsonProcessingException e) {
-            log.error("解析动作配置失败，connectorId: {}, actionName: {}", connector.getId(), actionName, e);
-            return null;
         }
     }
 

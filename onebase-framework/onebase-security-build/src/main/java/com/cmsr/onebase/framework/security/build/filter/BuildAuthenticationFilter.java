@@ -16,6 +16,7 @@ import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -78,6 +79,12 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
     @SuppressWarnings("NullableProblems")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        
+        if (StaticResourceUtil.isStaticResource(request)) {
+            chain.doFilter(request, response);
+            return;
+        }
+        
         if (isLoginOrLogoutRequest(request)) {
             // 如果是登录、登出、注册，那么从header中获取租户信息
             TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));

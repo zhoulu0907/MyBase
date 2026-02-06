@@ -15,66 +15,75 @@ import java.util.List;
 @Data
 public class OAuth2ClientSaveReqVO {
 
-    @Schema(description = "编号", example = "1024")
+    @Schema(description = "应用唯一标识", example = "1024")
     private Long id;
 
-    @Schema(description = "客户端编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "tudou")
-    @NotNull(message = "客户端编号不能为空")
-    private String clientId;
-
-    @Schema(description = "客户端密钥", requiredMode = Schema.RequiredMode.REQUIRED, example = "fan")
-    @NotNull(message = "客户端密钥不能为空")
-    private String secret;
-
-    @Schema(description = "应用名", requiredMode = Schema.RequiredMode.REQUIRED, example = "土豆")
-    @NotNull(message = "应用名不能为空")
+    @Schema(description = "应用名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "tudou")
+    @NotNull(message = "应用名称不能为空")
     private String name;
 
-    @Schema(description = "应用图标", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.cmsr.com")
-    @NotNull(message = "应用图标不能为空")
-    private String logo;
+    @Schema(description = "联系人", requiredMode = Schema.RequiredMode.REQUIRED, example = "tudou")
+    @NotNull(message = "联系人不能为空")
+    private String contactUser;
 
-    @Schema(description = "应用描述", example = "我是一个应用")
-    private String description;
-
-    @Schema(description = "状态，参见 CommonStatusEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "状态不能为空")
-    private Integer status;
-
-    @Schema(description = "访问令牌的有效期", requiredMode = Schema.RequiredMode.REQUIRED, example = "8640")
-    @NotNull(message = "访问令牌的有效期不能为空")
-    private Integer accessTokenValiditySeconds;
-
-    @Schema(description = "刷新令牌的有效期", requiredMode = Schema.RequiredMode.REQUIRED, example = "8640000")
-    @NotNull(message = "刷新令牌的有效期不能为空")
-    private Integer refreshTokenValiditySeconds;
+    @Schema(description = "联系人邮箱", requiredMode = Schema.RequiredMode.REQUIRED, example = "tudou")
+    @NotNull(message = "联系人邮箱不能为空")
+    private String contactEmail;
 
     @Schema(description = "可重定向的 URI 地址", requiredMode = Schema.RequiredMode.REQUIRED, example = "http://cmsr.com")
     @NotNull(message = "可重定向的 URI 地址不能为空")
     private List<@NotEmpty(message = "重定向的 URI 不能为空") String> redirectUris;
 
-    @Schema(description = "授权类型，参见 OAuth2GrantTypeEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "password")
-    @NotNull(message = "授权类型不能为空")
-    private List<String> authorizedGrantTypes;
+     @Schema(description = "客户端编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "tudou")
+//     @NotNull(message = "客户端编号不能为空")
+     private String clientId;
 
-    @Schema(description = "授权范围", example = "user_info")
-    private List<String> scopes;
+     @Schema(description = "客户端密钥", requiredMode = Schema.RequiredMode.REQUIRED, example = "fan")
+//     @NotNull(message = "客户端密钥不能为空")
+     private String secret;
 
-    @Schema(description = "自动通过的授权范围", example = "user_info")
-    private List<String> autoApproveScopes;
+     @Schema(description = "应用图标", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.cmsr.com")
+//     @NotNull(message = "应用图标不能为空")
+     private String logo;
 
-    @Schema(description = "权限", example = "system:user:query")
-    private List<String> authorities;
+     @Schema(description = "应用描述", example = "我是一个应用")
+     private String description;
 
-    @Schema(description = "资源", example = "1024")
-    private List<String> resourceIds;
+     @Schema(description = "状态，参见 CommonStatusEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+//     @NotNull(message = "状态不能为空")
+     private Integer status;
 
-    @Schema(description = "附加信息", example = "{yunai: true}")
-    private String additionalInformation;
+     @Schema(description = "访问令牌的有效期", requiredMode = Schema.RequiredMode.REQUIRED, example = "8640")
+//     @NotNull(message = "访问令牌的有效期不能为空")
+     private Integer accessTokenValiditySeconds;
 
-    @AssertTrue(message = "附加信息必须是 JSON 格式")
-    public boolean isAdditionalInformationJson() {
-        return StrUtil.isEmpty(additionalInformation) || JsonUtils.isJson(additionalInformation);
-    }
+     @Schema(description = "刷新令牌的有效期", requiredMode = Schema.RequiredMode.REQUIRED, example = "8640000")
+//     @NotNull(message = "刷新令牌的有效期不能为空")
+     private Integer refreshTokenValiditySeconds;
+
+
+     @Schema(description = "授权类型，参见 OAuth2GrantTypeEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "password")
+//     @NotNull(message = "授权类型不能为空")
+     private List<String> authorizedGrantTypes;
+
+     @Schema(description = "授权范围", example = "user_info")
+     private List<String> scopes;
+
+     @Schema(description = "自动通过的授权范围", example = "user_info")
+     private List<String> autoApproveScopes;
+
+     @Schema(description = "权限", example = "system:user:query")
+     private List<String> authorities;
+
+     @Schema(description = "资源", example = "1024")
+     private List<String> resourceIds;
+
+     @Schema(description = "附加信息", example = "{yunai: true}")
+     private String additionalInformation;
+
+     @AssertTrue(message = "附加信息必须是 JSON 格式")
+     public boolean isAdditionalInformationJson() {
+         return StrUtil.isEmpty(additionalInformation) || JsonUtils.isJson(additionalInformation);
+     }
 
 }

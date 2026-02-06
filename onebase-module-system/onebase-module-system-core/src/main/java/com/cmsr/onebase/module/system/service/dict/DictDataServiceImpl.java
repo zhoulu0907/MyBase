@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
+import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchReqVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataBatchRespVO;
 import com.cmsr.onebase.module.system.vo.dictdata.DictDataInsertReqVO;
@@ -50,6 +51,9 @@ public class DictDataServiceImpl implements DictDataService {
 
     @Resource
     private DictDataRepository dictDataRepository;
+
+    @Resource
+    private DictTypeRepository dictTypeRepository;
 
     @Override
     @TenantIgnore
@@ -122,6 +126,16 @@ public class DictDataServiceImpl implements DictDataService {
 
         // 删除字典数据
         dictDataRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteDictDataByDictOwner(String dictOwnerType, Long dictOwnerId) {
+        // 5. 删除租户级别字典Dict
+        List<DictTypeDO> dictTypeDOList = dictTypeRepository.findAllListByOwner(dictOwnerType, dictOwnerId);
+        // 5.1 删除字典类型对应的数据
+        dictDataRepository.removeDictDataByType(dictTypeDOList.stream().map(DictTypeDO::getType).collect(Collectors.toList()));
+        // 5.2 删除字典类型
+        dictTypeRepository.removeByDictOwnerId(dictOwnerType,dictOwnerId);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.cmsr.onebase.plugin.build.vo.req.PluginUploadReqVO;
 import com.cmsr.onebase.plugin.build.vo.req.PluginVersionStatusReqVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoDetailRespVO;
 import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoRespVO;
+import com.cmsr.onebase.plugin.core.dal.dataobject.PluginInfoDO;
 import jakarta.validation.Valid;
 
 /**
@@ -16,6 +17,21 @@ import jakarta.validation.Valid;
  * @date 2026-01-06
  */
 public interface PluginInfoService {
+
+    /**
+     * 准备插件前端资源
+     * <p>
+     * 检查并解压插件前端资源
+     * </p>
+     *
+     * @param plugin 插件信息
+     */
+    void preparePluginFrontend(PluginInfoDO plugin);
+
+    /**
+     * 准备所有已启用插件的前端资源
+     */
+    void prepareAllPluginFrontends();
 
     /**
      * 新增插件（首次上传）

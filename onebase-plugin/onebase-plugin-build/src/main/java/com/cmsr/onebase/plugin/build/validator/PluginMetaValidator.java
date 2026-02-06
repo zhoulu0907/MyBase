@@ -1,10 +1,10 @@
 package com.cmsr.onebase.plugin.build.validator;
 
-import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.plugin.core.model.PluginMetaInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.regex.Pattern;
 
@@ -33,7 +33,7 @@ public class PluginMetaValidator {
      * @return 解析后的元数据信息
      */
     public PluginMetaInfo validate(String jsonContent) {
-        if (StrUtil.isBlank(jsonContent)) {
+        if (!StringUtils.hasText(jsonContent)) {
             throw exception(PLUGIN_JSON_EMPTY);
         }
 
@@ -55,11 +55,11 @@ public class PluginMetaValidator {
             throw exception(PLUGIN_META_PLUGIN_ID_REQUIRED);
         }
 
-        if (StrUtil.isBlank(metaInfo.getPluginName())) {
+        if (!StringUtils.hasText(metaInfo.getPluginName())) {
             throw exception(PLUGIN_META_PLUGIN_NAME_REQUIRED);
         }
 
-        if (StrUtil.isBlank(metaInfo.getPluginVersion())) {
+        if (!StringUtils.hasText(metaInfo.getPluginVersion())) {
             throw exception(PLUGIN_META_VERSION_REQUIRED);
         }
 

@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.license.core.handler.LicenseCheckHandler;
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,12 @@ public class LicenseCheckFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        // 静态资源直接放行
+        if (StaticResourceUtil.isStaticResource(request)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             // 许可证校验，许可证有问题会抛出异常中断

@@ -133,6 +133,18 @@ public interface FlowConnectorService {
      */
     Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO);
 
+    /**
+     * 更新连接器动作配置
+     * <p>
+     * 更新指定动作名称的配置信息
+     *
+     * @param connectorId 连接器实例ID
+     * @param actionName  动作名称（作为properties的key）
+     * @param actionConfig 新的动作配置
+     * @return 更新是否成功
+     */
+    Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig);
+
     // ==================== 动作管理接口 ====================
 
     /**
@@ -243,13 +255,12 @@ public interface FlowConnectorService {
     ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionName);
 
     /**
-     * 执行HTTP连接器动作
+     * 调试HTTP连接器动作
      * <p>
-     * 从 action_config 的 debug 配置中获取所有参数执行HTTP请求
+     * 接收debug配置信息并执行HTTP请求
      *
-     * @param connectorId 连接器ID
-     * @param actionName  动作名称
+     * @param reqVO 调试请求VO（包含url、method、headers等调试信息）
      * @return 执行响应结果
      */
-    ExecuteHttpActionRespVO executeHttpAction(Long connectorId, String actionName);
+    ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO);
 }

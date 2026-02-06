@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.security.build.filter;
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,12 @@ public class BuildApplicationContextHeaderFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        // 静态资源直接放行
+        if (StaticResourceUtil.isStaticResource(request)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         try {
             String applicationIdHeader = request.getHeader(X_APPLICATION_ID);
             Long applicationId = NumberUtils.toLong(applicationIdHeader, -1L);

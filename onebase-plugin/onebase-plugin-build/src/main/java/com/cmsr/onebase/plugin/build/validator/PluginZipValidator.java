@@ -1,14 +1,14 @@
 package com.cmsr.onebase.plugin.build.validator;
 
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +63,7 @@ public class PluginZipValidator {
 
         // 3. 校验文件扩展名
         String originalFilename = file.getOriginalFilename();
-        if (StrUtil.isBlank(originalFilename)) {
+        if (!StringUtils.hasText(originalFilename)) {
             throw exception(PLUGIN_FILE_NAME_INVALID);
         }
         String extension = getFileExtension(originalFilename);
@@ -74,7 +74,7 @@ public class PluginZipValidator {
         // 4. 读取文件内容
         byte[] content;
         try {
-            content = IoUtil.readBytes(file.getInputStream());
+            content = file.getInputStream().readAllBytes();
         } catch (IOException e) {
             log.error("读取插件文件失败", e);
             throw exception(PLUGIN_FILE_READ_ERROR);
@@ -144,7 +144,7 @@ public class PluginZipValidator {
             while ((entry = zis.getNextEntry()) != null) {
                 String entryName = entry.getName();
                 if ("plugin.manifest.json".equals(entryName) || entryName.endsWith("/plugin.manifest.json")) {
-                    return IoUtil.readUtf8(zis);
+                    return new String(readEntryContent(zis), StandardCharsets.UTF_8);
                 }
                 zis.closeEntry();
             }
@@ -167,7 +167,7 @@ public class PluginZipValidator {
             while ((entry = zis.getNextEntry()) != null) {
                 String entryName = entry.getName();
                 if ("plugin.schema.json".equals(entryName) || entryName.endsWith("/plugin.schema.json")) {
-                    return IoUtil.readUtf8(zis);
+                    return new String(readEntryContent(zis), StandardCharsets.UTF_8);
                 }
                 zis.closeEntry();
             }
