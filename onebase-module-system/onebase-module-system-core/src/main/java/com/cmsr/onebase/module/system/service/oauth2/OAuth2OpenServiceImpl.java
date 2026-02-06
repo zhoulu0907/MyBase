@@ -63,7 +63,8 @@ public class OAuth2OpenServiceImpl implements OAuth2OpenService {
                                                                      String username,
                                                                      String password,
                                                                      String scope,
-                                                                     String refreshToken) {
+                                                                     String refreshToken,
+                                                                     String runMode) {
         List<String> scopes = OAuth2Utils.buildScopes(scope);
         // 1.1 校验授权类型
         OAuth2GrantTypeEnum grantTypeEnum = OAuth2GrantTypeEnum.getByGrantType(grantType);
@@ -83,7 +84,7 @@ public class OAuth2OpenServiceImpl implements OAuth2OpenService {
         OAuth2AccessTokenDO accessTokenDO;
         switch (grantTypeEnum) {
             case AUTHORIZATION_CODE:
-                accessTokenDO = oauth2GrantService.grantAuthorizationCodeForAccessToken(null,client.getClientId(), code, redirectUri, state);
+                accessTokenDO = oauth2GrantService.grantAuthorizationCodeForAccessToken(runMode,client.getClientId(), code, redirectUri, state);
                 break;
             case PASSWORD:
                 accessTokenDO = oauth2GrantService.grantPassword(username, password, client.getClientId(), scopes);
