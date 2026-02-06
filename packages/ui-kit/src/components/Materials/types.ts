@@ -477,11 +477,11 @@ export interface ITabsPositionConfigType<KeyType> extends ICommonConfigType {
 export interface IStepsConfigType extends ICommonConfigType {
   key: string;
   name: string;
-  type: typeof CONFIG_TYPES.TABS;
+  type: typeof CONFIG_TYPES.STEPS;
 }
 
-// 步骤条样式
-export interface IStepsTypeConfigType<KeyType> extends ICommonConfigType {
+// 页签组件类型
+export interface ITabsTypeConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABS_TYPE;

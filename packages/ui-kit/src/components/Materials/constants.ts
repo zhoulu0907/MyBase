@@ -94,6 +94,8 @@ export const CONFIG_TYPES = {
   TABS_TYPE: 'TabsType',
   // 页签组件位置
   TABS_POSITION: 'TabsPosition',
+  // 步骤条样式库
+  STEPS: 'Steps',
   // 静态文件
   IMAGE: 'Image',
   FILE: 'File',

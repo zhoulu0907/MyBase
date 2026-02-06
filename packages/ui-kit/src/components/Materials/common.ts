@@ -53,6 +53,7 @@ import type {
     ITabsConfigType,
     ITabsPositionConfigType,
     ITabsTypeConfigType,
+    IStepsConfigType,
     ITextConfigType,
     ITimeFormatConfigType,
     ITimeRangeConfigType,
@@ -708,41 +709,14 @@ export const tabsPositionConfig: ITabsPositionConfigType<TTabsPositionSelectKeyT
 };
 
 // ==================== 步骤条 ====================
-export const stepsConfig: ITabsConfigType = {
+export const stepsConfig: IStepsConfigType = {
   key: 'steps',
-  name: '多步骤显示',
-  type: 'Tabs'
+  name: '样式库',
+  type: 'Steps'
 };
 
-// 步骤条样式
+// 步骤条样式类型
 export type TStepsTypeSelectKeyType = 'default' | 'navigation' | 'arrow' | 'dot';
-export const stepsTypeConfig: ITabsTypeConfigType<TStepsTypeSelectKeyType> = {
-  key: 'type',
-  name: '步骤条样式',
-  type: 'TabsType',
-  range: [
-    {
-      key: 'default',
-      label: 'default',
-      value: 'default'
-    },
-    {
-      key: 'navigation',
-      label: 'navigation',
-      value: 'navigation'
-    },
-    {
-      key: 'arrow',
-      label: 'arrow',
-      value: 'arrow'
-    },
-    {
-      key: 'dot',
-      label: 'dot',
-      value: 'dot'
-    }
-  ]
-};
 
 // 步骤条标签位置
 export type TStepsLabelPlacementSelectKeyType = 'horizontal' | 'vertical';

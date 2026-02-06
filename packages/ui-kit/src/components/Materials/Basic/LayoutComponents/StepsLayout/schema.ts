@@ -3,7 +3,6 @@ import {
   baseDefault,
   widthConfig,
   stepsConfig,
-  stepsTypeConfig,
   stepsLabelPlacementConfig,
   type ICommonBaseType,
   type TWidthSelectKeyType,
@@ -27,7 +26,6 @@ import type {
   IWidthConfigType,
   TSelectDefaultType,
   IStepsConfigType,
-  IStepsTypeConfigType,
   IStepsLabelPlacementConfigType,
 } from '../../../types';
 
@@ -45,7 +43,6 @@ export type XStepsLayoutEditData = Array<
   | ITextAreaConfigType
   | IBooleanConfigType
   | IStepsConfigType
-  | IStepsTypeConfigType<TStepsTypeSelectKeyType>
   | IStepsLabelPlacementConfigType<TStepsLabelPlacementSelectKeyType>
 >;
 
@@ -84,7 +81,6 @@ const XStepsLayout: XStepsLayoutSchema = {
   editData: [
     ...baseConfig,
     stepsConfig,
-    stepsTypeConfig,
     stepsLabelPlacementConfig,
     widthConfig
   ],
