@@ -8,6 +8,7 @@ import XInformationList from './InformationList';
 import XTodoList from './TodoList';
 import XWelcomeCard from './WelcomeCard';
 import XButtonWorkbench from './ButtonWorkbench';
+import XImageWorkbench from './ImageWorkbench';
 
 export const WorkbenchBasicComp = {
   XQuickEntry,
@@ -16,6 +17,7 @@ export const WorkbenchBasicComp = {
   XInformationList,
   XTodoList,
   XWelcomeCard,
-  XButtonWorkbench
+  XButtonWorkbench,
+  XImageWorkbench
 } satisfies Record<WorkbenchComponentType, ComponentType<any>>;
 

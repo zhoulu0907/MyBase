@@ -152,7 +152,8 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
     [WORKBENCH_COMPONENT_TYPES.WELCOME_CARD]: { component: WorkbenchComp.XWelcomeCard },
     [WORKBENCH_COMPONENT_TYPES.TODO_CENTER]: { component: WorkbenchComp.XTodoCenter },
     [WORKBENCH_COMPONENT_TYPES.TODO_LIST]: { component: WorkbenchComp.XTodoList },
-    [WORKBENCH_COMPONENT_TYPES.INFORMATION_LIST]: { component: WorkbenchComp.XInformationList }
+    [WORKBENCH_COMPONENT_TYPES.INFORMATION_LIST]: { component: WorkbenchComp.XInformationList },
+    [WORKBENCH_COMPONENT_TYPES.IMAGE_WORKBENCH]: { component: WorkbenchComp.XImageWorkbench }
   };
 
   // 渲染对应的组件

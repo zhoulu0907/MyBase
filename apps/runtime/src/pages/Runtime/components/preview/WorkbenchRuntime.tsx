@@ -27,6 +27,13 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
     }
   }, [pageSetId]);
 
+  useEffect(() => {
+    const ele = document.getElementById('runtime-content');
+    if (ele && ele.style) {
+      ele.style.backgroundColor = '#F2F3F5';
+    }
+  }, []);
+
   return (
     <>
       {workbenchComponents.value.map((cp: GridItem) => {
@@ -42,7 +49,7 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
               className={styles.componentItem}
               style={{
                 width: `calc(${getWorkbenchComponentWidth(sanitizedSchema, cp.type as WorkbenchComponentType)} - 8px)`,
-                margin: '4px'
+                margin: '10px'
               }}
             >
               <PreviewRender

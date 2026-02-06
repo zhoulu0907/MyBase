@@ -12,7 +12,7 @@ export function getWorkbenchRuntimeUserInfo(
 ): WorkbenchRuntimeUserInfo {
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
   const avatarId = userPermissionInfo?.user?.avatar;
-  const nickname = userPermissionInfo?.user?.nickname || '';
+  const nickname = userPermissionInfo?.user?.nickname || '用户';
 
   let avatarUrl = '';
   if (avatarId) {
