@@ -26,8 +26,8 @@ public interface DictDataApi extends DictDataCommonApi {
     @GetMapping(PREFIX + "/valid")
     @Operation(summary = "校验字典数据们是否有效")
     @Parameters({
-        @Parameter(name = "dictType", description = "字典类型", example = "SEX", required = true),
-        @Parameter(name = "descriptions", description = "字典数据值的数组", example = "1,2", required = true)
+            @Parameter(name = "dictType", description = "字典类型", example = "SEX", required = true),
+            @Parameter(name = "descriptions", description = "字典数据值的数组", example = "1,2", required = true)
     })
     CommonResult<Boolean> validateDictDataList(@RequestParam("dictType") String dictType,
                                                @RequestParam("values") Collection<String> values);
@@ -41,5 +41,13 @@ public interface DictDataApi extends DictDataCommonApi {
     @Operation(summary = "根据多个字典类型ID获得字典数据列表")
     @Parameter(name = "dictTypeIds", description = "字典类型ID数组", required = true)
     CommonResult<Map<Long, List<DictDataRespDTO>>> getDictDataListByTypeIds(@RequestParam("dictTypeIds") Collection<Long> dictTypeIds);
+
+    @GetMapping(PREFIX + "/delete-by-dict-owner")
+    @Operation(summary = "根据字典所有者类型和ID删除字典数据")
+    @Parameters({
+            @Parameter(name = "dictOwnerType", description = "字典所有者类型", example = "TENANT", required = true),
+            @Parameter(name = "dictOwnerId", description = "字典所有者ID", example = "1,2", required = true)
+    })
+    void deleteDictDataByDictOwner(@RequestParam("dictOwnerType") String dictOwnerType, @RequestParam("dictOwnerId") Long dictOwnerId);
 
 }
