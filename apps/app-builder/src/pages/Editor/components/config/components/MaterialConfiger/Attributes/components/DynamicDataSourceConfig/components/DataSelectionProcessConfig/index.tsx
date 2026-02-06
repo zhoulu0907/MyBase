@@ -171,10 +171,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
     // const next = value && value !== echoField ? [value] : [];
     const next = value ? [value] : [];
     setSelected(next);
-    const selectableOptions =
-      isDropdown && echoField
-        ? displayFieldOptions || []
-        :  displayFieldOptions || [];
+    const selectableOptions = isDropdown && echoField ? displayFieldOptions || [] : displayFieldOptions || [];
     const header = selectableOptions.reduce((fields: any[], option: any) => {
       if (selected.includes(option.fieldName)) {
         fields.push({
@@ -345,10 +342,14 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
               </FormItem> */}
               <FormItem
                 label={isDropdown ? '辅助字段' : '选择数据时的显示字段'}
-                tooltip={{
-                  content: '可配置辅助字段，结合回显字段，帮助用户选择关联数据',
-                  position: 'bottom'
-                }}
+                tooltip={
+                  isDropdown
+                    ? {
+                        content: '可配置辅助字段，结合回显字段，帮助用户选择关联数据',
+                        position: 'bottom'
+                      }
+                    : null
+                }
               >
                 {/* <div>{JSON.stringify(displayFieldOptions)}</div> */}
                 {isDropdown ? (
