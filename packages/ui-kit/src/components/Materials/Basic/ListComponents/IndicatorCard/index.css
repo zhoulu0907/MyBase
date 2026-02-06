@@ -1,0 +1,62 @@
+.indicatorCard {
+    box-sizing: border-box;
+    padding: 16px 20px;
+    color: #1D2129;
+    font-size: 14px;
+
+    .cardOne {
+        .cardOneItem {
+            display: flex;
+            align-items: center;
+
+            .cardOneContent {
+                flex: 1;
+                padding: 16px 26px 16px 16px;
+                box-sizing: border-box;
+                position: relative;
+
+                .cardOneTitle {
+                    width: calc(100% - 32px);
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    line-height: 32px;
+                }
+
+                .cardOneValue {
+                    line-height: 32px;
+                    font-size: 24px;
+                    font-weight: 600;
+                }
+
+                .cardOneCompare {
+                    padding-top: 4px;
+                    color: #86909C;
+                    font-size: 12px;
+                    line-height: 20px;
+
+                    .cardOneCompareType {
+                        padding: 0 6px;
+                    }
+                }
+
+                .cardOneIcon {
+                    position: absolute;
+                    top: 16px;
+                    right: 26px;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+
+            .cardOneDivider {
+                margin: 0;
+                height: 56px;
+            }
+        }
+    }
+}

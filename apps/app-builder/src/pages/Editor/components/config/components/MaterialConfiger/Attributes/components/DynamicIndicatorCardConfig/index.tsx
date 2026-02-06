@@ -31,7 +31,8 @@ import {
   INDICATOR_COMPARE_CALCULATE_METHOD,
   INDICATOR_COMPARE_CALCULATE_TYPE,
   getPopupContainer,
-  useAppEntityStore
+  useAppEntityStore,
+  webMenuIcons
 } from '@onebase/ui-kit';
 import {
   FieldType,
@@ -48,6 +49,7 @@ import AsyncDeptSelectField from './component/AsyncDeptSelectField';
 import AsyncSelectField from './component/AsyncSelectField';
 import AsyncUserSelectField from './component/AsyncUserSelectField';
 import { FormulaEditor } from '@/components/FormulaEditor';
+import { ReactSVG } from 'react-svg';
 import styles from '../../index.module.less';
 
 interface Props {
@@ -90,7 +92,8 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
     index: null,
     i: null
   });
-
+  // 图标下拉内容
+  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   const opCodeOptions = [
     {
       label: '公式',
@@ -105,8 +108,6 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
       value: FieldType.VARIABLES
     }
   ];
-  // 图标下拉内容
-  const dropList = [{ lable: <IconStarFill />, value: 'IconStarFill' }];
 
   useEffect(() => {
     getEntityList();
@@ -955,15 +956,15 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                   <Dropdown
                     droplist={
                       <Menu>
-                        {dropList?.map((iconItem) => (
+                        {allWebMenuIcons?.map((iconItem) => (
                           <Menu.Item
-                            key={iconItem.value}
+                            key={iconItem.code}
                             onClick={() => {
-                              const icon = { ...currentIndicator.icon, name: iconItem.value };
+                              const icon = { ...currentIndicator.icon, name: iconItem.code };
                               setCurrentIndicator((prev: any) => ({ ...prev, icon }));
                             }}
                           >
-                            <span style={{ fontSize: '16px' }}>{iconItem.lable}</span>
+                            <img style={{ width: 'auto', height: '18px', fill: '#333' }} src={iconItem.icon} alt="" />
                           </Menu.Item>
                         ))}
                       </Menu>
@@ -977,11 +978,23 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '20px',
                         borderRadius: '4px'
                       }}
                     >
-                      {dropList.find((ele) => ele.value === currentIndicator.icon?.name)?.lable}
+                      <ReactSVG
+                        style={{ height: '20px' }}
+                        src={allWebMenuIcons.find((ele) => ele.code === currentIndicator.icon?.name)?.icon || ''}
+                        beforeInjection={(svg) => {
+                          const fillColor = currentIndicator.icon?.color || 'rgb(var(--primary-6))';
+                          svg.querySelectorAll('*').forEach((el) => {
+                            if (el.getAttribute('fill') === 'black') {
+                              el.setAttribute('fill', fillColor);
+                            }
+                          });
+                          svg.setAttribute('width', '20px');
+                          svg.setAttribute('height', '20px');
+                        }}
+                      />
                     </div>
                   </Dropdown>
                 </Grid.Col>
