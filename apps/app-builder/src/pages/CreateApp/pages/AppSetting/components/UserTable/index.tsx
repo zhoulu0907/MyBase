@@ -154,6 +154,9 @@ const UserMembers = (props: IProps) => {
       if (roleInfo.roleType === RoleType.ADMIN) {
         deptType = CodeType.TENANT;
         userType = RoleType.USER;
+      } else if (roleInfo.roleType === RoleType.OUTERUSER) {
+        deptType = CodeType.THIRD;
+        userType = RoleType.OUTERUSER;
       } else if (curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
         deptType = CodeType.CORP;
         userType = RoleType.CUSTOM;

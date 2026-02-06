@@ -93,7 +93,7 @@ export interface XInputDateRangePickerConfig extends ICommonBaseType {
   /**
    * 占位符
    */
-  placeholder: TTextDefaultType;
+  placeholder: TTextDefaultType[];
 
   /**
    * 描述信息（鼠标悬浮时显示）
@@ -207,7 +207,7 @@ const XDateRangePicker: XInputDateRangePickerSchema = {
       text: '日期区间',
       display: true
     },
-    placeholder: '请选择日期',
+    placeholder: ['请选择日期', '请选择日期'],
     tooltip: '',
     dataField: [],
     startDefaultValueConfig: {
