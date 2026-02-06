@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.infra.framework.file.core.utils;
 import cn.hutool.core.io.FileMagicNumber;
 import com.cmsr.onebase.module.infra.enums.file.FileUploadCheckConstants;
 
+import java.util.Arrays;
 /**
  * 功能概要：文件魔数(Magic Number)验证
  *
@@ -18,7 +19,7 @@ public final class FileMNValidateUtil {
     public static boolean isValidDefaultMagicNumber(byte[] content, String extension) {
         return switch (extension) {
             case FileUploadCheckConstants.PDF -> FileMagicNumber.PDF.match(content);
-            case FileUploadCheckConstants.DOC -> FileMagicNumber.DOC.match(content);
+            case FileUploadCheckConstants.DOC -> isValidDocMagicNumber(content);
             case FileUploadCheckConstants.DOCX -> FileMagicNumber.DOCX.match(content);
             case FileUploadCheckConstants.XLS -> FileMagicNumber.XLS.match(content);
             case FileUploadCheckConstants.XLSX -> FileMagicNumber.XLSX.match(content);
@@ -32,6 +33,25 @@ public final class FileMNValidateUtil {
             // 可添加更多文件类型的魔数校验
             default -> false;
         };
+    }
+
+    private static boolean isValidDocMagicNumber(byte[] content) {
+        // 首先尝试hutool的标准校验
+        if (FileMagicNumber.DOC.match(content)) {
+            return true;
+        }
+
+        // 如果标准校验失败，进行WPS兼容性校验
+        if (content.length < 8) {
+            return false;
+        }
+
+        // 检查前8字节是否匹配标准DOC魔数
+        byte[] expectedMagic = {(byte) 0xD0, (byte) 0xCF, 0x11, (byte) 0xE0,
+                (byte) 0xA1, (byte) 0xB1, 0x1A, (byte) 0xE1};
+
+        // 直接比较前8字节
+        return  Arrays.equals(Arrays.copyOfRange(content, 0, 8), expectedMagic);
     }
 
     /**
