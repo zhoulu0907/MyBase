@@ -6,7 +6,7 @@
  */
 import pkg from '../package.json'
 
-export const PLUGIN_NAME = 'ob-plugin-ocr'
+export const PLUGIN_NAME = 'onebase-plugin-ocr'
 export const PLUGIN_DISPLAY_NAME = 'OCR插件'
 export const PLUGIN_VERSION = pkg.version
 export const PLUGIN_ROUTE_PREFIX = '/' + PLUGIN_NAME

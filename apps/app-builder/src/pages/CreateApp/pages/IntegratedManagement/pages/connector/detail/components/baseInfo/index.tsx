@@ -11,7 +11,13 @@ interface ConnectorBaseInfoProps {
   onCreate?: (data: { description: string }) => void;
 }
 
-const ConnectorBaseInfo: React.FC<ConnectorBaseInfoProps> = ({ baseInfo, isCreateMode = false, createName = '', onCreateNameChange, onCreate }) => {
+const ConnectorBaseInfo: React.FC<ConnectorBaseInfoProps> = ({
+  baseInfo,
+  isCreateMode = false,
+  createName = '',
+  onCreateNameChange,
+  onCreate
+}) => {
   const [description, setDescription] = useState(baseInfo.description);
 
   const handleDescriptionOnChange = (value: string) => {
@@ -48,13 +54,9 @@ const ConnectorBaseInfo: React.FC<ConnectorBaseInfoProps> = ({ baseInfo, isCreat
       <div className={styles.title}>基本信息</div>
 
       <div className={styles.content}>
-        <div className={styles.contentItem}>
-          连接器类型: {baseInfo?.connectorTypeName || '未知类型'}
-        </div>
+        <div className={styles.contentItem}>连接器类型: {baseInfo?.typeCode || '未知类型'}</div>
 
-        <div className={styles.contentItem}>
-          连接器版本: {baseInfo?.version || '1.0.0'}
-        </div>
+        <div className={styles.contentItem}>连接器版本: {baseInfo?.version || '1.0.0'}</div>
 
         <div className={styles.description}>
           <div>描述</div>

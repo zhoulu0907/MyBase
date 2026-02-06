@@ -8,11 +8,15 @@ import { useAppEntityStore } from '@onebase/ui-kit';
 import { pluginBridge } from './bridge';
 import { PluginHostAPI } from './host-api';
 
+let isInitialized = false;
+
 export async function initPlugins() {
+  if (isInitialized) return;
+  isInitialized = true;
+
   try {
     // 开发模式：检查是否启用插件
     const enablePlugins = (window as any)?.global_config?.ENABLE_PLUGINS !== false;
-
     if (!enablePlugins) {
       console.log('[Plugin Loader] 插件功能已禁用');
       return;
@@ -49,31 +53,129 @@ export async function initPlugins() {
     (window as any).__OB_PLUGIN_SDK = sdk;
     (window as any).__OB_PLUGIN_EMITTER = pluginEmitter;
 
-    // 6. 加载插件
+    // 6. 插件加载流程
     const pm = new PluginManager(context as any);
-    const configPlugins = ((window as any)?.global_config?.PLUGINS) || [];
 
-    if (Array.isArray(configPlugins) && configPlugins.length > 0) {
-      for (const pluginCfg of configPlugins) {
-        pm.registerPlugin(pluginCfg);
+    let pluginList: any[] = [];
+    let source: 'server' | 'local' = 'local';
+    let getPluginConfigPlainApi: any = null;
+
+    // 6.1 尝试从服务端获取清单
+    try {
+      const api = await import('@onebase/platform-center');
+      const { getPluginManifestApi } = api;
+      getPluginConfigPlainApi = api.getPluginConfigPlainApi;
+
+      const res = await getPluginManifestApi();
+      console.log('[Plugin Loader] getPluginManifestApi res', res);
+      const manifest = res || [];
+
+      if (Array.isArray(manifest) && manifest.length > 0) {
+        pluginList = manifest;
+        source = 'server';
       }
-      for (const pluginCfg of configPlugins) {
-        const p = await pm.loadPlugin(pluginCfg.name);
-        await pluginBridge.integratePlugin(p, sdk);
-      }
-    } else {
-      // 默认加载模板插件 (开发模式)
-      const base = (window as any)?.global_config?.PLUGIN_BASE_URL || 'http://localhost:3001';
-      pm.registerPlugin({
-        name: 'ob-plugin-template',
-        version: '0.0.0',
-        displayName: '示例插件',
-        routePrefix: '/ob-plugin-template',
-        resources: { js: `${base}/ob-plugin-template.umd.js`, css: `${base}/ob-plugin-template.css` }
-      });
-      const p = await pm.loadPlugin('ob-plugin-template');
-      await pluginBridge.integratePlugin(p, sdk);
+    } catch (e) {
+      console.warn('[Plugin Loader] Failed to load from server, falling back to local config:', e);
     }
+
+    // 6.2 如果服务端为空，尝试本地配置
+    if (pluginList.length === 0) {
+      pluginList = ((window as any)?.global_config?.PLUGINS) || [];
+    }
+
+    // 7. 统一注册流程
+    for (const item of pluginList) {
+      // 确保 pluginId 和 name 都有值
+      const pluginId = item.pluginId || item.name;
+      item.pluginId = pluginId;
+      item.name = pluginId;
+      
+      let baseUrl = item.baseUrl || '';
+      // 处理 baseUrl (如果存在且是相对路径)
+      if (baseUrl && !baseUrl.startsWith('http') && (window as any).global_config?.PLUGIN_URL) {
+          const prefix = (window as any).global_config.PLUGIN_URL.replace(/\/$/, '');
+          const path = baseUrl.startsWith('/') ? baseUrl : `/${baseUrl}`;
+          baseUrl = `${prefix}${path}`;
+      }
+      if (baseUrl && !baseUrl.endsWith('/')) {
+        baseUrl = `${baseUrl}/`;
+      }
+      item.baseUrl = baseUrl;
+
+      let resources: any = item.resources || {};
+      let displayName = item.displayName || pluginId;
+      let routePrefix = item.routePrefix || `/${pluginId}`;
+      let version = item.version;
+
+      // 如果是静态资源类型 (static)，尝试获取 frontend.manifest.json
+      if (item.type === 'static' && baseUrl) {
+          try {
+              const manifestUrl = `${baseUrl}frontend.manifest.json`;
+              const manifestRes = await fetch(manifestUrl);
+              if (manifestRes.ok) {
+                  const manifestData = await manifestRes.json();
+                  
+                  // 使用 manifest 中的元数据
+                  if (manifestData.displayName) displayName = manifestData.displayName;
+                  if (manifestData.routePrefix) routePrefix = manifestData.routePrefix;
+                  if (manifestData.version) version = manifestData.version;
+                  
+                  // 构造 JS/CSS 资源路径
+                  if (manifestData.entry) {
+                      if (manifestData.entry.js) resources.js = `${baseUrl}${manifestData.entry.js}`;
+                      if (manifestData.entry.css) resources.css = `${baseUrl}${manifestData.entry.css}`;
+                  }
+              } else {
+                  console.warn(`[Plugin Loader] Failed to fetch frontend.manifest.json for ${pluginId}`);
+              }
+          } catch (e) {
+              console.warn(`[Plugin Loader] Error loading frontend.manifest.json for ${pluginId}:`, e);
+          }
+      } 
+
+      // 执行注册
+      pm.registerPlugin({
+        name: pluginId,
+        version: version,
+        displayName: displayName,
+        type: item.type,
+        resources: resources,
+        routePrefix: routePrefix,
+        ...item
+      } as any);
+    }
+
+    // 8. 统一加载与集成流程
+    for (const item of pluginList) {
+       const pluginId = item.pluginId || item.name;
+       try {
+         // 获取配置 (仅服务端模式)
+         let config = {};
+         if (source === 'server' && getPluginConfigPlainApi) {
+           try {
+             const confRes = await getPluginConfigPlainApi({ pluginId: pluginId, pluginVersion: item.version });
+             config = confRes || {};
+           } catch (err) {
+             console.warn(`[Plugin Loader] Failed to fetch config for ${pluginId}`, err);
+           }
+         } else if (item.config) {
+             // 本地配置可能直接包含 config
+             config = item.config;
+         }
+
+         const p = await pm.loadPlugin(pluginId);
+         if (p) {
+           // 注入配置
+           if (typeof (p as any).setConfig === 'function') {
+             (p as any).setConfig(config);
+           }
+           await pluginBridge.integratePlugin(p, sdk);
+         }
+       } catch (err) {
+         console.error(`[Plugin Loader] Failed to load plugin ${pluginId}`, err);
+       }
+    }
+
   } catch (e) {
     console.error('[Plugin Loader] Error:', e);
   }
