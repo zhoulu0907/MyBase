@@ -120,7 +120,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "RMBCAP(10.5)" }
+{ "formula": "RMBCAP(1.05)" }
 
 ### UUID
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -144,7 +144,32 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXMATCH('13812345679', '\d{11}' )"}
+{ "formula": "REGEXMATCH('13812345679', '\\\\d{11}' )"}
+
+
+### AND
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "AND(1=1, 2=2)"}
+
+### IF
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "IF(1==1, 41,23)"}
+
+### CHAR
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "CHAR(100)"}
 
 ### REGEXEXTRACT
 POST {{baseUrl}}/formula/engine/debug-formula
@@ -160,7 +185,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "REGEXEXTRACTALL(text,reg)",
+{ "formula": "REGEXEXTRACTALL('小明的电话号码是 13812345678, 小红的电话号码是13987654321','\\\\d{11}')",
   "parameters": {
     "text": "小明的电话号码是 13812345678, 小红的电话号码是13987654321",
     "reg": "\\d{11}"
@@ -181,7 +206,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "CHAR(65)" }
+{ "formula": "CHAR(34)" }
 
 ### TEXTSPLIT
 POST {{baseUrl}}/formula/engine/execute-formula

@@ -67,4 +67,8 @@ public class DictDataApiImpl implements DictDataApi {
         return success(result);
     }
 
+    @Override
+    public void deleteDictDataByDictOwner(String dictOwnerType, Long dictOwnerId) {
+        dictDataService.deleteDictDataByDictOwner(dictOwnerType, dictOwnerId);
+    }
 }

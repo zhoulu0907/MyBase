@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.system.vo.oauth.OAuth2ClientSaveReqVO;
 import com.cmsr.onebase.module.system.dal.database.OAuth2ClientDataRepository;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.util.oauth2.OAuth2ClientUtils;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
+import java.util.UUID;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -33,14 +35,30 @@ import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 @Validated
 @Slf4j
 public class OAuth2ClientServiceImpl implements OAuth2ClientService {
+    public static final String USER_READ = "user.read";
+    public static final String USER_WRITE = "user.write";
+    public static final String AUTHORIZATION_CODE = "authorization_code";
+    public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String SYSTEM_USER_QUERY = "system:user:query";
     @Resource
     private OAuth2ClientDataRepository oauth2ClientDataRepository;
 
     @Override
     public Long createOAuth2Client(OAuth2ClientSaveReqVO createReqVO) {
-        validateClientIdExists(null, createReqVO.getClientId());
+        // validateClientIdExists(null, createReqVO.getClientId());
         // 插入
         OAuth2ClientDO client = BeanUtils.toBean(createReqVO, OAuth2ClientDO.class);
+
+        client.setClientId(OAuth2ClientUtils.generateClientId());
+        client.setSecret(OAuth2ClientUtils.generateClientSecret());
+        client.setStatus(CommonStatusEnum.ENABLE.getStatus());
+        client.setAccessTokenValiditySeconds(180);
+        client.setRefreshTokenValiditySeconds(8640);
+        client.setAuthorizedGrantTypes(CollUtil.newArrayList(AUTHORIZATION_CODE, REFRESH_TOKEN));
+        client.setScopes(CollUtil.newArrayList(USER_READ,USER_WRITE));
+        client.setAuthorities(CollUtil.newArrayList(SYSTEM_USER_QUERY));
+        client.setAutoApproveScopes(CollUtil.newArrayList(USER_READ,USER_WRITE));
+
         oauth2ClientDataRepository.insert(client);
         return client.getId();
     }
@@ -52,7 +70,7 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
         // 校验存在
         validateOAuth2ClientExists(updateReqVO.getId());
         // 校验 Client 未被占用
-        validateClientIdExists(updateReqVO.getId(), updateReqVO.getClientId());
+        // validateClientIdExists(updateReqVO.getId(), updateReqVO.getClientId());
 
         // 更新
         OAuth2ClientDO updateObj = BeanUtils.toBean(updateReqVO, OAuth2ClientDO.class);
@@ -138,6 +156,8 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
             throw exception(OAUTH2_CLIENT_EXISTS);
         }
     }
+
+
 
     @VisibleForTesting
     void validateOAuth2ClientExists(Long id) {
