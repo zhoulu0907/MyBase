@@ -495,11 +495,11 @@ public class DynamicMetadataRepository {
     public List<Row> selectRelationRowsByParent(String tableName, String relationKey, Object relationValue, boolean filterDeleted, List<SemanticFieldSchemaDTO> fields) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            Object v = toLongIfNotEmpty(relationValue);
-            if (v == null) {
+            // 关系查询的条件字段类型不确定（可能是 bigint 也可能是 varchar），直接使用原始值避免类型不匹配
+            if (relationValue == null || String.valueOf(relationValue).trim().isEmpty()) {
                 return List.of();
             }
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(v));
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(relationValue));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
                 if (hasDraftStatusField(fields)) {
@@ -524,12 +524,11 @@ public class DynamicMetadataRepository {
     public List<Row> selectRelationRowsByCondition(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            // 将 relationValue 转换为 Long 类型，避免字符串与 bigint 类型比较出错
-            Object normalizedValue = toLongIfNotEmpty(relationValue);
-            if (normalizedValue == null) {
+            // 关系查询的条件字段类型不确定（可能是 bigint 也可能是 varchar），直接使用原始值避免类型不匹配
+            if (relationValue == null || String.valueOf(relationValue).trim().isEmpty()) {
                 return List.of();
             }
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(normalizedValue));
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(relationValue));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
             }
