@@ -34,6 +34,8 @@
                     color: #86909C;
                     font-size: 12px;
                     line-height: 20px;
+                    display: flex;
+                    align-items: center;
 
                     .cardOneCompareType {
                         padding: 0 6px;
