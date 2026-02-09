@@ -11,7 +11,7 @@ import type { XPreviewStepsLayoutConfig } from './schema';
 const Step = Steps.Step;
 
 const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMode?: boolean, showFromPageData?: Function; refresh?: number; }) => {
-  const { id, defaultValue = [], type, colCount, labelPlacement, pageType, detailMode, showFromPageData, refresh, showDescription = false } = props;
+  const { id, defaultValue = [], type, colCount, labelPlacement, pageType, detailMode, showFromPageData, refresh, showDescription = false, color } = props;
   useSignals();
 
   const {
@@ -53,7 +53,12 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
   };
 
   return (
-    <div className={`XPreviewStepsLayout ${pageType === EDITOR_TYPES.LIST_EDITOR ? 'listPreviewStepsLayout' : ''}`}>
+    <div 
+      className={`XPreviewStepsLayout ${pageType === EDITOR_TYPES.LIST_EDITOR ? 'listPreviewStepsLayout' : ''}`}
+      style={{
+        '--primary-6': color || undefined
+      } as React.CSSProperties}
+    >
       <div className="stepsContainer">
         <Steps
           current={current}

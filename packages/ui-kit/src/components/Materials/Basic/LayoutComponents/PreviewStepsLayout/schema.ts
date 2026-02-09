@@ -61,6 +61,8 @@ export interface XPreviewStepsLayoutConfig extends ICommonBaseType {
   pageType?: string;
 
   showDescription?: boolean;
+
+  color?: string;
 }
 
 const defaultValue = [
@@ -94,7 +96,9 @@ const XPreviewStepsLayout: XPreviewStepsLayoutSchema = {
     defaultValue,
     type: STEPS_TYPE_OPTIONS.DEFAULT,
     colCount: defaultValue.length,
-    labelPlacement: STEPS_LABEL_PLACEMENT_VALUES[STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL]
+    labelPlacement: STEPS_LABEL_PLACEMENT_VALUES[STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL],
+    showDescription: false,
+    color: ''
   }
 };
 

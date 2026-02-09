@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Steps, Form, Input, Space, Checkbox } from '@arco-design/web-react';
+import { Button, Steps, Form, Input, Checkbox, ColorPicker } from '@arco-design/web-react';
 import { IconArrowLeft, IconSwap, IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
@@ -11,6 +11,29 @@ const FormItem = Form.Item;
 
 type StepsStyleType = 'default' | 'navigation' | 'arrow' | 'dot';
 type StepsLabelPlacementType = 'horizontal' | 'vertical';
+
+function hexToRgb(hex: string): string {
+  if (!hex) return '';
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (result) {
+    return `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}`;
+  }
+  return hex;
+}
+
+function colorToRgbValue(color: string): string {
+  if (!color) return '';
+  if (color.startsWith('#')) {
+    return hexToRgb(color);
+  }
+  if (color.startsWith('rgb')) {
+    const match = color.match(/^rgb\(?\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)?$/);
+    if (match) {
+      return `${match[1]}, ${match[2]}, ${match[3]}`;
+    }
+  }
+  return color;
+}
 
 interface StepsStyleItem {
   key: string;
@@ -300,6 +323,17 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
         className={styles.formItem}
       >
         {renderStepsConfig()}
+      </FormItem>
+      <FormItem layout="vertical" labelAlign="left" label="颜色" className={styles.formItem}>
+        <ColorPicker
+          value={configs.color ? `rgb(${configs.color})` : ''}
+          format="rgb"
+          disabledAlpha
+          onChange={(value) => {
+            const rgbValue = colorToRgbValue(value);
+            handlePropsChange('color', rgbValue);
+          }}
+        />
       </FormItem>
     </div>
   );

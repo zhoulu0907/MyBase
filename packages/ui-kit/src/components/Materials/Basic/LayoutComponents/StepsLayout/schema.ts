@@ -59,6 +59,8 @@ export interface XStepsLayoutConfig extends ICommonBaseType {
   colCount: number;
 
   showDescription?: boolean;
+
+  color?: string;
 }
 
 const defaultValue = [
@@ -92,7 +94,9 @@ const XStepsLayout: XStepsLayoutSchema = {
     defaultValue,
     type: STEPS_TYPE_OPTIONS.DEFAULT,
     colCount: defaultValue.length,
-    labelPlacement: STEPS_LABEL_PLACEMENT_VALUES[STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL]
+    labelPlacement: STEPS_LABEL_PLACEMENT_VALUES[STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL],
+    showDescription: false,
+    color: ''
   }
 };
 
