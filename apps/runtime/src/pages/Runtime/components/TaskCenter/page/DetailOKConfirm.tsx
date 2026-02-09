@@ -51,9 +51,13 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
         entity: entityData,
         targetHandlerId
       };
-      await fetchExecTask(req);
-      onSetPopupVisible(false);
-      onBack();
+      const res = await fetchExecTask(req);
+      console.log('exec task---res--11-', res);
+      if (res) {
+        Message.success(res?.msg || '操作成功');
+        onSetPopupVisible(false);
+        onBack && onBack();
+      }
     } catch (error) {
       console.log('表单验证失败:', error);
     }

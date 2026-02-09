@@ -134,9 +134,13 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
           data: fieldData
         }
       };
-      await fetchExecTask(req);
-      setPredictVisible(false);
-      onBack && onBack();
+      const res = await fetchExecTask(req);
+      console.log('exec task---res--22-', res);
+      if (res) {
+        Message.success(res?.msg || '操作成功');
+        setPredictVisible(false);
+        onBack && onBack();
+      }
     } catch (error) {}
   };
 
