@@ -35,6 +35,23 @@ function colorToRgbValue(color: string): string {
   return color;
 }
 
+function getDefaultThemeColor(): string {
+  const bodyStyle = getComputedStyle(document.body);
+  const primaryColor = bodyStyle.getPropertyValue('--primary-6').trim();
+  if (primaryColor) {
+    return colorToRgbValue(primaryColor);
+  }
+  return '';
+}
+
+function getThemeColorForDisplay(color: string): string {
+  if (!color) {
+    const defaultColor = getDefaultThemeColor();
+    return defaultColor ? `rgb(${defaultColor})` : '';
+  }
+  return `rgb(${color})`;
+}
+
 interface StepsStyleItem {
   key: string;
   label: string;
@@ -326,7 +343,7 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
       </FormItem>
       <FormItem layout="vertical" labelAlign="left" label="颜色" className={styles.formItem}>
         <ColorPicker
-          value={configs.color ? `rgb(${configs.color})` : ''}
+          value={getThemeColorForDisplay(configs.color as string)}
           format="rgb"
           disabledAlpha
           onChange={(value) => {
