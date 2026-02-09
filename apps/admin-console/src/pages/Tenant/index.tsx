@@ -221,7 +221,7 @@ const TenantManagement: React.FC = () => {
 
   const DropList = ({ data }: { data: PlatformTenantInfo }) => {
     return (
-      <Menu>
+      <Menu className={styles.dropMenu}>
         <Menu.Item key="1" onClick={() => nav(`edit?id=${data.id}`)}>
           <IconEdit style={iconStyle} />
           编辑

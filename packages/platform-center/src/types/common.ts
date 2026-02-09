@@ -24,5 +24,6 @@ export enum StatusEnum {
 
 export enum CodeType {
   CORP = 'corp',
-  TENANT = 'tenant'
+  TENANT = 'tenant',
+  THIRD = 'third'
 }

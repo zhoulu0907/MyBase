@@ -45,14 +45,15 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     setOptions(newOptions);
   };
 
-  const renderTag = (options: DictData[]) => {
-    const option = options.find((op) => op.value === fieldValue?.id || op.value === fieldValue);
+  const renderTag = () => {
+    const option = options.find((op) => op.value === fieldValue?.id || op.id === fieldValue?.id || op.value === fieldValue || op.id === fieldValue);
     if(!option?.colorType ){
-      return fieldValue?.name || null 
+      return fieldValue?.name || option?.label; 
     } else {
       return <Tag color={option.colorType}>{option.label}</Tag>
     }
   }
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -79,7 +80,7 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {renderTag(options) || '--'}
+            {renderTag() || '--'}
           </div>
         ) : (
           <RadioGroup
