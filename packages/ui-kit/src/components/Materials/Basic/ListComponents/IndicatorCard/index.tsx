@@ -56,6 +56,39 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
     return 6;
   };
 
+  const renderCardValue = (ele: any, index: number) => {
+    let value = `${data?.[index]?.value || 0}`;
+    // 显示为绝对值
+    if (ele.absoluteValue) {
+      value = `${Math.abs(Number(value))}`;
+    }
+    // 保留小数点
+    if (ele.precisionLimit) {
+      value = Number(value).toFixed(ele.precision || 0);
+    }
+    // 使用千分位分隔符
+    if (ele.thousandsSeparator) {
+      const decimalIndex = value.indexOf('.');
+      if (decimalIndex !== -1) {
+        const decimalNum = value.slice(decimalIndex);
+        const intNum = value.slice(0, decimalIndex);
+        const intValue = intNum.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        value = `${intValue}${decimalNum}`;
+      } else {
+        value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      }
+    }
+    // 显示为百分比
+    if (ele.percent) {
+      value = `${value}%`;
+    }
+    // 显示单位
+    if (ele.unitLimit) {
+      value = `${value}${ele.unit}`;
+    }
+    return value;
+  };
+
   return (
     <div
       style={{
@@ -64,23 +97,23 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
       }}
       className="indicatorCard"
     >
-      {label.display && <Typography.Ellipsis showTooltip={true}>{label.text}</Typography.Ellipsis>}
+      {label.display && (
+        <Typography.Ellipsis showTooltip={true} style={{ marginBottom: '12px' }}>
+          {label.text}
+        </Typography.Ellipsis>
+      )}
 
       {styleType === INDICATOR_CARD_STYLE_TYPE.ONE && (
-        <Grid.Row className="cardOne">
+        <Grid.Row>
           {indicatorList?.map((ele: any, index) => (
             <Grid.Col key={index} span={getSpan(ele.width)}>
               <div className="cardOneItem">
                 <div className="cardOneContent">
                   {ele.label?.display && <div className="cardOneTitle">{ele.label.text}</div>}
-                  <div className="cardOneValue">
-                    {ele.thousandsSeparator
-                      ? `${data?.[index]?.value || 0}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-                      : `${data?.[index]?.value || 0}`}
-                  </div>
+                  <div className="cardOneValue">{renderCardValue(ele, index)}</div>
                   {ele.compareLimit && (
                     <div className="cardOneCompare">
-                      <span>同比</span>
+                      <span>{ele.compareDescribe || '同比'}</span>
                       {data?.[index]?.type === 'rise' ? (
                         <span className="cardOneCompareType" style={{ color: 'red' }}>
                           {data?.[index]?.comparePercent || '0%'}
@@ -95,25 +128,27 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
                     </div>
                   )}
 
-                  <div
-                    className="cardOneIcon"
-                    style={{ backgroundColor: ele.backgroundColor || 'rgba(var(--primary-6),0.1)' }}
-                  >
-                    <ReactSVG
-                      style={{ height: '18px' }}
-                      src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
-                      beforeInjection={(svg) => {
-                        const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
-                        svg.querySelectorAll('*').forEach((el) => {
-                          if (el.getAttribute('fill') === 'black') {
-                            el.setAttribute('fill', fillColor);
-                          }
-                        });
-                        svg.setAttribute('width', '18px');
-                        svg.setAttribute('height', '18px');
-                      }}
-                    />
-                  </div>
+                  {ele.icon?.display && (
+                    <div
+                      className="cardOneIcon"
+                      style={{ backgroundColor: ele.backgroundColor || 'rgba(var(--primary-6),0.1)' }}
+                    >
+                      <ReactSVG
+                        style={{ height: '18px' }}
+                        src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                        beforeInjection={(svg) => {
+                          const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
+                          svg.querySelectorAll('*').forEach((el) => {
+                            if (el.getAttribute('fill') === 'black') {
+                              el.setAttribute('fill', fillColor);
+                            }
+                          });
+                          svg.setAttribute('width', '18px');
+                          svg.setAttribute('height', '18px');
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
                 {index < indicatorList.length - 1 && <Divider className="cardOneDivider" type="vertical" />}
               </div>
@@ -123,33 +158,184 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
       )}
 
       {styleType === INDICATOR_CARD_STYLE_TYPE.TWO && (
-        <Grid.Row className="cardTwo">
+        <Grid.Row>
           {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}></Grid.Col>
+            <Grid.Col key={index} span={getSpan(ele.width)}>
+              <div className="cardTwoItem">
+                <div className="cardTwoContent">
+                  {ele.icon?.display && (
+                    <div
+                      className="cardTwoIcon"
+                      style={{ backgroundColor: ele.icon?.color || 'rgb(var(--primary-6))' }}
+                    >
+                      <ReactSVG
+                        style={{ height: '24px' }}
+                        src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                        beforeInjection={(svg) => {
+                          const fillColor = '#ffffff';
+                          svg.querySelectorAll('*').forEach((el) => {
+                            if (el.getAttribute('fill') === 'black') {
+                              el.setAttribute('fill', fillColor);
+                            }
+                          });
+                          svg.setAttribute('width', '24px');
+                          svg.setAttribute('height', '24px');
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div style={{ flex: '1', overflow: 'hidden' }}>
+                    {ele.label?.display && <div className="cardTwoTitle">{ele.label.text}</div>}
+                    <div className="cardTwoValue">{renderCardValue(ele, index)}</div>
+                    {ele.compareLimit && (
+                      <div className="cardTwoCompare">
+                        <span>{ele.compareDescribe || '同比'}</span>
+                        {data?.[index]?.type === 'rise' ? (
+                          <span className="cardTwoCompareType" style={{ color: 'red' }}>
+                            {data?.[index]?.comparePercent || '0%'}
+                            <img src={riseSvg01} alt="" />
+                          </span>
+                        ) : (
+                          <span className="cardTwoCompareType" style={{ color: '#00B42A' }}>
+                            {data?.[index]?.comparePercent || '0%'}
+                            <img src={declineSvg01} alt="" />
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {index < indicatorList.length - 1 && <Divider className="cardTwoDivider" type="vertical" />}
+              </div>
+            </Grid.Col>
           ))}
         </Grid.Row>
       )}
 
       {styleType === INDICATOR_CARD_STYLE_TYPE.THREE && (
-        <Grid.Row className="cardThree">
+        <Grid.Row gutter={20}>
           {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}></Grid.Col>
+            <Grid.Col key={index} span={getSpan(ele.width)}>
+              <div
+                className="cardThreeItem"
+                style={{ backgroundColor: ele.backgroundColor || 'rgba(var(--primary-6), 0.1)' }}
+              >
+                <div className="cardThreeContent">
+                  {ele.label?.display && <div className="cardThreeTitle">{ele.label.text}</div>}
+                  <div className="cardThreeValue">{renderCardValue(ele, index)}</div>
+                  {ele.compareLimit && (
+                    <div className="cardThreeCompare">
+                      <span>{ele.compareDescribe || '同比'}</span>
+                      {data?.[index]?.type === 'rise' ? (
+                        <span className="cardThreeCompareType" style={{ color: 'red' }}>
+                          {data?.[index]?.comparePercent || '0%'}
+                          <img src={riseSvg01} alt="" />
+                        </span>
+                      ) : (
+                        <span className="cardThreeCompareType" style={{ color: '#00B42A' }}>
+                          {data?.[index]?.comparePercent || '0%'}
+                          <img src={declineSvg01} alt="" />
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {ele.icon?.display && (
+                  <div className="cardThreeIcon">
+                    <ReactSVG
+                      style={{ height: '42px' }}
+                      src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                      beforeInjection={(svg) => {
+                        const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
+                        svg.querySelectorAll('*').forEach((el) => {
+                          if (el.getAttribute('fill') === 'black') {
+                            el.setAttribute('fill', fillColor);
+                          }
+                        });
+                        svg.setAttribute('width', '42px');
+                        svg.setAttribute('height', '42px');
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </Grid.Col>
           ))}
         </Grid.Row>
       )}
 
       {styleType === INDICATOR_CARD_STYLE_TYPE.FOUR && (
-        <Grid.Row className="cardFour">
+        <Grid.Row>
           {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}></Grid.Col>
+            <Grid.Col key={index} span={getSpan(ele.width)}>
+              <div className="cardFourItem">
+                <div className="cardFourContent">
+                  <Grid.Row align="center">
+                    <Grid.Col span={16}>
+                      <div className="cardFourValue">{renderCardValue(ele, index)}</div>
+                      {ele.label?.display && <div className="cardFourTitle">{ele.label.text}</div>}
+                    </Grid.Col>
+                    {ele.compareLimit && (
+                      <Grid.Col span={8}>
+                        {data?.[index]?.type === 'rise' ? (
+                          <div className="cardFourCompareType" style={{ color: 'red' }}>
+                            <img src={riseSvg02} alt="" />
+                            {data?.[index]?.comparePercent || '0%'}
+                          </div>
+                        ) : (
+                          <div className="cardFourCompareType" style={{ color: '#00B42A' }}>
+                            <img src={declineSvg02} alt="" />
+                            {data?.[index]?.comparePercent || '0%'}
+                          </div>
+                        )}
+                        <div className="cardFourCompare">{ele.compareDescribe || '同比'}</div>
+                      </Grid.Col>
+                    )}
+                  </Grid.Row>
+                </div>
+
+                {index < indicatorList.length - 1 && <Divider className="cardFourDivider" type="vertical" />}
+              </div>
+            </Grid.Col>
           ))}
         </Grid.Row>
       )}
 
       {styleType === INDICATOR_CARD_STYLE_TYPE.FIVE && (
-        <Grid.Row className="cardFive">
+        <Grid.Row>
           {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)} className="card"></Grid.Col>
+            <Grid.Col key={index} span={getSpan(ele.width)}>
+              <div className="cardFiveItem">
+                <div className="cardFiveContent">
+                  <div className="cardFiveLeft">
+                    {ele.label?.display && <div className="cardFiveTitle">{ele.label.text}</div>}
+                    <div className="cardFiveValue">{renderCardValue(ele, index)}</div>
+                    {ele.compareLimit && (
+                      <div className="cardFiveompare">
+                        <span>{ele.compareDescribe || '同比'}</span>
+                        {data?.[index]?.type === 'rise' ? (
+                          <span className="cardFiveCompareType" style={{ color: 'red' }}>
+                            {data?.[index]?.comparePercent || '0%'}
+                            <img src={riseSvg01} alt="" />
+                          </span>
+                        ) : (
+                          <span className="cardFiveCompareType" style={{ color: '#00B42A' }}>
+                            {data?.[index]?.comparePercent || '0%'}
+                            <img src={declineSvg01} alt="" />
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {data?.[index]?.type === 'rise' ? (
+                    <img className="cardFiveImg" src={riseSvg03} alt="" />
+                  ) : (
+                    <img className="cardFiveImg" src={declineSvg03} alt="" />
+                  )}
+                </div>
+                {index < indicatorList.length - 1 && <Divider className="cardFiveDivider" type="vertical" />}
+              </div>
+            </Grid.Col>
           ))}
         </Grid.Row>
       )}

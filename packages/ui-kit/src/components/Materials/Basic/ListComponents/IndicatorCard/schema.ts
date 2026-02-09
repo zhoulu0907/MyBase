@@ -165,7 +165,7 @@ const XIndicatorCard: XIndicatorCardSchema = {
         thousandsSeparator: false,
         absoluteValue: false,
         // 图标样式
-        icon: { display: false, name: '', color: '#19bbff' },
+        icon: { display: true, name: '', color: '#19bbff' },
         // 背景颜色
         backgroundColor: '#FFFFFF',
         // 同环比
@@ -206,7 +206,7 @@ const XIndicatorCard: XIndicatorCardSchema = {
         thousandsSeparator: false,
         absoluteValue: false,
         // 图标样式
-        icon: { display: false, name: '', color: '#19bbff' },
+        icon: { display: true, name: '', color: '#19bbff' },
         // 背景颜色
         backgroundColor: '#FFFFFF',
         // 同环比
@@ -247,7 +247,7 @@ const XIndicatorCard: XIndicatorCardSchema = {
         thousandsSeparator: false,
         absoluteValue: false,
         // 图标样式
-        icon: { display: false, name: '', color: '#19bbff' },
+        icon: { display: true, name: '', color: '#19bbff' },
         // 背景颜色
         backgroundColor: '#FFFFFF',
         // 同环比
@@ -288,7 +288,7 @@ const XIndicatorCard: XIndicatorCardSchema = {
         thousandsSeparator: false,
         absoluteValue: false,
         // 图标样式
-        icon: { display: false, name: '', color: '#19bbff' },
+        icon: { display: true, name: '', color: '#19bbff' },
         // 背景颜色
         backgroundColor: '#FFFFFF',
         // 同环比
