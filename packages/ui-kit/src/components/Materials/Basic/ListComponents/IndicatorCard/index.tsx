@@ -89,85 +89,85 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
     return value;
   };
 
-  return (
-    <div
-      style={{
-        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
-        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'block'
-      }}
-      className="indicatorCard"
-    >
-      {label.display && (
-        <Typography.Ellipsis showTooltip={true} style={{ marginBottom: '12px' }}>
-          {label.text}
-        </Typography.Ellipsis>
-      )}
+  const renderCard = () => {
+    switch (styleType) {
+      case INDICATOR_CARD_STYLE_TYPE.ONE: {
+        return (
+          <Grid.Row>
+            {indicatorList?.map((ele: any, index) => (
+              <Grid.Col key={index} span={getSpan(ele.width)}>
+                <div className="card">
+                  <div className="cardContent" style={{ paddingRight: '26px', paddingTop: '20px' }}>
+                    <div className="cardMain">
+                      {ele.label?.display && (
+                        <Typography.Ellipsis
+                          showTooltip={true}
+                          className="cardTitle"
+                          style={{ width: 'calc(100% - 32px)' }}
+                        >
+                          {ele.label.text}
+                        </Typography.Ellipsis>
+                      )}
 
-      {styleType === INDICATOR_CARD_STYLE_TYPE.ONE && (
-        <Grid.Row>
-          {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}>
-              <div className="cardOneItem">
-                <div className="cardOneContent">
-                  {ele.label?.display && <div className="cardOneTitle">{ele.label.text}</div>}
-                  <div className="cardOneValue">{renderCardValue(ele, index)}</div>
-                  {ele.compareLimit && (
-                    <div className="cardOneCompare">
-                      <span>{ele.compareDescribe || '同比'}</span>
-                      {data?.[index]?.type === 'rise' ? (
-                        <span className="cardOneCompareType" style={{ color: 'red' }}>
-                          {data?.[index]?.comparePercent || '0%'}
-                          <img src={riseSvg01} alt="" />
-                        </span>
-                      ) : (
-                        <span className="cardOneCompareType" style={{ color: '#00B42A' }}>
-                          {data?.[index]?.comparePercent || '0%'}
-                          <img src={declineSvg01} alt="" />
-                        </span>
+                      <Typography.Ellipsis showTooltip={true} className="cardValue">
+                        {renderCardValue(ele, index)}
+                      </Typography.Ellipsis>
+
+                      {ele.compareLimit && (
+                        <div className="cardCompare">
+                          <span>{ele.compareDescribe || '同比'}</span>
+                          <span
+                            className="cardCompareValue"
+                            style={{ color: data?.[index]?.type === 'rise' ? 'red' : '#00B42A' }}
+                          >
+                            {data?.[index]?.comparePercent || '0%'}
+                          </span>
+                          <img
+                            className="cardCompareImg"
+                            src={data?.[index]?.type === 'rise' ? riseSvg01 : declineSvg01}
+                            alt=""
+                          />
+                        </div>
                       )}
                     </div>
-                  )}
 
-                  {ele.icon?.display && (
-                    <div
-                      className="cardOneIcon"
-                      style={{ backgroundColor: ele.backgroundColor || 'rgba(var(--primary-6),0.1)' }}
-                    >
-                      <ReactSVG
-                        style={{ height: '18px' }}
-                        src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
-                        beforeInjection={(svg) => {
-                          const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
-                          svg.querySelectorAll('*').forEach((el) => {
-                            if (el.getAttribute('fill') === 'black') {
-                              el.setAttribute('fill', fillColor);
-                            }
-                          });
-                          svg.setAttribute('width', '18px');
-                          svg.setAttribute('height', '18px');
-                        }}
-                      />
-                    </div>
-                  )}
+                    {ele.icon?.display && (
+                      <div
+                        className="cardIcon1"
+                        style={{ backgroundColor: ele.backgroundColor || 'rgba(var(--primary-6),0.1)' }}
+                      >
+                        <ReactSVG
+                          style={{ height: '18px' }}
+                          src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                          beforeInjection={(svg) => {
+                            const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
+                            svg.querySelectorAll('*').forEach((el) => {
+                              if (el.getAttribute('fill') === 'black') {
+                                el.setAttribute('fill', fillColor);
+                              }
+                            });
+                            svg.setAttribute('width', '18px');
+                            svg.setAttribute('height', '18px');
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {index < indicatorList.length - 1 && <Divider className="cardDivider" type="vertical" />}
                 </div>
-                {index < indicatorList.length - 1 && <Divider className="cardOneDivider" type="vertical" />}
-              </div>
-            </Grid.Col>
-          ))}
-        </Grid.Row>
-      )}
-
-      {styleType === INDICATOR_CARD_STYLE_TYPE.TWO && (
-        <Grid.Row>
-          {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}>
-              <div className="cardTwoItem">
-                <div className="cardTwoContent">
-                  {ele.icon?.display && (
-                    <div
-                      className="cardTwoIcon"
-                      style={{ backgroundColor: ele.icon?.color || 'rgb(var(--primary-6))' }}
-                    >
+              </Grid.Col>
+            ))}
+          </Grid.Row>
+        );
+      }
+      case INDICATOR_CARD_STYLE_TYPE.TWO: {
+        return (
+          <Grid.Row>
+            {indicatorList?.map((ele: any, index) => (
+              <Grid.Col key={index} span={getSpan(ele.width)}>
+                <div className="card">
+                  <div className="cardContent">
+                    <div className="cardIcon2" style={{ backgroundColor: ele.icon?.color || 'rgb(var(--primary-6))' }}>
                       <ReactSVG
                         style={{ height: '24px' }}
                         src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
@@ -183,162 +183,215 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
                         }}
                       />
                     </div>
-                  )}
-                  <div style={{ flex: '1', overflow: 'hidden' }}>
-                    {ele.label?.display && <div className="cardTwoTitle">{ele.label.text}</div>}
-                    <div className="cardTwoValue">{renderCardValue(ele, index)}</div>
-                    {ele.compareLimit && (
-                      <div className="cardTwoCompare">
-                        <span>{ele.compareDescribe || '同比'}</span>
-                        {data?.[index]?.type === 'rise' ? (
-                          <span className="cardTwoCompareType" style={{ color: 'red' }}>
-                            {data?.[index]?.comparePercent || '0%'}
-                            <img src={riseSvg01} alt="" />
-                          </span>
-                        ) : (
-                          <span className="cardTwoCompareType" style={{ color: '#00B42A' }}>
-                            {data?.[index]?.comparePercent || '0%'}
-                            <img src={declineSvg01} alt="" />
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {index < indicatorList.length - 1 && <Divider className="cardTwoDivider" type="vertical" />}
-              </div>
-            </Grid.Col>
-          ))}
-        </Grid.Row>
-      )}
+                    <div className="cardMain">
+                      {ele.label?.display && (
+                        <Typography.Ellipsis showTooltip={true} className="cardTitle">
+                          {ele.label.text}
+                        </Typography.Ellipsis>
+                      )}
 
-      {styleType === INDICATOR_CARD_STYLE_TYPE.THREE && (
-        <Grid.Row gutter={20}>
-          {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}>
-              <div
-                className="cardThreeItem"
-                style={{ backgroundColor: ele.backgroundColor || 'rgba(var(--primary-6), 0.1)' }}
-              >
-                <div className="cardThreeContent">
-                  {ele.label?.display && <div className="cardThreeTitle">{ele.label.text}</div>}
-                  <div className="cardThreeValue">{renderCardValue(ele, index)}</div>
-                  {ele.compareLimit && (
-                    <div className="cardThreeCompare">
-                      <span>{ele.compareDescribe || '同比'}</span>
-                      {data?.[index]?.type === 'rise' ? (
-                        <span className="cardThreeCompareType" style={{ color: 'red' }}>
-                          {data?.[index]?.comparePercent || '0%'}
-                          <img src={riseSvg01} alt="" />
-                        </span>
-                      ) : (
-                        <span className="cardThreeCompareType" style={{ color: '#00B42A' }}>
-                          {data?.[index]?.comparePercent || '0%'}
-                          <img src={declineSvg01} alt="" />
-                        </span>
+                      <Typography.Ellipsis showTooltip={true} className="cardValue">
+                        {renderCardValue(ele, index)}
+                      </Typography.Ellipsis>
+
+                      {ele.compareLimit && (
+                        <div className="cardCompare">
+                          <span>{ele.compareDescribe || '同比'}</span>
+                          <span
+                            className="cardCompareValue"
+                            style={{ color: data?.[index]?.type === 'rise' ? 'red' : '#00B42A' }}
+                          >
+                            {data?.[index]?.comparePercent || '0%'}
+                          </span>
+                          <img
+                            className="cardCompareImg"
+                            src={data?.[index]?.type === 'rise' ? riseSvg01 : declineSvg01}
+                            alt=""
+                          />
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-                {ele.icon?.display && (
-                  <div className="cardThreeIcon">
-                    <ReactSVG
-                      style={{ height: '42px' }}
-                      src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
-                      beforeInjection={(svg) => {
-                        const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
-                        svg.querySelectorAll('*').forEach((el) => {
-                          if (el.getAttribute('fill') === 'black') {
-                            el.setAttribute('fill', fillColor);
-                          }
-                        });
-                        svg.setAttribute('width', '42px');
-                        svg.setAttribute('height', '42px');
-                      }}
-                    />
                   </div>
-                )}
-              </div>
-            </Grid.Col>
-          ))}
-        </Grid.Row>
-      )}
-
-      {styleType === INDICATOR_CARD_STYLE_TYPE.FOUR && (
-        <Grid.Row>
-          {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}>
-              <div className="cardFourItem">
-                <div className="cardFourContent">
-                  <Grid.Row align="center">
-                    <Grid.Col span={16}>
-                      <div className="cardFourValue">{renderCardValue(ele, index)}</div>
-                      {ele.label?.display && <div className="cardFourTitle">{ele.label.text}</div>}
-                    </Grid.Col>
-                    {ele.compareLimit && (
-                      <Grid.Col span={8}>
-                        {data?.[index]?.type === 'rise' ? (
-                          <div className="cardFourCompareType" style={{ color: 'red' }}>
-                            <img src={riseSvg02} alt="" />
-                            {data?.[index]?.comparePercent || '0%'}
-                          </div>
-                        ) : (
-                          <div className="cardFourCompareType" style={{ color: '#00B42A' }}>
-                            <img src={declineSvg02} alt="" />
-                            {data?.[index]?.comparePercent || '0%'}
-                          </div>
-                        )}
-                        <div className="cardFourCompare">{ele.compareDescribe || '同比'}</div>
-                      </Grid.Col>
-                    )}
-                  </Grid.Row>
+                  {index < indicatorList.length - 1 && <Divider className="cardDivider" type="vertical" />}
                 </div>
+              </Grid.Col>
+            ))}
+          </Grid.Row>
+        );
+      }
+      case INDICATOR_CARD_STYLE_TYPE.THREE: {
+        return (
+          <Grid.Row gutter={20}>
+            {indicatorList?.map((ele: any, index) => (
+              <Grid.Col key={index} span={getSpan(ele.width)}>
+                <div className="card" style={{ backgroundColor: ele.backgroundColor || 'rgba(var(--primary-6),0.1)' }}>
+                  <div className="cardContent">
+                    <div className="cardMain">
+                      {ele.label?.display && (
+                        <Typography.Ellipsis showTooltip={true} className="cardTitle">
+                          {ele.label.text}
+                        </Typography.Ellipsis>
+                      )}
 
-                {index < indicatorList.length - 1 && <Divider className="cardFourDivider" type="vertical" />}
-              </div>
-            </Grid.Col>
-          ))}
-        </Grid.Row>
-      )}
+                      <Typography.Ellipsis
+                        showTooltip={true}
+                        className="cardValue"
+                        style={{ width: 'calc(100% - 50px)' }}
+                      >
+                        {renderCardValue(ele, index)}
+                      </Typography.Ellipsis>
 
-      {styleType === INDICATOR_CARD_STYLE_TYPE.FIVE && (
-        <Grid.Row>
-          {indicatorList?.map((ele: any, index) => (
-            <Grid.Col key={index} span={getSpan(ele.width)}>
-              <div className="cardFiveItem">
-                <div className="cardFiveContent">
-                  <div className="cardFiveLeft">
-                    {ele.label?.display && <div className="cardFiveTitle">{ele.label.text}</div>}
-                    <div className="cardFiveValue">{renderCardValue(ele, index)}</div>
+                      {ele.compareLimit && (
+                        <div className="cardCompare">
+                          <span>{ele.compareDescribe || '同比'}</span>
+                          <span
+                            className="cardCompareValue"
+                            style={{ color: data?.[index]?.type === 'rise' ? 'red' : '#00B42A' }}
+                          >
+                            {data?.[index]?.comparePercent || '0%'}
+                          </span>
+                          <img
+                            className="cardCompareImg"
+                            src={data?.[index]?.type === 'rise' ? riseSvg01 : declineSvg01}
+                            alt=""
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div className="cardIcon3">
+                      <ReactSVG
+                        style={{ height: '42px' }}
+                        src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                        beforeInjection={(svg) => {
+                          const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
+                          svg.querySelectorAll('*').forEach((el) => {
+                            if (el.getAttribute('fill') === 'black') {
+                              el.setAttribute('fill', fillColor);
+                            }
+                          });
+                          svg.setAttribute('width', '42px');
+                          svg.setAttribute('height', '42px');
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Grid.Col>
+            ))}
+          </Grid.Row>
+        );
+      }
+      case INDICATOR_CARD_STYLE_TYPE.FOUR: {
+        return (
+          <Grid.Row>
+            {indicatorList?.map((ele: any, index) => (
+              <Grid.Col key={index} span={getSpan(ele.width)}>
+                <div className="card">
+                  <div className="cardContent">
+                    <div className="cardMain">
+                      {ele.label?.display && (
+                        <Typography.Ellipsis showTooltip={true} className="cardTitle">
+                          {ele.label.text}
+                        </Typography.Ellipsis>
+                      )}
+
+                      <Typography.Ellipsis showTooltip={true} className="cardValue">
+                        {renderCardValue(ele, index)}
+                      </Typography.Ellipsis>
+                    </div>
                     {ele.compareLimit && (
-                      <div className="cardFiveompare">
-                        <span>{ele.compareDescribe || '同比'}</span>
-                        {data?.[index]?.type === 'rise' ? (
-                          <span className="cardFiveCompareType" style={{ color: 'red' }}>
-                            {data?.[index]?.comparePercent || '0%'}
-                            <img src={riseSvg01} alt="" />
-                          </span>
-                        ) : (
-                          <span className="cardFiveCompareType" style={{ color: '#00B42A' }}>
-                            {data?.[index]?.comparePercent || '0%'}
-                            <img src={declineSvg01} alt="" />
-                          </span>
-                        )}
+                      <div className="cardRight">
+                        <div
+                          className="cardCompareValue4"
+                          style={{ color: data?.[index]?.type === 'rise' ? 'red' : '#00B42A' }}
+                        >
+                          <img
+                            className="cardCompareImg4"
+                            src={data?.[index]?.type === 'rise' ? riseSvg02 : declineSvg02}
+                            alt=""
+                          />
+                          <span>{data?.[index]?.comparePercent || '0%'}</span>
+                        </div>
+                        <div className="cardCompare4">{ele.compareDescribe || '同比'}</div>
                       </div>
                     )}
                   </div>
-                  {data?.[index]?.type === 'rise' ? (
-                    <img className="cardFiveImg" src={riseSvg03} alt="" />
-                  ) : (
-                    <img className="cardFiveImg" src={declineSvg03} alt="" />
-                  )}
+                  {index < indicatorList.length - 1 && <Divider className="cardDivider" type="vertical" />}
                 </div>
-                {index < indicatorList.length - 1 && <Divider className="cardFiveDivider" type="vertical" />}
-              </div>
-            </Grid.Col>
-          ))}
-        </Grid.Row>
+              </Grid.Col>
+            ))}
+          </Grid.Row>
+        );
+      }
+      case INDICATOR_CARD_STYLE_TYPE.FIVE: {
+        return (
+          <Grid.Row>
+            {indicatorList?.map((ele: any, index) => (
+              <Grid.Col key={index} span={getSpan(ele.width)}>
+                <div className="card">
+                  <div className="cardContent" style={{ paddingRight: '26px' }}>
+                    <div className="cardMain">
+                      {ele.label?.display && (
+                        <Typography.Ellipsis showTooltip={true} className="cardTitle">
+                          {ele.label.text}
+                        </Typography.Ellipsis>
+                      )}
+
+                      <Typography.Ellipsis showTooltip={true} className="cardValue">
+                        {renderCardValue(ele, index)}
+                      </Typography.Ellipsis>
+
+                      {ele.compareLimit && (
+                        <div className="cardCompare">
+                          <span>{ele.compareDescribe || '同比'}</span>
+                          <span
+                            className="cardCompareValue"
+                            style={{ color: data?.[index]?.type === 'rise' ? 'red' : '#00B42A' }}
+                          >
+                            {data?.[index]?.comparePercent || '0%'}
+                          </span>
+                          <img
+                            className="cardCompareImg"
+                            src={data?.[index]?.type === 'rise' ? riseSvg01 : declineSvg01}
+                            alt=""
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <img
+                      className="cardCompareImg5"
+                      src={data?.[index]?.type === 'rise' ? riseSvg03 : declineSvg03}
+                      alt=""
+                    />
+                  </div>
+                  {index < indicatorList.length - 1 && <Divider className="cardDivider" type="vertical" />}
+                </div>
+              </Grid.Col>
+            ))}
+          </Grid.Row>
+        );
+      }
+      default: {
+        return <></>;
+      }
+    }
+  };
+
+  return (
+    <div
+      style={{
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'block'
+      }}
+      className="indicatorCard"
+    >
+      {label.display && (
+        <Typography.Ellipsis showTooltip={true} style={{ marginBottom: '12px' }}>
+          {label.text}
+        </Typography.Ellipsis>
       )}
+
+      {renderCard()}
     </div>
   );
 });
