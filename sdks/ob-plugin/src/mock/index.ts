@@ -1,4 +1,5 @@
 import { type HostSDK, type Context, type UIAPI, type Entity, type Field } from '../sdk/types';
+import { createRequest, enrichRequest } from '../sdk/context/request';
 // 使用 context.events 进行监听，避免不同包实例导致事件总线不一致
 import { CONFIG_TYPES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../sdk/utils/constants';
 
@@ -51,9 +52,15 @@ export function createMockHostSDK(
     }
   } catch {}
 
+  // 补全请求方法
+  const baseRequest = context.request || createRequest();
+  const requestAPI = enrichRequest(baseRequest.request);
+  finalContext.request = requestAPI;
+
   return {
     context: finalContext,
-    ui: options?.ui ?? defaultUI
+    ui: options?.ui ?? defaultUI,
+    ...requestAPI
   };
 }
 

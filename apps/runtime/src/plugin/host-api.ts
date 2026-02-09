@@ -1,6 +1,7 @@
 import * as Arco from '@arco-design/web-react';
 import { pluginEmitter } from '@ob/plugin/sdk';
 import { getFieldOptionsConfig, useAppEntityStore } from '@onebase/ui-kit';
+import { createClient, getRuntimeBackendURL } from '@onebase/common';
 import { pluginBridge } from './bridge';
 
 /**
@@ -58,6 +59,33 @@ export class PluginHostAPI {
       entity: this.buildEntityAPI(),
       ui: this.buildUIAPI(),
       router: this.buildRouterAPI(), // 新增能力示例：路由
+      request: this.buildRequestAPI(),
+    };
+  }
+
+  private buildRequestAPI() {
+    // 使用 Runtime API 作为基础，空前缀确保插件可以自由控制完整路径
+    // 如果插件请求 /runtime/plugin/xxx，则完整 URL 为 <runtime-backend>/runtime/plugin/xxx
+    const httpClient = createClient('', getRuntimeBackendURL());
+
+    const request = async (config: any) => {
+      const { data, headers = {} } = config;
+      // 兼容处理：如果是 FormData/File/Blob，确保不强制使用 application/json
+      if (data instanceof FormData || data instanceof Blob || (typeof File !== 'undefined' && data instanceof File)) {
+        // 显式设置为 undefined，让 Axios/Browser 自动处理（如 FormData 需要自动生成 boundary）
+        Object.assign(headers, { 'Content-Type': undefined });
+      }
+      
+      const res = await httpClient.instance.request({
+        ...config,
+        headers
+      });
+      return res.data;
+    };
+
+    // 适配 RequestAPI 接口
+    return {
+      request
     };
   }
 

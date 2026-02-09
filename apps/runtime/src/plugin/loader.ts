@@ -28,7 +28,7 @@ export async function initPlugins() {
     const hostAPI = PluginHostAPI.getInstance();
     const context = hostAPI.buildContext();
 
-    const sdk = createHostSDK(context as any, { ui: context.ui } as any);
+    const sdk = createHostSDK(context as any, { ui: context.ui, request: context.request } as any);
     (window as any).__OB_PLUGIN_SDK = sdk;
     (window as any).__OB_PLUGIN_EMITTER = pluginEmitter;
     const pm = new PluginManager(context as any);

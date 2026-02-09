@@ -3,7 +3,7 @@ import '@icon-park/react/styles/index.css';
 import { NotFoundPage, TokenManager } from '@onebase/common';
 import { useEffect } from 'react';
 import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch } from 'react-router-dom';
-// import { initPlugins } from './plugin';
+import { initPlugins } from './plugin';
 import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
@@ -40,6 +40,7 @@ function AppContent() {
   useEffect(() => {
     if (tenantId) {
       TokenManager.setCurIdentifyId(tenantId);
+      // initPlugins(); // 已在 main.tsx 中提前初始化
     }
   }, [tenantId, location.pathname]);
 

@@ -32,17 +32,29 @@ export interface EventsAPI {
 }
 
 export interface RequestAPI {
-  get: (url: string, init?: RequestInit) => Promise<Response>
-  post: (url: string, body?: any, init?: RequestInit) => Promise<Response>
+  get: (url: string, config?: any) => Promise<any>
+  post: (url: string, data?: any, config?: any) => Promise<any>
+  put: (url: string, data?: any, config?: any) => Promise<any>
+  delete: (url: string, config?: any) => Promise<any>
+  request: (config: any) => Promise<any>
 }
 
 export interface Context {
   terminal: Terminal
   entity: EntityAPI
   events?: EventsAPI
-  request?: RequestAPI
+  request?: { request: (config: any) => Promise<any> }
 }
 
 export interface ErrorReportOptions { scope?: string }
 export interface UIAPI { reportError(error: unknown, options?: ErrorReportOptions): void }
-export interface HostSDK { context: Context; ui: UIAPI }
+export interface HostSDK {
+  context: Context
+  ui: UIAPI
+  // Request methods exposed on root
+  get: RequestAPI['get']
+  post: RequestAPI['post']
+  put: RequestAPI['put']
+  delete: RequestAPI['delete']
+  request: RequestAPI['request']
+}
