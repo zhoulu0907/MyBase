@@ -12,7 +12,7 @@ interface AppImportModalProps {
   onClose: () => void;
   onComplete: () => void;
   // 应用信息
-  appInfo: Application;
+  appInfo?: Application;
 }
 
 // 应用导入/导入更新更新弹窗
@@ -59,7 +59,9 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
   const handleUpload = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('applicationId', appInfo.id);
+    if(appInfo?.id){
+      formData.append('applicationId', appInfo?.id);
+    }
     const res = await importAppVersion(formData);
     return res;
   };

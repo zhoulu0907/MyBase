@@ -55,6 +55,62 @@
       flex-direction: column;
     }
 
+    .appCreate {
+      margin-bottom: 16px;
+      .aiCreate {
+        height: 120px;
+        border-radius: 8px;
+        background-position: 100% 100%;
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        box-sizing: border-box;
+        padding: 26px 20px;
+        cursor: pointer;
+        .aiCreateTitle {
+          font-weight: 700;
+          font-size: 22px;
+          line-height: 26px;
+          color: #272e3b;
+        }
+        .aiCreateDesc {
+          padding-top: 8px;
+          width: 150px;
+          color: #547781;
+          font-size: 12px;
+          line-height: 17px;
+        }
+      }
+      .otherCreate {
+        height: 120px;
+        border-radius: 8px;
+        border: 1px solid #eaeeef;
+        box-sizing: border-box;
+        cursor: pointer;
+        padding: 26px 12px 26px 16px;
+        display: flex;
+        .otherCreateContent {
+          flex: 1;
+          overflow: hidden;
+          .otherCreateTitle {
+            color: #24515d;
+            font-weight: 500;
+            font-size: 18px;
+            line-height: 32px;
+          }
+          .otherCreateDesc {
+            width: 132px;
+            color: #7c979e;
+            font-size: 12px;
+            line-height: 17px;
+          }
+        }
+        .otherCreateImg {
+          width: 60px;
+          height: 60px;
+        }
+      }
+    }
+
     .appFilter {
       height: @appFilterHeight;
       display: flex;
