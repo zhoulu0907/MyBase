@@ -57,6 +57,8 @@ export interface XStepsLayoutConfig extends ICommonBaseType {
   labelPlacement?: TSelectDefaultType<TStepsLabelPlacementSelectKeyType>;
 
   colCount: number;
+
+  showDescription?: boolean;
 }
 
 const defaultValue = [

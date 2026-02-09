@@ -59,6 +59,8 @@ export interface XPreviewStepsLayoutConfig extends ICommonBaseType {
   colCount: number;
 
   pageType?: string;
+
+  showDescription?: boolean;
 }
 
 const defaultValue = [

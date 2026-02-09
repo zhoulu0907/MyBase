@@ -11,7 +11,7 @@ import type { XPreviewStepsLayoutConfig } from './schema';
 const Step = Steps.Step;
 
 const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMode?: boolean, showFromPageData?: Function; refresh?: number; }) => {
-  const { id, defaultValue = [], type, colCount, labelPlacement, pageType, detailMode, showFromPageData, refresh } = props;
+  const { id, defaultValue = [], type, colCount, labelPlacement, pageType, detailMode, showFromPageData, refresh, showDescription = false } = props;
   useSignals();
 
   const {
@@ -65,7 +65,7 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
             <Step
               key={step.key}
               title={step.title}
-              description={step.description}
+              description={showDescription ? step.description : undefined}
             />
           ))}
         </Steps>

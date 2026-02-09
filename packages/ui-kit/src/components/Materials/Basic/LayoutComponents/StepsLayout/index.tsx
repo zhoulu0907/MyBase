@@ -15,7 +15,7 @@ const canvasPaddingWidth = 40;
 const componentMaxWidth = leftPanelWidth + rightPanelWidth + canvasPaddingWidth;
 
 const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { id, defaultValue = [], type, colCount, labelPlacement, runtime = true } = props;
+  const { id, defaultValue = [], type, colCount, labelPlacement, showDescription = false, runtime = true } = props;
   useSignals();
 
   const { layoutSubComponents, setLayoutSubComponents } = usePageEditorSignal();
@@ -77,7 +77,7 @@ const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; deta
             <Step
               key={step.key}
               title={step.title}
-              description={step.description}
+              description={showDescription ? step.description : undefined}
             />
           ))}
         </Steps>

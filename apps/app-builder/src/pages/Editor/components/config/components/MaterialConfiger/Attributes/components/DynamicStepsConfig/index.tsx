@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Steps, Form, Input, Space } from '@arco-design/web-react';
+import { Button, Steps, Form, Input, Space, Checkbox } from '@arco-design/web-react';
 import { IconArrowLeft, IconSwap, IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
@@ -74,6 +74,7 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
     (configs.labelPlacement as StepsLabelPlacementType) || 'horizontal'
   );
   const [stepsConfig, setStepsConfig] = useState<any[]>([]);
+  const [showDescription, setShowDescription] = useState(false);
 
   useEffect(() => {
     setCurrentStyle((configs.type as StepsStyleType) || 'default');
@@ -81,7 +82,8 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
     if (configs && configs.defaultValue) {
       setStepsConfig(configs.defaultValue as any[]);
     }
-  }, [configs.type, configs.labelPlacement, configs.defaultValue]);
+    setShowDescription(!!configs.showDescription);
+  }, [configs.type, configs.labelPlacement, configs.defaultValue, configs.showDescription]);
 
   const handleStyleChange = (style: StepsStyleType) => {
     setCurrentStyle(style);
@@ -219,29 +221,35 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
         >
           {stepsConfig?.map((step: any, idx: number) => (
             <div key={step.key} className={styles.stepsConfigItem}>
-              <Space style={{ width: '100%' }}>
-                <Input
-                  size="small"
-                  value={step.title}
-                  onChange={(e) => handleStepTitleChange(idx, e)}
-                  className={styles.stepsConfigItemInput}
-                  placeholder="步骤标题"
-                />
-                <Input
-                  size="small"
-                  value={step.description || ''}
-                  onChange={(e) => handleStepDescriptionChange(idx, e)}
-                  className={styles.stepsConfigItemInput}
-                  placeholder="步骤描述"
-                  style={{ flex: 1 }}
-                />
+              <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                 <IconDragDotVertical
                   className="steps-item-handle"
                   style={{
                     cursor: 'move',
-                    color: '#555'
+                    color: '#555',
+                    marginRight: '8px'
                   }}
                 />
+                <div style={{ flex: 1 }}>
+                  <Input
+                    size="small"
+                    value={step.title}
+                    onChange={(e) => handleStepTitleChange(idx, e)}
+                    className={styles.stepsConfigItemInput}
+                    placeholder="步骤标题"
+                    style={{ marginBottom: showDescription ? '8px' : 0, width: '100%' }}
+                  />
+                  {showDescription && (
+                    <Input
+                      size="small"
+                      value={step.description || ''}
+                      onChange={(e) => handleStepDescriptionChange(idx, e)}
+                      className={styles.stepsConfigItemInput}
+                      placeholder="步骤描述"
+                      style={{ width: '100%' }}
+                    />
+                  )}
+                </div>
                 <Button
                   icon={<IconDelete />}
                   shape="circle"
@@ -249,8 +257,9 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
                   status="danger"
                   disabled={stepsConfig?.length < 2}
                   onClick={() => handleDeleteStep(idx)}
+                  style={{ marginLeft: '8px' }}
                 />
-              </Space>
+              </div>
             </div>
           ))}
         </ReactSortable>
@@ -270,7 +279,26 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
       <FormItem layout="vertical" labelAlign="left" label="样式库" className={styles.formItem}>
         {isEditing ? renderStyleSelection() : renderStylePreview()}
       </FormItem>
-      <FormItem layout="vertical" labelAlign="left" label="步骤配置" className={styles.formItem}>
+      <FormItem
+        layout="vertical"
+        labelAlign="left"
+        label={
+          <>
+            步骤
+            <Checkbox
+              checked={showDescription}
+              style={{ float: 'right' }}
+              onChange={(v) => {
+                setShowDescription(v);
+                handlePropsChange('showDescription', v);
+              }}
+            >
+              显示描述
+            </Checkbox>
+          </>
+        }
+        className={styles.formItem}
+      >
         {renderStepsConfig()}
       </FormItem>
     </div>
