@@ -27,13 +27,26 @@ public class EtlFlinkMappings {
     }
 
     public String getFlinkType(String datasourceType, String type) {
-        String flinkType = mappings.get(datasourceType.toLowerCase(), type.toLowerCase());
+        String normalizedType = type.toLowerCase();
+        String flinkType = mappings.get(datasourceType.toLowerCase(), normalizedType);
         if (StringUtils.isNotBlank(flinkType)) {
             return flinkType;
         }
-        flinkType = mappings.get(DEFAULT.toLowerCase(), type.toLowerCase());
+        flinkType = mappings.get(DEFAULT.toLowerCase(), normalizedType);
         if (StringUtils.isNotBlank(flinkType)) {
             return flinkType;
+        }
+        // 去除类型名称中的长度/精度信息后重试，如 varchar(255) -> varchar, numeric(10,2) -> numeric
+        String baseType = normalizedType.replaceAll("\\(.*\\)", "").trim();
+        if (!baseType.equals(normalizedType)) {
+            flinkType = mappings.get(datasourceType.toLowerCase(), baseType);
+            if (StringUtils.isNotBlank(flinkType)) {
+                return flinkType;
+            }
+            flinkType = mappings.get(DEFAULT.toLowerCase(), baseType);
+            if (StringUtils.isNotBlank(flinkType)) {
+                return flinkType;
+            }
         }
         throw new RuntimeException("未找到对应的字段类型映射: " + datasourceType + "-" + type);
     }

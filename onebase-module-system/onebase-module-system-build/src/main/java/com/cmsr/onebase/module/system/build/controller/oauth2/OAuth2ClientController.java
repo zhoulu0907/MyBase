@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.build.controller.oauth2;
 
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -11,6 +12,7 @@ import com.cmsr.onebase.module.system.service.oauth2.OAuth2ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,16 +24,18 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - OAuth2 客户端")
 @RestController
-@RequestMapping("/system/oauth2-client")
+@RequestMapping("/system/oauth2/client")
 @Validated
 public class OAuth2ClientController {
 
     @Resource
     private OAuth2ClientService oAuth2ClientService;
 
+    @ApiSignIgnore
+    @PermitAll
     @PostMapping("/create")
     @Operation(summary = "创建 OAuth2 客户端")
-    @PreAuthorize("@ss.hasPermission('tenant:oauth2-client:create')")
+//    @PreAuthorize("@ss.hasPermission('tenant:oauth2-client:create')")
     public CommonResult<Long> createOAuth2Client(@Valid @RequestBody OAuth2ClientSaveReqVO createReqVO) {
         return success(oAuth2ClientService.createOAuth2Client(createReqVO));
     }

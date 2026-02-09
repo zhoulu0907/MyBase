@@ -51,6 +51,13 @@ public interface DictDataService {
     void deleteDictData(Long id);
 
     /**
+     * 根据dictOwner删除数据
+     * @param dictOwnerType 字典所有者类型
+     * @param dictOwnerId 所有者ID
+     */
+    void deleteDictDataByDictOwner(String dictOwnerType,Long dictOwnerId);
+
+    /**
      * 获得字典数据列表
      *
      * @param status   状态
@@ -145,5 +152,7 @@ public interface DictDataService {
      * @return 按dictTypeId分组的字典数据 Map
      */
     Map<Long, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds);
+
+
 
 }
