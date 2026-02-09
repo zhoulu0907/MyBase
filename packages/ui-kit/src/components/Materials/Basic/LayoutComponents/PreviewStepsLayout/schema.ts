@@ -62,6 +62,8 @@ export interface XPreviewStepsLayoutConfig extends ICommonBaseType {
 
   showDescription?: boolean;
 
+  validateOnNext?: boolean;
+
   color?: string;
 }
 
@@ -98,6 +100,7 @@ const XPreviewStepsLayout: XPreviewStepsLayoutSchema = {
     colCount: defaultValue.length,
     labelPlacement: STEPS_LABEL_PLACEMENT_VALUES[STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL],
     showDescription: false,
+    validateOnNext: false,
     color: ''
   }
 };

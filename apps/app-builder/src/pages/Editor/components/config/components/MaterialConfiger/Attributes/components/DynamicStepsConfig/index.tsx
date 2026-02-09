@@ -306,9 +306,9 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
         <Button
           type="outline"
           onClick={handleAddStep}
-          style={{ marginTop: '16px', width: '100%' }}
+          style={{ marginTop: '16px', width: '88px' }}
         >
-          添加一项
+          新增步骤
         </Button>
       </div>
     );
@@ -340,6 +340,16 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
         className={styles.formItem}
       >
         {renderStepsConfig()}
+      </FormItem>
+      <FormItem layout="vertical" labelAlign="left" label="校验" className={styles.formItem}>
+        <Checkbox
+          checked={!!configs.validateOnNext}
+          onChange={(v) => {
+            handlePropsChange('validateOnNext', v);
+          }}
+        >
+          下一步时触发当前步骤校验
+        </Checkbox>
       </FormItem>
       <FormItem layout="vertical" labelAlign="left" label="颜色" className={styles.formItem}>
         <ColorPicker

@@ -60,6 +60,8 @@ export interface XStepsLayoutConfig extends ICommonBaseType {
 
   showDescription?: boolean;
 
+  validateOnNext?: boolean;
+
   color?: string;
 }
 
@@ -96,6 +98,7 @@ const XStepsLayout: XStepsLayoutSchema = {
     colCount: defaultValue.length,
     labelPlacement: STEPS_LABEL_PLACEMENT_VALUES[STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL],
     showDescription: false,
+    validateOnNext: false,
     color: ''
   }
 };
