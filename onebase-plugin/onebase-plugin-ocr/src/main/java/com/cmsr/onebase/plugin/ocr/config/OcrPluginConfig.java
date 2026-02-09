@@ -10,20 +10,22 @@ import org.springframework.stereotype.Component;
 
 /**
  * OCR 插件配置管理
+ * <p>
+ * 适配器模式：通过 PluginContextService 从宿主系统动态获取配置。
+ * 支持 Dev 模式（本地模拟配置）和 Prod 模式（宿主真实配置）。
+ * </p>
  *
  * @author chengyuansen
  * @date 2026-01-12
  */
 @Slf4j
+@Component
 public class OcrPluginConfig {
 
     private static final String DEFAULT_BAIDU_ENDPOINT = "https://aip.baidubce.com";
 
-    private final PluginContextService pluginContextService;
-
-    public OcrPluginConfig(PluginContextService pluginContextService) {
-        this.pluginContextService = pluginContextService;
-    }
+    @Resource
+    private PluginContextService pluginContextService;
 
     /**
      * 获取 OCR 服务商 Client ID
@@ -53,6 +55,15 @@ public class OcrPluginConfig {
     public String getEndpoint() {
         String endpoint = getConfig(OcrConfigKeys.CONFIG_ENDPOINT);
         return StringUtils.isBlank(endpoint) ? DEFAULT_BAIDU_ENDPOINT : endpoint;
+    }
+
+    /**
+     * 获取 OCR 服务商 Region ID
+     *
+     * @return Region ID
+     */
+    public String getRegionId() {
+        return getConfig(OcrConfigKeys.CONFIG_REGION_ID);
     }
 
     /**
