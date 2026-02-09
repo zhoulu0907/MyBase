@@ -22,7 +22,6 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import RuntimeMenuItem from './components/menuItem';
 import PreviewContainer from './components/preview';
-// import { initPlugins } from '@/plugin';
 import './components/TaskCenter/style/taskSide.less';
 
 import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
@@ -81,6 +80,8 @@ const Runtime: React.FC = () => {
       const curIdentifyId = TokenManager.getCurIdentifyId();
       // 如果缓存中已有 tenantId，且与当前路径id（tenantId）一致，则不再设置 curIdentifyId
       if (curIdentifyId == tenantId) {
+        // 确保插件初始化（即使ID没变，可能是首次加载）
+        // initPlugins(); // 已前置到 main.tsx
         return;
       }
 
@@ -93,6 +94,8 @@ const Runtime: React.FC = () => {
         TokenManager.setCurIdentifyId(tenantId);
       }
     }
+    // 初始化插件
+    // initPlugins(); // 已前置到 main.tsx
   }, [appId, tenantId]);
 
   useEffect(() => {
@@ -102,7 +105,6 @@ const Runtime: React.FC = () => {
   }, [appId, isDev]);
 
   useEffect(() => {
-    // initPlugins();
     getUserInfo();
   }, []);
 

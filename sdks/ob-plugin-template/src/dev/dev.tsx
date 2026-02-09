@@ -11,6 +11,7 @@ import { PluginManager } from '@ob/plugin/host'
 import { createMockHostSDK } from '@ob/plugin/mock'
 import { ComponentDebugger } from './ComponentDebugger'
 import { MOCK_ENTITIES, MOCK_FIELDS } from './mock/config'
+import { ENV_CONFIG } from './env'
 
 ;(window as any).React = React
 ;(window as any).ReactDOM = ReactDOM
@@ -57,6 +58,49 @@ const mockContext = {
     listFields: () => {
       const fields = (window as any).__MOCK_FORM_FIELDS
       return Array.isArray(fields) ? fields : ['docType', 'userName', 'userId']
+    }
+  },
+  request: {
+    request: async (config: any) => {
+      const { url, headers = {}, ...rest } = config
+      const fullUrl = url.startsWith('http') ? url : `${ENV_CONFIG.HOST_URL}${url.startsWith('/') ? '' : '/'}${url}`
+      
+      const newHeaders = {
+        ...headers,
+        ...(ENV_CONFIG.TOKEN ? { Authorization: `Bearer ${ENV_CONFIG.TOKEN}` } : {}),
+        ...(ENV_CONFIG.TENANT_ID ? { 'X-Tenant-Id': ENV_CONFIG.TENANT_ID } : {}),
+        ...(ENV_CONFIG.APP_ID ? { 'X-Application-Id': ENV_CONFIG.APP_ID } : {})
+      }
+
+      // 处理 FormData/File/Blob，移除 Content-Type 让浏览器自动处理
+      const { data } = rest
+      const isFormData = data instanceof FormData
+      const isBlob = data instanceof Blob || (typeof File !== 'undefined' && data instanceof File)
+      
+      if (isFormData || isBlob) {
+        if (newHeaders['Content-Type']) {
+          delete newHeaders['Content-Type']
+        }
+      } else if (!newHeaders['Content-Type']) {
+        newHeaders['Content-Type'] = 'application/json'
+      }
+
+      // 如果是 JSON 数据，需要序列化
+      if (!isFormData && !isBlob && typeof data === 'object' && data !== null) {
+        rest.body = JSON.stringify(data)
+        delete rest.data
+      } else {
+        rest.body = data
+        delete rest.data
+      }
+
+      const response = await fetch(fullUrl, {
+        headers: newHeaders,
+        ...rest
+      })
+      
+      const resData = await response.json().catch(() => ({}))
+      return { ...resData, status: response.status, statusText: response.statusText }
     }
   }
 }
