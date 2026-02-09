@@ -98,9 +98,16 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
             const jsonResult = JSON.stringify(data.result || {});
             setDisplayValue(jsonResult);
             break;
+          case 'String':
+            // 对Char单独解码处理
+            if (formula.startsWith('CHAR')) {
+              setDisplayValue(atob(data.result || ''));
+            } else {
+              setDisplayValue(withSingleEscapedChar(data.result));
+            }
+            break;
           case 'Double':
           case 'Long':
-          case 'String':
           default:
             setDisplayValue(withSingleEscapedChar(data.result));
         }
