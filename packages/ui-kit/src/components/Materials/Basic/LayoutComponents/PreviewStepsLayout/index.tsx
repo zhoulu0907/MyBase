@@ -24,7 +24,7 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
   } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
 
   const [current, setCurrent] = useState(1);
-  const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
+  const colComponents = layoutSubComponents[id] || Array.from({ length: defaultValue.length }, () => []);
 
   useEffect(() => {
     const currentColumns = layoutSubComponents[id];
@@ -34,7 +34,7 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
         Array.from({ length: defaultValue.length }, () => [])
       );
     }
-  }, [defaultValue, id, colComponents]);
+  }, [defaultValue, id]);
 
   const handlePrev = () => {
     if (current > 1) {
@@ -79,9 +79,9 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
             style={{ display: current === index + 1 ? 'block' : 'none' }}
           >
             <ReactSortable
-              id={`workspace-content-${id}`}
+              id={`workspace-content-${id}-${index}`}
               className="content"
-              list={colComponents[index]}
+              list={colComponents[index] || []}
               setList={(newList) => {
                 colComponents[index] = newList;
               }}

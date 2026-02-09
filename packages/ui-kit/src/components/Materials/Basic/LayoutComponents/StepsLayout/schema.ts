@@ -61,17 +61,17 @@ export interface XStepsLayoutConfig extends ICommonBaseType {
 
 const defaultValue = [
   {
-    title: '步骤1',
+    title: '步骤一',
     key: '1',
     description: '这是步骤1的描述'
   },
   {
-    title: '步骤2',
+    title: '步骤二',
     key: '2',
     description: '这是步骤2的描述'
   },
   {
-    title: '步骤3',
+    title: '步骤三',
     key: '3',
     description: '这是步骤3的描述'
   }

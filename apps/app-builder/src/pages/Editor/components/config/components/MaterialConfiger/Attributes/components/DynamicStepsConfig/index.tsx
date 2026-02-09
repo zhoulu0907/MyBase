@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Steps, Form } from '@arco-design/web-react';
-import { IconArrowLeft, IconSwap } from '@arco-design/web-react/icon';
+import { Button, Steps, Form, Input, Space } from '@arco-design/web-react';
+import { IconArrowLeft, IconSwap, IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
+import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
 
 const { Step } = Steps;
@@ -19,6 +20,7 @@ interface StepsStyleItem {
 
 export interface DynamicStepsConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | unknown[]) => void;
+  handleMultiPropsChange?: (updates: { key: string; value: string | number | boolean | unknown[] }[]) => void;
   item?: any;
   configs: Record<string, unknown>;
   id?: string;
@@ -47,17 +49,39 @@ const STEPS_STYLES: StepsStyleItem[] = [
   }
 ];
 
-const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChange, configs }) => {
+const DEFAULT_STEPS = [
+  {
+    title: '步骤一',
+    key: '1',
+    description: '这是步骤1的描述'
+  },
+  {
+    title: '步骤二',
+    key: '2',
+    description: '这是步骤2的描述'
+  },
+  {
+    title: '步骤三',
+    key: '3',
+    description: '这是步骤3的描述'
+  }
+];
+
+const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChange, handleMultiPropsChange, configs }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentStyle, setCurrentStyle] = useState<StepsStyleType>((configs.type as StepsStyleType) || 'default');
   const [currentLabelPlacement, setCurrentLabelPlacement] = useState<StepsLabelPlacementType>(
     (configs.labelPlacement as StepsLabelPlacementType) || 'horizontal'
   );
+  const [stepsConfig, setStepsConfig] = useState<any[]>([]);
 
   useEffect(() => {
     setCurrentStyle((configs.type as StepsStyleType) || 'default');
     setCurrentLabelPlacement((configs.labelPlacement as StepsLabelPlacementType) || 'horizontal');
-  }, [configs.type, configs.labelPlacement]);
+    if (configs && configs.defaultValue) {
+      setStepsConfig(configs.defaultValue as any[]);
+    }
+  }, [configs.type, configs.labelPlacement, configs.defaultValue]);
 
   const handleStyleChange = (style: StepsStyleType) => {
     setCurrentStyle(style);
@@ -65,14 +89,65 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
     setIsEditing(false);
   };
 
+  const handleStepTitleChange = (index: number, value: string) => {
+    const newList = [...stepsConfig];
+    newList[index] = {
+      ...newList[index],
+      title: value
+    };
+    setStepsConfig(newList);
+    handlePropsChange('defaultValue', newList);
+  };
+
+  const handleStepDescriptionChange = (index: number, value: string) => {
+    const newList = [...stepsConfig];
+    newList[index] = {
+      ...newList[index],
+      description: value
+    };
+    setStepsConfig(newList);
+    handlePropsChange('defaultValue', newList);
+  };
+
+  const handleAddStep = () => {
+    const newStepNumber = stepsConfig.length + 1;
+    const newStep = {
+      title: `步骤${newStepNumber}`,
+      key: String(newStepNumber),
+      description: ''
+    };
+    const newList = [...stepsConfig, newStep];
+    setStepsConfig(newList);
+    handlePropsChange('defaultValue', newList);
+    if (handleMultiPropsChange) {
+      handleMultiPropsChange([
+        { key: 'defaultValue', value: newList },
+        { key: 'colCount', value: newList.length }
+      ]);
+    }
+  };
+
+  const handleDeleteStep = (index: number) => {
+    const newList = [...stepsConfig];
+    newList.splice(index, 1);
+    setStepsConfig(newList);
+    handlePropsChange('defaultValue', newList);
+    if (handleMultiPropsChange) {
+      handleMultiPropsChange([
+        { key: 'defaultValue', value: newList },
+        { key: 'colCount', value: newList.length }
+      ]);
+    }
+  };
+
   const renderStylePreview = () => {
     return (
       <div className={styles.stepsStylePreview}>
         <div className={styles.stepsStylePreviewContent}>
           <Steps current={1} type={currentStyle} labelPlacement={currentLabelPlacement}>
-            <Step title="步骤1" description="这是步骤1的描述" />
-            <Step title="步骤2" description="这是步骤2的描述" />
-            <Step title="步骤3" description="这是步骤3的描述" />
+            {stepsConfig.map((step: any, index: number) => (
+              <Step key={index} title={step.title} description={step.description} />
+            ))}
           </Steps>
         </div>
         <Button
@@ -116,17 +191,94 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
     );
   };
 
+  const renderStepsConfig = () => {
+    return (
+      <div className={styles.stepsConfigList}>
+        <ReactSortable
+          list={stepsConfig}
+          setList={() => {}}
+          group={{
+            name: 'steps-item'
+          }}
+          swap
+          sort={true}
+          handle=".steps-item-handle"
+          className={styles.stepsSortableList}
+          forceFallback={true}
+          animation={150}
+          onSort={(e) => {
+            const { oldIndex, newIndex } = e;
+            if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+              const movedList = [...stepsConfig];
+              const [movedItem] = movedList.splice(oldIndex, 1);
+              movedList.splice(newIndex, 0, movedItem);
+              setStepsConfig(movedList);
+              handlePropsChange('defaultValue', movedList);
+            }
+          }}
+        >
+          {stepsConfig?.map((step: any, idx: number) => (
+            <div key={step.key} className={styles.stepsConfigItem}>
+              <Space style={{ width: '100%' }}>
+                <Input
+                  size="small"
+                  value={step.title}
+                  onChange={(e) => handleStepTitleChange(idx, e)}
+                  className={styles.stepsConfigItemInput}
+                  placeholder="步骤标题"
+                />
+                <Input
+                  size="small"
+                  value={step.description || ''}
+                  onChange={(e) => handleStepDescriptionChange(idx, e)}
+                  className={styles.stepsConfigItemInput}
+                  placeholder="步骤描述"
+                  style={{ flex: 1 }}
+                />
+                <IconDragDotVertical
+                  className="steps-item-handle"
+                  style={{
+                    cursor: 'move',
+                    color: '#555'
+                  }}
+                />
+                <Button
+                  icon={<IconDelete />}
+                  shape="circle"
+                  size="mini"
+                  status="danger"
+                  disabled={stepsConfig?.length < 2}
+                  onClick={() => handleDeleteStep(idx)}
+                />
+              </Space>
+            </div>
+          ))}
+        </ReactSortable>
+        <Button
+          type="outline"
+          onClick={handleAddStep}
+          style={{ marginTop: '16px', width: '100%' }}
+        >
+          添加一项
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div className={styles.dynamicStepsConfig}>
       <FormItem layout="vertical" labelAlign="left" label="样式库" className={styles.formItem}>
         {isEditing ? renderStyleSelection() : renderStylePreview()}
       </FormItem>
+      <FormItem layout="vertical" labelAlign="left" label="步骤配置" className={styles.formItem}>
+        {renderStepsConfig()}
+      </FormItem>
     </div>
   );
 };
 
-registerConfigRenderer(CONFIG_TYPES.STEPS, ({ id, handlePropsChange, item, configs }) => (
-  <DynamicStepsConfig id={id} handlePropsChange={handlePropsChange} item={item} configs={configs} />
+registerConfigRenderer(CONFIG_TYPES.STEPS, ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
+  <DynamicStepsConfig id={id} handlePropsChange={handlePropsChange} handleMultiPropsChange={handleMultiPropsChange} item={item} configs={configs} />
 ));
 
 export default DynamicStepsConfig;

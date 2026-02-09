@@ -21,7 +21,7 @@ const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; deta
   const { layoutSubComponents, setLayoutSubComponents } = usePageEditorSignal();
 
   const [current, setCurrent] = useState(1);
-  const colComponents = layoutSubComponents[id] || Array.from({ length: colCount }, () => []);
+  const colComponents = layoutSubComponents[id] || Array.from({ length: defaultValue.length }, () => []);
 
   useEffect(() => {
     if (!id) {
@@ -43,7 +43,7 @@ const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; deta
 
       setLayoutSubComponents(id, updatedColumns);
     }
-  }, [defaultValue, id, layoutSubComponents]);
+  }, [defaultValue, id]);
 
   const handlePrev = () => {
     if (current > 1) {

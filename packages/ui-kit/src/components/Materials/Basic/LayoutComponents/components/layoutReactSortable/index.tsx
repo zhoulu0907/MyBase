@@ -491,7 +491,7 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
       const rect = wrapper.getBoundingClientRect();
       const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
         e.clientY >= rect.top && e.clientY <= rect.bottom;
-      wrapper.classList.toggle('drag-over', inside && colComponents[index].length === 0);
+      wrapper.classList.toggle('drag-over', inside && (!colComponents[index] || colComponents[index].length === 0));
     };
 
     const handleDown = (e) => {
@@ -514,10 +514,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
 
   return (
     <div ref={wrapperRef} className='sortableWrapper'>
-      {colComponents[index].length === 0 && <div className='placeholder'>将组件拖入这里</div>}
+      {(!colComponents[index] || colComponents[index].length === 0) && <div className='placeholder'>将组件拖入这里</div>}
       <ReactSortable
         id={sortableId}
-        list={colComponents[index]}
+        list={colComponents[index] || []}
         group={{ name: groupName }}
         sort={true}
         forceFallback={true}
