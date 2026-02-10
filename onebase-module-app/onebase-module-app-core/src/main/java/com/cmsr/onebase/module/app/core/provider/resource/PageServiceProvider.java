@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.screen.api.dto.DashboardProjectDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +84,7 @@ public class PageServiceProvider {
     }
 
     public List<PageDTO> listPageView(Long pageSetId, Boolean isDev) {
-        if (isDev){
+        if (BooleanUtils.isTrue(isDev)){
             ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
         }
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetId);
