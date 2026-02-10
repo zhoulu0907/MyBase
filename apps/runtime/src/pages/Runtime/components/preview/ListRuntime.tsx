@@ -34,6 +34,7 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
 
   useEffect(() => {
     if (pageSetId) {
+      console.log('isDEV:xxxxx  ', isDev);
       const loadData = async () => {
         setLoading(true);
         try {
