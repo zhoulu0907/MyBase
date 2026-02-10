@@ -1,4 +1,5 @@
 import EditorEmpty from '@/assets/images/edit_empty.svg';
+import { pluginBridge } from '@/plugin/bridge';
 import { Button, Form, Spin } from '@arco-design/web-react';
 import {
   getEntityFieldsWithChildren,
@@ -20,17 +21,16 @@ import {
   startLoadWorkbenchPageSet,
   STATUS_OPTIONS,
   STATUS_VALUES,
+  useAppEntityStore,
   useEditorSignalMap,
   useListEditorSignal,
   useWorkbenchEditorSignal,
-  useAppEntityStore,
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
-import { pluginBridge } from '@/plugin/bridge';
 
 interface PreviewProps {
   menuId: string;
@@ -172,7 +172,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   const getDashboardId = async (pageSetId: string) => {
     try {
       const res = await listPageView({
-        pageSetId: pageSetId
+        pageSetId: pageSetId,
+        isDev: true
       });
       if (res && res.pages && res.pages.length > 0) {
         const imgRes = getFileUrlById(res.pages[0].indexImage);
