@@ -35,6 +35,13 @@ const XPreviewTabsLayout = memo((props: XTabsLayoutConfig & { detailMode?: boole
     }
   }, [defaultValue, id, colComponents]);
 
+  useEffect(()=>{
+    const isActive = defaultValue?.some(ele=>ele.key===activeTab)
+    if(!isActive && defaultValue?.length){
+      setActiveTab(defaultValue[0]?.key)
+    }
+  },[])
+
   return (
     <Tabs
       className={pageType === EDITOR_TYPES.LIST_EDITOR ? "XPreviewTabsLayout listPreviewTabsLayout": "XPreviewTabsLayout"}
