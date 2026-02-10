@@ -9,7 +9,8 @@ import {
   Select,
   Space,
   Spin,
-  Typography
+  Typography,
+  Grid
 } from '@arco-design/web-react';
 import { IconLeft, IconPlus, IconRight, IconSearch } from '@arco-design/web-react/icon';
 import {
@@ -41,6 +42,11 @@ import { appOptions, calculateMaxItems, createTimeOptions, statusOptions } from 
 import styles from './index.module.less';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import aiCreateSVG from '@/assets/images/ai_create.svg';
+import aiPng from '@/assets/images/appBasic/app_ai.png';
+import createSvg from '@/assets/images/appBasic/app_create.svg';
+import cloneSvg from '@/assets/images/appBasic/app_clone.svg';
+import importSvg from '@/assets/images/appBasic/app_import.svg';
+import AppImportModal from '@/components/AppImportModal';
 
 const Option = Select.Option;
 
@@ -83,6 +89,9 @@ const AppManagement: React.FC = () => {
   // option dropdown
   const [optionVisibleId, setOptionVisibleId] = useState('');
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
+
+  // 应用导入/更新弹窗
+    const [importVisible, setImportVisible] = useState(false);
 
   useEffect(() => {
     if (!appContainerRef.current) return;
@@ -263,6 +272,50 @@ const AppManagement: React.FC = () => {
     <div className={styles.appPage}>
       <div className={styles.appContainer}>
         <div className={styles.appHasDataBox}>
+          {ACTIONS.CREATE && (
+            <Grid.Row gutter={24} className={styles.appCreate}>
+              <Grid.Col span={9}>
+                <div
+                  className={styles.aiCreate}
+                  style={{
+                    backgroundImage: `linear-gradient(99.09deg, #BADAFF 0%, #EFF6FF 22.12%, rgba(239, 246, 255, 0) 56.73%, rgba(239, 246, 255, 0) 87.76%),url(${aiPng})`
+                  }}
+                  onClick={() => navigate('/aigen/chat')}
+                >
+                  <div className={styles.aiCreateTitle}>AI生成应用</div>
+                  <div className={styles.aiCreateDesc}>输入需求或上传文档，大模型自动帮您搭建零代码应用</div>
+                </div>
+              </Grid.Col>
+              <Grid.Col span={5}>
+                <div className={styles.otherCreate} onClick={() => setCreateVisible(true)}>
+                  <div className={styles.otherCreateContent}>
+                    <div className={styles.otherCreateTitle}>手动创建应用</div>
+                    <div className={styles.otherCreateDesc}>手动拖拉拽可视化组件，从零开始创建零代码应用</div>
+                  </div>
+                  <img src={createSvg} alt=''/>
+                </div>
+              </Grid.Col>
+              <Grid.Col span={5}>
+                <div className={styles.otherCreate}>
+                  <div className={styles.otherCreateContent}>
+                    <div className={styles.otherCreateTitle}>智能克隆</div>
+                    <div className={styles.otherCreateDesc}>智能解析高码应用，快速转换为零代码应用</div>
+                  </div>
+                  <img src={cloneSvg} alt=''/>
+                </div>
+              </Grid.Col>
+              <Grid.Col span={5}>
+                <div className={styles.otherCreate} onClick={()=>setImportVisible(true)}>
+                  <div className={styles.otherCreateContent}>
+                    <div className={styles.otherCreateTitle}>应用导入</div>
+                    <div className={styles.otherCreateDesc}>快速导入应用包，一键复用已有配置</div>
+                  </div>
+                  <img className={styles.otherCreateImg} src={importSvg} alt=''/>
+                </div>
+              </Grid.Col>
+            </Grid.Row>
+          )}
+
           <div
             className={styles.appFilter}
             style={{
@@ -270,31 +323,13 @@ const AppManagement: React.FC = () => {
             }}
           >
             <div className={styles.cteateBtn}>
-              <Button
-                type="primary"
-                size="large"
-                permission={ACTIONS.CREATE}
-                icon={<IconPlus fontSize={16} />}
-                onClick={() => {
-                  setCreateVisible(true);
-                }}
-              >
-                创建应用
-              </Button>
-              {/* TODO(ai)：当前仅ai测试账号可见 */}
-              {tenantId === '156421901678804992' &&
-                userPermissionInfo?.user?.id?.toString() === '156421901678804997' && (
-                  <Button
-                    type="primary"
-                    size="large"
-                    permission={ACTIONS.CREATE}
-                    onClick={() => navigate('/aigen/chat')}
-                    className={styles.aiCteateApp}
-                    icon={<img src={aiCreateSVG} />}
-                  >
-                    AI生成应用
-                  </Button>
-                )}
+              <Input
+                className={styles.appInput}
+                allowClear
+                suffix={<IconSearch />}
+                onChange={handleSearchChange}
+                placeholder="搜索"
+              />
             </div>
 
             {/* 筛选下拉框 */}
@@ -340,15 +375,6 @@ const AppManagement: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-              <Divider type="vertical" />
-
-              <Input
-                className={styles.appInput}
-                allowClear
-                suffix={<IconSearch />}
-                onChange={handleSearchChange}
-                placeholder="搜索"
-              />
             </div>
           </div>
 
@@ -522,6 +548,14 @@ const AppManagement: React.FC = () => {
           />
         </div>
       </Modal>
+
+      <AppImportModal
+        visible={importVisible}
+        onClose={() => setImportVisible(false)}
+        onComplete={() => {
+          getApplicationList()
+        }}
+      />
     </div>
   );
 };
