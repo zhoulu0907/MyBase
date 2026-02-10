@@ -96,6 +96,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   const dashboardType = 'dashboard';
   const resourceUrl = getDashBoardURL();
+  const isDev = useIsRuntimeDev();
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -125,7 +126,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const getDashboardId = async (pageSetId: string) => {
     try {
       const res = await listPageView({
-        pageSetId: pageSetId
+        pageSetId: pageSetId,
+        isDev: isDev
       });
 
       if (res && res.pages && res.pages.length > 0) {

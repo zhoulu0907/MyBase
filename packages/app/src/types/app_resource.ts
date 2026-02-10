@@ -70,6 +70,7 @@ export interface CreatePageViewParams {
 
 export interface ListPageViewParams {
   pageSetId: string;
+  isDev?: boolean;
 }
 export enum ViewType {
   MIX = 'mix',
