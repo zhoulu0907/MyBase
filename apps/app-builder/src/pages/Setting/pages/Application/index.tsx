@@ -296,7 +296,7 @@ const AppManagement: React.FC = () => {
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
-                <div className={styles.otherCreate} style={{cursor:'default'}}>
+                <div className={styles.otherCreate}>
                   <div className={styles.otherCreateContent}>
                     <div className={styles.otherCreateTitle}>智能克隆</div>
                     <div className={styles.otherCreateDesc}>智能解析高码应用，快速转换为零代码应用</div>

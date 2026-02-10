@@ -40,7 +40,6 @@ export async function initPlugins() {
       const res = await getRuntimePluginManifestApi();
       const manifest = res?.data || [];
       
-      debugger
       if (Array.isArray(manifest) && manifest.length > 0) {
         loadedFromServer = true;
         
