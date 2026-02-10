@@ -42,7 +42,6 @@ import { appOptions, calculateMaxItems, createTimeOptions, statusOptions } from 
 import styles from './index.module.less';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import aiCreateSVG from '@/assets/images/ai_create.svg';
-import aiPng from '@/assets/images/appBasic/app_ai.png';
 import createSvg from '@/assets/images/appBasic/app_create.svg';
 import cloneSvg from '@/assets/images/appBasic/app_clone.svg';
 import importSvg from '@/assets/images/appBasic/app_import.svg';
@@ -91,7 +90,7 @@ const AppManagement: React.FC = () => {
   const userPermissionInfo = UserPermissionManager.getUserPermissionInfo();
 
   // 应用导入/更新弹窗
-    const [importVisible, setImportVisible] = useState(false);
+  const [importVisible, setImportVisible] = useState(false);
 
   useEffect(() => {
     if (!appContainerRef.current) return;
@@ -275,13 +274,7 @@ const AppManagement: React.FC = () => {
           {ACTIONS.CREATE && (
             <Grid.Row gutter={24} className={styles.appCreate}>
               <Grid.Col span={9}>
-                <div
-                  className={styles.aiCreate}
-                  style={{
-                    backgroundImage: `linear-gradient(99.09deg, #BADAFF 0%, #EFF6FF 22.12%, rgba(239, 246, 255, 0) 56.73%, rgba(239, 246, 255, 0) 87.76%),url(${aiPng})`
-                  }}
-                  onClick={() => navigate('/aigen/chat')}
-                >
+                <div className={styles.aiCreate} onClick={() => navigate('/aigen/chat')}>
                   <div className={styles.aiCreateTitle}>AI生成应用</div>
                   <div className={styles.aiCreateDesc}>输入需求或上传文档，大模型自动帮您搭建零代码应用</div>
                 </div>
@@ -292,7 +285,7 @@ const AppManagement: React.FC = () => {
                     <div className={styles.otherCreateTitle}>手动创建应用</div>
                     <div className={styles.otherCreateDesc}>手动拖拉拽可视化组件，从零开始创建零代码应用</div>
                   </div>
-                  <img src={createSvg} alt=''/>
+                  <img src={createSvg} alt="" />
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
@@ -301,16 +294,16 @@ const AppManagement: React.FC = () => {
                     <div className={styles.otherCreateTitle}>智能克隆</div>
                     <div className={styles.otherCreateDesc}>智能解析高码应用，快速转换为零代码应用</div>
                   </div>
-                  <img src={cloneSvg} alt=''/>
+                  <img src={cloneSvg} alt="" />
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
-                <div className={styles.otherCreate} onClick={()=>setImportVisible(true)}>
+                <div className={styles.otherCreate} onClick={() => setImportVisible(true)}>
                   <div className={styles.otherCreateContent}>
                     <div className={styles.otherCreateTitle}>应用导入</div>
                     <div className={styles.otherCreateDesc}>快速导入应用包，一键复用已有配置</div>
                   </div>
-                  <img className={styles.otherCreateImg} src={importSvg} alt=''/>
+                  <img className={styles.otherCreateImg} src={importSvg} alt="" />
                 </div>
               </Grid.Col>
             </Grid.Row>
@@ -553,7 +546,7 @@ const AppManagement: React.FC = () => {
         visible={importVisible}
         onClose={() => setImportVisible(false)}
         onComplete={() => {
-          getApplicationList()
+          getApplicationList();
         }}
       />
     </div>
