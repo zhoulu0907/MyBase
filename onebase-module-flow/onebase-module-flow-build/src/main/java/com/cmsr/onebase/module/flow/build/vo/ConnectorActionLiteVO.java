@@ -36,4 +36,10 @@ public class ConnectorActionLiteVO implements Serializable {
 
     @Schema(description = "状态：1-已发布，2-已下架", example = "1")
     private String status;
+
+    @Schema(description = "创建时间", example = "2026-02-05 16:30:56")
+    private String createTime;
+
+    @Schema(description = "更新时间", example = "2026-02-05 18:31:26")
+    private String updateTime;
 }

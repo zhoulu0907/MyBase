@@ -88,7 +88,7 @@ public class PageController {
     @PostMapping("/view/list")
     @Operation(summary = "视图列表")
     public CommonResult<ListPageViewRespVO> listPageView(@RequestBody ListPageViewReqVO listPageViewReqVO) {
-        List<PageDTO> pages = pageService.listPageView(listPageViewReqVO.getPageSetId());
+        List<PageDTO> pages = pageService.listPageView(listPageViewReqVO.getPageSetId(), listPageViewReqVO.getIsDev());
 
         ListPageViewRespVO listPageViewRespVO = new ListPageViewRespVO();
         listPageViewRespVO.setPages(pages);

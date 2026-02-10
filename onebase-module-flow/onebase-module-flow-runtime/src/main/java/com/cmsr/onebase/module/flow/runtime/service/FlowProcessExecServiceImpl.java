@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * @Author：huangjie
- * @Date：2025/9/4 17:38
+ *                  @Date：2025/9/4 17:38
  */
 @Slf4j
 @Setter
@@ -56,7 +56,8 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
     @Override
     public List<QueryFormTriggerRespVO> queryFormTrigger(Long pageId) {
         Long applicationId = ApplicationManager.getApplicationId();
-        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageId(applicationId, pageId);
+        List<StartFormNodeData> startFormNodeDataList = flowProcessCache.findStartFormNodeDataByPageId(applicationId,
+                pageId);
         return startFormNodeDataList.stream()
                 .map(startFormNodeData -> BeanUtils.toBean(startFormNodeData, QueryFormTriggerRespVO.class))
                 .toList();
@@ -91,7 +92,8 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             RowData rowData = convertInputParamsData(reqVO, startFormNodeData);
             boolean isTrigger = true;
             if (CollectionUtils.isNotEmpty(startFormNodeData.getFilterCondition())) {
-                OrExpression orExpression = flowConditionsProvider.formatConditionsForExpression(startFormNodeData.getFilterCondition(), rowData);
+                OrExpression orExpression = flowConditionsProvider
+                        .formatConditionsForExpression(startFormNodeData.getFilterCondition(), rowData);
                 isTrigger = expressionExecutor.evaluateInput(orExpression, rowData);
             }
             if (!isTrigger) {
@@ -127,7 +129,6 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
         return executorInput;
     }
 
-
     private RowData convertInputParamsData(FormTriggerReqVO reqVO, StartFormNodeData startFormNodeData) {
         Map<String, Object> inputParams = reqVO.getInputParams();
         if (MapUtils.isEmpty(inputParams)) {
@@ -144,11 +145,11 @@ public class FlowProcessExecServiceImpl implements FlowProcessExecService {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
             if (tableFieldSchemas.isTableName(fieldName)) {
-                //子表的数据
+                // 子表的数据
                 TableData subTableData = convertToTableData(tableName, tableFieldSchemas, fieldValue);
                 rowData.addValue(tableName + "." + fieldName, ColumnType.SUBTABLE, subTableData);
             } else {
-                //主表的数据
+                // 主表的数据
                 SemanticFieldTypeEnum fieldTypeEnum = tableFieldSchemas.getFieldTypeEnum(tableName, fieldName);
                 Object convertValue = FieldTypeConvertor.convert(fieldTypeEnum, fieldValue);
                 rowData.addValue(tableName + "." + fieldName, ColumnType.SIMPLE, convertValue);

@@ -6,13 +6,15 @@ spring:
   # 数据源配置项
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3
+    url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3?ssl=false&connectTimeout=30&socketTimeout=30
     username: postgres
     password: onebase@2025
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimum-idle: 1
       maximum-pool-size: 20
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
   redis:
     redisson:
       config: |
@@ -72,6 +74,13 @@ liteflow:
   enable: false
   version-tag: 0
   js-server-address: http://10.0.104.41:28392
+
+# Flow流程跟踪配置
+flow:
+  trace:
+    # 设置为需要跟踪的流程ID后，该流程的所有详细日志都会输出
+    # 设置为 0 或留空则不进行特定流程跟踪
+    process-id: 195502410512138240
 
 # Goview配置 开发环境特定的文件存储配置
 v2:

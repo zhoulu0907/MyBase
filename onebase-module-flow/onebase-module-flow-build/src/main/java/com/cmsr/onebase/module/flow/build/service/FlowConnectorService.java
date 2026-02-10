@@ -140,10 +140,10 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器实例ID
      * @param actionName  动作名称（作为properties的key）
-     * @param actionConfig 新的动作配置
+     * @param reqVO       动作配置请求
      * @return 更新是否成功
      */
-    Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig);
+    Boolean updateActionConfig(Long connectorId, String actionName, SaveActionConfigReqVO reqVO);
 
     // ==================== 动作管理接口 ====================
 

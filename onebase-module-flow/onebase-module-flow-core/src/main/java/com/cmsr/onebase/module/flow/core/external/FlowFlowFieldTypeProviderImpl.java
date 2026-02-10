@@ -12,6 +12,7 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDT
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ import java.util.*;
  * @Author：huangjie
  * @Date：2025/10/14 17:53
  */
+@Slf4j
 @Setter
 @Component
 public class FlowFlowFieldTypeProviderImpl implements FlowFieldTypeProvider {
@@ -55,20 +57,24 @@ public class FlowFlowFieldTypeProviderImpl implements FlowFieldTypeProvider {
         for (JsonGraphNode node : nodes) {
             NodeData nodeData = node.getData();
             if (nodeData instanceof StartFormNodeData n) {
-                if (n.getPageId() == null) {
-                    String pageUuid = n.getPageUuid();
-                    Long pageId = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(applicationId, flowProperties.getVersionTag(),
-                            () -> flowAppProvider.findPageIdByAppIdAndPageUuid(applicationId, pageUuid)
-                    ));
-                    n.setPageId(pageId);
-                }
-                if (n.getTableName() == null) {
-                    String pageUuid = n.getPageUuid();
-                    String tableUuid = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(applicationId, flowProperties.getVersionTag(),
-                            () -> flowAppProvider.findTableUuidByAppIdAndPageUuid(applicationId, pageUuid)
-                    ));
-                    String tableName = findTableNameByUuid(applicationId, tableUuid);
-                    n.setTableName(tableName);
+                // 检查 pageUuid 是否存在
+                String pageUuid = n.getPageUuid();
+                if (pageUuid == null || pageUuid.isEmpty()) {
+                    log.warn("StartForm节点缺少pageUuid，跳过字段类型补全。节点ID: {}, 流程应用ID: {}", node.getId(), applicationId);
+                } else {
+                    if (n.getPageId() == null) {
+                        Long pageId = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(applicationId, flowProperties.getVersionTag(),
+                                () -> flowAppProvider.findPageIdByAppIdAndPageUuid(applicationId, pageUuid)
+                        ));
+                        n.setPageId(pageId);
+                    }
+                    if (n.getTableName() == null) {
+                        String tableUuid = TenantManager.withoutTenantCondition(() -> ApplicationManager.withApplicationIdAndVersionTag(applicationId, flowProperties.getVersionTag(),
+                                () -> flowAppProvider.findTableUuidByAppIdAndPageUuid(applicationId, pageUuid)
+                        ));
+                        String tableName = findTableNameByUuid(applicationId, tableUuid);
+                        n.setTableName(tableName);
+                    }
                 }
             }
             if (nodeData instanceof FieldTypeProcessable processable) {

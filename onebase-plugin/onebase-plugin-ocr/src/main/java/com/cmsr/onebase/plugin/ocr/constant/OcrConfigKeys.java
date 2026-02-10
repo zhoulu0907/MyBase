@@ -31,4 +31,10 @@ public class OcrConfigKeys {
      * 不同服务商的 API 端点地址
      */
     public static final String CONFIG_ENDPOINT = "endpoint";
+
+    /**
+     * OCR 服务商 Region ID 配置键
+     * 适用于阿里云等需要指定区域的服务商
+     */
+    public static final String CONFIG_REGION_ID = "region-id";
 }

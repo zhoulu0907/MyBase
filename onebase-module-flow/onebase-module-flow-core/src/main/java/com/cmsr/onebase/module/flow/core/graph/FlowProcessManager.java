@@ -172,22 +172,130 @@ public class FlowProcessManager {
         });
     }
 
+    /**
+     * 处理流程更新 - Flow 流程核心方法
+     *
+     * <p>当流程配置发生变更时调用，负责完成以下工作：</p>
+     * <ol>
+     *   <li>验证流程定义的有效性</li>
+     *   <li>解析 JSON 流程定义，构建内存中的流程图结构</li>
+     *   <li>将构建好的流程图缓存到内存中，供流程执行时使用</li>
+     *   <li>根据触发类型（定时/日期字段），启动相应的调度任务</li>
+     * </ol>
+     *
+     * <p><b>核心概念：</b></p>
+     * <ul>
+     *   <li><b>FlowProcessDO</b>: 流程的数据库持久化对象，包含流程定义 JSON</li>
+     *   <li><b>JsonGraph</b>: 流程图在内存中的表示，包含节点、边、连接关系</li>
+     *   <li><b>FlowProcessCache</b>: 流程图内存缓存，避免每次执行都重新解析</li>
+     *   <li><b>调度任务</b>: 对于定时触发或日期字段触发的流程，需要创建定时任务</li>
+     * </ul>
+     *
+     * <p><b>执行流程：</b></p>
+     * <pre>
+     * FlowProcessDO (数据库)
+     *       ↓
+     * processDefinition (JSON字符串)
+     *       ↓
+     * FlowGraphBuilder.build() 解析构建
+     *       ↓
+     * JsonGraph (内存流程图)
+     *       ↓
+     * FlowProcessCache (缓存)
+     *       ↓
+     * startSchedulingJob() (启动调度)
+     * </pre>
+     *
+     * @param processDO 流程数据对象，包含流程定义、触发类型、应用ID等信息
+     * @param sync 是否同步启动调度任务
+     *             <ul>
+     *               <li>true: 同步执行，适用于单条流程更新场景</li>
+     *               <li>false: 异步执行，适用于批量初始化场景，避免阻塞</li>
+     *             </ul>
+     */
     private void onProcessUpdate(FlowProcessDO processDO, boolean sync) {
-        log.info("处理流程更新：{}-{}", processDO.getApplicationId(), processDO.getId());
+        // 提取流程ID，用于日志跟踪和缓存键
+        Long processId = processDO.getId();
+
+        // 检查是否为需要详细跟踪的流程（用于调试）
+        Long traceProcessId = flowProperties.getTraceProcessId();
+        boolean isTrace = processId.equals(traceProcessId);
+
+        // 记录流程更新开始日志
+        if (isTrace) {
+            log.info("[TRACE-{}] ========== onProcessUpdate开始 ==========", processId);
+            log.info("[TRACE-{}] 处理流程更新: applicationId={}, processName={}, triggerType={}, enableStatus={}, publishStatus={}",
+                    processId, processDO.getApplicationId(), processDO.getProcessName(),
+                    processDO.getTriggerType(), processDO.getEnableStatus(), processDO.getPublishStatus());
+        } else {
+            log.info("处理流程更新：{}-{}", processDO.getApplicationId(), processDO.getId());
+        }
+
+        // ========== 第一步：验证流程定义 ==========
+        // 流程定义是一个JSON字符串，描述了节点、边、连接关系
         if (StringUtils.isBlank(processDO.getProcessDefinition())) {
             log.error("流程定义错误, 未包含内容：{}", processDO);
             return;
         }
-        JsonGraph jsonGraph = flowGraphBuilder.build(processDO.getApplicationId(), processDO.getProcessDefinition());
+
+        if (isTrace) {
+            log.info("[TRACE-{}] 开始构建流程图, processDefinitionLength={}",
+                    processId, processDO.getProcessDefinition().length());
+        }
+
+        // ========== 第二步：构建流程图 ==========
+        // 将 JSON 字符串解析为内存中的 JsonGraph 对象
+        // 此过程会：
+        // 1. 解析 JSON 结构
+        // 2. 验证节点类型和数据
+        // 3. 补全字段类型信息（如 StartForm 节点的 tableName）
+        // 4. 建立节点间的连接关系
+        JsonGraph jsonGraph = flowGraphBuilder.build(processDO.getApplicationId(),
+                processDO.getProcessDefinition(), processId);
+
         if (jsonGraph == null) {
             log.error("流程定义错误：{}", processDO);
             return;
         }
+
+        if (isTrace) {
+            log.info("[TRACE-{}] 流程图构建成功: nodeCount={}, hasStartNode={}",
+                    processId,
+                    jsonGraph.getNodes() != null ? jsonGraph.getNodes().size() : 0,
+                    jsonGraph.getStartNode() != null);
+        }
+
+        // ========== 第三步：更新缓存 ==========
+        // 将构建好的流程图存入内存缓存，后续执行时直接从缓存获取
+        // 缓存 key: processId, value: (FlowProcessDO, JsonGraph)
         flowProcessCache.update(processDO, jsonGraph);
+
+        if (isTrace) {
+            log.info("[TRACE-{}] 流程已添加到缓存", processId);
+        }
+
+        // ========== 第四步：启动调度任务 ==========
+        // 根据触发类型决定是否需要启动定时任务：
+        // - TIME: 定时触发（如 cron 表达式）
+        // - DATE_FIELD: 日期字段触发（如某个日期字段到达时）
+        // - FORM: 表单触发（无需定时任务，由前端调用触发）
         if (sync) {
+            // 同步执行：立即启动调度任务
+            if (isTrace) {
+                log.info("[TRACE-{}] 同步启动调度任务", processId);
+            }
             startSchedulingJob(processDO);
         } else {
+            // 异步执行：放入线程池，避免阻塞当前线程
+            // 批量初始化时使用，提高启动速度
+            if (isTrace) {
+                log.info("[TRACE-{}] 异步启动调度任务", processId);
+            }
             executor.execute(() -> startSchedulingJob(processDO));
+        }
+
+        if (isTrace) {
+            log.info("[TRACE-{}] ========== onProcessUpdate完成 ==========", processId);
         }
     }
 
