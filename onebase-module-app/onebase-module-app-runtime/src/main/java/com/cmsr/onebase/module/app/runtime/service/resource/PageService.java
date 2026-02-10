@@ -14,6 +14,6 @@ public interface PageService {
 
     String getMetadataByPageId(Long pageId);
 
-    List<PageDTO> listPageView(Long pageSetId);
+    List<PageDTO> listPageView(Long pageSetId,  Boolean isDev);
 
 }
