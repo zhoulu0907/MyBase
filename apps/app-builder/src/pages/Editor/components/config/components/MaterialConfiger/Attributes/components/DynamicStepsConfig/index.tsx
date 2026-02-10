@@ -63,12 +63,6 @@ function getThemeColorForDisplay(color: string): string {
   return `rgb(${color})`;
 }
 
-interface StepsStyleItem {
-  key: string;
-  label: string;
-  value: StepsStyleType;
-}
-
 export interface DynamicStepsConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | unknown[]) => void;
   handleMultiPropsChange?: (updates: { key: string; value: string | number | boolean | unknown[] }[]) => void;

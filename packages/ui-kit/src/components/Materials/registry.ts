@@ -148,7 +148,7 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     type: COMPONENT_TYPE.STEPS_LAYOUT,
     schema: cloneDeep(BasicSchema.XStepsLayout),
     validate: BaseValidate.XStepsLayout,
-    template: { h: 36, w: 118, displayName: '步骤条', icon: 'steps_layout_cp.svg', category: 'layout' },
+    template: { h: 36, w: 118, displayName: '步骤条', icon: 'colpase_layout_cp.svg', category: 'form' },
     fieldMap: [],
     entityMap: []
   },
@@ -663,7 +663,10 @@ export function initComponentImplementations(): void {
     if (!descriptor) continue
     const category = descriptor.template.category
     let impl: ReactComponentType<any> | undefined
-    if (category === 'form') impl = (FormComp as any)[type]
+    // 特殊处理：步骤条组件虽然在表单分类，但实现仍在布局组件中
+    if (type === COMPONENT_TYPE.STEPS_LAYOUT) {
+      impl = (LayoutComp as any)[type]
+    } else if (category === 'form') impl = (FormComp as any)[type]
     else if (category === 'layout') impl = (LayoutComp as any)[type]
     else if (category === 'list') impl = (ListComp as any)[type]
     else if (category === 'show') impl = (ShowComp as any)[type]
@@ -989,29 +992,31 @@ export function getComponentImpl(type: ComponentType, runtime?:boolean): ReactCo
   const d = COMPONENT_REGISTRY[type]
   if (!d) return undefined
   const category = d.template.category
+  const componentType = d.type
+  // 特殊处理：步骤条组件虽然属于表单分类，但实现仍在布局组件中
+  if (componentType === COMPONENT_TYPE.STEPS_LAYOUT) {
+    return runtime ? (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_STEPS_LAYOUT] : (LayoutComp as any)[COMPONENT_TYPE.STEPS_LAYOUT]
+  }
   // 先布局组件
   if (category === 'layout') {
     if(runtime){
-      if(type === COMPONENT_TYPE.COLUMN_LAYOUT){
+      if(componentType === COMPONENT_TYPE.COLUMN_LAYOUT){
         return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_COLUMN_LAYOUT]
       }
-      if(type === COMPONENT_TYPE.COLLAPSE_LAYOUT){
+      if(componentType === COMPONENT_TYPE.COLLAPSE_LAYOUT){
         return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_COLLAPSE_LAYOUT]
       }
-      if(type === COMPONENT_TYPE.TABS_LAYOUT){
+      if(componentType === COMPONENT_TYPE.TABS_LAYOUT){
         return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_TABS_LAYOUT]
       }
-      if(type === COMPONENT_TYPE.STEPS_LAYOUT){
-        return (LayoutComp as any)[COMPONENT_TYPE.PREVIEW_STEPS_LAYOUT]
-      }
     }
-    return (LayoutComp as any)[type]
+    return (LayoutComp as any)[componentType]
   }
   if (d.component) return d.component
-  if (category === 'form') return (FormComp as any)[type]
-  if (category === 'list') return (ListComp as any)[type]
-  if (category === 'show') return (ShowComp as any)[type]
-  if (category === 'workbench') return (WorkbenchComp as any)[type]
+  if (category === 'form') return (FormComp as any)[componentType]
+  if (category === 'list') return (ListComp as any)[componentType]
+  if (category === 'show') return (ShowComp as any)[componentType]
+  if (category === 'workbench') return (WorkbenchComp as any)[componentType]
   return undefined
 }
 
