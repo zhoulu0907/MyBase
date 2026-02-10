@@ -83,6 +83,9 @@ public class PageServiceProvider {
 
     public List<PageDTO> listPageView(Long pageSetId) {
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetId);
+        if (pageSetDO == null) {
+            throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_FOUND_OR_UNPUBLISHED);
+        }
         Long applicationId = pageSetDO.getApplicationId();
         String pageSetUuid = pageSetDO.getPageSetUuid();
         Integer pageSetType = pageSetDO.getPageSetType();
