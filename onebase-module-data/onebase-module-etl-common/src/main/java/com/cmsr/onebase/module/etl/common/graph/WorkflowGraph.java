@@ -45,7 +45,7 @@ public class WorkflowGraph {
 
     public Node findIncomingNode(Node node) {
         for (Edge edge : edges) {
-            if (edge.getTargetNodeId().equals(node.getId())) {
+            if (edge.getTargetNodeId() != null && edge.getTargetNodeId().equals(node.getId())) {
                 return findNodeById(edge.getSourceNodeId());
             }
         }
@@ -123,7 +123,7 @@ public class WorkflowGraph {
 
     private Node findNodeById(String nodeId) {
         for (Node node : nodes) {
-            if (node.getId().equals(nodeId)) {
+            if (node.getId() != null && node.getId().equals(nodeId)) {
                 return node;
             }
         }
@@ -176,7 +176,7 @@ public class WorkflowGraph {
 
     private void addNode(Node node) {
         for (Node n : nodes) {
-            if (n.getId().equals(node.getId())) {
+            if (n.getId() != null && n.getId().equals(node.getId())) {
                 return;
             }
         }
@@ -185,7 +185,8 @@ public class WorkflowGraph {
 
     private void addEdge(Edge edge) {
         for (Edge e : edges) {
-            if (e.getSourceNodeId().equals(edge.getSourceNodeId()) && e.getTargetNodeId().equals(edge.getTargetNodeId())) {
+            if (e.getSourceNodeId() != null && e.getSourceNodeId().equals(edge.getSourceNodeId())
+                    && e.getTargetNodeId() != null && e.getTargetNodeId().equals(edge.getTargetNodeId())) {
                 return;
             }
         }

@@ -55,6 +55,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
  * @date 2025-10-1
  */
 @Slf4j
+@Deprecated
 public abstract class AbstractMetadataDataMethodCoreService implements MetadataDataMethodCoreServiceV2 {
 
 
