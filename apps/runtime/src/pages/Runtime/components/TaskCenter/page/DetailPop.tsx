@@ -135,13 +135,16 @@ const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisib
         }
       };
       const res = await fetchExecTask(req);
-      console.log('exec task---res--22-', res);
       if (res) {
         Message.success(res?.msg || '操作成功');
         setPredictVisible(false);
         onBack && onBack();
+      } else {
+        Message.error(res?.msg || '操作失败');
       }
-    } catch (error) {}
+    } catch (error: any) {
+      Message.error(error?.msg || '操作失败');
+    }
   };
 
   const handleConfirmOK = async (value: any) => {
