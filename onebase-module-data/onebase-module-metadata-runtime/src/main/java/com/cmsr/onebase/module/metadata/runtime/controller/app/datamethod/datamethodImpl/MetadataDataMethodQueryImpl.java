@@ -31,6 +31,7 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DAT
 
 @Slf4j
 @Component
+@Deprecated
 public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreService {
 
     @Resource
