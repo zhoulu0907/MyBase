@@ -35,7 +35,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
 
   return (
     <ConfigProvider getPopupContainer={getPopupContainer}>
-      {triggerEditorSignal.isInvalidNode(node.id) && <ErrorIcon />}
+      {triggerEditorSignal.isInvalidNode(nodeRender.node.id) && <ErrorIcon />}
 
       <div
         /*
@@ -67,7 +67,7 @@ export const BaseNode = ({ node }: { node: FlowNodeEntity }) => {
            */
           ...nodeRender.node.getNodeRegistry().meta.style,
           opacity: nodeRender.dragging ? 0.3 : 1,
-          outline: triggerEditorSignal.isInvalidNode(node.id) ? '1px solid rgb(var(--red-6))' : 'none'
+          outline: triggerEditorSignal.isInvalidNode(nodeRender.node.id) ? '1px solid rgb(var(--red-6))' : 'none'
         }}
       >
         <NodeRenderContext.Provider value={nodeRender}>{form?.render()}</NodeRenderContext.Provider>
