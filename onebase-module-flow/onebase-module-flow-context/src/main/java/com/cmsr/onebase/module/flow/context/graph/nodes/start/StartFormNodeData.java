@@ -63,7 +63,9 @@ public class StartFormNodeData extends NodeData implements FieldTypeProcessable,
     @Override
     public Set<String> getTableNames() {
         Set<String> tableNames = new HashSet<>();
-        tableNames.add(tableName);
+        if (tableName != null) {
+            tableNames.add(tableName);
+        }
         Set<String> ss = FieldTypeHelper.extractTableNames(filterCondition);
         tableNames.addAll(ss);
         return tableNames;

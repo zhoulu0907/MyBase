@@ -32,6 +32,15 @@ import java.util.List;
 public class HttpRequest implements Serializable {
 
     /**
+     * 流程追踪信息
+     * 用于全流程日志关联，方便问题排查
+     */
+    private String processId;
+    private String traceId;
+    private String executionUuid;
+    private String nodeId;
+
+    /**
      * 请求 URL（已解析变量）
      *
      * <p>支持 http 和 https 协议。
