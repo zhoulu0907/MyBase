@@ -47,6 +47,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
 
   // 完成
   const handleComplete = () => {
+    Message.success('导入完成');
     if (onComplete) {
       onComplete();
     } else {
@@ -137,6 +138,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                     if (flag && url) {
                       onProgress(100)
                       onSuccess({url});
+                      Message.success('上传成功');
                     } else {
                       onError({
                         status: 'error',
