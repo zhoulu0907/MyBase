@@ -31,8 +31,8 @@ public class PageServiceImpl implements PageService {
     }
 
     @Override
-    public List<PageDTO> listPageView(Long pageSetId) {
-        return pageServiceProvider.listPageView(pageSetId);
+    public List<PageDTO> listPageView(Long pageSetId, Boolean isDev) {
+        return pageServiceProvider.listPageView(pageSetId, isDev);
     }
 
 }

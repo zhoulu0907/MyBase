@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.provider.resource;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -81,7 +82,10 @@ public class PageServiceProvider {
         return mainMetadata;
     }
 
-    public List<PageDTO> listPageView(Long pageSetId) {
+    public List<PageDTO> listPageView(Long pageSetId, Boolean isDev) {
+        if (isDev){
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetId);
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_FOUND_OR_UNPUBLISHED);
