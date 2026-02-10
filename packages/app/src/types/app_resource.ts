@@ -52,6 +52,10 @@ export interface GetPageListByAppIdReq {
   appId: string;
 }
 
+export interface GetTablesByAppIdReq {
+  applicationId: string;
+}
+
 export interface GetPageMetadataReq {
   pageUuid: string;
 }

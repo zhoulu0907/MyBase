@@ -6,6 +6,7 @@ import {
   GetAppIdByPageSetIdReq,
   GetComponentListByPageIdReq,
   GetPageListByAppIdReq,
+  GetTablesByAppIdReq,
   GetPageMetadataReq,
   GetPageSetIdReq,
   GetPageSetMainMetaDataReq,
@@ -53,6 +54,10 @@ export const getPageMetadata = (params: GetPageMetadataReq) => {
 
 export const getComponentListByPageId = (params: GetComponentListByPageIdReq) => {
   return appService.post('/resource/component/list', params);
+};
+
+export const getTablesByAppId = (params: GetTablesByAppIdReq) => {
+  return appService.get('/resource/component/list/list_page_components', params);
 };
 
 export const createPageView = (params: CreatePageViewParams) => {
