@@ -112,14 +112,14 @@ const XStepsLayout = memo((props: XStepsLayoutConfig & { runtime?: boolean; deta
           type="secondary"
           icon={<IconLeft />}
           onClick={handlePrev}
-          disabled={current === 1}
+          style={{ display: current === 1 ? 'none' : undefined }}
         >
           上一步
         </Button>
         <Button
-          type="primary"
+          type="outline"
           onClick={handleNext}
-          disabled={current === defaultValue.length}
+          style={{ display: current === defaultValue.length ? 'none' : undefined }}
         >
           下一步
           <IconRight />

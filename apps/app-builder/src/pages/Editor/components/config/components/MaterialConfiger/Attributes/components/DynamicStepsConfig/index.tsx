@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Steps, Form, Input, Checkbox, ColorPicker } from '@arco-design/web-react';
+import { Button, Steps, Form, Input, Checkbox, ColorPicker, Image } from '@arco-design/web-react';
 import { IconArrowLeft, IconSwap, IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { CONFIG_TYPES } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
 import { ReactSortable } from 'react-sortablejs';
 import styles from './index.module.less';
+import StepsStyle1Image from '@/assets/images/cp/steps1.png';
+import StepsStyle2Image from '@/assets/images/cp/steps2.png';
+import StepsStyle3Image from '@/assets/images/cp/steps3.png';
+import StepsStyle4Image from '@/assets/images/cp/steps4.png';
 
 const { Step } = Steps;
 const FormItem = Form.Item;
 
 type StepsStyleType = 'default' | 'navigation' | 'arrow' | 'dot';
 type StepsLabelPlacementType = 'horizontal' | 'vertical';
+
+interface StepsStyleItem {
+  key: string;
+  label: string;
+  value: StepsStyleType;
+  image: string;
+}
 
 function hexToRgb(hex: string): string {
   if (!hex) return '';
@@ -70,22 +81,26 @@ const STEPS_STYLES: StepsStyleItem[] = [
   {
     key: 'default',
     label: '默认样式',
-    value: 'default'
+    value: 'default',
+    image: StepsStyle1Image
   },
   {
     key: 'navigation',
     label: '导航样式',
-    value: 'navigation'
+    value: 'navigation',
+    image: StepsStyle2Image
   },
   {
     key: 'arrow',
     label: '箭头样式',
-    value: 'arrow'
+    value: 'arrow',
+    image: StepsStyle3Image
   },
   {
     key: 'dot',
     label: '点状样式',
-    value: 'dot'
+    value: 'dot',
+    image: StepsStyle4Image
   }
 ];
 
@@ -183,14 +198,16 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
   };
 
   const renderStylePreview = () => {
+    const currentImage = STEPS_STYLES.find(s => s.value === currentStyle)?.image || StepsStyle1Image;
     return (
       <div className={styles.stepsStylePreview}>
         <div className={styles.stepsStylePreviewContent}>
-          <Steps current={1} type={currentStyle} labelPlacement={currentLabelPlacement}>
-            {stepsConfig.map((step: any, index: number) => (
-              <Step key={index} title={step.title} description={step.description} />
-            ))}
-          </Steps>
+          <Image
+            width="100%"
+            src={currentImage}
+            alt="样式预览"
+            preview={false}
+          />
         </div>
         <Button
           type="outline"
@@ -218,14 +235,12 @@ const DynamicStepsConfig: React.FC<DynamicStepsConfigProps> = ({ handlePropsChan
               className={`${styles.stepsStyleItem} ${currentStyle === style.value ? styles.active : ''}`}
               onClick={() => handleStyleChange(style.value)}
             >
-              <div className={styles.stepsStyleItemLabel}>{style.label}</div>
-              <div className={styles.stepsStyleItemPreview}>
-                <Steps current={1} type={style.value} labelPlacement={currentLabelPlacement} size="small">
-                  <Step title="步骤1" />
-                  <Step title="步骤2" />
-                  <Step title="步骤3" />
-                </Steps>
-              </div>
+              <Image
+                width="100%"
+                src={style.image}
+                alt={style.label}
+                preview={false}
+              />
             </div>
           ))}
         </div>

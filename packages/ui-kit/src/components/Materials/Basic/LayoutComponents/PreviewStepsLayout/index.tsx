@@ -142,14 +142,14 @@ const XPreviewStepsLayout = memo((props: XPreviewStepsLayoutConfig & { detailMod
           type="secondary"
           icon={<IconLeft />}
           onClick={handlePrev}
-          disabled={current === 1}
+          style={{ display: current === 1 ? 'none' : undefined }}
         >
           上一步
         </Button>
         <Button
           type="primary"
           onClick={handleNext}
-          disabled={current === defaultValue.length}
+          style={{ display: current === defaultValue.length ? 'none' : undefined }}
         >
           下一步
           <IconRight />
