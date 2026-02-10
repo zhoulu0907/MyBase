@@ -431,7 +431,9 @@ public class SemanticDataCrudService {
                         if (sourceFieldValueDto == null) continue;
                         Object targetFiledValue = sourceFieldValueDto.getStoreValue();
                         if (targetFiledValue == null) continue;
-                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
+                        // 确保查询值类型正确，避免 PostgreSQL bigint = character varying 类型不匹配
+                        Object queryValue = toLongIfNotEmpty(targetFiledValue);
+                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, queryValue != null ? queryValue : targetFiledValue);
                         if (rv != null) {
                             connVals.put(c.getTargetEntityTableName(), rv);
                         }
@@ -449,7 +451,9 @@ public class SemanticDataCrudService {
                         if (sourceFieldValueDto == null) continue;
                         Object targetFiledValue = sourceFieldValueDto.getStoreValue();
                         if (targetFiledValue == null) continue;
-                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, targetFiledValue);
+                        // 确保查询值类型正确，避免 PostgreSQL bigint = character varying 类型不匹配
+                        Object queryValue = toLongIfNotEmpty(targetFiledValue);
+                        SemanticRelationValueDTO rv = readRelationConnector(c, targetFiledName, queryValue != null ? queryValue : targetFiledValue);
                         if (rv != null) {
                             connVals.put(c.getTargetEntityTableName(), rv);
                         }
@@ -769,7 +773,8 @@ public class SemanticDataCrudService {
      */
     private void generateAndApplyAutoNumbers(List<SemanticFieldSchemaDTO> fields, SemanticEntityValueDTO value) {
         List<String> fieldIds = fields.stream()
-                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
+                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE)
+                        || (f.getFieldTypeEnum() == null && AUTO_CODE.getCode().equalsIgnoreCase(f.getFieldType())))
                 .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
         
@@ -933,7 +938,8 @@ public class SemanticDataCrudService {
         }
         
         List<String> fieldUuids = attrs.stream()
-                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE))
+                .filter(f -> Objects.equals(f.getFieldTypeEnum(), AUTO_CODE)
+                        || (f.getFieldTypeEnum() == null && AUTO_CODE.getCode().equalsIgnoreCase(f.getFieldType())))
                 .map(SemanticFieldSchemaDTO::getFieldUuid)
                 .toList();
         if (fieldUuids.isEmpty()) {

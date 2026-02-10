@@ -155,8 +155,7 @@ public class DataInspectServiceImpl implements DataInspectService {
             previewColumn.setDataIndex("_" + columnName);
             previewColumn.setTitle(displayName);
             previewColumn.setFieldType(flinkType);
-            int metaColumnIdx = columnData.getPosition() - 1;
-            columnList.add(metaColumnIdx, previewColumn);
+            columnList.add(previewColumn);
         }
         return columnList;
     }
