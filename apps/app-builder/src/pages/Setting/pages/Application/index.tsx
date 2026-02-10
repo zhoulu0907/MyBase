@@ -278,7 +278,7 @@ const AppManagement: React.FC = () => {
                 <div
                   className={styles.aiCreate}
                   style={{
-                    backgroundImage: `linear-gradient(99.09deg, #BADAFF 0%, #EFF6FF 22.12%, rgba(239, 246, 255, 0) 56.73%, rgba(239, 246, 255, 0) 87.76%),url(${aiPng})`
+                    backgroundImage: `linear-gradient(99.09deg, #BADAFF 0%, #EFF6FF 42.07%, rgba(239, 246, 255, 0) 56.73%, rgba(239, 246, 255, 0) 87.76%),url(${aiPng})`
                   }}
                   onClick={() => navigate('/aigen/chat')}
                 >
