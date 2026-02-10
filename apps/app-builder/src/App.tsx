@@ -8,6 +8,7 @@ import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
 import Login from './pages/Login';
+import OAuthCallback from './pages/OAuthCallback';
 import SettingPage from './pages/Setting';
 
 function AppContent() {
@@ -47,6 +48,7 @@ function AppContent() {
     <Routes>
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
+      <Route path="/oauth/obbuilder/:appName" element={<OAuthCallback />} />
       <Route path="/aigen/chat" element={null} />
       {/* 需要认证的路由 */}
       <Route
