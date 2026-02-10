@@ -647,6 +647,7 @@ const XTable = memo(
               <Form form={form} layout="vertical" className="searchItems">
                 <TableSearch
                   searchItems={searchItems}
+                  tableName={tableName}
                   labelColSpan={labelColSpan}
                   runtime={runtime}
                   onSearch={handleSearch}
