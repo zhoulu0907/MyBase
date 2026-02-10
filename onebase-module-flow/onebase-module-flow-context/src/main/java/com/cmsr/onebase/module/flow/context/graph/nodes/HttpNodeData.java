@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.flow.context.graph.nodes;
 
 import com.cmsr.onebase.module.flow.context.graph.NodeData;
 import com.cmsr.onebase.module.flow.context.graph.NodeType;
+import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -312,10 +313,17 @@ public class HttpNodeData extends NodeData implements Serializable {
     private String connectorUuid;
 
     /**
-     * HTTP动作UUID
-     * 用于标识具体的HTTP动作配置，从流程定义中传入
+     * 动作名称
+     * 用于从 action_config.properties 中按名称索引动作配置
      */
-    private String httpUuid;
+    private String actionName;
+
+    /**
+     * 环境名称
+     * 用于从 connector.config.properties 中按名称查找环境配置
+     * 为空时 fallback 取第一个环境
+     */
+    private String envName;
 
     /**
      * 连接器配置
@@ -405,25 +413,10 @@ public class HttpNodeData extends NodeData implements Serializable {
          * 支持 ${variableName} 格式的变量占位符。
          * 在节点执行时，变量会被替换为实际值。
          *
-         * <p>示例：
-         * <pre>{@code
-         * // 静态值
-         * value = "application/json"
-         *
-         * // 带变量替换
-         * value = "Bearer ${token}"
-         * // 如果 token = "abc123"，替换后为 "Bearer abc123"
-         *
-         * // 多个变量
-         * value = "Bearer ${realm}:${token}"
-         * // 如果 realm="api", token="xyz789"，替换后为 "Bearer api:xyz789"
-         * }</pre>
-         *
-         * <p>特殊字符：
-         * - 如果值中包含特殊字符（如引号），会自动转义
-         * - Unicode 字符（如中文）会被正确处理
-         * - 空值会发送空字符串
+         * <p>注意：
+         * - 实际数据库存储中字段名可能为 fieldValue，通过 @JsonAlias 兼容
          */
+        @JsonAlias("fieldValue")
         private String value;
     }
 }

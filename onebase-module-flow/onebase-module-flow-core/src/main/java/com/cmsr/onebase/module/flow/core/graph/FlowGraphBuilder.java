@@ -32,14 +32,19 @@ import java.util.Map;
 
 /**
  * @Author：huangjie
- * @Date：2025/9/28 15:12
+ *                  @Date：2025/9/28 15:12
  */
+@Slf4j
 @Component
 public class FlowGraphBuilder {
 
     @Setter
     @Autowired
     private FlowFieldTypeProvider flowFieldTypeProvider;
+
+    @Setter
+    @Autowired
+    private com.cmsr.onebase.module.flow.core.config.FlowProperties flowProperties;
 
     @Setter
     @Autowired
@@ -57,12 +62,26 @@ public class FlowGraphBuilder {
     @Autowired
     private FlowConnectorHttpRepository connectorHttpRepository;
 
-
     public JsonGraph build(Long applicationId, String json) {
+        return build(applicationId, json, null);
+    }
+
+    public JsonGraph build(Long applicationId, String json, Long processId) {
+        Long traceProcessId = flowProperties.getTraceProcessId();
+        if (processId != null && processId.equals(traceProcessId)) {
+            log.info("[TRACE-{}] FlowGraphBuilder.build开始: applicationId={}", processId, applicationId);
+        }
         JsonGraph jsonGraph = JsonUtils.parseObject(json, JsonGraph.class);
+        if (processId != null && processId.equals(traceProcessId)) {
+            log.info("[TRACE-{}] JsonGraph解析完成: nodeCount={}", processId,
+                    jsonGraph != null && jsonGraph.getNodes() != null ? jsonGraph.getNodes().size() : 0);
+        }
         addLoopContextToNodes(jsonGraph);
-        enrichNodeData(applicationId, jsonGraph);
+        enrichNodeData(applicationId, jsonGraph, processId);
         flowFieldTypeProvider.completeFieldType(applicationId, jsonGraph);
+        if (processId != null && processId.equals(traceProcessId)) {
+            log.info("[TRACE-{}] FlowGraphBuilder.build完成", processId);
+        }
         return jsonGraph;
     }
 
@@ -75,12 +94,20 @@ public class FlowGraphBuilder {
         }
     }
 
-    private void enrichNodeData(Long applicationId, JsonGraph jsonGraph) {
+    private void enrichNodeData(Long applicationId, JsonGraph jsonGraph, Long processId) {
+        Long traceProcessId = flowProperties.getTraceProcessId();
         if (jsonGraph == null || jsonGraph.getNodes() == null) {
             return;
         }
+        if (processId != null && processId.equals(traceProcessId)) {
+            log.info("[TRACE-{}] enrichNodeData开始: applicationId={}, nodeCount={}",
+                    processId, applicationId, jsonGraph.getNodes().size());
+        }
         for (JsonGraphNode node : jsonGraph.getNodes()) {
-            traverseNodeAndEnrichData(applicationId, node);
+            traverseNodeAndEnrichData(applicationId, node, processId);
+        }
+        if (processId != null && processId.equals(traceProcessId)) {
+            log.info("[TRACE-{}] enrichNodeData完成", processId);
         }
     }
 
@@ -103,17 +130,60 @@ public class FlowGraphBuilder {
         }
     }
 
-    private void traverseNodeAndEnrichData(Long applicationId, JsonGraphNode node) {
+    private void traverseNodeAndEnrichData(Long applicationId, JsonGraphNode node, Long processId) {
+        Long traceProcessId = flowProperties.getTraceProcessId();
+        String nodeId = node.getId();
+        String nodeType = node.getData() != null ? node.getData().getClass().getSimpleName() : "null";
+        boolean isTrace = processId != null && processId.equals(traceProcessId);
+
+        if (isTrace) {
+            log.info("[TRACE-{}] traverseNodeAndEnrichData开始: applicationId={}, nodeId={}, nodeType={}",
+                    processId, applicationId, nodeId, nodeType);
+        } else {
+            log.debug("[FlowGraphBuilder] traverseNodeAndEnrichData开始: applicationId={}, nodeId={}, nodeType={}",
+                    applicationId, nodeId, nodeType);
+        }
+
         if (node.getData() instanceof ScriptNodeData scriptNodeData) {
-            FlowConnectorScriptDO connectorScriptDO = TenantManager.withoutTenantCondition(() -> connectorScriptRepository.findByApplicationAndUuid(applicationId, scriptNodeData.getActionId(), scriptNodeData.getActionUuid()));
+            if (isTrace) {
+                log.info("[TRACE-{}] 处理ScriptNodeData: nodeId={}, actionId={}, actionUuid={}",
+                        processId, nodeId, scriptNodeData.getActionId(), scriptNodeData.getActionUuid());
+            } else {
+                log.debug("[FlowGraphBuilder] 处理ScriptNodeData: nodeId={}, actionId={}, actionUuid={}",
+                        nodeId, scriptNodeData.getActionId(), scriptNodeData.getActionUuid());
+            }
+            FlowConnectorScriptDO connectorScriptDO = TenantManager
+                    .withoutTenantCondition(() -> connectorScriptRepository.findByApplicationAndUuid(applicationId,
+                            scriptNodeData.getActionId(), scriptNodeData.getActionUuid()));
             scriptNodeData.setScript(connectorScriptDO.getRawScript());
             scriptNodeData.setInputSchema(connectorScriptDO.getInputSchema());
             scriptNodeData.setOutputSchema(connectorScriptDO.getOutputSchema());
+            if (isTrace) {
+                log.info("[TRACE-{}] ScriptNodeData处理完成: nodeId={}, scriptLength={}, inputSchema={}, outputSchema={}",
+                        processId, nodeId,
+                        connectorScriptDO.getRawScript() != null ? connectorScriptDO.getRawScript().length() : 0,
+                        connectorScriptDO.getInputSchema(),
+                        connectorScriptDO.getOutputSchema());
+            } else {
+                log.debug(
+                        "[FlowGraphBuilder] ScriptNodeData处理完成: nodeId={}, scriptLength={}, inputSchema={}, outputSchema={}",
+                        nodeId,
+                        connectorScriptDO.getRawScript() != null ? connectorScriptDO.getRawScript().length() : 0,
+                        connectorScriptDO.getInputSchema(),
+                        connectorScriptDO.getOutputSchema());
+            }
         }
         if (node.getData() instanceof CommonNodeData commonNodeData) {
+            if (isTrace) {
+                log.info("[TRACE-{}] 处理CommonNodeData: nodeId={}, connectorCode={}, nodeCode={}",
+                        processId, nodeId, commonNodeData.getConnectorCode(), commonNodeData.getNodeCode());
+            } else {
+                log.debug("[FlowGraphBuilder] 处理CommonNodeData: nodeId={}, connectorCode={}, nodeCode={}",
+                        nodeId, commonNodeData.getConnectorCode(), commonNodeData.getNodeCode());
+            }
             // 加载连接器配置
-            FlowConnectorDO connectorDO = TenantManager.withoutTenantCondition(() ->
-                flowConnectorMapper.selectByApplicationAndTypeCode(applicationId, commonNodeData.getConnectorCode()));
+            FlowConnectorDO connectorDO = TenantManager.withoutTenantCondition(() -> flowConnectorMapper
+                    .selectByApplicationAndTypeCode(applicationId, commonNodeData.getConnectorCode()));
             if (connectorDO != null) {
                 Map<String, Object> connectorConfig = new HashMap<>();
                 if (StringUtils.isNotBlank(connectorDO.getConfig())) {
@@ -123,8 +193,8 @@ public class FlowGraphBuilder {
             }
 
             // 加载节点配置
-            FlowNodeConfigDO nodeConfigDO = TenantManager.withoutTenantCondition(() ->
-                flowNodeConfigMapper.selectByApplicationAndCode(applicationId, commonNodeData.getNodeCode()));
+            FlowNodeConfigDO nodeConfigDO = TenantManager
+                    .withoutTenantCondition(() -> flowNodeConfigMapper.selectByCode(commonNodeData.getNodeCode()));
             if (nodeConfigDO != null) {
                 Map<String, Object> componentContext = new HashMap<>();
                 if (StringUtils.isNotBlank(nodeConfigDO.getConnConfigJson())) {
@@ -138,63 +208,149 @@ public class FlowGraphBuilder {
                 }
                 commonNodeData.setActionConfig(actionConfig);
             }
+            if (isTrace) {
+                log.info("[TRACE-{}] CommonNodeData处理完成: nodeId={}, connectorConfig={}, actionConfig={}",
+                        processId, nodeId, connectorDO != null, nodeConfigDO != null);
+            } else {
+                log.debug("[FlowGraphBuilder] CommonNodeData处理完成: nodeId={}, connectorConfig={}, actionConfig={}",
+                        nodeId, connectorDO != null, nodeConfigDO != null);
+            }
         }
-        // ========== 新增：HttpNodeData处理 ==========
+        // ========== HttpNodeData处理 ==========
         if (node.getData() instanceof HttpNodeData httpNodeData) {
-            // 从数据库加载HTTP动作配置
-            FlowConnectorHttpDO httpActionDO = TenantManager.withoutTenantCondition(() ->
-                connectorHttpRepository.findByApplicationAndUuid(
-                    applicationId,
-                    httpNodeData.getHttpUuid()
-                ));
+            String actionName = httpNodeData.getActionName();
+            String envName = httpNodeData.getEnvName();
 
-            if (httpActionDO != null) {
-                // 加载连接器配置
+            if (isTrace) {
+                log.info("[TRACE-{}] 开始加载HTTP节点配置: applicationId={}, actionName={}, envName={}, nodeId={}",
+                        processId, applicationId, actionName, envName, nodeId);
+            } else {
+                log.debug("[FlowGraphBuilder] 开始加载HTTP节点配置: applicationId={}, actionName={}, envName={}, nodeId={}",
+                        applicationId, actionName, envName, nodeId);
+            }
+
+            try {
+                // 步骤 1: 获取连接器
+                String connectorUuid = httpNodeData.getConnectorUuid();
+                if (StringUtils.isBlank(connectorUuid)) {
+                    log.error("[FlowGraphBuilder] 节点数据缺失connectorUuid: nodeId={}", nodeId);
+                    return;
+                }
+
                 QueryWrapper connectorQuery = QueryWrapper.create()
                         .where(FlowConnectorTableDef.FLOW_CONNECTOR.APPLICATION_ID.eq(applicationId))
-                        .and(FlowConnectorTableDef.FLOW_CONNECTOR.CONNECTOR_UUID.eq(httpActionDO.getConnectorUuid()));
-                FlowConnectorDO connectorDO = TenantManager.withoutTenantCondition(() ->
-                        flowConnectorMapper.selectOneByQuery(connectorQuery));
+                        .and(FlowConnectorTableDef.FLOW_CONNECTOR.CONNECTOR_UUID.eq(connectorUuid));
 
-                if (connectorDO != null) {
-                    Map<String, Object> connectorConfig = new HashMap<>();
-                    if (StringUtils.isNotBlank(connectorDO.getConfig())) {
-                        connectorConfig = JsonUtils.parseObject(connectorDO.getConfig(), Map.class);
+                FlowConnectorDO connectorDO = TenantManager
+                        .withoutTenantCondition(() -> flowConnectorMapper.selectOneByQuery(connectorQuery));
+
+                if (connectorDO == null) {
+                    log.error("[FlowGraphBuilder] 连接器不存在: connectorUuid={}", connectorUuid);
+                    return;
+                }
+
+                if (connectorDO.getActiveStatus() == null || connectorDO.getActiveStatus() == 0) {
+                    log.warn("[FlowGraphBuilder] 连接器已禁用: connectorUuid={}", connectorUuid);
+                    return;
+                }
+
+                // 步骤 2: 解析环境配置 — config.properties[envName].envConfig
+                Map<String, Object> envConfig = null;
+                if (StringUtils.isNotBlank(connectorDO.getConfig())) {
+                    try {
+                        Map<String, Object> configRoot = JsonUtils.parseObject(connectorDO.getConfig(), Map.class);
+                        if (configRoot != null) {
+                            Object propertiesObj = configRoot.get("properties");
+                            if (propertiesObj instanceof Map) {
+                                Map<String, Object> properties = (Map<String, Object>) propertiesObj;
+                                Map<String, Object> envEntry = null;
+                                if (StringUtils.isNotBlank(envName) && properties.containsKey(envName)) {
+                                    envEntry = (Map<String, Object>) properties.get(envName);
+                                } else if (!properties.isEmpty()) {
+                                    // fallback: 取第一个环境
+                                    envEntry = (Map<String, Object>) properties.values().iterator().next();
+                                }
+                                if (envEntry != null) {
+                                    Object envConfigObj = envEntry.get("envConfig");
+                                    if (envConfigObj instanceof Map) {
+                                        envConfig = (Map<String, Object>) envConfigObj;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("[FlowGraphBuilder] 解析连接器环境配置失败: connectorUuid={}", connectorUuid, e);
                     }
-                    httpNodeData.setConnectorConfig(connectorConfig);
+                }
+                httpNodeData.setConnectorConfig(envConfig);
+
+                // 步骤 3: 解析动作配置 — action_config.properties[actionName]
+                Map<String, Object> httpActionConfig = null;
+                String actionConfigJson = connectorDO.getActionConfig();
+                if (StringUtils.isBlank(actionConfigJson)) {
+                    log.error("[FlowGraphBuilder] 连接器缺少动作配置(action_config为空): connectorUuid={}", connectorUuid);
+                    return;
                 }
 
-                // 合并HTTP动作配置
-                Map<String, Object> httpActionConfig = new HashMap<>();
-                httpActionConfig.put("requestMethod", httpActionDO.getRequestMethod());
-                httpActionConfig.put("requestPath", httpActionDO.getRequestPath());
-                httpActionConfig.put("requestQuery", httpActionDO.getRequestQuery());
-                httpActionConfig.put("requestHeaders", httpActionDO.getRequestHeaders());
-                httpActionConfig.put("requestBodyType", httpActionDO.getRequestBodyType());
-                httpActionConfig.put("requestBodyTemplate", httpActionDO.getRequestBodyTemplate());
-                httpActionConfig.put("authType", httpActionDO.getAuthType());
-                httpActionConfig.put("authConfig", httpActionDO.getAuthConfig());
-                httpActionConfig.put("responseMapping", httpActionDO.getResponseMapping());
-                httpActionConfig.put("successCondition", httpActionDO.getSuccessCondition());
-                httpActionConfig.put("inputSchema", httpActionDO.getInputSchema());
-                httpActionConfig.put("outputSchema", httpActionDO.getOutputSchema());
-
-                // 覆盖超时和重试配置
-                if (httpActionDO.getTimeout() != null) {
-                    httpActionConfig.put("timeout", httpActionDO.getTimeout());
+                try {
+                    Map<String, Object> actionConfigRoot = JsonUtils.parseObject(actionConfigJson, Map.class);
+                    if (actionConfigRoot != null) {
+                        Object propertiesObj = actionConfigRoot.get("properties");
+                        if (propertiesObj instanceof Map) {
+                            Map<String, Object> properties = (Map<String, Object>) propertiesObj;
+                            if (StringUtils.isNotBlank(actionName) && properties.containsKey(actionName)) {
+                                Object actionObj = properties.get(actionName);
+                                if (actionObj instanceof Map) {
+                                    httpActionConfig = (Map<String, Object>) actionObj;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("[FlowGraphBuilder] 解析动作配置失败: connectorUuid={}", connectorUuid, e);
                 }
-                if (httpActionDO.getRetryCount() != null) {
-                    httpActionConfig.put("retryCount", httpActionDO.getRetryCount());
+
+                if (httpActionConfig == null) {
+                    log.error("[FlowGraphBuilder] 未在连接器配置中找到指定动作: connectorUuid={}, actionName={}", connectorUuid,
+                            actionName);
+                    return;
                 }
 
                 httpNodeData.setActionConfig(httpActionConfig);
+
+                if (isTrace) {
+                    log.info("[TRACE-{}] HTTP节点配置加载成功: actionName={}, envName={}",
+                            processId, actionName, envName);
+                } else {
+                    log.info("[FlowGraphBuilder] HTTP节点配置加载成功: actionName={}, envName={}",
+                            actionName, envName);
+                }
+
+            } catch (Exception e) {
+                log.error("[FlowGraphBuilder] 加载HTTP节点配置异常: error={}", e.getMessage(), e);
             }
         }
-        // ========== 新增结束 ==========
+
+        // 递归处理子节点
         if (CollectionUtils.isNotEmpty(node.getBlocks())) {
-            for (JsonGraphNode child : node.getBlocks()) {
-                traverseNodeAndEnrichData(applicationId, child);
+            if (isTrace) {
+                log.info("[TRACE-{}] 开始递归处理子节点: parentId={}, childrenCount={}",
+                        processId, nodeId, node.getBlocks().size());
+            } else {
+                log.debug("[FlowGraphBuilder] 开始递归处理子节点: parentId={}, childrenCount={}",
+                        nodeId, node.getBlocks().size());
             }
+            for (JsonGraphNode child : node.getBlocks()) {
+                traverseNodeAndEnrichData(applicationId, child, processId);
+            }
+        }
+
+        if (isTrace) {
+            log.info("[TRACE-{}] traverseNodeAndEnrichData完成: applicationId={}, nodeId={}, nodeType={}",
+                    processId, applicationId, nodeId, nodeType);
+        } else {
+            log.debug("[FlowGraphBuilder] traverseNodeAndEnrichData完成: applicationId={}, nodeId={}, nodeType={}",
+                    applicationId, nodeId, nodeType);
         }
     }
 }
