@@ -5,7 +5,7 @@ export const step2Schema: ISchema = {
   type: 'object',
   properties: {
     tabs: {
-      type: 'void',
+      type: 'object',
       'x-component': 'Tabs',
       'x-component-props': { type: 'card-gutter' },
       properties: {

@@ -83,7 +83,7 @@ const XDateRangePicker = memo((props: XInputDateRangePickerConfig & { runtime?: 
             format={DATE_FORMAT[dateType]}
             mode={currentDateType}
             showTime={dateType === DATE_VALUES[DATE_OPTIONS.FULL]}
-            placeholder={[placeholder]}
+            placeholder={placeholder}
             getPopupContainer={getPopupContainer}
             style={{
               width: '100%',

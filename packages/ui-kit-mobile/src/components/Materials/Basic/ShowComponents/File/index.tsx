@@ -9,6 +9,7 @@ const XFile = memo((props: XFileConfig & { runtime?: boolean; detailMode?: boole
   const { status, runtime = true, fileConfig } = props;
 
   const downloadFile = async (item: any) => {
+    if (!runtime) return;
     downloadFileByUrl(item.url, item.name);
   };
 

@@ -59,7 +59,7 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
             {fieldValue?.name ||
-              options.find((op) => op.value === fieldValue?.id || op.value === fieldValue || op.id === fieldValue)?.label ||
+              options.find((op) => op.value === fieldValue?.id || op.id === fieldValue?.id || op.value === fieldValue || op.id === fieldValue)?.label ||
               '--'}
           </div>
         ) : (

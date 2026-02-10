@@ -3,6 +3,7 @@ import {
   CreateConnectInstanceReq,
   CreateFlowMgmtReq,
   CreateScriptActionReq,
+  DebugActionReq,
   GetActionValueReq,
   ListConnectFlowNodeReq,
   ListConnectInstanceReq,
@@ -169,12 +170,24 @@ export const listConnectorActionInfos = (params: ListConnectorActionReq) => {
   return flowService.get(`/connector/${params.id}/action-infos`);
 };
 
+export const getConnectorActionInfo = (id: string, actionName: string) => {
+  return flowService.get(`/connector/${id}/actions/${actionName}`);
+};
+
 export const saveConnectorAction = (id: string, params: SaveConnectorActionReq) => {
   return flowService.post(`/connector/${id}/save-action`, params);
 };
 
 export const getActionValue = (id: string, params: GetActionValueReq) => {
   return flowService.get(`/connector/${id}/action-value`, params);
+};
+
+export const deleteHTTPAction = (id: string, actionName: string) => {
+  return flowService.post(`/connector/${id}/actions/${actionName}/delete`);
+};
+
+export const debugAction = (params: DebugActionReq) => {
+  return flowService.post(`/connector/debug-http-action`, params);
 };
 
 /**

@@ -22,7 +22,7 @@ export const step4Schema: ISchema = {
       'x-component-props': { placeholder: '请选择' }
     },
     debugParamsTabs: {
-      type: 'void',
+      type: 'object',
       'x-component': 'Tabs',
       'x-component-props': { type: 'card-gutter' },
       properties: {

@@ -62,6 +62,8 @@ import type {
     ITreeDataConfigType,
     TTextDefaultType,
     IUploadButtonConfigType,
+    IIndicatorCardStyleConfigType,
+    IIndicatorCardConfigType
 } from './types';
 
 // ==================== 基础与通用 ====================
@@ -520,6 +522,19 @@ export const groupFilterConfig: IGroupFilterConfigType = {
   type: 'GroupFilter'
 };
 
+// ==================== 指标卡 ====================
+export const indicatorCardStyleConfig:IIndicatorCardStyleConfigType ={
+  key: 'styleType',
+  name: '样式库',
+  type: 'IndicatorCardStyle'
+}
+export const indicatorCardConfig:IIndicatorCardConfigType ={
+  key: 'styleType',
+  name: '指标配置',
+  type: 'IndicatorCardConfig'
+}
+
+
 // ==================== 默认基础值 ====================
 export const baseDefault = {
   cpName: '',
@@ -826,9 +841,10 @@ export const autoplayConfig: IBooleanConfigType = {
 
 export const carouselIntervalConfig: INumberConfigType = {
   key: 'interval',
-  name: '轮播间隔',
+  name: '轮播间隔（秒）',
   type: 'NumberInput',
-  step: 1
+  step: 1,
+  max: 200
 }
 
 // ==================== 默认值与格式 ====================

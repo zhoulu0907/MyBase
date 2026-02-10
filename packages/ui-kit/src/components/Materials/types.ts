@@ -129,6 +129,18 @@ export interface IGroupFilterConfigType extends ICommonConfigType {
   type: typeof CONFIG_TYPES.GROUP_FILTER;
 }
 
+export interface IIndicatorCardStyleConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.INDICATOR_CARD_STYLE;
+}
+
+export interface IIndicatorCardConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.INDICATOR_CARD_CONFIG;
+}
+
 export interface IRadioDataConfigType extends ICommonConfigType {
   key: string;
   name: string;

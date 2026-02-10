@@ -63,7 +63,7 @@ const XInfoNotice: XInfoNoticeSchema = {
   config: {
     ...baseDefault,
     content: '公告内容',
-    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
   }
 };

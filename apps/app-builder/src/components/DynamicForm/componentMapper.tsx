@@ -207,7 +207,7 @@ const StepNav: React.FC<any> = observer((props) => {
   );
 });
 
-const ParamsTableInner: React.FC<any> = () => {
+const ParamsTableInner: React.FC<any> = observer(() => {
   const fieldRaw = useField();
   const field = fieldRaw as any;
   const data: any[] = Array.isArray(field.value) ? field.value : [];
@@ -226,40 +226,102 @@ const ParamsTableInner: React.FC<any> = () => {
 
   const columns = [
     {
-      title: '字段 Key',
-      dataIndex: 'key',
+      title: "参数名",
+      dataIndex: "key",
+      width: 150,
       render: (value: any, _record: any, index: number) => (
-        <Input value={value} onChange={(v) => setRow(index, { key: v })} />
-      )
+        <Input
+          value={value}
+          onChange={(v) => setRow(index, { key: v })}
+          placeholder="Key"
+        />
+      ),
     },
     {
-      title: '字段名称',
-      dataIndex: 'label',
+      title: "值类型",
+      dataIndex: "paramType",
+      width: 100,
       render: (value: any, _record: any, index: number) => (
-        <Input value={value} onChange={(v) => setRow(index, { label: v })} />
-      )
-    },
-    {
-      title: '字段类型',
-      dataIndex: 'type',
-      render: (value: any, _record: any, index: number) => (
-        <Select value={value} onChange={(v) => setRow(index, { type: v })}>
-          <Select.Option value="string">string</Select.Option>
-          <Select.Option value="number">number</Select.Option>
-          <Select.Option value="boolean">boolean</Select.Option>
+        <Select
+          value={value || "fixed"}
+          onChange={(v) => setRow(index, { paramType: v })}
+        >
+          <Select.Option value="fixed">固定值</Select.Option>
+          <Select.Option value="variable">变量</Select.Option>
         </Select>
       )
     },
     {
-      title: '字段描述',
-      dataIndex: 'description',
-      render: (value: any, _record: any, index: number) => (
-        <Input value={value} onChange={(v) => setRow(index, { description: v })} />
-      )
+      title: "数据类型",
+      dataIndex: "dataType",
+      width: 100,
+      render: (value: any, record: any, index: number) => (
+        <Select
+          value={value || "string"}
+          onChange={(v) => setRow(index, { dataType: v })}
+        >
+          <Select.Option value="string">String</Select.Option>
+          <Select.Option value="number">Number</Select.Option>
+          <Select.Option value="boolean">Boolean</Select.Option>
+        </Select>
+      ),
     },
     {
-      title: '操作',
-      dataIndex: 'operation',
+      title: "参数值",
+      dataIndex: "value",
+      render: (value: any, record: any, index: number) => {
+        if (record.paramType === "variable") {
+          return (
+            <Input
+              value={value}
+              onChange={(v) => setRow(index, { value: v })}
+              placeholder="请输入变量名"
+              prefix="${"
+              suffix="}"
+            />
+          );
+        }
+
+        // Fixed Value Rendering based on DataType
+        const dataType = record.dataType || "string";
+        
+        if (dataType === "boolean") {
+          return (
+            <Select
+              value={value === undefined ? undefined : String(value)}
+              onChange={(v) => setRow(index, { value: v === "true" })}
+              placeholder="请选择"
+            >
+              <Select.Option value="true">True</Select.Option>
+              <Select.Option value="false">False</Select.Option>
+            </Select>
+          );
+        }
+
+        if (dataType === "number") {
+          return (
+            <InputNumber
+              value={value}
+              onChange={(v) => setRow(index, { value: v })}
+              placeholder="请输入数值"
+              style={{ width: '100%' }}
+            />
+          );
+        }
+
+        return (
+          <Input
+            value={value}
+            onChange={(v) => setRow(index, { value: v })}
+            placeholder="请输入值"
+          />
+        );
+      },
+    },
+    {
+      title: "操作",
+      dataIndex: "operation",
+      width: 60,
       render: (_value: any, _record: any, index: number) => (
         <Button type="text" status="danger" icon={<IconDelete />} onClick={() => removeRow(index)} />
       )
@@ -283,11 +345,13 @@ const ParamsTableInner: React.FC<any> = () => {
             ...data,
             {
               _id: Date.now() + Math.random().toString(36).slice(2),
-              key: '',
-              label: '',
-              type: 'string',
-              description: ''
-            }
+              key: "",
+              label: "",
+              type: "string",
+              description: "",
+              paramType: "fixed",
+              dataType: "string",
+            },
           ];
           field.setValue(next);
         }}
@@ -297,28 +361,35 @@ const ParamsTableInner: React.FC<any> = () => {
       </Button>
     </div>
   );
-};
+});
 
 const ConnectorParamsInner: React.FC<any> = observer(() => {
   const form = useForm();
+  const fieldRaw = useField();
+  const field = fieldRaw as any;
 
-  const headers = (form.getValuesIn('inputGroup.headers') || []) as any[];
-  const queryParams = (form.getValuesIn('inputGroup.queryParams') || []) as any[];
-  const pathParams = (form.getValuesIn('inputGroup.pathParams') || []) as any[];
-  const bodyRaw = form.getValuesIn('inputGroup.body') as any;
+  // Use form.values to ensure reactivity tracking by observer
+  const values = form.values;
+  const inputGroup = values.inputGroup || {};
+  
+  const headers = (inputGroup.headers || []) as any[];
+  const queryParams = (inputGroup.queryParams || []) as any[];
+  const requestPath = inputGroup.path as string;
+  const bodyRaw = inputGroup.body as any;
 
   type Row = {
     id: string;
     name: string;
     label?: string;
     location: string;
-    path?: string;
+    type: string;
+    isExplicitType?: boolean;
   };
 
   const rows: Row[] = [];
   const varRowIds = new Set<string>();
 
-  const addVariableRow = (source: string, variableName: string, usage?: string) => {
+  const addVariableRow = (source: string, variableName: string, usage?: string, type: string = "string", isExplicitType: boolean = false) => {
     if (!variableName) return;
     const id = `var-${source}-${variableName}`;
     if (varRowIds.has(id)) return;
@@ -327,84 +398,65 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
       id,
       name: variableName,
       label: usage,
-      location: `${source}变量`
+      location: `${source}`,
+      type,
+      isExplicitType,
     });
   };
 
-  headers.forEach((item) => {
-    if (item && item.key) {
-      rows.push({
-        id: `header-${item.key}`,
-        name: item.key,
-        label: item.label,
-        location: 'HTTP请求头'
-      });
+  // ... (Calculation Logic) ...
+  // 1. Parse URL Path & Query variables
+  if (requestPath) {
+    const [pathPart, queryPart] = requestPath.split('?');
+
+    // 1.1 Path Variables
+    if (pathPart) {
+      const regexp = /\$\{([^}]+)\}/g;
+      let match: RegExpExecArray | null;
+      while ((match = regexp.exec(pathPart))) {
+        const varName = match[1];
+        addVariableRow("URL路径", varName, "Path参数");
+      }
     }
 
-    if (item) {
-      Object.keys(item).forEach((k) => {
-        const v = (item as any)[k];
-        if (typeof v === 'string') {
-          const regexp = /\$\{([^}]+)\}/g;
-          let match: RegExpExecArray | null;
-          while ((match = regexp.exec(v))) {
-            const varName = match[1];
-            addVariableRow('HTTP请求头', varName, item.key ? `${item.key}.${k}` : k);
-          }
+    // 1.2 Query Variables
+    if (queryPart) {
+      const searchParams = new URLSearchParams(queryPart);
+      searchParams.forEach((value, key) => {
+        const regexp = /\$\{([^}]+)\}/g;
+        let match: RegExpExecArray | null;
+        while ((match = regexp.exec(value))) {
+          const varName = match[1];
+          addVariableRow("URL查询参数", varName, key);
         }
       });
     }
-  });
+  }
 
-  queryParams.forEach((item) => {
-    if (item && item.key) {
-      rows.push({
-        id: `query-${item.key}`,
-        name: item.key,
-        label: item.label,
-        location: 'URL查询参数'
-      });
-    }
+  // 2. Parse Params Table (Headers, Query, Path)
+  const processParamsTable = (items: any[], location: string) => {
+    items.forEach((item) => {
+      if (!item || !item.key) return;
 
-    if (item) {
-      Object.keys(item).forEach((k) => {
-        const v = (item as any)[k];
-        if (typeof v === 'string') {
-          const regexp = /\$\{([^}]+)\}/g;
-          let match: RegExpExecArray | null;
-          while ((match = regexp.exec(v))) {
-            const varName = match[1];
-            addVariableRow('URL查询参数', varName, item.key ? `${item.key}.${k}` : k);
-          }
+      // Case 1: Explicit Variable Type
+      if (item.paramType === 'variable' && item.value) {
+        addVariableRow(location, item.value, item.key, item.dataType || "string", true);
+      }
+      // Case 2: Fixed Type but contains ${var} syntax (backward compatibility & flexibility)
+      else if (item.value && typeof item.value === 'string') {
+        const regexp = /\$\{([^}]+)\}/g;
+        let match: RegExpExecArray | null;
+        while ((match = regexp.exec(item.value))) {
+          const varName = match[1];
+          // If it's a fixed string with embedded variable, the variable itself is effectively a string part
+          addVariableRow(location, varName, item.key, "string", false); 
         }
-      });
-    }
-  });
+      }
+    });
+  };
 
-  pathParams.forEach((item) => {
-    if (item && item.key) {
-      rows.push({
-        id: `path-${item.key}`,
-        name: item.key,
-        label: item.label,
-        location: 'URL路径参数'
-      });
-    }
-
-    if (item) {
-      Object.keys(item).forEach((k) => {
-        const v = (item as any)[k];
-        if (typeof v === 'string') {
-          const regexp = /\$\{([^}]+)\}/g;
-          let match: RegExpExecArray | null;
-          while ((match = regexp.exec(v))) {
-            const varName = match[1];
-            addVariableRow('URL路径参数', varName, item.key ? `${item.key}.${k}` : k);
-          }
-        }
-      });
-    }
-  });
+  processParamsTable(headers, "HTTP请求头");
+  processParamsTable(queryParams, "URL查询参数");
 
   const addBodyParams = (prefix: string, value: any) => {
     if (value === null || value === undefined) {
@@ -432,7 +484,6 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
         addVariableRow('HTTP请求体', varName, prefix);
       }
     }
-    // Body keys are structural and should not be treated as parameters unless they contain variables
   };
 
   if (typeof bodyRaw === 'string' && bodyRaw.trim()) {
@@ -443,6 +494,71 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
       // ignore invalid json
     }
   }
+  // ... (End of Calculation Logic) ...
+
+  // Sync logic: Merge calculated rows with stored state to preserve 'type' selection
+  const currentParams = (field.value || []) as Row[];
+  const mergedParams: Row[] = rows.map((calculatedRow) => {
+    const existing = currentParams.find((p) => p.name === calculatedRow.name && p.location === calculatedRow.location);
+    if (existing) {
+      // If the variable comes from an explicit configuration (ParamsTable), strictly follow its type.
+      // Otherwise, respect the user's manual override in this table (existing.type), falling back to calculated type.
+      const resolvedType = calculatedRow.isExplicitType 
+        ? calculatedRow.type 
+        : (existing.type || calculatedRow.type);
+
+      return { 
+        ...calculatedRow, 
+        // Preserve label if it exists in store, otherwise use calculated one
+        label: existing.label || calculatedRow.label,
+        type: resolvedType
+      };
+    }
+    return calculatedRow;
+  });
+
+  // Effect to update field value when calculation changes
+  React.useEffect(() => {
+    const isDifferent = JSON.stringify(mergedParams) !== JSON.stringify(currentParams);
+    if (isDifferent) {
+      field.setValue(mergedParams);
+    }
+  }, [JSON.stringify(rows.map(r => r.id))]); // Dependency on structure changes, not deep values to avoid loop
+
+  const updateType = (index: number, newType: string) => {
+    const next = [...mergedParams];
+    const target = next[index];
+    next[index] = { ...target, type: newType };
+    field.setValue(next);
+
+    // Sync back to ParamsTable sources (headers, queryParams)
+    // Only sync if the variable is used as an explicit variable parameter
+    const varName = target.name;
+    
+    const syncToSource = (path: string) => {
+       const list = form.getValuesIn(path);
+       if (Array.isArray(list)) {
+         let modified = false;
+         const newList = list.map((item: any) => {
+           // Match logic: paramType is 'variable' AND value is the variable name
+           if (item?.paramType === 'variable' && item?.value === varName) {
+             if (item.dataType !== newType) {
+               modified = true;
+               return { ...item, dataType: newType };
+             }
+           }
+           return item;
+         });
+         
+         if (modified) {
+           form.setValuesIn(path, newList);
+         }
+       }
+    };
+    
+    syncToSource("inputGroup.headers");
+    syncToSource("inputGroup.queryParams");
+  };
 
   const columns = [
     {
@@ -454,12 +570,36 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
       dataIndex: 'location'
     },
     {
-      title: '说明',
-      dataIndex: 'label'
-    }
+      title: "类型",
+      dataIndex: "type",
+      width: 120,
+      render: (value: any, _record: any, index: number) => (
+        <Select
+          value={value}
+          onChange={(v) => updateType(index, v)}
+          size="small"
+        >
+          <Select.Option value="string">String</Select.Option>
+          <Select.Option value="number">Number</Select.Option>
+          <Select.Option value="boolean">Boolean</Select.Option>
+        </Select>
+      ),
+    },
+    {
+      title: "说明",
+      dataIndex: "label",
+    },
   ];
 
-  return <Table size="small" pagination={false} columns={columns} data={rows} rowKey={(record) => record.id} />;
+  return (
+    <Table
+      size="small"
+      pagination={false}
+      columns={columns}
+      data={mergedParams}
+      rowKey={(record) => record.id}
+    />
+  );
 });
 
 // ArrayItems 组件 - 支持动态增减数组项
@@ -634,10 +774,16 @@ export const FormilyTabs = connect(FormilyTabsInner);
 
 const HorizontalLayoutInner: React.FC<any> = observer((props) => {
   const schema = useFieldSchema();
+  const properties: any[] = [];
+  schema.mapProperties((s, name) => {
+    properties.push({ name, schema: s });
+  });
 
   return (
-    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-      <RecursionField schema={schema} onlyRenderProperties />
+    <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+      {properties.map(({ name, schema }) => (
+        <RecursionField key={name} name={name} schema={schema} />
+      ))}
     </div>
   );
 });
