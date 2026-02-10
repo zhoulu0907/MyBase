@@ -113,6 +113,10 @@ public class WorkFlowExecutor implements Closeable {
     }
 
     private void doAction(Node node) throws Exception {
+        if (node.getId() == null) {
+            log.warn("跳过 id 为空的节点, type: {}", node.getType());
+            return;
+        }
         if (node instanceof CreateTableAction action) {
             action.createTable(tableEnv, workflowGraph);
         }
@@ -133,7 +137,7 @@ public class WorkFlowExecutor implements Closeable {
     public DataPreview nodePreview() throws Exception {
         for (Node node : workflowGraph.iterateNodes()) {
             doAction(node);
-            if (node.getId().equals(executeRequest.getPreviewNodeId())) {
+            if (node.getId() != null && node.getId().equals(executeRequest.getPreviewNodeId())) {
                 String sql = "select * from " + node.getId() + " limit 20";
                 TableResult tableResult = tableEnv.executeSql(sql);
                 return tableResultToDataPreview(node.getId(), tableResult);
@@ -145,7 +149,7 @@ public class WorkFlowExecutor implements Closeable {
     public List<ColumnDefine> nodeColumns() throws Exception {
         for (Node node : workflowGraph.iterateNodes()) {
             doAction(node);
-            if (node.getId().equals(executeRequest.getPreviewNodeId())) {
+            if (node.getId() != null && node.getId().equals(executeRequest.getPreviewNodeId())) {
                 Table table = tableEnv.from(node.getId());
                 return tableToColumns(table);
             }

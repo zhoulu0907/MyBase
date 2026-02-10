@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.provider.resource;
 
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -18,6 +19,7 @@ import com.cmsr.onebase.module.screen.api.dto.DashboardProjectDTO;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -81,7 +83,10 @@ public class PageServiceProvider {
         return mainMetadata;
     }
 
-    public List<PageDTO> listPageView(Long pageSetId) {
+    public List<PageDTO> listPageView(Long pageSetId, Boolean isDev) {
+        if (BooleanUtils.isTrue(isDev)){
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
         AppResourcePagesetDO pageSetDO = pageSetRepository.getById(pageSetId);
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.PAGE_NOT_FOUND_OR_UNPUBLISHED);

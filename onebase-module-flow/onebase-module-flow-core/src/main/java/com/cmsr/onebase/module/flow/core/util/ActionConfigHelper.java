@@ -249,6 +249,17 @@ public class ActionConfigHelper {
     }
 
     /**
+     * 生成动作ID
+     * <p>
+     * 格式: action-{8位随机字符}
+     *
+     * @return 动作ID
+     */
+    public String generateActionId() {
+        return "action-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    /**
      * 校验 actionCode 是否唯一
      * <p>
      * 检查 actions 数组中是否已存在该 actionCode
@@ -325,8 +336,8 @@ public class ActionConfigHelper {
      */
     private void updateMetadata(ObjectNode root) {
         ObjectNode metadata = root.has(METADATA_KEY) && root.get(METADATA_KEY).isObject()
-            ? (ObjectNode) root.get(METADATA_KEY)
-            : root.putObject(METADATA_KEY);
+                ? (ObjectNode) root.get(METADATA_KEY)
+                : root.putObject(METADATA_KEY);
 
         // 更新时间戳
         metadata.put(UPDATED_AT_KEY, Instant.now().toString());

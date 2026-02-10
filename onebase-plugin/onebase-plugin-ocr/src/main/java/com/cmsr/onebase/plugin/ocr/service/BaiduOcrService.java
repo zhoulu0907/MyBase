@@ -10,10 +10,9 @@ import kong.unirest.core.ContentType;
 import kong.unirest.core.HttpResponse;
 import kong.unirest.core.JsonNode;
 import kong.unirest.core.Unirest;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Resource;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -23,8 +22,9 @@ import java.util.concurrent.TimeUnit;
  * @author chengyuansen
  * @date 2026-01-12
  */
-@Slf4j
-public class BaiduOcrService implements IOcrProvider {
+public class BaiduOcrService {
+
+    private static final Logger log = LoggerFactory.getLogger(BaiduOcrService.class);
 
     private static final String TOKEN_URI = "/oauth/2.0/token";
     private static final String IDCARD_URI = "/rest/2.0/ocr/v1/idcard";
@@ -100,7 +100,6 @@ public class BaiduOcrService implements IOcrProvider {
      * @param idCardSide 身份证正反面
      * @return JSON 响应字符串
      */
-    @Override
     public String recognizeIdCard(String imageB64, IdCardSideEnum idCardSide) {
         return executeWithRetry(token -> {
             String endpoint = ocrConfig.getEndpoint();
@@ -120,7 +119,6 @@ public class BaiduOcrService implements IOcrProvider {
      * @param exitentrypermitType 通行证类型
      * @return JSON 响应字符串
      */
-    @Override
     public String recognizeExitentrypermit(String imageB64, ExitentrypermitType exitentrypermitType) {
         return executeWithRetry(token -> {
             String endpoint = ocrConfig.getEndpoint();
@@ -139,7 +137,6 @@ public class BaiduOcrService implements IOcrProvider {
      * @param imageB64 图片Base64
      * @return JSON 响应字符串
      */
-    @Override
     public String recognizePassport(String imageB64) {
         return executeWithRetry(token -> {
             String endpoint = ocrConfig.getEndpoint();

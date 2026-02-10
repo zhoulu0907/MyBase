@@ -16,7 +16,7 @@ import java.util.Objects;
 
 /**
  * @Author：huangjie
- * @Date：2025/11/13 8:57
+ *                  @Date：2025/11/13 8:57
  */
 public class FlowChainBuilder {
 
@@ -46,7 +46,6 @@ public class FlowChainBuilder {
         List<ELWrapper> elWrappers = blocks.stream().map(node -> nodeDefine(node)).toList();
         return ELBus.ser(elWrappers.toArray(new ELWrapper[0]));
     }
-
 
     private ELWrapper nodeDefine(JsonGraphNode node) {
         if (StringUtils.equals(node.getType(), "ifBlock")) {
@@ -131,7 +130,11 @@ public class FlowChainBuilder {
     }
 
     private CommonNodeELWrapper toDefine(JsonGraphNode node) {
-        return ELBus.element(node.getType()).tag(node.getId());
+        String type = node.getType();
+        if ("connector".equals(type)) {
+            type = "common";
+        }
+        return ELBus.element(type).tag(node.getId());
     }
 
 }

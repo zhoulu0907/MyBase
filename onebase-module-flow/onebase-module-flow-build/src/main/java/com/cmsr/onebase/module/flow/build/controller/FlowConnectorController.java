@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 @Tag(name = "连接器", description = "连接器接口")
 @RestController
 @RequestMapping("/flow/connector")
@@ -182,8 +180,8 @@ public class FlowConnectorController {
     public CommonResult<Boolean> updateActionConfig(
             @PathVariable("id") Long id,
             @PathVariable("actionName") String actionName,
-            @RequestBody JsonNode actionConfig) {
-        Boolean result = connectorService.updateActionConfig(id, actionName, actionConfig);
+            @RequestBody @Valid SaveActionConfigReqVO reqVO) {
+        Boolean result = connectorService.updateActionConfig(id, actionName, reqVO);
         return CommonResult.success(result);
     }
 

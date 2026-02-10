@@ -524,11 +524,13 @@ public class DynamicMetadataRepository {
     public List<Row> selectRelationRowsByCondition(String tableName, String relationKey, Object relationValue, boolean filterDeleted) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
-            // 关系查询的条件字段类型不确定（可能是 bigint 也可能是 varchar），直接使用原始值避免类型不匹配
+            // 关系查询的条件字段类型不确定（可能是 bigint 也可能是 varchar），需要根据值类型进行转换
             if (relationValue == null || String.valueOf(relationValue).trim().isEmpty()) {
                 return List.of();
             }
-            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(relationValue));
+            // 尝试将字符串类型的数字转换为 Long，避免 PostgreSQL 类型不匹配错误
+            Object queryValue = toLongIfNumeric(relationValue);
+            QueryWrapper qw = QueryWrapper.create().where(new QueryColumn(relationKey).eq(queryValue));
             if (filterDeleted) {
                 qw.and(new QueryColumn(SystemFieldConstants.OPTIONAL.DELETED).eq(0));
             }
@@ -576,6 +578,34 @@ public class DynamicMetadataRepository {
             return new PageResult<>(rows, total);
         } finally {
             ApplicationDataSourceManager.clear();
+        }
+    }
+
+    /**
+     * 尝试将值转换为 Long 类型（如果它是数字字符串）。
+     * 用于解决 PostgreSQL 中 bigint = varchar 类型不匹配的问题。
+     *
+     * @param value 原始值
+     * @return 如果是数字字符串则返回 Long，否则返回原值
+     */
+    private Object toLongIfNumeric(Object value) {
+        if (value == null) {
+            return null;
+        }
+        // 已经是数字类型，直接返回
+        if (value instanceof Long || value instanceof Integer || value instanceof Number) {
+            return value;
+        }
+        String s = String.valueOf(value).trim();
+        if (s.isEmpty()) {
+            return null;
+        }
+        // 尝试解析为 Long
+        try {
+            return Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            // 不是数字，返回原值（用于 varchar 类型的字段）
+            return value;
         }
     }
 }

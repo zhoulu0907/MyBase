@@ -62,6 +62,7 @@ public class PluginContextController {
     private FileApi fileApi;
 
     @GetMapping("/manifest")
+    @PermitAll
     @Operation(summary = "获取所有可用插件的前端资源清单")
     public CommonResult<List<Map<String, Object>>> getPluginManifest() {
         List<Map<String, Object>> manifest = new ArrayList<>();

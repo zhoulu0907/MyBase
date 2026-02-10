@@ -33,6 +33,10 @@ public enum OcrProviderEnum {
         this.code = code;
         this.name = name;
     }
+    
+    public String getCode() {
+        return code;
+    }
 
     /**
      * 根据代码获取服务商枚举

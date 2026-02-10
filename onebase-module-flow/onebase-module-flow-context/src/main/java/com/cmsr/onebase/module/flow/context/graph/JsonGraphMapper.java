@@ -18,11 +18,10 @@ import java.util.Set;
 
 /**
  * @Author：huangjie
- * @Date：2025/12/14 19:05
+ *                  @Date：2025/12/14 19:05
  */
 @Slf4j
 public class JsonGraphMapper {
-
 
     private static final Map<String, Class<? extends NodeData>> TYPE_CLASS_MAP = new HashMap<>();
 
@@ -32,8 +31,8 @@ public class JsonGraphMapper {
 
     private static void initializeTypeClassMap() {
         try {
-            ClassPathScanningCandidateComponentProvider scanner =
-                    new ClassPathScanningCandidateComponentProvider(false);
+            ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(
+                    false);
             scanner.addIncludeFilter(new AnnotationTypeFilter(NodeType.class));
             scanner.addIncludeFilter(new AssignableTypeFilter(NodeData.class));
             Set<BeanDefinition> annotatedClasses = scanner.findCandidateComponents("com.cmsr.onebase.module.flow");
@@ -77,11 +76,17 @@ public class JsonGraphMapper {
             return graphNode;
         }
 
-        private NodeData getNodeDataByType(JsonNode dataNode, String type, ObjectMapper mapper) throws com.fasterxml.jackson.core.JsonProcessingException {
+        private NodeData getNodeDataByType(JsonNode dataNode, String type, ObjectMapper mapper)
+                throws com.fasterxml.jackson.core.JsonProcessingException {
             Class<? extends NodeData> dataClass = TYPE_CLASS_MAP.get(type);
             log.debug("获取到节点类型:{}, 节点内容: {}", type, dataNode.toString());
             if (dataClass != null) {
                 return mapper.treeToValue(dataNode, dataClass);
+            }
+            // 兼容性处理：connectr 类型映射到 CommonNodeData
+            if ("connector".equals(type)) {
+                return mapper.treeToValue(dataNode,
+                        com.cmsr.onebase.module.flow.context.graph.nodes.CommonNodeData.class);
             }
             return mapper.treeToValue(dataNode, NodeData.class);
         }

@@ -85,8 +85,9 @@ public class HttpExecuteService {
         int retryCount = request.getRetry() != null ? request.getRetry() : 0;
         int maxAttempts = retryCount + 1;
 
-        // 记录调试日志，方便排查问题
-        log.debug("开始执行 HTTP 请求 - 方法: {}, URL: {}, 超时: {}ms, 重试次数: {}",
+        // 记录调试日志，方便排查问题（带追踪信息）
+        log.info("[FLOW-TRACE] 开始执行HTTP请求: processId={}, traceId={}, executionUuid={}, nodeId={}, method={}, url={}, timeout={}ms, retry={}",
+                request.getProcessId(), request.getTraceId(), request.getExecutionUuid(), request.getNodeId(),
                 request.getMethod(), request.getUrl(), request.getTimeout(), retryCount);
 
         // SSRF 防护校验（只执行一次，在重试循环外）
@@ -110,14 +111,17 @@ public class HttpExecuteService {
                 lastException = e;
 
                 // 记录失败日志，包含详细的上下文信息
-                log.warn("HTTP 请求失败（第 {} 次尝试） - 方法: {}, URL: {}, 超时: {}ms, 异常: {}",
-                        attempt + 1, request.getMethod(), request.getUrl(), request.getTimeout(), e.getMessage());
+                log.warn("[FLOW-TRACE] HTTP请求失败（第{}次尝试）: processId={}, traceId={}, executionUuid={}, nodeId={}, method={}, url={}, timeout={}ms, 异异={}",
+                        attempt + 1, request.getProcessId(), request.getTraceId(), request.getExecutionUuid(),
+                        request.getNodeId(), request.getMethod(), request.getUrl(), request.getTimeout(), e.getMessage());
 
                 // 判断是否应该重试
                 if (attempt < maxAttempts - 1 && shouldRetry(e)) {
                     // 计算退避时间（指数退避）
                     long backoffTime = calculateBackoff(attempt);
-                    log.info("等待 {}ms 后进行第 {} 次重试...", backoffTime, attempt + 2);
+                    log.info("[FLOW-TRACE] 等待{}ms后进行第{}次重试: processId={}, traceId={}, executionUuid={}, nodeId={}",
+                            backoffTime, attempt + 2, request.getProcessId(), request.getTraceId(),
+                            request.getExecutionUuid(), request.getNodeId());
 
                     // 等待退避时间
                     Thread.sleep(backoffTime);
@@ -130,8 +134,9 @@ public class HttpExecuteService {
 
         // 所有尝试都失败，记录错误日志并抛出异常
         long totalDuration = System.currentTimeMillis() - startTime;
-        log.error("HTTP 请求最终失败（尝试了 {} 次） - 方法: {}, URL: {}, 总耗时: {}ms",
-                maxAttempts, request.getMethod(), request.getUrl(), totalDuration);
+        log.error("[FLOW-TRACE] HTTP请求最终失败（尝试了{}次）: processId={}, traceId={}, executionUuid={}, nodeId={}, method={}, url={}, 总耗时={}ms",
+                maxAttempts, request.getProcessId(), request.getTraceId(), request.getExecutionUuid(),
+                request.getNodeId(), request.getMethod(), request.getUrl(), totalDuration);
         throw lastException;
     }
 

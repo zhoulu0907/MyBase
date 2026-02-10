@@ -49,7 +49,6 @@ import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionU
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
 import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
 
-
 /**
  * 企业服务实现类
  *
@@ -69,6 +68,7 @@ public class CorpServiceImpl implements CorpService {
     private CorpDataRepository corpDataRepository;
 
     @Resource
+    @Lazy
     private UserService userService;
 
     @Resource
@@ -92,8 +92,7 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_CREATE_SUB_TYPE, bizNo = "{{#corpId}}",
-            success = SYSTEM_CORP_CREATE_SUCCESS)
+    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_CREATE_SUB_TYPE, bizNo = "{{#corpId}}", success = SYSTEM_CORP_CREATE_SUCCESS)
     public CorpAdminUserRespVO createCorpCombined(CorpCombinedVo corpCombineReqVO) {
         // 保存基础数据
         Long corpId = createCorp(corpCombineReqVO.getCorpReqVO());
@@ -119,7 +118,6 @@ public class CorpServiceImpl implements CorpService {
     private void createCorpAndAppRelation(List<AppAuthTimeReqVO> appAuthTimeReqVOs, Long corpId) {
         corpAppRelationService.createCorpAndAppRelation(appAuthTimeReqVOs, corpId);
     }
-
 
     public Long createCorp(CorpReqVO reqVO) {
         // 验证企业基本信息
@@ -221,8 +219,7 @@ public class CorpServiceImpl implements CorpService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_UPDATE_SUB_TYPE, bizNo = "{{#corp.id}}",
-            success = SYSTEM_CORP_UPDATE_SUCCESS)
+    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_UPDATE_SUB_TYPE, bizNo = "{{#corp.id}}", success = SYSTEM_CORP_UPDATE_SUCCESS)
     public void updateCorp(CorpUpdateReqVO reqVO) {
         CorpDO checkCorp = corpDataRepository.findById(reqVO.getId());
         if (checkCorp == null) {
@@ -233,7 +230,7 @@ public class CorpServiceImpl implements CorpService {
         validCorpCodeDuplicate(reqVO.getCorpCode(), reqVO.getId());
 
         if (null != reqVO.getUserLimit()) {
-            //  检查1：用户数下限，不能小于企业已有开启状态的用户实际数量
+            // 检查1：用户数下限，不能小于企业已有开启状态的用户实际数量
             validCorpUserMinCountLimit(reqVO.getUserLimit(), reqVO.getId());
             // 检查2：用户数上限，不能大于空间下可用的用户数量
             validCorpUserMaxCountLimit(reqVO.getUserLimit(), reqVO.getId());
@@ -264,11 +261,9 @@ public class CorpServiceImpl implements CorpService {
         corpDataRepository.updateCorpAdminId(corpId, adminId);
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_DELETE_SUB_TYPE, bizNo = "{{#id}}",
-            success = SYSTEM_CORP_DELETE_SUCCESS)
+    @LogRecord(type = SYSTEM_CORP_TYPE, subType = SYSTEM_CORP_DELETE_SUB_TYPE, bizNo = "{{#id}}", success = SYSTEM_CORP_DELETE_SUCCESS)
     public void deleteCorp(Long id) {
         // 查询企业
         CorpDO corp = corpDataRepository.findById(id);
@@ -276,7 +271,7 @@ public class CorpServiceImpl implements CorpService {
         corpDataRepository.deleteById(id);
         // 删除关联关系
         corpAppRelationService.deleteCorpAppRelationByCorpId(id);
-        //4.删除企业下的用户
+        // 4.删除企业下的用户
         userService.deleteUserByCorpId(id);
 
         // 记录操作日志上下文
@@ -285,7 +280,6 @@ public class CorpServiceImpl implements CorpService {
         LogRecordContext.putVariable("loginUser", loginUser);
         LogRecordContext.putVariable("corp", corp);
     }
-
 
     @Override
     public PageResult<CorpRespVO> getCorpAppsPage(CorpPageReqVO pageReqVO) {
@@ -317,8 +311,7 @@ public class CorpServiceImpl implements CorpService {
 
         CommonResult<List<DictDataRespDTO>> dictlist = dictDataApi.getDictDataList(CorpConstant.INDUSTRY_TYPE);
         Map<Long, String> dictmap = dictlist.getData().stream()
-                .collect(Collectors.toMap(DictDataRespDTO::getId
-                        , DictDataRespDTO::getLabel));
+                .collect(Collectors.toMap(DictDataRespDTO::getId, DictDataRespDTO::getLabel));
         Set<Long> adminUserIds = corpList.stream()
                 .map(CorpDO::getAdminId)
                 .filter(Objects::nonNull)
@@ -363,7 +356,8 @@ public class CorpServiceImpl implements CorpService {
         List<CorpRespVO> respList = corpList.stream()
                 .map(corpDO -> {
                     CorpRespVO respVO = BeanUtils.toBean(corpDO, CorpRespVO.class);
-                    List<CorpAppRelationDO> corpRels = relationGroupByCorp.getOrDefault(corpDO.getId(), Collections.emptyList());
+                    List<CorpAppRelationDO> corpRels = relationGroupByCorp.getOrDefault(corpDO.getId(),
+                            Collections.emptyList());
                     if (!corpRels.isEmpty()) {
                         List<CorpAppVo> corpApplicationList = new ArrayList<>();
                         for (CorpAppRelationDO rel : corpRels) {
@@ -476,7 +470,6 @@ public class CorpServiceImpl implements CorpService {
         corpDataRepository.updateStatus(id, status == null ? null : status.intValue());
     }
 
-
     /**
      * 获取企业精简列表
      *
@@ -495,7 +488,6 @@ public class CorpServiceImpl implements CorpService {
         // 用于校验企业用户数量是否超过限制（如大于500）
         validCorpUserMaxCountLimit(corpReqVO.getUserLimit(), null);
     }
-
 
     @Override
     public void checkCorp(CorpReqVO corpReqVO) {
