@@ -15,8 +15,12 @@ export const CcRecipientsNodeRegistry: FlowNodeRegistry = {
     expandable: false,
     addDisable: false,
     defaultPorts: [
-      { type: 'output', location: 'bottom' },
-      { type: 'input', location: 'top' }
+      { type: 'output', portID: 'interaction1', location: 'bottom' },
+      { type: 'input', portID: 'interaction2', location: 'top' },
+      { type: 'output', portID: 'interaction3', location: 'left' },
+      { type: 'output', portID: 'interaction4', location: 'right' },
+      { type: 'input', portID: 'interaction5', location: 'left' },
+      { type: 'input', portID: 'interaction6', location: 'right' },
     ]
   },
   info: {
