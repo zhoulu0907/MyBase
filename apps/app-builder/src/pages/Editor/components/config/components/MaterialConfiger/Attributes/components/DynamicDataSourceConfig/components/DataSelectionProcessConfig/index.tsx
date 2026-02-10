@@ -126,7 +126,11 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       };
     });
     tableConfig.searchItems = newSearchItems;
-    handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, { ...tableConfig, searchItems: newSearchItems });
+    
+    handleMultiPropsChange?.([
+      { key: SUB_ATTR_KEY.SELECTDATAFIELDS, value: value },
+      { key: SUB_ATTR_KEY.DYNAMICTABLECONFIG, value: { ...tableConfig, searchItems: newSearchItems } }
+    ]);
   };
 
   const handleSelectedChangeSingle = (value: any) => {
