@@ -7,5 +7,5 @@ const RUNTIME_DEV_PATH = '/runtime-dev';
  */
 export function useIsRuntimeDev(): boolean {
   const location = useLocation();
-  return location.pathname.includes(RUNTIME_DEV_PATH);
+  return location.pathname.includes(RUNTIME_DEV_PATH) || location.hash.includes(RUNTIME_DEV_PATH);
 }
