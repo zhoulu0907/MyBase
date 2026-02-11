@@ -12,4 +12,6 @@ public class AppUserNameLoginReqVO extends UserLoginReqVO {
     @NotNull(message = "应用ID不能为空")
     private Long appId;
 
+    @Schema(description = "是否是开发模式", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Boolean isDev;
 }
