@@ -258,7 +258,7 @@ const XTimePicker = memo((props: XInputTimePickerConfig & { runtime?: boolean; d
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
-            {dayjs(fieldValue).format(use24Hours ? TIME_FORMAT[dateType] : TIME_12_FORMAT[dateType])}
+            {fieldValue ? dayjs(fieldValue).format(use24Hours ? TIME_FORMAT[dateType] : TIME_12_FORMAT[dateType]):'--'}
           </div>
         ) : (
           // use24Hours 24小时制
