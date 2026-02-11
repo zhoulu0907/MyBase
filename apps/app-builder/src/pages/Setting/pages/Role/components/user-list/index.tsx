@@ -164,24 +164,24 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+        <Input
+          className={styles.userListInput}
+          prefix={<IconSearch />}
+          placeholder="输入用户姓名"
+          value={searchValue}
+          onChange={handleSearch}
+          onPressEnter={(e) => handleSearch(e.target.value)}
+        />
+        <div style={{ flex: 1 }} />
         <Space>
           <Button type="primary" icon={<IconPlus />} onClick={handleAdd}>
             添加
           </Button>
         </Space>
-        <div style={{ flex: 1 }} />
-        <Input
-          className={styles.userListInput}
-          prefix={<IconSearch />}
-          placeholder="输入用户名称"
-          value={searchValue}
-          onChange={handleSearch}
-          onPressEnter={(e) => handleSearch(e.target.value)}
-        />
       </div>
 
       <Spin loading={loading}>
-        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} border={false} />
+        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} stripe />
       </Spin>
       <div
         style={{

@@ -136,7 +136,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
       data: permissions.filter((record) => record.children && record.children.length > 0),
       // pagination: false,
       scroll: { y: 500 },
-      border: false,
+      stripe: true,
       loading,
       childrenColumnName: 'actions'
     }),

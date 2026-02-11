@@ -15,7 +15,8 @@ import {
   Upload,
   Form,
   Avatar,
-  Modal
+  Modal,
+  Divider
 } from '@arco-design/web-react';
 import {
   createCorpAppApi,
@@ -37,6 +38,7 @@ import type { AppItem, cropItem, industryTypeOption, OutletContextType, updatedP
 import { AuthorizedApp } from '../createApp/authorizedApp';
 import { Cropper } from '@onebase/common';
 import { IconUpload } from '@arco-design/web-react/icon';
+import BackPrevPage from '@/pages/Setting/components/goPrevPage';
 import styles from './index.module.less';
 
 enum StatusLabelEnum {
@@ -328,11 +330,12 @@ const EnterpriseInfoPage: React.FC = () => {
   const renderForm = () => {
     return (
       <Form
+        form={form}
         layout="horizontal"
         labelAlign="left"
         labelCol={{ span: 2, style: { width: '90px', flex: '0 0 auto' } }}
         wrapperCol={{ style: { flex: '1' } }}
-        form={form}
+        style={{ marginLeft: 20, maxWidth: 600 }}
       >
         <Form.Item label="企业Logo" field="corpLogo" triggerPropName="fileList">
           <Space direction="vertical">
@@ -471,6 +474,10 @@ const EnterpriseInfoPage: React.FC = () => {
 
   return (
     <div className={styles.enterpriseWrapper}>
+      <div className={styles.enterpriseHeader}>
+        <BackPrevPage title={formData?.corpName || ''} />
+      </div>
+      <Divider style={{ margin: 0 }} />
       {/* 主内容卡片 */}
       <Card bordered={false}>
         {/* 标签页组件 */}
@@ -479,18 +486,16 @@ const EnterpriseInfoPage: React.FC = () => {
             {isEdited ? (
               <>
                 {renderForm()}
-                <Space>
-                  <Button onClick={handleCancel}>取消</Button>
-                  <Button type="primary" onClick={handleSubmitInfo} loading={submitLoading}>
-                    保存修改
-                  </Button>
-                </Space>
+                <Button type="primary" onClick={handleSubmitInfo} loading={submitLoading} style={{ marginLeft: 110 }}>
+                  保存修改
+                </Button>
+                <Button onClick={handleCancel}>取消</Button>
               </>
             ) : (
               <>
                 {/* 企业信息展示 */}
                 <Descriptions size="large" data={data} column={1} border={false} className={styles.infoPreview} />
-                <Button onClick={toggleEdit}>编辑</Button>
+                <Button onClick={toggleEdit} style={{ marginLeft: 110 }}>编辑</Button>
               </>
             )}
           </Tabs.TabPane>

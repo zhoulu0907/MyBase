@@ -31,7 +31,7 @@ export const StatusTag: React.FC<StatusTagProps> = ({ status, type = 'text' }) =
   const dotClass = isEnable ? s.enable : (status === StatusEnum.EXPIRED ? s.expired : s.disable);
 
   return type === 'tag' ? (
-    <Tag color={statusColorMap[status]}>{text}</Tag>
+    <Tag color={statusColorMap[status]} style={{ color: 'rgb(var(--primary-6))', backgroundColor: 'rgb(var(--primary-6), 0.15)' }}>{text}</Tag>
   ) : (
     <div className={s.statusTag}>
       <div className={`${s.dot} ${dotClass}`}></div>

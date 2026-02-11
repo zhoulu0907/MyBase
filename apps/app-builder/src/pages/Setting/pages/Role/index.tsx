@@ -151,6 +151,7 @@ export default function RolePage() {
 
   return (
     <div className={styles.rolePage}>
+      <Divider style={{ margin: 0 }} />
       <Layout className={styles.pageLayout}>
         <Sider width={252} className={styles.leftPanel}>
           <RoleList
@@ -160,6 +161,7 @@ export default function RolePage() {
             onSelect={handleRoleSelect}
           />
         </Sider>
+        <Divider type='vertical' style={{ height: '100%', margin: 0 }} />
         <Layout className={styles.rightPanel}>
           {!activeRoleId || showEmpty ? (
             <>
@@ -174,10 +176,9 @@ export default function RolePage() {
                   description={activeRole?.remark}
                   rightChildren={OperationButtons}
                   wrapperClassName={styles.infoPanel}
-                ></InfoPanel>
-                <Divider style={{ margin: '16px 0' }} />
+                />
               </Header>
-              <Content>
+              <Content style={{ marginTop: 12 }}>
                 <Tabs activeTab={activeTab} onChange={handleTabChange}>
                   <TabPane key="user" title="角色用户">
                     <PlaceholderPanel hasPermission={hasPermission(ACTIONS.USER)}>

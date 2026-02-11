@@ -50,7 +50,7 @@ export interface DictManagerConfig {
   // API 配置
   api?: {
     getDictList?: (params: Record<string, string>) => Promise<DictItem[]>;
-    getDictDataList?: (params: PageParam & { dictType: string }) => Promise<PageResult<DictData>>;
+    getDictDataList?: (params: PageParam & { dictType: string; dictTypeId: string }) => Promise<PageResult<DictData>>;
     createDict?: (data: Partial<DictItem>) => Promise<void>;
     updateDict?: (data: Partial<DictItem>) => Promise<void>;
     deleteDict?: (id: string) => Promise<void>;
@@ -250,8 +250,10 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   const loadTableData = async (searchKeyword?: string) => {
     setLoading(true);
-    const params: PageParam & { dictType: string; label?: string } = {
-      dictType: dictList.find((t) => t.id === activeDictId)?.type || '',
+    const curDict = dictList.find((t) => t.id === activeDictId);
+    const params: PageParam & { dictType: string; label?: string; dictTypeId: string } = {
+      dictTypeId: curDict?.id || '',
+      dictType: curDict?.type || '',
       pageNo: currentPage,
       pageSize,
       ...(searchKeyword ? { label: searchKeyword } : {})
@@ -441,9 +443,11 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         await currentTabConfig.api?.createDictData?.({ dictType: activeDict.type, ...values });
       }
       // 刷新表格
+      const curDict = dictList.find((t) => t.id === activeDictId);
       if (activeDictId !== undefined) {
-        const params: PageParam & { dictType: string } = {
-          dictType: dictList.find((t) => t.id === activeDictId)?.type || '',
+        const params: PageParam & { dictType: string; dictTypeId: string } = {
+          dictTypeId: curDict?.id || '',
+          dictType: curDict?.type || '',
           pageNo: currentPage,
           pageSize
         };
@@ -480,13 +484,15 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         .map((item) => ({
           ...item,
           id: '',
-          dictType: activeDict.type
+          dictType: activeDict.type,
+          dictTypeId: activeDict.id
         }));
       const updateItems = valuesWithDelete
         .filter((item) => !item?.id?.startsWith('temp-') && !item?.isDelete)
         .map((item) => ({
           ...item,
-          dictType: activeDict.type
+          dictType: activeDict.type,
+          dictTypeId: activeDict.id
         }));
       const deleteItems = valuesWithDelete.filter((item) => item.isDelete).map((item) => item.id);
 
@@ -509,6 +515,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
 
   return (
     <div className={`${styles.systemDictPage} ${finalConfig.className}`} style={finalConfig.style}>
+      <Divider style={{ margin: 0 }} />
       <Layout className={styles.pageLayout}>
         <Sider width={252} className={styles.leftPanel}>
           {finalConfig.tabs.enabled ? (

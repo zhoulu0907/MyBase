@@ -44,54 +44,11 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         return;
       }
 
-      if (index == 0 || index > 2) {
+      if (index == 0) {
         return;
       }
 
       currentPath += `/${segment}`;
-
-      switch (segment) {
-        case 'platform-info':
-          break;
-        case 'application':
-          result.push({
-            key: 'onebase',
-            title: '应用管理',
-            path: '/onebase'
-          });
-          break;
-        case 'user':
-        case 'role':
-        case 'organization':
-          result.push({
-            key: 'onebase',
-            title: '用户与组织',
-            path: '/onebase'
-          });
-          break;
-        case 'spaceInfo':
-        case 'system-dict':
-        case 'security':
-        case 'profile':
-        case 'tenant':
-          result.push({
-            key: 'onebase',
-            title: '系统配置',
-            path: '/onebase'
-          });
-          break;
-        case 'plugin':
-        case 'externalUser':
-        case 'enterprise':
-          result.push({
-            key: 'onebase',
-            title: '扩展功能',
-            path: '/onebase'
-          });
-          break;
-        default:
-          break;
-      }
 
       // 根据路径生成对应的标题
       let title: string;
@@ -151,28 +108,28 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
       result.push({
         key: segment,
         title,
-        path: index === segments.length - 1 ? undefined : currentPath
+        path: currentPath
       });
     });
 
     return result;
   }, [location.pathname, items, t]);
 
-  const handleBreadcrumbClick = (item: BreadcrumbItemType) => {
-    if (item.path) {
-      navigate(item.path);
-    }
-  };
+  // const handleBreadcrumbClick = (item: BreadcrumbItemType) => {
+  //   if (item.path) {
+  //     navigate(item.path);
+  //   }
+  // };
 
-  // 如果没有面包屑项，不渲染面包屑
-  if (breadcrumbItems.length === 0) {
+  // 如果没有面包屑项，或者超过1层 不渲染面包屑
+  if (breadcrumbItems.length !== 1) {
     return null;
   }
 
   return (
     <div className={`${styles.breadcrumbContainer} ${className || ''}`}>
       <Breadcrumb separator="/">
-        {breadcrumbItems.map((item, index) => (
+        {breadcrumbItems.map((item) => (
           <Breadcrumb.Item
             key={item.key}
             // onClick={() => handleBreadcrumbClick(item)}

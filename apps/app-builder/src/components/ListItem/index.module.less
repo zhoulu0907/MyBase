@@ -6,8 +6,10 @@
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  padding: 0 4px;
-  margin-bottom: 8px;
+  padding: 0 4px 0 20px;
+  margin-bottom: 4px;
+  border-left: 4px solid transparent;
+  box-sizing: border-box;
 
   .listItemTitle {
     margin-right: 6px;
@@ -18,6 +20,7 @@
 
   &.active {
     color: rgb(var(--primary-6));
-    background-color: #f7f8fa;
+    border-left: 4px solid rgb(var(--primary-6));
+    background: rgb(var(--primary-6), 0.15);
   }
 }

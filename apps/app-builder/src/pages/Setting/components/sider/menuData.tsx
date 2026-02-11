@@ -5,6 +5,7 @@ export interface MenuItemType {
   key: string;
   title: string;
   icon?: React.ReactNode;
+  iconActive?: React.ReactNode;
   path?: string;
   children?: MenuItemType[];
   disabled?: boolean;
