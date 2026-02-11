@@ -80,6 +80,8 @@ export interface RuntimeAccountLoginRequest {
    * 登录平台 判断手机还是PC端登录
    */
   loginPlatform?: LoginPlatform;
+
+  isDev?: boolean;
 }
 
 export interface RuntimeCorpLoginRequest {
