@@ -4,6 +4,7 @@ import { NotFoundPage } from '@onebase/common';
 import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import MyAppPage from './pages/MyApp';
+import IotInfo from './pages/IotInfo';
 import Runtime from './pages/Runtime';
 import SettingPage from './pages/Setting';
 import ThirdLogin from './pages/thirdLogin';
@@ -20,6 +21,7 @@ function AppContent() {
       {/* 登录页面不需要认证 */}
       <Route path="/login" element={<Login />} />
       <Route path="/third/login" element={<ThirdLogin />} />
+      <Route path="/third/iot/info" element={<IotInfo />} />
 
       <Route path="/onebase/:tenantId/:appId/runtime/" element={<Runtime />} />
       <Route path="/onebase/:tenantId/:appId/runtime-dev/" element={<Runtime />} />
