@@ -28,6 +28,7 @@ import XCheckItemValidate from './FormComponents/CheckItem/validate';
 import XCollapseLayoutValidate from './LayoutComponents/CollapseLayout/validate';
 import XColumnLayoutValidate from './LayoutComponents/ColumnLayout/validate';
 import XTabsLayoutValidate from './LayoutComponents/TabsLayout/validate';
+import XStepsLayoutValidate from './LayoutComponents/StepsLayout/validate';
 
 import XCalendarValidate from './ListComponents/Calendar/validate';
 import XCarouselValidate from './ListComponents/Carousel/validate';
@@ -90,6 +91,7 @@ export const baseValidate = {
   XColumnLayout: XColumnLayoutValidate,
   XCollapseLayout: XCollapseLayoutValidate,
   XTabsLayout: XTabsLayoutValidate,
+  XStepsLayout: XStepsLayoutValidate,
 
   XAlert: XAlertValidate,
   XInfoNotice: XInfoNoticeValidate,

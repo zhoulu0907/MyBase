@@ -13,18 +13,38 @@ interface Props {
 
 const WbTableConfig = ({ handlePropsChange, item, configs }: Props) => {
   const [visible, setVisible] = useState<boolean>(false);
+  const [selectedItem, setSelectedItem] = useState({});
+  const [selectedKey, setSelectedKey] = useState<string>('');
+
+  const handleOpen = () => {
+    const initialKey = (configs?.[item.key] as { componentId?: string } | undefined)?.componentId || '';
+    setSelectedKey(initialKey);
+    setVisible(true);
+  };
+
+  const handleOk = () => {
+    setVisible(false);
+    handlePropsChange(item.key, selectedItem);
+  };
+
+  const handleChange = (key: string, item: object) => {
+    setSelectedKey(key);
+    setSelectedItem(item);
+  };
+
   return (
     <>
-      <Button className={styles.configBtn} type="outline" onClick={() => setVisible(true)}>
+      <Button className={styles.configBtn} type="outline" onClick={handleOpen}>
         配置
       </Button>
 
       <Modal
         visible={visible}
         onCancel={() => setVisible(false)}
+        onOk={handleOk}
         title={<div style={{ textAlign: 'left' }}>添加列表</div>}
       >
-        <TableSelector value={configs[item.key] as string} onChange={(value) => handlePropsChange(item.key, value)} />
+        <TableSelector value={selectedKey} onChange={handleChange} />
       </Modal>
     </>
   );

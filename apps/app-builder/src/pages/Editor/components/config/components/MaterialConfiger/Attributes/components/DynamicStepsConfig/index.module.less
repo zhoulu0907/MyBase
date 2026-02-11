@@ -1,0 +1,86 @@
+.dynamicStepsConfig {
+}
+
+.formItem {
+  margin-bottom: 16px;
+}
+
+.stepsStylePreview {
+  text-align: center;
+}
+
+.stepsStylePreviewContent {
+  background-color: #F7F8FA;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.stepsStyleSelection {
+  padding: 16px;
+}
+
+.stepsStyleSelectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stepsStyleSelectionTitle {
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.stepsStyleList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stepsStyleItem {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.3s ease;
+  background-color: #F7F8FA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  &:hover {
+    border-color: #165dff;
+  }
+
+  &.active {
+    border-color: #165dff;
+    background-color: rgba(22, 93, 255, 0.05);
+  }
+
+  :global(.arco-image) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.stepsConfigList {
+  padding: 0;
+}
+
+.stepsSortableList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stepsConfigItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stepsConfigItemInput {
+  width: 120px;
+}

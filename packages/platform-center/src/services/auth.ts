@@ -67,6 +67,15 @@ export const getCaptchaApi = (data: Captcha) => {
   return (isRuntimeEnv() ? runtimeService : systemService).post('/captcha/get', data);
 };
 
+export interface TiangongLoginRequest {
+  code: string;
+  appName: string;
+}
+
+export const tiangongLogin = (req: TiangongLoginRequest) => {
+  return systemService.post('/system/auth/tiangong-login', req);
+};
+
 // 校验验证码 /system/captcha/check
 export const checkCaptchaApi = (data: CaptchaCheck) => {
   return (isRuntimeEnv() ? runtimeService : systemService).post('/captcha/check', data);

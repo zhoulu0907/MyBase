@@ -341,7 +341,9 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
           };
           const finalConfig = applySubTableCellOverrides(newConfig, column.type);
           const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
-          const editDisabled = (_record.key || _record.key === '0') && !subTableConfig?.editRow;
+          const value = form.getFieldValue(subTableName)
+          const record = value?.[index];
+          const editDisabled = record?.id && !subTableConfig?.editRow;
 
           return (
             <>
@@ -389,9 +391,15 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
         bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
         fixed: subTableConfig?.operateFixed ? 'right' : '',
         render: (_col: any, _record: any, index: number) => {
+          const configId = subTableComponents[id]?.[0]?.id;
+          const config = configId ? pageComponentSchemas[configId]?.config : null;
+          const subTableName = config?.dataField?.[0];
+          const value = subTableName ? form.getFieldValue(subTableName) : null
+          const record = value?.[index];
+          
           const delDisabled =
             status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ||
-            ((_record.key || _record.key === 'θ') && !subTableConfig?.deleteRow);
+            (record?.id && !subTableConfig?.deleteRow);
           //status的readonly优先级最高
           return (
             <Button

@@ -49,6 +49,14 @@
     "leftTitle2": "让脑海中创意蓝图自然成形",
     "mobile": "手机号"
   },
+  "oauth": {
+    "callback": {
+      "processing": "正在处理授权，请稍候...",
+      "codeMissing": "授权码缺失",
+      "appNameMissing": "应用名称缺失",
+      "loginFailed": "登录失败"
+    }
+  },
   "navigation": {
     "onebase": "首页",
     "dashboard": "仪表板",

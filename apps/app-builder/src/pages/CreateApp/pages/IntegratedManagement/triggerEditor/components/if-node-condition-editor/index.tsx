@@ -586,7 +586,19 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
   return (
     <div className={styles.conditionWrapper}>
       <Form.Item label={label} required={required}>
-        <Form.List field="filterCondition">
+        <Form.List
+          field="filterCondition"
+          rules={[
+            { required: true, message: '请添加条件' },
+            {
+              validator: (value, cb) => {
+                if (!value || value.length === 0) {
+                  cb('请添加条件');
+                }
+              }
+            }
+          ]}
+        >
           {(conditions, { add, remove }) => {
             return (
               <div>

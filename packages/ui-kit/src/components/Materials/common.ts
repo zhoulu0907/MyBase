@@ -53,6 +53,7 @@ import type {
     ITabsConfigType,
     ITabsPositionConfigType,
     ITabsTypeConfigType,
+    IStepsConfigType,
     ITextConfigType,
     ITimeFormatConfigType,
     ITimeRangeConfigType,
@@ -60,6 +61,7 @@ import type {
     IVerifyConfigType,
     IWidthConfigType,
     ITreeDataConfigType,
+    IWebViewParamsConfigType,
     TTextDefaultType,
     IUploadButtonConfigType,
     IIndicatorCardStyleConfigType,
@@ -474,6 +476,12 @@ export const treeDataConfig: ITreeDataConfigType = {
   type: 'TreeData'
 };
 
+export const webViewParamsConfig: IWebViewParamsConfigType = {
+  key: 'metaData',
+  name: '数据绑定与参数',
+  type: 'WebViewParams'
+};
+
 export const canvasCardConfig: ICanvasCardConfigType = {
   key: 'componentName',
   name: '样式库',
@@ -721,6 +729,37 @@ export const tabsPositionConfig: ITabsPositionConfigType<TTabsPositionSelectKeyT
     }
   ]
 };
+
+// ==================== 步骤条 ====================
+export const stepsConfig: IStepsConfigType = {
+  key: 'steps',
+  name: '样式库',
+  type: 'Steps'
+};
+
+// 步骤条样式类型
+export type TStepsTypeSelectKeyType = 'default' | 'navigation' | 'arrow' | 'dot';
+
+// 步骤条标签位置
+export type TStepsLabelPlacementSelectKeyType = 'horizontal' | 'vertical';
+export const stepsLabelPlacementConfig: ITabsPositionConfigType<TStepsLabelPlacementSelectKeyType> = {
+  key: 'labelPlacement',
+  name: '标签位置',
+  type: 'TabsPosition',
+  range: [
+    {
+      key: '水平',
+      label: '水平',
+      value: 'horizontal'
+    },
+    {
+      key: '垂直',
+      label: '垂直',
+      value: 'vertical'
+    }
+  ]
+};
+
 // ==================== 图片与文件 ====================
 export const imageConfig: IImageConfigType = {
   key: 'image',
@@ -831,6 +870,7 @@ export const minRowsConfig: INumberConfigType = {
   min: 1,
   max: 10,
   step: 1,
+  precision: 0
 }
 
 export const autoplayConfig: IBooleanConfigType = {

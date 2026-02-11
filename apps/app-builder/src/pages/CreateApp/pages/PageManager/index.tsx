@@ -80,7 +80,7 @@ interface Options {
 }
 
 const menuStyles = {
-  height: '32px',
+  height: '32px'
 };
 
 const PageManagerPage: FC = () => {
@@ -483,7 +483,7 @@ const PageManagerPage: FC = () => {
       const pageSetId = await getPageSetId({
         menuId: menuResp.id
       });
-      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardInfo = await listPageView({ pageSetId, isDev: true });
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       if (screenMethod !== DashBoardCreateType.DashboardLink) {
         window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
@@ -620,7 +620,7 @@ const PageManagerPage: FC = () => {
       return;
     }
     if (curMenu.value?.pagesetType === dashboardPageType) {
-      const dashboardInfo = await listPageView({ pageSetId });
+      const dashboardInfo = await listPageView({ pageSetId, isDev: true });
 
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');

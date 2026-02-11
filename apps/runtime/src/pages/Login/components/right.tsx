@@ -1,5 +1,6 @@
 import { DynamicIcon } from '@/components/DynamicIcon';
 
+import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
@@ -59,6 +60,8 @@ const Right: React.FC = () => {
 
   const [appId, setAppId] = useState('');
   const [tenantId, setTenantId] = useState('');
+
+  const isDev = useIsRuntimeDev();
 
   useEffect(() => {
     // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
@@ -142,7 +145,8 @@ const Right: React.FC = () => {
           username: (values as RuntimeAccountLoginRequest).username!,
           appId: appId,
           captchaVerification: captchaVerification,
-          deviceId: deviceId
+          deviceId: deviceId,
+          isDev: isDev
         };
         response = await innerLogin(innerloginData, headers);
       } else if (!appId) {

@@ -19,8 +19,8 @@ import { ModalNodeRegistry } from './interaction/modal';
 import { NavigateNodeRegistry } from './interaction/navigate';
 import { RefreshNodeRegistry } from './interaction/refresh';
 import { TooltipNodeRegistry } from './interaction/tooltip';
-import { ConnectorNodeRegistry } from './other/connector';
 import { DataMapperNodeRegistry } from './other/data-mapper';
+import { HTTPNodeRegistry } from './other/http';
 import { JavascriptNodeRegistry } from './other/javascript';
 import { JsonNodeRegistry } from './other/json';
 import { LogNodeRegistry } from './other/log';
@@ -64,7 +64,7 @@ export const FlowNodeRegistries: FlowNodeRegistry[] = [
   MessageNodeRegistry,
   ScriptNodeRegistry,
   DataMapperNodeRegistry,
-  ConnectorNodeRegistry,
+  HTTPNodeRegistry,
 
   ModalNodeRegistry,
   NavigateNodeRegistry,

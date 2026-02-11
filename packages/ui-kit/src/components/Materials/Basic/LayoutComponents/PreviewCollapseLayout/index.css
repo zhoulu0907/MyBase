@@ -1,9 +1,9 @@
 .XPreviewCollapseLayout {
   width: 100%;
-  overflow: visible !important;
+  overflow-y: visible !important;
 
   .pc-collapse-item-content {
-    overflow: visible !important;
+    overflow-y: visible !important;
   }
 
   .pc-collapse-item-header-title {

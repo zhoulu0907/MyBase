@@ -48,6 +48,8 @@ export const CONFIG_TYPES = {
   TREE_FIELDS: 'TreeFields',
   // 树数据配置
   TREE_DATA: 'TreeData',
+  // 网页组件参数配置
+  WEB_VIEW_PARAMS: 'WebViewParams',
   // 表格分页数量
   TABLE_PAGE_SIZE: 'TablePageSize',
   // 图片、附件上传大小限制
@@ -94,6 +96,8 @@ export const CONFIG_TYPES = {
   TABS_TYPE: 'TabsType',
   // 页签组件位置
   TABS_POSITION: 'TabsPosition',
+  // 步骤条样式库
+  STEPS: 'Steps',
   // 静态文件
   IMAGE: 'Image',
   FILE: 'File',
@@ -393,6 +397,25 @@ export const TABS_POSITION_VALUES = {
   [TABS_POSITION_OPTIONS.BOTTOM]: 'bottom',
   [TABS_POSITION_OPTIONS.LEFT]: 'left',
   [TABS_POSITION_OPTIONS.RIGHT]: 'right'
+} as const;
+
+// 步骤条样式常量
+export const STEPS_TYPE_OPTIONS = {
+  DEFAULT: 'default',
+  NAVIGATION: 'navigation',
+  ARROW: 'arrow',
+  DOT: 'dot'
+} as const;
+
+// 步骤条标签位置常量
+export const STEPS_LABEL_PLACEMENT_OPTIONS = {
+  HORIZONTAL: 'horizontal',
+  VERTICAL: 'vertical'
+} as const;
+
+export const STEPS_LABEL_PLACEMENT_VALUES = {
+  [STEPS_LABEL_PLACEMENT_OPTIONS.HORIZONTAL]: 'horizontal',
+  [STEPS_LABEL_PLACEMENT_OPTIONS.VERTICAL]: 'vertical'
 } as const;
 
 // 折叠选项常量
