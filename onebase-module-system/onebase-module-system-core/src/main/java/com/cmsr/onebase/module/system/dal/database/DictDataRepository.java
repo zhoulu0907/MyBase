@@ -142,7 +142,7 @@ public class DictDataRepository extends BaseDataRepository<SystemDictDataMapper,
     /**
      * 根据字典类型批量删除字典数据
      *
-     * @param dictTypeIds 字典类型集合
+     * @param dictTypeIds 字典类型标识集合
      * @return 字典数据列表
      */
     public void removeDictDataByType(Collection<Long> dictTypeIds) {
