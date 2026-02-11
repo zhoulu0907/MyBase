@@ -7,7 +7,10 @@ import {
   COMPONENT_GROUP_NAME,
   type GridItem,
   type WorkbenchComponentType,
-  useWorkbenchSignal
+  useWorkbenchSignal,
+  getOrCreatePageConfig,
+  shouldShowInWorkspace,
+  isPageConfig
 } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { loadMicroApp, initGlobalState, type MicroApp } from 'qiankun';
@@ -40,6 +43,7 @@ export default function WorkbenchWorkspace() {
     curComponentID,
     setCurComponentID,
     clearCurComponentID,
+    curComponentSchema,
     setCurComponentSchema,
     wbComponentSchemas,
     setWbComponentSchemas,
@@ -116,45 +120,46 @@ export default function WorkbenchWorkspace() {
     workbenchComponents
   });
 
-  // 获取或创建页面配置 schema
-  const getPageConfigSchema = () => {
-    return {
-      type: 'page',
-      config: {
-        showHeader: true,
-        showSidebar: true
-      }
-    };
+  // 获取并设置页面配置
+  const loadPageConfig = () => {
+    const [pageConfigId, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas);
+
+    // 确保页面配置已保存
+    if (!wbComponentSchemas[pageConfigId]) {
+      setWbComponentSchemas(pageConfigId, pageConfigSchema);
+    }
+
+    setCurComponentSchema(pageConfigSchema);
   };
 
   // 处理空白区域点击
   const handleBodyMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    if (target.id === 'workspace-content') {
-      // 只在当前有选中组件时才清除并设置页面配置
-      if (curComponentID) {
-        clearCurComponentID?.();
-        setShowDeleteButton(false);
-        // 设置页面配置 schema
-        const pageConfigSchema = getPageConfigSchema();
-        setCurComponentSchema(pageConfigSchema);
-      }
+    if ((e.target as HTMLElement).id === 'workspace-content') {
+      clearCurComponentID?.();
+      setShowDeleteButton(false);
+      loadPageConfig();
     }
   };
 
-  // 初始化时设置页面配置
+  // 初始化页面配置（等待数据加载完成）
   useEffect(() => {
-    if (!isInitialized.current && !curComponentID) {
+    if (!isInitialized.current && !curComponentID && Object.keys(wbComponentSchemas).length > 0) {
       isInitialized.current = true;
-      setCurComponentSchema({
-        type: 'page',
-        config: {
-          showHeader: true,
-          showSidebar: true
-        }
-      });
+      loadPageConfig();
     }
-  }, []);
+  }, [wbComponentSchemas, curComponentID]);
+
+  // 同步页面配置更新
+  useEffect(() => {
+    if (!curComponentID && isPageConfig(curComponentSchema)) {
+      const [pageConfigId] = getOrCreatePageConfig(wbComponentSchemas);
+      const latestConfig = wbComponentSchemas[pageConfigId];
+
+      if (latestConfig && JSON.stringify(latestConfig.config) !== JSON.stringify(curComponentSchema?.config)) {
+        setCurComponentSchema(latestConfig);
+      }
+    }
+  }, [wbComponentSchemas, curComponentID]);
 
   const isMobileMode = editMode.value === EditMode.MOBILE;
 
@@ -204,7 +209,7 @@ export default function WorkbenchWorkspace() {
               group={{ name: COMPONENT_GROUP_NAME }}
             >
               {workbenchComponents
-                ?.filter((cp: GridItem) => cp.type !== 'entity')
+                ?.filter((cp: GridItem) => shouldShowInWorkspace(cp.type))
                 .map((cp: GridItem) => {
                   const currentWidth = getWorkbenchComponentWidth(
                     wbComponentSchemas[cp.id],

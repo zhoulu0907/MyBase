@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
-import { useWorkbenchSignal } from '@onebase/ui-kit';
+import { useWorkbenchSignal, isPageConfig } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import pageIcon from '@/assets/workbench/page_icon.svg';
 import * as ComponentConfig from './ConfigsByComp';
@@ -16,10 +16,14 @@ const WorkbenchConfiger = () => {
   const { curComponentID, curComponentSchema } = useWorkbenchSignal();
 
   const componentType = useMemo(() => curComponentSchema?.type, [curComponentSchema?.type]);
-  const isPageConfig = useMemo(() => componentType === 'page' || !curComponentID, [componentType, curComponentID]);
+  // 使用工具函数判断是否为页面配置
+  const isPageConfigType = useMemo(
+    () => isPageConfig(curComponentSchema) || !curComponentID,
+    [curComponentSchema, curComponentID]
+  );
 
   const configComponent = useMemo(() => {
-    if (isPageConfig) {
+    if (isPageConfigType) {
       return <ComponentConfig.PageConfig />;
     }
 
@@ -31,21 +35,21 @@ const WorkbenchConfiger = () => {
     const configName = `${componentType.replace(/^X/, '')}Config`;
     const ConfigComponent = ComponentConfig[configName as keyof typeof ComponentConfig];
     return ConfigComponent ? <ConfigComponent /> : <ComponentConfig.QuickEntryConfig />;
-  }, [isPageConfig, componentType]);
+  }, [isPageConfigType, componentType]);
 
   // 显示名称
   const displayName = useMemo(() => {
-    if (isPageConfig) return '页面配置';
+    if (isPageConfigType) return '页面配置';
     return curComponentSchema?.displayName || curComponentSchema?.config?.cpName || '工作台组件';
-  }, [isPageConfig, curComponentSchema?.displayName, curComponentSchema?.config?.cpName]);
+  }, [isPageConfigType, curComponentSchema?.displayName, curComponentSchema?.config?.cpName]);
 
   // 图标
   const icon = useMemo(() => {
-    if (isPageConfig) {
+    if (isPageConfigType) {
       return <img src={pageIcon} alt="页面配置" className={styles.pageIcon} />;
     }
     return ICON_Map_By_Type[componentType];
-  }, [isPageConfig, componentType]);
+  }, [isPageConfigType, componentType]);
 
   return (
     <div className={styles.workbenchConfigs}>
