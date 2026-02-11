@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.edge.condition.BpmConditionItem;
 import com.cmsr.onebase.module.bpm.core.enums.*;
+import com.cmsr.onebase.module.bpm.core.jsonconvert.FieldTypeConvertor;
 import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
@@ -27,10 +28,10 @@ import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
 import org.dromara.warm.flow.core.strategy.ExpressionStrategy;
 import org.dromara.warm.flow.core.utils.StringUtils;
-import com.cmsr.onebase.module.bpm.core.jsonconvert.FieldTypeConvertor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -44,6 +45,38 @@ import java.util.*;
  * @author cascade
  */
 public class ConditionStrategyOb implements ConditionStrategy {
+
+    private static final class EvalContext {
+        private final Map<String, Object> variable;
+        private SemanticEntityValueDTO entity;
+        private Map<String, Object> instanceMap;
+        private Map<String, Object> preNodeMap;
+
+        private EvalContext(Map<String, Object> variable) {
+            this.variable = variable;
+        }
+
+        private SemanticEntityValueDTO getOrBuildEntity(ConditionStrategyOb owner) {
+            if (entity == null) {
+                entity = owner.getOrBuildEntityMap(variable);
+            }
+            return entity;
+        }
+
+        private Map<String, Object> getOrBuildInstanceMap(ConditionStrategyOb owner) {
+            if (instanceMap == null) {
+                instanceMap = owner.getOrBuildInstanceMap(variable);
+            }
+            return instanceMap;
+        }
+
+        private Map<String, Object> getOrBuildPreNodeMap(ConditionStrategyOb owner) {
+            if (preNodeMap == null) {
+                preNodeMap = owner.getOrBuildPreNodeMap(variable);
+            }
+            return preNodeMap;
+        }
+    }
 
     @Override
     public String getType() {
@@ -78,8 +111,10 @@ public class ConditionStrategyOb implements ConditionStrategy {
                 return false;
             }
 
+            EvalContext ctx = new EvalContext(variable);
+
             for (List<BpmConditionItem> andList : orList) {
-                if (evaluateAndList(andList, variable)) {
+                if (evaluateAndList(ctx, andList)) {
                     return true;
                 }
             }
@@ -96,9 +131,9 @@ public class ConditionStrategyOb implements ConditionStrategy {
      * @param variable  流程上下文变量
      * @return 组内所有条件都成立返回 true，否则 false
      */
-    private boolean evaluateAndList(List<BpmConditionItem> andList, Map<String, Object> variable) {
+    private boolean evaluateAndList(EvalContext ctx, List<BpmConditionItem> andList) {
         for (BpmConditionItem cond : andList) {
-            if (!evaluateItem(cond, variable)) {
+            if (!evaluateItem(ctx, cond)) {
                 return false;
             }
         }
@@ -114,7 +149,7 @@ public class ConditionStrategyOb implements ConditionStrategy {
      * - 取右值（静态值/变量/公式）
      * - 按字段类型做比较
      */
-    private boolean evaluateItem(BpmConditionItem cond, Map<String, Object> variable) {
+    private boolean evaluateItem(EvalContext ctx, BpmConditionItem cond) {
         if (cond == null) {
             return false;
         }
@@ -142,8 +177,8 @@ public class ConditionStrategyOb implements ConditionStrategy {
 
         String fieldType = cond.getFieldType();
 
-        Object leftVal = resolveLeftValue(fieldScope, fieldName, variable);
-        Object rightVal = resolveRightValue(fieldType, op, operatorType, cond.getValue(), variable);
+        Object leftVal = resolveLeftValue(ctx, fieldScope, fieldName);
+        Object rightVal = resolveRightValue(ctx, fieldType, op, operatorType, cond.getValue());
 
         return compareByFieldType(leftVal, rightVal, op, fieldType);
     }
@@ -157,17 +192,15 @@ public class ConditionStrategyOb implements ConditionStrategy {
      * - PRE_NODE：前置节点（最近一次历史任务）数据
      * - 其他：直接从 variable 取
      */
-    private Object resolveLeftValue(String fieldScope, String fieldName, Map<String, Object> variable) {
-        if (variable == null) {
-            return null;
-        }
-
+    private Object resolveLeftValue(EvalContext ctx, String fieldScope, String fieldName) {
+        Map<String, Object> variable = ctx.variable;
+        // 表单属性
         if (FieldScopeEnum.ENTITY.getCode().equalsIgnoreCase(fieldScope)) {
-            SemanticEntityValueDTO orBuildEntity = getOrBuildEntityMap(variable);
-            if (orBuildEntity == null || orBuildEntity.getGlobalRawMap() == null) {
+            SemanticEntityValueDTO entity = ctx.getOrBuildEntity(this);
+            if (entity == null || entity.getGlobalRawMap() == null) {
                 return null;
             }
-            Map<String, Object> entityMap = orBuildEntity.getGlobalRawMap();
+            Map<String, Object> entityMap = entity.getGlobalRawMap();
             if (entityMap != null) {
                 Object v = entityMap.get(fieldName);
                 if (v != null) {
@@ -176,9 +209,9 @@ public class ConditionStrategyOb implements ConditionStrategy {
             }
             return variable.get(fieldName);
         }
-
+        // 当前实例属性
         if (FieldScopeEnum.INSTANCE.getCode().equalsIgnoreCase(fieldScope)) {
-            Map<String, Object> instanceMap = getOrBuildInstanceMap(variable);
+            Map<String, Object> instanceMap = ctx.getOrBuildInstanceMap(this);
             if (instanceMap != null) {
                 Object v = instanceMap.get(fieldName);
                 if (v != null) {
@@ -187,9 +220,9 @@ public class ConditionStrategyOb implements ConditionStrategy {
             }
             return variable.get(fieldName);
         }
-
+        // 如果类型选择是上一节点
         if (FieldScopeEnum.PRE_NODE.getCode().equalsIgnoreCase(fieldScope)) {
-            Map<String, Object> preNodeMap = getOrBuildPreNodeMap(variable);
+            Map<String, Object> preNodeMap = ctx.getOrBuildPreNodeMap(this);
             if (preNodeMap != null) {
                 Object v = preNodeMap.get(fieldName);
                 if (v != null) {
@@ -350,7 +383,7 @@ public class ConditionStrategyOb implements ConditionStrategy {
      * - VARIABLE：引用表单/实体字段（rawRight 通常是字段 uuid），从实体数据中取值
      * - FORMULA：公式，调用公式引擎计算并按字段类型进行转换
      */
-    private Object resolveRightValue(String fieldType, OpEnum op, OperatorTypeEnum operatorType, Object rawRight, Map<String, Object> variable) {
+    private Object resolveRightValue(EvalContext ctx, String fieldType, OpEnum op, OperatorTypeEnum operatorType, Object rawRight) {
         // 如果是静态值就是存什么取什么
         if (operatorType == OperatorTypeEnum.VALUE) {
             if (op == OpEnum.RANGE
@@ -364,25 +397,46 @@ public class ConditionStrategyOb implements ConditionStrategy {
         }
         // 如果是变量就是表单的数据
         if (operatorType == OperatorTypeEnum.VARIABLE) {
-            SemanticEntityValueDTO orBuildEntity = getOrBuildEntityMap(variable);
-            if (orBuildEntity == null || orBuildEntity.getGlobalRawMap() == null) {
+            SemanticEntityValueDTO entity = ctx.getOrBuildEntity(this);
+            if (entity == null || entity.getGlobalRawMap() == null) {
                 return null;
             }
-            Map<String, Object> entityMap = orBuildEntity.getGlobalRawMap();
+            Map<String, Object> entityMap = entity.getGlobalRawMap();
             // todo:如果是多选数据，这里需要改
-            SemanticFieldValueDTO<Object> fieldValueByUuid = orBuildEntity.getFieldValueByUuid((String) rawRight);
+            SemanticFieldValueDTO<Object> fieldValueByUuid = entity.getFieldValueByUuid((String) rawRight);
+            if (fieldValueByUuid == null || fieldValueByUuid.getFieldName() == null) {
+                return null;
+            }
             return entityMap.get(fieldValueByUuid.getFieldName());
         }
         // 如果是公式
         if (operatorType == OperatorTypeEnum.FORMULA) {
-            FormulaEngineApi formulaEngineApi = FrameInvoker.getBean(FormulaEngineApi.class);
-
-            String formula = MapUtils.getString((Map)rawRight, BpmConstants.VAR_FORMULADATA_KEY);
+            Map<String, Object> variable = ctx.variable;
+            SemanticEntityValueDTO entity = ctx.getOrBuildEntity(this);
+            if (entity == null) {
+                return null;
+            }
+            Map<String, Object> currentEntityRawMap = entity.getCurrentEntityRawMap();
+            String formula = MapUtils.getString((Map)rawRight, BpmConstants.VAR_FORMULA_KEY);
             Map parameters = MapUtils.getMap((Map)rawRight, BpmConstants.VAR_PARAMETERS_KEY);
+            parameters.forEach((key, value) -> {
+                String fieldUuid = String.valueOf(value);
+
+                // 根据 UUID 获取字段元数据
+                SemanticFieldValueDTO<Object> fieldValue = entity.getFieldValueByUuid(fieldUuid);
+                if (fieldValue != null && fieldValue.getFieldName() != null) {
+                    // 从实体数据 Map 中按字段名取值
+                    Object actualVal = currentEntityRawMap.get(fieldValue.getFieldName());
+                    // 处理日期格式化
+                    actualVal = dateFormat(actualVal);
+                    parameters.put(key, actualVal);
+                }
+            });
             FormulaExecuteReqDTO reqDTO = new FormulaExecuteReqDTO();
             reqDTO.setFormula(formula);
             reqDTO.setParameters(parameters);
             reqDTO.setContextData(variable);
+            FormulaEngineApi formulaEngineApi = FrameInvoker.getBean(FormulaEngineApi.class);
             CommonResult<FormulaExecuteRespDTO> respDTO = formulaEngineApi.executeFormula(reqDTO);
             if (respDTO.getData() == null) {
                 throw new IllegalCallerException("调用公式错误: " + reqDTO.getFormula() + ", 错误信息: " + respDTO.getMsg());
@@ -395,6 +449,18 @@ public class ConditionStrategyOb implements ConditionStrategy {
             }
         }
         return null;
+    }
+
+    //如果是时间格式转一下
+    private static Object dateFormat(Object actualVal) {
+        if (actualVal instanceof LocalDateTime ldt) {
+            actualVal = ldt.format(DateTimeFormatter.ofPattern(com.cmsr.onebase.framework.uid.utils.DateUtils.DATETIME_PATTERN));
+        } else if (actualVal instanceof Date d) {
+            actualVal = com.cmsr.onebase.framework.uid.utils.DateUtils.formatDate(d, com.cmsr.onebase.framework.uid.utils.DateUtils.DATETIME_PATTERN);
+        } else if (actualVal instanceof java.time.LocalDate ld) {
+            actualVal = ld.format(DateTimeFormatter.ofPattern(com.cmsr.onebase.framework.uid.utils.DateUtils.DAY_PATTERN));
+        }
+        return actualVal;
     }
 
     /**
@@ -765,17 +831,6 @@ public class ConditionStrategyOb implements ConditionStrategy {
             }
             return new Long[]{start, end};
         }
-        //预留一下这种格式
-//        if (right instanceof Map<?, ?> map) {
-//            Object startO = map.get("start");
-//            Object endO = map.get("end");
-//            Long start = toEpochMillis(startO);
-//            Long end = toEpochMillis(endO);
-//            if (start == null || end == null) {
-//                return null;
-//            }
-//            return new Long[]{start, end};
-//        }
         return null;
     }
 

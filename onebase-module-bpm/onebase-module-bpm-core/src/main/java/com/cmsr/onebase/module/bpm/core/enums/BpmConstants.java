@@ -63,7 +63,7 @@ public interface BpmConstants {
     String AGENT_TITLE_PREFIX = "【代理审批】";
 
     //OperatorType为公式时，value里面的是一个String和一个map，key分别为formulaData、parameters
-    String VAR_FORMULADATA_KEY = "formulaData";
+    String VAR_FORMULA_KEY = "formula";
     String VAR_PARAMETERS_KEY = "parameters";
 
     // OperatorType为静态值时，里面会存在一个map 两个key begin end
