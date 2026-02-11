@@ -1,13 +1,12 @@
 @panel-background-color: #fff;
 @panel-padding: 16px;
 .rolePage {
-  height: 100%;
+  height: calc(100% - 1px);
   .pageLayout {
     height: 100%;
     background-color: transparent;
   }
   .leftPanel {
-    margin-right: 16px;
     min-height: 400px;
     display: flex;
     flex-direction: column;
@@ -18,11 +17,6 @@
     :global(.pc-layout-sider-children) {
       padding: @panel-padding;
     }
-    .searchInput {
-      :global(.pc-input-inner-wrapper) {
-        border-radius: 24px;
-      }
-    }
 
     .roleList {
       flex: 1;
@@ -30,15 +24,32 @@
       overflow-x: hidden;
       .deptTreeNode {
         :global(.pc-tree-node) {
+          height: 36px;
+          padding-left: 0;
           margin-bottom: 4px;
 
+          :global(.pc-tree-node-switcher) {
+            width: 4px;
+            height: 100%;
+            margin-right: 20px;
+            background: transparent;
+          }
+
           &-selected {
-            :global(.pc-tree-node-title) {
-              background: #f7f8fa !important;
+            background: rgb(var(--primary-6), 0.15);
+            :global(.pc-tree-node-switcher) {
+              width: 4px;
+              height: 100%;
+              margin-right: 20px;
+              background: rgb(var(--primary-6));
             }
           }
           :global(.pc-tree-node-title) {
-            padding: 7px 5px 7px 4px;
+            padding: 6px 6px 6px 0;
+
+            &:hover {
+              background-color: transparent;
+            }
           }
         }
       }
@@ -83,18 +94,11 @@
   .userListInput {
     width: 220px;
     margin-right: 12px;
-
-    :global(.pc-input-inner-wrapper) {
-      border-radius: 24px !important;
-    }
   }
 }
 
 .permissionInput {
   width: 200px;
   margin-right: 32px;
-
-  :global(.pc-input-inner-wrapper) {
-    border-radius: 24px;
-  }
+  margin-bottom: 12px;
 }

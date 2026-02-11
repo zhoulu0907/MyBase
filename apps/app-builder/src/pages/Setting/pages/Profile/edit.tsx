@@ -1,10 +1,11 @@
 import { filterSpace } from '@/utils';
 import { emailValidator, phoneValidator } from '@/utils/validator';
-import { Button, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
+import { Button, Divider, Form, Input, Message, Select, Spin, Tabs } from '@arco-design/web-react';
 import { getPublicKey, hasPermission, sm2Encrypt, UploadAvatarComponent, UserPermissionManager, TENANT_PROFILE_PERMISSION as ACTIONS } from '@onebase/common';
 import { getLoginedUser, updateLoginedUser, updateLoginedUserPwd, uploadFile } from '@onebase/platform-center';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import BackPrevPage from '../../components/goPrevPage';
 import styles from './index.module.less';
 
 const TabPane = Tabs.TabPane;
@@ -132,7 +133,11 @@ const ProfileEditPage: React.FC<IEditPageProps> = ({ avatarUrl, setAvatarUrl }) 
 
   return (
     <div className={styles.editPage}>
-      <Tabs tabPosition="left">
+      <div className={styles.editPageHeader}>
+        <BackPrevPage title='编辑资料' />
+      </div>
+      <Divider style={{ margin: 0 }} />
+      <Tabs className={styles.editContainer} tabPosition="left">
         {hasPermission(ACTIONS.UPDATE) && (
           <TabPane key="tab1" title="基本资料">
             <div

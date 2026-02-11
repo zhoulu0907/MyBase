@@ -90,7 +90,7 @@ export const getDictDataListByType = (dictType: string): Promise<DictData[]> => 
 /**
  * 获取字典数据列表-分页
  */
-export const getDictDataListByPage = (params: PageParam & { dictType: string }): Promise<PageResult<DictData>> => {
+export const getDictDataListByPage = (params: PageParam & { dictType: string, dictTypeId: string }): Promise<PageResult<DictData>> => {
   return systemService.get('/dict-data/page', params);
 };
 

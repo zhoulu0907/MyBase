@@ -482,6 +482,18 @@ export default function UserTable({
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <Space>
+          <Input.Search
+            className={s.inputSearch}
+            style={{ width: 218, marginBottom: 0 }}
+            placeholder="输入用户姓名"
+            value={search}
+            onChange={handleSearch}
+            onPressEnter={(e) => handleSearch(e.target.value)}
+            allowClear
+          />
+          <Select defaultValue={status} bordered={false} options={statusOptions} onChange={(val) => setStatus(val)} />
+        </Space>
+        <Space>
           <Button permission={ACTIONS.CREATE} type="primary" icon={<IconPlus />} onClick={handleCreate}>
             新建用户
           </Button>
@@ -492,29 +504,17 @@ export default function UserTable({
             导出
           </Button> */}
         </Space>
-        <Space>
-          <Select defaultValue={status} bordered={false} options={statusOptions} onChange={(val) => setStatus(val)} />
-          <Input.Search
-            className={s.inputSearch}
-            style={{ width: 218, marginBottom: 0 }}
-            placeholder="输入用户名称"
-            value={search}
-            onChange={handleSearch}
-            onPressEnter={(e) => handleSearch(e.target.value)}
-            allowClear
-          />
-        </Space>
       </div>
       {/* 表格 */}
       <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
         <Table
           rowKey="id"
           hover
+          stripe
           columns={getColumns(handleEdit)}
           data={data}
           pagination={false}
           scroll={{ y: 510 }}
-          border={false}
         />
         {/* 页码 */}
         <div

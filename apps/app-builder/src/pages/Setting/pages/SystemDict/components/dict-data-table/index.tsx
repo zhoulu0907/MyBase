@@ -50,16 +50,16 @@ export default function DictionaryTable({
   return (
     <>
       <div className={s.tableHeader}>
-        <Button permission={ACTIONS.UPDATE} type="primary" onClick={onBatchConfig}>
-          字典值配置
-        </Button>
         <Input.Search
           value={searchValue}
           onChange={onSearchChange}
-          placeholder="搜索字典值"
+          placeholder="输入字典值"
           style={{ width: 200 }}
           allowClear
         />
+        <Button permission={ACTIONS.UPDATE} type="primary" onClick={onBatchConfig}>
+          字典值配置
+        </Button>
       </div>
       <div className={s.tableContainer}>
         <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} />

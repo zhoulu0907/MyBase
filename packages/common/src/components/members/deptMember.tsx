@@ -223,8 +223,8 @@ const DeptMember = (props: IProps) => {
         <div style={{ width: '300px', height: '100%', paddingLeft: '16px', overflow: 'hidden' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <span>已选择: {selectedMembers.length} 个</span>
-            <Button
-              type="text"
+            <div
+              style={{ cursor: 'pointer'}}
               onClick={() => {
                 setSelectedKeys([]);
                 if (onUpdateSelectedMembers) {
@@ -233,7 +233,7 @@ const DeptMember = (props: IProps) => {
               }}
             >
               清空
-            </Button>
+            </div>
           </div>
           <div style={{ height: 'calc(100% - 40px)', overflow: 'auto' }}>
             <List
@@ -243,20 +243,19 @@ const DeptMember = (props: IProps) => {
               render={(item) => (
                 <List.Item
                   key={item.key}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid #EAEEEF' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <Avatar size={24} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
+                      <Avatar size={32} style={{ backgroundColor: 'rgb(var(--primary-6))' }}>
                         {item.avatar ? <img src={getResourceById(item.avatar)} alt="avatar" /> : (item.name?.slice(0, 1) || 'U')}
                       </Avatar>
                       <div>
-                        <div>{item.name}</div>
-                        <div style={{ color: '#ccc' }}>{item.department || '未分配部门'}</div>
+                        <div style={{ fontSize: 14, color: '#24515D' }}>{item.name}</div>
+                        <div style={{ fontSize: 12, color: '#7C979E' }}>{item.department || '未分配部门'}</div>
                       </div>
                     </div>
-
-                    <Button type="text" icon={<IconClose />} onClick={() => removeMember(item.key)} />
+                    <IconClose fontSize={14} color='#7C979E' style={{ cursor: 'pointer'}} onClick={() => removeMember(item.key)} />
                   </div>
                 </List.Item>
               )}

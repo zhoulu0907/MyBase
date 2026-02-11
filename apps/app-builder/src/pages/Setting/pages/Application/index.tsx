@@ -269,33 +269,13 @@ const AppManagement: React.FC = () => {
               pointerEvents: applicationEmpty ? 'auto' : 'unset'
             }}
           >
-            <div className={styles.cteateBtn}>
-              <Button
-                type="primary"
-                size="large"
-                permission={ACTIONS.CREATE}
-                icon={<IconPlus fontSize={16} />}
-                onClick={() => {
-                  setCreateVisible(true);
-                }}
-              >
-                创建应用
-              </Button>
-              {/* TODO(ai)：当前仅ai测试账号可见 */}
-              {tenantId === '156421901678804992' &&
-                userPermissionInfo?.user?.id?.toString() === '156421901678804997' && (
-                  <Button
-                    type="primary"
-                    size="large"
-                    permission={ACTIONS.CREATE}
-                    onClick={() => navigate('/aigen/chat')}
-                    className={styles.aiCteateApp}
-                    icon={<img src={aiCreateSVG} />}
-                  >
-                    AI生成应用
-                  </Button>
-                )}
-            </div>
+            <Input
+              className={styles.appInput}
+              allowClear
+              suffix={<IconSearch />}
+              onChange={handleSearchChange}
+              placeholder="请输入"
+            />
 
             {/* 筛选下拉框 */}
             <div>
@@ -312,7 +292,6 @@ const AppManagement: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-              <Divider type="vertical" />
               <Select
                 placeholder="按创建时间排序"
                 bordered={false}
@@ -326,7 +305,6 @@ const AppManagement: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-              <Divider type="vertical" />
               <Select
                 placeholder="全部状态"
                 bordered={false}
@@ -340,15 +318,6 @@ const AppManagement: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-              <Divider type="vertical" />
-
-              <Input
-                className={styles.appInput}
-                allowClear
-                suffix={<IconSearch />}
-                onChange={handleSearchChange}
-                placeholder="搜索"
-              />
             </div>
           </div>
 
@@ -369,7 +338,7 @@ const AppManagement: React.FC = () => {
                   </Button>
                 </div>
               )}
-              {dataList?.map((item, _index) => (
+              {dataList?.map((item) => (
                 <AppCard
                   key={item.id}
                   item={item}

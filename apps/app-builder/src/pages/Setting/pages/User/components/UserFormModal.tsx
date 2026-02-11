@@ -163,6 +163,7 @@ export default function UserFormModal({
       onOk();
     } finally {
       setLoading(false);
+      form.resetFields();
     }
   };
 

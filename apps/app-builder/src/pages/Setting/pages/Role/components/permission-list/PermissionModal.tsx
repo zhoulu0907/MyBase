@@ -259,31 +259,21 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
 
   return (
     <Modal
-      title={
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}
-        >
-          <span>权限配置</span>
-          <Search
-            className={styles.permissionInput}
-            placeholder="请输入权限名称"
-            allowClear
-            value={searchValue}
-            onChange={(value) => setSearchValue(value)}
-            onSearch={setSearchValue}
-          />
-        </div>
-      }
+      title='权限配置'
       visible={visible}
       onCancel={onCancel}
       onOk={handleConfirm}
       confirmLoading={confirmLoading}
       style={{ width: 900 }}
     >
+      <Search
+        className={styles.permissionInput}
+        placeholder="输入权限名称"
+        allowClear
+        value={searchValue}
+        onChange={(value) => setSearchValue(value)}
+        onSearch={setSearchValue}
+      />
       <Table
         rowKey="id"
         childrenColumnName="actions"

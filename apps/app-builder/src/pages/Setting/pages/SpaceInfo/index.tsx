@@ -244,7 +244,7 @@ const SpaceInfo: React.FC<{ onTenantInfoChange?: (info: PlatformTenantInfo) => v
                         ) : (
                           <Avatar
                             shape="square"
-                            style={{ width: 160, height: 80, backgroundColor: '#F7F8FA', borderRadius: 12 }}
+                            style={{ width: 160, height: 80, backgroundColor: 'rgb(var(--primary-6))', borderRadius: 12 }}
                           >
                             <span className={styles.avatarText}>{spaceInfo.name?.slice(0, 6)}</span>
                           </Avatar>
