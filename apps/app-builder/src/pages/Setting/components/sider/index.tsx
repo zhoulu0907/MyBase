@@ -9,7 +9,7 @@ import organizationActiveSVG from '@/assets/images/organization-chart_active.svg
 import plugSVG from '@/assets/images/plug.svg';
 import plugActiveSVG from '@/assets/images/plug_active.svg';
 import securitySVG from '@/assets/images/security.svg';
-import securityActiveSVG from '@/assets/images/security.svg';
+import securityActiveSVG from '@/assets/images/security_active.svg';
 import tenantInfoSVG from '@/assets/images/space-ship-line.svg';
 import tenantInfoActiveSVG from '@/assets/images/space-ship-line_active.svg';
 import appLicationManageSVG from '@/assets/images/terminal-window-line.svg';
