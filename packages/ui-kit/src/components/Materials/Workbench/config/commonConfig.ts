@@ -236,8 +236,8 @@ export const richTextContentConfig: IWbRichTextContentConfigType = {
 /**
  * 数据列表-表格配置
  */
-export const tableUUidConfig: ITableConfigType = {
-  key: 'tableUUid',
+export const tableInfoConfig: ITableConfigType = {
+  key: 'tableInfo',
   name: '表格配置',
   type: WORKBENCH_CONFIG_TYPES.WB_TABLE_CONFIG
 };

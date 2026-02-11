@@ -34,13 +34,14 @@ function AppContent() {
   const match = useMatch('/onebase/:tenantId/*');
   const tenantId = match?.params.tenantId;
 
-  useEffect(() => {
-    initPlugins();
-  }, []);
+  // useEffect(() => {
+  //   initPlugins();
+  // }, []);
 
   useEffect(() => {
     if (tenantId) {
       TokenManager.setCurIdentifyId(tenantId);
+      // initPlugins(); // 已在 main.tsx 中提前初始化
     }
   }, [tenantId, location.pathname]);
 

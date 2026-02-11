@@ -7,6 +7,7 @@ import XTimeline from './Timeline';
 import XCard from './Card';
 import XTree from './Tree';
 import XCanvasCard from './CanvasCard';
+import XIndicatorCard from './IndicatorCard';
 
 import XCalendarSchema from './Calendar/schema';
 import XCarouselSchema from './Carousel/schema';
@@ -17,6 +18,7 @@ import XTimelineSchema from './Timeline/schema';
 import XCardSchema from './Card/schema';
 import XTreeSchema from './Tree/schema';
 import XCanvasCardSchema from './CanvasCard/schema';
+import XIndicatorCardSchema from './IndicatorCard/schema';
 
 export const ListComp = {
   XCollapse,
@@ -27,7 +29,8 @@ export const ListComp = {
   XTimeline,
   XCard,
   XTree,
-  XCanvasCard
+  XCanvasCard,
+  XIndicatorCard
 };
 
 export const ListSchema = {
@@ -39,5 +42,6 @@ export const ListSchema = {
   XTimelineSchema,
   XCardSchema,
   XTreeSchema,
-  XCanvasCardSchema
+  XCanvasCardSchema,
+  XIndicatorCardSchema
 };

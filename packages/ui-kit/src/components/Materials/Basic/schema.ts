@@ -38,6 +38,7 @@ import XTimeline from './ListComponents/Timeline/schema';
 import XCard from './ListComponents/Card/schema';
 import XTree from './ListComponents/Tree/schema';
 import XCanvasCard from './ListComponents/CanvasCard/schema';
+import XIndicatorCard from './ListComponents/IndicatorCard/schema';
 
 import XAlert from './ShowComponents/Alert/schema';
 import XCarouselForm from './ShowComponents/Carousel/schema';
@@ -86,6 +87,7 @@ export const baseSchema = {
   XCard,
   XTree,
   XCanvasCard,
+  XIndicatorCard,
 
   XColumnLayout,
   XCollapseLayout,

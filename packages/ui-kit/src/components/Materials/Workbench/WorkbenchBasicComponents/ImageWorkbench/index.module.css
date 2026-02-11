@@ -1,9 +1,7 @@
 .containerStyle {
   width: 100%;
   border-radius: 8px;
-  padding: 16px;
   box-sizing: border-box;
-  background-color: #fff;
 }
 
 .imageHeader {

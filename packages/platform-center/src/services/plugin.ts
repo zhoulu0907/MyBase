@@ -1,5 +1,5 @@
 import { pluginPageParams } from '../types';
-import { pluginService } from './clients';
+import { pluginService, runtimePluginService } from './clients';
 
 // 分页查询插件列表（动态插件）
 export const getPluginPageListApi = (data: pluginPageParams) => pluginService.get('/info/page', data);
@@ -52,4 +52,25 @@ export const savePluginConfigApi = (data: any) => pluginService.post('/config/sa
 // 获取插件配置详情
 export const getPluginConfigDetailApi = (params: { pluginId: string; pluginVersion: string }) => pluginService.get('/config/detail', params);
 
+// ================= 管理端上下文接口 =================
 
+// 获取管理端清单
+export const getPluginManifestApi = () => pluginService.get('/context/manifest');
+
+// 获取管理端配置值Map（明文/掩码）
+export const getPluginConfigPlainApi = (params: { pluginId: string; pluginVersion: string }) => pluginService.get('/context/config/plain', params);
+
+
+// ================= 运行态上下文接口 =================
+
+// 获取运行态清单
+export const getRuntimePluginManifestApi = () => runtimePluginService.get('/context/manifest');
+
+// 获取运行态配置
+export const getRuntimePluginConfigApi = (params: { pluginId: string; version: string }) => runtimePluginService.get('/context/config', params);
+
+// 获取当前租户ID
+export const getRuntimeTenantIdApi = () => runtimePluginService.get('/context/tenant-id');
+
+// 获取当前应用ID
+export const getRuntimeApplicationIdApi = () => runtimePluginService.get('/context/application-id');

@@ -52,6 +52,10 @@ export interface GetPageListByAppIdReq {
   appId: string;
 }
 
+export interface GetTablesByAppIdReq {
+  applicationId: string;
+}
+
 export interface GetPageMetadataReq {
   pageUuid: string;
 }
@@ -70,6 +74,7 @@ export interface CreatePageViewParams {
 
 export interface ListPageViewParams {
   pageSetId: string;
+  isDev?: boolean;
 }
 export enum ViewType {
   MIX = 'mix',

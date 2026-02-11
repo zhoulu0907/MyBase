@@ -102,7 +102,7 @@ const processListColComponents = (
   return colComponents;
 };
 
-export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Function,message?:string) {
+export async function startSavePageSet(params: SavePageSetParams, onSuccess?: Function, message?: string) {
   const {
     formComponents,
     formPageComponentSchemas,
@@ -424,7 +424,8 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
   // 载入视图
   const res = await listPageView({
-    pageSetId: pageSetId
+    pageSetId: pageSetId,
+    isDev: isDev
   });
   if (res && res.pages) {
     // 如果没有视图选中，就选中默认视图

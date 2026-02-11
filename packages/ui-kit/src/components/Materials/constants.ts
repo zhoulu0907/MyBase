@@ -149,6 +149,10 @@ export const CONFIG_TYPES = {
   GROUP_FILTER: 'GroupFilter',
   // 画布卡片配置
   CANVAS_CARD_CONFIG: 'CanvasCardConfig',
+  // 指标卡样式库
+  INDICATOR_CARD_STYLE: 'IndicatorCardStyle',
+  // 指标配置
+  INDICATOR_CARD_CONFIG: 'IndicatorCardConfig'
 } as const;
 
 // 状态选项常量
@@ -707,3 +711,44 @@ export const SELECT_OPTIONS_BPM = [
   { value: 'bpm_status', displayName: '流程状态', fieldName: 'bpm_status', fieldType: 'SELECT' },
   { value: 'bpm_current_node', displayName: '当前节点', fieldName: 'bpm_current_node', fieldType: 'SELECT' }
 ] as any;
+
+// 指标卡
+export const INDICATOR_CARD_STYLE_TYPE = {
+  ONE:'one',
+  TWO:'two',
+  THREE:'three',
+  FOUR:'four',
+  FIVE:'five',
+}
+// 指标字段计算方式  求和/平均值/最大值/最小值/计数/去重计数
+export const INDICATOR_CALCULATE_TYPE = {
+  SUM: 'sum',
+  AVERAGE: 'average',
+  MAX: 'max',
+  MIN: 'min',
+  COUNT: 'count',
+  DEDUCE: 'deduce'
+}
+// 指标 时间维度 timeDimension 时/天/周/月（默认）/年
+export const INDICATOR_TIME_DEMENSION = {
+  HOUR:'hour',
+  DAY:'day',
+  WEEK: 'week',
+  MONTH:'month',
+  YEAR: 'year'
+}
+
+// 指标 环比计算方式  环比、日同比、周同比、月同比、年同比
+export const INDICATOR_COMPARE_CALCULATE_METHOD = {
+  COMPARE: 'compare',
+  COMPARE_DAY: 'compareDay',
+  COMPARE_WEEK: 'compareWeek',
+  COMPARE_MONTH: 'compareMonth',
+  COMPARE_YEAR: 'compareYear',
+}
+// 指标 环比计算类型  差异率（默认）/差值/原始值
+export const INDICATOR_COMPARE_CALCULATE_TYPE = {
+  RATE: 'rate',
+  DIFFERENCE: 'difference',
+  VALUE: 'value',
+}

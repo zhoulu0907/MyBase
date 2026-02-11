@@ -130,7 +130,7 @@ const ContentDrawer = ({ visible, onClose, onChange, value, handlePropsChange, .
       onCancel={onClose}
       title="内容编辑"
       footer={null}
-      height="50vh"
+      height="72vh"
     >
       <div className={styles.content}>
         <Toolbar editor={editor} defaultConfig={toolbarConfig} mode="default" className={styles.Toolbar} />

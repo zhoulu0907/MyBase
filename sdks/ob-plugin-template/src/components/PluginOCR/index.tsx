@@ -13,9 +13,9 @@
  */
 // ===== 导入 begin =====
 import React, { useState, useEffect, useMemo } from 'react';
-import { Upload, Button, Message, Spin, Image, Space, Typography, Card, Form, Input, Popover } from '@arco-design/web-react';
+import { Upload, Button, Message, Spin, Image, Space, Typography, Card, Form, Input, Popover, Select } from '@arco-design/web-react';
 import { IconUpload, IconCamera, IconFileImage, IconDelete, IconEye, IconCloseCircle, IconPlus, IconImage, IconEdit } from '@arco-design/web-react/icon';
-import { OCR_TYPES } from './constants';
+import { OCR_TYPES, EXIT_ENTRY_PERMIT_TYPES } from './constants';
 import './index.css';
 import {
   genId,
@@ -313,6 +313,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     onChange
   } = props;
   const [recognizing, setRecognizing] = useState(false);
+  const [permitType, setPermitType] = useState('hk_mc_passport');
 
   const recognitionMode = ocrConfig?.recognitionMode || props.recognitionMode || 'fixed';
   const recognitionType = ocrConfig?.recognitionType || props.recognitionType || 'id_card_front';
@@ -475,30 +476,89 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
   }, [currentType, fieldId, form, onChange, sdk]);
 
   // ===== 外部 API 调用 begin =====
-  const callOCRIdCardAPI = React.useCallback(async (frontFile?: File, backFile?: File) => {
+  const callOCRAPI = React.useCallback(async (params: { frontFile?: File, backFile?: File, file?: File }) => {
     const formData = new FormData();
-    if (frontFile) formData.append('frontFile', frontFile);
-    if (backFile) formData.append('backFile', backFile);
+    let url = '';
+
+    if (currentType === 'id_card_front') {
+      url = '/runtime/plugin/onebase-plugin-ocr/id-card';
+      if (params.file) formData.append('frontFile', params.file);
+    } else if (currentType === 'id_card_both') {
+      url = '/runtime/plugin/onebase-plugin-ocr/id-card';
+      if (params.frontFile) formData.append('frontFile', params.frontFile);
+      if (params.backFile) formData.append('backFile', params.backFile);
+    } else if (currentType === 'exitentrypermit') {
+      url = '/runtime/plugin/onebase-plugin-ocr/exitentrypermit';
+      if (params.frontFile) formData.append('frontFile', params.frontFile);
+      if (params.backFile) formData.append('backFile', params.backFile);
+      formData.append('exitentrypermitType', permitType);
+    } else if (currentType === 'passport') {
+      url = '/runtime/plugin/onebase-plugin-ocr/passport';
+      if (params.file) formData.append('file', params.file);
+    }
 
     try {
-      const response = await fetch('http://10.0.104.33:8080/ocr/id_card', {
+      const response = await sdk.request({
+        url,
         method: 'POST',
-        body: formData,
+        data: formData,
       });
 
-      if (!response.ok) {
-        throw new Error(`OCR request failed: ${response.status} ${response.statusText}`);
+      if (response && response.code !== 0) {
+        throw new Error(response.msg || 'OCR request failed');
       }
 
-      return await response.json();
+      return response;
     } catch (error) {
       console.error('OCR Error:', error);
       throw error;
     }
-  }, []);
+  }, [currentType, permitType, sdk]);
   // ===== 外部 API 调用 end =====
 
   // ===== 内部事件 begin =====
+  const normalizeResult = React.useCallback((apiRes: any) => {
+    const data = apiRes?.data || {};
+    const getWords = (obj: any, key: string) => (obj?.[key]?.words ?? '');
+    const formatDate = (dateStr: string) => {
+      if (!dateStr) return '';
+      // Try to match YYYYMMDD
+      const match = dateStr.match(/^(\d{4})(\d{2})(\d{2})$/);
+      if (match) {
+        return `${match[1]}-${match[2]}-${match[3]}`;
+      }
+      return dateStr;
+    };
+
+    if (currentType === 'id_card_front' || currentType === 'id_card_both') {
+      const front = data?.front?.words_result || {};
+      const back = data?.back?.words_result || {};
+      const frontNorm = {
+        name: getWords(front, '姓名'),
+        gender: getWords(front, '性别'),
+        ethnicity: getWords(front, '民族'),
+        birthday: formatDate(getWords(front, '出生')),
+        address: getWords(front, '住址'),
+        id_number: getWords(front, '公民身份号码')
+      };
+      const validFrom = getWords(back, '签发日期');
+      const validTo = getWords(back, '失效日期');
+      const backNorm = {
+        issue_authority: getWords(back, '签发机关'),
+        valid_from: formatDate(validFrom),
+        valid_to: formatDate(validTo)
+      };
+      return { front: frontNorm, back: backNorm };
+    }
+
+    // Default passthrough for new types (passport, exitentrypermit)
+    // Assuming backend returns structured data matching OCR_FIELDS keys or raw data
+    return {
+      front: data?.front || data || {},
+      back: data?.back || {}
+    };
+  }, [currentType]);
+
   const handleDualIdentify = React.useCallback(async () => {
     console.log('[PluginOCR] handleDualIdentify triggered, current value:', fieldValue);
     
@@ -506,7 +566,12 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     const frontVal = values[0];
     const backVal = values[1];
 
-    if (!frontVal?.file || !backVal?.file) {
+    if ((!frontVal?.file && !backVal?.file) && (currentType === 'id_card_both' || currentType === 'exitentrypermit')) {
+      sdk?.ui?.notify?.('warning', '请至少上传一张图片');
+      return;
+    }
+
+    if (currentType === 'id_card_both' && (!frontVal?.file || !backVal?.file)) {
       console.warn('[PluginOCR] In dual mode, both front and back files are required');
       sdk?.ui?.notify?.('warning', '请上传身份证正反面两张图片');
       return;
@@ -517,50 +582,15 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
       const frontFile = frontVal?.file?.originFile;
       const backFile = backVal?.file?.originFile;
       
-      // console.log('[PluginOCR] Preparing to upload:', { frontFile, backFile });
-
-      const res = await callOCRIdCardAPI(frontFile, backFile);
-      const normalizeIdCardResult = (apiRes: any) => {
-        const data = apiRes?.data || {};
-        const front = data?.front?.words_result || {};
-        const back = data?.back?.words_result || {};
-        const getWords = (obj: any, key: string) => (obj?.[key]?.words ?? '');
-        const formatDate = (dateStr: string) => {
-          if (!dateStr) return '';
-          // Try to match YYYYMMDD
-          const match = dateStr.match(/^(\d{4})(\d{2})(\d{2})$/);
-          if (match) {
-            return `${match[1]}-${match[2]}-${match[3]}`;
-          }
-          return dateStr;
-        };
-        const frontNorm = {
-          name: getWords(front, '姓名'),
-          gender: getWords(front, '性别'),
-          ethnicity: getWords(front, '民族'),
-          birthday: formatDate(getWords(front, '出生')),
-          address: getWords(front, '住址'),
-          id_number: getWords(front, '公民身份号码')
-        };
-        const validFrom = getWords(back, '签发日期');
-        const validTo = getWords(back, '失效日期');
-        const backNorm = {
-          issue_authority: getWords(back, '签发机关'),
-          valid_from: formatDate(validFrom),
-          valid_to: formatDate(validTo)
-        };
-        return { front: frontNorm, back: backNorm };
-      };
-      const parsed = normalizeIdCardResult(res);
+      const res = await callOCRAPI({ frontFile, backFile });
+      const parsed = normalizeResult(res);
       
       // 更新结果
       const newValues = [...values];
       
       // 确保对象存在
-      newValues[0] = { ...newValues[0], result: parsed.front };
-      newValues[1] = { ...newValues[1], result: parsed.back };
-
-      // console.log('[PluginOCR] Identification success, updating value:', newValues);
+      if (newValues[0]) newValues[0] = { ...newValues[0], result: parsed.front };
+      if (newValues[1]) newValues[1] = { ...newValues[1], result: parsed.back };
 
       onChange?.(newValues);
 
@@ -590,11 +620,11 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
       }
     } catch (e: any) {
       console.error('[PluginOCR] Identification failed:', e);
-      // sdk?.ui?.notify?.('error', e.message || '识别失败');
+      sdk?.ui?.notify?.('error', e.message || '识别失败');
     } finally {
       setRecognizing(false);
     }
-  }, [fieldValue, sdk, callOCRIdCardAPI, onChange]);
+  }, [fieldValue, sdk, callOCRAPI, onChange, currentType, normalizeResult, currentBindingRules, resolveFieldName]);
   // ===== 内部事件 end =====
 
   const handleSingleIdentify = React.useCallback(async () => {
@@ -605,28 +635,10 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     }
     try {
       setRecognizing(true);
-      const res = await callOCRIdCardAPI(file);
-      const data = res?.data || {};
-      const front = data?.front?.words_result || {};
-      const getWords = (obj: any, key: string) => (obj?.[key]?.words ?? '');
-      const formatDate = (dateStr: string) => {
-        if (!dateStr) return '';
-        // Try to match YYYYMMDD
-        const match = dateStr.match(/^(\d{4})(\d{2})(\d{2})$/);
-        if (match) {
-          return `${match[1]}-${match[2]}-${match[3]}`;
-        }
-        return dateStr;
-      };
-      const frontNorm = {
-        name: getWords(front, '姓名'),
-        gender: getWords(front, '性别'),
-        ethnicity: getWords(front, '民族'),
-        birthday: formatDate(getWords(front, '出生')),
-        address: getWords(front, '住址'),
-        id_number: getWords(front, '公民身份号码')
-      };
-      onChange?.({ file: fieldValue?.file, result: frontNorm });
+      const res = await callOCRAPI({ file });
+      const parsed = normalizeResult(res);
+      
+      onChange?.({ file: fieldValue?.file, result: parsed.front });
 
       const rulesObj = Array.isArray(currentBindingRules) ? { bindings: currentBindingRules } : (currentBindingRules || {});
       const buildAssignments = (resultObj: any, list?: any[]) => {
@@ -641,7 +653,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
         });
         return out;
       };
-      const assignments = buildAssignments(frontNorm, (rulesObj as any).bindings);
+      const assignments = buildAssignments(parsed.front, (rulesObj as any).bindings);
       if (Object.keys(assignments).length > 0) {
         const setAll = (sdk as any)?.context?.entity?.setFieldsValue;
         console.log('[PluginOCR] Assignments:', assignments, setAll);
@@ -657,28 +669,39 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
     } finally {
       setRecognizing(false);
     }
-  }, [fieldValue, callOCRIdCardAPI, onChange, resolveFieldName]);
+  }, [fieldValue, callOCRAPI, onChange, resolveFieldName, normalizeResult, currentBindingRules, sdk]);
 
   // ===== 渲染方法 begin =====
   const renderInteractiveContent = () => {
     const isListMode = displayMode === 'list';
     const wrapperWidth = isListMode ? '100%' : 160;
 
-    if (currentType === 'id_card_both') {
+    if (currentType === 'id_card_both' || currentType === 'exitentrypermit') {
       return (
-        <DualUploaderWrapper 
-          displayMode={displayMode}
-          isListMode={isListMode}
-          wrapperWidth={wrapperWidth}
-          previewEnabled={previewEnabled}
-          triggerMode={triggerMode}
-          onUpload={undefined}
-          externalLoading={recognizing}
-        />
+        <Space direction="vertical" style={{ width: '100%' }}>
+          {currentType === 'exitentrypermit' && (
+             <Select 
+                style={{ width: '100%', marginBottom: 8 }} 
+                placeholder="请选择证件类型"
+                value={permitType}
+                onChange={setPermitType}
+                options={EXIT_ENTRY_PERMIT_TYPES}
+             />
+          )}
+          <DualUploaderWrapper 
+            displayMode={displayMode}
+            isListMode={isListMode}
+            wrapperWidth={wrapperWidth}
+            previewEnabled={previewEnabled}
+            triggerMode={triggerMode}
+            onUpload={undefined}
+            externalLoading={recognizing}
+          />
+        </Space>
       );
     }
 
-    const singleTitle = currentType === 'id_card_front' ? '身份证正面' : label?.text;
+    const singleTitle = currentType === 'id_card_front' ? '身份证正面' : (currentType === 'passport' ? '护照' : label?.text);
 
     return (
       <SingleUploaderWrapper
@@ -698,7 +721,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
   };
 
   const renderReadonlyContent = () => {
-    return currentType === 'id_card_both' ? (
+    return (currentType === 'id_card_both' || currentType === 'exitentrypermit') ? (
       <Space direction="vertical">
         <div>正面: {fieldValue?.[0]?.file?.name || '--'}</div>
         <div>反面: {fieldValue?.[1]?.file?.name || '--'}</div>
@@ -743,7 +766,7 @@ const PluginOCR = React.memo((props: PluginOCRProps) => {
         </Form.Item>
         {interactive && triggerMode === 'button' && (
           <div style={{ marginTop: 8 }}>
-            <Button type="primary" size="mini" onClick={currentType === 'id_card_both' ? handleDualIdentify : handleSingleIdentify}>识别</Button>
+            <Button type="primary" size="mini" onClick={(currentType === 'id_card_both' || currentType === 'exitentrypermit') ? handleDualIdentify : handleSingleIdentify}>识别</Button>
           </div>
         )}
       </>

@@ -44,11 +44,11 @@ const XFileUpload = memo(
 
       const progressAdapter = onProgress
         ? (progressEvent: ProgressEvent) => {
-            if (progressEvent.lengthComputable) {
-              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              onProgress(percent, progressEvent);
-            }
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
           }
+        }
         : undefined;
 
       if (runtime) {
@@ -254,6 +254,20 @@ const XFileUpload = memo(
               removeIcon: status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? null : <IconDelete />
             }}
             renderUploadList={renderUploadList}
+            tip={!detailMode && uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] ? <>
+              {verify?.fileFormatLimit && (
+                <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
+              )}
+              <span>
+                {verify?.maxCountLimit && (
+                  <span>
+                    最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                    {verify?.maxSizeLimit ? '，' : ''}
+                  </span>
+                )}
+                {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
+              </span>
+            </> : undefined}
           >
             {detailMode ? null : (
               <div className="uplaodTrigger">

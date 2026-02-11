@@ -38,6 +38,7 @@ import XTableValidate from './ListComponents/Table/validate';
 import XTimelineValidate from './ListComponents/Timeline/validate';
 import XCardValidate from './ListComponents/Card/validate';
 import XTreeValidate from './ListComponents/Tree/validate';
+import XIndicatorCardValidate from './ListComponents/IndicatorCard/validate';
 
 import XAlertValidate from './ShowComponents/Alert/validate';
 import XCarouselFormValidate from './ShowComponents/Carousel/validate';
@@ -85,6 +86,7 @@ export const baseValidate = {
   XList: XListValidate,
   XCard: XCardValidate,
   XTree: XTreeValidate,
+  XIndicatorCard: XIndicatorCardValidate,
 
   XColumnLayout: XColumnLayoutValidate,
   XCollapseLayout: XCollapseLayoutValidate,

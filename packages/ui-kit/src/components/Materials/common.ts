@@ -63,6 +63,8 @@ import type {
     ITreeDataConfigType,
     TTextDefaultType,
     IUploadButtonConfigType,
+    IIndicatorCardStyleConfigType,
+    IIndicatorCardConfigType
 } from './types';
 
 // ==================== 基础与通用 ====================
@@ -520,6 +522,19 @@ export const groupFilterConfig: IGroupFilterConfigType = {
   name: '绑定分组筛选',
   type: 'GroupFilter'
 };
+
+// ==================== 指标卡 ====================
+export const indicatorCardStyleConfig:IIndicatorCardStyleConfigType ={
+  key: 'styleType',
+  name: '样式库',
+  type: 'IndicatorCardStyle'
+}
+export const indicatorCardConfig:IIndicatorCardConfigType ={
+  key: 'styleType',
+  name: '指标配置',
+  type: 'IndicatorCardConfig'
+}
+
 
 // ==================== 默认基础值 ====================
 export const baseDefault = {

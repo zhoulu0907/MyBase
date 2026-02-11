@@ -2,7 +2,7 @@ import '@arco-design/web-react/dist/css/arco.css';
 import '@arco-themes/react-cyansu-ob03/index.less';
 
 import { ConfigProvider } from '@arco-design/web-react';
-import { ErrorPage, getAiGenURL } from '@onebase/common';
+import { ErrorPage, getAiGenURL, TokenManager } from '@onebase/common';
 import { loadTheme } from '@onebase/ui-kit/src/utils/theme';
 import { registerMicroApps, start } from 'qiankun';
 import { StrictMode } from 'react';
@@ -11,6 +11,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import App from './App.tsx';
 import './i18n';
 import './index.css';
+import { initPlugins } from './plugin';
 
 registerMicroApps([
   {
@@ -24,6 +25,21 @@ registerMicroApps([
 start();
 
 async function init() {
+  // 提前解析路由获取 tenantId 并初始化插件
+  try {
+    const hash = window.location.hash;
+    // 匹配 #/onebase/:tenantId
+    const match = hash.match(/^#\/onebase\/([^/?]+)/);
+    if (match && match[1]) {
+      const tenantId = match[1];
+      console.log('[App Builder] Early init: Found tenantId', tenantId);
+      TokenManager.setCurIdentifyId(tenantId);
+      initPlugins();
+    }
+  } catch (e) {
+    console.error('[App Builder] Early init failed:', e);
+  }
+
   await loadTheme({
     default: () => import('./themes/theme.less'),
     tiangong: () => import('./themes/theme_tiangong.less'),
