@@ -488,9 +488,14 @@ export default function EditorHeader() {
   const handleSavePageSet = async (exit?: boolean) => {
     setSaveLoading(true);
     if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
-      await onFlowSave();
-      setSaveLoading(false);
-      return;
+      try {
+        await onFlowSave();
+        return;
+      } catch (error) {
+        console.error('保存失败:', error);
+      } finally {
+        setSaveLoading(false);
+      }
     }
 
     const { dataTitleType, redirectType, dataTitle } = usePageSettingSignal;
