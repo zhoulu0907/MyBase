@@ -63,9 +63,9 @@ export default function IotInfo() {
     <div className={styles.iotInfoPage}>
       {/* 设备概览 */}
       <Card className={styles.deviceOverview}>
-        <Title heading={4} style={{ margin: 0 }}>
-           设备概览
-         </Title>
+        <Title heading={4} style={{ margin: 0, padding: '16px 0' }}>
+          设备概览
+        </Title>
         <Descriptions
           data={[
             { label: '设备名称', value: '离心式压缩机' },
@@ -86,9 +86,9 @@ export default function IotInfo() {
       {/* 设备运行参数 */}
       <Card className={styles.deviceParams}>
         <div className={styles.header}>
-           <Title heading={4} style={{ margin: 0 }}>
-             设备运行参数
-           </Title>
+          <Title heading={4} style={{ margin: 0, padding: '16px 0' }}>
+            设备运行参数
+          </Title>
           <Space>
             <Button type="primary" style={{ color: '#ff0000', borderColor: '#ff0000' }}>
               开机
