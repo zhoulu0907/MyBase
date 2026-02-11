@@ -50,9 +50,8 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
     Message.success('导入完成');
     if (onComplete) {
       onComplete();
-    } else {
-      onClose();
     }
+    onClose();
     setCurrentStep(1);
   };
 
