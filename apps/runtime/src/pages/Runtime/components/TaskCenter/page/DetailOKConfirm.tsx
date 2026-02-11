@@ -51,11 +51,17 @@ const DetailOKConfirm: FC = forwardRef((props: any, ref: any) => {
         entity: entityData,
         targetHandlerId
       };
-      await fetchExecTask(req);
-      onSetPopupVisible(false);
-      onBack();
-    } catch (error) {
+      const res = await fetchExecTask(req);
+      if (res) {
+        Message.success(res?.msg || '操作成功');
+        onSetPopupVisible(false);
+        onBack && onBack();
+      } else {
+        Message.error(res?.msg || '操作失败');
+      }
+    } catch (error: any) {
       console.log('表单验证失败:', error);
+      Message.error(error?.msg || '操作失败');
     }
   };
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
