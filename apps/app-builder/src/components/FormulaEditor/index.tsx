@@ -276,13 +276,24 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   /**
    * 复制公式
    */
-  const handleCopy = useCallback(async () => {
+  const handleEditorCopy = useCallback(async () => {
     try {
       copy(formula);
       Message.success('公式已复制到剪贴板');
     } catch (err) {
-      await navigator.clipboard.writeText(formula);
-      Message.success('公式已复制到剪贴板');
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(formula);
+        Message.success('公式已复制到剪贴板');
+      } else {
+        console.error('复制失败: ', err);
+        const textarea = document.createElement('textarea');
+        textarea.value = formula;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        Message.success('公式已复制到剪贴板');
+      }
     }
   }, [formula]);
 
@@ -493,7 +504,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
             error={error}
             isDebugMode={isDebugMode}
             onChange={setFormula}
-            onCopy={handleCopy}
+            onCopy={handleEditorCopy}
             onDebug={handleClickDebug}
             filteredVariables={filteredVariables}
             filteredFunctions={filteredFunctions}
