@@ -61,6 +61,7 @@ import type {
     IVerifyConfigType,
     IWidthConfigType,
     ITreeDataConfigType,
+    IWebViewParamsConfigType,
     TTextDefaultType,
     IUploadButtonConfigType,
     IIndicatorCardStyleConfigType,
@@ -473,6 +474,12 @@ export const treeDataConfig: ITreeDataConfigType = {
   key: 'metaData',
   name: '数据绑定',
   type: 'TreeData'
+};
+
+export const webViewParamsConfig: IWebViewParamsConfigType = {
+  key: 'metaData',
+  name: '数据绑定与参数',
+  type: 'WebViewParams'
 };
 
 export const canvasCardConfig: ICanvasCardConfigType = {

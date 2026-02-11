@@ -48,6 +48,8 @@ export const CONFIG_TYPES = {
   TREE_FIELDS: 'TreeFields',
   // 树数据配置
   TREE_DATA: 'TreeData',
+  // 网页组件参数配置
+  WEB_VIEW_PARAMS: 'WebViewParams',
   // 表格分页数量
   TABLE_PAGE_SIZE: 'TablePageSize',
   // 图片、附件上传大小限制

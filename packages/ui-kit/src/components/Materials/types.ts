@@ -90,6 +90,13 @@ export interface ITreeDataConfigType extends ICommonConfigType {
   advanced?: boolean;
 }
 
+export interface IWebViewParamsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.WEB_VIEW_PARAMS;
+  advanced?: boolean;
+}
+
 export interface ICardDataConfigType extends ICommonConfigType {
   key: string;
   name: string;
