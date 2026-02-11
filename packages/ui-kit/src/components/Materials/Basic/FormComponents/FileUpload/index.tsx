@@ -188,8 +188,8 @@ const XFileUpload = memo(
               (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
                 ? fieldValue?.length
                 : verify?.maxCountLimit
-                  ? undefined
-                  : verify?.maxCount
+                  ? verify?.maxCount
+                  : undefined
             }
             listType="text"
             beforeUpload={async (file) => {

@@ -365,8 +365,8 @@ const XImgUpload = memo(
               (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
                 ? fieldValue?.length
                 : verify?.maxCountLimit
-                  ? undefined
-                  : verify?.maxCount
+                  ? verify?.maxCount
+                  : undefined
             }
             accept='image/*'
             listType={'text'}
