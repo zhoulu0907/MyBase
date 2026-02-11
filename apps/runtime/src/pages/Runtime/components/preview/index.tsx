@@ -75,7 +75,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     flows,
     setFlows,
     resetFlows,
-    rowDataType
+    rowDataType,
+    rowData,
+    setRowData
   } = pagesRuntimeSignal;
 
   const [pageSetId, setPageSetId] = useState('');
@@ -438,6 +440,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     console.log('formValues: ', formValues);
     form.setFieldsValue(formValues);
     detailForm.setFieldsValue(formValues);
+    setRowData(res);
 
     return res;
   };

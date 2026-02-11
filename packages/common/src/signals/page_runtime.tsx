@@ -35,6 +35,12 @@ export const createPagesRuntimeSignal = () => {
     rowDataId.value = newEntityDataId;
   };
 
+  // 表格行 原始数据
+  const rowData = signal<any>({});
+  const setRowData = (newRowData: any) => {
+    rowData.value = newRowData;
+  };
+
   const mainMetaDataFields = signal<any[]>([]);
   const setMainMetaDataFields = (fields: any[]) => {
     mainMetaDataFields.value = fields;
@@ -88,6 +94,9 @@ export const createPagesRuntimeSignal = () => {
 
     rowDataId,
     setRowDataId,
+
+    rowData,
+    setRowData,
 
     mainMetaDataFields,
     setMainMetaDataFields,
