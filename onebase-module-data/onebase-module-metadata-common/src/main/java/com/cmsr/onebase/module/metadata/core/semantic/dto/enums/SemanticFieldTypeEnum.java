@@ -63,7 +63,7 @@ public enum SemanticFieldTypeEnum {
             return null;
         }
         for (SemanticFieldTypeEnum type : values()) {
-            if (type.getCode().equals(code)) {
+            if (type.getCode().equalsIgnoreCase(code)) {
                 return type;
             }
         }
