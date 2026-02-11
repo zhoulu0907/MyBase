@@ -1,6 +1,6 @@
 import DownloadLink from '@/assets/images/download_link.svg';
 import { Button, Form, Message, Progress, Typography, Upload } from '@arco-design/web-react';
-import { IconClose, IconDelete, IconDownload, IconUpload } from '@arco-design/web-react/icon';
+import { IconClose, IconDelete, IconDownload, IconUpload, IconRefresh, IconLoading } from '@arco-design/web-react/icon';
 import { type UploadItem, type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
@@ -111,14 +111,20 @@ const XFileUpload = memo(
               {file.percent && file.percent !== 100 ? (
                 <div className="uplaodList-text-item-process">
                   <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
-                  <IconClose
+                  {file.status === 'error' && <IconRefresh className="uplaodList-text-item-process-close" style={{ color: 'red' }} onClick={() => {
+                    if (props.onReupload) {
+                      props.onReupload(file);
+                    }
+                  }} />}
+                  {file.status === 'uploading' && <IconLoading className="uplaodList-text-item-process-close" />}
+                  {(!file.status || file.status === 'done') && <IconClose
                     className="uplaodList-text-item-process-close"
                     onClick={() => {
                       if (props.onRemove) {
                         props.onRemove(file);
                       }
                     }}
-                  />
+                  />}
                 </div>
               ) : (
                 <div className="uplaodList-text-item-opera">
@@ -143,13 +149,21 @@ const XFileUpload = memo(
                   )}
 
                   {!detailMode && (
-                    <IconDelete
-                      onClick={() => {
-                        if (props.onRemove) {
-                          props.onRemove(file);
+                    <>
+                      {file.status === 'error' && <IconRefresh style={{ color: 'red' }} onClick={() => {
+                        if (props.onReupload) {
+                          props.onReupload(file);
                         }
-                      }}
-                    />
+                      }} />}
+                      {file.status === 'uploading' && <IconLoading />}
+                      {(!file.status || file.status === 'done') && <IconDelete
+                        onClick={() => {
+                          if (props.onRemove) {
+                            props.onRemove(file);
+                          }
+                        }}
+                      />}
+                    </>
                   )}
                 </div>
               )}
@@ -220,6 +234,7 @@ const XFileUpload = memo(
                 const uploadFileUrl = URL.createObjectURL(file);
                 // 文件上传文件id
                 if (fileId && uploadFileUrl !== '') {
+                  Message.success('上传成功');
                   setFileUrl(uploadFileUrl);
                   onSuccess({ fileId: fileId });
                 } else {

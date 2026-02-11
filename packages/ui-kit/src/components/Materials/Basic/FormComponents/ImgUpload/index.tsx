@@ -402,6 +402,7 @@ const XImgUpload = memo(
                 const fileId = await handleUpload(file, onProgress);
                 // 文件上传文件id
                 if (fileId) {
+                  Message.success('上传成功');
                   onSuccess({ fileId: fileId });
                 } else {
                   onError({
