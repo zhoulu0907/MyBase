@@ -831,6 +831,7 @@ export const minRowsConfig: INumberConfigType = {
   min: 1,
   max: 10,
   step: 1,
+  precision: 0
 }
 
 export const autoplayConfig: IBooleanConfigType = {
