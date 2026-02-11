@@ -458,10 +458,15 @@ const XTable = memo(
       queryData = form.getFieldsValue();
 
       // TODO(mickey): 后续调试
-      // if (sortByObject?.fieldName) {
-      //   req.sortField = sortByObject.fieldName;
-      //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
-      // }
+      if (sortByObject?.fieldName) {
+        const sortBy = [
+          {
+            field: sortByObject.fieldName,
+            direction: sortByObject.sortBy
+          }
+        ]
+        queryData = {...queryData, sortBy}
+      }
 
       // TODO(mickey): 考虑模糊查询和范围查询
       const conditions: any[] = [];

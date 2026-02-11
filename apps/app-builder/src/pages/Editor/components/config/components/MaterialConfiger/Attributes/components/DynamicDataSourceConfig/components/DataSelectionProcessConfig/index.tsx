@@ -32,8 +32,8 @@ const SUB_ATTR_KEY = {
 };
 
 const sortOptions = [
-  { value: 1, label: '升序' },
-  { value: 2, label: '降序' }
+  { value: 'ASC', label: '升序' },
+  { value: 'DESC', label: '降序' }
 ];
 
 const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({

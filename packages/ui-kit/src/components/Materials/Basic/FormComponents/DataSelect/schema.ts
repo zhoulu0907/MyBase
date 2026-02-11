@@ -261,7 +261,7 @@ const XDataSelect: XDataSelectSchema = {
       searchItems: [],
       sortByObject: {
         fieldName: '',
-        sortBy: 1
+        sortBy: 'ASC'
       },
       operationButton: []
     }

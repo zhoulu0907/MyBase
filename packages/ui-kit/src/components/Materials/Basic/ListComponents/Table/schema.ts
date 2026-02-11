@@ -211,7 +211,7 @@ export interface XTableConfig extends ICommonBaseType {
    */
   sortByObject?: {
     fieldName: TTextDefaultType;
-    sortBy: TNumberDefaultType;
+    sortBy: string;
   };
 
   /**
