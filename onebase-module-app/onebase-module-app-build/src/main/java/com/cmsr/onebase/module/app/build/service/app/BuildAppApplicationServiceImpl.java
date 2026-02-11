@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
+import com.cmsr.onebase.module.app.core.enums.app.DevelopStatusEnum;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
@@ -137,7 +138,7 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         }
         List<ApplicationRespVO> respVOS = pageResult.getList().stream().map(v -> {
             ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
-            bean.setAppStatusText(AppStatusEnum.getText(v.getAppStatus()));
+            bean.setAppStatusText(DevelopStatusEnum.getText(v.getAppStatus()));
             return bean;
         }).toList();
         enrichIcons(respVOS);
@@ -241,7 +242,7 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     private void enrichDevelopStatus(ApplicationRespVO vo) {
         if (AppPublishEnum.isNotPublished(vo.getAppStatus())) {
-            vo.setDevelopStatus("开发中");
+            vo.setDevelopStatus(DevelopStatusEnum.DEVELOPING.getText());
         }
         AppVersionDO versionDO = versionRepository.findRuntimeByApplicationId(vo.getId());
         if (versionDO == null) {
@@ -254,9 +255,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         LocalDateTime appUpdateTime = vo.getUpdateTime();
         LocalDateTime versionPublishTime = versionDO.getCreateTime();
         if (appUpdateTime.isBefore(versionPublishTime)) {
-            vo.setDevelopStatus("已发布");
+            vo.setDevelopStatus(DevelopStatusEnum.PUBLISHED.getText());
         } else {
-            vo.setDevelopStatus("有更新");
+            vo.setDevelopStatus(DevelopStatusEnum.UPDATED.getText());
         }
     }
 
