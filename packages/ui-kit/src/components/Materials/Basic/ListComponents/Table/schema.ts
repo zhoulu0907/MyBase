@@ -212,7 +212,7 @@ export interface XTableConfig extends ICommonBaseType {
   sortByObject?: {
     fieldName: TTextDefaultType;
     sortBy: string;
-  };
+  }[];
 
   /**
    * 数据选择过滤条件

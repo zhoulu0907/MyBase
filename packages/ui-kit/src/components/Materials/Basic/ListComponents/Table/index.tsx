@@ -457,18 +457,16 @@ const XTable = memo(
 
       queryData = form.getFieldsValue();
 
-      // TODO(mickey): 后续调试
-      if (sortByObject?.fieldName) {
-        const sortBy = [
-          {
-            field: sortByObject.fieldName,
-            direction: sortByObject.sortBy
-          }
-        ]
-        queryData = {...queryData, sortBy}
+      // 数据排序
+      if (sortByObject?.length) {
+        const sortBy = sortByObject.map(ele => ({
+          field: ele.fieldName,
+          direction: ele.sortBy
+        }))
+        queryData = { ...queryData, sortBy }
       }
 
-      // TODO(mickey): 考虑模糊查询和范围查询
+      // 考虑模糊查询和范围查询
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
         if (typeof value === 'object' && !Array.isArray(value)) {
@@ -486,6 +484,10 @@ const XTable = memo(
           });
         }
       });
+      // 数据过滤 filterCondition
+      if (filterCondition && filterCondition.length > 0) {
+        conditions.push.apply(conditions,filterCondition)
+      }
 
       const filters = {
         nodeType: 'GROUP',
@@ -496,7 +498,7 @@ const XTable = memo(
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
-        filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
+        filters: filters
       };
       let res: any;
       if (props?.pageSetType === PageType.BPM) {
@@ -529,17 +531,6 @@ const XTable = memo(
                 newItem[key] = dateValue.toLocaleDateString();
               }
             }
-
-            // // 部门选择单选 TODO
-            // const deptSelectField = mainMetaData.parentFields.find(
-            //   (field: AppEntityField) =>
-            //     field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
-            // );
-            // if (deptSelectField && newItem[key]) {
-            //   if (newItem[key]) {
-            //     newItem[key] = newItem[key]?.deptName || '';
-            //   }
-            // }
           }
         });
 
@@ -597,12 +588,12 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-      if(record) {
+      if (record) {
         if (record.bpm_instance_id) {
           setRowDataType(PageType.BPM);
           setBpmInstanceId(record.bpm_instance_id);
         } else {
-           setRowDataType(PageType.NORMAL);
+          setRowDataType(PageType.NORMAL);
           setBpmInstanceId('');
         }
       }
