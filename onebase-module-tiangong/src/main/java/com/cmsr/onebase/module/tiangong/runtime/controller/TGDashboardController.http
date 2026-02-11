@@ -7,3 +7,6 @@
 GET {{baseUrl}}/tiangong/dashboard/device-info-all
 Content-Type: application/json
 X-Tenant-Id: 184717008866115584
+
+{
+}
