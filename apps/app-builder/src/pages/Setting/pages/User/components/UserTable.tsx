@@ -259,7 +259,7 @@ export default function UserTable({
               {record.nickname}
             </span>
             {isSystemUser(record) && (
-              <Tag color="cyan" style={{ marginLeft: '8px' }}>
+              <Tag style={{ color: 'rgb(var(--primary-6))', backgroundColor: 'rgb(var(--primary-6), 0.15)', marginLeft: '8px' }}>
                 系统
               </Tag>
             )}
