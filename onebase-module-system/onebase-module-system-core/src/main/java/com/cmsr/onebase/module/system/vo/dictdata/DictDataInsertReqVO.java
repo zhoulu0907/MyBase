@@ -31,6 +31,10 @@ public class DictDataInsertReqVO {
     @Size(max = 100, message = "字典类型长度不能超过100个字符")
     private String dictType;
 
+    @Schema(description = "字典类型标识", example = "1")
+    @NotNull(message = "字典类型标识不能为空")
+    private Long dictTypeId;
+
     @Schema(description = "状态,见 CommonStatusEnum 枚举", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "状态不能为空")
     @InEnum(value = CommonStatusEnum.class, message = "修改状态必须是 {value}")

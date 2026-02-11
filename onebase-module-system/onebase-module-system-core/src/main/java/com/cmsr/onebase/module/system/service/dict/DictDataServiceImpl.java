@@ -132,8 +132,8 @@ public class DictDataServiceImpl implements DictDataService {
     public void deleteDictDataByDictOwner(String dictOwnerType, Long dictOwnerId) {
         // 5. 删除租户级别字典Dict
         List<DictTypeDO> dictTypeDOList = dictTypeRepository.findAllListByOwner(dictOwnerType, dictOwnerId);
-        // 5.1 删除字典类型对应的数据
-        dictDataRepository.removeDictDataByType(dictTypeDOList.stream().map(DictTypeDO::getType).collect(Collectors.toList()));
+        // 5.1 删除字典类型标识对应的数据
+        dictDataRepository.removeDictDataByType(dictTypeDOList.stream().map(DictTypeDO::getId).collect(Collectors.toList()));
         // 5.2 删除字典类型
         dictTypeRepository.removeByDictOwnerId(dictOwnerType,dictOwnerId);
     }
