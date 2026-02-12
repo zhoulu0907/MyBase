@@ -13,6 +13,8 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorHttpDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnectorTableDef;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowConnectorMapper;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowNodeConfigMapper;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowProcessDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowProcessTableDef;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessMapper;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
@@ -224,14 +226,13 @@ public class FlowGraphBuilder {
         // ========== HttpNodeData处理 ==========
         if (node.getData() instanceof HttpNodeData httpNodeData) {
             String actionName = httpNodeData.getActionName();
-            String envName = httpNodeData.getEnvName();
 
             if (isTrace) {
-                log.info("[TRACE-{}] 开始加载HTTP节点配置: applicationId={}, actionName={}, envName={}, nodeId={}",
-                        processId, applicationId, actionName, envName, nodeId);
+                log.info("[TRACE-{}] 开始加载HTTP节点配置: applicationId={}, actionName={}, nodeId={}",
+                        processId, applicationId, actionName, nodeId);
             } else {
-                log.debug("[FlowGraphBuilder] 开始加载HTTP节点配置: applicationId={}, actionName={}, envName={}, nodeId={}",
-                        applicationId, actionName, envName, nodeId);
+                log.debug("[FlowGraphBuilder] 开始加载HTTP节点配置: applicationId={}, actionName={}, nodeId={}",
+                        applicationId, actionName, nodeId);
             }
 
             try {
@@ -261,25 +262,19 @@ public class FlowGraphBuilder {
 
                 // 步骤 2: 解析环境配置 — config.properties[envName].envConfig
                 Map<String, Object> envConfig = null;
+                String envName = null;
                 if (StringUtils.isNotBlank(connectorDO.getConfig())) {
                     try {
                         Map<String, Object> configRoot = JsonUtils.parseObject(connectorDO.getConfig(), Map.class);
                         if (configRoot != null) {
+                            envName = configRoot.get("enableEnvName").toString();
                             Object propertiesObj = configRoot.get("properties");
                             if (propertiesObj instanceof Map) {
                                 Map<String, Object> properties = (Map<String, Object>) propertiesObj;
-                                Map<String, Object> envEntry = null;
                                 if (StringUtils.isNotBlank(envName) && properties.containsKey(envName)) {
-                                    envEntry = (Map<String, Object>) properties.get(envName);
-                                } else if (!properties.isEmpty()) {
-                                    // fallback: 取第一个环境
-                                    envEntry = (Map<String, Object>) properties.values().iterator().next();
-                                }
-                                if (envEntry != null) {
-                                    Object envConfigObj = envEntry.get("envConfig");
-                                    if (envConfigObj instanceof Map) {
-                                        envConfig = (Map<String, Object>) envConfigObj;
-                                    }
+                                    envConfig = (Map<String, Object>) properties.get(envName);
+                                } else {
+                                    log.error("[FlowGraphBuilder] 连接器环境配置为空: connectorUuid={}", connectorUuid);
                                 }
                             }
                         }
@@ -294,8 +289,19 @@ public class FlowGraphBuilder {
 
                 if (processId != null) {
                     try {
-                        // 3a) 查询 process_definition
-                        String processDefinitionJson = flowProcessMapper.selectProcessDefinitionByProcessId(processId);
+                        // 3a) 查询 process_definition（绕过租户过滤，与连接器查询保持一致）
+                        QueryWrapper processQuery = QueryWrapper.create()
+                                .select(FlowProcessTableDef.FLOW_PROCESS.PROCESS_DEFINITION)
+                                .where(FlowProcessTableDef.FLOW_PROCESS.ID.eq(processId));
+
+                        FlowProcessDO processDO = TenantManager
+                                .withoutTenantCondition(() -> flowProcessMapper.selectOneByQuery(processQuery));
+
+                        String processDefinitionJson = processDO != null ? processDO.getProcessDefinition() : null;
+
+                        if (processDefinitionJson == null) {
+                            log.warn("[FlowGraphBuilder] 流程定义未找到: processId={}, 可能原因: 租户隔离或数据已删除", processId);
+                        }
 
                         // 3b) 从原始 JSON 中查找节点并提取 actionParams.{actionName}
                         httpActionConfig = extractActionConfigFromProcessDefinition(

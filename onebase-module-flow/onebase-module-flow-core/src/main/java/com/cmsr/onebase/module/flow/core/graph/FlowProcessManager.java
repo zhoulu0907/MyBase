@@ -80,12 +80,22 @@ public class FlowProcessManager {
                         FlowEnableStatusEnum.ENABLE.getStatus(),
                         flowProperties.getVersionTag()
                 ));
+        // 检查是否为需要详细跟踪的流程（用于调试）
+        Long traceProcessId = flowProperties.getTraceProcessId();
+
         for (FlowProcessDO flowProcessDO : flowProcessDOS) {
+
+            // 提取流程ID，用于日志跟踪和缓存键
+            Long processId = flowProcessDO.getId();
+            boolean isTrace = processId.equals(traceProcessId);
+
             try {
                 onProcessUpdate(flowProcessDO, false);
-                log.info("加载flowProcess流程成功：{}-{}", flowProcessDO.getApplicationId(), flowProcessDO.getId());
+                if (isTrace){
+                    log.info("[WORKFLOW-DEBUG] 加载flowProcess流程成功：{}", flowProcessDO);
+                }
             } catch (Exception e) {
-                log.error("初始化flowProcessDO异常：{}", flowProcessDO, e);
+                log.error("[WORKFLOW-DEBUG] 初始化flowProcessDO异常：{}", flowProcessDO, e);
             }
         }
         executor.execute(() -> {
@@ -116,7 +126,7 @@ public class FlowProcessManager {
             onProcessUpdate(flowProcessDO, sync);
         }
         cleanApplicationJob(applicationId, flowProcessDOS);
-        log.info("处理应用更新: {}, 删除：{} ，添加：{}", applicationId, oldProcessIds, flowProcessDOS.stream().map(FlowProcessDO::getId).toList());
+        log.info("[WORKFLOW-DEBUG] 处理应用更新: {}, 删除：{} ，添加：{}", applicationId, oldProcessIds, flowProcessDOS.stream().map(FlowProcessDO::getId).toList());
     }
 
 
@@ -127,7 +137,7 @@ public class FlowProcessManager {
             flowProcessCache.deleteByProcessId(id);
         });
         stopApplicationJob(applicationId);
-        log.info("处理应用删除：{}, 删除: {}", applicationId, ids);
+        log.info("[WORKFLOW-DEBUG] 处理应用删除：{}, 删除: {}", applicationId, ids);
     }
 
     public void checkTimeJob() {
@@ -227,8 +237,6 @@ public class FlowProcessManager {
             log.info("[TRACE-{}] 处理流程更新: applicationId={}, processName={}, triggerType={}, enableStatus={}, publishStatus={}",
                     processId, processDO.getApplicationId(), processDO.getProcessName(),
                     processDO.getTriggerType(), processDO.getEnableStatus(), processDO.getPublishStatus());
-        } else {
-            log.info("处理流程更新：{}-{}", processDO.getApplicationId(), processDO.getId());
         }
 
         // ========== 第一步：验证流程定义 ==========
@@ -258,22 +266,16 @@ public class FlowProcessManager {
             return;
         }
 
+        // ========== 第三步：更新缓存 ==========
+        // 将构建好的流程图存入内存缓存，后续执行时直接从缓存获取
+        // 缓存 key: processId, value: (FlowProcessDO, JsonGraph)
+        flowProcessCache.update(processDO, jsonGraph);
         if (isTrace) {
             log.info("[TRACE-{}] 流程图构建成功: nodeCount={}, hasStartNode={}",
                     processId,
                     jsonGraph.getNodes() != null ? jsonGraph.getNodes().size() : 0,
                     jsonGraph.getStartNode() != null);
         }
-
-        // ========== 第三步：更新缓存 ==========
-        // 将构建好的流程图存入内存缓存，后续执行时直接从缓存获取
-        // 缓存 key: processId, value: (FlowProcessDO, JsonGraph)
-        flowProcessCache.update(processDO, jsonGraph);
-
-        if (isTrace) {
-            log.info("[TRACE-{}] 流程已添加到缓存", processId);
-        }
-
         // ========== 第四步：启动调度任务 ==========
         // 根据触发类型决定是否需要启动定时任务：
         // - TIME: 定时触发（如 cron 表达式）

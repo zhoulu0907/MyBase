@@ -8,7 +8,7 @@
     <select id="selectProcessDefinitionByProcessId" resultType="java.lang.String">
         SELECT PROCESS_DEFINITION
         FROM flow_process
-        WHERE PROCESS_ID = #{processId}
+        WHERE id = #{processId}
         AND DELETED = 0
     </select>
 
