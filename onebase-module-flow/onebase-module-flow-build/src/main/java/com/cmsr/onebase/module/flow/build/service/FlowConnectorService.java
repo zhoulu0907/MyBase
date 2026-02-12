@@ -146,6 +146,16 @@ public interface FlowConnectorService {
     Boolean enableEnvironment(Long connectorId, String envName);
 
     /**
+     * 获取启用环境名称
+     * <p>
+     * 从连接器配置中读取当前启用的环境名称
+     *
+     * @param connectorId 连接器实例ID
+     * @return 启用的环境名称，未设置则返回null
+     */
+    String getEnabledEnvName(Long connectorId);
+
+    /**
      * 保存连接器动作配置
      * <p>
      * 将新的动作配置添加到 flow_connector.action_config.properties 中

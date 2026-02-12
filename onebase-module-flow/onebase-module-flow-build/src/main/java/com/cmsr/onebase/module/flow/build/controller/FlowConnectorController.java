@@ -173,6 +173,15 @@ public class FlowConnectorController {
         return CommonResult.success(result);
     }
 
+    @Operation(summary = "获取启用环境名称",
+              description = "获取连接器当前启用的环境名称，用于编辑回显。未设置则返回null")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @GetMapping("/{id}/get-enabled-envname")
+    public CommonResult<String> getEnabledEnvName(@PathVariable("id") Long id) {
+        String enabledEnvName = connectorService.getEnabledEnvName(id);
+        return CommonResult.success(enabledEnvName);
+    }
+
     // ==================== 动作管理接口 ====================
 
     @Operation(summary = "获取动作配置模板",

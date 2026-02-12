@@ -242,6 +242,11 @@ public class NodeServiceImpl extends WarmServiceImpl<FlowNodeDao<Node>, Node> im
             if (CollUtil.isEmpty(skipsGateway)) {
                 return null;
             }
+            //增加一个排序
+            skipsGateway = skipsGateway.stream()
+                    .sorted(Comparator.comparingInt(Skip::getPriority))
+                    .collect(Collectors.toList());
+
             if (!NodeType.isStart(nextNode.getNodeType()) && NodeType.isGateWaySerial(nextNode.getNodeType())) {
                 //  如果满足跳转条件，则取任意一条，否则取跳转条件为空的任意一条
                 Skip skipOne = null;
