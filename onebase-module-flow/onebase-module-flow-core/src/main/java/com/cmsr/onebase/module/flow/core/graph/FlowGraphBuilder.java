@@ -18,6 +18,7 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.cmsr.onebase.module.flow.core.external.FlowFieldTypeProvider;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.tenant.TenantManager;
 import lombok.Setter;
@@ -334,5 +335,95 @@ public class FlowGraphBuilder {
             log.debug("[FlowGraphBuilder] traverseNodeAndEnrichData完成: applicationId={}, nodeId={}, nodeType={}",
                     applicationId, nodeId, nodeType);
         }
+    }
+
+    /**
+     * 从 process_definition 中提取 HTTP 节点的动作配置
+     *
+     * @param processDefinitionJson 流程定义 JSON 字符串
+     * @param nodeId 节点 ID
+     * @param actionName 动作名称
+     * @param processId 流程 ID（用于日志）
+     * @return 动作配置 Map，提取失败返回 null
+     */
+    private Map<String, Object> extractActionConfigFromProcessDefinition(
+            String processDefinitionJson, String nodeId, String actionName, Long processId) {
+
+        Long traceProcessId = flowProperties.getTraceProcessId();
+        boolean isTrace = processId != null && processId.equals(traceProcessId);
+
+        try {
+            if (StringUtils.isBlank(processDefinitionJson)) {
+                if (isTrace) {
+                    log.warn("[TRACE-{}] process_definition 为空", processId);
+                }
+                return null;
+            }
+
+            JsonNode processRoot = JsonUtils.parseObject(processDefinitionJson, JsonNode.class);
+            JsonNode nodesArray = processRoot.get("nodes");
+
+            if (nodesArray == null || !nodesArray.isArray()) {
+                if (isTrace) {
+                    log.warn("[TRACE-{}] process_definition 中没有 nodes 数组", processId);
+                }
+                return null;
+            }
+
+            // 遍历节点查找目标节点
+            for (JsonNode nodeJson : nodesArray) {
+                JsonNode idNode = nodeJson.get("id");
+                if (idNode != null && nodeId.equals(idNode.asText())) {
+                    // 找到目标节点
+                    JsonNode dataNode = nodeJson.get("data");
+                    if (dataNode == null) {
+                        if (isTrace) {
+                            log.warn("[TRACE-{}] 节点没有 data 字段: nodeId={}", processId, nodeId);
+                        }
+                        return null;
+                    }
+
+                    JsonNode actionParamsNode = dataNode.get("actionParams");
+                    if (actionParamsNode == null) {
+                        if (isTrace) {
+                            log.warn("[TRACE-{}] 节点没有 actionParams 字段: nodeId={}", processId, nodeId);
+                        }
+                        return null;
+                    }
+
+                    JsonNode actionConfigNode = actionParamsNode.get(actionName);
+                    if (actionConfigNode == null) {
+                        if (isTrace) {
+                            log.warn("[TRACE-{}] actionParams 中没有找到动作: nodeId={}, actionName={}",
+                                    processId, nodeId, actionName);
+                        }
+                        return null;
+                    }
+
+                    Map<String, Object> result = JsonUtils.parseObject(
+                            actionConfigNode.toString(), Map.class);
+
+                    if (isTrace) {
+                        log.info("[TRACE-{}] 成功提取动作配置: nodeId={}, actionName={}, configSize={}",
+                                processId, nodeId, actionName, result != null ? result.size() : 0);
+                    }
+
+                    return result;
+                }
+            }
+
+            if (isTrace) {
+                log.warn("[TRACE-{}] 未找到节点: nodeId={}", processId, nodeId);
+            }
+        } catch (Exception e) {
+            if (isTrace) {
+                log.error("[TRACE-{}] 解析 process_definition 失败: processId={}, nodeId={}",
+                        processId, processId, nodeId, e);
+            } else {
+                log.error("[FlowGraphBuilder] 解析 process_definition 失败: processId={}, nodeId={}",
+                        processId, nodeId, e);
+            }
+        }
+        return null;
     }
 }
