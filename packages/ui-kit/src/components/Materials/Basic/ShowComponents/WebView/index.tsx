@@ -12,6 +12,7 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
 
   const [iframeError, setIframeError] = useState(false);
   const [validUrl, setValidUrl] = useState('');
+  const [iframeHeight, setIframeHeight] = useState('900px');
   const { rowData } = pagesRuntimeSignal;
 
   const getValidUrl = (url: string) => {
@@ -47,6 +48,29 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
     const url = buildUrlWithParams(webViewUrl);
     setValidUrl(url);
   }, [webViewUrl, params, runtime, rowData.value]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'iframeHeight') {
+        setIframeHeight(`${event.data.height + 10}px`);
+      }
+    };
+
+    const handleResize = () => {
+      const iframe = document.querySelector('iframe[title="WebView"]');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'recalculateHeight' }, '*');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // 如果 iframe 加载失败，显示备用内容
   if (iframeError) {
@@ -95,9 +119,8 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
         src={validUrl}
         style={{
           width: '100%',
-          height: '900px', // 设置固定高度，避免 auto 导致的问题
-          border: '1px solid #e0e0e0',
-          borderRadius: '8px',
+          height: iframeHeight,
+          border: 'none',
           boxSizing: 'border-box'
         }}
         title="WebView"
