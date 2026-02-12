@@ -294,7 +294,7 @@ const Runtime: React.FC = () => {
           {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (
-            <div className={styles.contentBody}>
+            <div className={styles.contentBody} id="runtime-content-body">
               <PreviewContainer
                 menuId={curMenu.value?.id || ''}
                 runtime={true}

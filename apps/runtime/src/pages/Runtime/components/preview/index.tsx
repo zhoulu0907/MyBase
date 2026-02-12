@@ -475,7 +475,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
     setTimeout(() => setRefresh(Date.now()), 150);
   };
 
-  const getBGcolor = { backgroundColor: pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? '#f2f3f5' : '#fff' };
+  const getBGcolor = { backgroundColor: pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? 'transparent' : '#fff' };
 
   React.useEffect(() => {
     pluginBridge.registerContext({ form });

@@ -132,6 +132,14 @@ export default function WorkbenchWorkspace() {
     setCurComponentSchema(pageConfigSchema);
   };
 
+  // 获取页面配置
+  const getPageConfig = () => {
+    const [, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas);
+    return pageConfigSchema.config;
+  };
+
+  const pageConfig = getPageConfig();
+
   // 处理空白区域点击
   const handleBodyMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).id === 'workspace-content') {
@@ -204,6 +212,13 @@ export default function WorkbenchWorkspace() {
               sort={SORTABLE_CONFIG.sort}
               forceFallback={SORTABLE_CONFIG.forceFallback}
               className={styles.workspaceContent}
+              style={{
+                backgroundColor: pageConfig.pageBgColor || undefined,
+                backgroundImage: pageConfig.pageBgImg ? `url(${pageConfig.pageBgImg})` : undefined,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
               onAdd={handlers.handleComponentAdd}
               onStart={handlers.handleDragStart}
               group={{ name: COMPONENT_GROUP_NAME }}

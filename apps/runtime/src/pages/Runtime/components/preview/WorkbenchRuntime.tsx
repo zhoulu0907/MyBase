@@ -3,6 +3,7 @@ import {
   PreviewRender,
   startLoadWorkbenchPageSet,
   useWorkbenchEditorSignal,
+  getOrCreatePageConfig,
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
@@ -15,24 +16,101 @@ interface WorkbenchRuntimeProps {
   runtime: boolean;
 }
 
+// 设置元素背景样式
+const setBackgroundStyle = (
+  element: HTMLElement | null,
+  config: { color?: string; image?: string; transparent?: boolean }
+) => {
+  if (!element?.style) return;
+
+  const { color, image, transparent } = config;
+
+  if (transparent) {
+    element.style.backgroundColor = 'transparent';
+    return;
+  }
+
+  element.style.backgroundColor = color || '';
+
+  if (image) {
+    Object.assign(element.style, {
+      backgroundImage: `url(${image})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    });
+  } else {
+    Object.assign(element.style, {
+      backgroundImage: '',
+      backgroundSize: '',
+      backgroundPosition: '',
+      backgroundRepeat: ''
+    });
+  }
+};
+
+// 清除元素背景样式
+const clearBackgroundStyle = (element: HTMLElement | null) => {
+  setBackgroundStyle(element, {});
+};
+
 const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime }) => {
   useSignals();
 
-  const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
+  const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
+    useWorkbenchEditorSignal;
+
+  // 组件挂载时清理旧数据和背景样式
+  useEffect(() => {
+    clearWorkbenchComponents();
+    clearWbComponentSchemas();
+
+    const runtimeContentEle = document.getElementById('runtime-content');
+    const contentBodyEle = document.getElementById('runtime-content-body');
+
+    clearBackgroundStyle(runtimeContentEle);
+    clearBackgroundStyle(contentBodyEle);
+  }, []);
 
   useEffect(() => {
     console.log('workbench runtime pageSetId: ', pageSetId);
+
+    // 先清空旧数据和背景样式
+    clearWorkbenchComponents();
+    clearWbComponentSchemas();
+
+    const runtimeContentEle = document.getElementById('runtime-content');
+    const contentBodyEle = document.getElementById('runtime-content-body');
+    clearBackgroundStyle(runtimeContentEle);
+    clearBackgroundStyle(contentBodyEle);
+
+    // 加载新页面数据
     if (pageSetId) {
       startLoadWorkbenchPageSet({ pageSetId });
     }
   }, [pageSetId]);
 
+  // 设置页面背景样式
   useEffect(() => {
-    const ele = document.getElementById('runtime-content');
-    if (ele && ele.style) {
-      ele.style.backgroundColor = '#F2F3F5';
-    }
-  }, []);
+    const runtimeContentEle = document.getElementById('runtime-content');
+    const contentBodyEle = document.getElementById('runtime-content-body');
+
+    const [, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas.value);
+    const { pageBgColor, pageBgImg } = pageConfigSchema.config;
+
+    setBackgroundStyle(runtimeContentEle, {
+      color: pageBgColor || '#F2F3F5',
+      image: pageBgImg
+    });
+
+    setBackgroundStyle(contentBodyEle, { transparent: true });
+
+    // 组件卸载时清除样式
+    return () => {
+      clearBackgroundStyle(runtimeContentEle);
+      clearBackgroundStyle(contentBodyEle);
+    };
+  }, [wbComponentSchemas.value]);
 
   return (
     <>
@@ -45,7 +123,6 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
         return (
           <Fragment key={cp.id}>
             <div
-              key={cp.id}
               className={styles.componentItem}
               style={{
                 width: `calc(${getWorkbenchComponentWidth(sanitizedSchema, cp.type as WorkbenchComponentType)} - 8px)`,
@@ -55,7 +132,6 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
               <PreviewRender
                 cpId={cp.id}
                 cpType={cp.type}
-                // pageType={EDITOR_TYPES.WORKBENCH_EDITOR}
                 pageComponentSchema={sanitizedSchema}
                 runtime={runtime}
                 preview={false}

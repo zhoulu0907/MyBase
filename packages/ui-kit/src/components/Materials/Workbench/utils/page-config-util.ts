@@ -11,6 +11,8 @@ export const PAGE_CONFIG_TYPE = '__PAGE_CONFIG__';
 export interface PageConfig {
   showHeader: boolean;
   showSidebar: boolean;
+  pageBgColor: string;
+  pageBgImg: string;
 }
 
 export interface PageConfigSchema extends EditConfig {
@@ -20,6 +22,13 @@ export interface PageConfigSchema extends EditConfig {
   editData: Record<string, any>;
 }
 
+export const PAGE_CONFIG_DEFAULT = {
+  showHeader: true, 
+  showSidebar: true,
+  pageBgColor: '',
+  pageBgImg: ''
+}
+
 /**
  * 创建默认的页面配置
  */
@@ -27,7 +36,7 @@ export function createDefaultPageConfig(id?: string): PageConfigSchema {
   return {
     id: id || `page-config-${uuidv4()}`,
     type: PAGE_CONFIG_TYPE,
-    config: { showHeader: true, showSidebar: true },
+    config: PAGE_CONFIG_DEFAULT,
     editData: {}
   };
 }
@@ -62,8 +71,10 @@ export function getOrCreatePageConfig(schemas: Record<string, EditConfig>): [str
         id,
         type: PAGE_CONFIG_TYPE,
         config: {
-          showHeader: config.config?.showHeader ?? true,
-          showSidebar: config.config?.showSidebar ?? true
+          showHeader: config.config?.showHeader ?? PAGE_CONFIG_DEFAULT.showHeader,
+          showSidebar: config.config?.showSidebar ?? PAGE_CONFIG_DEFAULT.showSidebar,
+          pageBgColor: config.config?.pageBgColor ?? PAGE_CONFIG_DEFAULT.pageBgColor,
+          pageBgImg: config.config?.pageBgImg ?? PAGE_CONFIG_DEFAULT.pageBgImg
         },
         editData: config.editData || {}
       }
