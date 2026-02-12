@@ -37,6 +37,14 @@ public interface UserService {
     Long createCorpAdminUser(@Valid AdminUserDO createReqVO);
 
     /**
+     * 创建用户
+     *
+     * @param createReqVO 用户信息
+     * @return 用户编号
+     */
+    AdminUserDO updateOrAddUser(@Valid AdminUserDO createReqVO);
+
+    /**
      * 创建平台用户
      *
      * @param createReqVO 用户信息
