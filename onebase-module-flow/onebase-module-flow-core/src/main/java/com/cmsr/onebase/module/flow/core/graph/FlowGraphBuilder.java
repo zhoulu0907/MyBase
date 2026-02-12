@@ -13,6 +13,7 @@ import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorHttpDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnectorTableDef;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowConnectorMapper;
 import com.cmsr.onebase.module.flow.core.dal.mapper.FlowNodeConfigMapper;
+import com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessMapper;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorScriptDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
@@ -61,6 +62,10 @@ public class FlowGraphBuilder {
     @Setter
     @Autowired
     private FlowConnectorHttpRepository connectorHttpRepository;
+
+    @Setter
+    @Autowired
+    private FlowProcessMapper flowProcessMapper;
 
     public JsonGraph build(Long applicationId, String json) {
         return build(applicationId, json, null);
@@ -286,35 +291,13 @@ public class FlowGraphBuilder {
 
                 // 步骤 3: 解析动作配置 — action_config.properties[actionName]
                 Map<String, Object> httpActionConfig = null;
-                String actionConfigJson = connectorDO.getActionConfig();
-                if (StringUtils.isBlank(actionConfigJson)) {
-                    log.error("[FlowGraphBuilder] 连接器缺少动作配置(action_config为空): connectorUuid={}", connectorUuid);
-                    return;
-                }
 
-                try {
-                    Map<String, Object> actionConfigRoot = JsonUtils.parseObject(actionConfigJson, Map.class);
-                    if (actionConfigRoot != null) {
-                        Object propertiesObj = actionConfigRoot.get("properties");
-                        if (propertiesObj instanceof Map) {
-                            Map<String, Object> properties = (Map<String, Object>) propertiesObj;
-                            if (StringUtils.isNotBlank(actionName) && properties.containsKey(actionName)) {
-                                Object actionObj = properties.get(actionName);
-                                if (actionObj instanceof Map) {
-                                    httpActionConfig = (Map<String, Object>) actionObj;
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error("[FlowGraphBuilder] 解析动作配置失败: connectorUuid={}", connectorUuid, e);
-                }
-
-                if (httpActionConfig == null) {
-                    log.error("[FlowGraphBuilder] 未在连接器配置中找到指定动作: connectorUuid={}, actionName={}", connectorUuid,
-                            actionName);
-                    return;
-                }
+//                todo:解析动作配置流程:
+//                请参考http-flow-exp.json，为flow_process.process_definition数据
+//                a）在FlowGraphBuilder.traverseNodeAndEnrichData方法中实现，步骤 3: 解析动作配置
+//                b）根据processId从flow_process中获取process_definition信息
+//                c）根据nodeId从process_definition中找到http-node信息
+//                d）将actionParams.{actionName}（此处为action1）下的内容解析出来，作为httpActionConfig
 
                 httpNodeData.setActionConfig(httpActionConfig);
 
