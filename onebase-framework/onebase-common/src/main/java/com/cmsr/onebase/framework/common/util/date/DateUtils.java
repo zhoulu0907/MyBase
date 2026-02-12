@@ -1,8 +1,12 @@
 package com.cmsr.onebase.framework.common.util.date;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * 时间工具类
@@ -96,5 +100,45 @@ public class DateUtils {
         return LocalDateTime.now().toLocalDate().equals(date.toLocalDate());
     }
 
+
+
+    /**
+     * 获取指定日期的开始时间戳
+     * @param dateStr 日期字符串，格式：yyyy-MM-dd
+     */
+    public static long getStartTimestampOfDate(String dateStr, String format) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(format);
+            sdf.setTimeZone(TimeZone.getDefault());
+            Date date = sdf.parse(dateStr);
+            return date.getTime();
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("日期格式不正确，请使用 yyyy-MM-dd 格式: " + dateStr);
+        }
+    }
+
+    /**
+     * 获取指定日期的结束时间戳
+     * @param dateStr 日期字符串，格式：yyyy-MM-dd
+     */
+    public static long getEndTimestampOfDate(String dateStr, String format) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(format);
+            sdf.setTimeZone(TimeZone.getDefault());
+            Date date = sdf.parse(dateStr);
+            // 加上23小时59分59秒999毫秒
+        return date.getTime() + 24 * 60 * 60 * 1000 - 1;
+        } catch (ParseException e) {
+            throw new IllegalArgumentException("日期格式不正确: " + dateStr);
+        }
+    }
+
+    //获取一个时间戳的当天最大时间戳
+    public static long getEndOfDayTimestamp1(long timestamp) {
+        Instant instant = Instant.ofEpochMilli(timestamp);
+        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+        LocalDateTime endOfDay = dateTime.toLocalDate().atTime(LocalTime.MAX);
+        return endOfDay.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
 
 }
