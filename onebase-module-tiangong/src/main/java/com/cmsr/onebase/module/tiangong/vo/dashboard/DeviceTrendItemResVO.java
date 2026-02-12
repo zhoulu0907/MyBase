@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "设备接入趋势数据项 VO")
 @Data
-public class DeviceTrendItemVO {
+public class DeviceTrendItemResVO {
 
     @Schema(description = "月份")
     private String month;

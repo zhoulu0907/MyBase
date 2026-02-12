@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.tiangong.runtime.controller;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.module.tiangong.vo.dashboard.DeviceRuntimeParamVO;
+import com.cmsr.onebase.module.tiangong.vo.dashboard.DeviceRuntimeParamResVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
@@ -31,9 +31,9 @@ public class TGDeviceController {
     @ApiSignIgnore
     @GetMapping("/device-runtime-params")
     @Operation(summary ="获取设备运行参数（动态数据）")
-    public CommonResult<List<DeviceRuntimeParamVO>> getDeviceRuntimeParams() {
+    public CommonResult<List<DeviceRuntimeParamResVO>> getDeviceRuntimeParams() {
         Random random = new Random();
-        List<DeviceRuntimeParamVO> paramList = List.of(
+        List<DeviceRuntimeParamResVO> paramList = List.of(
                 createDeviceRuntimeParam("861556071807043", "鹿井士腾高速井泵", random),
                 createDeviceRuntimeParam("861556071789019", "日虹背负永磁", random),
                 createDeviceRuntimeParam("861556071807044", "天工智能泵站", random),
@@ -44,8 +44,8 @@ public class TGDeviceController {
 
 
     // 私有辅助方法
-    private DeviceRuntimeParamVO createDeviceRuntimeParam(String deviceId, String deviceName, Random random) {
-        DeviceRuntimeParamVO param = new DeviceRuntimeParamVO();
+    private DeviceRuntimeParamResVO createDeviceRuntimeParam(String deviceId, String deviceName, Random random) {
+        DeviceRuntimeParamResVO param = new DeviceRuntimeParamResVO();
         param.setDeviceId(deviceId);
         param.setDeviceName(deviceName);
         param.setUpdateTime("2026-02-12 16:11:10");

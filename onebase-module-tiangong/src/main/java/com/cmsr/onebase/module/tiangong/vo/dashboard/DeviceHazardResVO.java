@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "设备隐患信息 VO")
 @Data
-public class DeviceHazardVO {
+public class DeviceHazardResVO {
 
     @Schema(description = "隐患ID")
     private Integer id;

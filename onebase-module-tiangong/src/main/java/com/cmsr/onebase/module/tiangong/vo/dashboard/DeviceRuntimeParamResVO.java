@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Schema(description = "设备运行参数响应 VO")
 @Data
-public class DeviceRuntimeParamVO {
+public class DeviceRuntimeParamResVO {
 
     @Schema(description = "转速 (F008)")
     private Double speed;

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Random;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -63,8 +62,8 @@ public class TGDashboardController {
     @ApiSignIgnore
     @GetMapping("/cumulative-device-count-trend")
     @Operation(summary ="获取累计设备接入数趋势")
-    public CommonResult<List<DeviceTrendItemVO>> getCumulativeDeviceCountTrend() {
-        List<DeviceTrendItemVO> trendList = List.of(
+    public CommonResult<List<DeviceTrendItemResVO>> getCumulativeDeviceCountTrend() {
+        List<DeviceTrendItemResVO> trendList = List.of(
                 createTrendItem("1月", 680),
                 createTrendItem("2月", 1480),
                 createTrendItem("3月", 2580),
@@ -83,8 +82,8 @@ public class TGDashboardController {
     @ApiSignIgnore
     @GetMapping("/device-hazards")
     @Operation(summary ="获取设备隐患列表")
-    public CommonResult<List<DeviceHazardVO>> getDeviceHazards() {
-        List<DeviceHazardVO> hazardList = List.of(
+    public CommonResult<List<DeviceHazardResVO>> getDeviceHazards() {
+        List<DeviceHazardResVO> hazardList = List.of(
                 createDeviceHazard(1, "浙江省", "主轴断裂", "2026-02-10"),
                 createDeviceHazard(2, "江苏省", "主轴断裂", "2026-02-10"),
                 createDeviceHazard(3, "山东省", "主轴断裂", "2026-02-10")
@@ -99,8 +98,8 @@ public class TGDashboardController {
     @ApiSignIgnore
     @GetMapping("/predictive-hazard-trend")
     @Operation(summary ="获取预测性隐患数量趋势")
-    public CommonResult<List<DeviceTrendItemVO>> getPredictiveHazardTrend() {
-        List<DeviceTrendItemVO> trendList = List.of(
+    public CommonResult<List<DeviceTrendItemResVO>> getPredictiveHazardTrend() {
+        List<DeviceTrendItemResVO> trendList = List.of(
                 createTrendItem("1月", 100),
                 createTrendItem("2月", 100),
                 createTrendItem("3月", 150)
@@ -115,8 +114,8 @@ public class TGDashboardController {
     @ApiSignIgnore
     @GetMapping("/pending-hazard-work-orders")
     @Operation(summary ="获取待处理隐患工单列表")
-    public CommonResult<List<PendingHazardWorkOrderVO>> getPendingHazardWorkOrders() {
-        List<PendingHazardWorkOrderVO> workOrderList = List.of(
+    public CommonResult<List<PendingHazardWorkOrderResVO>> getPendingHazardWorkOrders() {
+        List<PendingHazardWorkOrderResVO> workOrderList = List.of(
                 createPendingWorkOrder(1, "G1219318", "主轴断裂", "2026-02-10"),
                 createPendingWorkOrder(2, "G1219319", "主轴断裂", "2026-02-10")
         );
@@ -130,8 +129,8 @@ public class TGDashboardController {
     @ApiSignIgnore
     @GetMapping("/alarm-list")
     @Operation(summary ="获取告警列表")
-    public CommonResult<List<DeviceAlarmVO>> getAlarmList() {
-        List<DeviceAlarmVO> alarmList = List.of(
+    public CommonResult<List<DeviceAlarmResVO>> getAlarmList() {
+        List<DeviceAlarmResVO> alarmList = List.of(
                 createDeviceAlarm(1, "861556071807043", "鹿井士腾高速井泵", "电机低速过流", "2025-11-18"),
                 createDeviceAlarm(2, "861556071789019", "日虹背负永磁", "母线欠压", "2025-11-15")
         );
@@ -153,15 +152,15 @@ public class TGDashboardController {
     }
 
     // 私有辅助方法
-    private DeviceTrendItemVO createTrendItem(String month, Integer count) {
-        DeviceTrendItemVO item = new DeviceTrendItemVO();
+    private DeviceTrendItemResVO createTrendItem(String month, Integer count) {
+        DeviceTrendItemResVO item = new DeviceTrendItemResVO();
         item.setMonth(month);
         item.setCount(count);
         return item;
     }
 //
-    private DeviceHazardVO createDeviceHazard(Integer id, String province, String deviceName, String predictTime) {
-        DeviceHazardVO hazard = new DeviceHazardVO();
+    private DeviceHazardResVO createDeviceHazard(Integer id, String province, String deviceName, String predictTime) {
+        DeviceHazardResVO hazard = new DeviceHazardResVO();
         hazard.setId(id);
         hazard.setProvince(province);
         hazard.setDeviceName(deviceName);
@@ -169,8 +168,8 @@ public class TGDashboardController {
         return hazard;
     }
 
-    private PendingHazardWorkOrderVO createPendingWorkOrder(Integer id, String workOrderNo, String hazardName, String createTime) {
-        PendingHazardWorkOrderVO workOrder = new PendingHazardWorkOrderVO();
+    private PendingHazardWorkOrderResVO createPendingWorkOrder(Integer id, String workOrderNo, String hazardName, String createTime) {
+        PendingHazardWorkOrderResVO workOrder = new PendingHazardWorkOrderResVO();
         workOrder.setId(id);
         workOrder.setWorkOrderNo(workOrderNo);
         workOrder.setHazardName(hazardName);
@@ -178,8 +177,8 @@ public class TGDashboardController {
         return workOrder;
     }
 
-    private DeviceAlarmVO createDeviceAlarm(Integer id, String deviceId, String deviceName, String alarmName, String alarmTime) {
-        DeviceAlarmVO alarm = new DeviceAlarmVO();
+    private DeviceAlarmResVO createDeviceAlarm(Integer id, String deviceId, String deviceName, String alarmName, String alarmTime) {
+        DeviceAlarmResVO alarm = new DeviceAlarmResVO();
         alarm.setId(id);
         alarm.setDeviceId(deviceId);
         alarm.setDeviceName(deviceName);

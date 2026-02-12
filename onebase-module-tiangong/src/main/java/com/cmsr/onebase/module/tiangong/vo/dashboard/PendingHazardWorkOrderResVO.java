@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "待处理隐患工单 VO")
 @Data
-public class PendingHazardWorkOrderVO {
+public class PendingHazardWorkOrderResVO {
 
     @Schema(description = "工单ID")
     private Integer id;
