@@ -186,6 +186,10 @@ export const deleteHTTPAction = (id: string, actionName: string) => {
   return flowService.post(`/connector/${id}/actions/${actionName}/delete`);
 };
 
+export const updateHTTPAction = (id: string, actionName: string, params: SaveConnectorActionReq) => {
+  return flowService.post(`/connector/${id}/actions/${actionName}/update-config`, params);
+};
+
 export const debugAction = (params: DebugActionReq) => {
   return flowService.post(`/connector/debug-http-action`, params);
 };

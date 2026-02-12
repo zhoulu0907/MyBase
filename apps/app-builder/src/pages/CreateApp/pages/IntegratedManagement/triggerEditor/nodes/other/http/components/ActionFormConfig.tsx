@@ -36,7 +36,7 @@ function actionConfigToFormValues(config: Record<string, unknown>): Record<strin
 
 interface ActionFormConfigProps {
   connector: FlowConnector | null;
-  actionKey: string | null;
+  actionName: string | null;
   initialValues?: Record<string, any>;
   onChange?: (values: Record<string, any>) => void;
   formRef?: React.MutableRefObject<Form | null>;
@@ -44,17 +44,17 @@ interface ActionFormConfigProps {
 
 export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
   connector,
-  actionKey,
+  actionName,
   initialValues,
   onChange,
   formRef
 }) => {
-  // 创建 Formily form 实例，当 actionKey 变化时重新创建
+  // 创建 Formily form 实例，当 actionName 变化时重新创建
   const form = useMemo<Form>(() => {
     return createForm({
       initialValues: initialValues || {}
     });
-  }, [actionKey]); // 当 actionKey 变化时重新创建 form
+  }, [actionName]); // 当 actionName 变化时重新创建 form
 
   // 将 form 实例暴露到 ref
   useEffect(() => {
@@ -65,13 +65,13 @@ export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
 
   // 当 initialValues 变化时，更新表单值
   useEffect(() => {
-    if (actionKey && initialValues) {
+    if (actionName && initialValues) {
       form.setValues(initialValues);
-    } else if (actionKey && (!initialValues || Object.keys(initialValues).length === 0)) {
-      // 如果切换了 actionKey 但没有初始值，重置表单
+    } else if (actionName && (!initialValues || Object.keys(initialValues).length === 0)) {
+      // 如果切换了 actionName 但没有初始值，重置表单
       form.reset();
     }
-  }, [initialValues, actionKey, form]);
+  }, [initialValues, actionName, form]);
 
   // 监听表单值变化
   useEffect(() => {
@@ -105,7 +105,7 @@ export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
     };
   }, [form, onChange]);
 
-  // 通过接口获取动作 schema，id 为 connector.id，actionName 为 actionKey
+  // 通过接口获取动作 schema，id 为 connector.id，actionName 为当前选中动作名称
   const [actionSchema, setActionSchema] = useState<ISchema | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(false);
 
@@ -113,13 +113,13 @@ export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
   const actionFormComponents = useMemo(() => ({ DebugParamReadOnlyTable }), []);
 
   useEffect(() => {
-    if (!connector?.id || !actionKey) {
+    if (!connector?.id || !actionName) {
       setActionSchema(null);
       return;
     }
     let cancelled = false;
     setSchemaLoading(true);
-    getConnectorActionInfo(connector.id, actionKey)
+    getConnectorActionInfo(connector.id, actionName)
       .then((res: unknown) => {
         if (cancelled) return;
         const config = (res ?? {}) as Record<string, unknown>;
@@ -145,7 +145,7 @@ export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [connector?.id, actionKey, form]);
+  }, [connector?.id, actionName, form]);
 
   if (schemaLoading) {
     return <div style={{ color: '#999', padding: '32px 0', textAlign: 'center' }}>加载中...</div>;

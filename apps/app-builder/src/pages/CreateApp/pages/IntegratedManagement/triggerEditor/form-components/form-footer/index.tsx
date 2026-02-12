@@ -82,7 +82,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
         // 合并数据：先使用 signal 数据，然后用表单数据覆盖（表单数据可能是最新的）
         param = { ...signalData, ...formInfo };
 
-        // 确保 actionParams 从 signal 中读取（因为它按 actionKey 存储，包含所有动作的参数）
+        // 确保 actionParams 从 signal 中读取（因为它按 actionName 存储，包含所有动作的参数）
         if (signalData.actionParams) {
           param.actionParams = signalData.actionParams;
         }
