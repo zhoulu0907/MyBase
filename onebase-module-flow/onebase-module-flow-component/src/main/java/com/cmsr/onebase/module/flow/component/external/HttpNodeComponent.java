@@ -104,13 +104,12 @@ public class HttpNodeComponent extends SkippableNodeComponent {
 
         if (connectorConfig != null && actionConfig != null) {
             // ===== 动态加载配置路径 =====
-            log.info("[FLOW-TRACE] HTTP节点使用动态加载配置: nodeId={}， connectorConfig={}, actionConfig={}",
-                    nodeId, connectorConfig, actionConfig);
+            log.debug("[FLOW-TRACE] HTTP节点使用动态加载配置: nodeId={}", nodeId);
 
             // 从 actionConfig 根层级获取 method/url（实际数据结构）
             method = (String) actionConfig.get("method");
             requestPath = (String) actionConfig.get("url");
-            log.info("[FLOW-TRACE] 从actionConfig获取到: method={}, url={}", method, requestPath);
+            log.debug("[FLOW-TRACE] 从actionConfig获取到: method={}, url={}", method, requestPath);
 
             // 从 actionConfig.tabs 获取请求参数（requestHeaders/requestBody/queryParams/pathParams）
             Map<String, Object> paramTabs = getNestedMap(actionConfig, "tabs");
@@ -125,15 +124,12 @@ public class HttpNodeComponent extends SkippableNodeComponent {
                 throw new IllegalArgumentException(errorMsg);
             }
 
-            log.info("[FLOW-TRACE] 使用参数来源: tabs, paramTabs中包含的keys: {}",
+            log.debug("[FLOW-TRACE] 使用参数来源: tabs, paramTabs中包含的keys: {}",
                     paramTabs.keySet());
 
             // 构建 headers（从 paramTabs.requestHeaders 或 connectorConfig.properties.headers 获取）
             headers = new ArrayList<>();
-            List<?> requestHeadersList = null;
-            if (paramTabs != null) {
-                requestHeadersList = (List<?>) paramTabs.get("requestHeaders");
-            }
+            List<?> requestHeadersList = (List<?>) paramTabs.get("requestHeaders");
             if (requestHeadersList != null && !requestHeadersList.isEmpty()) {
                 for (Object item : requestHeadersList) {
                     if (item instanceof Map<?, ?> headerMap) {
@@ -148,7 +144,7 @@ public class HttpNodeComponent extends SkippableNodeComponent {
                     }
                 }
             }
-            log.info("[FLOW-TRACE] 构建的请求头数量: nodeId={}, headers={}", nodeId, headers.size());
+            log.debug("[FLOW-TRACE] 构建的请求头数量: nodeId={}, headers={}", nodeId, headers.size());
 
             // 认证处理 — 从 connectorConfig.properties.headers.Authorization 读取（如果存在）
             Map<String, Object> connectorProps = getNestedMap(connectorConfig, "properties");
@@ -156,7 +152,8 @@ public class HttpNodeComponent extends SkippableNodeComponent {
             Map<String, Object> authHeaderConfig = headersConfig != null ? getNestedMap(headersConfig, "Authorization") : null;
             if (authHeaderConfig != null) {
                 String token = (String) authHeaderConfig.get("value");
-                log.info("[FLOW-TRACE] 从环境配置获取到认证token: nodeId={}, token={}", nodeId, token);
+                log.debug("[FLOW-TRACE] 从环境配置获取到认证token: nodeId={}, tokenLength={}", nodeId,
+                        token != null ? token.length() : 0);
                 if (token != null && !token.isEmpty()) {
                     HttpNodeData.Header authHeader = new HttpNodeData.Header();
                     authHeader.setKey("Authorization");
@@ -175,7 +172,7 @@ public class HttpNodeComponent extends SkippableNodeComponent {
             // ===== 构建完整 URL =====
             // actionConfig.url 已是完整请求URL，直接使用
             String fullUrl = replaceVariables(requestPath != null ? requestPath : "", expressionContext);
-            log.info("[FLOW-TRACE] URL变量替换后: nodeId={}, fullUrl={}", nodeId, fullUrl);
+            log.debug("[FLOW-TRACE] URL变量替换后: nodeId={}, fullUrl={}", nodeId, fullUrl);
 
             // pathParams 替换 — 从 paramTabs.pathParams 获取并替换 URL 中的 {paramName}
             Object pathParamsObj = paramTabs.get("pathParams");
@@ -194,7 +191,7 @@ public class HttpNodeComponent extends SkippableNodeComponent {
 
             // queryParams 拼接（从 paramTabs.queryParams 获取）
             String finalUrl = appendQueryParams(fullUrl, paramTabs, expressionContext);
-            log.info("[FLOW-TRACE] 添加queryParams后的最终URL: nodeId={}, finalUrl={}", nodeId, finalUrl);
+            log.debug("[FLOW-TRACE] 添加queryParams后的最终URL: nodeId={}, finalUrl={}", nodeId, finalUrl);
 
             // 构建 HttpRequest
             HttpRequest request = new HttpRequest();
@@ -221,10 +218,9 @@ public class HttpNodeComponent extends SkippableNodeComponent {
             String resolvedBody = replaceVariables(bodyContent != null ? bodyContent : "", expressionContext);
             request.setBodyContent(resolvedBody);
 
-            log.info("[FLOW-TRACE] HTTP请求头: nodeId={}, headerCount={}", nodeId, resolvedHeaders.size());
-            log.info("[FLOW-TRACE] HTTP请求体: nodeId={}, body={}",
-                    nodeId, resolvedBody != null && resolvedBody.length() > 500
-                            ? resolvedBody.substring(0, 500) + "...(truncated)" : resolvedBody);
+            log.debug("[FLOW-TRACE] HTTP请求头: nodeId={}, headerCount={}", nodeId, resolvedHeaders.size());
+            log.debug("[FLOW-TRACE] HTTP请求体: nodeId={}, bodyLength={}",
+                    nodeId, resolvedBody != null ? resolvedBody.length() : 0);
 
             executeRequest(request, executeContext, variableContext, nodeId, processId, traceId, executionUuid);
         } else {
@@ -246,19 +242,18 @@ public class HttpNodeComponent extends SkippableNodeComponent {
                                 VariableContext variableContext, String nodeId,
                                 Long processId, String traceId, String executionUuid) throws Exception {
         try {
-            log.info("[FLOW-TRACE] HTTP请求准备: processId={}, traceId={}, executionUuid={}, nodeId={}, method={}, url={}",
-                    processId, traceId, executionUuid, nodeId, request.getMethod(), request.getUrl());
+            log.info("[FLOW-TRACE] HTTP请求准备: processId={}, nodeId={}, method={}, url={}",
+                    processId, nodeId, request.getMethod(), request.getUrl());
 
             HttpServiceResponse serviceResponse = httpExecuteService.execute(request);
 
-            log.info("[FLOW-TRACE] HTTP响应接收: processId={}, traceId={}, executionUuid={}, nodeId={}, statusCode={}, duration={}ms",
-                    processId, traceId, executionUuid, nodeId, serviceResponse.getStatusCode(), serviceResponse.getDuration());
+            log.info("[FLOW-TRACE] HTTP响应接收: processId={}, nodeId={}, statusCode={}, duration={}ms",
+                    processId, nodeId, serviceResponse.getStatusCode(), serviceResponse.getDuration());
 
             // rawBody 截断日志
             String rawBody = serviceResponse.getRawBody();
-            log.info("[FLOW-TRACE] HTTP响应体: nodeId={}, rawBody={}", nodeId,
-                    rawBody != null && rawBody.length() > 500
-                            ? rawBody.substring(0, 500) + "...(truncated)" : rawBody);
+            log.debug("[FLOW-TRACE] HTTP响应体: nodeId={}, rawBodyLength={}", nodeId,
+                    rawBody != null ? rawBody.length() : 0);
 
             // 构建输出
             Map<String, Object> output = new HashMap<>();
@@ -276,8 +271,7 @@ public class HttpNodeComponent extends SkippableNodeComponent {
 
             variableContext.putNodeVariables(this.getTag(), output);
 
-            log.info("[FLOW-TRACE] HTTP节点执行完成: processId={}, traceId={}, executionUuid={}, nodeId={}, outputKeys={}",
-                    processId, traceId, executionUuid, nodeId, output.keySet());
+            log.debug("[FLOW-TRACE] HTTP节点执行完成: processId={}, nodeId={}", processId, nodeId);
         } catch (Exception e) {
             log.error("[FLOW-TRACE] HTTP节点执行异常: processId={}, nodeId={}, method={}, url={}, error={}",
                     processId, nodeId, request.getMethod(), request.getUrl(), e.getMessage(), e);
@@ -295,19 +289,6 @@ public class HttpNodeComponent extends SkippableNodeComponent {
         if (parent == null) return null;
         Object value = parent.get(key);
         return value instanceof Map ? (Map<String, Object>) value : null;
-    }
-
-    /**
-     * 安全转换为 Integer
-     */
-    private int toInteger(Object value, int defaultValue) {
-        if (value == null) return defaultValue;
-        if (value instanceof Number) return ((Number) value).intValue();
-        try {
-            return Integer.parseInt(value.toString());
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
     }
 
     /**
@@ -362,19 +343,19 @@ public class HttpNodeComponent extends SkippableNodeComponent {
         if (paramTabs != null) {
             Object queryParams = paramTabs.get("queryParams");
             if (queryParams instanceof List<?> paramsList) {
-                log.info("[FLOW-TRACE] 处理queryParams: paramsCount={}", paramsList.size());
+                log.debug("[FLOW-TRACE] 处理queryParams: paramsCount={}", paramsList.size());
                 collectQueryParams(paramsList, queryParts, expressionContext);
             }
         }
 
         if (queryParts.isEmpty()) {
-            log.info("[FLOW-TRACE] 无queryParams需要添加，返回原URL: url={}", url);
+            log.debug("[FLOW-TRACE] 无queryParams需要添加");
             return url;
         }
 
         String separator = url.contains("?") ? "&" : "?";
         String result = url + separator + String.join("&", queryParts);
-        log.info("[FLOW-TRACE] 拼接queryParams后的URL: url={}", result);
+        log.debug("[FLOW-TRACE] 拼接queryParams后的URL: url={}", result);
         return result;
     }
 

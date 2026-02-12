@@ -267,7 +267,8 @@ public class FlowGraphBuilder {
                     try {
                         Map<String, Object> configRoot = JsonUtils.parseObject(connectorDO.getConfig(), Map.class);
                         if (configRoot != null) {
-                            envName = configRoot.get("enableEnvName").toString();
+                            Object enableEnvObj = configRoot.get("enableEnvName");
+                            envName = enableEnvObj != null ? enableEnvObj.toString() : null;
                             Object propertiesObj = configRoot.get("properties");
                             if (propertiesObj instanceof Map) {
                                 Map<String, Object> properties = (Map<String, Object>) propertiesObj;

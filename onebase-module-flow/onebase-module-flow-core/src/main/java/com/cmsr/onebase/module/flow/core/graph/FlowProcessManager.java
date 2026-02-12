@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -87,15 +88,15 @@ public class FlowProcessManager {
 
             // 提取流程ID，用于日志跟踪和缓存键
             Long processId = flowProcessDO.getId();
-            boolean isTrace = processId.equals(traceProcessId);
+            boolean isTrace = Objects.equals(processId, traceProcessId);
 
             try {
                 onProcessUpdate(flowProcessDO, false);
                 if (isTrace){
-                    log.info("[WORKFLOW-DEBUG] 加载flowProcess流程成功：{}", flowProcessDO);
+                    log.info("[TRACE-{}] 加载flowProcess流程成功", processId);
                 }
             } catch (Exception e) {
-                log.error("[WORKFLOW-DEBUG] 初始化flowProcessDO异常：{}", flowProcessDO, e);
+                log.error("初始化flowProcessDO异常：processId={}", processId, e);
             }
         }
         executor.execute(() -> {
@@ -126,7 +127,7 @@ public class FlowProcessManager {
             onProcessUpdate(flowProcessDO, sync);
         }
         cleanApplicationJob(applicationId, flowProcessDOS);
-        log.info("[WORKFLOW-DEBUG] 处理应用更新: {}, 删除：{} ，添加：{}", applicationId, oldProcessIds, flowProcessDOS.stream().map(FlowProcessDO::getId).toList());
+        log.info("处理应用更新: applicationId={}, 删除：{} ，添加：{}", applicationId, oldProcessIds, flowProcessDOS.stream().map(FlowProcessDO::getId).toList());
     }
 
 
@@ -137,7 +138,7 @@ public class FlowProcessManager {
             flowProcessCache.deleteByProcessId(id);
         });
         stopApplicationJob(applicationId);
-        log.info("[WORKFLOW-DEBUG] 处理应用删除：{}, 删除: {}", applicationId, ids);
+        log.info("处理应用删除：applicationId={}, 删除: {}", applicationId, ids);
     }
 
     public void checkTimeJob() {
@@ -229,7 +230,7 @@ public class FlowProcessManager {
 
         // 检查是否为需要详细跟踪的流程（用于调试）
         Long traceProcessId = flowProperties.getTraceProcessId();
-        boolean isTrace = processId.equals(traceProcessId);
+        boolean isTrace = Objects.equals(processId, traceProcessId);
 
         // 记录流程更新开始日志
         if (isTrace) {

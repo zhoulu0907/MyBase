@@ -48,9 +48,7 @@ public class JsonGraphMapper {
                     }
                 }
             }
-            // 【DEBUG】打印所有注册的节点类型
-            log.info("【DEBUG JsonGraphMapper】初始化完成，注册的节点类型: {}", TYPE_CLASS_MAP.keySet());
-            log.debug("初始化节点数据类型映射成功");
+            log.debug("初始化节点数据类型映射成功，注册的节点类型: {}", TYPE_CLASS_MAP.keySet());
         } catch (Exception e) {
             log.error("初始化节点数据类型映射失败", e);
         }
@@ -81,26 +79,18 @@ public class JsonGraphMapper {
         private NodeData getNodeDataByType(JsonNode dataNode, String type, ObjectMapper mapper)
                 throws com.fasterxml.jackson.core.JsonProcessingException {
             Class<? extends NodeData> dataClass = TYPE_CLASS_MAP.get(type);
-            // 【DEBUG】打印原始 JSON 数据，用于诊断字段映射问题
-            log.info("【DEBUG JsonGraphMapper】节点类型:{}, 原始JSON数据:\n{}", type, dataNode.toPrettyString());
-            log.info("【DEBUG JsonGraphMapper】映射到类:{}", type,
+            log.debug("获取到节点类型:{}, 映射到类:{}", type,
                     dataClass != null ? dataClass.getSimpleName() : "null");
-            log.info("【DEBUG JsonGraphMapper】TYPE_CLASS_MAP包含的类型: {}", TYPE_CLASS_MAP.keySet());
-            log.debug("获取到节点类型:{}, 节点内容: {}", type, dataNode.toString());
 
             if (dataClass != null) {
-                NodeData result = mapper.treeToValue(dataNode, dataClass);
-                log.info("【DEBUG JsonGraphMapper】反序列化成功: type={}, resultClass={}, result={}",
-                        type, result.getClass().getSimpleName(), result);
-                return result;
+                return mapper.treeToValue(dataNode, dataClass);
             }
-            // 兼容性处理：connectr 类型映射到 CommonNodeData
+            // 兼容性处理：connector 类型映射到 CommonNodeData
             if ("connector".equals(type)) {
-                log.info("【DEBUG JsonGraphMapper】connector类型映射到CommonNodeData");
                 return mapper.treeToValue(dataNode,
                         com.cmsr.onebase.module.flow.context.graph.nodes.CommonNodeData.class);
             }
-            log.warn("【DEBUG JsonGraphMapper】未知节点类型:{}, 使用基类NodeData", type);
+            log.warn("未知节点类型:{}, 使用基类NodeData", type);
             return mapper.treeToValue(dataNode, NodeData.class);
         }
     }

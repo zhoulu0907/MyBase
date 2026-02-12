@@ -211,10 +211,10 @@ public class ConnectorConfigParser {
     /**
      * 从配置 JSON 中解析指定环境的配置 Schema
      * <p>
-     * 从 flow_connector.config 的 properties 中提取 properties[envCode] 的值
+     * 从 flow_connector.config 的 properties 中提取 properties[envName] 的值
      *
      * @param configJson 配置 JSON 字符串
-     * @param envCode    环境编码（如 DEV、TEST、PROD）
+     * @param envName    环境名称（如 DEV环境配置）
      * @return 该环境的配置 Schema（JsonNode）
      * @throws ServiceException 如果环境配置不存在
      */
