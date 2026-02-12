@@ -63,7 +63,6 @@ public class FlowGraphBuilder {
     @Autowired
     private FlowConnectorHttpRepository connectorHttpRepository;
 
-    @Setter
     @Autowired
     private FlowProcessMapper flowProcessMapper;
 
