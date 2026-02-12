@@ -4,7 +4,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Spin, Steps } from '@arco-design/web-react';
 import { type Form as FormilyForm } from '@formily/core';
 import {
-  listConnectorActionInfos,
+  listConnectorActions,
   listConnectorByType,
   listConnectorNodeConfig,
   type ConnectorNodeConfig,
@@ -73,32 +73,44 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
       return;
     }
     setActionsLoading(true);
-    listConnectorActionInfos({
+    listConnectorActions({
       id: selectedConnector.id,
       pageNo: 1,
       pageSize: 500
     })
       .then((res: any) => {
         const items: ActionItem[] = [];
-        const raw = res?.list ?? res?.records ?? res;
+        // const raw = res?.list ?? res?.records ?? res;
 
-        if (raw?.properties && typeof raw.properties === 'object') {
-          Object.entries(raw.properties).forEach(([key, property]: [string, any]) => {
-            items.push({
-              key,
-              title: property?.title,
-              description: property?.description
-            });
+        // if (raw?.properties && typeof raw.properties === 'object') {
+        //   Object.entries(raw.properties).forEach(([key, property]: [string, any]) => {
+        //     items.push({
+        //       key,
+        //       title: property?.title,
+        //       description: property?.description
+        //     });
+        //   });
+        // } else if (Array.isArray(raw)) {
+        //   (raw as any[]).forEach((item) => {
+        //     items.push({
+        //       key: item.actionName ?? item.key ?? item.id,
+        //       title: item.title ?? item.actionName ?? item.name,
+        //       description: item.description
+        //     });
+        //   });
+        // }
+        // setActionItems(items);
+
+        const raw = res || ([] as any[]);
+
+        (raw as any[]).forEach((item: any) => {
+          items.push({
+            key: item,
+            title: item,
+            description: item
           });
-        } else if (Array.isArray(raw)) {
-          (raw as any[]).forEach((item) => {
-            items.push({
-              key: item.actionName ?? item.key ?? item.id,
-              title: item.title ?? item.actionName ?? item.name,
-              description: item.description
-            });
-          });
-        }
+        });
+
         setActionItems(items);
       })
       .catch(() => {
