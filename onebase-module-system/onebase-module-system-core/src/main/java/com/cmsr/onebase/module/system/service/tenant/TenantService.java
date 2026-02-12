@@ -93,6 +93,14 @@ public interface TenantService {
     TenantDO getTenantByName(String name);
 
     /**
+     * 获得code对应的空间
+     *
+     * @param tenantCode 空间编码
+     * @return 空间
+     */
+    TenantDO getTenantByCode(String tenantCode);
+
+    /**
      * 获得域名对应的空间
      *
      * @param website 域名

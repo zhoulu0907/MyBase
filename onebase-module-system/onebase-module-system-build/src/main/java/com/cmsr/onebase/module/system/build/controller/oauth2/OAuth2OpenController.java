@@ -1,12 +1,15 @@
 package com.cmsr.onebase.module.system.build.controller.oauth2;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2OpenService;
+import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -17,9 +20,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
 
 /**
  * 提供给外部应用调用为主
@@ -42,6 +42,9 @@ public class OAuth2OpenController {
     @Resource
     private OAuth2OpenService oauth2OpenService;
 
+    @Resource
+    private UserService userService;
+
     /**
      * 对应 Spring Security OAuth 的 TokenEndpoint 类的 postAccessToken 方法
      *
@@ -55,6 +58,7 @@ public class OAuth2OpenController {
      */
     @PostMapping("/token")
     @PermitAll
+    @ApiSignIgnore
     @Operation(summary = "获得访问令牌", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
     @Parameters({
             @Parameter(name = "grant_type", required = true, description = "授权类型", example = "code"),
@@ -75,7 +79,7 @@ public class OAuth2OpenController {
                                                                      @RequestParam(value = "password", required = false) String password, // 密码模式
                                                                      @RequestParam(value = "scope", required = false) String scope, // 密码模式
                                                                      @RequestParam(value = "refresh_token", required = false) String refreshToken) { // 刷新模式
-        return oauth2OpenService.postAccessToken(request, grantType, code, redirectUri, state, username, password, scope, refreshToken);
+        return oauth2OpenService.postAccessToken(request, grantType, code, redirectUri, state, username, password, scope, refreshToken, RunModeEnum.BUILD.getValue());
     }
 
     @PostMapping("/revoke-token")
@@ -137,6 +141,15 @@ public class OAuth2OpenController {
                                                           @RequestParam(value = "auto_approve") Boolean autoApprove,
                                                           @RequestParam(value = "state", required = false) String state) {
         return oauth2OpenService.approveOrDeny(responseType, clientId, scope, redirectUri, autoApprove, state);
+    }
+
+    @PostMapping("/user/get")
+    @Operation(summary = "获取用户信息")
+    @PermitAll
+    @ApiSignIgnore
+    CommonResult<UserSimpleRespVO> getUser(@RequestParam("access_token") String accessToken) {
+
+        return CommonResult.success(userService.getUserInfoByToken(accessToken));
     }
 
 

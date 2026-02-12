@@ -9,6 +9,7 @@ import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -71,6 +72,7 @@ import jakarta.validation.Validator;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
@@ -229,6 +231,17 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         return applicationDTO.getTenantId();
     }
 
+    private Long getTenantId(Long appId) {
+        ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+        ApplicationDTO applicationDTO = TenantManager.withoutTenantCondition(() -> appApplicationApi.findAppApplicationById(appId));
+
+        if (applicationDTO == null) {
+            throw exception(AUTH_LOGIN_APP_DELETE_OR_DISABLE);
+        }
+
+        return applicationDTO.getTenantId();
+    }
+
     private void checkPasswordMatched(String password, AdminUserDO user, String account, LoginLogTypeEnum logTypeEnum) {
         boolean passwordMatched = userService.isPasswordMatch(password, user.getPassword());
         if (!passwordMatched) {
@@ -249,11 +262,18 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         validateCaptcha(reqVO);
 
         // 验证应用是否存在,同时获取租户ID
-        Long tenanId = checkAppAndGetTenantId(reqVO.getAppId());
+
+        Long tenantId = null;
+
+        if(BooleanUtils.isTrue(reqVO.getIsDev())) {
+            tenantId = getTenantId(reqVO.getAppId());
+        }else {
+            tenantId = checkAppAndGetTenantId(reqVO.getAppId());
+        }
 
         AtomicReference<AuthLoginRespVO> authLoginRespVO = new AtomicReference<>();
         // 设置应用所在的租户环境
-        TenantUtils.execute(tenanId, () -> {
+        TenantUtils.execute(tenantId, () -> {
             // 检查平台租户是否允许创建应用
             // checkPlatformAdminEnableAppCreate();
 

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.dal.database;
 
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.data.base.BaseDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
@@ -37,6 +38,19 @@ public class TenantDataRepository extends BaseDataRepository<SystemTenantMapper,
             return null;
         }
         return getOne(query().eq(TenantDO.NAME, name));
+    }
+
+    /**
+     * 根据租户编码查询租户
+     *
+     * @param code 租户编码
+     * @return 租户对象
+     */
+    public TenantDO findByCode(String code) {
+        if (StringUtils.isBlank(code)) {
+            return null;
+        }
+        return getOne(query().eq(TenantDO.TENANT_CODE, code).eq(TenantDO.STATUS, CommonStatusEnum.ENABLE.getStatus()));
     }
 
     /**

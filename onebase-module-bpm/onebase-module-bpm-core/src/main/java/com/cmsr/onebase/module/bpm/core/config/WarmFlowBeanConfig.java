@@ -1,9 +1,6 @@
 package com.cmsr.onebase.module.bpm.core.config;
 
-import com.cmsr.onebase.module.bpm.core.expression.ConditionStrategyDefault;
-import com.cmsr.onebase.module.bpm.core.expression.ConditionStrategySpel;
-import com.cmsr.onebase.module.bpm.core.expression.ListenerStrategySpel;
-import com.cmsr.onebase.module.bpm.core.expression.VariableStrategySpel;
+import com.cmsr.onebase.module.bpm.core.expression.*;
 import com.cmsr.onebase.module.bpm.core.helper.SpelHelper;
 import com.cmsr.onebase.module.bpm.core.utils.SpringUtil;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.dao.*;
@@ -186,6 +183,7 @@ public class WarmFlowBeanConfig {
     private void setExpression() {
         ExpressionUtil.setExpression(new ConditionStrategyDefault());
         ExpressionUtil.setExpression(new ConditionStrategySpel());
+        ExpressionUtil.setExpression(new ConditionStrategyOb());
         ExpressionUtil.setExpression(new ListenerStrategySpel());
         ExpressionUtil.setExpression(new VariableStrategySpel());
     }

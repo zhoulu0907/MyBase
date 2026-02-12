@@ -10,6 +10,7 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -31,6 +32,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
@@ -269,6 +271,40 @@ public class UserServiceImpl implements UserService {
         Long roleId = createCoreAdminRole();
         permissionService.assignUserRoles(userDO.getId(), singleton(roleId));
         return userDO.getId();
+    }
+
+    @Override
+    public AdminUserDO updateOrAddUser(AdminUserDO userDO) {
+        AdminUserDO adminUserDO = userDataRepository.getUserByTianGongId(userDO.getId());
+        if (adminUserDO == null) {
+            if (userDO.getUserType() == null) {
+                userDO.setUserType(UserTypeEnum.TENANT.getValue());
+            }
+            userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+            if (userDO.getAdminType() == null) {
+                userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
+            }
+            // 1.1 校验账户配合
+            validateTenantUserCountMaxLimit();
+            // 1.2 校验正确性
+            validateUserForCreateOrUpdate(null, userDO.getUsername(),
+                    userDO.getMobile(), userDO.getEmail(), userDO.getDeptId(), userDO.getPostIds(), userDO.getUserType());
+
+            userDO.setTianGongID(userDO.getId());
+            userDO.setPassword(encodePassword("AdminChina2025!")); // 加密密码
+            userDO.setId(null);
+            userDataRepository.save(userDO);
+            RoleDO roleIdsByCodeAndTenantId = roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+            // 保存初始密码历史记录
+            securityConfigApi.savePasswordHistory(userDO.getId(), userDO.getPassword());
+
+            // 2 插入用户角色关联
+            Set<Long> roleIds = new HashSet<>();
+            roleIds.add(roleIdsByCodeAndTenantId.getId());
+            permissionService.assignUserRoles(userDO.getId(), roleIds);
+            return userDO;
+        }
+        return adminUserDO;
     }
 
     private Long createCoreAdminRole() {

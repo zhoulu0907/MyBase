@@ -1,0 +1,12 @@
+## 默认环境变量配置（直接使用local环境配置）
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 登录成功后会自动更新token到环境变量中
+
+### 天工 => 设备信息
+GET {{baseUrl}}/tiangong/dashboard/device-info-all
+Content-Type: application/json
+X-Tenant-Id: 184717008866115584
+
+{
+}

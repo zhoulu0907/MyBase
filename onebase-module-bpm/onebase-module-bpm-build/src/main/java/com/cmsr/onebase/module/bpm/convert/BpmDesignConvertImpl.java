@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.bpm.build.vo.design.strategy.NodeVOStrategyManage
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.edge.EdgeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.enums.VersionStatusEnum;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
@@ -302,7 +303,11 @@ public class BpmDesignConvertImpl implements BpmDesignConvert {
                 skipJson.setPriority(edgeExtDTO.getPriority());
 
                 if (!edgeExtDTO.getIsDefault()) {
-                    skipJson.setSkipCondition(JsonUtils.toJsonString(edgeExtDTO.getCondition()));
+                    String skipCondition = JsonUtils.toJsonString(edgeExtDTO.getCondition());
+                    if(StringUtils.isNotEmpty(skipCondition) && !skipCondition.startsWith(BpmConstants.VAR_OB_KEY )){
+                        skipCondition = BpmConstants.VAR_OB_KEY + skipCondition;
+                    }
+                    skipJson.setSkipCondition(skipCondition);
                 }
             }
 
