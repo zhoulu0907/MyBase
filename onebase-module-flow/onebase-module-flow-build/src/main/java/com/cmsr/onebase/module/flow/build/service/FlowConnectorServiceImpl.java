@@ -385,8 +385,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode) {
-        log.info("getEnvironmentConfig start, connectorId: {}, envCode: {}", connectorId, envCode);
+    public EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName) {
+        log.info("getEnvironmentConfig start, connectorId: {}, envName: {}", connectorId, envName);
 
         // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -399,19 +399,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         String config = connector.getConfig();
         if (StringUtils.isBlank(config)) {
             log.warn("Connector config is empty, connectorId: {}", connectorId);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_CONFIG_NOT_EXISTS, envCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_CONFIG_NOT_EXISTS, envName);
         }
 
         // 3. 使用 Parser 提取环境 Schema
-        JsonNode envSchema = connectorConfigParser.parseEnvironmentSchema(config, envCode);
+        JsonNode envSchema = connectorConfigParser.parseEnvironmentSchema(config, envName);
 
         // 4. 封装 VO
         EnvironmentConfigVO vo = new EnvironmentConfigVO();
         vo.setSchema(envSchema);
-        vo.setEnvCode(envCode);
+        vo.setEnvCode(envName);
         vo.setTypeCode(connector.getTypeCode());
 
-        log.info("getEnvironmentConfig success, connectorId: {}, envCode: {}", connectorId, envCode);
+        log.info("getEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
         return vo;
     }
 
