@@ -140,6 +140,14 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       iconActive: <img src={corpActiveSVG} />,
       path: `/onebase/${tenantId}/setting/enterprise`,
       permissionKey: TENANT_MENUS.CORP
+    },
+    {
+      key: 'copilotdoc',
+      title: 'AI生成文档',
+      icon: <img src={corpSVG} />,
+      iconActive: <img src={corpActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/copilotdoc`,
+      permissionKey: TENANT_MENUS.AIDOC
     }
   ];
 
