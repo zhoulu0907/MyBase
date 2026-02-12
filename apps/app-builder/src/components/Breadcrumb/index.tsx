@@ -101,6 +101,9 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'externalUser':
           title = t('sider.externalUser');
           break;
+        case 'copilotdoc':
+          title = t('sider.copilotdoc');
+          break;
         default:
           title = decodeURIComponent(segment);
       }
