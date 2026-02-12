@@ -1117,6 +1117,38 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
+    public String getEnabledEnvName(Long connectorId) {
+        log.info("getEnabledEnvName start, connectorId: {}", connectorId);
+
+        // 1. 查询并验证连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 获取 config 字段
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.info("Connector config is empty, return null, connectorId: {}", connectorId);
+            return null;
+        }
+
+        // 3. 解析 JSON 并获取 enableEnvName
+        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode enableEnvNameNode = root.get("enableEnvName");
+
+        if (enableEnvNameNode == null || enableEnvNameNode.isNull()) {
+            log.info("enableEnvName not found or is null, connectorId: {}", connectorId);
+            return null;
+        }
+
+        String enableEnvName = enableEnvNameNode.asText();
+        log.info("getEnabledEnvName success, connectorId: {}, enableEnvName: {}", connectorId, enableEnvName);
+        return enableEnvName;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO) {
         return saveOrUpdateActionConfigInternal(connectorId, reqVO.getActionConfig(), true);
