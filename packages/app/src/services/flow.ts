@@ -211,6 +211,22 @@ export const getConnectorEnvList = (id: string) => {
   return flowService.get(`/connector/${id}/environments`);
 };
 
+export const getConnectgorEnvironmentConfig = (id: string, envName: string) => {
+  return flowService.get(`/connector/${id}/environment-config?envName=${envName}`);
+};
+
+export const updateEnvironmentConfig = (id: string, params: any) => {
+  return flowService.post(`/connector/${id}/update-env`, params);
+};
+
+export const enableConnectorEnvironment = (id: string, envName: string) => {
+  return flowService.post(`/connector/${id}/enable-env?envName=${envName}`);
+};
+
+export const getEnableConnectorEnvironment = (id: string) => {
+  return flowService.get(`/connector/${id}/get-enabled-envname`);
+};
+
 /**
  * 获取连接器环境详情
  * @param id 环境ID
