@@ -402,7 +402,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
                 .asString();
         if (response.getStatus() != 200) {
             log.error("Flink Server 列分析响应错误: {}", response.getBody());
-            throw new IllegalStateException("请求响应异常，" + response.getBody());
+            throw new IllegalStateException("请检查SQL及相关配置");
         }
         return JsonUtils.parseArray(response.getBody(), ColumnDefine.class);
     }

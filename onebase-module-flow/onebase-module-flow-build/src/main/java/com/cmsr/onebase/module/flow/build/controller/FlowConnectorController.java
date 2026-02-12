@@ -19,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 @Tag(name = "连接器", description = "连接器接口")
 @RestController
 @RequestMapping("/flow/connector")
@@ -122,13 +120,13 @@ public class FlowConnectorController {
     @Operation(summary = "查询连接器的指定环境配置信息",
               description = "从flow_connector.config的properties中解析出指定环境的Formily Schema")
     @Parameter(name = "id", description = "连接器实例ID（主键）", required = true, example = "1")
-    @Parameter(name = "envCode", description = "环境编码（如DEV、TEST、PROD）", required = true, example = "PROD")
+    @Parameter(name = "envName", description = "环境名称（如DEV环境配置）", required = true, example = "DEV环境配置")
     @GetMapping("/{id}/environment-config")
     public CommonResult<EnvironmentConfigVO> getEnvironmentConfig(
             @PathVariable("id") Long id,
-            @RequestParam("envCode") @NotBlank(message = "环境编码不能为空") String envCode) {
+            @RequestParam("envName") @NotBlank(message = "环境名称不能为空") String envName) {
 
-        EnvironmentConfigVO config = connectorService.getEnvironmentConfig(id, envCode);
+        EnvironmentConfigVO config = connectorService.getEnvironmentConfig(id, envName);
         return CommonResult.success(config);
     }
 
@@ -149,6 +147,29 @@ public class FlowConnectorController {
             @PathVariable("id") Long id,
             @RequestBody @Valid SaveEnvironmentConfigReqVO reqVO) {
         Boolean result = connectorService.saveEnvironmentConfig(id, reqVO);
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "更新连接器环境配置",
+              description = "更新已存在的环境配置，环境必须存在，否则拒绝")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @PostMapping("/{id}/update-env")
+    public CommonResult<Boolean> updateEnvironmentConfig(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid SaveEnvironmentConfigReqVO reqVO) {
+        Boolean result = connectorService.updateEnvironmentConfig(id, reqVO);
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "设置启用环境",
+              description = "设置连接器当前启用的环境，环境必须存在。传空表示取消启用")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @Parameter(name = "envName", description = "环境名称（传空表示取消启用）", required = false)
+    @PostMapping("/{id}/enable-env")
+    public CommonResult<Boolean> enableEnvironment(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "envName", required = false) String envName) {
+        Boolean result = connectorService.enableEnvironment(id, envName);
         return CommonResult.success(result);
     }
 
@@ -182,19 +203,20 @@ public class FlowConnectorController {
     public CommonResult<Boolean> updateActionConfig(
             @PathVariable("id") Long id,
             @PathVariable("actionName") String actionName,
-            @RequestBody JsonNode actionConfig) {
-        Boolean result = connectorService.updateActionConfig(id, actionName, actionConfig);
+            @RequestBody @Valid SaveActionConfigReqVO reqVO) {
+        Boolean result = connectorService.updateActionConfig(id, actionName, reqVO);
         return CommonResult.success(result);
     }
 
-    @Operation(summary = "查询连接器动作清单")
+    @Operation(summary = "查询连接器动作清单（精简版）",
+              description = "返回动作名称数组。业务规则：必须先设置启用环境（enableEnvName），否则返回错误'未正确配置环境信息'")
     @GetMapping("/{id}/actions")
     public CommonResult<List<String>> getActions(@PathVariable Long id) {
         List<String> actions = connectorService.getActionsById(id);
         return CommonResult.success(actions);
     }
 
-    @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表（精简版）")
+    @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表")
     @GetMapping("/{id}/action-infos")
     public CommonResult<List<ConnectorActionLiteVO>> getActionInfos(
             @Parameter(description = "连接器实例ID", required = true, example = "1")

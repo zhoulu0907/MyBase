@@ -1,0 +1,5 @@
+# 公式引擎配置
+onebase:
+  tiangong:
+    # 公式引擎地址
+    domainUrl: http://localhost:8080/tiangong

@@ -218,9 +218,9 @@ public class ConnectorConfigParser {
      * @return 该环境的配置 Schema（JsonNode）
      * @throws ServiceException 如果环境配置不存在
      */
-    public JsonNode parseEnvironmentSchema(String configJson, String envCode) {
+    public JsonNode parseEnvironmentSchema(String configJson, String envName) {
         if (configJson == null || configJson.trim().isEmpty()) {
-            throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envCode=" + envCode));
+            throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envName=" + envName));
         }
 
         try {
@@ -230,23 +230,23 @@ public class ConnectorConfigParser {
             JsonNode propertiesNode = root.get("properties");
             if (propertiesNode == null || !propertiesNode.isObject()) {
                 log.warn("config 中未找到 properties 字段或其不是对象类型");
-                throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envCode=" + envCode));
+                throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envName=" + envName));
             }
 
             // 获取指定环境的配置
-            JsonNode envSchemaNode = propertiesNode.get(envCode);
+            JsonNode envSchemaNode = propertiesNode.get(envName);
             if (envSchemaNode == null || envSchemaNode.isNull()) {
-                log.warn("环境配置不存在，envCode: {}, 可用环境: {}", envCode,
+                log.warn("环境配置不存在，envName: {}, 可用环境: {}", envName,
                         collectFieldNames(propertiesNode));
-                throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envCode=" + envCode));
+                throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envName=" + envName));
             }
 
-            log.info("成功解析环境配置，envCode: {}", envCode);
+            log.info("成功解析环境配置，envName: {}", envName);
             return envSchemaNode;
 
         } catch (JsonProcessingException e) {
             log.error("解析配置 JSON 失败，configJson: {}", configJson, e);
-            throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envCode=" + envCode));
+            throw new ServiceException(new ErrorCode(1123788, "环境配置不存在：envName=" + envName));
         }
     }
 }

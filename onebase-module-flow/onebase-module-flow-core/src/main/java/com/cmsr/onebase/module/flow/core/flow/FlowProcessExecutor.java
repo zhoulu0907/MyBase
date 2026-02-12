@@ -35,7 +35,7 @@ import java.util.UUID;
 
 /**
  * @Author：huangjie
- * @Date：2025/9/11 14:32
+ *                  @Date：2025/9/11 14:32
  */
 @Setter
 @Slf4j
@@ -60,7 +60,6 @@ public class FlowProcessExecutor {
 
     private FlowProcessCache flowProcessCache = FlowProcessCache.getInstance();
 
-
     /**
      * 执行新流程（基于traceId和输入参数）
      */
@@ -73,27 +72,43 @@ public class FlowProcessExecutor {
         if (!flowProcessCache.isProcessExist(processId)) {
             return ExecutorResult.error("流程不存在: " + processId);
         }
+
         ExecuteContext executeContext = createExecuteContext(executorInput);
+        String executionUuid = executeContext.getExecutionUuid();
+
+        log.info("[FLOW-TRACE] startExecution开始: processId={}, traceId={}, executionUuid={}",
+                processId, traceId, executionUuid);
+
         FlowExecutionLogDO executionLog = createNewExecutionLog(executorInput);
         executionLog.setTraceId(executeContext.getTraceId());
         executionLog.setExecutionUuid(executeContext.getExecutionUuid());
         try {
-            //初始化变量上下文
+            // 初始化变量上下文
             VariableContext variableContext = new VariableContext();
             variableContext.setInputParams(executorInput.getInputParams());
-            //初始化执行上下文
+            log.info("[FLOW-TRACE] 变量上下文已初始化: processId={}, traceId={}, executionUuid={}, inputParams={}",
+                    processId, traceId, executionUuid, executorInput.getInputParams().keySet());
+
+            // 初始化执行上下文
             Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
             executeContext.setNodeDataMap(nodeData);
+            log.info("[FLOW-TRACE] 节点数据已加载: processId={}, traceId={}, executionUuid={}, nodeCount={}",
+                    processId, traceId, executionUuid, nodeData != null ? nodeData.size() : 0);
 
             executeContext.addLog("检查流程触发次数");
             int callCount = validateTraceIdCallCount(traceId, processId);
             executeContext.addLog("流程触发阈值正常[" + callCount + "]");
+            log.info("[FLOW-TRACE] 流程触发次数检查通过: processId={}, traceId={}, executionUuid={}, callCount={}",
+                    processId, traceId, executionUuid, callCount);
 
-
-            //执行流程
+            // 执行流程
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
-            //处理结果到日志
-            executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
+            log.info("[FLOW-TRACE] executeFlow完成: processId={}, traceId={}, executionUuid={}, success={}",
+                    processId, traceId, executionUuid, result.isSuccess());
+
+            // 处理结果到日志
+            executionLog.setExecutionResult(
+                    result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getMessage(result.getCause()));
             return result;
         } catch (Exception e) {
@@ -141,7 +156,7 @@ public class FlowProcessExecutor {
         ExecuteContext executeContext = null;
         try {
             ExecuteLog executeLog = new ExecuteLog();
-            //初始化变量上下文
+            // 初始化变量上下文
             String executionUuid = executorInput.getExecutionUuid();
             executeLog.addLog("恢复变量上下文");
             VariableContext variableContext = flowContextProvider.restoreVariableContext(executionUuid);
@@ -149,14 +164,14 @@ public class FlowProcessExecutor {
             if (variableContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
-            //初始化执行上下文
+            // 初始化执行上下文
             executeLog.addLog("恢复执行上下文");
             executeContext = flowContextProvider.restoreExecuteContext(executionUuid);
             executeLog.addLog("恢复执行上下文结束");
             if (executeContext == null) {
                 throw new Exception("执行上下文不存在或已过期: " + executionUuid);
             }
-            //执行上下文添加执行UUID
+            // 执行上下文添加执行UUID
             executeContext.setExecutionUuid(UUID.randomUUID().toString());
             executeContext.setExecuteLog(executeLog);
             Map<String, NodeData> nodeData = flowProcessCache.findNodeData(processId);
@@ -165,13 +180,14 @@ public class FlowProcessExecutor {
 
             variableContext.setInputParams(executorInput.getInputParams());
             variableContext.setOutputParams(Collections.emptyMap());
-            //设置日志执行UUID
+            // 设置日志执行UUID
             executionLog.setTraceId(executeContext.getTraceId());
             executionLog.setExecutionUuid(executeContext.getExecutionUuid());
-            //执行流程
+            // 执行流程
             ExecutorResult result = executeFlow(processId, variableContext, executeContext);
-            //处理结果到日志
-            executionLog.setExecutionResult(result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
+            // 处理结果到日志
+            executionLog.setExecutionResult(
+                    result.isSuccess() ? ExecutionResultEnum.SUCCESS.getCode() : ExecutionResultEnum.FAILED.getCode());
             executionLog.setErrorMessage(ExceptionUtils.getMessage(result.getCause()));
             return result;
         } catch (Exception e) {
@@ -180,8 +196,10 @@ public class FlowProcessExecutor {
             executionLog.setErrorMessage(ExceptionUtils.getMessage(e));
             return ExecutorResult.error(processId, "执行流程异常", e);
         } finally {
-            executeContext.addLog("流程执行结束");
-            executionLog.setLogText(executeContext.getLogText());
+            if (executeContext != null) {
+                executeContext.addLog("流程执行结束");
+                executionLog.setLogText(executeContext.getLogText());
+            }
             executionLog.setEndTime(LocalDateTime.now());
             Duration duration = Duration.between(executionLog.getStartTime(), executionLog.getEndTime());
             executionLog.setDurationTime(duration.toMillis());
@@ -189,20 +207,28 @@ public class FlowProcessExecutor {
         }
     }
 
-
     /**
      * 执行流程的公共逻辑
      */
     private ExecutorResult executeFlow(Long processId, VariableContext variableContext, ExecuteContext executeContext) {
         String chainId = FlowUtils.toFlowChainId(processId);
+        String traceId = executeContext.getTraceId();
+        String executionUuid = executeContext.getExecutionUuid();
+
+        log.info("[FLOW-TRACE] executeFlow开始: processId={}, traceId={}, executionUuid={}, chainId={}",
+                processId, traceId, executionUuid, chainId);
+
         executeContext.addLog("调用流程执行方法");
         LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
         executeContext.addLog("调用流程执行方法返回");
+
+        log.info("[FLOW-TRACE] LiteFlow执行完成: processId={}, traceId={}, executionUuid={}, success={}",
+                processId, traceId, executionUuid, response.isSuccess());
+
         VariableContext updatedVariableContext = response.getContextBean(VariableContext.class);
         ExecuteContext updatedExecuteContext = response.getContextBean(ExecuteContext.class);
         return buildExecutorResult(response, updatedExecuteContext, updatedVariableContext);
     }
-
 
     /**
      * 验证并生成traceId
@@ -214,7 +240,6 @@ public class FlowProcessExecutor {
         }
         return callInvocation.size();
     }
-
 
     /**
      * 创建新的执行日志
@@ -231,7 +256,6 @@ public class FlowProcessExecutor {
         log.setTenantId(flowProcessDO.getTenantId());
         return log;
     }
-
 
     /**
      * 查询调用次数
@@ -250,7 +274,8 @@ public class FlowProcessExecutor {
     /**
      * 构建执行结果
      */
-    private static ExecutorResult buildExecutorResult(LiteflowResponse response, ExecuteContext executeContext, VariableContext variableContext) {
+    private static ExecutorResult buildExecutorResult(LiteflowResponse response, ExecuteContext executeContext,
+            VariableContext variableContext) {
         ExecutorResult result = new ExecutorResult();
         result.setTraceId(executeContext.getTraceId());
         result.setProcessId(executeContext.getProcessId());

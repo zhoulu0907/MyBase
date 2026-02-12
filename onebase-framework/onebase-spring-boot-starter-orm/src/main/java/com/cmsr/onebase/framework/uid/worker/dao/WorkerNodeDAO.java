@@ -79,15 +79,19 @@ public class WorkerNodeDAO {
                         // 使用多种策略判断数据库类型
                         if (driverName.contains("mysql") || url.contains("mysql")) {
                             databaseType = MYSQL;
-                        } else if (driverName.contains("postgresql") || url.contains("postgresql") || databaseProductName.contains("postgresql")) {
+                        } else if (driverName.contains("postgresql") || url.contains("postgresql")
+                                || databaseProductName.contains("postgresql")) {
                             databaseType = POSTGRESQL;
-                        } else if (driverName.contains("dm") || url.contains("dm") || databaseProductName.contains("dameng")) {
+                        } else if (driverName.contains("dm") || url.contains("dm")
+                                || databaseProductName.contains("dameng")) {
                             databaseType = DM;
-                        } else if (driverName.contains("kingbase") || url.contains("kingbase") || databaseProductName.contains("kingbase")) {
+                        } else if (driverName.contains("kingbase") || url.contains("kingbase")
+                                || databaseProductName.contains("kingbase")) {
                             databaseType = KINGBASE;
                         } else if (driverName.contains("oracle") || databaseProductName.contains("oracle")) {
                             databaseType = ORACLE;
-                        } else if (driverName.contains("sqlserver") || url.contains("sqlserver") || databaseProductName.contains("microsoft")) {
+                        } else if (driverName.contains("sqlserver") || url.contains("sqlserver")
+                                || databaseProductName.contains("microsoft")) {
                             databaseType = SQLSERVER;
                         } else {
                             LOGGER.warn("未识别的数据库驱动 - 驱动名称: {}, URL: {}, 产品名称: {}, 将使用默认类型 OTHER",
@@ -117,7 +121,7 @@ public class WorkerNodeDAO {
         String dbType = getDatabaseType();
         try {
             // 使用if-else条件逻辑处理不同数据库类型
-            if (MYSQL.equals(dbType) || POSTGRESQL.equals(dbType) || SQLSERVER.equals(dbType)) {
+            if (MYSQL.equals(dbType) || POSTGRESQL.equals(dbType) || SQLSERVER.equals(dbType) || OTHER.equals(dbType)) {
                 // 支持自增ID的数据库
                 insertWithAutoIncrement(workerNodeEntity);
             } else {

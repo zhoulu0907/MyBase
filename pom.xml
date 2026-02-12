@@ -26,6 +26,7 @@
         <module>onebase-module-bpm</module>
 <!--        <module>onebase-module-ai</module>-->
         <module>onebase-module-dashboard</module>
+        <module>onebase-module-tiangong</module>
     </modules>
 
     <name>${project.artifactId}</name>

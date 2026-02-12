@@ -54,6 +54,16 @@ public interface FlowErrorCodeConstants {
     ErrorCode ENV_ALREADY_EXISTS = new ErrorCode(1123793, "环境配置已存在");
 
     /**
+     * 环境配置不存在（用于编辑更新）
+     */
+    ErrorCode ENV_NOT_EXISTS = new ErrorCode(1123800, "环境配置不存在：envName={}");
+
+    /**
+     * 启用环境未配置
+     */
+    ErrorCode ENABLE_ENV_NOT_CONFIGURED = new ErrorCode(1123801, "未正确配置环境信息");
+
+    /**
      * 环境配置格式无效
      */
     ErrorCode INVALID_ENV_CONFIG = new ErrorCode(1123794, "环境配置格式无效");

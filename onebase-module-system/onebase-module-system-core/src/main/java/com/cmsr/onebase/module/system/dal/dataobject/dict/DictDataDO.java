@@ -22,6 +22,7 @@ public class DictDataDO extends BaseEntity {
     public static final String LABEL      = "label";
     public static final String VALUE      = "value";
     public static final String DICT_TYPE  = "dict_type";
+    public static final String DICT_TYPE_ID  = "dict_type_id";
     public static final String STATUS     = "status";
     public static final String COLOR_TYPE = "color_type";
     public static final String CSS_CLASS  = "css_class";
@@ -49,6 +50,11 @@ public class DictDataDO extends BaseEntity {
      */
     @Column(value = DICT_TYPE)
     private String  dictType;
+    /**
+     * 字典类型标识
+     */
+    @Column(value = DICT_TYPE_ID)
+    private Long  dictTypeId;
     /**
      * 状态
      * <p>

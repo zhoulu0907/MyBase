@@ -21,6 +21,10 @@ public enum IdCardSideEnum {
         this.value = value;
         this.description = description;
     }
+    
+    public String getValue() {
+        return value;
+    }
 
     public static IdCardSideEnum getByValue(String value) {
         for (IdCardSideEnum side : values()) {

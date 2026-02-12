@@ -84,10 +84,10 @@ public interface FlowConnectorService {
      * 从 flow_connector.config 的 properties 中解析指定环境的 Formily Schema
      *
      * @param connectorId 连接器实例ID（主键）
-     * @param envCode     环境编码（如 DEV、TEST、PROD）
+     * @param envName     环境名称（如 DEV环境配置）
      * @return 环境配置 VO
      */
-    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode);
+    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName);
 
     /**
      * 获取环境配置模板
@@ -122,6 +122,30 @@ public interface FlowConnectorService {
     Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
 
     /**
+     * 更新连接器环境配置
+     * <p>
+     * 更新已存在的环境配置，环境必须存在
+     * 如果环境不存在则拒绝更新
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO 环境配置请求
+     * @return 更新是否成功
+     */
+    Boolean updateEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
+    /**
+     * 设置启用环境
+     * <p>
+     * 在连接器配置中设置当前启用的环境名称
+     * 环境必须存在才能启用
+     *
+     * @param connectorId 连接器实例ID
+     * @param envName     环境名称（传空或null表示取消启用）
+     * @return 设置是否成功
+     */
+    Boolean enableEnvironment(Long connectorId, String envName);
+
+    /**
      * 保存连接器动作配置
      * <p>
      * 将新的动作配置添加到 flow_connector.action_config.properties 中
@@ -140,10 +164,10 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器实例ID
      * @param actionName  动作名称（作为properties的key）
-     * @param actionConfig 新的动作配置
+     * @param reqVO       动作配置请求
      * @return 更新是否成功
      */
-    Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig);
+    Boolean updateActionConfig(Long connectorId, String actionName, SaveActionConfigReqVO reqVO);
 
     // ==================== 动作管理接口 ====================
 

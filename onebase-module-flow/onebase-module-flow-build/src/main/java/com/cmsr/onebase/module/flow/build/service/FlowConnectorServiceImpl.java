@@ -230,7 +230,32 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             log.warn("Connector not found, id: {}", id);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
+
+        // 校验是否已配置启用环境
+        validateEnableEnvConfigured(connector);
+
         return parseActionsFromConnector(connector, id.toString());
+    }
+
+    /**
+     * 校验是否已配置启用环境
+     *
+     * @param connector 连接器数据对象
+     */
+    private void validateEnableEnvConfigured(FlowConnectorDO connector) {
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.warn("Config is blank, enableEnvName not configured");
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENABLE_ENV_NOT_CONFIGURED);
+        }
+
+        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode enableEnvName = root.get("enableEnvName");
+
+        if (enableEnvName == null || enableEnvName.isNull() || StringUtils.isBlank(enableEnvName.asText())) {
+            log.warn("enableEnvName is null or blank, connector: {}", connector.getId());
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENABLE_ENV_NOT_CONFIGURED);
+        }
     }
 
     /**
@@ -241,19 +266,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
      * @return 动作名称列表
      */
     private List<String> parseActionsFromConnector(FlowConnectorDO connector, String connectorIdentifier) {
-        // 1. Get config
-        String config = connector.getConfig();
-        if (StringUtils.isBlank(config)) {
-            log.info("Config is blank, return empty list, connector: {}", connectorIdentifier);
+        // 1. Get actionConfig
+        String actionConfig = connector.getActionConfig();
+        if (StringUtils.isBlank(actionConfig)) {
+            log.info("ActionConfig is blank, return empty list, connector: {}", connectorIdentifier);
             return Collections.emptyList();
         }
 
         // 2. Parse JSON and extract properties keys
-        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode root = JsonUtils.parseTree(actionConfig);
         JsonNode properties = root.get("properties");
 
         if (properties == null || !properties.isObject()) {
-            log.error("Invalid connector config, properties not found or not an object, connector: {}",
+            log.error("Invalid connector action_config, properties not found or not an object, connector: {}",
                     connectorIdentifier);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
         }
@@ -360,8 +385,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     }
 
     @Override
-    public EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode) {
-        log.info("getEnvironmentConfig start, connectorId: {}, envCode: {}", connectorId, envCode);
+    public EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName) {
+        log.info("getEnvironmentConfig start, connectorId: {}, envName: {}", connectorId, envName);
 
         // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -374,19 +399,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         String config = connector.getConfig();
         if (StringUtils.isBlank(config)) {
             log.warn("Connector config is empty, connectorId: {}", connectorId);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_CONFIG_NOT_EXISTS, envCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_CONFIG_NOT_EXISTS, envName);
         }
 
         // 3. 使用 Parser 提取环境 Schema
-        JsonNode envSchema = connectorConfigParser.parseEnvironmentSchema(config, envCode);
+        JsonNode envSchema = connectorConfigParser.parseEnvironmentSchema(config, envName);
 
         // 4. 封装 VO
         EnvironmentConfigVO vo = new EnvironmentConfigVO();
         vo.setSchema(envSchema);
-        vo.setEnvCode(envCode);
+        vo.setEnvCode(envName);
         vo.setTypeCode(connector.getTypeCode());
 
-        log.info("getEnvironmentConfig success, connectorId: {}, envCode: {}", connectorId, envCode);
+        log.info("getEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
         return vo;
     }
 
@@ -499,6 +524,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
                     .actionName(getString(action, "actionName"))
                     .description(getString(action, "description"))
                     .status(getString(action, "status"))
+                    .createTime(getString(action, "createTime"))
+                    .updateTime(getString(action, "updateTime"))
                     .build();
             result.add(vo);
         }
@@ -543,10 +570,16 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
                 JsonNode basicNode = actionNode.get("basic");
                 String description = basicNode != null ? getString(basicNode, "description") : null;
 
+                // 获取时间字段
+                String createTime = getString(actionNode, "createTime");
+                String updateTime = getString(actionNode, "updateTime");
+
                 ConnectorActionLiteVO vo = ConnectorActionLiteVO.builder()
                         .actionName(actionName)
                         .description(description)
                         .status(status)
+                        .createTime(createTime)
+                        .updateTime(updateTime)
                         .build();
                 result.add(vo);
             }
@@ -587,11 +620,17 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             JsonNode basicNode = actionNode.get("basic");
             String description = basicNode != null ? getString(basicNode, "description") : null;
 
+            // 获取时间字段
+            String createTime = getString(actionNode, "createTime");
+            String updateTime = getString(actionNode, "updateTime");
+
             // 4. 构建返回 VO - 字段映射：basic→basicInfo, request→inputConfig, response→outputConfig, debug→debugConfig
             ConnectorActionVO vo = ConnectorActionVO.builder()
                     .actionName(actionName)
                     .description(description)
                     .status(getString(actionNode, "status"))
+                    .createTime(createTime)
+                    .updateTime(updateTime)
                     .basicInfo(actionNode.get("basic"))
                     .inputConfig(actionNode.get("request"))
                     .outputConfig(actionNode.get("response"))
@@ -1000,14 +1039,93 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public Boolean updateEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO) {
+        log.info("updateEnvironmentConfig start, connectorId: {}", connectorId);
+
+        // 1. 查询并验证连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 解析根配置
+        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
+        ObjectNode properties = rootConfig.withObject("properties");
+
+        // 3. 从请求中提取环境名称
+        String envName = extractEnvNameFromConfig(reqVO.getConfig());
+
+        // 4. 检查环境是否存在（编辑保存必须存在）
+        if (!properties.has(envName)) {
+            log.warn("Environment not exists, connectorId: {}, envName: {}", connectorId, envName);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envName);
+        }
+
+        // 5. 替换已有环境配置
+        properties.set(envName, reqVO.getConfig());
+
+        // 6. 更新元数据版本
+        updateMetadataVersion(rootConfig);
+
+        // 7. 保存到数据库
+        connector.setConfig(toJsonString(rootConfig));
+        connectorRepository.updateById(connector);
+
+        log.info("updateEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean enableEnvironment(Long connectorId, String envName) {
+        log.info("enableEnvironment start, connectorId: {}, envName: {}", connectorId, envName);
+
+        // 1. 查询并验证连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 解析根配置
+        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
+        ObjectNode properties = rootConfig.withObject("properties");
+
+        // 3. 如果envName不为空，校验环境是否存在
+        if (StringUtils.isNotBlank(envName)) {
+            if (!properties.has(envName)) {
+                log.warn("Environment not exists, connectorId: {}, envName: {}", connectorId, envName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envName);
+            }
+            // 设置启用环境
+            rootConfig.put("enableEnvName", envName);
+        } else {
+            // 取消启用（设置为null）
+            rootConfig.putNull("enableEnvName");
+        }
+
+        // 4. 更新元数据版本
+        updateMetadataVersion(rootConfig);
+
+        // 5. 保存到数据库
+        connector.setConfig(toJsonString(rootConfig));
+        connectorRepository.updateById(connector);
+
+        log.info("enableEnvironment success, connectorId: {}, envName: {}", connectorId, envName);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO) {
         return saveOrUpdateActionConfigInternal(connectorId, reqVO.getActionConfig(), true);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean updateActionConfig(Long connectorId, String actionName, JsonNode actionConfig) {
-        return saveOrUpdateActionConfigInternal(connectorId, actionConfig, false);
+    public Boolean updateActionConfig(Long connectorId, String actionName, SaveActionConfigReqVO reqVO) {
+        return saveOrUpdateActionConfigInternal(connectorId, reqVO.getActionConfig(), false);
     }
 
     /**
@@ -1051,13 +1169,37 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             }
         }
 
-        // 5. 保存动作配置
-        properties.set(actionName, actionConfig);
+        // 5. 添加时间戳字段
+        String currentTime = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        ObjectNode actionConfigWithTimestamp;
+        if (actionConfig.isObject()) {
+            actionConfigWithTimestamp = (ObjectNode) actionConfig;
+        } else {
+            actionConfigWithTimestamp = objectMapper.createObjectNode();
+            actionConfigWithTimestamp.setAll((ObjectNode) actionConfig);
+        }
 
-        // 6. 更新元数据版本
+        if (isNew) {
+            // 新建：设置createTime和updateTime
+            actionConfigWithTimestamp.put("createTime", currentTime);
+            actionConfigWithTimestamp.put("updateTime", currentTime);
+        } else {
+            // 更新：只更新updateTime，保留原createTime
+            JsonNode existingAction = properties.get(actionName);
+            String existingCreateTime = existingAction != null && existingAction.has("createTime")
+                    ? existingAction.get("createTime").asText()
+                    : currentTime;
+            actionConfigWithTimestamp.put("createTime", existingCreateTime);
+            actionConfigWithTimestamp.put("updateTime", currentTime);
+        }
+
+        // 6. 保存动作配置
+        properties.set(actionName, actionConfigWithTimestamp);
+
+        // 7. 更新元数据版本
         updateActionMetadataVersion(rootActionConfig);
 
-        // 7. 保存到数据库
+        // 8. 保存到数据库
         connector.setActionConfig(toJsonString(rootActionConfig));
         connectorRepository.updateById(connector);
 
