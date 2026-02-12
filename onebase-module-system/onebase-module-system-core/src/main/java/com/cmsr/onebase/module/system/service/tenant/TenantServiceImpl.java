@@ -877,6 +877,11 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public TenantDO getTenantByCode(String code) {
+        return tenantDataRepository.findByCode(code);
+    }
+
+    @Override
     public TenantDO getTenantByWebsite(String website) {
         return tenantDataRepository.findByWebsite(website);
     }

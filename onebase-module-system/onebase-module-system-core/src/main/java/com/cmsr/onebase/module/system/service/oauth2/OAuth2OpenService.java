@@ -38,7 +38,8 @@ public interface OAuth2OpenService {
                                                               String username,
                                                               String password,
                                                               String scope,
-                                                              String refreshToken);
+                                                              String refreshToken,
+                                                              String runMode);
 
     /**
      * 删除访问令牌

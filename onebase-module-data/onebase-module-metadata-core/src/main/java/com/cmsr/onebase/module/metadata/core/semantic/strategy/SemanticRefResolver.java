@@ -925,7 +925,10 @@ public class SemanticRefResolver {
             if (options == null || options.isEmpty()) return null;
             String valueStr = String.valueOf(idOrVal);
             for (SemanticFieldOptionDTO opt : options) {
-                // 同时支持用 id 和 optionValue 匹配
+                // 同时支持用 optionUuid、id 和 optionValue 匹配
+                if (opt.getOptionUuid() != null && opt.getOptionUuid().equals(valueStr)) {
+                    return opt.getOptionLabel();
+                }
                 if (opt.getId() != null && String.valueOf(opt.getId()).equals(valueStr)) {
                     return opt.getOptionLabel();
                 }

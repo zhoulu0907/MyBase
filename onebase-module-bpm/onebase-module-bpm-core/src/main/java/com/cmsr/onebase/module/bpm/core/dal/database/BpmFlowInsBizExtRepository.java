@@ -20,4 +20,11 @@ public class BpmFlowInsBizExtRepository extends ServiceImpl<BpmFlowInsBizExtMapp
         queryWrapper.eq(BpmFlowInsBizExtDO::getInstanceId, instanceId);
         return getOne(queryWrapper);
     }
+
+    public BpmFlowInsBizExtDO findOneByBusinessDataId(String businessDataId) {
+        QueryWrapper queryWrapper = QueryWrapper.create();
+        queryWrapper.eq(BpmFlowInsBizExtDO::getBusinessDataId, businessDataId);
+        return getOne(queryWrapper);
+    }
+
 }

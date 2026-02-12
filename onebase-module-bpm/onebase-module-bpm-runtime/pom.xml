@@ -51,13 +51,6 @@
             <artifactId>js-scriptengine</artifactId>
         </dependency>
 
-        <!-- 元数据模块 -->
-        <dependency>
-            <groupId>com.cmsr.onebase</groupId>
-            <artifactId>onebase-module-metadata-api</artifactId>
-            <version>${revision}</version>
-        </dependency>
-
     </dependencies>
     <build>
         <!-- 设置构建的 jar 包名 -->

@@ -123,6 +123,7 @@ onebase:
       - /admin-api/infra/file/download/**
       - /platform/infra/file/download/**
       - /admin-api/app/application/get
+      - /admin-api/system/auth/tiangong-login
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**

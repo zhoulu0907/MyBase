@@ -298,6 +298,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
 
+        // - entityDataId：流程业务数据ID
+        variables.put(BpmConstants.VAR_ENTITY_DATA_ID_KEY, entityDataId);
+
         // 开启流程
         FlowParams flowParams = FlowParams.build()
                 //.handler(startProcessBo.getHandler())
@@ -306,49 +309,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 .flowStatus(businessStatus.getCode());
 
         Instance instance = insService.start(entityDataId, flowParams);
-
-        // 提交请求 自动往下走一个节点
-        if (!reqVO.isDraft()) {
-            List<Task> tasks = taskService.getByInsId(instance.getId());
-
-            // 获取待办任务，必须为发起节点
-            if (CollectionUtils.isEmpty(tasks)) {
-                throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
-            }
-
-            Task task = tasks.get(0);
-            String taskNodeCode = task.getNodeCode();
-
-            String defJsonStr = instance.getDefJson();
-            DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
-
-            for (NodeJson nodeJson : defJson.getNodeList()) {
-                if (Objects.equals(nodeJson.getNodeCode(), taskNodeCode)) {
-                    // 判断节点类型，必须是发起节点
-                    BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
-
-                    if (!Objects.equals(extDTO.getNodeType(), BpmNodeTypeEnum.INITIATION.getCode())) {
-                        throw exception(ErrorCodeConstants.FLOW_NODE_TYPE_MUST_BE_INITIATION);
-                    }
-
-                    break;
-                }
-            }
-
-            // 自动跳到下一个节点
-            FlowParams skipParams = FlowParams.build()
-//                    .handler(completeTaskBo.getHandler())
-                    .variable(variables)
-                    .skipType(SkipType.PASS.getKey())
-                    .message(BpmNodeApproveStatusEnum.POST_SUBMITTED.getName())
-                    .flowStatus(businessStatus.getCode())
-                    .hisStatus(BpmNodeApproveStatusEnum.POST_SUBMITTED.getCode());
-//                    .hisTaskExt(completeTaskBo.getFileId());
-            taskService.skip(skipParams, task);
-
-            // 设置发起时间
-            flowInsExtDO.setSubmitTime(LocalDateTime.now());
-        }
+        variables.put(BpmConstants.VAR_INSTANCE_ID_KEY, instance.getId());
 
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
@@ -386,7 +347,52 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         flowInsExtDO.setInstanceId(instance.getId());
         flowInsExtDO.setApplicationId(applicationId);
 
-        flowInsExtRepository.save(flowInsExtDO);
+        // 提交请求 自动往下走一个节点
+        if (!reqVO.isDraft()) {
+            List<Task> tasks = taskService.getByInsId(instance.getId());
+
+            // 获取待办任务，必须为发起节点
+            if (CollectionUtils.isEmpty(tasks)) {
+                throw exception(ErrorCodeConstants.FLOW_TASK_NOT_EXISTS);
+            }
+
+            Task task = tasks.get(0);
+            String taskNodeCode = task.getNodeCode();
+
+            String defJsonStr = instance.getDefJson();
+            DefJson defJson = FlowEngine.jsonConvert.strToBean(defJsonStr, DefJson.class);
+
+            for (NodeJson nodeJson : defJson.getNodeList()) {
+                if (Objects.equals(nodeJson.getNodeCode(), taskNodeCode)) {
+                    // 判断节点类型，必须是发起节点
+                    BaseNodeExtDTO extDTO = JsonUtils.parseObject(nodeJson.getExt(), BaseNodeExtDTO.class);
+
+                    if (!Objects.equals(extDTO.getNodeType(), BpmNodeTypeEnum.INITIATION.getCode())) {
+                        throw exception(ErrorCodeConstants.FLOW_NODE_TYPE_MUST_BE_INITIATION);
+                    }
+
+                    break;
+                }
+            }
+
+            // 设置发起时间
+            flowInsExtDO.setSubmitTime(LocalDateTime.now());
+            flowInsExtRepository.save(flowInsExtDO);
+
+            // 自动跳到下一个节点
+            FlowParams skipParams = FlowParams.build()
+//                    .handler(completeTaskBo.getHandler())
+                    .variable(variables)
+                    .skipType(SkipType.PASS.getKey())
+                    .message(BpmNodeApproveStatusEnum.POST_SUBMITTED.getName())
+                    .flowStatus(businessStatus.getCode())
+                    .hisStatus(BpmNodeApproveStatusEnum.POST_SUBMITTED.getCode());
+//                    .hisTaskExt(completeTaskBo.getFileId());
+            taskService.skip(skipParams, task);
+
+        } else {
+            flowInsExtRepository.save(flowInsExtDO);
+        }
 
         respVO.setInstanceId(instance.getId());
         respVO.setEntityDataId(entityDataId);

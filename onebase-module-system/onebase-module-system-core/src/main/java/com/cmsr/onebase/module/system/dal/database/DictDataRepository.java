@@ -49,6 +49,7 @@ public class DictDataRepository extends BaseDataRepository<SystemDictDataMapper,
         QueryWrapper queryWrapper = query()
                 .like(DictDataDO.LABEL, reqVO.getLabel(), reqVO.getLabel() != null && !reqVO.getLabel().trim().isEmpty())
                 .eq(DictDataDO.DICT_TYPE, reqVO.getDictType(), reqVO.getDictType() != null && !reqVO.getDictType().trim().isEmpty())
+                .eq(DictDataDO.DICT_TYPE_ID, reqVO.getDictTypeId(), reqVO.getDictTypeId() != null)
                 .eq(DictDataDO.STATUS, reqVO.getStatus(), reqVO.getStatus() != null)
                 .orderBy(DictDataDO.SORT, true);
 
@@ -141,13 +142,13 @@ public class DictDataRepository extends BaseDataRepository<SystemDictDataMapper,
     /**
      * 根据字典类型批量删除字典数据
      *
-     * @param dictTypes 字典类型集合
+     * @param dictTypeIds 字典类型标识集合
      * @return 字典数据列表
      */
-    public void removeDictDataByType(Collection<String> dictTypes) {
-        if (dictTypes == null || dictTypes.isEmpty()) {
+    public void removeDictDataByType(Collection<Long> dictTypeIds) {
+        if (dictTypeIds == null || dictTypeIds.isEmpty()) {
             return;
         }
-        this.remove(query().in(DictDataDO.DICT_TYPE, dictTypes));
+        this.remove(query().in(DictDataDO.DICT_TYPE_ID, dictTypeIds));
     }
 }
