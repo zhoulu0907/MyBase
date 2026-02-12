@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.system.build.controller.auth;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
@@ -21,9 +22,12 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -124,5 +128,19 @@ public class BuildAuthController {
     public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO) {
         authService.resetPassword(reqVO);
         return success(true);
+    }
+
+    @GetMapping("/tiangong-login")
+    @PermitAll
+    @ApiSignIgnore
+    @Operation(summary = "天宫平台用户登录")
+    public AuthLoginRespVO tianGongLogin(@RequestParam @NotBlank(message = "{code}不能为空") String code, @RequestParam(required = false) String state, HttpServletResponse response) throws IOException {
+
+        AuthLoginRespVO authLoginRespVO = authService.tianGongLogin(code, state);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), authLoginRespVO.getAccessToken()));
+        response.sendRedirect("http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/onebase/260705906803245056/home/enterprise-app");
+        return authLoginRespVO;
     }
 }
