@@ -230,7 +230,32 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             log.warn("Connector not found, id: {}", id);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
+
+        // 校验是否已配置启用环境
+        validateEnableEnvConfigured(connector);
+
         return parseActionsFromConnector(connector, id.toString());
+    }
+
+    /**
+     * 校验是否已配置启用环境
+     *
+     * @param connector 连接器数据对象
+     */
+    private void validateEnableEnvConfigured(FlowConnectorDO connector) {
+        String config = connector.getConfig();
+        if (StringUtils.isBlank(config)) {
+            log.warn("Config is blank, enableEnvName not configured");
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENABLE_ENV_NOT_CONFIGURED);
+        }
+
+        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode enableEnvName = root.get("enableEnvName");
+
+        if (enableEnvName == null || enableEnvName.isNull() || StringUtils.isBlank(enableEnvName.asText())) {
+            log.warn("enableEnvName is null or blank, connector: {}", connector.getId());
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENABLE_ENV_NOT_CONFIGURED);
+        }
     }
 
     /**
@@ -241,19 +266,19 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
      * @return 动作名称列表
      */
     private List<String> parseActionsFromConnector(FlowConnectorDO connector, String connectorIdentifier) {
-        // 1. Get config
-        String config = connector.getConfig();
-        if (StringUtils.isBlank(config)) {
-            log.info("Config is blank, return empty list, connector: {}", connectorIdentifier);
+        // 1. Get actionConfig
+        String actionConfig = connector.getActionConfig();
+        if (StringUtils.isBlank(actionConfig)) {
+            log.info("ActionConfig is blank, return empty list, connector: {}", connectorIdentifier);
             return Collections.emptyList();
         }
 
         // 2. Parse JSON and extract properties keys
-        JsonNode root = JsonUtils.parseTree(config);
+        JsonNode root = JsonUtils.parseTree(actionConfig);
         JsonNode properties = root.get("properties");
 
         if (properties == null || !properties.isObject()) {
-            log.error("Invalid connector config, properties not found or not an object, connector: {}",
+            log.error("Invalid connector action_config, properties not found or not an object, connector: {}",
                     connectorIdentifier);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
         }
@@ -1009,6 +1034,85 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
         connectorRepository.updateById(connector);
 
         log.info("saveEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO) {
+        log.info("updateEnvironmentConfig start, connectorId: {}", connectorId);
+
+        // 1. 查询并验证连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 解析根配置
+        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
+        ObjectNode properties = rootConfig.withObject("properties");
+
+        // 3. 从请求中提取环境名称
+        String envName = extractEnvNameFromConfig(reqVO.getConfig());
+
+        // 4. 检查环境是否存在（编辑保存必须存在）
+        if (!properties.has(envName)) {
+            log.warn("Environment not exists, connectorId: {}, envName: {}", connectorId, envName);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envName);
+        }
+
+        // 5. 替换已有环境配置
+        properties.set(envName, reqVO.getConfig());
+
+        // 6. 更新元数据版本
+        updateMetadataVersion(rootConfig);
+
+        // 7. 保存到数据库
+        connector.setConfig(toJsonString(rootConfig));
+        connectorRepository.updateById(connector);
+
+        log.info("updateEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
+        return Boolean.TRUE;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean enableEnvironment(Long connectorId, String envName) {
+        log.info("enableEnvironment start, connectorId: {}, envName: {}", connectorId, envName);
+
+        // 1. 查询并验证连接器实例
+        FlowConnectorDO connector = connectorRepository.getById(connectorId);
+        if (connector == null) {
+            log.warn("Connector not found, id: {}", connectorId);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
+        }
+
+        // 2. 解析根配置
+        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
+        ObjectNode properties = rootConfig.withObject("properties");
+
+        // 3. 如果envName不为空，校验环境是否存在
+        if (StringUtils.isNotBlank(envName)) {
+            if (!properties.has(envName)) {
+                log.warn("Environment not exists, connectorId: {}, envName: {}", connectorId, envName);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envName);
+            }
+            // 设置启用环境
+            rootConfig.put("enableEnvName", envName);
+        } else {
+            // 取消启用（设置为null）
+            rootConfig.putNull("enableEnvName");
+        }
+
+        // 4. 更新元数据版本
+        updateMetadataVersion(rootConfig);
+
+        // 5. 保存到数据库
+        connector.setConfig(toJsonString(rootConfig));
+        connectorRepository.updateById(connector);
+
+        log.info("enableEnvironment success, connectorId: {}, envName: {}", connectorId, envName);
         return Boolean.TRUE;
     }
 

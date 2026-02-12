@@ -150,6 +150,29 @@ public class FlowConnectorController {
         return CommonResult.success(result);
     }
 
+    @Operation(summary = "更新连接器环境配置",
+              description = "更新已存在的环境配置，环境必须存在，否则拒绝")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @PostMapping("/{id}/update-env")
+    public CommonResult<Boolean> updateEnvironmentConfig(
+            @PathVariable("id") Long id,
+            @RequestBody @Valid SaveEnvironmentConfigReqVO reqVO) {
+        Boolean result = connectorService.updateEnvironmentConfig(id, reqVO);
+        return CommonResult.success(result);
+    }
+
+    @Operation(summary = "设置启用环境",
+              description = "设置连接器当前启用的环境，环境必须存在。传空表示取消启用")
+    @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
+    @Parameter(name = "envName", description = "环境名称（传空表示取消启用）", required = false)
+    @PostMapping("/{id}/enable-env")
+    public CommonResult<Boolean> enableEnvironment(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "envName", required = false) String envName) {
+        Boolean result = connectorService.enableEnvironment(id, envName);
+        return CommonResult.success(result);
+    }
+
     // ==================== 动作管理接口 ====================
 
     @Operation(summary = "获取动作配置模板",
@@ -185,14 +208,15 @@ public class FlowConnectorController {
         return CommonResult.success(result);
     }
 
-    @Operation(summary = "查询连接器动作清单")
+    @Operation(summary = "查询连接器动作清单（精简版）",
+              description = "返回动作名称数组。业务规则：必须先设置启用环境（enableEnvName），否则返回错误'未正确配置环境信息'")
     @GetMapping("/{id}/actions")
     public CommonResult<List<String>> getActions(@PathVariable Long id) {
         List<String> actions = connectorService.getActionsById(id);
         return CommonResult.success(actions);
     }
 
-    @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表（精简版）")
+    @Operation(summary = "获取连接器的动作列表", description = "返回连接器的动作配置列表")
     @GetMapping("/{id}/action-infos")
     public CommonResult<List<ConnectorActionLiteVO>> getActionInfos(
             @Parameter(description = "连接器实例ID", required = true, example = "1")
