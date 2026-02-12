@@ -2,9 +2,7 @@ package com.cmsr.onebase.module.tiangong.runtime.controller;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
-import com.cmsr.onebase.module.tiangong.utils.JsonFileReaderUtil;
-import com.cmsr.onebase.module.tiangong.vo.dashboard.DashboardInfoReqVO;
+import com.cmsr.onebase.module.tiangong.vo.dashboard.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
@@ -12,10 +10,11 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -26,21 +25,166 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 @RequestMapping("/tiangong/dashboard")
 public class TGDashboardController {
 
-    private final JsonFileReaderUtil jsonFileReaderUtil;
 
-    public TGDashboardController(JsonFileReaderUtil jsonFileReaderUtil) {
-        this.jsonFileReaderUtil = jsonFileReaderUtil;
-    }
 
     @PermitAll
     @ApiSignIgnore
     @GetMapping("/device-info-all")
     @Operation(summary = "获取设备信息")
-    @TenantIgnore
-    public CommonResult<Map<String, Object>> getDeviceInfo(@Valid DashboardInfoReqVO reqVO) {
-        // 直接读取并返回JSON文件内容
-        String jsonFilePath = "json/柱状图测试数据.json";
-        Map<String, Object> jsonData = jsonFileReaderUtil.readJsonFileToMap(jsonFilePath);
-        return success(jsonData);
+    public CommonResult<DeviceInfoRespVO> getDeviceInfo(@RequestBody @Valid DashboardInfoReqVO reqVO) {
+        DeviceInfoRespVO respVO = new DeviceInfoRespVO();
+        respVO.setTest("haha");
+        return success(respVO);
     }
+
+    /**
+     *
+     * 获取设备规模统计
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/device-scale")
+    @Operation(summary ="获取设备规模统计")
+    public CommonResult<DeviceScaleRespVO> getDeviceScale() {
+        DeviceScaleRespVO respVO = new DeviceScaleRespVO();
+        respVO.setOnlineCount(30000);
+        respVO.setOfflineCount(2000);
+        respVO.setUnactivatedCount(2000);
+        respVO.setTotalCount(34000);
+        return success(respVO);
+    }
+
+    /**
+     *
+     * 获取累计设备接入数趋势
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/cumulative-device-count-trend")
+    @Operation(summary ="获取累计设备接入数趋势")
+    public CommonResult<List<DeviceTrendItemResVO>> getCumulativeDeviceCountTrend() {
+        List<DeviceTrendItemResVO> trendList = List.of(
+                createTrendItem("1月", 680),
+                createTrendItem("2月", 1480),
+                createTrendItem("3月", 2580),
+                createTrendItem("4月", 3880),
+                createTrendItem("5月", 5380),
+                createTrendItem("6月", 7000),
+                createTrendItem("7月", 8900)
+        );
+        return success(trendList);
+    }
+
+    /**
+     * 获取设备隐患列表
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/device-hazards")
+    @Operation(summary ="获取设备隐患列表")
+    public CommonResult<List<DeviceHazardResVO>> getDeviceHazards() {
+        List<DeviceHazardResVO> hazardList = List.of(
+                createDeviceHazard(1, "浙江省", "主轴断裂", "2026-02-10"),
+                createDeviceHazard(2, "江苏省", "主轴断裂", "2026-02-10"),
+                createDeviceHazard(3, "山东省", "主轴断裂", "2026-02-10")
+        );
+        return success(hazardList);
+    }
+
+    /**
+     * 获取预测性隐患数量趋势
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/predictive-hazard-trend")
+    @Operation(summary ="获取预测性隐患数量趋势")
+    public CommonResult<List<DeviceTrendItemResVO>> getPredictiveHazardTrend() {
+        List<DeviceTrendItemResVO> trendList = List.of(
+                createTrendItem("1月", 100),
+                createTrendItem("2月", 100),
+                createTrendItem("3月", 150)
+        );
+        return success(trendList);
+    }
+
+    /**
+     * 获取待处理隐患工单列表
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/pending-hazard-work-orders")
+    @Operation(summary ="获取待处理隐患工单列表")
+    public CommonResult<List<PendingHazardWorkOrderResVO>> getPendingHazardWorkOrders() {
+        List<PendingHazardWorkOrderResVO> workOrderList = List.of(
+                createPendingWorkOrder(1, "G1219318", "主轴断裂", "2026-02-10"),
+                createPendingWorkOrder(2, "G1219319", "主轴断裂", "2026-02-10")
+        );
+        return success(workOrderList);
+    }
+
+    /**
+     * 获取告警列表
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/alarm-list")
+    @Operation(summary ="获取告警列表")
+    public CommonResult<List<DeviceAlarmResVO>> getAlarmList() {
+        List<DeviceAlarmResVO> alarmList = List.of(
+                createDeviceAlarm(1, "861556071807043", "鹿井士腾高速井泵", "电机低速过流", "2025-11-18"),
+                createDeviceAlarm(2, "861556071789019", "日虹背负永磁", "母线欠压", "2025-11-15")
+        );
+        return success(alarmList);
+    }
+
+    /**
+     * 获取设备故障检测统计
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/device-fault-detection")
+    @Operation(summary ="获取设备故障检测统计")
+    public CommonResult<DeviceFaultDetectionRespVO> getDeviceFaultDetection() {
+        DeviceFaultDetectionRespVO respVO = new DeviceFaultDetectionRespVO();
+        respVO.setRealTimeAlarms(120);
+        respVO.setHistoricalAlarms(1063);
+        return success(respVO);
+    }
+
+    // 私有辅助方法
+    private DeviceTrendItemResVO createTrendItem(String month, Integer count) {
+        DeviceTrendItemResVO item = new DeviceTrendItemResVO();
+        item.setMonth(month);
+        item.setCount(count);
+        return item;
+    }
+    //
+    private DeviceHazardResVO createDeviceHazard(Integer id, String province, String deviceName, String predictTime) {
+        DeviceHazardResVO hazard = new DeviceHazardResVO();
+        hazard.setId(id);
+        hazard.setProvince(province);
+        hazard.setDeviceName(deviceName);
+        hazard.setPredictTime(predictTime);
+        return hazard;
+    }
+
+    private PendingHazardWorkOrderResVO createPendingWorkOrder(Integer id, String workOrderNo, String hazardName, String createTime) {
+        PendingHazardWorkOrderResVO workOrder = new PendingHazardWorkOrderResVO();
+        workOrder.setId(id);
+        workOrder.setWorkOrderNo(workOrderNo);
+        workOrder.setHazardName(hazardName);
+        workOrder.setCreateTime(createTime);
+        return workOrder;
+    }
+
+    private DeviceAlarmResVO createDeviceAlarm(Integer id, String deviceId, String deviceName, String alarmName, String alarmTime) {
+        DeviceAlarmResVO alarm = new DeviceAlarmResVO();
+        alarm.setId(id);
+        alarm.setDeviceId(deviceId);
+        alarm.setDeviceName(deviceName);
+        alarm.setAlarmName(alarmName);
+        alarm.setAlarmTime(alarmTime);
+        return alarm;
+    }
+
 }
