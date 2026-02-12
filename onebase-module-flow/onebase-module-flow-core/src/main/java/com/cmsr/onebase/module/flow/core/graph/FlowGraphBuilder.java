@@ -418,7 +418,7 @@ public class FlowGraphBuilder {
         } catch (Exception e) {
             if (isTrace) {
                 log.error("[TRACE-{}] 解析 process_definition 失败: processId={}, nodeId={}",
-                        processId, processId, nodeId, e);
+                        processId, nodeId, e);
             } else {
                 log.error("[FlowGraphBuilder] 解析 process_definition 失败: processId={}, nodeId={}",
                         processId, nodeId, e);
