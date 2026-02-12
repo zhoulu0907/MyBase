@@ -4,4 +4,12 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.cmsr.onebase.module.flow.core.dal.mapper.FlowProcessMapper">
 
+    <!-- 根据 processId 查询流程定义 JSON -->
+    <select id="selectProcessDefinitionByProcessId" resultType="java.lang.String">
+        SELECT PROCESS_DEFINITION
+        FROM flow_process
+        WHERE PROCESS_ID = #{processId}
+        AND DELETED = 0
+    </select>
+
 </mapper>
