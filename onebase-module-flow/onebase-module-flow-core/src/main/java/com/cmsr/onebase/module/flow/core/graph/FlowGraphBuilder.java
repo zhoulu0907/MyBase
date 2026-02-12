@@ -289,15 +289,28 @@ public class FlowGraphBuilder {
                 }
                 httpNodeData.setConnectorConfig(envConfig);
 
-                // 步骤 3: 解析动作配置 — action_config.properties[actionName]
+                // 步骤 3: 解析动作配置 — 从 process_definition 提取 actionParams.{actionName}
                 Map<String, Object> httpActionConfig = null;
 
-//                todo:解析动作配置流程:
-//                请参考http-flow-exp.json，为flow_process.process_definition数据
-//                a）在FlowGraphBuilder.traverseNodeAndEnrichData方法中实现，步骤 3: 解析动作配置
-//                b）根据processId从flow_process中获取process_definition信息
-//                c）根据nodeId从process_definition中找到http-node信息
-//                d）将actionParams.{actionName}（此处为action1）下的内容解析出来，作为httpActionConfig
+                if (processId != null) {
+                    try {
+                        // 3a) 查询 process_definition
+                        String processDefinitionJson = flowProcessMapper.selectProcessDefinitionByProcessId(processId);
+
+                        // 3b) 从原始 JSON 中查找节点并提取 actionParams.{actionName}
+                        httpActionConfig = extractActionConfigFromProcessDefinition(
+                                processDefinitionJson, nodeId, actionName, processId);
+
+                    } catch (Exception e) {
+                        if (isTrace) {
+                            log.error("[TRACE-{}] 解析动作配置失败: nodeId={}, actionName={}",
+                                    processId, nodeId, actionName, e);
+                        } else {
+                            log.error("[FlowGraphBuilder] 解析动作配置失败: nodeId={}, actionName={}",
+                                    nodeId, actionName, e);
+                        }
+                    }
+                }
 
                 httpNodeData.setActionConfig(httpActionConfig);
 
