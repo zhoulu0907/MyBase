@@ -72,4 +72,8 @@ public interface BpmConstants {
 
     String VAR_OB_KEY = "ob@@";
 
+    String VAR_HANDLER_KEY = "handler";
+
+    String VAR_FLOW_STATUS_KEY = "flowStatus";
+
 }

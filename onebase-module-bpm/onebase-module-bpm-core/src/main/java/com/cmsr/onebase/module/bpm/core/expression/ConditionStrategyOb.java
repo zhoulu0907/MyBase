@@ -4,11 +4,14 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.edge.condition.BpmConditionItem;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.jsonconvert.FieldTypeConvertor;
+import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
@@ -33,6 +36,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * 自定义 OneBase 条件表达式解析策略，解析流程设计器保存的 JSON 条件串。
@@ -101,27 +106,19 @@ public class ConditionStrategyOb implements ConditionStrategy {
             return false;
         }
         expression = expression.trim();
-        try {
-            List<List<BpmConditionItem>> orList = JsonUtils.parseObject(
-                    expression,
-                    new TypeReference<List<List<BpmConditionItem>>>() {}
-            );
+        List<List<BpmConditionItem>> orList = JsonUtils.parseObject(
+                expression,
+                new TypeReference<List<List<BpmConditionItem>>>() {}
+        );
 
-            if (orList == null) {
-                return false;
+        EvalContext ctx = new EvalContext(variable);
+
+        for (List<BpmConditionItem> andList : orList) {
+            if (evaluateAndList(ctx, andList)) {
+                return true;
             }
-
-            EvalContext ctx = new EvalContext(variable);
-
-            for (List<BpmConditionItem> andList : orList) {
-                if (evaluateAndList(ctx, andList)) {
-                    return true;
-                }
-            }
-            return false;
-        } catch (Exception e) {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -155,25 +152,9 @@ public class ConditionStrategyOb implements ConditionStrategy {
         }
 
         String fieldScope = cond.getFieldScope();
-
         String fieldName = cond.getFieldName();
-        if (StringUtils.isEmpty(fieldName)) {
-            return false;
-        }
-
-        OpEnum op;
-        try {
-            op = OpEnum.getByName(cond.getOp());
-        } catch (Exception e) {
-            return false;
-        }
-
-        OperatorTypeEnum operatorType;
-        try {
-            operatorType = OperatorTypeEnum.getByCode(cond.getOperatorType());
-        } catch (Exception e) {
-            operatorType = null;
-        }
+        OpEnum op = OpEnum.getByName(cond.getOp());
+        OperatorTypeEnum  operatorType = OperatorTypeEnum.getByCode(cond.getOperatorType());
 
         String fieldType = cond.getFieldType();
 
@@ -316,36 +297,47 @@ public class ConditionStrategyOb implements ConditionStrategy {
      */
     private Map<String, Object> getOrBuildPreNodeMap(Map<String, Object> variable) {
 
-        Long instanceId = toLong(variable.get(BpmConstants.VAR_INSTANCE_ID_KEY));
-        if (instanceId == null) {
-            return null;
-        }
-
-        List<HisTask> hisTasks;
-        try {
-            hisTasks = FlowEngine.hisTaskService().getByInsId(instanceId);
-        } catch (Exception e) {
-            return null;
-        }
-
-        if (hisTasks == null || hisTasks.isEmpty()) {
-            return null;
-        }
-        if (hisTasks != null && !hisTasks.isEmpty()) {
-            hisTasks = hisTasks.stream()
-                    .filter(Objects::nonNull)
-                    .sorted(Comparator.comparing(HisTask::getCreateTime,
-                            Comparator.nullsLast(Comparator.naturalOrder())).reversed())
-                    .toList();
-        }
-        HisTask last = hisTasks.get(0);
+//        Long instanceId = toLong(variable.get(BpmConstants.VAR_INSTANCE_ID_KEY));
+//        if (instanceId == null) {
+//            return null;
+//        }
+//        Instance instance = FlowEngine.insService().getById(instanceId);
+//        if (instance == null) {
+//            return null;
+//        }
+//
+//        List<HisTask> hisTasks = FlowEngine.hisTaskService().getByInsId(instanceId);
+//
+//        if (hisTasks == null || hisTasks.isEmpty()) {
+//            return null;
+//        }
+//        if (hisTasks != null && !hisTasks.isEmpty()) {
+//            hisTasks = hisTasks.stream()
+//                    .filter(Objects::nonNull)
+//                    .sorted(Comparator.comparing(HisTask::getCreateTime,
+//                            Comparator.nullsLast(Comparator.naturalOrder())).reversed())
+//                    .toList();
+//        }
+//        HisTask last = null;
+//        for(HisTask his : hisTasks){
+//            BaseNodeExtDTO nodeExt = BpmUtil.getNodeExtDTOByNodeCode(his.getNodeCode(), instance.getDefJson());
+//            if (nodeExt != null && BpmNodeTypeEnum.APPROVER.getCode().equalsIgnoreCase(nodeExt.getNodeType())
+//                    // 如果hisTask的node_code 和instance的 NodeCode相同，说明是并行节点
+//                    && !his.getNodeCode().equals(instance.getNodeCode())) {
+//                last = his;
+//                break;
+//            }
+//        }
+//        if (null == last ){
+//            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+//        }
 
         Map<String, Object> map = new HashMap<>();
-        map.put(PreNodeEnum.APPROVAL_RESULT.getCode(), last.getFlowStatus());
-        map.put(PreNodeEnum.APPROVER_ID.getCode(), last.getApprover());
-        map.put(PreNodeEnum.APPROVAL_TIME.getCode(), last.getUpdateTime());
+        map.put(PreNodeEnum.APPROVAL_RESULT.getCode(), variable.get(BpmConstants.VAR_FLOW_STATUS_KEY));
+        map.put(PreNodeEnum.APPROVER_ID.getCode(), variable.get(BpmConstants.VAR_HANDLER_KEY));
+        map.put(PreNodeEnum.APPROVAL_TIME.getCode(), LocalDateTime.now());
 
-        Long deptId = tryExtractApproverDeptId(last);
+        Long deptId = tryExtractApproverDeptId(String.valueOf(variable.get(BpmConstants.VAR_HANDLER_KEY)));
 
 
 
@@ -361,8 +353,7 @@ public class ConditionStrategyOb implements ConditionStrategy {
      * <p>
      * 调用用户接口获取用户详情，返回部门 ID；失败则返回 null。
      */
-    private Long tryExtractApproverDeptId(HisTask last) {
-        String approverIdStr = last.getApprover(); // 通常是 String
+    private Long tryExtractApproverDeptId(String approverIdStr) {
         Long approverId = toLong(approverIdStr);
         if (approverId != null) {
             AdminUserApi adminUserApi = FrameInvoker.getBean(AdminUserApi.class);
@@ -403,11 +394,11 @@ public class ConditionStrategyOb implements ConditionStrategy {
             }
             Map<String, Object> entityMap = entity.getGlobalRawMap();
             // todo:如果是多选数据，这里需要改
-            SemanticFieldValueDTO<Object> fieldValueByUuid = entity.getFieldValueByUuid((String) rawRight);
-            if (fieldValueByUuid == null || fieldValueByUuid.getFieldName() == null) {
-                return null;
-            }
-            return entityMap.get(fieldValueByUuid.getFieldName());
+//            SemanticFieldValueDTO<Object> fieldValueByUuid = entity.getFieldValueByUuid((String) rawRight);
+//            if (fieldValueByUuid == null || fieldValueByUuid.getFieldName() == null) {
+//                return null;
+//            }
+            return entityMap.get(rawRight);
         }
         // 如果是公式
         if (operatorType == OperatorTypeEnum.FORMULA) {
@@ -420,13 +411,10 @@ public class ConditionStrategyOb implements ConditionStrategy {
             String formula = MapUtils.getString((Map)rawRight, BpmConstants.VAR_FORMULA_KEY);
             Map parameters = MapUtils.getMap((Map)rawRight, BpmConstants.VAR_PARAMETERS_KEY);
             parameters.forEach((key, value) -> {
-                String fieldUuid = String.valueOf(value);
-
-                // 根据 UUID 获取字段元数据
-                SemanticFieldValueDTO<Object> fieldValue = entity.getFieldValueByUuid(fieldUuid);
-                if (fieldValue != null && fieldValue.getFieldName() != null) {
+                String fieldName = String.valueOf(value);
+                if (StringUtils.isNotEmpty(fieldName)) {
                     // 从实体数据 Map 中按字段名取值
-                    Object actualVal = currentEntityRawMap.get(fieldValue.getFieldName());
+                    Object actualVal = currentEntityRawMap.get(fieldName);
                     // 处理日期格式化
                     actualVal = dateFormat(actualVal);
                     parameters.put(key, actualVal);

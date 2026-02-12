@@ -26,6 +26,7 @@ import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Skip;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
+import org.dromara.warm.flow.core.enums.FlowStatus;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.utils.StringUtils;
 import org.springframework.stereotype.Component;
@@ -632,13 +633,16 @@ public class ApproverExecTaskStrategy extends AbstractExecTaskStrategy<ApproverN
                 if (entityVO != null && MapUtils.isNotEmpty(entityVO.getData())) {
                     entityVO.getData().forEach((key, value) -> variables.put(String.valueOf(key), value));
                 }
-                variables.put(BpmConstants.VAR_ENTITY_TABLE_NAME_KEY, entityVO.getTableName());
-                variables.put(BpmConstants.VAR_INSTANCE_ID_KEY, task.getInstanceId());
                 // 基础 FlowParams（SAVE 不需要）
                 FlowParams baseParams = FlowParams.build()
                         .variable(variables)
                         .message(comment);
-
+                variables.put(BpmConstants.VAR_ENTITY_TABLE_NAME_KEY, entityVO.getTableName());
+                variables.put(BpmConstants.VAR_INSTANCE_ID_KEY, task.getInstanceId());
+                variables.put(BpmConstants.VAR_HANDLER_KEY, baseParams.getHandler());
+                variables.put(BpmConstants.VAR_FLOW_STATUS_KEY, StringUtils.isNotEmpty(baseParams.getFlowStatus())
+                        ? baseParams.getFlowStatus() : SkipType.isReject(baseParams.getSkipType())
+                        ? FlowStatus.REJECT.getKey() : FlowStatus.PASS.getKey());
                 // 如果是代理人，需要忽略权限校验，以被代理人权限执行 todo 是否需要二次校验
                 if (agentInsDO != null) {
                     baseParams.ignore(true);
