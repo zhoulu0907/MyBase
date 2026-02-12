@@ -2,7 +2,6 @@ package com.cmsr.onebase.module.system.vo.oauth;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AuthorizeURIRespVO {
 
     @Schema(description = "回调地址", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.aaa.com")

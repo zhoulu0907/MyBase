@@ -45,8 +45,3 @@ X-Tenant-Id: 184717008866115584
 
 {
 }
-
-### 8. 获取设备运行参数（动态数据）
-GET {{baseUrl}}/tiangong/dashboard/device-runtime-params
-Content-Type: application/json
-X-Tenant-Id: 184717008866115584

@@ -158,7 +158,7 @@ public class TGDashboardController {
         item.setCount(count);
         return item;
     }
-//
+    //
     private DeviceHazardResVO createDeviceHazard(Integer id, String province, String deviceName, String predictTime) {
         DeviceHazardResVO hazard = new DeviceHazardResVO();
         hazard.setId(id);

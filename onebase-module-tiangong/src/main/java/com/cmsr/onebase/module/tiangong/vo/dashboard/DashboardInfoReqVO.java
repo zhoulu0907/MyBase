@@ -3,7 +3,7 @@ package com.cmsr.onebase.module.tiangong.vo.dashboard;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-@Schema(description = "管理后台 - 账号密码登录 Request VO，如果登录并绑定社交用户，需要传递 social 开头的参数")
+@Schema(description = "天工-仪表盘信息 Request VO")
 @Data
 public class DashboardInfoReqVO {
 

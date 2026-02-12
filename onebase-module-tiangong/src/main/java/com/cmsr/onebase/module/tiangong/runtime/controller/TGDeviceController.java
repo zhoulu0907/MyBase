@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.tiangong.runtime.controller;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.tiangong.vo.dashboard.DeviceRuntimeParamResVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +30,7 @@ public class TGDeviceController {
      */
     @PermitAll
     @ApiSignIgnore
+    @TenantIgnore
     @GetMapping("/device-runtime-params")
     @Operation(summary ="获取设备运行参数（动态数据）")
     public CommonResult<List<DeviceRuntimeParamResVO>> getDeviceRuntimeParams() {
