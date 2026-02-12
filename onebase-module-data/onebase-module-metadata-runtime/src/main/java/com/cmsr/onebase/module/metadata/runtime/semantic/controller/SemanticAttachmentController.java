@@ -59,6 +59,7 @@ public class SemanticAttachmentController {
                          @RequestParam("id") Long id,
                          @RequestParam("fieldName") String fieldName,
                          @RequestParam("fileId") Long fileId,
+                         @RequestParam(value = "isDev", required = false, defaultValue = "false") Boolean isDev,
                          HttpServletRequest request,
                          HttpServletResponse response) throws Exception {
         String traceId = request.getHeader("X-Trace-Id");
@@ -99,7 +100,8 @@ public class SemanticAttachmentController {
                                        @RequestParam("file") MultipartFile file,
                                        @RequestParam(value = "name", required = false) String name,
                                        @RequestParam(value = "directory", required = false) String directory,
-                                       @RequestParam(value = "type", required = false) String type) throws Exception {
+                                       @RequestParam(value = "type", required = false) String type,
+                                       @RequestParam(value = "isDev", required = false, defaultValue = "false") Boolean isDev) throws Exception {
         String finalName = (name == null || name.isBlank()) ? file.getOriginalFilename() : name;
         String finalType = (type == null || type.isBlank()) ? file.getContentType() : type;
         FileCreateReqDTO req = new FileCreateReqDTO()

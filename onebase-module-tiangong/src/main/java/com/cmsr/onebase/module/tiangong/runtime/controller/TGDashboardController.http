@@ -3,6 +3,45 @@
 # 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
 # 登录成功后会自动更新token到环境变量中
 
+### 1. 获取设备规模统计
+GET {{baseUrl}}/tiangong/dashboard/device-scale
+Content-Type: application/json
+X-Tenant-Id: 184717008866115584
+
+### 2. 获取累计设备接入数趋势
+GET {{baseUrl}}/tiangong/dashboard/cumulative-device-count-trend
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 3. 获取设备隐患列表
+GET {{baseUrl}}/tiangong/dashboard/device-hazards
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 4. 获取预测性隐患数量趋势
+GET {{baseUrl}}/tiangong/dashboard/predictive-hazard-trend
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 5. 获取待处理隐患工单列表
+GET {{baseUrl}}/tiangong/dashboard/pending-hazard-work-orders
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 6. 获取告警列表
+GET {{baseUrl}}/tiangong/dashboard/alarm-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 7. 获取设备故障检测统计
+GET {{baseUrl}}/tiangong/dashboard/device-fault-detection
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
 ### 天工 => 设备信息
 GET {{baseUrl}}/tiangong/dashboard/device-info-all
 Content-Type: application/json
+X-Tenant-Id: 184717008866115584
+
+{
+}

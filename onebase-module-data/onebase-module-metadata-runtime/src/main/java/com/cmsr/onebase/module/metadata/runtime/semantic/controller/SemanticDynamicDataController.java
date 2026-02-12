@@ -46,6 +46,7 @@ public class SemanticDynamicDataController {
      * @param tableName 表名，用于解析实体ID
      * @param menuId 菜单ID（用于权限与上下文）
      * @param draftId 草稿ID（可选）
+     * @param isDev 是否开发模式（可选，默认false），为true时查询编辑态元数据
      * @param body 语义化合并请求体，顶层键为业务字段或连接器
      * @param request HTTP 请求对象，用于读取 `X-Trace-Id`
      * @param response HTTP 响应对象，用于回写 `X-Trace-Id`
@@ -54,6 +55,7 @@ public class SemanticDynamicDataController {
     public CommonResult<Map<String, Object>> create(@PathVariable("tableName") String tableName,
                                                     @RequestParam("menuId") Long menuId,
                                                     @RequestParam(value = "draftId", required = false) Long draftId,
+                                                    @RequestParam(value = "isDev", required = false, defaultValue = "false") Boolean isDev,
                                                     @RequestBody SemanticMergeBodyVO body,
                                                     HttpServletRequest request,
                                                     HttpServletResponse response) {
@@ -76,12 +78,14 @@ public class SemanticDynamicDataController {
      * @param tableName 表名
      * @param menuId 菜单ID
      * @param body 语义化合并请求体，包含主键 `id` 及待更新字段
+     * @param isDev 是否开发模式（可选，默认false），为true时查询编辑态元数据
      * @param request HTTP 请求对象
      * @param response HTTP 响应对象
      * @return 更新后的动态数据响应
      */
     public CommonResult<Map<String, Object>> update(@PathVariable("tableName") String tableName,
                                                     @RequestParam("menuId") Long menuId,
+                                                    @RequestParam(value = "isDev", required = false, defaultValue = "false") Boolean isDev,
                                                     @RequestBody SemanticMergeBodyVO body,
                                                     HttpServletRequest request,
                                                     HttpServletResponse response) {
@@ -102,12 +106,14 @@ public class SemanticDynamicDataController {
      * @param tableName 表名
      * @param menuId 菜单ID
      * @param body 目标请求体，`data.id` 为删除主键，支持可选方法编码
+     * @param isDev 是否开发模式（可选，默认false），为true时查询编辑态元数据
      * @param request HTTP 请求对象
      * @param response HTTP 响应对象
      * @return 删除是否成功
      */
     public CommonResult<Boolean> delete(@PathVariable("tableName") String tableName,
                                         @RequestParam("menuId") Long menuId,
+                                        @RequestParam(value = "isDev", required = false, defaultValue = "false") Boolean isDev,
                                         @RequestBody SemanticTargetBodyVO body,
                                         HttpServletRequest request,
                                         HttpServletResponse response) {
@@ -128,12 +134,14 @@ public class SemanticDynamicDataController {
      * @param tableName 表名
      * @param menuId 菜单ID
      * @param body 目标请求体，`data.id` 为查询主键，支持包含子表/关系控制
+     * @param isDev 是否开发模式（可选，默认false），为true时查询编辑态元数据
      * @param request HTTP 请求对象
      * @param response HTTP 响应对象
      * @return 详情动态数据响应
      */
     public CommonResult<Map<String, Object>> detail(@PathVariable("tableName") String tableName,
                                                     @RequestParam("menuId") Long menuId,
+                                                    @RequestParam(value = "isDev", required = false, defaultValue = "false") Boolean isDev,
                                                     @RequestBody SemanticTargetBodyVO body,
                                                     HttpServletRequest request,
                                                     HttpServletResponse response) {
@@ -154,12 +162,14 @@ public class SemanticDynamicDataController {
      * @param tableName 表名
      * @param menuId 菜单ID
      * @param body 分页请求体，包含分页、排序、过滤等上下文
+     * @param isDev 是否开发模式（可选，默认false），为true时查询编辑态元数据
      * @param request HTTP 请求对象
      * @param response HTTP 响应对象
      * @return 分页结果
      */
     public CommonResult<PageResult<Map<String, Object>>> page(@PathVariable("tableName") String tableName,
                                                               @RequestParam("menuId") Long menuId,
+                                                              @RequestParam(value = "isDev", required = false, defaultValue = "false") Boolean isDev,
                                                               @RequestBody SemanticPageBodyVO body,
                                                               HttpServletRequest request,
                                                               HttpServletResponse response) {
