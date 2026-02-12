@@ -120,13 +120,13 @@ public class FlowConnectorController {
     @Operation(summary = "查询连接器的指定环境配置信息",
               description = "从flow_connector.config的properties中解析出指定环境的Formily Schema")
     @Parameter(name = "id", description = "连接器实例ID（主键）", required = true, example = "1")
-    @Parameter(name = "envCode", description = "环境编码（如DEV、TEST、PROD）", required = true, example = "PROD")
+    @Parameter(name = "envName", description = "环境名称（如DEV环境配置）", required = true, example = "DEV环境配置")
     @GetMapping("/{id}/environment-config")
     public CommonResult<EnvironmentConfigVO> getEnvironmentConfig(
             @PathVariable("id") Long id,
-            @RequestParam("envCode") @NotBlank(message = "环境编码不能为空") String envCode) {
+            @RequestParam("envName") @NotBlank(message = "环境名称不能为空") String envName) {
 
-        EnvironmentConfigVO config = connectorService.getEnvironmentConfig(id, envCode);
+        EnvironmentConfigVO config = connectorService.getEnvironmentConfig(id, envName);
         return CommonResult.success(config);
     }
 

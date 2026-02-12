@@ -84,10 +84,10 @@ public interface FlowConnectorService {
      * 从 flow_connector.config 的 properties 中解析指定环境的 Formily Schema
      *
      * @param connectorId 连接器实例ID（主键）
-     * @param envCode     环境编码（如 DEV、TEST、PROD）
+     * @param envName     环境名称（如 DEV环境配置）
      * @return 环境配置 VO
      */
-    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode);
+    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName);
 
     /**
      * 获取环境配置模板
