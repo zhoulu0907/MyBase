@@ -84,10 +84,10 @@ public interface FlowConnectorService {
      * 从 flow_connector.config 的 properties 中解析指定环境的 Formily Schema
      *
      * @param connectorId 连接器实例ID（主键）
-     * @param envCode     环境编码（如 DEV、TEST、PROD）
+     * @param envName     环境名称（如 DEV环境配置）
      * @return 环境配置 VO
      */
-    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode);
+    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName);
 
     /**
      * 获取环境配置模板
@@ -120,6 +120,40 @@ public interface FlowConnectorService {
      * @return 保存是否成功
      */
     Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
+    /**
+     * 更新连接器环境配置
+     * <p>
+     * 更新已存在的环境配置，环境必须存在
+     * 如果环境不存在则拒绝更新
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO 环境配置请求
+     * @return 更新是否成功
+     */
+    Boolean updateEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
+    /**
+     * 设置启用环境
+     * <p>
+     * 在连接器配置中设置当前启用的环境名称
+     * 环境必须存在才能启用
+     *
+     * @param connectorId 连接器实例ID
+     * @param envName     环境名称（传空或null表示取消启用）
+     * @return 设置是否成功
+     */
+    Boolean enableEnvironment(Long connectorId, String envName);
+
+    /**
+     * 获取启用环境名称
+     * <p>
+     * 从连接器配置中读取当前启用的环境名称
+     *
+     * @param connectorId 连接器实例ID
+     * @return 启用的环境名称，未设置则返回null
+     */
+    String getEnabledEnvName(Long connectorId);
 
     /**
      * 保存连接器动作配置
