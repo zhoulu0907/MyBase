@@ -132,10 +132,16 @@ onebase:
     begin-code: 000000 # 这里配置 9999 的原因是，测试方便。
     end-code: 999999 # 这里配置 9999 的原因是，测试方便。
   plugin: # 插件相关配置项
+    enabled: true # 启用插件系统
+    mode: dev # 开发模式
+    auto-load: true # 自动加载插件
+    auto-start: true # 自动启动插件
     plugins-dir: plugins # 插件存放根目录
     frontend-dir: plugins/frontend # 前端插件存放目录
     backend-dir: plugins # 后端插件存放目录
     temp-dir: plugins/.temp # 临时目录
+    dev-class-paths: # 开发模式下扫描的类路径
+      - ../onebase-plugin/onebase-plugin-ocr/target/classes # OCR插件编译输出目录
 
 debug: false
 
