@@ -70,4 +70,6 @@ public interface BpmConstants {
     String VAR_BEGIN_KEY = "begin";
     String VAR_END_KEY = "end";
 
+    String VAR_OB_KEY = "ob@@";
+
 }
