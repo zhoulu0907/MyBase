@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
 import jakarta.validation.Valid;
 
+import java.util.Map;
+
 /**
  * 管理后台的认证 Service 接口
  *
@@ -83,5 +85,11 @@ public interface BuildAuthService {
      * @return 登录结果
      */
     AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
+
+    /**
+     * 天宫账号登录
+     *
+     */
+    AuthLoginRespVO tianGongLogin(String code, String state);
 
 }
