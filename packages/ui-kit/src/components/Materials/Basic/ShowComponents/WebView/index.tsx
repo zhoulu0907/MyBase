@@ -95,7 +95,7 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
         src={validUrl}
         style={{
           width: '100%',
-          height: '400px', // 设置固定高度，避免 auto 导致的问题
+          height: '900px', // 设置固定高度，避免 auto 导致的问题
           border: '1px solid #e0e0e0',
           borderRadius: '8px',
           boxSizing: 'border-box'
