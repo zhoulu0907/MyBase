@@ -1,4 +1,4 @@
-import { Card, Image, Tag, Typography, Avatar } from '@arco-design/web-react';
+import { Card, Tag, Typography, Avatar } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import { attachmentDownload, menuSignal } from '@onebase/app';
 import type { XCanvasCardConfig } from '../schema';
@@ -14,6 +14,7 @@ interface CanvasCardType2Props extends XCanvasCardConfig {
   record?: Record<string, unknown>;
   displayFields?: {
     avatar?: string;
+    avatarFill?: string;
     mainTitle?: string;
     categoryTags?: string[];
     cardFields?: string[];
@@ -150,13 +151,12 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
   return (
     <div className="canvas-card-body-type2">
       <div className="canvas-card-image-type2">
-        <Image
+        <img
           src={avatarUrl}
           alt="card image"
           width={72}
           height={72}
-          style={{ '--fit': 'cover' } as React.CSSProperties}
-          preview={false}
+          style={{ objectFit: displayFields?.avatarFill || 'fill' }}
         />
       </div>
       

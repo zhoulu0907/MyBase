@@ -1,4 +1,4 @@
-import { Form, Button, Image, Select, Switch } from '@arco-design/web-react';
+import { Form, Button, Image, Select, Switch, Radio } from '@arco-design/web-react';
 import { IconArrowLeft, IconSwap, IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import {
   FilterEntityFields,
@@ -39,12 +39,14 @@ interface FieldConfig {
 
 interface DisplayFieldsConfig {
   mainImage?: string;
+  mainImageFill?: string;
   categoryTags?: string[];
   mainTitle?: string;
   cardContent?: string;
   auxiliaryInfo?: string[];
   countHint?: string;
   avatar?: string;
+  avatarFill?: string;
   cardFields?: string[];
 }
 
@@ -78,6 +80,12 @@ const FIELD_TYPE_CONFIG = {
   COUNT_HINT: [ENTITY_FIELD_TYPE.NUMBER.VALUE],
   CARD_FIELDS: []
 };
+
+const IMAGE_FILL_OPTIONS = [
+  { label: '拉伸填满', value: 'fill' },
+  { label: '居中填满', value: 'cover' },
+  { label: '原图居中', value: 'contain' }
+];
 
 const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
   if (a.isSystemField !== b.isSystemField) {
@@ -313,10 +321,24 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             placeholder="请选择字段"
             value={displayFields.mainImage}
             getPopupContainer={getPopupContainer}
+            style={{ marginBottom: '8px' }}
             onChange={(value) => handleFieldChange('mainImage', value)}
           >
             {renderFieldOptions(FIELD_TYPE_CONFIG.MAIN_IMAGE)}
           </Select>
+          <Radio.Group
+            value={displayFields.mainImageFill || 'fill'}
+            type="button"
+            size="default"
+            style={{ width: '100%', display: 'flex' }}
+            onChange={(value) => handleFieldChange('mainImageFill', value)}
+          >
+            {IMAGE_FILL_OPTIONS.map((option) => (
+              <Radio key={option.value} value={option.value} style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}>
+                {option.label}
+              </Radio>
+            ))}
+          </Radio.Group>
         </FormItem>
 
         <FormItem layout="vertical" labelAlign="left" label="分类标签" className={styles.formItem}>
@@ -442,10 +464,24 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
             placeholder="请选择字段"
             value={displayFields.avatar}
             getPopupContainer={getPopupContainer}
+            style={{ marginBottom: '8px' }}
             onChange={(value) => handleFieldChange('avatar', value)}
           >
             {renderFieldOptions(FIELD_TYPE_CONFIG.AVATAR)}
           </Select>
+          <Radio.Group
+            value={displayFields.avatarFill || 'fill'}
+            type="button"
+            size="default"
+            style={{ width: '100%', display: 'flex' }}
+            onChange={(value) => handleFieldChange('avatarFill', value)}
+          >
+            {IMAGE_FILL_OPTIONS.map((option) => (
+              <Radio key={option.value} value={option.value} style={{ flex: 1, textAlign: 'center', whiteSpace: 'nowrap' }}>
+                {option.label}
+              </Radio>
+            ))}
+          </Radio.Group>
         </FormItem>
 
         <FormItem layout="vertical" labelAlign="left" label="主标题" className={styles.formItem}>
