@@ -4,6 +4,7 @@ import {
   startLoadWorkbenchPageSet,
   useWorkbenchEditorSignal,
   getOrCreatePageConfig,
+  pageLayoutSignal,
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
@@ -59,6 +60,7 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
 
   const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
     useWorkbenchEditorSignal;
+  const { setPageLayout, resetPageLayout } = pageLayoutSignal;
 
   // 组件挂载时清理旧数据和背景样式
   useEffect(() => {
@@ -79,6 +81,9 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
     clearWorkbenchComponents();
     clearWbComponentSchemas();
 
+    // 重置页面布局配置
+    resetPageLayout();
+
     const runtimeContentEle = document.getElementById('runtime-content');
     const contentBodyEle = document.getElementById('runtime-content-body');
     clearBackgroundStyle(runtimeContentEle);
@@ -90,25 +95,37 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
     }
   }, [pageSetId]);
 
-  // 设置页面背景样式
+  // 应用页面配置（背景样式和布局配置）
   useEffect(() => {
     const runtimeContentEle = document.getElementById('runtime-content');
     const contentBodyEle = document.getElementById('runtime-content-body');
 
-    const [, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas.value);
-    const { pageBgColor, pageBgImg } = pageConfigSchema.config;
+    // 如果没有配置数据，清除背景样式并重置布局
+    if (!wbComponentSchemas.value || Object.keys(wbComponentSchemas.value).length === 0) {
+      clearBackgroundStyle(runtimeContentEle);
+      clearBackgroundStyle(contentBodyEle);
+      resetPageLayout();
+      return;
+    }
 
+    const [, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas.value);
+    const { pageBgColor, pageBgImg, showHeader, showSidebar } = pageConfigSchema.config;
+
+    // 设置背景样式
     setBackgroundStyle(runtimeContentEle, {
       color: pageBgColor || '#F2F3F5',
       image: pageBgImg
     });
-
     setBackgroundStyle(contentBodyEle, { transparent: true });
 
-    // 组件卸载时清除样式
+    // 设置页面布局配置
+    setPageLayout({ showHeader, showSidebar });
+
+
     return () => {
       clearBackgroundStyle(runtimeContentEle);
       clearBackgroundStyle(contentBodyEle);
+      resetPageLayout();
     };
   }, [wbComponentSchemas.value]);
 

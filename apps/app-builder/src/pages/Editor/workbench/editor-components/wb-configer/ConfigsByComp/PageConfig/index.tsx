@@ -1,5 +1,5 @@
 import { Form, Switch, ColorPicker, Input, Message } from '@arco-design/web-react';
-import { IconCloud } from '@arco-design/web-react/icon';
+import { IconCloud, IconDelete } from '@arco-design/web-react/icon';
 import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { useWorkbenchSignal, isPageConfig, PAGE_CONFIG_TYPE, PAGE_CONFIG_DEFAULT } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -261,6 +261,13 @@ const PageConfig = () => {
             {pageConfig.pageBgImg && (
               <div className={styles.imagePreview}>
                 <img src={pageConfig.pageBgImg} alt="背景预览" className={styles.previewImage} />
+                <IconDelete
+                  className={styles.icon}
+                  onClick={() => {
+                    handleChange('pageBgImg', '');
+                    Message.info(`删除成功`);
+                  }}
+                />
               </div>
             )}
           </div>
