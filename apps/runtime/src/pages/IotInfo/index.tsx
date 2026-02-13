@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Card, Descriptions, Typography, Table, Button, Input, Space } from '@arco-design/web-react';
+import { Card, Descriptions, Typography, Button, Input, Space, Message } from '@arco-design/web-react';
 import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
+import { createClient, getRuntimeBackendURL } from '@onebase/common';
 import styles from './index.module.less';
 
 const { Title } = Typography;
@@ -20,29 +21,114 @@ interface DeviceParam {
   updateTime: string;
 }
 
-const deviceParams: DeviceParam[] = [
-  { id: '1', name: '转速', value: '3', unit: 'rpm', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '2', name: '轴振动', value: '3.18', unit: 'mm/s', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '3', name: '轴承温度', value: '20.39', unit: '°C', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '4', name: '电机温度', value: '0.09', unit: '°C', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '5', name: '绕组温度', value: '38777', unit: '°C', status: 'error', updateTime: '2026-02-10 16:11:10' },
-  { id: '6', name: '轴向位移', value: '--', unit: 'mm', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '7', name: '径向振动', value: '--', unit: 'mm', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '8', name: '电压', value: '--', unit: 'V', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '9', name: '电流', value: '100', unit: 'A', status: 'warning', updateTime: '2026-02-10 16:11:10' },
-  { id: '10', name: '功率', value: '50', unit: 'kW', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '11', name: '频率', value: '50', unit: 'Hz', status: 'normal', updateTime: '2026-02-10 16:11:10' },
-  { id: '12', name: '功率因数', value: '0.95', unit: '', status: 'normal', updateTime: '2026-02-10 16:11:10' }
-];
+interface DeviceRuntimeParamResVO {
+  speed?: number;
+  current?: number;
+  outputPower?: number;
+  ratedPower?: number;
+  outputVoltage?: number;
+  inputVoltage?: number;
+  outputCurrent?: number;
+  faultCode?: string;
+  runTime?: number;
+  pressure?: number;
+  deviceId?: string;
+  deviceName?: string;
+  updateTime?: string;
+}
+
+const httpClient = createClient('/tiangong', getRuntimeBackendURL());
+
+const formatDateTime = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
+const formatNumber = (value: number | string | undefined): string => {
+  if (value === undefined || value === null) return '--';
+  const num = Number(value);
+  if (isNaN(num)) return '--';
+  return num.toFixed(2);
+};
 
 export default function IotInfo() {
   const [searchParams] = useSearchParams();
   const [params, setParams] = useState<ParamData[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 8;
+  const [deviceParams, setDeviceParams] = useState<DeviceParam[]>([]);
+  const pageSize = 10;
   const lastHeightRef = useRef<number>(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const transformRuntimeData = (data: DeviceRuntimeParamResVO): DeviceParam[] => {
+    const updateTime = formatDateTime();
+
+    const currentStatus = data.current !== undefined && Number(data.current) > 80 ? 'warning' : 'normal';
+    const faultStatus = data.faultCode ? 'error' : 'normal';
+
+    return [
+      { id: 'speed', name: '转速', value: formatNumber(data.speed), unit: 'rpm', status: 'normal', updateTime },
+      { id: 'current', name: '电流', value: formatNumber(data.current), unit: 'A', status: currentStatus, updateTime },
+      { id: 'outputPower', name: '输出功率', value: formatNumber(data.outputPower), unit: 'kW', status: 'normal', updateTime },
+      { id: 'ratedPower', name: '电机额定功率', value: formatNumber(data.ratedPower), unit: 'kW', status: 'normal', updateTime },
+      { id: 'outputVoltage', name: '输出电压', value: formatNumber(data.outputVoltage), unit: 'V', status: 'normal', updateTime },
+      { id: 'inputVoltage', name: '输入电压', value: formatNumber(data.inputVoltage), unit: 'V', status: 'normal', updateTime },
+      { id: 'outputCurrent', name: '输出电流', value: formatNumber(data.outputCurrent), unit: 'A', status: 'normal', updateTime },
+      { id: 'faultCode', name: '故障码', value: data.faultCode || '--', unit: '', status: faultStatus, updateTime },
+      { id: 'runTime', name: '运行时间', value: formatNumber(data.runTime), unit: 'h', status: 'normal', updateTime },
+      { id: 'pressure', name: '压力', value: formatNumber(data.pressure), unit: 'MPa', status: 'normal', updateTime }
+    ];
+  };
+
+  const fetchDeviceRuntimeParams = useCallback(async () => {
+    try {
+      const res = await httpClient.get<DeviceRuntimeParamResVO[]>('/device/device-runtime-params');
+      if (res) {
+        const allParams: DeviceParam[] = [];
+        res.forEach((item) => {
+          allParams.push(...transformRuntimeData(item));
+        });
+        setDeviceParams(allParams);
+      }
+    } catch (error) {
+      console.error('获取设备运行参数失败:', error);
+      Message.error('获取设备运行参数失败');
+    }
+  }, []);
+
+  const clearPollingTimer = useCallback(() => {
+    if (pollingTimerRef.current) {
+      clearInterval(pollingTimerRef.current);
+      pollingTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDeviceRuntimeParams();
+
+    pollingTimerRef.current = setInterval(() => {
+      fetchDeviceRuntimeParams();
+    }, 3000);
+
+    const handleBeforeUnload = () => {
+      clearPollingTimer();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearPollingTimer();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [fetchDeviceRuntimeParams, clearPollingTimer]);
 
   useEffect(() => {
     const paramArray: ParamData[] = [];
@@ -161,6 +247,9 @@ export default function IotInfo() {
               搜索
             </Button>
             <Button onClick={() => setSearchValue('')}>重置</Button>
+            <Button icon={<IconRefresh />} onClick={fetchDeviceRuntimeParams}>
+              刷新
+            </Button>
           </Space>
         </div>
 
@@ -186,10 +275,7 @@ export default function IotInfo() {
 
         {/* 分页 */}
         <div className={styles.pagination}>
-          <div className={styles.pageInfo}>
-            {' '}
-            共 {filteredParams.length} 条，当前第 {currentPage} 页{' '}
-          </div>
+          <div className={styles.pageInfo}> 当前第 {currentPage} 页 </div>
           <Space>
             <Button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
               上一页

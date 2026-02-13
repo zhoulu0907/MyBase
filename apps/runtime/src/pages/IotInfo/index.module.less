@@ -27,18 +27,10 @@
     display: grid;
     gap: 16px;
     margin-bottom: 20px;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
 
-    @media (min-width: 1200px) {
-      grid-template-columns: repeat(6, 1fr);
-    }
-
-    @media (min-width: 800px) and (max-width: 1199px) {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    @media (max-width: 799px) {
-      grid-template-columns: repeat(2, 1fr);
+    @media (min-width: 800px) {
+      grid-template-columns: repeat(5, 1fr);
     }
   }
 
@@ -71,7 +63,7 @@
 }
 
 .value {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
   color: #165dff;
 
