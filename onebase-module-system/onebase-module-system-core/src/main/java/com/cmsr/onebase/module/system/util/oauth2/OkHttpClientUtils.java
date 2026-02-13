@@ -4,13 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.TlsVersion;
+import okio.Buffer;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -81,12 +84,26 @@ public class OkHttpClientUtils {
     }
 
     public static String sendRequest(Request request) {
+        return sendRequest(request, false);
+    }
+
+    public static String sendRequest(Request request, boolean logDetail) {
+        if (logDetail) {
+            log.info("HTTP请求详情: {}", buildRequestDebugInfo(request));
+        }
 
         try (Response response = createTrustingOkHttpClient().newCall(request).execute()) {
 
             if (response.body() != null) {
                 String string = response.body().string();
-                log.debug("响应内容长度: {}", string.length());
+                if (logDetail) {
+                    log.info("HTTP响应详情: code={}, message={}, body={}", response.code(), response.message(), string);
+                } else {
+                    log.debug("HTTP响应: code={}, message={}, bodyLength={}", response.code(), response.message(), string.length());
+                }
+                if (!response.isSuccessful()) {
+                    throw new RuntimeException("访问" + request.url() + "失败: HTTP " + response.code() + ", body=" + string);
+                }
                 return string;
             } else {
                 log.error("响应为空");
@@ -97,6 +114,29 @@ public class OkHttpClientUtils {
             log.error("访问失败", e);
             throw new RuntimeException("访问" + request.url() + "失败: " + e.getMessage());
         }
+    }
+
+    private static String buildRequestDebugInfo(Request request) {
+        StringBuilder debugInfo = new StringBuilder();
+        debugInfo.append("method=").append(request.method())
+                .append(", url=").append(request.url())
+                .append(", headers=").append(request.headers());
+
+        RequestBody requestBody = request.body();
+        if (requestBody == null) {
+            debugInfo.append(", body=");
+            return debugInfo.toString();
+        }
+
+        try {
+            Buffer buffer = new Buffer();
+            requestBody.writeTo(buffer);
+            String body = buffer.readString(StandardCharsets.UTF_8);
+            debugInfo.append(", body=").append(body);
+        } catch (Exception e) {
+            debugInfo.append(", body=<读取失败: ").append(e.getMessage()).append(">");
+        }
+        return debugInfo.toString();
     }
 
 

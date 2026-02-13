@@ -141,6 +141,8 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     private String tianGongScope;
     @Value("${onebase.auth.tiangong.device-id:tianGong}")
     private String tianGongDeviceId;
+    @Value("${onebase.auth.tiangong.http-debug-log-enabled:false}")
+    private Boolean tianGongHttpDebugLogEnabled;
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -570,12 +572,18 @@ public class BuildAuthServiceImpl implements BuildAuthService {
                 .build();
 
         // 发送请求
-        String responseBody = OkHttpClientUtils.sendRequest(request);
-        // 解析响应
-        OAuth2OpenAccessTokenRespVO oAuth2OpenAccessTokenRespVO = JSONUtil.toBean(responseBody, OAuth2OpenAccessTokenRespVO.class);
-        if (oAuth2OpenAccessTokenRespVO == null || StringUtils.isBlank(oAuth2OpenAccessTokenRespVO.getAccessToken())) {
-            throw new RuntimeException("天工登录失败: 获取access_token为空");
+        String responseBody = OkHttpClientUtils.sendRequest(request, Boolean.TRUE.equals(tianGongHttpDebugLogEnabled));
+        JSONObject tokenObj = JSONUtil.parseObj(responseBody);
+        String accessToken = tokenObj.getStr("access_token");
+        if (StringUtils.isBlank(accessToken)) {
+            throw new RuntimeException("天工登录失败: 获取access_token为空, token响应=" + responseBody);
         }
+        OAuth2OpenAccessTokenRespVO oAuth2OpenAccessTokenRespVO = new OAuth2OpenAccessTokenRespVO();
+        oAuth2OpenAccessTokenRespVO.setAccessToken(accessToken);
+        oAuth2OpenAccessTokenRespVO.setRefreshToken(tokenObj.getStr("refresh_token"));
+        oAuth2OpenAccessTokenRespVO.setTokenType(tokenObj.getStr("token_type"));
+        oAuth2OpenAccessTokenRespVO.setExpiresIn(tokenObj.getLong("expires_in"));
+        oAuth2OpenAccessTokenRespVO.setScope(tokenObj.getStr("scope"));
         //3.通过access_token获取用户信息
         // 创建请求
         Request request1 = new Request.Builder()
@@ -583,7 +591,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
                 .get()
                 .addHeader("Authorization", (oAuth2OpenAccessTokenRespVO.getTokenType() + " " + oAuth2OpenAccessTokenRespVO.getAccessToken()))
                 .build();
-        String userInfoResponseBody = OkHttpClientUtils.sendRequest(request1);
+        String userInfoResponseBody = OkHttpClientUtils.sendRequest(request1, Boolean.TRUE.equals(tianGongHttpDebugLogEnabled));
         // 解析响应
         JSONObject userObj = JSONUtil.parseObj(userInfoResponseBody);
         Integer status = userObj.getInt("code");
