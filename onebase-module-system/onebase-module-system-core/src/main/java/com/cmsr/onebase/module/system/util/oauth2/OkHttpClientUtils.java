@@ -1,9 +1,11 @@
 package com.cmsr.onebase.module.system.util.oauth2;
 
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.TlsVersion;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -11,6 +13,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -35,7 +38,7 @@ public class OkHttpClientUtils {
             };
 
             // 创建SSL上下文
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, trustAllCerts, new SecureRandom());
 
             // 创建hostname verifier，接受所有主机名
@@ -44,9 +47,14 @@ public class OkHttpClientUtils {
                 return true;
             };
 
-            OkHttpClient client = new OkHttpClient.Builder()
+                ConnectionSpec tlsSpec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                    .tlsVersions(TlsVersion.TLS_1_3, TlsVersion.TLS_1_2)
+                    .build();
+
+                OkHttpClient client = new OkHttpClient.Builder()
                     .sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
                     .hostnameVerifier(hostnameVerifier)
+                    .connectionSpecs(Arrays.asList(tlsSpec, ConnectionSpec.COMPATIBLE_TLS, ConnectionSpec.CLEARTEXT))
                     .connectTimeout(10, TimeUnit.SECONDS)  // 增加超时时间
                     .readTimeout(30, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
@@ -78,7 +86,7 @@ public class OkHttpClientUtils {
 
             if (response.body() != null) {
                 String string = response.body().string();
-                log.info("响应内容: {}", string);
+                log.debug("响应内容长度: {}", string.length());
                 return string;
             } else {
                 log.error("响应为空");
