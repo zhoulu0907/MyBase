@@ -4,10 +4,11 @@ import { memo, useEffect, useState } from 'react';
 import { attachmentDownload, menuSignal } from '@onebase/app';
 import type { XCanvasCardConfig } from '../schema';
 import '../index.css';
+import defaultImage from '@/assets/images/cp/canvascard-default.svg';
 
 const { Text, Paragraph } = Typography;
 
-const DEFAULT_IMAGE = '/CanvasCardType1Pic.jpg';
+const PREVIEW_IMAGE = '/CanvasCardType1Pic.jpg';
 
 interface CanvasCardType1Props extends XCanvasCardConfig {
   runtime?: boolean;
@@ -28,7 +29,7 @@ interface CanvasCardType1Props extends XCanvasCardConfig {
 const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
   const { status, runtime = true, record, displayFields, fieldList = [], tableName } = props;
   const { curMenu } = menuSignal;
-  const [imageUrl, setImageUrl] = useState(DEFAULT_IMAGE);
+  const [imageUrl, setImageUrl] = useState(runtime ? defaultImage : PREVIEW_IMAGE);
   
   useEffect(() => {
     const loadImage = async () => {
@@ -161,6 +162,9 @@ const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
           width={229}
           height={129}
           style={{ objectFit: displayFields?.mainImageFill || 'fill' }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = defaultImage;
+          }}
         />
       </div>
       

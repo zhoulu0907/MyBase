@@ -3,10 +3,11 @@ import { memo, useEffect, useState } from 'react';
 import { attachmentDownload, menuSignal } from '@onebase/app';
 import type { XCanvasCardConfig } from '../schema';
 import '../index.css';
+import defaultImage from '@/assets/images/cp/canvascard-default.svg';
 
 const { Text, Paragraph } = Typography;
 
-const DEFAULT_IMAGE = '/CanvasCardType2Pic.png';
+const PREVIEW_IMAGE = '/CanvasCardType2Pic.png';
 
 interface CanvasCardType2Props extends XCanvasCardConfig {
   runtime?: boolean;
@@ -25,7 +26,7 @@ interface CanvasCardType2Props extends XCanvasCardConfig {
 const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
   const { status, runtime = true, record, displayFields, fieldList = [], tableName } = props;
   const { curMenu } = menuSignal;
-  const [avatarUrl, setAvatarUrl] = useState(DEFAULT_IMAGE);
+  const [avatarUrl, setAvatarUrl] = useState(runtime ? defaultImage : PREVIEW_IMAGE);
   
   const getFieldValue = (fieldName?: string): string => {
     if (!fieldName || !record) return '';
@@ -157,6 +158,9 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
           width={72}
           height={72}
           style={{ objectFit: displayFields?.avatarFill || 'fill' }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = defaultImage;
+          }}
         />
       </div>
       
