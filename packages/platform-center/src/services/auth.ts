@@ -73,7 +73,10 @@ export interface TiangongLoginRequest {
 }
 
 export const tiangongLogin = (req: TiangongLoginRequest) => {
-  return systemService.post('/system/auth/tiangong-login', req);
+  const { code, appName } = req;
+  return systemService.get('/system/auth/tiangong-login', {
+    params: { code, state: appName }
+  });
 };
 
 // 校验验证码 /system/captcha/check
