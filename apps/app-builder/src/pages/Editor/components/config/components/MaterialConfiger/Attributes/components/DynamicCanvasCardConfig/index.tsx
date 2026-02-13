@@ -90,8 +90,6 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
   const [isEditing, setIsEditing] = useState(false);
   const [currentComponent, setCurrentComponent] = useState((configs.componentName as string) || 'CanvasCardType1');
   const [displayFields, setDisplayFields] = useState<DisplayFieldsConfig>((configs.displayFields as DisplayFieldsConfig) || {});
-  const hiddenDraft = (configs.hiddenDraft as boolean) || false;
-  const showAddBtn = (configs.showAddBtn as boolean) !== false;
 
   const { mainEntity, subEntities } = useAppEntityStore();
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
@@ -570,18 +568,6 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
       </FormItem>
       <FormItem layout="vertical" labelAlign="left" label="显示字段" className={styles.formItem}>
         {currentComponent === 'CanvasCardType1' ? renderStyle1Fields() : renderStyle2Fields()}
-      </FormItem>
-      <FormItem layout="vertical" labelAlign="left" label="添加数据按钮" className={styles.formItem}>
-        <Switch
-          checked={showAddBtn}
-          onChange={(checked) => handlePropsChange('showAddBtn', checked)}
-        />
-      </FormItem>
-      <FormItem layout="vertical" labelAlign="left" label="草稿箱" className={styles.formItem}>
-        <Switch
-          checked={!hiddenDraft}
-          onChange={(checked) => handlePropsChange('hiddenDraft', !checked)}
-        />
       </FormItem>
     </div>
   );

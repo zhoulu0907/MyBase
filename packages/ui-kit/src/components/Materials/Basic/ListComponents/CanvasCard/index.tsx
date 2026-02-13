@@ -18,18 +18,16 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
   detailMode?: boolean; 
   componentName?: string; 
   showFromPageData?: Function; 
-  hiddenDraft?: boolean; 
-  showAddBtn?: boolean; 
   refresh?: number;
   displayFields?: DisplayFieldsConfig;
   fieldList?: Array<{ fieldName: string; displayName: string }>;
   preview?: boolean;
 }) => {
   useSignals();
-  const { menuPermission, canCreate } = menuPermissionSignal;
+  const { canCreate } = menuPermissionSignal;
   const { setRowDataId } = pagesRuntimeSignal;
   const { curMenu } = menuSignal;
-  const { status, runtime = true, componentName = 'CanvasCardType1', showFromPageData, hiddenDraft, showAddBtn = true, tableName, metaData, displayFields, refresh, fieldList: propFieldList, preview } = props;
+  const { status, runtime = true, componentName = 'CanvasCardType1', showFromPageData, tableName, metaData, displayFields, refresh, fieldList: propFieldList, preview } = props;
 
   const [cardData, setCardData] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
@@ -175,13 +173,13 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
       <div className="canvas-card-header">
         <div className="headerActions">
           <div className="addButton">
-            {showAddBtn && canCreate.value && (
+            {(!runtime || canCreate.value) && (
               <Button type="primary" onClick={handleCreate} icon={<IconPlus />}>
                 添加数据
               </Button>
             )}
 
-            {!hiddenDraft && canCreate.value && (
+            {(!runtime || canCreate.value) && (
               <CanvasCardDraftBox
                 showFromPageData={showFromPageData}
                 menuId={curMenu.value?.id}
