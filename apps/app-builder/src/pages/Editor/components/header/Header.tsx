@@ -493,6 +493,7 @@ export default function EditorHeader() {
         return;
       } catch (error) {
         console.error('保存失败:', error);
+        return;
       } finally {
         setSaveLoading(false);
       }
