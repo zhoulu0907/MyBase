@@ -1,4 +1,4 @@
-import { Form, Button, Image, Select, Switch, Radio } from '@arco-design/web-react';
+import { Form, Button, Image, Select, Switch, Radio, Dropdown, Menu, Checkbox } from '@arco-design/web-react';
 import { IconArrowLeft, IconSwap, IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import {
   FilterEntityFields,
@@ -21,6 +21,19 @@ import styles from './index.module.less';
 import { registerConfigRenderer } from '../../registry';
 import CanvasCardType1Image from '@/assets/images/cp/CanvasCardType1.png';
 import CanvasCardType2Image from '@/assets/images/cp/CanvasCardType2.png';
+import icon1 from '@onebase/ui-kit/src/assets/images/cp/icon1.svg';
+import icon2 from '@onebase/ui-kit/src/assets/images/cp/icon2.svg';
+import icon3 from '@onebase/ui-kit/src/assets/images/cp/icon3.svg';
+import icon4 from '@onebase/ui-kit/src/assets/images/cp/icon4.svg';
+import icon5 from '@onebase/ui-kit/src/assets/images/cp/icon5.svg';
+import icon6 from '@onebase/ui-kit/src/assets/images/cp/icon6.svg';
+import icon7 from '@onebase/ui-kit/src/assets/images/cp/icon7.svg';
+import icon8 from '@onebase/ui-kit/src/assets/images/cp/icon8.svg';
+import icon9 from '@onebase/ui-kit/src/assets/images/cp/icon9.svg';
+import icon10 from '@onebase/ui-kit/src/assets/images/cp/icon10.svg';
+import icon11 from '@onebase/ui-kit/src/assets/images/cp/icon11.svg';
+import icon12 from '@onebase/ui-kit/src/assets/images/cp/icon12.svg';
+import icon13 from '@onebase/ui-kit/src/assets/images/cp/icon13.svg';
 
 const FormItem = Form.Item;
 
@@ -45,6 +58,8 @@ interface DisplayFieldsConfig {
   cardContent?: string;
   auxiliaryInfo?: string[];
   countHint?: string;
+  showCountIcon?: boolean;
+  countIcon?: string;
   avatar?: string;
   avatarFill?: string;
   cardFields?: string[];
@@ -85,6 +100,22 @@ const IMAGE_FILL_OPTIONS = [
   { label: '拉伸填满', value: 'fill' },
   { label: '居中填满', value: 'cover' },
   { label: '原图居中', value: 'contain' }
+];
+
+const COUNT_ICONS = [
+  { key: 'icon1', src: icon1 },
+  { key: 'icon2', src: icon2 },
+  { key: 'icon3', src: icon3 },
+  { key: 'icon4', src: icon4 },
+  { key: 'icon5', src: icon5 },
+  { key: 'icon6', src: icon6 },
+  { key: 'icon7', src: icon7 },
+  { key: 'icon8', src: icon8 },
+  { key: 'icon9', src: icon9 },
+  { key: 'icon10', src: icon10 },
+  { key: 'icon11', src: icon11 },
+  { key: 'icon12', src: icon12 },
+  { key: 'icon13', src: icon13 }
 ];
 
 const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
@@ -448,6 +479,71 @@ const DynamicCanvasCardConfig: React.FC<DynamicCanvasCardConfigProps> = ({ handl
           >
             {renderFieldOptions(FIELD_TYPE_CONFIG.COUNT_HINT)}
           </Select>
+        </FormItem>
+
+        <FormItem layout="vertical" labelAlign="left" label="显示图标" className={styles.formItem}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Checkbox
+              checked={displayFields.showCountIcon || false}
+              onChange={(checked) => handleFieldChange('showCountIcon', checked)}
+            >
+              显示图标
+            </Checkbox>
+            <Dropdown
+              trigger="click"
+              position="bl"
+              droplist={
+                <Menu
+                  style={{
+                    padding: '8px'
+                  }}
+                >
+                  {COUNT_ICONS.map((icon) => (
+                    <div
+                      key={icon.key}
+                      onClick={() => handleFieldChange('countIcon', icon.key)}
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        border: displayFields.countIcon === icon.key ? '2px solid rgb(var(--primary-6))' : '1px solid var(--color-border)',
+                        borderRadius: '4px'
+                      }}
+                    >
+                      <img src={icon.src} alt={icon.key} style={{ width: '16px', height: '16px' }} />
+                    </div>
+                  ))}
+                </Menu>
+              }
+            >
+              <div
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  background: 'var(--color-fill-1)'
+                }}
+              >
+                {displayFields.countIcon ? (
+                  <img
+                    src={COUNT_ICONS.find(i => i.key === displayFields.countIcon)?.src}
+                    alt="selected icon"
+                    style={{ width: '16px', height: '16px' }}
+                  />
+                ) : (
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-3)' }}>?</span>
+                )}
+              </div>
+            </Dropdown>
+          </div>
         </FormItem>
       </div>
     );

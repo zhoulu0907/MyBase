@@ -1,14 +1,42 @@
 import { Card, Tag, Typography } from '@arco-design/web-react';
-import { IconEye } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { attachmentDownload, menuSignal } from '@onebase/app';
 import type { XCanvasCardConfig } from '../schema';
 import '../index.css';
 import defaultImage from '@/assets/images/cp/canvascard-default.svg';
+import icon1 from '@/assets/images/cp/icon1.svg';
+import icon2 from '@/assets/images/cp/icon2.svg';
+import icon3 from '@/assets/images/cp/icon3.svg';
+import icon4 from '@/assets/images/cp/icon4.svg';
+import icon5 from '@/assets/images/cp/icon5.svg';
+import icon6 from '@/assets/images/cp/icon6.svg';
+import icon7 from '@/assets/images/cp/icon7.svg';
+import icon8 from '@/assets/images/cp/icon8.svg';
+import icon9 from '@/assets/images/cp/icon9.svg';
+import icon10 from '@/assets/images/cp/icon10.svg';
+import icon11 from '@/assets/images/cp/icon11.svg';
+import icon12 from '@/assets/images/cp/icon12.svg';
+import icon13 from '@/assets/images/cp/icon13.svg';
 
 const { Text, Paragraph } = Typography;
 
 const PREVIEW_IMAGE = '/CanvasCardType1Pic.jpg';
+
+const COUNT_ICONS_MAP: Record<string, string> = {
+  icon1,
+  icon2,
+  icon3,
+  icon4,
+  icon5,
+  icon6,
+  icon7,
+  icon8,
+  icon9,
+  icon10,
+  icon11,
+  icon12,
+  icon13
+};
 
 interface CanvasCardType1Props extends XCanvasCardConfig {
   runtime?: boolean;
@@ -22,6 +50,8 @@ interface CanvasCardType1Props extends XCanvasCardConfig {
     cardContent?: string;
     auxiliaryInfo?: string[];
     countHint?: string;
+    showCountIcon?: boolean;
+    countIcon?: string;
   };
   fieldList?: Array<{ fieldName: string; displayName: string }>;
 }
@@ -188,7 +218,14 @@ const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
           {displayFields?.countHint ? (
             <div className="canvas-card-stats">
               <Text type="secondary">
-                <IconEye /> {renderContent(displayFields?.countHint, renderFieldPreview(displayFields?.countHint, ''))}
+                {displayFields?.showCountIcon && displayFields?.countIcon && (
+                  <img
+                    src={COUNT_ICONS_MAP[displayFields.countIcon]}
+                    alt="icon"
+                    style={{ width: '16px', height: '16px', marginRight: '4px', verticalAlign: 'middle' }}
+                  />
+                )}
+                {renderContent(displayFields?.countHint, renderFieldPreview(displayFields?.countHint, ''))}
               </Text>
             </div>
           ) : null}

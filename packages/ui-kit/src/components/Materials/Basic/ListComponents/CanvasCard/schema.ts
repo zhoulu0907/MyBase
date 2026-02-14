@@ -29,6 +29,8 @@ export type DisplayFieldsConfig = {
   cardContent?: string;
   auxiliaryInfo?: string[];
   countHint?: string;
+  showCountIcon?: boolean;
+  countIcon?: string;
   avatar?: string;
   avatarFill?: string;
   cardFields?: string[];
@@ -110,6 +112,8 @@ const XCanvasCard: XCanvasCardSchema = {
       cardContent: '',
       auxiliaryInfo: [],
       countHint: '',
+      showCountIcon: false,
+      countIcon: 'icon1',
       avatar: '',
       avatarFill: 'fill',
       cardFields: ['', '', '', '']
