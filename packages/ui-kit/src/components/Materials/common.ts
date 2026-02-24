@@ -884,7 +884,9 @@ export const carouselIntervalConfig: INumberConfigType = {
   name: '轮播间隔（秒）',
   type: 'NumberInput',
   step: 1,
-  max: 200
+  min: 1,
+  max: 200,
+  precision: 0
 }
 
 // ==================== 默认值与格式 ====================
