@@ -11,6 +11,7 @@ import type { XRichTextConfig } from './schema';
 
 const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
+    align,
     label,
     dataField,
     tooltip,
@@ -19,6 +20,7 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
     defaultValueConfig = '',
     verify,
     layout,
+    placeholder,
     runtime = true
   } = props;
 
@@ -47,6 +49,9 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
           <div dangerouslySetInnerHTML={{ __html: defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '' }}></div>
         ) : (
           <WangEditor
+            align={align}
+            defaultValueConfig={defaultValueConfig}
+            placeholder={placeholder}
             runtime={runtime}
             style={{
               pointerEvents: runtime ? 'unset' : 'none'
