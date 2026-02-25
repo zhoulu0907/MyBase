@@ -7,12 +7,11 @@ const AiCopilotDoc: React.FC = () => {
   const microAppRef = useRef(null);
   const loadedRef = useRef(false);
   useEffect(() => {
-    const entryAdress = 'http://s25029301301.dev.internal.virtueit.net/v1/aicopilot/';
     if (containerRef.current && !loadedRef.current) {
       loadedRef.current = true;
       microAppRef.current = loadMicroApp({
         name: 'ai-copilot-doc',
-        entry: entryAdress||getAiCopilotURL(),
+        entry: getAiCopilotURL(),
         container: containerRef.current,
         props: {
           defaultPage: 'aiDoc-list',
