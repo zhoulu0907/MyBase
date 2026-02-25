@@ -336,19 +336,6 @@ export const instanceOptions = [
   }
 ];
 
-export const entityOptions = [
-  {
-    label: '表单字段1',
-    value: 'field1',
-    type: FieldType.USER
-  },
-  {
-    label: '表单字段2',
-    value: 'field2',
-    type: FieldType.DATE
-  }
-];
-
 export enum userType {
   SAAS = 3,
   INNER = 2

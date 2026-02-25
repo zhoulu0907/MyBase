@@ -14,7 +14,7 @@ import { SidebarContext } from '../../context';
 import { FormulaEditor } from '@/components/FormulaEditor';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 import type { ConditionRule } from './constants';
-import { FieldType, Operator, preNodeOptions, instanceOptions, entityOptions } from './constants';
+import { FieldType, Operator, preNodeOptions, instanceOptions } from './constants';
 import {
   textOpOption,
   longTextOpOption,
@@ -166,6 +166,8 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         fieldType: selectedField?.type || ''
       };
     }
+
+    console.log(value);
     newRules[ruleIndex] = {
       ...newRules[ruleIndex],
       [field]: value,
@@ -220,7 +222,14 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         options = instanceOptions;
         break;
       case 'entity':
-        options = entityOptions;
+        options = [];
+        formSummaryOptions.forEach((op) => {
+          options.push({
+            label: op.displayName,
+            value: op.fieldId,
+            type: op.fieldType
+          });
+        });
         break;
       default:
         options = [];
