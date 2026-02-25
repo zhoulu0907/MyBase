@@ -57,7 +57,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
     [
       {
         fieldScope: '',
-        fieldUuid: '',
+        fieldName: '',
         op: '',
         operatorType: '',
         value: '',
@@ -87,9 +87,9 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         isValid = conditionGroups.every((group) =>
           group.every((item) => {
             if (item.op === Operator.IS_EMPTY || item.op === Operator.IS_NOT_EMPTY) {
-              return item.fieldScope && item.fieldUuid && item.op;
+              return item.fieldScope && item.fieldName && item.op;
             }
-            return item.fieldScope && item.fieldUuid && item.op && item.operatorType && item.value;
+            return item.fieldScope && item.fieldName && item.op && item.operatorType && item.value;
           })
         );
       }
@@ -147,7 +147,8 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         ...fromValue,
         priority
       };
-
+      console.log(line.lineData);
+      return;
       Message.success('保存成功');
       handleClose();
     });
@@ -156,9 +157,9 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
   const handleRuleChange = (groupIndex: number, ruleIndex: number, field: string, value: any, item?: any) => {
     const newGroups = [...conditionGroups];
     const newRules = [...newGroups[groupIndex]];
-    const fields = ['fieldScope', 'fieldUuid', 'op', 'operatorType', 'value'];
+    const fields = ['fieldScope', 'fieldName', 'op', 'operatorType', 'value'];
     const currentFieldIndex = fields.indexOf(field);
-    if (field === 'fieldUuid') {
+    if (field === 'fieldName') {
       const ops = renderFieldIdOptions(item);
       const selectedField = ops.find((opt: any) => opt.value === value);
       newRules[ruleIndex] = {
@@ -344,7 +345,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       ...newGroups[groupIndex],
       {
         fieldScope: '',
-        fieldUuid: '',
+        fieldName: '',
         op: '',
         operatorType: '',
         value: '',
@@ -361,7 +362,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       [
         {
           fieldScope: '',
-          fieldUuid: '',
+          fieldName: '',
           op: '',
           operatorType: '',
           value: '',
@@ -490,10 +491,10 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                                 {/* 业务字段 */}
                                 <Select
                                   className={styles.ruleItemSelect}
-                                  value={item.fieldUuid}
+                                  value={item.fieldName}
                                   style={{ width: 120 }}
                                   disabled={!item.fieldScope}
-                                  onChange={(value) => handleRuleChange(groupIndex, index, 'fieldUuid', value, item)}
+                                  onChange={(value) => handleRuleChange(groupIndex, index, 'fieldName', value, item)}
                                 >
                                   {renderFieldIdOptions(item).map((option: any) => (
                                     <Option key={option.value} value={option.value}>
@@ -506,7 +507,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                                   className={styles.ruleItemSelect}
                                   value={item.op}
                                   style={{ width: 100 }}
-                                  disabled={!item.fieldScope || !item.fieldUuid}
+                                  disabled={!item.fieldScope || !item.fieldName}
                                   onChange={(value) => handleRuleChange(groupIndex, index, 'op', value)}
                                 >
                                   {renderOpOptions(item)}
@@ -535,7 +536,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                                         index={index}
                                         groupIndex={groupIndex}
                                         isDisabled={
-                                          !item.fieldScope || !item.fieldUuid || !item.op || !item.operatorType
+                                          !item.fieldScope || !item.fieldName || !item.op || !item.operatorType
                                         }
                                         onRuleChange={handleRuleChange}
                                         onOpenFormula={() => openFormulaEditor(item, groupIndex, index)}
