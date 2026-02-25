@@ -147,8 +147,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         ...fromValue,
         priority
       };
-      console.log(line.lineData);
-      return;
       Message.success('保存成功');
       handleClose();
     });
