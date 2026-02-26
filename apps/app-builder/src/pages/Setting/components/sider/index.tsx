@@ -20,6 +20,10 @@ import roleSVG from '@/assets/images/user.svg';
 import roleActiveSVG from '@/assets/images/user_active.svg';
 import userInfoSVG from '@/assets/images/userInfo.svg';
 import userInfoActiveSVG from '@/assets/images/userInfo_active.svg';
+import copilotdocSVG from '@/assets/images/aidoc_line.svg';
+import copilotdocActiveSVG from '@/assets/images/aidoc_line_active.svg';
+import wxminiSVG from '@/assets/images/wxmini_line.svg';
+import wxminiActiveSVG from '@/assets/images/wxmini_line_active.svg';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
@@ -144,10 +148,18 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     {
       key: 'copilotdoc',
       title: 'AI生成文档',
-      icon: <img src={corpSVG} />,
-      iconActive: <img src={corpActiveSVG} />,
+      icon: <img src={copilotdocSVG} />,
+      iconActive: <img src={copilotdocActiveSVG} />,
       path: `/onebase/${tenantId}/setting/copilotdoc`,
-      permissionKey: TENANT_MENUS.AIDOC
+    //   permissionKey: TENANT_MENUS.AIDOC
+    },
+    {
+      key: 'wxmini',
+      title: 'AI生成小程序',
+      icon: <img src={wxminiSVG} />,
+      iconActive: <img src={wxminiActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/wxmini`,
+    //   permissionKey: TENANT_MENUS.WXMINI
     }
   ];
 
