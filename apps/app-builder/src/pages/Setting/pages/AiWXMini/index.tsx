@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { loadMicroApp } from 'qiankun';
 import { getAiCopilotURL } from '@onebase/common';
 
-const AiCopilotDoc: React.FC = () => {
+const AiWXMini: React.FC = () => {
   const containerRef = useRef(null);
   const microAppRef = useRef(null);
   const loadedRef = useRef(false);
@@ -14,7 +14,7 @@ const AiCopilotDoc: React.FC = () => {
         entry: getAiCopilotURL(),
         container: containerRef.current,
         props: {
-          defaultPage: 'aiDoc-list',
+          defaultPage: 'wxMini-list',
           fromMain: true
         }
       });
@@ -34,4 +34,4 @@ const AiCopilotDoc: React.FC = () => {
   );
 };
 
-export default AiCopilotDoc;
+export default AiWXMini;

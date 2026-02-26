@@ -104,6 +104,9 @@ const AppBreadcrumb: React.FC<BreadcrumbProps> = ({ className, items }) => {
         case 'copilotdoc':
           title = t('sider.copilotdoc');
           break;
+        case 'wxmini':
+          title = t('sider.wxmini');
+          break;
         default:
           title = decodeURIComponent(segment);
       }

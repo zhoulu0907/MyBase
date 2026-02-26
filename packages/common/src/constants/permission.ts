@@ -27,7 +27,9 @@ export const TENANT_MENUS = {
   CORP: 'tenant:corp', //企业管理
   PROFILE: 'tenant:profile', //个人中心
   THIRD: 'tenant:third', //外部用户
-  PLUGIN: 'tenant:config' //插件管理
+  PLUGIN: 'tenant:config', //插件管理
+  AIDOC: 'tenant:aidoc', //AI生成文档
+  WXMINI: 'tenant:wxmini' //AI生成小程序
 };
 
 /** 空间管理-用户管理 */
