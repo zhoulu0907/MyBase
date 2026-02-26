@@ -166,7 +166,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       };
     }
 
-    console.log(value);
     newRules[ruleIndex] = {
       ...newRules[ruleIndex],
       [field]: value,
@@ -178,7 +177,6 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         {}
       )
     };
-
     newGroups[groupIndex] = newRules;
     setConditionGroups(newGroups);
   };
@@ -225,7 +223,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
         formSummaryOptions.forEach((op) => {
           options.push({
             label: op.displayName,
-            value: op.fieldId,
+            value: op.fieldName,
             type: op.fieldType
           });
         });
