@@ -38,6 +38,11 @@ GET {{baseUrl}}/tiangong/dashboard/device-fault-detection
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
+### 8. 获取仪表盘概览统计信息（设备接入数、区域覆盖、注册用户数）
+GET {{baseUrl}}/tiangong/dashboard/dashboard-summary
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
 ### 天工 => 设备信息
 GET {{baseUrl}}/tiangong/dashboard/device-info-all
 Content-Type: application/json

@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.tiangong.runtime.controller;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.tiangong.vo.dashboard.*;
+import com.cmsr.onebase.module.tiangong.vo.dashboard.DashboardSummaryRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
@@ -148,6 +149,21 @@ public class TGDashboardController {
         DeviceFaultDetectionRespVO respVO = new DeviceFaultDetectionRespVO();
         respVO.setRealTimeAlarms(120);
         respVO.setHistoricalAlarms(1063);
+        return success(respVO);
+    }
+
+    /**
+     * 获取仪表盘概览统计信息（设备接入数、区域覆盖、注册用户数）
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/dashboard-summary")
+    @Operation(summary = "获取仪表盘概览统计信息")
+    public CommonResult<DashboardSummaryRespVO> getDashboardSummary() {
+        DashboardSummaryRespVO respVO = new DashboardSummaryRespVO();
+        respVO.setDeviceCount(72000L);
+        respVO.setRegionCoverage("24省120市");
+        respVO.setUserCount(27000L);
         return success(respVO);
     }
 
