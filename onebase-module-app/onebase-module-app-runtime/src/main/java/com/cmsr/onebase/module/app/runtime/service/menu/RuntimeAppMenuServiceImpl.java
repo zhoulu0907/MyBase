@@ -133,6 +133,34 @@ public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
         return menuListRespVOS;
     }
 
+    @Override
+    public List<Long> listApplicationMenuByName(Boolean isDev, String menuName) {
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
+        // TODO 临时方案，后面要修改
+        appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        //
+
+        if (Boolean.TRUE.equals(isDev)) {
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
+
+        List<Long> menuIds = appAuthSecurityApi.getVisibleMenuIds(userId, applicationId, menuName);
+        if (CollectionUtils.isEmpty(menuIds)) {
+            return Collections.emptyList();
+        }
+
+        return menuIds;
+    }
+
     private LinkedList<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
         List<MenuListRespVO> menuListRespList = BeanUtils.toBean(menuDOS, MenuListRespVO.class);
         enrichPagesetType(menuListRespList);

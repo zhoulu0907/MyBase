@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
 import com.cmsr.onebase.module.app.core.dal.mapper.AppMenuMapper;
 import com.mybatisflex.core.query.QueryWrapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -74,6 +75,19 @@ public class AppMenuRepository extends BaseBizRepository<AppMenuMapper, AppMenuD
                 .where(APP_MENU.APPLICATION_ID.eq(applicationId))
                 .where(APP_MENU.MENU_TYPE.in(menuTypes))
                 .orderBy(AppMenuDO::getMenuSort, true);
+        return list(queryWrapper);
+    }
+
+    public List<AppMenuDO> findByApplicationIdAndTypeAndName(Long applicationId, Set<Integer> menuTypes, String menuName) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_MENU.APPLICATION_ID.eq(applicationId))
+                .where(APP_MENU.MENU_TYPE.in(menuTypes))
+                .orderBy(AppMenuDO::getMenuSort, true);
+
+        //新增通过menuName查询菜单，用于AI查询已有菜单
+        if (StringUtils.isNotBlank(menuName)) {
+            queryWrapper.where(APP_MENU.MENU_NAME.eq(menuName));
+        }
         return list(queryWrapper);
     }
 

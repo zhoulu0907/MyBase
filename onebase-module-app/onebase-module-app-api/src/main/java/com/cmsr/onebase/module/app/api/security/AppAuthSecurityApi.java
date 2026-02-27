@@ -23,6 +23,8 @@ public interface AppAuthSecurityApi {
 
     List<Long> getVisibleMenuIds(Long userId, Long applicationId);
 
+    List<Long> getVisibleMenuIds(Long userId, Long applicationId, String menuName);
+
     OperationPermission getMenuOperationPermission(Long userId, Long applicationId, Long menuId);
 
     DataPermission getMenuDataPermission(Long userId, Long applicationId, Long menuId);
