@@ -48,6 +48,7 @@ public class TGDsahboardSecurityRiskMonitoringController {
         respVO.setUpperClothingDetection(0);
         respVO.setCarViolationDetection(0);
         respVO.setDoorOpeningDetection(0);
+        respVO.setSmokeDetection(0);
         respVO.setPlacementDetection(0);
         respVO.setPersonnelNearBeltDetection(0);
         respVO.setPhoneUsageDetection(0);

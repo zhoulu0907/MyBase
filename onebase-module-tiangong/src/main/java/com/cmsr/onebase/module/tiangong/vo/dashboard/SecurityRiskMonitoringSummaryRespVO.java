@@ -43,6 +43,9 @@ public class SecurityRiskMonitoringSummaryRespVO {
     @Schema(description = "开门检测数量")
     private Integer doorOpeningDetection;
     
+    @Schema(description = "烟雾检测数量")
+    private Integer smokeDetection;
+
     @Schema(description = "搁置检测数量")
     private Integer placementDetection;
     
