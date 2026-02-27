@@ -65,6 +65,7 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       }
     ]
   ]);
+  const [showPreNode, setShowPreNode] = useState(false);
   const [form] = Form.useForm();
   const location = useLocation();
   const ctx = useClientContext();
@@ -400,13 +401,25 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
       !(rangeTypes.includes(item.fieldType as FieldType) && item.op === Operator.RANGE)
     );
   };
+
+  const findsourceNode = (id: string) => {
+    const jsonData = ctx.document.toJSON();
+    const targetElement = jsonData?.edges.find((item) => item.targetNodeID === id);
+    if (targetElement && targetElement.sourceNodeID.startsWith('approver')) {
+      return true;
+    } else if (targetElement) {
+      return findsourceNode(targetElement.sourceNodeID);
+    } else {
+      return false;
+    }
+  };
   useEffect(() => {
     getFormSummaryData();
-
     if (line.lineData) {
       form.setFieldsValue(line.lineData);
       line.lineData.condition && setConditionGroups(line.lineData.condition);
     }
+    setShowPreNode(findsourceNode(line.info.from));
   }, []);
 
   return (
@@ -474,9 +487,11 @@ export function SidebarLineRenderer(props: { line: WorkflowLineEntity }) {
                                   style={{ width: 142 }}
                                   onChange={(value) => handleRuleChange(groupIndex, index, 'fieldScope', value)}
                                 >
-                                  <Option key={'pre_node'} value={'pre_node'}>
-                                    上个审批节点属性
-                                  </Option>
+                                  {showPreNode && (
+                                    <Option key={'pre_node'} value={'pre_node'}>
+                                      上个审批节点属性
+                                    </Option>
+                                  )}
                                   <Option key={'instance'} value={'instance'}>
                                     流程实例属性
                                   </Option>
