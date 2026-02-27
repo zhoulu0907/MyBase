@@ -36,8 +36,8 @@ export const ApproverNodeRegistry: FlowNodeRegistry = {
   },
   onAdd() {
     return {
-      id: `executor_${nanoid(5)}`,
-      type: 'executor',
+      id: `approver_${nanoid(5)}`,
+      type: 'approver',
       data: {
         name: '审批人',
         errorMsg: '节点缺少审批人',

@@ -141,7 +141,14 @@ export const Editor = () => {
 
   // useEffect(() => {
   //   const dispose = ref?.current?.document.linesManager.onAvailableLinesChange((e) => {
-  //     console.log(e, '这里监听线条的新增和删除');
+  //     // 监听条件边线，第一条设为默认分支
+  //     if (e.type === 'ADD_LINE') {
+  //       const lineJson = e.toJSON();
+  //       if (lineJson.sourceNodeID.startsWith('conditional_branch')) {
+  //         const allLines = ref?.current?.document.linesManager.getAllLines();
+  //         console.log(e, lineJson, allLines, '这里监听线条的新增和删除');
+  //       }
+  //     }
   //   });
   //   return () => dispose?.dispose();
   // }, []);
