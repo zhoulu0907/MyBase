@@ -19,6 +19,7 @@ import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.type.UserRefType;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
 import com.cmsr.onebase.module.system.api.user.AdminUserApi;
 import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
@@ -184,6 +185,10 @@ public class ConditionStrategyOb implements ConditionStrategy {
             Map<String, Object> entityMap = entity.getGlobalRawMap();
             if (entityMap != null) {
                 Object v = entityMap.get(fieldName);
+                // 如果是系统字段UserRefType，不能直接返回
+                if (v instanceof UserRefType){
+                    return ((UserRefType) v).getId();
+                }
                 if (v != null) {
                     return v;
                 }
@@ -398,7 +403,17 @@ public class ConditionStrategyOb implements ConditionStrategy {
 //            if (fieldValueByUuid == null || fieldValueByUuid.getFieldName() == null) {
 //                return null;
 //            }
-            return entityMap.get(rawRight);
+            if (entityMap != null) {
+                Object v = entityMap.get(rawRight);
+                // 如果是系统字段UserRefType，不能直接返回
+                if (v instanceof UserRefType){
+                    return ((UserRefType) v).getId();
+                }
+                if (v != null) {
+                    return v;
+                }
+            }
+            return null;
         }
         // 如果是公式
         if (operatorType == OperatorTypeEnum.FORMULA) {
