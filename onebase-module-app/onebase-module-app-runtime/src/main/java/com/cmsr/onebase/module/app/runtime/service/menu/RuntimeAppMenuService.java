@@ -16,4 +16,6 @@ public interface RuntimeAppMenuService {
     List<MenuListRespVO> listApplicationMenu(Boolean isDev);
 
     MenuPermissionVO getMenuPermission(Long menuId);
+
+    List<Long> listApplicationMenuByName(Boolean isDev, String menuName);
 }

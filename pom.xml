@@ -177,6 +177,19 @@
             <name>aliyun</name>
             <url>https://maven.aliyun.com/repository/public</url>
         </repository>
+
+        <!-- CMSR 内部制品库（流水线环境优先使用） -->
+        <repository>
+            <id>cmsr-artifactory-aliyun</id>
+            <name>cmsr-artifactory-maven-aliyun</name>
+            <url>http://artifact.ec.rdcloud.4c.hq.cmcc:80/artifactory/maven-aliyun</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
 </project>
