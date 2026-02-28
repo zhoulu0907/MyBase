@@ -646,7 +646,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         onCancel={() => setBatchConfigModalVisible(false)}
         onOk={handleBatchConfigOk}
         loading={batchConfigLoading}
-        dictType={activeDict?.type || ''}
+        dictTypeId={activeDict?.id || ''}
       />
     </div>
   );
