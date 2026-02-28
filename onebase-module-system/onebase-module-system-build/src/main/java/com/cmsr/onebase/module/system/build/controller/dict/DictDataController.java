@@ -140,6 +140,23 @@ public class DictDataController {
         List<DictDataDO> list = dictDataService.getDictDataList(CommonStatusEnum.ENABLE.getStatus(), dictType);
         return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
     }
+
+    /**
+     * 根据字典类型ID获得字典数据列表（简化版）
+     *
+     * @param dictTypeId 字典类型ID
+     * @return 字典数据列表
+     */
+    @GetMapping("/simple-list-by-dict-type-id")
+    @Operation(summary = "根据字典类型ID获得字典数据列表", description = "简化版本，直接通过字典类型ID查询字典数据")
+    @Parameter(name = "dictTypeId", description = "字典类型ID", required = true, example = "1")
+    // 无需添加权限认证，因为前端全局都需要
+    public CommonResult<List<DictDataSimpleRespVO>> getSimpleDictDataListByDictTypeId(
+            @RequestParam("dictTypeId") Long dictTypeId) {
+        // 直接通过字典类型ID查询字典数据列表
+        List<DictDataDO> list = dictDataService.getDictDataListByDictTypeId(dictTypeId, CommonStatusEnum.ENABLE.getStatus());
+        return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
+    }
     @GetMapping("/page")
     @Operation(summary = "/获得字典类型的分页列表")
     @PreAuthorize("@ss.hasPermission('tenant:dict:query')")

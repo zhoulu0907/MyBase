@@ -10,3 +10,18 @@
 GET {{baseUrl}}/system/dict-data/simple-list
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+### 根据字典类型ID获得字典数据列表（新接口测试）
+GET {{baseUrl}}/system/dict-data/simple-list-by-dict-type-id?dictTypeId=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 测试不存在的字典类型ID
+GET {{baseUrl}}/system/dict-data/simple-list-by-dict-type-id?dictTypeId=999999
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 测试无效的字典类型ID参数
+GET {{baseUrl}}/system/dict-data/simple-list-by-dict-type-id?dictTypeId=invalid
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
