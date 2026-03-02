@@ -406,7 +406,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (CollectionUtils.isEmpty(configListByKeysAndAppId)) {
             throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
         } else {
-            if (configListByKeysAndAppId.get(0).getConfigValue().equals(SystemConfigKeyEnum.appThirdUserEnable_DefaultValue)) {
+            if (!configListByKeysAndAppId.get(0).getConfigValue().equals(String.valueOf(SystemConfigKeyEnum.appThirdUserEnable_DefaultValue))) {
                 throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
             }
         }

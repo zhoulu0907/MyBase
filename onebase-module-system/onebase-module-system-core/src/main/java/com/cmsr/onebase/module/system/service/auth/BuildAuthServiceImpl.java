@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.auth;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.anji.captcha.model.common.ResponseModel;
@@ -38,6 +39,7 @@ import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.util.oauth2.AesCfbCryptoUtil;
 import com.cmsr.onebase.module.system.util.oauth2.OkHttpClientUtils;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
@@ -602,9 +604,15 @@ public class BuildAuthServiceImpl implements BuildAuthService {
             }
             AdminUserDO adminUserDO = JSONUtil.toBean(result, AdminUserDO.class);
             String phone = (String) result.get("phone");
-            //todo 返回的username与phone为加密字段，需解密后存入数据库，要与天工沟通加密方式
 
-            adminUserDO.setMobile(phone);
+            //todo 返回的username与phone为加密字段，需解密后存入数据库，要与天工沟通加密方式
+            if (StrUtil.isNotEmpty(adminUserDO.getUsername())) {
+                adminUserDO.setUsername(AesCfbCryptoUtil.decrypt(adminUserDO.getUsername()));
+            }
+            if (StrUtil.isNotEmpty(phone)){
+                adminUserDO.setMobile(AesCfbCryptoUtil.decrypt(phone));
+            }
+
             AtomicReference<AuthLoginRespVO> loginRespRef = new AtomicReference<>();
             TenantUtils.execute(tenantDo.getId(), () -> {
                 //4.保存用户信息
