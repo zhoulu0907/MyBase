@@ -58,7 +58,7 @@ export interface AdvancedTableOperationConfigProps {
 }
 
 const openTypeOptions = [
-  { label: '侧边栏', value: RedirectMethod.DRAWER },
+  { label: '侧边栏', value: RedirectMethod.DRAWER }
   // { label: '新页签', value: RedirectMethod.NEW_TAB }
 ];
 
@@ -208,14 +208,14 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
         const newValue = newData.map((op: OperationButtonConfig) =>
           op.type === modalButtonVisible
             ? {
-              ...op,
-              buttonName: values.buttonName,
-              buttonIcon: values.buttonIcon,
-              iconColor: values.iconColor,
-              confirmText: values.confirmText,
-              deletedAction: values.deletedAction,
-              redirectPageId: values.redirectPageId,
-              redirectMethod: values.redirectMethod
+                ...op,
+                buttonName: values.buttonName,
+                buttonIcon: values.buttonIcon,
+                iconColor: values.iconColor,
+                confirmText: values.confirmText,
+                deletedAction: values.deletedAction,
+                redirectPageId: values.redirectPageId,
+                redirectMethod: values.redirectMethod
               }
             : op
         );
@@ -300,102 +300,106 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
         </div>
       </Form.Item>
 
-      <div>操作栏配置</div>
-      <Form.Item label="按钮显示方式">
-        <RadioGroup
-          defaultValue={'all'}
-          onChange={(value) => {
-            handlePropsChange('operationButtonShowType', value);
-          }}
-        >
-          {buttonIconOptions.map((button) => (
-            <Radio key={button.label} value={button.value}>
-              {button.label}
-            </Radio>
-          ))}
-        </RadioGroup>
-      </Form.Item>
+      {item.showOpearate === false ? null : (
+        <>
+          <div>操作栏配置</div>
+          <Form.Item label="按钮显示方式">
+            <RadioGroup
+              defaultValue={'all'}
+              onChange={(value) => {
+                handlePropsChange('operationButtonShowType', value);
+              }}
+            >
+              {buttonIconOptions.map((button) => (
+                <Radio key={button.label} value={button.value}>
+                  {button.label}
+                </Radio>
+              ))}
+            </RadioGroup>
+          </Form.Item>
 
-      <Form.Item>
-        <div className={styles.buttonShowRule}>
-          第
-          {
-            <InputNumber
-              defaultValue={configs['operationButtonCollpaseNumber']}
-              className={`buttonShowInput ${styles.buttonInput}`}
-              size="mini"
-              min={1}
-              max={20}
-              onChange={(value) => handlePropsChange('operationButtonCollpaseNumber', +value)}
-            />
-          }
-          个按钮开始收入“更多”菜单
-        </div>
-
-        {configs[operationButton].map((op: OperationButtonConfig, index: number) => (
-          <Fragment key={index}>
-            <div className={styles.buttonItem}>
-              <Grid.Row align="center">
-                <Grid.Col span={16} flex="1">
-                  <Space align="center">
-                    <IconDragDotVertical style={{ cursor: 'grab', color: '#86909c' }} />
-                    <Typography.Text>{op.buttonName}</Typography.Text>
-                    {
-                      <DynamicIcon
-                        IconComponent={iconMap[op.buttonIcon as keyof typeof iconMap]}
-                        theme="outline"
-                        size="16"
-                        fill={op.iconColor}
-                        style={{
-                          margin: 'auto'
-                        }}
-                      />
-                    }
-                  </Space>
-                </Grid.Col>
-
-                <Grid.Col span={8} style={{ textAlign: 'right' }}>
-                  <Space align="center">
-                    <IconEditStroked
-                      onClick={() => handleOpenButtonModal(op)}
-                      style={{ display: 'flex', color: '#86909c', cursor: 'pointer' }}
-                    />
-                    <Switch
-                      size="small"
-                      disabled={op.type === 'edit'}
-                      defaultChecked={op.type === 'edit' ? false : op.display}
-                      onChange={(value) => {
-                        const newArr = [...configs[operationButton]];
-                        newArr[index] = { ...newArr[index], display: value };
-                        handlePropsChange(operationButton, newArr);
-                      }}
-                    />
-                  </Space>
-                </Grid.Col>
-              </Grid.Row>
+          <Form.Item>
+            <div className={styles.buttonShowRule}>
+              第
+              {
+                <InputNumber
+                  defaultValue={configs['operationButtonCollpaseNumber']}
+                  className={`buttonShowInput ${styles.buttonInput}`}
+                  size="mini"
+                  min={1}
+                  max={20}
+                  onChange={(value) => handlePropsChange('operationButtonCollpaseNumber', +value)}
+                />
+              }
+              个按钮开始收入“更多”菜单
             </div>
-            <Divider style={{ margin: 0 }} />
-          </Fragment>
-        ))}
-      </Form.Item>
 
-      <Form.Item label="按钮权限配置">
-        <RadioGroup
-          defaultValue={configs['advancedButtonPermission']}
-          onChange={(value) => {
-            handlePropsChange('advancedButtonPermission', value);
-          }}
-        >
-          {buttonPermissionOptions.map((op, index) => (
-            <Radio key={index} value={op.value}>
-              {op.label}
-              <Tooltip content={op.tips}>
-                <IconExclamationCircle style={{ marginLeft: 4 }} />
-              </Tooltip>
-            </Radio>
-          ))}
-        </RadioGroup>
-      </Form.Item>
+            {configs[operationButton]?.map((op: OperationButtonConfig, index: number) => (
+              <Fragment key={index}>
+                <div className={styles.buttonItem}>
+                  <Grid.Row align="center">
+                    <Grid.Col span={16} flex="1">
+                      <Space align="center">
+                        <IconDragDotVertical style={{ cursor: 'grab', color: '#86909c' }} />
+                        <Typography.Text>{op.buttonName}</Typography.Text>
+                        {
+                          <DynamicIcon
+                            IconComponent={iconMap[op.buttonIcon as keyof typeof iconMap]}
+                            theme="outline"
+                            size="16"
+                            fill={op.iconColor}
+                            style={{
+                              margin: 'auto'
+                            }}
+                          />
+                        }
+                      </Space>
+                    </Grid.Col>
+
+                    <Grid.Col span={8} style={{ textAlign: 'right' }}>
+                      <Space align="center">
+                        <IconEditStroked
+                          onClick={() => handleOpenButtonModal(op)}
+                          style={{ display: 'flex', color: '#86909c', cursor: 'pointer' }}
+                        />
+                        <Switch
+                          size="small"
+                          disabled={op.type === 'edit'}
+                          defaultChecked={op.type === 'edit' ? false : op.display}
+                          onChange={(value) => {
+                            const newArr = [...configs[operationButton]];
+                            newArr[index] = { ...newArr[index], display: value };
+                            handlePropsChange(operationButton, newArr);
+                          }}
+                        />
+                      </Space>
+                    </Grid.Col>
+                  </Grid.Row>
+                </div>
+                <Divider style={{ margin: 0 }} />
+              </Fragment>
+            ))}
+          </Form.Item>
+
+          <Form.Item label="按钮权限配置">
+            <RadioGroup
+              defaultValue={configs['advancedButtonPermission']}
+              onChange={(value) => {
+                handlePropsChange('advancedButtonPermission', value);
+              }}
+            >
+              {buttonPermissionOptions.map((op, index) => (
+                <Radio key={index} value={op.value}>
+                  {op.label}
+                  <Tooltip content={op.tips}>
+                    <IconExclamationCircle style={{ marginLeft: 4 }} />
+                  </Tooltip>
+                </Radio>
+              ))}
+            </RadioGroup>
+          </Form.Item>
+        </>
+      )}
 
       <Modal title="行点击跳转" visible={modalVisible} onCancel={handleCloseModal} onOk={handleOnModal}>
         <Form layout="inline" form={form} className={styles.rowNavModal}>

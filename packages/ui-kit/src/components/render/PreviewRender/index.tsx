@@ -13,6 +13,7 @@ import {
   WorkbenchComponentType,
   WORKBENCH_COMPONENT_TYPES
 } from 'src/components/Materials';
+import { STATUS_OPTIONS, STATUS_VALUES } from 'src/components/Materials/constants';
 
 /**
  * 组件渲染的通用属性
@@ -171,6 +172,11 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
 
     return <Impl {...baseProps} />;
   }, [componentConfig, refresh]);
+
+  // 隐藏的组件 runtime 不展示
+  if (pageComponentSchema?.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
+    return <></>
+  }
 
   return <>{renderComponent()}</>;
 };

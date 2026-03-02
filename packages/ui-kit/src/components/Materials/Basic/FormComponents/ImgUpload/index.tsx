@@ -446,6 +446,20 @@ const XImgUpload = memo(
             disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode || !isRuntimeEnv()}
             drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
             renderUploadList={renderUploadList}
+            tip={!detailMode && (uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] || uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) ? <>
+              {verify?.fileFormatLimit && (
+                <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
+              )}
+              <span>
+                {verify?.maxCountLimit && (
+                  <span>
+                    最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                    {verify?.maxSizeLimit ? '，' : ''}
+                  </span>
+                )}
+                {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
+              </span>
+            </> : undefined}
           >
             {detailMode ? null : (
               <div className="uplaodTrigger">
