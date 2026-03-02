@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
 import { Button, Drawer, Form, Input, Message, Select, Space, Spin } from '@arco-design/web-react';
-import { deleteField, getFieldById, updateField } from '@onebase/app';
-import { ENTITY_FIELD_TYPE, FIELD_TYPE } from '@onebase/ui-kit';
+import { deleteField, getFieldById, type UpdateFieldReqVO, updateField } from '@onebase/app';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import { DeleteConfirmModal } from '../../Modals';
 import styles from './EditFieldDrawer.module.less';
 
@@ -21,6 +21,7 @@ interface FieldDetail {
   entityName: string;
   applicationId: string;
   displayName: string;
+  entityUuid?: string;
 }
 
 interface EditFieldDrawerProps {
@@ -120,6 +121,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
       const updateData = {
         applicationId: curAppId,
         id: fieldDetail.id,
+        entityUuid: fieldDetail.entityUuid,
         entityId: fieldDetail.entityId,
         fieldCode: values.fieldCode,
         fieldName: values.fieldName,
@@ -129,7 +131,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
         displayName: values.displayName
       };
 
-      await updateField(updateData);
+      await updateField(updateData as UpdateFieldReqVO);
       Message.success('更新字段成功');
       setVisible(false);
       onSuccess?.();
