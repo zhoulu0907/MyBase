@@ -27,7 +27,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   const [selectedUser, setSelectedUser] = useState<string[]>([]);
   const [selectedRole, setSelectedRole] = useState<string[]>([]);
   const { curAppInfo } = useAppStore();
-  
+  const [userNoPower, setUserNoPower] = useState<boolean>(false);
+
   const handleChangeUser = (val: string[]) => {
     if (val.length <= userMaxCount) {
       setSelectedUser(val);
@@ -58,6 +59,9 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     }
     getUserPage(params)
       .then((res: any) => {
+        if (userNoPower) {
+          setUserNoPower(false);
+        }
         if (Array.isArray(res?.list)) {
           const selectArr: any[] = [];
           res.list?.forEach((item: any) => {
@@ -71,6 +75,9 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
       })
       .catch((err: any) => {
         console.info('Api getUserPage Error:', err);
+        if (typeof err === 'string' && err.indexOf('没有该操作权限') > -1) {
+          setUserNoPower(true);
+        }
       });
   }
   function initRoleData() {
@@ -235,26 +242,32 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.user}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select
-              mode="multiple"
-              placeholder="选择审批人"
-              value={selectedUser}
-              onChange={handleChangeUser}
-              filterOption={(inputValue, option) =>
-                option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
-              }
-              allowClear
-            >
-              {userOptions?.map((option: any) => (
-                <Option
-                  key={option?.userId}
-                  value={option?.userId}
-                  disabled={selectedUser.length === userMaxCount && !selectedUser.includes(option.userId)}
-                >
-                  {option.name}
-                </Option>
-              ))}
-            </Select>
+            {!userNoPower ? (
+              <Select
+                mode="multiple"
+                placeholder="选择审批人"
+                value={selectedUser}
+                onChange={handleChangeUser}
+                filterOption={(inputValue, option) =>
+                  option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+                }
+                allowClear
+              >
+                {userOptions?.map((option: any) => (
+                  <Option
+                    key={option?.userId}
+                    value={option?.userId}
+                    disabled={selectedUser.length === userMaxCount && !selectedUser.includes(option.userId)}
+                  >
+                    {option.name}
+                  </Option>
+                ))}
+              </Select>
+            ) : (
+              <Select disabled mode="multiple" placeholder="选择审批人" defaultValue={['no_power']}>
+                <Option value="no_power">无权限</Option>
+              </Select>
+            )}
           </FormItem>
         )}
         {simpleCkType === 'role' && (
