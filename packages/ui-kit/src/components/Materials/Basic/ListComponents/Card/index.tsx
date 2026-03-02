@@ -325,13 +325,14 @@ const XCard = memo(
               dataField: [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`],
               label: {
                 display: !isTitle,
-                text: fieldName
+                text: dataFieldInfo.displayName || fieldName
               },
               verify: { required: false },
               tooltip: '',
               layout: layout
             }
           };
+
           return (
             <PreviewRender
               cpId={fieldName}
