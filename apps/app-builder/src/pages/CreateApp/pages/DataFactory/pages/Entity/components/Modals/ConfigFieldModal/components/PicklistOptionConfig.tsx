@@ -193,7 +193,7 @@ export const PicklistOptionConfig: React.FC<PicklistOptionConfigProps> = ({
         ))}
       </Select>
 
-      <div>
+      <div className={styles.optionsContainer}>
         {optionType === CONFIG_TYPE.CUSTOM &&
           options.map((option, index) => (
             <div key={index} className={styles.optionItem}>

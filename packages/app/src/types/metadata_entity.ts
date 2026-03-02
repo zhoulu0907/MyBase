@@ -124,6 +124,7 @@ export interface GetEntityPageParams {
 export interface CreateFieldReqVO {
   appId: string;
   entityId: string;
+  entityUuid?: string;
   fieldCode?: string;
   fieldName: string;
   description: string;
