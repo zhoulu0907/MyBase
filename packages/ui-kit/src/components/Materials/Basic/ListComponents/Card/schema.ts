@@ -28,6 +28,7 @@ import {
   statusConfig,
   layoutConfig,
   cardWidthConfig,
+  rowRedirectConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
@@ -41,6 +42,7 @@ import {
   STATUS_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  RedirectMethod
 } from '../../../constants';
 
 export interface XCardSchema {
@@ -136,6 +138,13 @@ export interface XCardConfig extends ICommonBaseType {
    * 卡片宽度
    */
   cardWidth: TSelectDefaultType<TWidthSelectKeyType>;
+
+  /**
+   * 行点击跳转
+   */
+  advancedRowRedirect?: TBooleanDefaultType;
+  redirectPageId?: TTextDefaultType;
+  redirectMethod?: TTextDefaultType;
 }
 
 const XCard: XCardSchema = {
@@ -157,7 +166,15 @@ const XCard: XCardSchema = {
     // 字段布局方式
     layoutConfig,
     // 宽度
-    cardWidthConfig
+    cardWidthConfig,
+    // 点击跳转
+    {
+      key: 'advancedRowRedirect',
+      name: '行点击跳转',
+      type: 'TableData',
+      advanced: true,
+      showOpearate: false
+    },
   ],
   config: {
     ...baseDefault,
@@ -179,7 +196,10 @@ const XCard: XCardSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
-    cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER]
+    cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
+    advancedRowRedirect: true,
+    redirectPageId: '',
+    redirectMethod: RedirectMethod.DRAWER,
   }
 };
 

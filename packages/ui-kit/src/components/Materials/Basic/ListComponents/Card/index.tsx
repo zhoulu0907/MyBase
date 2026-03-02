@@ -18,7 +18,7 @@ import { useFormEditorSignal } from 'src/signals/page_editor';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
 import type { XCardConfig } from './schema';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, RedirectMethod } from '../../../constants';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import PreviewRender from 'src/components/render/PreviewRender';
 import CardSearch from './cardSerach';
@@ -80,6 +80,9 @@ const XCard = memo(
       showFromPageData,
       refresh,
       sortBy,
+      advancedRowRedirect,
+      redirectPageId,
+      redirectMethod,
     } = props;
     const [form] = Form.useForm();
     const [cardForm] = Form.useForm();
@@ -349,6 +352,50 @@ const XCard = memo(
       return <span>{_record[fieldName]}</span>;
     };
 
+    // 行点击事件
+    const handleRowClick = (record: any) => {
+      if (!runtime) {
+        return;
+      }
+      if (advancedRowRedirect) {
+        if (redirectMethod === RedirectMethod.DRAWER) {
+          // 打开抽屉显示详情
+          setDrawerVisible(true);
+          redirectPageId && setDrawerPageId(redirectPageId);
+          if (record.bpm_instance_id) {
+            setRowDataType(PageType.BPM);
+            setBpmInstanceId(record.bpm_instance_id);
+          } else {
+            setRowDataType(PageType.NORMAL);
+            setBpmInstanceId('');
+          }
+          handleEdit(record.id, false);
+          if (runtime) {
+            redirectPageId && setDetailPageViewId(redirectPageId);
+          }
+        } else if (redirectMethod === RedirectMethod.NEW_TAB) {
+          // 打开新的标签页
+        }
+      }
+    };
+
+    const handleEdit = (id: string, toFormPage: boolean, record?: any) => {
+      if (!runtime) {
+        return;
+      }
+      if (record) {
+        if (record.bpm_instance_id) {
+          setRowDataType(PageType.BPM);
+          setBpmInstanceId(record.bpm_instance_id);
+        } else {
+          setRowDataType(PageType.NORMAL);
+          setBpmInstanceId('');
+        }
+      }
+      setRowDataId(id);
+      showFromPageData?.(id, toFormPage);
+    };
+
     return (
       <div
         style={{
@@ -402,6 +449,7 @@ const XCard = memo(
                   <Card
                     className="card"
                     bordered={false}
+                    onClick={handleRowClick}
                     cover={
                       coverField ? (
                         <img
