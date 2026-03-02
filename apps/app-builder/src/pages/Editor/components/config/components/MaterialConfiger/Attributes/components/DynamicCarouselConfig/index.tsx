@@ -54,6 +54,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('visitMode', 'public');
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {
