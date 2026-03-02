@@ -12,7 +12,7 @@ export interface DynamicOptionsProps {
   id: string;
 }
 
-const DynamicOptionsConfig: React.FC<DynamicOptionsProps> = ({ handlePropsChange, item, configs, id }) => {
+const DynamicOptionsConfig: React.FC<DynamicOptionsProps> = ({ item, configs }) => {
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const { appDict } = menuDictSignal;
