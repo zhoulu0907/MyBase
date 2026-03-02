@@ -28,6 +28,8 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   const [selectedRole, setSelectedRole] = useState<string[]>([]);
   const { curAppInfo } = useAppStore();
   const [userNoPower, setUserNoPower] = useState<boolean>(false);
+  // 标记获取userOptions列表数据的接口已经执行完成
+  const [userOptsStatus, setUserOptsStatus] = useState<number>(0);
 
   const handleChangeUser = (val: string[]) => {
     if (val.length <= userMaxCount) {
@@ -57,6 +59,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     if (curAppInfo.publishModel && curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
       params.userType = userType.SAAS;
     }
+    setUserOptsStatus(1);
     getUserPage(params)
       .then((res: any) => {
         if (userNoPower) {
@@ -72,12 +75,14 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
           });
           setUserOptions(selectArr);
         }
+        setUserOptsStatus(2);
       })
       .catch((err: any) => {
         console.info('Api getUserPage Error:', err);
         if (typeof err === 'string' && err.indexOf('没有该操作权限') > -1) {
           setUserNoPower(true);
         }
+        setUserOptsStatus(2);
       });
   }
   function initRoleData() {
@@ -157,20 +162,22 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     return !isSame;
   }
   useEffect(() => {
-    const configMap = {
-      role: { key: 'roles', formField: 'role', idField: 'roleId' },
-      user: { key: 'users', formField: 'user', idField: 'userId' }
-    } as const;
-    const config = configMap[approverConfig?.handlerType as keyof typeof configMap];
-    const dataArray = config ? approverConfig?.[config.key] : undefined;
-    if (dataArray && dataArray.length > 0) {
-      const formData = form.getFieldsValue([config.formField]);
-      const isChange = needFormFill(dataArray, formData?.[config.formField], config.idField);
-      if (isChange) {
-        setInitData();
+    if (approverConfig?.handlerType && userOptsStatus === 2) {
+      const configMap = {
+        role: { key: 'roles', formField: 'role', idField: 'roleId' },
+        user: { key: 'users', formField: 'user', idField: 'userId' }
+      } as const;
+      const config = configMap[approverConfig?.handlerType as keyof typeof configMap];
+      const dataArray = config ? approverConfig?.[config.key] : undefined;
+      if (dataArray && dataArray.length > 0) {
+        const formData = form.getFieldsValue([config.formField]);
+        const isChange = needFormFill(dataArray, formData?.[config.formField], config.idField);
+        if (isChange) {
+          setInitData();
+        }
       }
     }
-  }, [approverConfig]);
+  }, [approverConfig, userOptsStatus]);
 
   useEffect(() => {
     initUserData();
@@ -182,7 +189,14 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     if (handlerType) {
       setSimpleCkType(handlerType);
       if (handlerType === 'user') {
-        const userArr = users.map((item: any) => item.userId);
+        let userArr = users.map((item: any) => item.userId);
+        // 如果审批人下拉列表有数据，需要进行过滤，把不存在于列表的项，删除
+        if (userOptions?.length > 0) {
+          const listUserIds = userOptions.map((item: any) => item.userId);
+          userArr = userArr.filter((uid: any) => {
+            return listUserIds.indexOf(uid) > -1;
+          });
+        }
         prevUserIdsRef.current = userArr;
         form.setFieldsValue({
           user: userArr
