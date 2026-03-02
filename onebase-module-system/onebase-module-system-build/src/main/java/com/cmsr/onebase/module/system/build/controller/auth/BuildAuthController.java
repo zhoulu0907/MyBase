@@ -134,7 +134,7 @@ public class BuildAuthController {
     @PermitAll
     @ApiSignIgnore
     @Operation(summary = "天宫平台用户登录")
-    public AuthLoginRespVO tianGongLogin(@RequestParam @NotBlank(message = "{code}不能为空") String code, @RequestParam(required = false) String state, HttpServletResponse response) throws IOException {
+    public AuthLoginRespVO tianGongLogin(@RequestParam @NotBlank(message = "{code}不能为空") String code, @RequestParam(required = false) String state, HttpServletResponse response) {
 
         AuthLoginRespVO authLoginRespVO = authService.tianGongLogin(code, state);
         // 设置Cookie
