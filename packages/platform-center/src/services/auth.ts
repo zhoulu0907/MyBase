@@ -74,8 +74,8 @@ export interface TiangongLoginRequest {
 
 export const tiangongLogin = (req: TiangongLoginRequest) => {
   const { code, appName } = req;
-  return systemService.get('/system/auth/tiangong-login', {
-    params: { code, state: appName }
+  return systemService.get('/auth/tiangong-login', {
+    code
   });
 };
 
