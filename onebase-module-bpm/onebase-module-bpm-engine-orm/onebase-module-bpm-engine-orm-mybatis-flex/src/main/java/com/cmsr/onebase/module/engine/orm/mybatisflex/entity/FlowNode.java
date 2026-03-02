@@ -49,7 +49,7 @@ public class FlowNode extends WarmFlowBizEntity implements Node {
 
     /** 签署比例值 */
     @Column(value = "node_ratio", comment = "签署比例值")
-    private BigDecimal nodeRatio;
+    private String nodeRatio;
 
     /** 坐标 */
     @Column(value = "coordinate", comment = "坐标")

@@ -13,29 +13,26 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.cmsr.onebase.module.bpm.core.expression;
+package org.dromara.warm.flow.core.strategy;
 
-import com.cmsr.onebase.module.bpm.core.helper.SpelHelper;
-import org.dromara.warm.flow.core.strategy.ListenerStrategy;
-
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * spel监听器表达式 #{@user.eval()}
+ * 监听器表达式策略接口
  *
- * @author warm
+ * @author warm,battcn
  */
-public class ListenerStrategySpel implements ListenerStrategy {
+public interface ListenerStrategy extends ExpressionStrategy<Boolean> {
+
+    /**
+     * 监听器表达式策略实现类集合
+     */
+    List<ExpressionStrategy<Boolean>> EXPRESSION_STRATEGY_LIST = new ArrayList<>();
 
     @Override
-    public String getType() {
-        return "#";
+    default void setExpression(ExpressionStrategy<Boolean> expressionStrategy) {
+        EXPRESSION_STRATEGY_LIST.add(expressionStrategy);
     }
 
-    @Override
-    public Boolean eval(String expression, Map<String, Object> variable) {
-        SpelHelper.parseExpression(expression, variable);
-        // 恒返回true，说明匹配上监听器表达式，扩展策略也一定要返回true
-        return true;
-    }
 }

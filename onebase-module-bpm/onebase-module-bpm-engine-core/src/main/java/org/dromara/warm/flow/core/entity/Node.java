@@ -17,7 +17,6 @@ package org.dromara.warm.flow.core.entity;
 
 import org.dromara.warm.flow.core.FlowEngine;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -100,9 +99,9 @@ public interface Node extends RootEntity {
 
     Node setNodeName(String nodeName);
 
-    BigDecimal getNodeRatio();
+    String getNodeRatio();
 
-    Node setNodeRatio(BigDecimal nodeRatio);
+    Node setNodeRatio(String nodeRatio);
 
     String getPermissionFlag();
 
@@ -123,14 +122,6 @@ public interface Node extends RootEntity {
     String getListenerPath();
 
     Node setListenerPath(String listenerPath);
-
-    String getHandlerType();
-
-    Node setHandlerType(String listenerType);
-
-    String getHandlerPath();
-
-    Node setHandlerPath(String listenerPath);
 
     String getFormCustom();
 
@@ -166,7 +157,6 @@ public interface Node extends RootEntity {
             .setDelFlag(this.getDelFlag())
             .setNodeType(this.getNodeType())
             .setDefinitionId(this.getDefinitionId())
-            .setDefinitionUuid(this.getDefinitionUuid())
             .setNodeCode(this.getNodeCode())
             .setNodeName(this.getNodeName())
             .setNodeRatio(this.getNodeRatio())
@@ -176,8 +166,6 @@ public interface Node extends RootEntity {
             .setAnyNodeSkip(this.getAnyNodeSkip())
             .setListenerType(this.getListenerType())
             .setListenerPath(this.getListenerPath())
-            .setHandlerType(this.getHandlerType())
-            .setHandlerPath(this.getHandlerPath())
             .setFormCustom(this.getFormCustom())
             .setFormPath(this.getFormPath())
             .setExt(this.getExt());

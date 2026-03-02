@@ -16,7 +16,7 @@
 package com.cmsr.onebase.module.bpm.core.expression;
 
 import com.cmsr.onebase.module.bpm.core.helper.SpelHelper;
-import org.dromara.warm.flow.core.condition.ConditionStrategy;
+import org.dromara.warm.flow.core.strategy.ConditionStrategy;
 
 import java.util.Map;
 
