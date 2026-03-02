@@ -15,6 +15,11 @@ const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const userMaxCount = 100;
 const roleMaxCount = 10;
+const enum UserOptsEnum {
+  Initial = 0,
+  Ready = 1,
+  Done = 2
+}
 const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -29,7 +34,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   const { curAppInfo } = useAppStore();
   const [userNoPower, setUserNoPower] = useState<boolean>(false);
   // 标记获取userOptions列表数据的接口已经执行完成
-  const [userOptsStatus, setUserOptsStatus] = useState<number>(0);
+  const [userOptsStatus, setUserOptsStatus] = useState<number>(UserOptsEnum.Initial);
 
   const handleChangeUser = (val: string[]) => {
     if (val.length <= userMaxCount) {
@@ -59,7 +64,7 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     if (curAppInfo.publishModel && curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
       params.userType = userType.SAAS;
     }
-    setUserOptsStatus(1);
+    setUserOptsStatus(UserOptsEnum.Ready);
     getUserPage(params)
       .then((res: any) => {
         if (userNoPower) {
@@ -75,14 +80,14 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
           });
           setUserOptions(selectArr);
         }
-        setUserOptsStatus(2);
+        setUserOptsStatus(UserOptsEnum.Done);
       })
       .catch((err: any) => {
         console.info('Api getUserPage Error:', err);
         if (typeof err === 'string' && err.indexOf('没有该操作权限') > -1) {
           setUserNoPower(true);
         }
-        setUserOptsStatus(2);
+        setUserOptsStatus(UserOptsEnum.Done);
       });
   }
   function initRoleData() {
