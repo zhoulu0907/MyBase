@@ -180,10 +180,8 @@ const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
       if (filteredInfoList.length > 0) {
         return filteredInfoList.map((infoField: string, index: number) => {
           const infoValue = getInfoValue(infoField);
-          const label = `辅助信息${index + 1}`;
           return (
             <div key={index} className="canvas-card-info-item">
-              <Text type="secondary">{label}</Text>
               <Text>{infoValue || renderFieldPreview(infoField, '')}</Text>
             </div>
           );
