@@ -104,7 +104,7 @@ const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
     if (!fieldName || !record) return '';
     const value = record[fieldName];
     if (value === null || value === undefined) return '';
-    if (typeof value === 'object') return (value as any).id || '';
+    if (typeof value === 'object') return (value as any).name || '';
     return String(value);
   };
 

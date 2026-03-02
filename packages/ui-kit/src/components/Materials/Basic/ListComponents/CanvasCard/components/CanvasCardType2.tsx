@@ -32,7 +32,7 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
     if (!fieldName || !record) return '';
     const value = record[fieldName];
     if (value === null || value === undefined) return '';
-    if (typeof value === 'object') return (value as any).id || '';
+    if (typeof value === 'object') return (value as any).name || '';
     return String(value);
   };
 
