@@ -1,5 +1,5 @@
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Form, Grid, Input, Message, Modal, Select, Space } from '@arco-design/web-react';
+import { Form, Grid, Input, InputNumber, Message, Modal, Select, Space } from '@arco-design/web-react';
 import * as ruleService from '@onebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAppStore } from '@/store/store_app';
@@ -295,23 +295,13 @@ const CreateOtherRule: React.FC<CreateRuleModalProps> = ({
         {ruleType === VALIDATION_TYPES.LENGTH && (
           <Grid.Row gutter={16}>
             <Grid.Col span={12}>
-              <Form.Item
-                label="最小长度"
-                field="minLength"
-                rules={[{ required: true, message: '请输入最小长度' }]}
-                initialValue="0"
-              >
-                <Input placeholder="请输入最小长度" />
+              <Form.Item label="最小长度" field="minLength" rules={[{ required: true, message: '请输入最小长度' }]}>
+                <InputNumber placeholder="请输入最小长度" min={0} max={8000} defaultValue={0} />
               </Form.Item>
             </Grid.Col>
             <Grid.Col span={12}>
-              <Form.Item
-                label="最大长度"
-                field="maxLength"
-                rules={[{ required: true, message: '请输入最大长度' }]}
-                initialValue="800"
-              >
-                <Input placeholder="请输入最大长度" />
+              <Form.Item label="最大长度" field="maxLength" rules={[{ required: true, message: '请输入最大长度' }]}>
+                <InputNumber placeholder="请输入最大长度" min={0} max={8000} defaultValue={800} />
               </Form.Item>
             </Grid.Col>
           </Grid.Row>
