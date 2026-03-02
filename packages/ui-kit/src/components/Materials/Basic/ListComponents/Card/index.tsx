@@ -1,5 +1,5 @@
-import { Button, Form, List, Card, Empty } from '@arco-design/web-react';
-import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
+import { Button, Form, List, Card, Empty, Message, Tooltip, Popconfirm } from '@arco-design/web-react';
+import { IconPlus, IconRefresh, IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { isRuntimeEnv, menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
@@ -7,18 +7,24 @@ import {
   dataMethodPageV2,
   getEntityFieldsWithChildren,
   getFormDataPage,
+  deleteFormDataPage,
+  DeleteMethodV2Params,
+  dataMethodDeleteV2,
   attachmentDownload,
   menuSignal,
   PageMethodV2Params,
+  queryFlowExecForm,
   PageType,
   VALIDATION_TYPE,
+  CATEGORY_TYPE,
+  TRIGGER_EVENTS,
   type AppEntityField
 } from '@onebase/app';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
 import type { XCardConfig } from './schema';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, RedirectMethod } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, RedirectMethod, TableOperationButton } from '../../../constants';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import PreviewRender from 'src/components/render/PreviewRender';
 import CardSearch from './cardSerach';
@@ -64,6 +70,7 @@ const XCard = memo(
     const {
       status,
       runtime = true,
+      preview,
       metaData,
       tableName,
       coverField,
@@ -83,7 +90,10 @@ const XCard = memo(
       advancedRowRedirect,
       redirectPageId,
       redirectMethod,
+      operationButton
     } = props;
+    const hasOperationPermission = true;
+
     const [form] = Form.useForm();
     const [cardForm] = Form.useForm();
     // 实际查询用的参数
@@ -379,6 +389,7 @@ const XCard = memo(
       }
     };
 
+    // 编辑
     const handleEdit = (id: string, toFormPage: boolean, record?: any) => {
       if (!runtime) {
         return;
@@ -394,6 +405,44 @@ const XCard = memo(
       }
       setRowDataId(id);
       showFromPageData?.(id, toFormPage);
+    };
+
+    // 删除
+    const handleDelete = async (id: string) => {
+      if (!runtime) {
+        return;
+      }
+
+      const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.LIST);
+      const pageId = curFormPage?.id;
+
+      const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+
+      const deleteFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.DELETE)
+      );
+      setFlows(deleteFlows);
+
+      const req: DeleteMethodV2Params = {
+        id: id
+      };
+      let res: any;
+      if (props?.pageSetType === PageType.BPM) {
+        const params = {
+          menuId: curMenu.value?.id,
+          tableName,
+          ...req
+        };
+        res = await deleteFormDataPage(params);
+      } else {
+        res = await dataMethodDeleteV2(tableName, curMenu.value?.id, req);
+      }
+
+      if (res) {
+        Message.success('删除成功');
+      }
+
+      handlePage();
     };
 
     return (
@@ -446,33 +495,81 @@ const XCard = memo(
               noDataElement={<div style={{ padding: '10px 0 20px' }}><Empty /></div>}
               render={(item, index) => {
                 return (
-                  <Card
-                    className="card"
-                    bordered={false}
-                    onClick={handleRowClick}
-                    cover={
-                      coverField ? (
-                        <img
-                          style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
-                          src={item[coverField]}
-                          alt=""
-                        />
-                      ) : undefined
-                    }
-                  >
-                    <Card.Meta
-                      title={titleField ? renderItem(item, titleField, index, true) : undefined}
-                      description={
-                        showFields ? (
-                          <>
-                            {columns?.map((ele, i) => (
-                              <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
-                            ))}
-                          </>
+                  <div className='cardItem'>
+                    <Card
+                      className="card"
+                      bordered={false}
+                      onClick={handleRowClick}
+                      cover={
+                        coverField ? (
+                          <img
+                            style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
+                            src={item[coverField]}
+                            alt=""
+                          />
                         ) : undefined
                       }
-                    />
-                  </Card>
+                    >
+                      <Card.Meta
+                        title={titleField ? renderItem(item, titleField, index, true) : undefined}
+                        description={
+                          showFields ? (
+                            <>
+                              {columns?.map((ele, i) => (
+                                <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
+                              ))}
+                            </>
+                          ) : undefined
+                        }
+                      />
+                    </Card>
+                    <div className='cardExtra'>
+                        {operationButton?.map((opearate, index) => (
+                          <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
+                            {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
+                              <Button
+                                type="text"
+                                size="small"
+                                style={{ padding: '0 8px' }}
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleEdit(item.id, true, item);
+                                }}
+                                icon={<IconEdit />}
+                              ></Button>
+                            )}
+
+                            {opearate.type === TableOperationButton.DELETE && opearate.display && canDelete.value && (
+                              <div onClick={(event) => event.stopPropagation()}>
+                                <Popconfirm
+                                  focusLock
+                                  title="确认删除"
+                                  content={opearate.confirmText}
+                                  disabled={preview}
+                                  onOk={(event) => {
+                                    event.stopPropagation();
+                                    handleDelete(item.id);
+                                  }}
+                                >
+                                  <Button
+                                    type="text"
+                                    size="small"
+                                    disabled={preview}
+                                    style={{ padding: '0 4px' }}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                    }}
+                                    status={'danger'}
+                                    icon={<IconDelete />}
+                                  >
+                                  </Button>
+                                </Popconfirm>
+                              </div>
+                            )}
+                          </Tooltip>
+                        ))}
+                      </div>
+                  </div>
                 )
               }}
               onReachBottom={(currentPage) => {
