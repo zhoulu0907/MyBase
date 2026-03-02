@@ -79,6 +79,7 @@
   color: #666;
   height: 48px;
   overflow: hidden;
+  flex: 1;
 }
 
 .canvas-card-footer {
@@ -104,6 +105,13 @@
 .canvas-card-stats {
   font-size: 12px;
   color: #999;
+  display: flex;
+  align-items: center;
+}
+
+.pc-typography-secondary {
+  display: flex;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
