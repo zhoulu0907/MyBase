@@ -124,6 +124,7 @@ const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
     if (runtime && record && fieldName) {
       const value = getFieldValue(fieldName);
       if (value) return value;
+      return null;
     }
     return defaultValue || '';
   };
@@ -169,16 +170,25 @@ const CanvasCardType1 = memo((props: CanvasCardType1Props) => {
         return '';
       };
 
-      return infoList.map((infoField: string, index: number) => {
-        const infoValue = getInfoValue(infoField);
-        const label = `辅助信息${index + 1}`;
-        return (
-          <div key={index} className="canvas-card-info-item">
-            <Text type="secondary">{label}</Text>
-            <Text>{infoValue || renderFieldPreview(infoField, '')}</Text>
-          </div>
-        );
-      });
+      const filteredInfoList = runtime && record
+        ? infoList.filter(infoField => {
+            const infoValue = getInfoValue(infoField);
+            return infoValue && infoValue.trim() !== '';
+          })
+        : infoList;
+
+      if (filteredInfoList.length > 0) {
+        return filteredInfoList.map((infoField: string, index: number) => {
+          const infoValue = getInfoValue(infoField);
+          const label = `辅助信息${index + 1}`;
+          return (
+            <div key={index} className="canvas-card-info-item">
+              <Text type="secondary">{label}</Text>
+              <Text>{infoValue || renderFieldPreview(infoField, '')}</Text>
+            </div>
+          );
+        });
+      }
     }
     return null;
   };

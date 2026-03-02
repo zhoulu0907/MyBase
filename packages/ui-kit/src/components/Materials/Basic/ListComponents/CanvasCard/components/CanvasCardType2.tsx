@@ -52,7 +52,7 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
     if (runtime && record && fieldName) {
       const value = getFieldValue(fieldName);
       if (value) return value;
-      return '';
+      return null;
     }
     return defaultValue || '';
   };
@@ -107,16 +107,25 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
   const renderCardFields = () => {
     const renderList = cardFields.filter((field: string) => field);
     if (renderList.length > 0) {
-      return (
-        <div className="canvas-card-fields-type2">
-          {renderList.map((fieldName: string, index: number) => (
-            <div key={index} className="canvas-card-field-item">
-              <Text type="secondary">{getFieldName(fieldName)}</Text>
-              <Text>{renderContent(fieldName, renderFieldPreview(fieldName, ''))}</Text>
-            </div>
-          ))}
-        </div>
-      );
+      const filteredList = runtime && record
+        ? renderList.filter(fieldName => {
+            const value = getFieldValue(fieldName);
+            return value && value.trim() !== '';
+          })
+        : renderList;
+
+      if (filteredList.length > 0) {
+        return (
+          <div className="canvas-card-fields-type2">
+            {filteredList.map((fieldName: string, index: number) => (
+              <div key={index} className="canvas-card-field-item">
+                <Text type="secondary">{getFieldName(fieldName)}</Text>
+                <Text>{renderContent(fieldName, renderFieldPreview(fieldName, ''))}</Text>
+              </div>
+            ))}
+          </div>
+        );
+      }
     }
     return null;
   };
