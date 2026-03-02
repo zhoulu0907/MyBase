@@ -10,7 +10,8 @@ import { ReactSortable, type SortableEvent } from 'react-sortablejs';
 import {
   ALL_COMPONENT_TYPES,
   ENTITY_COMPONENT_TYPES,
-  FORM_COMPONENT_TYPES
+  FORM_COMPONENT_TYPES,
+  LIST_COMPONENT_TYPES
 } from 'src/components/Materials/componentTypes';
 import { COMPONENT_MAP } from 'src/components/Materials/componentsMap';
 import {
@@ -21,6 +22,7 @@ import {
   WIDTH_VALUES
 } from 'src/components/Materials/constants';
 import { getComponentConfig, getComponentSchema, getComponentWidth } from 'src/components/Materials/schema';
+import { ENTITY_FIELD_TYPE } from 'src/components/DataFactory'
 import EditRender from 'src/components/render/EditRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { useAppEntityStore } from 'src/signals/store_entity';
@@ -37,6 +39,20 @@ interface LayoutReactSortableProps {
   index: number;
   runtime?: boolean;
 }
+
+// 暂时不能在表格展示的数据类型
+export const hiddenFieldTypes = [
+  ENTITY_FIELD_TYPE.RELATION.VALUE,
+  ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+  ENTITY_FIELD_TYPE.ARRAY.VALUE,
+  ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+  ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+  ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+  ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
+];
 const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
   id,
   sortableId,
@@ -96,6 +112,23 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     schema.config.cpName = itemDisplayName;
     schema.config.id = cpID;
     schema.config.dataField = tableName && fieldName ? [tableName, fieldName] : [];
+
+    // 表格 自动预配置【数据绑定】为当前表单绑定实体  表头一并带出
+    if (itemType === LIST_COMPONENT_TYPES.TABLE) {
+      schema.config.tableName = mainEntity.tableName;
+      schema.config.metaData = mainEntity.entityUuid;
+      schema.config.columns = mainEntity.fields
+        .filter(
+          (item) => item.isSystemField !== 1 && item.fieldType && !hiddenFieldTypes.includes(item.fieldType)
+        )
+        .map((item) => ({
+          // 保留已有的命名，如果没有则使用字段展示名称
+          title: item.displayName,
+          dataIndex: item.fieldName,
+          disabled: item.disabled,
+          id: item.id
+        }));
+    }
 
     // 主表 字段组件
     if (tableName && fieldName) {
@@ -487,14 +520,14 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
 
-    const checkPos = (e) => {
+    const checkPos = (e:any) => {
       const rect = wrapper.getBoundingClientRect();
       const inside = e.clientX >= rect.left && e.clientX <= rect.right &&
         e.clientY >= rect.top && e.clientY <= rect.bottom;
       wrapper.classList.toggle('drag-over', inside && (!colComponents[index] || colComponents[index].length === 0));
     };
 
-    const handleDown = (e) => {
+    const handleDown = (e:any) => {
       if (!wrapper.contains(e.target)) window.addEventListener('mousemove', checkPos);
     };
 
