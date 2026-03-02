@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -135,6 +136,24 @@ public class TGDsahboardSecurityRiskMonitoringController {
         return success(screenshotList);
     }
 
+    /**
+     * 获取违规列表
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/violation-list")
+    @Operation(summary = "获取违规列表")
+    public CommonResult<List<ViolationListRespVO>> getViolationList() {
+        List<ViolationListRespVO> violationList = List.of(
+                createViolationList(1, "区域入侵检测", "A区 一楼", "摄像头001", LocalDateTime.now().minusMinutes(2), "待审核", "https://example.com/image1.jpg"),
+                createViolationList(2, "非机动车违规", "B区 二楼", "摄像头002", LocalDateTime.now().minusMinutes(5), "已通过", "https://example.com/image2.jpg"),
+                createViolationList(3, "油污泄漏检测", "C区 地下室", "摄像头003", LocalDateTime.now().minusMinutes(8), "驳回", "https://example.com/image3.jpg"),
+                createViolationList(4, "围栏识别", "D区 外围", "摄像头004", LocalDateTime.now().minusMinutes(12), "待审核", "https://example.com/image4.jpg"),
+                createViolationList(5, "防尘检测", "E区 车间", "摄像头005", LocalDateTime.now().minusMinutes(15), "已通过", "https://example.com/image5.jpg")
+        );
+        return success(violationList);
+    }
+
     // 私有辅助方法
     private ViolationAddressTop5RespVO createViolationAddressTop5(Integer rank, String addressName, Integer violationCount) {
         ViolationAddressTop5RespVO vo = new ViolationAddressTop5RespVO();
@@ -164,6 +183,18 @@ public class TGDsahboardSecurityRiskMonitoringController {
         vo.setCameraInfo(cameraInfo);
         vo.setAddress(address);
         vo.setTimeInfo(timeInfo);
+        return vo;
+    }
+
+    private ViolationListRespVO createViolationList(Integer sequenceNumber, String violationType, String address, String camera, LocalDateTime time, String auditStatus, String imageUrl) {
+        ViolationListRespVO vo = new ViolationListRespVO();
+        vo.setSequenceNumber(sequenceNumber);
+        vo.setViolationType(violationType);
+        vo.setAddress(address);
+        vo.setCamera(camera);
+        vo.setTime(time);
+        vo.setAuditStatus(auditStatus);
+        vo.setImageUrl(imageUrl);
         return vo;
     }
 }

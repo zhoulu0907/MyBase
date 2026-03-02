@@ -43,6 +43,11 @@ GET {{baseUrl}}/tiangong/dashboard/dashboard-summary
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
+### 9. 获取隐患工单列表
+GET {{baseUrl}}/tiangong/dashboard/hazard-work-order-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
 ### 天工 => 设备信息
 GET {{baseUrl}}/tiangong/dashboard/device-info-all
 Content-Type: application/json

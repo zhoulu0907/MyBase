@@ -124,6 +124,22 @@ public class TGDashboardController {
     }
 
     /**
+     * 获取隐患工单列表（用于大屏展示）
+     */
+    @PermitAll
+    @ApiSignIgnore
+    @GetMapping("/hazard-work-order-list")
+    @Operation(summary ="隐患工单列表")
+    public CommonResult<List<HazardWorkOrderListResVO>> getHazardWorkOrderList() {
+        List<HazardWorkOrderListResVO> workOrderList = List.of(
+                createHazardWorkOrder(1, "G1219318", "861556071807043", "高速井泵", "张三", "+86 13800138000", "2026-03-05", "处理中"),
+                createHazardWorkOrder(2, "G1219319", "861556071789019", "永磁电机", "李四", "+86 13900139000", "2026-03-06", "待处理"),
+                createHazardWorkOrder(3, "G1219320", "861556071789020", "变频器", "王五", "+86 13700137000", "2026-03-07", "已完成")
+        );
+        return success(workOrderList);
+    }
+
+    /**
      * 获取告警列表
      */
     @PermitAll
@@ -190,6 +206,19 @@ public class TGDashboardController {
         workOrder.setWorkOrderNo(workOrderNo);
         workOrder.setHazardName(hazardName);
         workOrder.setCreateTime(createTime);
+        return workOrder;
+    }
+
+    private HazardWorkOrderListResVO createHazardWorkOrder(Integer seqNo, String workOrderNo, String deviceId, String deviceModel, String contactPerson, String contactPhone, String appointmentTime, String workOrderStatus) {
+        HazardWorkOrderListResVO workOrder = new HazardWorkOrderListResVO();
+        workOrder.setSeqNo(seqNo);
+        workOrder.setWorkOrderNo(workOrderNo);
+        workOrder.setDeviceId(deviceId);
+        workOrder.setDeviceModel(deviceModel);
+        workOrder.setContactPerson(contactPerson);
+        workOrder.setContactPhone(contactPhone);
+        workOrder.setAppointmentTime(appointmentTime);
+        workOrder.setWorkOrderStatus(workOrderStatus);
         return workOrder;
     }
 

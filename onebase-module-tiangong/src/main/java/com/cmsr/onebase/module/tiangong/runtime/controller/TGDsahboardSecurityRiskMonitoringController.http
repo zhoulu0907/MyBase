@@ -27,3 +27,8 @@ tenant-id: {{adminTenantId}}
 GET {{baseUrl}}/tiangong/security-risk-monitoring/camera-screenshot-list
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+### 6. 获取违规列表
+GET {{baseUrl}}/tiangong/security-risk-monitoring/violation-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
