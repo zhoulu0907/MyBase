@@ -49,6 +49,7 @@
         </if>
         and aard.deleted = 0
         and (d.id is null or d.deleted = 0)
+        order by aard.update_time desc
     </select>
     <select id="selectRoleMembers" resultType="com.cmsr.onebase.module.app.core.dto.auth.RoleMemberDTO">
         select * from (
@@ -96,6 +97,7 @@
         and aard.deleted = 0
         and (d.id is null or d.deleted = 0)
         ) as combined_result
+        order by update_time desc
     </select>
 
     <select id="findUserPhotoList" resultType="com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO">
