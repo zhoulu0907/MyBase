@@ -70,9 +70,7 @@ public class FileDataRepository extends ServiceImpl<FileMapper, FileDO> {
     public FileDO findByIdAndVisitMode(Long id, String visitMode) {
         QueryWrapper queryWrapper = QueryWrapper.create();
         queryWrapper.eq(BaseDO.ID, id);
-        if (StrUtil.isEmpty(visitMode)){
-            queryWrapper.ne(FileDO.COLUMN_VISIT_MODE, FileVisitModeEnum.PERMISSION.getValue());
-        } else {
+        if (StrUtil.isNotEmpty(visitMode)){
             queryWrapper.eq(FileDO.COLUMN_VISIT_MODE, visitMode);
         }
         return getOne(queryWrapper);
