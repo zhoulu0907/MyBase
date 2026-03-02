@@ -140,7 +140,6 @@ public class BuildAuthController {
         // 设置Cookie
         response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
                 securityProperties.getTokenHeader(), authLoginRespVO.getAccessToken()));
-        response.sendRedirect("http://s25029301301.dev.internal.virtueit.net:81/v0/obappbuilder/#/onebase/260705906803245056/home/enterprise-app");
         return authLoginRespVO;
     }
 }
