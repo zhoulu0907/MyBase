@@ -986,11 +986,11 @@ public class TaskServiceImpl extends WarmServiceImpl<FlowTaskDao<Task>, Task> im
         HisTask hisTask = FlowEngine.hisTaskService().getById(hisTaskId);
         AssertUtil.isNull(hisTask, ExceptionCons.NOT_FOUND_FLOW_TASK);
 
-        Definition definition = FlowEngine.defService().getById(hisTask.getDefinitionId());
+        Definition definition = FlowEngine.defService().getByDefUuid(hisTask.getDefinitionUuid());
         AssertUtil.isNull(definition, ExceptionCons.NOT_FOUNT_DEF);
 
         Node nowNode = CollUtil.getOne(FlowEngine.nodeService()
-            .getByNodeCodes(Collections.singletonList(hisTask.getNodeCode()), hisTask.getDefinitionId()));
+            .getByNodeCodes(Collections.singletonList(hisTask.getNodeCode()), definition.getId()));
         AssertUtil.isNull(nowNode, ExceptionCons.LOST_CUR_NODE);
 
         FlowDto flowDto = new FlowDto();

@@ -157,6 +157,7 @@ public interface Node extends RootEntity {
             .setDelFlag(this.getDelFlag())
             .setNodeType(this.getNodeType())
             .setDefinitionId(this.getDefinitionId())
+            .setDefinitionUuid(this.getDefinitionUuid())
             .setNodeCode(this.getNodeCode())
             .setNodeName(this.getNodeName())
             .setNodeRatio(this.getNodeRatio())
