@@ -71,6 +71,7 @@ const XCard = memo(
       status,
       runtime = true,
       preview,
+      label,
       metaData,
       tableName,
       coverField,
@@ -226,12 +227,15 @@ const XCard = memo(
 
         let coverFieldValue = null;
         if (coverField) {
-          coverFieldValue = await attachmentDownload(tableName, {
-            menuId: curMenu.value.id,
-            id: rowId,
-            fieldName: coverField,
-            fileId: item[coverField]?.[0].id
-          })
+          const fileId = item[coverField]?.[0]?.id;
+          if (fileId) {
+            coverFieldValue = await attachmentDownload(tableName, {
+              menuId: curMenu.value.id,
+              id: rowId,
+              fieldName: coverField,
+              fileId: fileId
+            })
+          }
         }
         newCardData.push({
           id: rowId,
@@ -338,7 +342,7 @@ const XCard = memo(
               dataField: [mainMetaData.tableName, `${mainMetaData.tableName}.${index}.${dataFieldInfo.fieldName}`],
               label: {
                 display: !isTitle,
-                text: dataFieldInfo.displayName || fieldName
+                text: column?.title || dataFieldInfo.displayName || fieldName
               },
               verify: { required: false },
               tooltip: '',
@@ -481,6 +485,7 @@ const XCard = memo(
           </div>
         </div>
         <div className="cardContent">
+          {label?.display && <>{label.text}</>}
           {/* 滚动加载 */}
           <Form
             form={cardForm}
@@ -524,51 +529,51 @@ const XCard = memo(
                       />
                     </Card>
                     <div className='cardExtra'>
-                        {operationButton?.map((opearate, index) => (
-                          <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
-                            {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
-                              <Button
-                                type="text"
-                                size="small"
-                                style={{ padding: '0 8px' }}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  handleEdit(item.id, true, item);
-                                }}
-                                icon={<IconEdit />}
-                              ></Button>
-                            )}
+                      {operationButton?.map((opearate, index) => (
+                        <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
+                          {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
+                            <Button
+                              type="text"
+                              size="small"
+                              style={{ padding: '0 8px' }}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleEdit(item.id, true, item);
+                              }}
+                              icon={<IconEdit />}
+                            ></Button>
+                          )}
 
-                            {opearate.type === TableOperationButton.DELETE && opearate.display && canDelete.value && (
-                              <div onClick={(event) => event.stopPropagation()}>
-                                <Popconfirm
-                                  focusLock
-                                  title="确认删除"
-                                  content={opearate.confirmText}
+                          {opearate.type === TableOperationButton.DELETE && opearate.display && canDelete.value && (
+                            <div onClick={(event) => event.stopPropagation()}>
+                              <Popconfirm
+                                focusLock
+                                title="确认删除"
+                                content={opearate.confirmText}
+                                disabled={preview}
+                                onOk={(event) => {
+                                  event.stopPropagation();
+                                  handleDelete(item.id);
+                                }}
+                              >
+                                <Button
+                                  type="text"
+                                  size="small"
                                   disabled={preview}
-                                  onOk={(event) => {
+                                  style={{ padding: '0 4px' }}
+                                  onClick={(event) => {
                                     event.stopPropagation();
-                                    handleDelete(item.id);
                                   }}
+                                  status={'danger'}
+                                  icon={<IconDelete />}
                                 >
-                                  <Button
-                                    type="text"
-                                    size="small"
-                                    disabled={preview}
-                                    style={{ padding: '0 4px' }}
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                    }}
-                                    status={'danger'}
-                                    icon={<IconDelete />}
-                                  >
-                                  </Button>
-                                </Popconfirm>
-                              </div>
-                            )}
-                          </Tooltip>
-                        ))}
-                      </div>
+                                </Button>
+                              </Popconfirm>
+                            </div>
+                          )}
+                        </Tooltip>
+                      ))}
+                    </div>
                   </div>
                 )
               }}
