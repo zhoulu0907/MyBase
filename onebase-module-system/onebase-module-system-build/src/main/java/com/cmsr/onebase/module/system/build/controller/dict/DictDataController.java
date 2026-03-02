@@ -131,15 +131,11 @@ public class DictDataController {
     public CommonResult<List<DictDataSimpleRespVO>> getSimpleDictDataListByTypeId(
             @RequestParam("dictTypeId") Long dictTypeId) {
         // 通过dictTypeId查询字典类型
-        DictTypeDO dictTypeDO = dictTypeService.getDictType(dictTypeId);
-        String dictType = null;
-        if (dictTypeDO != null) {
-            dictType = dictTypeDO.getType();
-        }
-        // 查询字典数据列表
-        List<DictDataDO> list = dictDataService.getDictDataList(CommonStatusEnum.ENABLE.getStatus(), dictType);
+        // 直接通过字典类型ID查询字典数据列表
+        List<DictDataDO> list = dictDataService.getDictDataListByDictTypeId(dictTypeId, CommonStatusEnum.ENABLE.getStatus());
         return success(BeanUtils.toBean(list, DictDataSimpleRespVO.class));
     }
+
     @GetMapping("/page")
     @Operation(summary = "/获得字典类型的分页列表")
     @PreAuthorize("@ss.hasPermission('tenant:dict:query')")

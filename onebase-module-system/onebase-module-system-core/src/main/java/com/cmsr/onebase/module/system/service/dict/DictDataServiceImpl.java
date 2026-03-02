@@ -226,6 +226,18 @@ public class DictDataServiceImpl implements DictDataService {
     }
 
     @Override
+    @TenantIgnore
+    public List<DictDataDO> getDictDataListByDictTypeId(Long dictTypeId, Integer status) {
+        return TenantUtils.executeIgnore(() -> {
+            List<DictDataDO> list = dictDataRepository.findListByDictTypeIdAndStatus(dictTypeId, status);
+            // 创建可变列表的副本以支持排序
+            List<DictDataDO> mutableList = new ArrayList<>(list);
+            mutableList.sort(Comparator.comparingInt(DictDataDO::getSort));
+            return mutableList;
+        });
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public DictDataBatchRespVO batchOperateDictData(DictDataBatchReqVO batchReqVO) {
         List<Long> createdIds = new ArrayList<>();

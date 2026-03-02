@@ -45,6 +45,15 @@ public class AppMenuController {
         return success(runtimeAppMenuService.listApplicationMenu(isDev));
     }
 
+
+    @GetMapping("/list-by-name")
+    @Operation(summary = "应用菜单列表-根据名称查询")
+    public CommonResult<List<Long>> listApplicationMenuByName(
+            @RequestParam(value = "isDev", required = false) Boolean isDev,
+            @RequestParam(value = "menuName", required = false) String menuName) {
+        return success(runtimeAppMenuService.listApplicationMenuByName(isDev, menuName));
+    }
+
     @GetMapping("/permission")
     @Operation(summary = "应用菜单权限")
     public CommonResult<MenuPermissionVO> getMenuPermission(@RequestParam("menuId") Long menuId) {
