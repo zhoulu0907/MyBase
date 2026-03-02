@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.auth;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.anji.captcha.model.common.ResponseModel;
@@ -605,8 +606,12 @@ public class BuildAuthServiceImpl implements BuildAuthService {
             String phone = (String) result.get("phone");
 
             //todo 返回的username与phone为加密字段，需解密后存入数据库，要与天工沟通加密方式
-            adminUserDO.setUsername(AesCfbCryptoUtil.decrypt(adminUserDO.getUsername()));
-            adminUserDO.setMobile(AesCfbCryptoUtil.decrypt(phone));
+            if (StrUtil.isNotEmpty(adminUserDO.getUsername())) {
+                adminUserDO.setUsername(AesCfbCryptoUtil.decrypt(adminUserDO.getUsername()));
+            }
+            if (StrUtil.isNotEmpty(phone)){
+                adminUserDO.setMobile(AesCfbCryptoUtil.decrypt(phone));
+            }
 
             AtomicReference<AuthLoginRespVO> loginRespRef = new AtomicReference<>();
             TenantUtils.execute(tenantDo.getId(), () -> {
