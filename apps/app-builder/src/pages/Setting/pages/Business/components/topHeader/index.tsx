@@ -35,13 +35,19 @@ export const TopHeader: React.FC<topHeaderProps> = ({
 
   return (
     <div className={styles.topHeader}>
-      {/*顶部左侧 新建企业*/}
+      {/* 顶部左侧 搜索*/}
+      <div className={styles.searchContent}>
+        <Input.Search
+          allowClear
+          placeholder={`输入${title.slice(2, 4)}名称`}
+          className={styles.searchInput}
+          onChange={(value) => setSearchInputValue(value)}
+        />
+        {isBusiness && <Select bordered={false} options={statusOptions} defaultValue={2} onChange={handleChange} />}
+      </div>
+
+      {/*顶部右侧 新建企业*/}
       <div className={styles.createBusiness}>
-        {type !== 'authorized-application' && hasPermission(ACTIONS.CREATE) && (
-          <Button type="primary" icon={<IconPlus />} onClick={onAdd}>
-            {title}
-          </Button>
-        )}
         {isBusiness && (
           <div className={styles.linkContent}>
             <span>企业用户登录地址:</span>
@@ -51,16 +57,11 @@ export const TopHeader: React.FC<topHeaderProps> = ({
             <IconCopy onClick={() => copyToClipboard(href)} style={{ fontSize: 16 }} />
           </div>
         )}
-      </div>
-      {/* 顶部右侧 搜索*/}
-      <div className={styles.searchContent}>
-        {isBusiness && <Select bordered={false} options={statusOptions} defaultValue={2} onChange={handleChange} />}
-        <Input.Search
-          allowClear
-          placeholder={`输入${title}名称`}
-          className={styles.searchInput}
-          onChange={(value) => setSearchInputValue(value)}
-        />
+        {type !== 'authorized-application' && hasPermission(ACTIONS.CREATE) && (
+          <Button type="primary" icon={<IconPlus />} onClick={onAdd}>
+            {title}
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -36,6 +36,7 @@ export enum NodeType {
   SCRIPT = 'script',
   DATA_MAPPER = 'dataMapper',
   CONNECTOR = 'connector',
+  HTTP = 'http',
 
   MODAL = 'modal',
   NAVIGATE = 'navigate',

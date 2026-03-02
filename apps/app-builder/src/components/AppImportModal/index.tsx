@@ -1,7 +1,6 @@
-import { Button, Modal, Steps, Upload, Radio, Tag, Progress, Alert, Input, Message } from '@arco-design/web-react';
-import { IconUpload, IconLoading, IconRefresh, IconCheckCircleFill, IconEdit } from '@arco-design/web-react/icon';
+import { Alert, Button, Input, Message, Modal, Progress, Radio, Tag, Upload } from '@arco-design/web-react';
+import { IconCheckCircleFill, IconEdit, IconRefresh, IconUpload } from '@arco-design/web-react/icon';
 import { ExportStatus, importAppVersion, type Application } from '@onebase/app';
-import { uploadFile, getFileUrlById } from '@onebase/platform-center';
 import { useState } from 'react';
 import styles from './index.module.less';
 
@@ -50,9 +49,8 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
     Message.success('导入完成');
     if (onComplete) {
       onComplete();
-    } else {
-      onClose();
     }
+    onClose();
     setCurrentStep(1);
   };
 
@@ -60,7 +58,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
   const handleUpload = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    if(appInfo?.id){
+    if (appInfo?.id) {
       formData.append('applicationId', appInfo?.id);
     }
     const res = await importAppVersion(formData);
@@ -87,8 +85,8 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
             取消
           </Button>
           <Button type="primary" onClick={handleComplete} disabled={!hasFile}>
-              完成
-            </Button>
+            完成
+          </Button>
           {/* {currentStep < stepList.length && (
             <Button type="primary" onClick={handleNext}>
               下一步
@@ -123,7 +121,7 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                   successIcon: <IconCheckCircleFill color="#4FAE7B" />
                 }}
                 beforeUpload={async (file: any) => {
-                  if (!['application/x-zip-compressed'].includes(file.type)) {
+                  if (!['application/x-zip-compressed', 'application/zip'].includes(file.type)) {
                     Message.warning(`不支持该格式，仅支持 zip`);
                     return false;
                   }
@@ -133,11 +131,11 @@ const AppImportModal: React.FC<AppImportModalProps> = ({ visible, onClose, onCom
                   try {
                     const flag = await handleUpload(file);
                     setHasFile(flag);
-                    const url = URL.createObjectURL(file)
+                    const url = URL.createObjectURL(file);
                     // 上传成功
                     if (flag && url) {
-                      onProgress(100)
-                      onSuccess({url});
+                      onProgress(100);
+                      onSuccess({ url });
                       Message.success('上传成功');
                     } else {
                       onError({

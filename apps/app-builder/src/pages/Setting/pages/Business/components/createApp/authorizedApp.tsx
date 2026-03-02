@@ -13,7 +13,7 @@ import { formatTimeYMDHMS } from '@onebase/common';
 import { type CorpAppParams, type updateAppParams, getCorpAppSimpleListApi } from '@onebase/platform-center';
 import EditAuthorizedTime from '../modal/editAuthorizedTime';
 import { useState } from 'react';
-import { useLocation, useOutletContext } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import { CreateAppModal } from '../modal/createAppModal';
 
 export const AuthorizedApp: React.FC<IAuthorizedAppProps> = ({
@@ -31,7 +31,6 @@ export const AuthorizedApp: React.FC<IAuthorizedAppProps> = ({
   onRemoveAuthorizedApp,
   onSubmit
 }) => {
-  const location = useLocation();
   const { currentId } = useOutletContext<OutletContextType>();
   const [authorizedAppItem, setAuthorizedAppItem] = useState<AppItem | null>(null);
   const [dropdownList, setDropdownList] = useState<authorizedAppList[]>([]);

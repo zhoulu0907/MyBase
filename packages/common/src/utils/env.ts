@@ -45,8 +45,12 @@ export const getMobileEditorURL = (): string => {
   return envConfig?.MOBILE_EDITOR_URL;
 };
 
+export const getAiCopilotURL = (): string => {
+  return aiConfig?.COPILOT;
+};
+
 export const getAiGenURL = (): string => {
-  return aiConfig?.AI_CONFIG;
+  return aiConfig?.GENAPP;
 };
 
 export const getResourceURL = (): string => {

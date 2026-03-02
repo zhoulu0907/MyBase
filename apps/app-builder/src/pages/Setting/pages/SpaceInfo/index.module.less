@@ -4,7 +4,7 @@
   overflow-y: auto;
   display: flex;
   justify-content: center;
-  padding: 32px;
+  padding: 0 20px;
   box-sizing: border-box;
 
   .spaceInfoPageMain {
@@ -46,7 +46,7 @@
           gap: 24px;
 
           .avatarText {
-            color: #4e5969;
+            color: #fff;
             text-align: right;
             font-size: 20px;
             font-style: normal;
@@ -121,16 +121,14 @@
     .statsSection {
       min-width: 180px;
       display: flex;
-      gap: 20px;
+      gap: 24px;
       .statCard {
         height: 70px;
-        background: #f7f8fa;
-        border-radius: 8px;
-        border: 1px solid #e5e6eb;
         padding: 8px 16px;
         min-width: 120px;
         text-align: center;
         box-sizing: border-box;
+        position: relative;
 
         .statLabel {
           color: #4e5969;
@@ -141,6 +139,17 @@
           color: #1d2129;
           font-size: 20px;
           font-weight: 600;
+        }
+
+        &:last-of-type::after {
+          content: '';
+          position: absolute;
+          left: -12px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 1px;
+          height: 32px;
+          background: #D3DCDF;
         }
       }
     }

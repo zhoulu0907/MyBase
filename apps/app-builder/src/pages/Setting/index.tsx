@@ -9,6 +9,8 @@ import ApplicationPage from './pages/Application';
 import OrganizationPage from './pages/Organization';
 import RolePage from './pages/Role';
 import SpaceInfo from './pages/SpaceInfo';
+import AiCopilotDoc from './pages/AiCopilotDoc/index';
+import AiWXMini from './pages/AiWXMini/index';
 import SystemDictPage from './pages/SystemDict';
 import UserPage from './pages/User';
 
@@ -80,6 +82,8 @@ const SettingPage: React.FC = () => {
                 <Route path="system-dict" element={<SystemDictPage />} />
                 <Route path="security" element={<SecurityPage />} />
                 <Route path="spaceInfo" element={<SpaceInfo onTenantInfoChange={handleTenantInfoChange} />} />
+                <Route path="copilotdoc" element={<AiCopilotDoc />} />
+                <Route path="wxmini" element={<AiWXMini />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="plugin" element={<PluginPage />} />
                 <Route path="externalUser" element={<ExternalUserPage />} />

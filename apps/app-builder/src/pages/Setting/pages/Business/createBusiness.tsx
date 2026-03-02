@@ -1,4 +1,4 @@
-import { Button, Message, Space, Steps } from '@arco-design/web-react';
+import { Button, Divider, Message, Space, Steps } from '@arco-design/web-react';
 import { IconLoading } from '@arco-design/web-react/icon';
 import {
   checkCorpAdminUserApi,
@@ -20,13 +20,15 @@ import { CreateSuccess } from './components/createApp/createSuccess';
 import { steps } from './constants';
 import styles from './createBusiness.module.less';
 import type { AppItem, OutletContextType, successData, updatedParams } from './types/appItem';
+import BackPrevPage from '../../components/goPrevPage';
 
 const CreateBusinessPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { industryOptions } = useOutletContext<OutletContextType>();
+
   const [basicValues, setBasicData] = useState<Record<string, any>>({});
   const [adminValues, setAdminData] = useState<Record<string, any>>({});
-  const { industryOptions, currentId } = useOutletContext<OutletContextType>();
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<AppItem[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
@@ -265,27 +267,32 @@ const CreateBusinessPage: React.FC = () => {
   return (
     <div className={styles.createBusinessConatiner}>
       {/* 导航条 */}
-      <Steps current={currentStep}>
-        {steps.map((step, index) => (
-          <Steps.Step key={index} title={step.title} />
-        ))}
-      </Steps>
+      <div className={styles.createBusinessHeader}>
+        <BackPrevPage title='创建企业'/>
+        <Steps current={currentStep}>
+          {steps.map((step, index) => (
+            <Steps.Step key={index} title={step.title} />
+          ))}
+        </Steps>
+      </div>
+      <Divider style={{ margin: 0 }} />
       {/* 内容展示区域 */}
       <div className={styles.BusinessInformation}>
         {/* 内容区域 */}
         {renderContent(currentStep)}
-        {/* 底部操作按钮 */}
-        {currentStep !== 4 && (
-          <div className={styles.footerButton}>
-            <Space size={16}>
-              <Button onClick={handlePrev}>{currentStep === 1 ? '返回' : '上一步'}</Button>
-              <Button type="primary" onClick={handleNext} disabled={currentStep === steps.length}>
-                {currentStep === 3 && createLoading ? <IconLoading /> : '下一步'}
-              </Button>
-            </Space>
-          </div>
-        )}
       </div>
+      {/* 底部操作按钮 */}
+      <Divider style={{ margin: 0 }} />
+      {currentStep !== 4 && (
+        <div className={styles.footerButton}>
+          <Space size={16}>
+            <Button onClick={handlePrev}>{currentStep === 1 ? '返回' : '上一步'}</Button>
+            <Button type="primary" onClick={handleNext} disabled={currentStep === steps.length}>
+              {currentStep === 3 && createLoading ? <IconLoading /> : '下一步'}
+            </Button>
+          </Space>
+        </div>
+      )}
     </div>
   );
 };

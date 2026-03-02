@@ -476,6 +476,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   };
 
   const onBack = () => {
+    setDrawerVisible(false);
     setPredictVisible(false);
     setTimeout(() => setRefresh(Date.now()), 150);
   };

@@ -46,9 +46,9 @@ const AppCard: React.FC<AppCardProps> = ({
     return '未知模式';
   };
 
-  const getColor = (model?: string) => {
-    return model === PlatformTenantPublishMode.inner ? 'cyan' : 'blue';
-  };
+  // const getColor = (model?: string) => {
+  //   return model === PlatformTenantPublishMode.inner ? 'cyan' : 'blue';
+  // };
 
   const getDevelopStatus = (developStatus?: string) => {
     if (developStatus === ApplicationStatus.ITERATE) {
@@ -58,11 +58,11 @@ const AppCard: React.FC<AppCardProps> = ({
   };
 
   const getTagColor = (item: Application) => {
-    return item.appStatus === 0 ? '#4E5969' : 'rgb(var(--primary-6))';
+    return item.appStatus === 0 ? '#547781' : '#2DC86D';
   };
 
   const getTagBackgroundColor = (item: Application) => {
-    return item.appStatus === 0 ? '#F7F8FA' : 'rgb(var(--primary-1))';
+    return item.appStatus === 0 ? 'rgba(36, 81, 93, 0.08)' : 'rgba(34, 206, 118, 0.08)';
   };
 
   // 应用导出/下载弹窗
@@ -150,7 +150,9 @@ const AppCard: React.FC<AppCardProps> = ({
                       color={TagColor[item.appStatus]}
                       style={{
                         fontSize: 12,
-                        fontWeight: 400
+                        fontWeight: 400,
+                        color: '#1F59FF',
+                        backgroundColor: 'rgba(31, 89, 255, 0.08)'
                       }}
                     >
                       {getDevelopStatus(item.developStatus)}
@@ -161,7 +163,9 @@ const AppCard: React.FC<AppCardProps> = ({
                     color={TagColor[item.appStatus]}
                     style={{
                       fontSize: 12,
-                      fontWeight: 400
+                      fontWeight: 400,
+                      color: item.appStatus === 1 ? '#40CBCA' : '#1F59FF',
+                      backgroundColor: item.appStatus === 1 ? 'rgba(64, 203, 202, 0.08)' : 'rgba(31, 89, 255, 0.08)'
                     }}
                   >
                     {item.appStatusText}
@@ -202,7 +206,7 @@ const AppCard: React.FC<AppCardProps> = ({
             <div className={styles.appDesc}>{item.description ?? '该应用暂无介绍。'}</div>
           </Tooltip>
           <div className={styles.appTags}>
-            <Tag className={ item.publishModel === 'inner'? styles.innerTag:styles.saasTag}>
+            <Tag className={item.publishModel === 'inner' ? styles.innerTag : styles.saasTag}>
               {getModel(item.publishModel)}
             </Tag>
             {item.tags && item.tags.length > 0 && <Divider type="vertical" style={{ margin: '0' }} />}

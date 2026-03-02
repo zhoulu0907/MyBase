@@ -105,8 +105,8 @@ export const setMainMetaData = async (
       entityUuid: entity.childEntityUuid,
       tableName: entity.childTableName,
       entityName: entity.childEntityName,
-      entityType: ENTITY_TYPE.SUB,
-      fields: entity.childFields
+      entityType: entity.relationshipType === 'SUBTABLE_ONE_TO_MANY' ? ENTITY_TYPE.SUB : ENTITY_TYPE.INDEP, // 细分子实体类型，用于暂先隐藏子表以外的关联表
+      fields: entity.childFields,
     }))
     setSubEntities({
       entities: subEntities || []

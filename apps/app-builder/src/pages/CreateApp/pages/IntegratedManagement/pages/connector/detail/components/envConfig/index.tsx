@@ -3,10 +3,12 @@ import { createForm } from '@formily/core';
 import { createSchemaField, FormProvider, type ISchema } from '@formily/react';
 import {
   createConnectorEnv,
-  getConnectorEnvDetail,
+  enableConnectorEnvironment,
+  getConnectgorEnvironmentConfig,
   getConnectorEnvList,
+  getEnableConnectorEnvironment,
   getEnvConfigTemplate,
-  updateConnectorEnv,
+  updateEnvironmentConfig,
   type ConnectInstance
 } from '@onebase/app';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -60,14 +62,41 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
     []
   );
 
+  const loadDefaultEnv = async () => {
+    try {
+      const res = await getEnableConnectorEnvironment(baseInfo.id);
+      console.log(res);
+      const envName = res;
+      if (envName) {
+        setSelectedEnv(envName);
+        setConfigType('existing');
+        await fetchEnvDetail(envName);
+      }
+    } catch (error) {
+      console.error('Failed to get default connector environment:', error);
+    }
+  };
+
+  // 进入页面时先获取默认启用环境信息
+  useEffect(() => {
+    if (!baseInfo?.id) return;
+
+    loadDefaultEnv();
+  }, [baseInfo?.id]);
+
+  // 选择已有环境时拉取环境列表
   useEffect(() => {
     if (configType === 'existing') {
       fetchEnvList();
     }
-    if (configType === 'create') {
+  }, [configType]);
+
+  // 挂载时加载环境配置模板 schema，供「创建」与「选择已有环境」详情共用动态表单
+  useEffect(() => {
+    if (baseInfo?.id) {
       handleGetEnvConfigTemplate();
     }
-  }, [configType]);
+  }, [baseInfo?.id]);
 
   const fetchEnvList = async () => {
     setLoading(true);
@@ -78,7 +107,7 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
         setEnvList(
           list.map((item: any) => ({
             label: item.envName,
-            value: item.id
+            value: item.envName
           }))
         );
       }
@@ -96,18 +125,18 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
     }
   };
 
-  const fetchEnvDetail = async (envId: string) => {
+  const fetchEnvDetail = async (envName: string) => {
     setDetailLoading(true);
     try {
-      const res = await getConnectorEnvDetail(envId);
-      const data = res && res.data ? res.data : res && res.id ? res : null;
+      const res = await getConnectgorEnvironmentConfig(baseInfo.id, envName);
+      const data = res?.data ?? res;
 
-      if (data) {
+      if (data && (data.schema || data.envCode != null)) {
         setEnvDetail(data);
-        // Populate form
+        // 按接口结构 schema.envMode、schema.envConfig 填入动态表单（与创建环境表单结构一致）
         form.setValues({
-          ...data,
-          envMode: 'create' // Ensure visibility
+          envMode: data.schema?.envMode ?? 'create',
+          envConfig: data.schema?.envConfig ?? {}
         });
       } else {
         setEnvDetail(null);
@@ -120,10 +149,16 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
     }
   };
 
-  const handleEnvChange = (envId: string) => {
-    setSelectedEnv(envId);
-    if (envId) {
-      fetchEnvDetail(envId);
+  const handleEnvChange = async (envName: string) => {
+    setSelectedEnv(envName);
+    if (envName) {
+      await fetchEnvDetail(envName);
+      try {
+        await enableConnectorEnvironment(baseInfo.id, envName);
+      } catch (error) {
+        console.error('Failed to enable connector environment:', error);
+        Message.error('启用环境失败');
+      }
     } else {
       setEnvDetail(null);
       form.reset();
@@ -514,11 +549,13 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
       return;
     }
     try {
-      await form.validate();
-      const values = form.values;
-      await updateConnectorEnv({
-        id: envDetail.id,
-        ...values
+      //   await form.validate();
+      const values = form.values as { envMode?: string; envConfig?: Record<string, unknown> };
+      await updateEnvironmentConfig(baseInfo.id, {
+        config: {
+          envMode: values.envMode,
+          envConfig: values.envConfig
+        }
       });
       Message.success('保存成功');
     } catch (error) {
@@ -587,15 +624,20 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
           {envDetail && (
             <Spin loading={detailLoading} style={{ width: '100%', marginTop: 20 }}>
               <div className={styles.envDetail}>
-                {/* <FormProvider form={form}>
-                  <SchemaField schema={envConfigTemplateSchema} />
-                </FormProvider> */}
-
-                <div className={styles.saveButton} style={{ marginTop: 24 }}>
-                  <Button type="primary" onClick={handleSave}>
-                    保存
-                  </Button>
-                </div>
+                {envConfigTemplateSchema ? (
+                  <>
+                    <FormProvider form={form}>
+                      <SchemaField schema={envConfigTemplateSchema} />
+                    </FormProvider>
+                    <div className={styles.saveButton} style={{ marginTop: 24 }}>
+                      <Button type="primary" onClick={handleSave}>
+                        保存
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <Spin loading={templateLoading} style={{ display: 'block', margin: '20px auto' }} />
+                )}
               </div>
             </Spin>
           )}

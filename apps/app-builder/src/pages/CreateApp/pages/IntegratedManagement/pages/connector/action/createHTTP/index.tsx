@@ -1,7 +1,13 @@
 import { Button, Message, Spin, Steps } from '@arco-design/web-react';
 import { createForm } from '@formily/core';
 import { createSchemaField, FormProvider } from '@formily/react';
-import { debugAction, getConnectorActionInfo, saveConnectorAction, type SaveConnectorActionReq } from '@onebase/app';
+import {
+  debugAction,
+  getConnectorActionInfo,
+  saveConnectorAction,
+  updateHTTPAction,
+  type SaveConnectorActionReq
+} from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useEffect, useMemo, useState } from 'react';
 import { componentMap, FormilyFormItem } from '../../../../../../../../components/DynamicForm/componentMapper';
@@ -99,6 +105,14 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({ editActionN
         Message.error((e as Error)?.message ?? '获取动作详情失败');
       })
       .finally(() => setEditLoading(false));
+  }, [editActionName, form]);
+
+  // 编辑模式：基础信息-动作名称不允许编辑
+  useEffect(() => {
+    if (!editActionName) return;
+    form.setFieldState('basic.actionName', (state) => {
+      state.disabled = true;
+    });
   }, [editActionName, form]);
 
   const getTabsData = (values: Record<string, unknown>) => {
@@ -207,7 +221,11 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({ editActionN
     setSaveLoading(true);
     try {
       const params: SaveConnectorActionReq = { actionConfig: combined };
-      await saveConnectorAction(connectorId, params);
+      if (isEditMode && editActionName) {
+        await updateHTTPAction(connectorId, editActionName, params);
+      } else {
+        await saveConnectorAction(connectorId, params);
+      }
       Message.success('保存成功');
     } catch (e) {
       Message.error((e as Error)?.message ?? '保存失败');
@@ -242,7 +260,7 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({ editActionN
                 调试
               </Button>
             )}
-            {isEditMode && onSuccess && (
+            {onSuccess && (
               <Button type="text" onClick={onSuccess}>
                 返回
               </Button>

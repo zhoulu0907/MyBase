@@ -1,6 +1,6 @@
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { listToTree } from '@/utils/tree';
-import { Layout } from '@arco-design/web-react';
+import { Divider, Layout } from '@arco-design/web-react';
 import { hasPermission, TENANT_DEPT_QUERY, TENANT_USER_QUERY } from '@onebase/common';
 import { getDeptList, getUserPage } from '@onebase/platform-center';
 import { useEffect, useState } from 'react';
@@ -40,35 +40,38 @@ export default function UserPage() {
   }, []);
 
   return (
-    <Layout className={styles.userPage}>
-      <Sider
-        className={styles.leftPanel}
-        resizeDirections={['right']}
-        style={{ minWidth: 252, maxWidth: 500 }}
-        collapsible={false}
-        trigger={null}
-      >
-        <PlaceholderPanel hasPermission={hasPermission(TENANT_DEPT_QUERY)}>
-          <DeptTreeCmp
-            selectedDeptId={selectedDeptId}
-            onDeptSelect={setSelectedDeptId}
-            totalUserCount={totalUserCount}
-            treeData={deptTree}
-            setDeptTree={setDeptTree}
-            deptLoading={deptLoading}
-          />
-        </PlaceholderPanel>
-      </Sider>
-      <Content className={styles.rightPanel}>
-        <PlaceholderPanel hasPermission={hasPermission(TENANT_USER_QUERY)}>
-          <UserTable
-            selectedDeptId={selectedDeptId}
-            deptTree={deptTree}
-            deptLoading={deptLoading}
-            onRefreshDept={() => fetchDeptList()}
-          />
-        </PlaceholderPanel>
-      </Content>
-    </Layout>
+    <>
+      <Divider style={{ margin: 0 }} />
+      <Layout className={styles.userPage}>
+        <Sider
+          className={styles.leftPanel}
+          resizeDirections={['right']}
+          style={{ minWidth: 252, maxWidth: 500 }}
+          collapsible={false}
+          trigger={null}
+        >
+          <PlaceholderPanel hasPermission={hasPermission(TENANT_DEPT_QUERY)}>
+            <DeptTreeCmp
+              selectedDeptId={selectedDeptId}
+              onDeptSelect={setSelectedDeptId}
+              totalUserCount={totalUserCount}
+              treeData={deptTree}
+              setDeptTree={setDeptTree}
+              deptLoading={deptLoading}
+            />
+          </PlaceholderPanel>
+        </Sider>
+        <Content className={styles.rightPanel}>
+          <PlaceholderPanel hasPermission={hasPermission(TENANT_USER_QUERY)}>
+            <UserTable
+              selectedDeptId={selectedDeptId}
+              deptTree={deptTree}
+              deptLoading={deptLoading}
+              onRefreshDept={() => fetchDeptList()}
+            />
+          </PlaceholderPanel>
+        </Content>
+      </Layout>
+    </>
   );
 }

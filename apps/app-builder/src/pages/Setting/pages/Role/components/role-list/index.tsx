@@ -3,9 +3,9 @@ import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { renderDraggedTree } from '@/utils';
 import { listToTree } from '@/utils/tree';
-import { Input, Spin, Tag, Tree } from '@arco-design/web-react';
+import { Input, Spin, Tag, Tooltip, Tree } from '@arco-design/web-react';
 import type { TreeDataType } from '@arco-design/web-react/es/Tree/interface';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { IconPlusCircleFill } from '@arco-design/web-react/icon';
 import { TENANT_ROLE_PERMISSION as ACTIONS } from '@onebase/common';
 import { getRolePage, RoleType, type PageParam, type RoleVO } from '@onebase/platform-center';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
@@ -156,24 +156,23 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
 
   return (
     <>
-      <div className={s.searchInput}>
-        <Input.Search
-          value={searchValue}
-          onChange={handleSearchChange}
-          placeholder="输入角色名称"
-          allowClear
-          style={{ borderRadius: '24px', marginBottom: '8px' }}
-        />
-      </div>
+      <Input.Search
+        value={searchValue}
+        onChange={handleSearchChange}
+        placeholder="输入角色名称"
+        allowClear
+        style={{ borderRadius: '24px', marginBottom: '8px' }}
+      />
       <ListItem title={listTitle}>
         <Button
           permission={ACTIONS.CREATE}
           type="text"
           onClick={onAdd}
-          style={{ paddingLeft: '8px', paddingRight: '8px' }}
+          style={{ paddingLeft: '8px', paddingRight: '8px', backgroundColor: 'transparent' }}
         >
-          <IconPlus />
-          新建
+          <Tooltip content='新增'>
+            <IconPlusCircleFill fontSize={20} />
+          </Tooltip>
         </Button>
       </ListItem>
       <PlaceholderPanel hasPermission={true} isLoading={loading} isEmpty={roleList.length === 0}>
@@ -210,8 +209,8 @@ export default forwardRef(function RoleList({ activeId, onSelect, onAdd }: RoleL
               renderTitle={(node: TreeDataType) => {
                 return (
                   <>
-                    <span style={{ minWidth: '120px', display: 'inline-block' }}>{node.name}</span>
-                    {node.type === RoleType.SYSTEM && <Tag color="cyan">系统</Tag>}
+                    <span style={{ marginRight: 4 }}>{node.name}</span>
+                    {node.type === RoleType.SYSTEM && <Tag style={{ color: 'rgb(var(--primary-6))', backgroundColor: 'rgb(var(--primary-6), 0.15)' }}>系统</Tag>}
                   </>
                 );
               }}

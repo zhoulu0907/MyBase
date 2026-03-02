@@ -2,8 +2,8 @@ import ListItem from '@/components/ListItem';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag from '@/components/StatusTag';
-import { Input } from '@arco-design/web-react';
-import { IconPlus } from '@arco-design/web-react/icon';
+import { Input, Tooltip } from '@arco-design/web-react';
+import { IconPlusCircleFill } from '@arco-design/web-react/icon';
 import { TENANT_DICT_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import { type DictItem } from '@onebase/platform-center';
 import styles from '../../index.module.less';
@@ -31,11 +31,11 @@ export default function DictionaryListProps({
   return (
     <>
       <Input.Search
-        className={styles.searchInput}
         value={searchValue}
         onChange={onSearchChange}
         placeholder="输入字典名称"
         allowClear
+        style={{ marginBottom: 10 }}
       />
       <ListItem title={listTitle}>
         {!isHideTenantAddDictButton && (
@@ -43,10 +43,11 @@ export default function DictionaryListProps({
             permission={ACTIONS.CREATE}
             type="text"
             onClick={onAdd}
-            style={{ paddingLeft: '8px', paddingRight: '8px' }}
+            style={{ paddingLeft: '8px', paddingRight: '8px', backgroundColor: 'transparent' }}
           >
-            <IconPlus />
-            新建
+            <Tooltip content='新增'>
+              <IconPlusCircleFill fontSize={20} />
+            </Tooltip>
           </Button>
         )}
       </ListItem>
@@ -58,7 +59,7 @@ export default function DictionaryListProps({
             active={item.id === activeId}
             onClick={() => onSelect(item.id)}
             children={<StatusTag status={item.status} type="tag" />}
-          ></ListItem>
+          />
         ))}
       </PlaceholderPanel>
     </>

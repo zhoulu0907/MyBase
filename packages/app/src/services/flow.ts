@@ -186,6 +186,10 @@ export const deleteHTTPAction = (id: string, actionName: string) => {
   return flowService.post(`/connector/${id}/actions/${actionName}/delete`);
 };
 
+export const updateHTTPAction = (id: string, actionName: string, params: SaveConnectorActionReq) => {
+  return flowService.post(`/connector/${id}/actions/${actionName}/update-config`, params);
+};
+
 export const debugAction = (params: DebugActionReq) => {
   return flowService.post(`/connector/debug-http-action`, params);
 };
@@ -209,6 +213,22 @@ export const getConnectorTypeInfo = (nodeCode: string) => {
 
 export const getConnectorEnvList = (id: string) => {
   return flowService.get(`/connector/${id}/environments`);
+};
+
+export const getConnectgorEnvironmentConfig = (id: string, envName: string) => {
+  return flowService.get(`/connector/${id}/environment-config?envName=${envName}`);
+};
+
+export const updateEnvironmentConfig = (id: string, params: any) => {
+  return flowService.post(`/connector/${id}/update-env`, params);
+};
+
+export const enableConnectorEnvironment = (id: string, envName: string) => {
+  return flowService.post(`/connector/${id}/enable-env?envName=${envName}`);
+};
+
+export const getEnableConnectorEnvironment = (id: string) => {
+  return flowService.get(`/connector/${id}/get-enabled-envname`);
 };
 
 /**

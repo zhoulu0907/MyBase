@@ -133,6 +133,8 @@
     "spaceInfo": "空间信息",
     "enterpriseInfo": "企业信息",
     "enterprise": "企业管理",
+    "copilotdoc": "AI生成文档",
+    "wxmini":"AI生成小程序",
     "tenant": "个人中心",
     "profile": "个人中心",
     "edit": "编辑",

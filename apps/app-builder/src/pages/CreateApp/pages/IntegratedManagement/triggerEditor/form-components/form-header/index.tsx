@@ -59,7 +59,7 @@ function DropdownContent(props: { updateTitleEdit: (editing: boolean) => void })
   }, [registry, node]);
 
   return (
-    <Menu>
+    <Menu className={styles.operationMenu}>
       {/* <Menu.Item
         key="editTitle"
         onClick={(e: Event) => {

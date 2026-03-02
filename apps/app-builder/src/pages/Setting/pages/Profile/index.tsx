@@ -166,13 +166,13 @@ const ProfilePage: React.FC = () => {
       {
         title: '企业ID',
         dataIndex: 'id',
-        width: 120,
+        width: 200,
         ellipsis: true
       },
       {
         title: '行业类型',
         dataIndex: 'industryType',
-        width: 100,
+        width: 200,
         placeholder: '-',
         render: (val: string) => {
           const getIndustryTypeName = industryDict?.find((data) => data.id === val)?.label || '-';
@@ -182,7 +182,7 @@ const ProfilePage: React.FC = () => {
       {
         title: '管理员',
         dataIndex: 'adminName',
-        width: 90,
+        width: 200,
         placeholder: '-',
         ellipsis: true
       },
@@ -358,7 +358,7 @@ const ProfilePage: React.FC = () => {
               data={corpData}
               pagination={false}
               scroll={{ y: 510 }}
-              border={false}
+              stripe
             />
             {/* 页码 */}
             <div
@@ -383,15 +383,14 @@ const ProfilePage: React.FC = () => {
             </div>
           </TabPane>
           <TabPane key={CREATED_TYPE.APPLICATION} title="我创建的应用">
-            <Space direction="vertical" size={16}>
+            <Space direction="vertical" size={8} style={{ width: '100%' }}>
               {appData?.map((item, index) => (
                 <Card
                   key={index}
                   bordered={false}
                   style={{
                     width: '100%',
-                    borderRadius: 16,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                    borderBottom: '1px solid #EAEEEF'
                   }}
                 >
                   <Row align="center" gutter={8}>

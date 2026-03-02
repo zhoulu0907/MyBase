@@ -12,7 +12,7 @@ import {
   Typography,
   Grid
 } from '@arco-design/web-react';
-import { IconLeft, IconPlus, IconRight, IconSearch } from '@arco-design/web-react/icon';
+import { IconLeft, IconRight, IconSearch } from '@arco-design/web-react/icon';
 import {
   createApplication,
   deleteApplication,
@@ -315,15 +315,13 @@ const AppManagement: React.FC = () => {
               pointerEvents: applicationEmpty ? 'auto' : 'unset'
             }}
           >
-            <div className={styles.cteateBtn}>
-              <Input
-                className={styles.appInput}
-                allowClear
-                suffix={<IconSearch />}
-                onChange={handleSearchChange}
-                placeholder="搜索"
-              />
-            </div>
+            <Input
+              className={styles.appInput}
+              allowClear
+              suffix={<IconSearch />}
+              onChange={handleSearchChange}
+              placeholder="请输入"
+            />
 
             {/* 筛选下拉框 */}
             <div>
@@ -340,7 +338,6 @@ const AppManagement: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-              <Divider type="vertical" />
               <Select
                 placeholder="按创建时间排序"
                 bordered={false}
@@ -354,7 +351,6 @@ const AppManagement: React.FC = () => {
                   </Option>
                 ))}
               </Select>
-              <Divider type="vertical" />
               <Select
                 placeholder="全部状态"
                 bordered={false}
@@ -388,7 +384,7 @@ const AppManagement: React.FC = () => {
                   </Button>
                 </div>
               )}
-              {dataList?.map((item, _index) => (
+              {dataList?.map((item) => (
                 <AppCard
                   key={item.id}
                   item={item}

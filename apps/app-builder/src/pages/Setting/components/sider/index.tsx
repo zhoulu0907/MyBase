@@ -1,14 +1,29 @@
 import corpSVG from '@/assets/images/building-line.svg';
+import corpActiveSVG from '@/assets/images/building-line_active.svg';
 import externalUserSVG from '@/assets/images/external_user.svg';
+import externalUserActiveSVG from '@/assets/images/external_user_active.svg';
 import dictSVG from '@/assets/images/file.svg';
+import dictActiveSVG from '@/assets/images/file_active.svg';
 import organizationSVG from '@/assets/images/organization-chart.svg';
+import organizationActiveSVG from '@/assets/images/organization-chart_active.svg';
 import plugSVG from '@/assets/images/plug.svg';
+import plugActiveSVG from '@/assets/images/plug_active.svg';
 import securitySVG from '@/assets/images/security.svg';
+import securityActiveSVG from '@/assets/images/security_active.svg';
 import tenantInfoSVG from '@/assets/images/space-ship-line.svg';
+import tenantInfoActiveSVG from '@/assets/images/space-ship-line_active.svg';
 import appLicationManageSVG from '@/assets/images/terminal-window-line.svg';
+import appLicationManageActiveSVG from '@/assets/images/terminal-window-line_active.svg';
 import userSVG from '@/assets/images/user-group.svg';
+import userActiveSVG from '@/assets/images/user-group_active.svg';
 import roleSVG from '@/assets/images/user.svg';
+import roleActiveSVG from '@/assets/images/user_active.svg';
 import userInfoSVG from '@/assets/images/userInfo.svg';
+import userInfoActiveSVG from '@/assets/images/userInfo_active.svg';
+import copilotdocSVG from '@/assets/images/aidoc_line.svg';
+import copilotdocActiveSVG from '@/assets/images/aidoc_line_active.svg';
+import wxminiSVG from '@/assets/images/wxmini_line.svg';
+import wxminiActiveSVG from '@/assets/images/wxmini_line_active.svg';
 import { userPermissionSignal } from '@/store/singals/user_permission';
 import { Button, Layout, Menu } from '@arco-design/web-react';
 import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
@@ -27,13 +42,6 @@ interface SiderProps {
   className?: string;
   collapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
-  //   menuItems?: MenuItemType[];
-}
-
-interface MenuGroupConfig {
-  title: string;
-  key: string;
-  children: MenuItemType[];
 }
 
 const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse }) => {
@@ -48,130 +56,125 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const { tenantId } = useParams();
 
   // 默认菜单项
-  const menuConfig: MenuGroupConfig[] = [
+  const menuConfig: MenuItemType[] = [
     {
-      key: 'application_management',
+      key: 'application',
       title: '应用管理',
-      children: [
-        {
-          key: 'application',
-          title: '应用管理',
-          icon: <img src={appLicationManageSVG} />,
-          path: `/onebase/${tenantId}/setting/application`,
-          permissionKey: TENANT_MENUS.APP
-        }
-      ]
+      icon: <img src={appLicationManageSVG} />,
+      iconActive: <img src={appLicationManageActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/application`,
+      permissionKey: TENANT_MENUS.APP
     },
     {
-      key: 'userAndOrigantion',
-      title: '用户与组织',
-      children: [
-        {
-          key: 'user',
-          title: '用户管理',
-          icon: <img src={userSVG} />,
-          path: `/onebase/${tenantId}/setting/user`,
-          permissionKey: TENANT_MENUS.USER
-        },
-        {
-          key: 'role',
-          title: '角色管理',
-          icon: <img src={roleSVG} />,
-          path: `/onebase/${tenantId}/setting/role`,
-          permissionKey: TENANT_MENUS.ROLE
-        },
-        {
-          key: 'organization',
-          title: '组织管理',
-          icon: <img src={organizationSVG} />,
-          path: `/onebase/${tenantId}/setting/organization`,
-          permissionKey: TENANT_MENUS.DEPT
-        }
-      ]
+      key: 'user',
+      title: '用户管理',
+      icon: <img src={userSVG} />,
+      iconActive: <img src={userActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/user`,
+      permissionKey: TENANT_MENUS.USER
     },
     {
-      key: 'systemConfig',
-      title: '系统配置',
-      children: [
-        {
-          key: 'spaceInfo',
-          title: '空间信息',
-          icon: <img src={tenantInfoSVG} />,
-          path: `/onebase/${tenantId}/setting/spaceInfo`,
-          permissionKey: TENANT_MENUS.INFO
-        },
-        {
-          key: 'system-dict',
-          title: '数据字典管理',
-          icon: <img src={dictSVG} />,
-          path: `/onebase/${tenantId}/setting/system-dict`,
-          permissionKey: TENANT_MENUS.DICT
-        },
-        {
-          key: 'security',
-          title: '安全设置',
-          icon: <img src={securitySVG} />,
-          path: `/onebase/${tenantId}/setting/security`,
-          permissionKey: TENANT_MENUS.SECURITY
-        },
-        {
-          key: 'profile',
-          title: '个人中心',
-          icon: <img src={userInfoSVG} />,
-          path: `/onebase/${tenantId}/setting/profile`,
-          permissionKey: TENANT_MENUS.PROFILE
-        }
-      ]
+      key: 'role',
+      title: '角色管理',
+      icon: <img src={roleSVG} />,
+      iconActive: <img src={roleActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/role`,
+      permissionKey: TENANT_MENUS.ROLE
     },
     {
-      key: 'extraFunction',
-      title: '扩展功能',
-      children: [
-        {
-          key: 'plugin',
-          title: '插件管理',
-          icon: <img src={plugSVG} />,
-          path: `/onebase/${tenantId}/setting/plugin`,
-          permissionKey: TENANT_MENUS.PLUGIN
-        },
-        {
-          key: 'externalUser',
-          title: '外部用户',
-          icon: <img src={externalUserSVG} />,
-          path: `/onebase/${tenantId}/setting/externalUser`,
-          permissionKey: TENANT_MENUS.THIRD
-        },
-        {
-          key: 'enterprise',
-          title: '企业管理',
-          icon: <img src={corpSVG} />,
-          path: `/onebase/${tenantId}/setting/enterprise`,
-          permissionKey: TENANT_MENUS.CORP
-        }
-      ]
+      key: 'organization',
+      title: '组织管理',
+      icon: <img src={organizationSVG} />,
+      iconActive: <img src={organizationActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/organization`,
+      permissionKey: TENANT_MENUS.DEPT
+    },
+    {
+      key: 'spaceInfo',
+      title: '空间信息',
+      icon: <img src={tenantInfoSVG} />,
+      iconActive: <img src={tenantInfoActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/spaceInfo`,
+      permissionKey: TENANT_MENUS.INFO
+    },
+    {
+      key: 'system-dict',
+      title: '数据字典管理',
+      icon: <img src={dictSVG} />,
+      iconActive: <img src={dictActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/system-dict`,
+      permissionKey: TENANT_MENUS.DICT
+    },
+    {
+      key: 'security',
+      title: '安全设置',
+      icon: <img src={securitySVG} />,
+      iconActive: <img src={securityActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/security`,
+      permissionKey: TENANT_MENUS.SECURITY
+    },
+    {
+      key: 'profile',
+      title: '个人中心',
+      icon: <img src={userInfoSVG} />,
+      iconActive: <img src={userInfoActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/profile`,
+      permissionKey: TENANT_MENUS.PROFILE
+    },
+    {
+      key: 'plugin',
+      title: '插件管理',
+      icon: <img src={plugSVG} />,
+      iconActive: <img src={plugActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/plugin`,
+      permissionKey: TENANT_MENUS.PLUGIN
+    },
+    {
+      key: 'externalUser',
+      title: '外部用户',
+      icon: <img src={externalUserSVG} />,
+      iconActive: <img src={externalUserActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/externalUser`,
+      permissionKey: TENANT_MENUS.THIRD
+    },
+    {
+      key: 'enterprise',
+      title: '企业管理',
+      icon: <img src={corpSVG} />,
+      iconActive: <img src={corpActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/enterprise`,
+      permissionKey: TENANT_MENUS.CORP
+    },
+    {
+      key: 'copilotdoc',
+      title: 'AI生成文档',
+      icon: <img src={copilotdocSVG} />,
+      iconActive: <img src={copilotdocActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/copilotdoc`,
+    //   permissionKey: TENANT_MENUS.AIDOC
+    },
+    {
+      key: 'wxmini',
+      title: 'AI生成小程序',
+      icon: <img src={wxminiSVG} />,
+      iconActive: <img src={wxminiActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/wxmini`,
+    //   permissionKey: TENANT_MENUS.WXMINI
     }
   ];
 
-  const getDefaultKeys = () => {
-    let defaultOpenKeys: string[] = [];
-    let defaultSelectedKeys: string[] = [];
+  const defaultSelectedKeys = () => {
+    const defaultSelectedKeys: string[] = [];
     menuConfig.map((item) => {
-      defaultOpenKeys.push(item.key);
-      item.children?.map((child) => {
-        defaultSelectedKeys.push(child.key);
-      });
+      defaultSelectedKeys.push(item.key);
     });
-    return { defaultOpenKeys, defaultSelectedKeys };
+    return defaultSelectedKeys;
   };
 
   const platMenuData = () => {
-    let result: MenuItemType[] = [];
+    const result: MenuItemType[] = [];
     menuConfig?.forEach((menu) => {
-      if (menu.children?.length > 0) {
-        menu.children.forEach((item) => {
-          result.push(item);
-        });
-      }
+      result.push(menu);
     });
     return result;
   };
@@ -269,10 +272,10 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
               key={item.key}
               disabled={item.disabled}
               className={styles.menuItemWrapper}
-              style={collapsed ? { padding: '0 10px' } : { display: 'flex', alignItems: 'center' }}
+              style={collapsed ? { padding: '0 12px' } : { display: 'flex', alignItems: 'center' }}
             >
-              <div className={styles.menuItemWrapper}>
-                {item.icon}
+              <div className={styles.menuItemContent}>
+                {selectedKeys.includes(item.key) ? item.iconActive : item.icon}
                 <span className={styles.menuTitle}>{item.title}</span>
               </div>
             </MenuItem>
@@ -280,10 +283,10 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         })
         .filter(Boolean);
     },
-    [collapsed, permissionReady]
+    [collapsed, permissionReady, selectedKeys]
   );
 
-  const defaultKeys = getDefaultKeys();
+  const defaultKeys = defaultSelectedKeys();
 
   const renderContent = () => {
     return (
@@ -291,8 +294,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
         mode="vertical"
         autoOpen={true}
         selectedKeys={selectedKeys}
-        defaultOpenKeys={defaultKeys.defaultOpenKeys}
-        defaultSelectedKeys={defaultKeys.defaultSelectedKeys}
+        defaultSelectedKeys={defaultKeys}
         onClickMenuItem={handleMenuClick}
       >
         {renderMenuItems(menuConfig)}
@@ -307,9 +309,9 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       onCollapse={onCollapse}
       trigger={null}
       width={240}
-      collapsedWidth={64}
     >
       <div className={styles.siderContent}>
+        <div className={styles.sliderTitle}>AI+零代码开发平台</div>
         <div className={styles.menuContainer}>{renderContent()}</div>
 
         <div className={styles.collapseButtonContainer}>

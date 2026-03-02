@@ -9,6 +9,7 @@ import { defaultExtenstion } from '../utils/defaultLine';
 import type { VariablesList } from '@onebase/app';
 import { lintGutter, linter, type Diagnostic } from '@codemirror/lint';
 import { validateFormula } from '../utils/formula';
+import copy from 'copy-to-clipboard';
 
 interface FormulaInputProps {
   error: string;
@@ -225,7 +226,7 @@ export function FormulaInput({
    * 处理复制按钮点击事件。
    * 复制当前公式和相关变量数据到剪贴板。
    */
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async() => {
     // 复制公式和变量数据
     const copyData = {
       formula: value,
@@ -235,22 +236,24 @@ export function FormulaInput({
 
     // 将数据转换为 JSON 字符串并复制到剪贴板
     const copyText = JSON.stringify(copyData);
-    navigator.clipboard
-      .writeText(copyText)
-      .then(() => {
+    try {
+      copy(copyText);
+      onCopy();
+    } catch (err) {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(copyText);
         onCopy();
-      })
-      .catch((err) => {
-        console.error('复制失败:', err);
-        // 降级处理：使用传统复制方法
-        const textArea = document.createElement('textarea');
-        textArea.value = copyText;
-        document.body.appendChild(textArea);
-        textArea.select();
+      } else {
+        console.error('复制失败: ', err);
+        const textarea = document.createElement('textarea');
+        textarea.value = copyText;
+        document.body.appendChild(textarea);
+        textarea.select();
         document.execCommand('copy');
-        document.body.removeChild(textArea);
+        document.body.removeChild(textarea);
         onCopy();
-      });
+      }
+    }
   }, [value, filteredVariables, filteredFunctions, onCopy]);
 
   /**

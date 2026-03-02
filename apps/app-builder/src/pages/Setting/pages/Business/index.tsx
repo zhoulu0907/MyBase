@@ -54,7 +54,7 @@ const BusinessPage: React.FC = () => {
       dataIndex: 'corpName'
     },
     {
-      title: '企业编码',
+      title: '企业ID',
       dataIndex: 'corpCode'
     },
     {
@@ -361,7 +361,7 @@ const BusinessPage: React.FC = () => {
             onChange: handlePageChange
           }}
           rowKey="id"
-          border={false}
+          stripe
         />
       </div>
     );

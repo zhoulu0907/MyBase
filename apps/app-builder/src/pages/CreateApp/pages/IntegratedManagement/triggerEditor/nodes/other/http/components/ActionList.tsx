@@ -14,10 +14,10 @@ interface ActionListProps {
 }
 
 export const ActionList: React.FC<ActionListProps> = ({ items, form, onSelect }) => {
-  const selectedActionKey = form.getFieldValue('actionKey');
+  const selectedActionName = form.getFieldValue('actionName');
 
   const handleSelect = (item: ActionItem) => {
-    form.setFieldValue('actionKey', item.key);
+    form.setFieldValue('actionName', item.key);
     onSelect?.(item);
   };
 
@@ -28,7 +28,7 @@ export const ActionList: React.FC<ActionListProps> = ({ items, form, onSelect })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {items.map((item) => {
-        const isSelected = selectedActionKey === item.key;
+        const isSelected = selectedActionName === item.key;
         return (
           <div
             key={item.key}

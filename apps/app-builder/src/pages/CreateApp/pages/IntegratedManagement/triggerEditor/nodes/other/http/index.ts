@@ -4,9 +4,9 @@ import { type FlowNodeRegistry } from '../../../typings';
 import { generateNodeId } from '../../utils';
 import { formMeta } from './form-meta';
 
-export const ConnectorNodeRegistry: FlowNodeRegistry = {
-  type: NodeType.CONNECTOR,
-  title: '连接器节点',
+export const HTTPNodeRegistry: FlowNodeRegistry = {
+  type: NodeType.HTTP,
+  title: 'HTTP节点',
   category: 'other',
   meta: {
     isStart: false,
@@ -18,7 +18,7 @@ export const ConnectorNodeRegistry: FlowNodeRegistry = {
   },
   info: {
     icon: iconOther,
-    description: '这是连接器节点，用于记录日志。'
+    description: '这是HTTP节点，用于发送HTTP请求。'
   },
   /**
    * Render node via formMeta
@@ -29,10 +29,10 @@ export const ConnectorNodeRegistry: FlowNodeRegistry = {
   },
   onAdd(ctx, from) {
     return {
-      id: generateNodeId(NodeType.CONNECTOR),
-      type: NodeType.CONNECTOR,
+      id: generateNodeId(NodeType.HTTP),
+      type: NodeType.HTTP,
       data: {
-        title: '连接器节点'
+        title: 'HTTP节点'
       }
     };
   }

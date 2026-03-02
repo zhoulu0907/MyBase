@@ -32,8 +32,8 @@ const SUB_ATTR_KEY = {
 };
 
 const sortOptions = [
-  { value: 1, label: '升序' },
-  { value: 2, label: '降序' }
+  { value: 'ASC', label: '升序' },
+  { value: 'DESC', label: '降序' }
 ];
 
 const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
@@ -58,8 +58,8 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
 
   const [filterCondition, setFilterCondition] = useState(configs[SUB_ATTR_KEY.FILTERCONDITION]);
 
-  const [sortFieldValue, setSortFieldValue] = useState<string>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT].fieldName);
-  const [sortValue, setSortValue] = useState<number>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT].sortBy);
+  const [sortFieldValue, setSortFieldValue] = useState<string>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.[0]?.fieldName);
+  const [sortValue, setSortValue] = useState<number>(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.[0]?.sortBy);
 
   // 回显字段：用于排除和预览显示
   const echoField = useMemo(() => {
@@ -77,8 +77,8 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       //   .filter((f: any) => f !== echoField);
       setSelected(initialSelected);
       setFilterCondition(configs[SUB_ATTR_KEY.FILTERCONDITION]);
-      setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.fieldName);
-      setSortValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.sortBy);
+      setSortFieldValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.[0]?.fieldName);
+      setSortValue(tableConfig[SUB_ATTR_KEY.SORTBYOBJECT]?.[0]?.sortBy);
       tableConfig.metaData = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].entityUuid;
       tableConfig.tableName = configs[SUB_ATTR_KEY.SELECTEDDATASOURCE].tableName;
       handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
@@ -126,7 +126,7 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
       };
     });
     tableConfig.searchItems = newSearchItems;
-    
+
     handleMultiPropsChange?.([
       { key: SUB_ATTR_KEY.SELECTDATAFIELDS, value: value },
       { key: SUB_ATTR_KEY.DYNAMICTABLECONFIG, value: { ...tableConfig, searchItems: newSearchItems } }
@@ -170,10 +170,12 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
 
   const handlSortFieldValueChange = (value: string) => {
     const sortBy = value ? sortValue : 1;
-    tableConfig.sortByObject = {
-      fieldName: value,
-      sortBy: sortBy
-    };
+    tableConfig.sortByObject = [
+      {
+        fieldName: value,
+        sortBy: sortBy
+      }
+    ];
 
     setSortFieldValue(value);
     setSortValue(sortBy);
@@ -182,16 +184,18 @@ const DataSelectionProcessConfig: React.FC<DataSelectionProcessConfigProps> = ({
 
   const handleSortValueChange = (value: number) => {
     setSortValue(value);
-    tableConfig.sortByObject = {
-      fieldName: sortFieldValue,
-      sortBy: value
-    };
+    tableConfig.sortByObject = [
+      {
+        fieldName: sortFieldValue,
+        sortBy: value
+      }
+    ];
     handlePropsChange(SUB_ATTR_KEY.DYNAMICTABLECONFIG, tableConfig);
   };
 
   const handleOKModal = (values: any) => {
-    const newFilterCondition = getConditionChildren(values);
-    tableConfig.filterCondition = newFilterCondition;
+    const newFilterCondition:any = getConditionChildren(values);
+    tableConfig.filterCondition = newFilterCondition?.children || [];
     handleMultiPropsChange?.([
       { key: SUB_ATTR_KEY.FILTERCONDITION, value: values },
       { key: SUB_ATTR_KEY.DYNAMICTABLECONFIG, value: tableConfig }
