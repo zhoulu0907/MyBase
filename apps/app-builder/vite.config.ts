@@ -10,7 +10,12 @@ export default defineConfig({
   },
   base: './',
   build: {
-    minify: 'esbuild'
+    minify: 'esbuild',
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html')
+      }
+    }
   },
   plugins: [
     react({
@@ -46,8 +51,7 @@ export default defineConfig({
         javascriptEnabled: true,
         modifyVars: {
           prefix: 'pc'
-        },
-        timeout: 30000 // 增加Less编译超时时间到30秒
+        }
       }
     }
   }
