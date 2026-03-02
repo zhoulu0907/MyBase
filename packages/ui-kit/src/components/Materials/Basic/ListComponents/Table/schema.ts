@@ -288,7 +288,7 @@ const XTable: XTableSchema = {
     columns: [],
 
     searchItems: [],
-    advancedRowRedirect: true,
+    advancedRowRedirect: false,
     redirectPageId: '',
     redirectMethod: RedirectMethod.DRAWER,
 

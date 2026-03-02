@@ -197,7 +197,7 @@ const XCard: XCardSchema = {
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
-    advancedRowRedirect: true,
+    advancedRowRedirect: false,
     redirectPageId: '',
     redirectMethod: RedirectMethod.DRAWER,
   }
