@@ -2,7 +2,7 @@ import CompDeleteIcon from '@/assets/images/app_delete.svg';
 import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
 import CompShowIcon from '@/assets/images/eye_off_icon.svg';
 import { Divider } from '@arco-design/web-react';
-import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField } from '@onebase/app';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField, type PageView } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import { cloneDeep } from 'lodash-es';
 import React, { useEffect, useRef } from 'react';
@@ -26,7 +26,7 @@ import { ENTITY_FIELD_TYPE } from 'src/components/DataFactory'
 import EditRender from 'src/components/render/EditRender';
 import { usePageEditorSignal } from 'src/hooks/useSignal';
 import { useAppEntityStore } from 'src/signals/store_entity';
-import { usePageComponentValidateSignal } from 'src/signals'
+import { usePageComponentValidateSignal, usePageViewEditorSignal } from 'src/signals'
 import { type GridItem } from 'src/utils/const';
 import { v4 as uuidv4 } from 'uuid';
 import './index.css';
@@ -63,6 +63,8 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
 }) => {
   useSignals();
   const { mainEntity } = useAppEntityStore();
+  const { pageViews } = usePageViewEditorSignal;
+
   const {
     curComponentID,
     setCurComponentID,
@@ -128,6 +130,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           disabled: item.disabled,
           id: item.id
         }));
+      const defaultView = (Object.values(pageViews.value) as PageView[]).find(
+        (item: PageView) => item.isDefaultDetailViewMode
+      );
+      schema.config.redirectPageId = defaultView?.pageUuid;
     }
 
     // 主表 字段组件

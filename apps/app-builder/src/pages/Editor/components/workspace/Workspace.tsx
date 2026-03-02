@@ -45,7 +45,7 @@ import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor'
 import { initGlobalState, loadMicroApp, type MicroApp } from 'qiankun';
 
 import { Divider, Form } from '@arco-design/web-react';
-import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField, menuSignal } from '@onebase/app';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField, menuSignal, type PageView } from '@onebase/app';
 import { EditMode, getHashQueryParam, getMobileEditorURL } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
@@ -673,6 +673,10 @@ export default function EditorWorkspace() {
                     disabled: item.disabled,
                     id: item.id
                   }));
+                const defaultView = (Object.values(pageViews.value) as PageView[]).find(
+                  (item: PageView) => item.isDefaultDetailViewMode
+                );
+                schema.config.redirectPageId = defaultView?.pageUuid;
               }
 
               // 主表 字段组件
