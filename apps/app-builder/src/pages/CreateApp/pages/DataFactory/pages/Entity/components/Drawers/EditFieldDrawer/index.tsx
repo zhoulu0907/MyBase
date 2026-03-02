@@ -48,6 +48,7 @@ const EditFieldDrawer: React.FC<EditFieldDrawerProps> = ({ visible, setVisible, 
 
   useEffect(() => {
     if (visible && fieldId) {
+      form.resetFields();
       fetchFieldDetail();
     }
   }, [visible, fieldId]);
