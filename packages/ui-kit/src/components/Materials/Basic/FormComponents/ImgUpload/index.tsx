@@ -43,11 +43,11 @@ const XImgUpload = memo(
 
       const progressAdapter = onProgress
         ? (progressEvent: ProgressEvent) => {
-            if (progressEvent.lengthComputable) {
-              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              onProgress(percent, progressEvent);
-            }
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
           }
+        }
         : undefined;
 
       if (runtime) {
@@ -235,7 +235,7 @@ const XImgUpload = memo(
                       }}
                     />
                     <IconDownload
-                      onClick={async(e) => {
+                      onClick={async (e) => {
                         e.stopPropagation();
                         const lastIndexOf = fieldName.lastIndexOf('.');
                         const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
@@ -284,12 +284,12 @@ const XImgUpload = memo(
                         ) : null}
                       </div>
                     </div>
-                    <IconClose
+                    {!detailMode && <IconClose
                       className="uplaodImgList-list-item-close"
                       onClick={() => {
                         handleRemoveFile(file, index, fileProps);
                       }}
-                    />
+                    />}
                   </div>
                   {file.percent && file.percent !== 100 ? (
                     <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
@@ -355,7 +355,7 @@ const XImgUpload = memo(
           }
           field={fieldId}
           layout={layout}
-          tooltip={ tooltip && {
+          tooltip={tooltip && {
             content: tooltip,
             position: tooltipPosition
           }}

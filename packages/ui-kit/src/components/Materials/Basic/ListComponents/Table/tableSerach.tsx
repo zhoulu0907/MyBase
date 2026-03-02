@@ -3,6 +3,7 @@ import { Button, Form } from '@arco-design/web-react';
 import { IconSearch, IconSync } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
 import { COMPONENT_MAP, FORM_COMPONENT_TYPES, FormComp, getComponentSchema } from 'src/components/Materials';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { v4 as uuidv4 } from 'uuid';
@@ -33,6 +34,30 @@ const TableSearch = memo((props: TableSearchConfig) => {
   const { mainEntity, subEntities } = useAppEntityStore();
 
   const renderSearchItem = (item: any) => {
+    // todo 数据标题 需要和后端确定
+    if (item.value?.indexOf('-') !== -1) {
+      const schema = getComponentSchema(COMPONENT_MAP.TEXT);
+      const cpId = nanoid()
+      const componentConfig = {
+        ...schema.config,
+        label: {
+          display: true,
+          text: item.label
+        },
+        layout: 'vertical',
+        labelColSpan,
+        dataField: [],
+        defaultValue: undefined,
+        defaultValueConfig: { type: DEFAULT_VALUE_TYPES.CUSTOM, customValue: null },
+        defaultDeptValue: undefined,     // 清空search是部门选择的默认值
+        defaultUserValue: undefined,     // 清空search是人员选择的默认值
+        status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+        verify: { required: false },
+        tooltip: ''
+      };
+      return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
+    }
+    
     let copyMainEntity: any = { ...mainEntity };
 
     if (pageSetType === PageType.BPM) {
@@ -94,9 +119,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
 
     if (cpId) {
       const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
-      // 组件类型
-      const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
-
       componentConfig = {
         ...currentComponentSchemas.config,
         layout: 'vertical',

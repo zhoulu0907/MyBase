@@ -42,7 +42,8 @@ import {
   STATUS_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
-  RedirectMethod
+  RedirectMethod,
+  TableOperationButton
 } from '../../../constants';
 
 export interface XCardSchema {
@@ -145,6 +146,20 @@ export interface XCardConfig extends ICommonBaseType {
   advancedRowRedirect?: TBooleanDefaultType;
   redirectPageId?: TTextDefaultType;
   redirectMethod?: TTextDefaultType;
+  /**
+   * 操作按钮
+   */
+  operationButton: {
+    type: string;
+    buttonName: string;
+    buttonIcon: string;
+    iconColor: string;
+    redirectPageId?: string;
+    redirectMethod?: string;
+    confirmText?: string;
+    deletedAction?: string;
+    display: boolean;
+  }[];
 }
 
 const XCard: XCardSchema = {
@@ -200,6 +215,27 @@ const XCard: XCardSchema = {
     advancedRowRedirect: false,
     redirectPageId: '',
     redirectMethod: RedirectMethod.DRAWER,
+    // 操作按钮
+    operationButton: [
+      {
+        type: TableOperationButton.EDIT,
+        buttonName: '编辑',
+        buttonIcon: 'edit',
+        iconColor: '#C9CDD4',
+        redirectPageId: '',
+        redirectMethod: RedirectMethod.NEW_TAB,
+        display: true
+      },
+      {
+        type: TableOperationButton.DELETE,
+        buttonName: '删除',
+        buttonIcon: 'delete',
+        iconColor: '#F53F3F',
+        confirmText: '确定删除？删除后不可恢复',
+        deletedAction: RedirectMethod.REFRESH,
+        display: true
+      }
+    ],
   }
 };
 

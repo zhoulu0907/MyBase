@@ -126,16 +126,16 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
 
   const { pageViews } = usePageViewEditorSignal;
 
-  useEffect(() => {
-    const hasPageView = pageViews.value[configs.redirectPageId]?.detailViewMode == 1;
-    if (!hasPageView) {
-      handleMultiPropsChange([
-        { key: advancedRowRedirect, value: false },
-        { key: redirectPageId, value: '' },
-        { key: redirectMethod, value: RedirectMethod.DRAWER }
-      ]);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const hasPageView = pageViews.value[configs.redirectPageId]?.detailViewMode == 1;
+  //   if (!hasPageView) {
+  //     handleMultiPropsChange([
+  //       { key: advancedRowRedirect, value: false },
+  //       { key: redirectPageId, value: '' },
+  //       { key: redirectMethod, value: RedirectMethod.DRAWER }
+  //     ]);
+  //   }
+  // }, []);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalButtonVisible, setModalButtonVisible] = useState<'edit' | 'delete' | string>('');
