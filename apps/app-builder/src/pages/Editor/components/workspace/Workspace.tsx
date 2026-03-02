@@ -186,7 +186,19 @@ export default function EditorWorkspace() {
 
   // 复制组件
   const handleCopyComponent = (comp: any, originId: string) => {
-    addComponents(comp);
+    const componentsList = [...components];
+    const originIndex = componentsList.findIndex((item: any) => item.id === originId);
+
+    if (originIndex > -1) {
+      const newComponentsList = [
+        ...componentsList.slice(0, originIndex + 1),
+        comp,
+        ...componentsList.slice(originIndex + 1)
+      ];
+      setComponents(newComponentsList);
+    } else {
+      addComponents(comp);
+    }
 
     const idMap = new Map();
     idMap.set(originId, comp.id);
@@ -205,6 +217,10 @@ export default function EditorWorkspace() {
 
       schema.config = schemaConfig;
       schema.config.cpName = comp.displayName || '';
+      schema.config.label = {
+        ...schema.config.label,
+        text: schema.config.label.text + '-复制' || ''
+      };
       schema.config.id = newId; // 使用新 ID
 
       console.debug('newProps', schema, originalComp);

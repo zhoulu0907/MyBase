@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useMemo, useCallback, CSSProperties } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, CSSProperties, useRef } from 'react';
 import { Editor, Toolbar } from '@wangeditor/editor-for-react';
 // 引入 wangEditor 的类型
-import { IDomEditor, IEditorConfig, IToolbarConfig } from '@wangeditor/editor';
+import { IDomEditor, IEditorConfig, IToolbarConfig, SlateTransforms } from '@wangeditor/editor';
+import { DEFAULT_VALUE_TYPES } from '@/components/Materials/constants';
+import { TSelectDefaultType, TTextDefaultType } from '@/components/Materials/types';
+import { TAlignSelectKeyType } from '@/components/Materials/common';
 
 // ----------------- 类型定义 -----------------
 
@@ -10,28 +13,75 @@ interface WangEditorProps {
   value?: string; // Form.Item 注入的 value
   onChange?: (html: any) => void; // Form.Item 注入的 onChange
   runtime?: boolean;
+  placeholder?: TTextDefaultType;
   style?: CSSProperties;
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
+  defaultValueConfig?: any;
 }
 
 
 // ----------------- 静态配置 -----------------
-
-// 将静态配置移到外部，避免重渲染时重复创建
-// 并为它们添加类型注解
-const toolbarConfig: Partial<IToolbarConfig> = {};
-
 const editorConfig: Partial<IEditorConfig> = {
   placeholder: '请输入内容...',
   MENU_CONF: {},
   scroll: true
 };
 
+// 将静态配置移到外部，避免重渲染时重复创建
+// 并为它们添加类型注解
+const toolbarConfig: Partial<IToolbarConfig> = {};
 
 // ----------------- 封装的组件 -----------------
 
-const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, runtime, style }) => {
+const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, align, runtime, placeholder, defaultValueConfig, style }) => {
+  const isSyncingFromConfigRef = useRef(false);
+
   // 2. 为 useState 添加类型注解
   const [editor, setEditor] = useState<IDomEditor | null>(null);
+
+  useEffect(() => {
+    if (editor && placeholder) {
+      editor.getConfig().placeholder = placeholder;
+      const $placeholder = editor.getEditableContainer().querySelector('.w-e-text-placeholder');
+      if ($placeholder) {
+        $placeholder.innerHTML = placeholder;
+      }
+    }
+  }, [placeholder, editor]);
+
+  useEffect(() => {
+    const customValue =
+      defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '';
+    if (!editor) return;
+    if (customValue === undefined || customValue === null) return;
+    if (customValue === editor.getHtml()) return;
+
+    // 记录当前聚焦元素，避免在设计态下修改默认值时编辑器抢焦点导致右侧输入框失焦
+    const activeElement = (typeof document !== 'undefined'
+      ? (document.activeElement as HTMLElement | null)
+      : null);
+
+    isSyncingFromConfigRef.current = true;
+    editor.setHtml(customValue);
+
+    if (activeElement && typeof activeElement.focus === 'function') {
+      // 异步恢复焦点，确保在编辑器内部处理完成后执行
+      setTimeout(() => {
+        try {
+          activeElement.focus();
+        } catch {
+          // ignore
+        }
+      }, 0);
+    }
+  }, [defaultValueConfig, editor]);
+
+  useEffect(() => {
+    if (editor && align) {
+      editor.selectAll();
+      SlateTransforms.setNodes(editor, { textAlign: align }, { mode: 'all' });
+    }
+  }, [align, editor]);
 
   // 使用 useCallback 确保 onChange 函数引用稳定
   const stableOnChange = useCallback((html: string) => {
@@ -42,6 +92,7 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, ru
   useEffect(() => {
     // 确保 editor 实例已创建，并且外部 value 与内部 value 不一致时才更新
     if (editor && value !== editor.getHtml()) {
+      isSyncingFromConfigRef.current = true;
       editor.setHtml(value);
     }
   }, [value, editor]);
@@ -66,6 +117,10 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, ru
   // 使用 useMemo 缓存编辑器变化的回调函数
   const handleEditorChange = useMemo(() => {
     return (currentEditor: IDomEditor) => {
+      if (isSyncingFromConfigRef.current) {
+        isSyncingFromConfigRef.current = false;
+        return;
+      }
       const newHtml = currentEditor.getHtml();
       // 只有当内容真正变化时才调用 onChange
       if (newHtml !== value) {
