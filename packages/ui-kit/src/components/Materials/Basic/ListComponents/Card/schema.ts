@@ -171,9 +171,9 @@ const XCard: XCardSchema = {
     // 封面图片
     coverImageConfig,
     // 数据排序规则
-    // dataSortByConfig,
+    dataSortByConfig,
     // 数据过滤
-    // dataFilterConfig,
+    dataFilterConfig,
     // 绑定分组筛选
     groupFilterConfig,
     // 显示状态
