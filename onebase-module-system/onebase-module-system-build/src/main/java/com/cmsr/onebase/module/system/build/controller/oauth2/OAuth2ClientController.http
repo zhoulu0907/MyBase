@@ -5,8 +5,8 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 
 {
-  "name": "onebase-client5",
-  "contactUser": "admin5",
+  "name": "AITool",
+  "contactUser": "aitool",
   "contactEmail": "admin5@example.com",
   "redirectUris": ["https://www.aaa.com"],
   "logo": "https://www.aaa.com/images/favicon.ico",

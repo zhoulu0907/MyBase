@@ -27,8 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
@@ -134,12 +132,12 @@ public class BuildAuthController {
     @PermitAll
     @ApiSignIgnore
     @Operation(summary = "天宫平台用户登录")
-    public AuthLoginRespVO tianGongLogin(@RequestParam @NotBlank(message = "{code}不能为空") String code, @RequestParam(required = false) String state, HttpServletResponse response) {
+    public CommonResult<AuthLoginRespVO> tianGongLogin(@RequestParam @NotBlank(message = "{code}不能为空") String code, @RequestParam @NotBlank(message = "{deviceId}不能为空") String deviceId, HttpServletResponse response) {
 
-        AuthLoginRespVO authLoginRespVO = authService.tianGongLogin(code, state);
+        AuthLoginRespVO authLoginRespVO = authService.tianGongLogin(code, deviceId);
         // 设置Cookie
         response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
                 securityProperties.getTokenHeader(), authLoginRespVO.getAccessToken()));
-        return authLoginRespVO;
+        return success(authLoginRespVO);
     }
 }

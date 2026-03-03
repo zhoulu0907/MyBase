@@ -90,6 +90,6 @@ public interface BuildAuthService {
      * 天宫账号登录
      *
      */
-    AuthLoginRespVO tianGongLogin(String code, String state);
+    AuthLoginRespVO tianGongLogin(String code, String deviceId);
 
 }
