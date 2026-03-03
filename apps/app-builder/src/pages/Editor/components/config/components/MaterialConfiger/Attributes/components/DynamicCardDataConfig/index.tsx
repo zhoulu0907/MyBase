@@ -229,7 +229,7 @@ const DynamicCardDataConfig = ({ handlePropsChange, handleMultiPropsChange, item
                 handlePropsChange('showFields', value);
               }}
             >
-              显示文本内容
+              显示字段标题
             </Checkbox>
           </>
         }

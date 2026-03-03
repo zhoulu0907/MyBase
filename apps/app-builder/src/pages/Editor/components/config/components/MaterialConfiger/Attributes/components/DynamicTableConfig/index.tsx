@@ -13,7 +13,8 @@ import {
   ENTITY_FIELD_TYPE,
   getPopupContainer,
   useAppEntityStore,
-  SELECT_OPTIONS_BPM
+  SELECT_OPTIONS_BPM,
+  usePageSettingSignal
 } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
@@ -60,6 +61,7 @@ export const hiddenSearchFieldTypes = [
 
 /**
  * 对实体字段进行排序：系统字段排在后面，非系统字段排在前面
+ * 数据标题排在表单字段前面
  */
 const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
   if (a.isSystemField !== b.isSystemField) {
@@ -76,6 +78,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   id
 }) => {
   const { mainEntity, subEntities } = useAppEntityStore();
+  const { dataTitleType, dataTitle } = usePageSettingSignal;
 
   const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
   const [entityUuid, setEntityUuid] = useState<string>('');
@@ -182,7 +185,29 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
       (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
     );
 
-    setFieldList(newFieldList);
+    // 数据标题
+    const DATA_TITLE = {
+      id: '1',
+      entityId: '1',
+      entityUuid: '1',
+      fieldName: `${dataTitleType.value}-${dataTitle.value}`,
+      displayName: '数据标题',
+      fieldType: 'TEXT',
+      dataLength: 0,
+      defaultValue: null,
+      description: '',
+      isSystemField: 0,
+      isPrimaryKey: false,
+      isRequired: false,
+      isUnique: 1,
+      allowNull: false,
+      sortOrder: 1,
+      runMode: 1,
+      appId: '',
+      status: 1
+    };
+
+    setFieldList([DATA_TITLE, ...newFieldList]);
 
     if (configs.metaData === entityUuid) {
       return;
@@ -199,7 +224,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
     }));
 
     if (curMenu?.value?.pagesetType === PageType.BPM) {
-      const bpmColumn = SELECT_OPTIONS_BPM.map((item:any) => {
+      const bpmColumn = SELECT_OPTIONS_BPM.map((item: any) => {
         return {
           title: item.displayName,
           dataIndex: item.fieldName,
@@ -518,7 +543,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
                 {fieldList
                   .sort(sortEntityFields)
                   .filter((item: MetadataEntityField) => {
-                    return !hiddenSearchFieldTypes.includes(item.fieldType);
+                    return !hiddenSearchFieldTypes.includes(item.fieldType) && item.entityId !== '1';
                   })
                   .map((item: MetadataEntityField) => (
                     <Select.Option key={item.fieldName} value={item.fieldName}>

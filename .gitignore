@@ -70,3 +70,5 @@ packages/common/src/utils/base.ts
 
 # App Config
 **/public/config.js
+
+.trae
