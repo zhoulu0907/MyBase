@@ -220,7 +220,7 @@ export interface XTableConfig extends ICommonBaseType {
   /**
    * 数据选择过滤条件
    */
-  filterCondition?: any
+  filterCondition?: any;
 }
 
 export interface OperationButtonConfig {
@@ -291,7 +291,7 @@ const XTable: XTableSchema = {
     pageSize: 10,
     metaData: '',
     tableName: '',
-    filterCondition:{},
+    filterCondition: [],
     // labelColSpan: 100,
     defaultValue: [],
     columns: [],
