@@ -476,12 +476,29 @@ const XTable = memo(
         }
 
         if (value != undefined && value != null && value !== '') {
-          conditions.push({
-            nodeType: 'CONDITION',
-            fieldName: key,
-            operator: VALIDATION_TYPE.EQUALS,
-            fieldValue: Array.isArray(value) ? value : (typeof value === 'object' ? [value?.id] : [value])
-          });
+          // 日期范围选择器提交 [start, end]，使用 RANGE 条件；结束日取 23:59:59 以包含当天全天（兼容精确到秒的日期时间字段）
+          const isDateRange = Array.isArray(value) && value.length === 2;
+          if (isDateRange) {
+            const toDayjs = (v: any) =>
+              v && typeof v === 'object' && typeof v.startOf === 'function' ? v : null;
+            const start = toDayjs(value[0]);
+            const end = toDayjs(value[1]);
+            const startStr = start ? start.startOf('day').format('YYYY-MM-DD HH:mm:ss') : value[0];
+            const endStr = end ? end.endOf('day').format('YYYY-MM-DD HH:mm:ss') : value[1];
+            conditions.push({
+              nodeType: 'CONDITION',
+              fieldName: key,
+              operator: VALIDATION_TYPE.RANGE,
+              fieldValue: [startStr, endStr]
+            });
+          } else {
+            conditions.push({
+              nodeType: 'CONDITION',
+              fieldName: key,
+              operator: VALIDATION_TYPE.EQUALS,
+              fieldValue: Array.isArray(value) ? value : (typeof value === 'object' ? [value?.id] : [value])
+            });
+          };
         }
       });
       // 数据过滤 filterCondition

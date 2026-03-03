@@ -115,6 +115,16 @@ const TableSearch = memo((props: TableSearchConfig) => {
       cpId = `${cpType}-${uuidv4()}`;
     }
 
+    // 日期范围选择器统一使用「开始日期」「结束日期」占位，日期类型使用date
+    if (
+      cpType === FORM_COMPONENT_TYPES.DATE_RANGE_PICKER ||
+      cpType === FORM_COMPONENT_TYPES.DATE_PICKER ||
+      cpType === FORM_COMPONENT_TYPES.DATE_TIME_PICKER
+    ) {
+      componentConfig.dateType = 'date';
+      componentConfig.placeholder = ['开始日期', '结束日期'];
+    }
+
     switch (cpType) {
       case FORM_COMPONENT_TYPES.INPUT_TEXT:
         return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
@@ -158,26 +168,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
             detailMode={detailMode}
           />
         );
-      case FORM_COMPONENT_TYPES.DATE_PICKER:
-        return (
-          <FormComp.XDatePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
-        return (
-          <FormComp.XDateRangePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
       case FORM_COMPONENT_TYPES.TIME_PICKER:
         return (
           <FormComp.XTimePicker
@@ -188,9 +178,12 @@ const TableSearch = memo((props: TableSearchConfig) => {
             detailMode={detailMode}
           />
         );
+      case FORM_COMPONENT_TYPES.DATE_PICKER:
+      case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
       case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
+        console.log('componentConfig', componentConfig);
         return (
-          <FormComp.XDateTimePicker
+          <FormComp.XDateRangePicker
             cpName={cpId}
             id={cpId}
             {...componentConfig}
