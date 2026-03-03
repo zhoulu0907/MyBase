@@ -1,5 +1,5 @@
 import '@arco-design/web-react/dist/css/arco.css';
-import '@arco-themes/react-cyansu-ob03/index.less';
+import '@arco-themes/react-tiangong/index.less';
 
 import { ConfigProvider } from '@arco-design/web-react';
 import { ErrorPage, getAiGenURL, TokenManager } from '@onebase/common';
