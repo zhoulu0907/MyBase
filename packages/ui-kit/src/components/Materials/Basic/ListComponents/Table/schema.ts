@@ -243,6 +243,12 @@ const XTable: XTableSchema = {
     tableMetaDataConfig,
     // keyDataConfig,
     // labelColSpanConfig,
+    // 数据排序规则
+    dataSortByConfig,
+    // 数据过滤
+    dataFilterConfig,
+    // 绑定分组筛选
+    groupFilterConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
@@ -260,12 +266,6 @@ const XTable: XTableSchema = {
     // },
     widthConfig,
     statusConfig,
-     // 数据排序规则
-        dataSortByConfig,
-        // 数据过滤
-        dataFilterConfig,
-        // 绑定分组筛选
-        groupFilterConfig,
     rowRedirectConfig,
     tableOperationConfig,
     tableButtonPermissionConfig
