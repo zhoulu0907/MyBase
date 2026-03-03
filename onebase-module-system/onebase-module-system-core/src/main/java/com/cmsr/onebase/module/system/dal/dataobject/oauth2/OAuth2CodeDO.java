@@ -26,6 +26,8 @@ public class OAuth2CodeDO extends BaseEntity {
     public static final String REDIRECT_URI = "redirect_uri";
     public static final String STATE        = "state";
     public static final String EXPIRES_TIME = "expires_time";
+    public static final String TENANT_ID = "tenant_id";
+    public static final String APPLICATION_ID = "application_id";
 
     /**
      * 授权码
@@ -71,5 +73,18 @@ public class OAuth2CodeDO extends BaseEntity {
      */
     @Column(value = EXPIRES_TIME)
     private LocalDateTime expiresTime;
+
+    /**
+     * 租户id
+     */
+    @Column(value = TENANT_ID)
+    private Long tenantId;
+
+
+    /**
+     * 应用id
+     */
+    @Column(value = APPLICATION_ID)
+    private Long applicationId;
 
 }

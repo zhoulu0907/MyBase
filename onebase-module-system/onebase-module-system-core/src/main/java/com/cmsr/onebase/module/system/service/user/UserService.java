@@ -451,5 +451,5 @@ public interface UserService {
      * @param accessToken 访问令牌
      * @return 用户信息
      */
-    UserSimpleRespVO getUserInfoByToken(String accessToken);
+    OAuth2UserInfoRespVO getUserInfoByToken(String accessToken);
 }

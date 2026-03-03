@@ -4,6 +4,7 @@ import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
@@ -64,8 +66,13 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
         }
 
         // 创建访问令牌
-        return oauth2TokenService.createAccessTokenWithMode(runMode,null,null, codeDO.getUserId(), codeDO.getUserType(),
-                codeDO.getClientId(), codeDO.getScopes(), null);
+        AtomicReference<OAuth2AccessTokenDO> loginRespRef = new AtomicReference<>();
+        TenantUtils.execute(codeDO.getTenantId(), () -> {
+            OAuth2AccessTokenDO accessToken = oauth2TokenService.createAccessTokenWithMode(runMode, null, codeDO.getApplicationId(), codeDO.getUserId(), codeDO.getUserType(),
+                    codeDO.getClientId(), codeDO.getScopes(), null);
+            loginRespRef.set(accessToken);
+        });
+        return loginRespRef.get();
     }
 
     @Override

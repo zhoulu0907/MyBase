@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import cn.hutool.core.util.IdUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -40,7 +42,9 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
                 .setUserId(userId).setUserType(userType)
                 .setClientId(clientId).setScopes(scopes)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(TIMEOUT))
-                .setRedirectUri(redirectUri).setState(state);
+                .setRedirectUri(redirectUri).setState(state)
+                .setTenantId(TenantContextHolder.getTenantId())
+                .setApplicationId(ApplicationManager.getApplicationId());
         oauth2CodeDataRepository.insert(codeDO);
         return codeDO;
     }
