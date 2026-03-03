@@ -1,6 +1,6 @@
 import { Message } from '@arco-design/web-react';
-import { useEffect } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useEffect, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../hooks/useI18n';
 import { tiangongLogin } from '@onebase/platform-center';
 import { TokenManager } from '@onebase/common';
@@ -8,12 +8,18 @@ import styles from './index.module.less';
 
 const OAuthCallback: React.FC = () => {
   const { t } = useI18n();
-  const { appName } = useParams<{ appName: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const processedRef = useRef(false);
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
+      // 防止重复处理
+      if (processedRef.current) {
+        return;
+      }
+      processedRef.current = true;
+
       const code = searchParams.get('code');
 
       if (!code) {
@@ -54,7 +60,7 @@ const OAuthCallback: React.FC = () => {
     };
 
     handleOAuthCallback();
-  }, [searchParams, navigate, t]);
+  }, [navigate, t]);
 
   return (
     <div className={styles.callbackContainer}>
