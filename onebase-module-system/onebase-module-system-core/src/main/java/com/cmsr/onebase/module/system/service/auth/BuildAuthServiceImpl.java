@@ -141,8 +141,8 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     private String tianGongRedirectUri;
     @Value("${onebase.auth.tiangong.scope:server}")
     private String tianGongScope;
-    @Value("${onebase.auth.tiangong.device-id:tianGong}")
-    private String tianGongDeviceId;
+//    @Value("${onebase.auth.tiangong.device-id:tianGong}")
+//    private String tianGongDeviceId;
     @Value("${onebase.auth.tiangong.http-debug-log-enabled:false}")
     private Boolean tianGongHttpDebugLogEnabled;
 
@@ -538,7 +538,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
 
     @Override
-    public AuthLoginRespVO tianGongLogin(String code, String state) {
+    public AuthLoginRespVO tianGongLogin(String code, String deviceId) {
 
         TenantDO tenantDo = tenantService.getTenantByCode(tianGongTenantCode);
         if (tenantDo == null) {
@@ -618,7 +618,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
                 //4.保存用户信息
                 AdminUserDO adminUser = userService.updateOrAddUser(adminUserDO);
                 //5.创建Token
-                AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(adminUser.getUserType(), adminUser.getId(), adminUser.getUsername(), tianGongDeviceId, LoginLogTypeEnum.LOGIN_USERNAME, null);
+                AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(adminUser.getUserType(), adminUser.getId(), adminUser.getUsername(), deviceId, LoginLogTypeEnum.LOGIN_USERNAME, null);
                 loginRespRef.set(authLoginRespVO);
             });
             AuthLoginRespVO authLoginRespVO = loginRespRef.get();

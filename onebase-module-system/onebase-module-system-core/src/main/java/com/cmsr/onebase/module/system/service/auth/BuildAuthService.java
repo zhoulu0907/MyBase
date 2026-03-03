@@ -87,9 +87,9 @@ public interface BuildAuthService {
     AuthLoginRespVO corpLogin(@Valid CorpAuthLoginReqVO reqVO);
 
     /**
-     * 天宫账号登录
+     * 天工账号登录
      *
      */
-    AuthLoginRespVO tianGongLogin(String code, String state);
+    AuthLoginRespVO tianGongLogin(String code, String deviceId);
 
 }
