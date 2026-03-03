@@ -198,6 +198,11 @@ export interface TenantLoginResponse {
   corpId: string; // 企业id
 }
 
+export interface TiangongLoginRequest {
+  code: string;
+  deviceId: string;
+}
+
 export interface TiangongLoginResponse {
   userId: string; // 用户ID
   accessToken: string; // 访问令牌
