@@ -221,6 +221,10 @@ export interface XTableConfig extends ICommonBaseType {
    * 数据选择过滤条件
    */
   filterCondition?: any;
+  /**
+   * 绑定分组筛选
+   */
+  groupFilter?:string;
 }
 
 export interface OperationButtonConfig {
@@ -295,7 +299,7 @@ const XTable: XTableSchema = {
     // labelColSpan: 100,
     defaultValue: [],
     columns: [],
-
+    groupFilter: '',
     searchItems: [],
     advancedRowRedirect: true,
     redirectPageId: '',
