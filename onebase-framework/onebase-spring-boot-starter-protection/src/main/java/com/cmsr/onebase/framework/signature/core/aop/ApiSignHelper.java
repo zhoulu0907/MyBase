@@ -52,9 +52,9 @@ public class ApiSignHelper {
         }
 
         // 0.2 如果是本地请求，则跳过签名验证
-        // if (isLocalRequest(request)) {
-        //     return true;
-        // }
+        if (isLocalRequest(request)) {
+            return true;
+        }
 
         // 0.3 如果请求方IP在白名单请求，则跳过签名验证
         if (isIpWhiteListRequest(request)) {
