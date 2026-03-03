@@ -251,8 +251,6 @@ const XTable: XTableSchema = {
     dataSortByConfig,
     // 数据过滤
     dataFilterConfig,
-    // 绑定分组筛选
-    groupFilterConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
@@ -263,11 +261,8 @@ const XTable: XTableSchema = {
     tableShowTotalConfig,
     tableShowOperateConfig,
     tableFixedOperateConfig,
-    // {
-    //   key: 'saveWithHidden',
-    //   name: '隐藏时提交数据',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
+    // 绑定分组筛选
+    groupFilterConfig,
     widthConfig,
     statusConfig,
     rowRedirectConfig,
