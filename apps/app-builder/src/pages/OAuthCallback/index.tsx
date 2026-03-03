@@ -14,14 +14,10 @@ const OAuthCallback: React.FC = () => {
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
-      // 防止重复处理
-      if (processedRef.current) {
-        return;
-      }
+      if (processedRef.current) return;
       processedRef.current = true;
 
       const code = searchParams.get('code');
-
       if (!code) {
         Message.error(t('oauth.callback.codeMissing'));
         navigate('/login');
@@ -32,9 +28,7 @@ const OAuthCallback: React.FC = () => {
         const response = await tiangongLogin({ code });
         
         if (response && response.accessToken) {
-          // 存储 token 信息
           TokenManager.setCurIdentifyId(response.tenantId);
-          
           TokenManager.setToken({
             userId: response.userId,
             accessToken: response.accessToken,
@@ -45,17 +39,14 @@ const OAuthCallback: React.FC = () => {
             loginURL: window.location.href
           }, true);
           
-          Message.success('登录成功');
-          // 跳转到应用构建器首页
           navigate(`/onebase/${response.tenantId}/home/enterprise-app`);
         }
       } catch (error: any) {
         console.error('天工登录失败:', error);
-        if (error?.response?.status === 302) {
-          return;
+        if (error?.response?.status !== 302) {
+          Message.error(error?.message || t('oauth.callback.loginFailed'));
+          navigate('/login');
         }
-        Message.error(error?.message || t('oauth.callback.loginFailed'));
-        navigate('/login');
       }
     };
 
