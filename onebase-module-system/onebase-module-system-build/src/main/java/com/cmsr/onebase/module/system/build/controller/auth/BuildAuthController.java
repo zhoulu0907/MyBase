@@ -131,7 +131,7 @@ public class BuildAuthController {
     @GetMapping("/tiangong-login")
     @PermitAll
     @ApiSignIgnore
-    @Operation(summary = "天宫平台用户登录")
+    @Operation(summary = "天工平台用户登录")
     public CommonResult<AuthLoginRespVO> tianGongLogin(@RequestParam @NotBlank(message = "{code}不能为空") String code, @RequestParam @NotBlank(message = "{deviceId}不能为空") String deviceId, HttpServletResponse response) {
 
         AuthLoginRespVO authLoginRespVO = authService.tianGongLogin(code, deviceId);
