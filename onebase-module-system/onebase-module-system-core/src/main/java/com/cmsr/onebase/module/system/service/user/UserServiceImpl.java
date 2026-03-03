@@ -1566,13 +1566,15 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public UserSimpleRespVO getUserInfoByToken(String accessToken) {
+    public OAuth2UserInfoRespVO getUserInfoByToken(String accessToken) {
         OAuth2AccessTokenDO token = oauth2TokenService.getAccessToken(accessToken);
         if (token == null) {
             throw exception(GlobalErrorCodeConstants.UNAUTHORIZED);
         }
         AdminUserDO user = userDataRepository.getById(token.getUserId());
-        return BeanUtils.toBean(user, UserSimpleRespVO.class);
+        OAuth2UserInfoRespVO oAuth2UserInfoRespVO = BeanUtils.toBean(user, OAuth2UserInfoRespVO.class);
+        oAuth2UserInfoRespVO.setApplicationId(token.getAppId());
+        return oAuth2UserInfoRespVO;
     }
 
 }

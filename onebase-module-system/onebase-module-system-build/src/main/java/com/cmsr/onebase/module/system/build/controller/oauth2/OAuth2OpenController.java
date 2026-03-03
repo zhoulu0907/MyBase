@@ -3,12 +3,14 @@ package com.cmsr.onebase.module.system.build.controller.oauth2;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2OpenService;
+import com.cmsr.onebase.module.system.vo.user.OAuth2UserInfoRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -147,7 +149,8 @@ public class OAuth2OpenController {
     @Operation(summary = "获取用户信息")
     @PermitAll
     @ApiSignIgnore
-    CommonResult<UserSimpleRespVO> getUser(@RequestParam("access_token") String accessToken) {
+    @TenantIgnore
+    CommonResult<OAuth2UserInfoRespVO> getUser(@RequestParam("access_token") String accessToken) {
 
         return CommonResult.success(userService.getUserInfoByToken(accessToken));
     }

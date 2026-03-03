@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.system.service.oauth2.OAuth2OpenService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
-import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
+import com.cmsr.onebase.module.system.vo.user.OAuth2UserInfoRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -110,7 +110,7 @@ public class RuntimeOauth2OpenController {
     @Operation(summary = "获取用户信息")
     @PermitAll
     @ApiSignIgnore
-    CommonResult<UserSimpleRespVO> getUser(@RequestParam("access_token") String accessToken) {
+    CommonResult<OAuth2UserInfoRespVO> getUser(@RequestParam("access_token") String accessToken) {
 
         return CommonResult.success(userService.getUserInfoByToken(accessToken));
     }

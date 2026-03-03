@@ -111,6 +111,7 @@ onebase:
       - /runtime/system/captcha/**
       - /runtime/infra/file/download/**
       - /runtime/app/application/get
+      - /admin-api/system/oauth2/authorize/token
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**

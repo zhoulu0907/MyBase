@@ -124,6 +124,7 @@ onebase:
       - /platform/infra/file/download/**
       - /admin-api/app/application/get
       - /admin-api/system/auth/tiangong-login
+      - /admin-api/system/oauth2/authorize/token
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**

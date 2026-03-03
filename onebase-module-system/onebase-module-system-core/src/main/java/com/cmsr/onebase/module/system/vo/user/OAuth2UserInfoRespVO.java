@@ -37,6 +37,15 @@ public class OAuth2UserInfoRespVO {
     @Schema(description = "用户头像", example = "https://www.cmsr.com")
     private String avatar;
 
+    @Schema(description = "租户id")
+    private Long tenantId;
+
+    @Schema(description = "应用id")
+    private Long applicationId;
+
+    @Schema(description = "对应的天工用户id")
+    private Long tiangongID;
+
     /**
      * 所在部门
      */
