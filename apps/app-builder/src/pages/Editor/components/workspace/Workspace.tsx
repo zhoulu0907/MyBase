@@ -2,6 +2,7 @@ import {
   DEFAULT_VALUE_TYPES,
   EDITOR_TYPES,
   FORM_COMPONENT_TYPES,
+  LIST_COMPONENT_TYPES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   useFormEditorSignal,
@@ -30,6 +31,7 @@ import {
   usePageComponentValidateSignal,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  ENTITY_FIELD_TYPE,
   type GridItem
 } from '@onebase/ui-kit';
 
@@ -43,12 +45,26 @@ import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor'
 import { initGlobalState, loadMicroApp, type MicroApp } from 'qiankun';
 
 import { Divider, Form } from '@arco-design/web-react';
-import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField, menuSignal } from '@onebase/app';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, type AppEntityField, menuSignal, type PageView } from '@onebase/app';
 import { EditMode, getHashQueryParam, getMobileEditorURL } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
 import 'react-grid-layout/css/styles.css';
 import View from '../view';
 import styles from './index.module.less';
+
+// 暂时不能在表格展示的数据类型
+export const hiddenFieldTypes = [
+  ENTITY_FIELD_TYPE.RELATION.VALUE,
+  ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+  ENTITY_FIELD_TYPE.ARRAY.VALUE,
+  ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+  ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+  ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+  ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
+];
 
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
@@ -421,7 +437,11 @@ export default function EditorWorkspace() {
                     // 是否必填：1-是，0-不是 isRequired
                     // 是否唯一：1-是，0-不是 isUnique
                     const noRepeat =
-                      field.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
+                      field.isUnique === 1
+                        ? true
+                        : typeof schema.config?.verify?.noRepeat === 'boolean'
+                          ? false
+                          : undefined;
                     schema.config.verify = {
                       ...schema.config.verify,
                       required: field.isRequired,
@@ -518,7 +538,11 @@ export default function EditorWorkspace() {
                     // 字段描述 description
                     subSchema.config.tooltip = ele.description;
                     const noRepeat =
-                      ele.isUnique === 1 ? true : (typeof subSchema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
+                      ele.isUnique === 1
+                        ? true
+                        : typeof subSchema.config?.verify?.noRepeat === 'boolean'
+                          ? false
+                          : undefined;
                     subSchema.config.verify = {
                       ...subSchema.config.verify,
                       required: ele.isRequired,
@@ -634,6 +658,27 @@ export default function EditorWorkspace() {
               schema.config.cpName = itemDisplayName;
               schema.config.id = cpID;
 
+              // 表格 自动预配置【数据绑定】为当前表单绑定实体  表头一并带出
+              if (itemType === LIST_COMPONENT_TYPES.TABLE) {
+                schema.config.tableName = mainEntity.tableName;
+                schema.config.metaData = mainEntity.entityUuid;
+                schema.config.columns = mainEntity.fields
+                  .filter(
+                    (item) => item.isSystemField !== 1 && item.fieldType && !hiddenFieldTypes.includes(item.fieldType)
+                  )
+                  .map((item) => ({
+                    // 保留已有的命名，如果没有则使用字段展示名称
+                    title: item.displayName,
+                    dataIndex: item.fieldName,
+                    disabled: item.disabled,
+                    id: item.id
+                  }));
+                const defaultView = (Object.values(pageViews.value) as PageView[]).find(
+                  (item: PageView) => item.isDefaultDetailViewMode
+                );
+                schema.config.redirectPageId = defaultView?.pageUuid;
+              }
+
               // 主表 字段组件
               if (tableName && fieldName) {
                 // 获取当前字段数据源配置
@@ -656,7 +701,11 @@ export default function EditorWorkspace() {
                   // 是否必填：1-是，0-不是 isRequired
                   // 是否唯一：1-是，0-不是 isUnique
                   const noRepeat =
-                    currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
+                    currentField.isUnique === 1
+                      ? true
+                      : typeof schema.config?.verify?.noRepeat === 'boolean'
+                        ? false
+                        : undefined;
                   schema.config.verify = {
                     ...schema.config.verify,
                     required: currentField.isRequired,
