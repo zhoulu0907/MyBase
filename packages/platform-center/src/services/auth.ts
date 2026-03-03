@@ -8,7 +8,8 @@ import {
   RuntimeMobileLoginRequest,
   RuntimeThirdLoginRequest,
   SendVerifyCodeRequest,
-  TenantLoginRequest
+  TenantLoginRequest,
+  TiangongLoginResponse
 } from '../types';
 import { platformService, runtimeService, systemService } from './clients';
 
@@ -69,11 +70,10 @@ export const getCaptchaApi = (data: Captcha) => {
 
 export interface TiangongLoginRequest {
   code: string;
-  appName: string;
 }
 
-export const tiangongLogin = (req: TiangongLoginRequest) => {
-  const { code, appName } = req;
+export const tiangongLogin = (req: TiangongLoginRequest): Promise<TiangongLoginResponse> => {
+  const { code } = req;
   return systemService.get('/auth/tiangong-login', {
     code
   });
