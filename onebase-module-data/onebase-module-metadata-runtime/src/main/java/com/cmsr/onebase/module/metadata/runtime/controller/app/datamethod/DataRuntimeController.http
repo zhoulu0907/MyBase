@@ -1,0 +1,10 @@
+
+### 超管登录 => 成功
+POST {{baseUrl}}/metadata/data-method/orwa_device_details/page
+Content-Type: application/json
+X-Tenant-Id: 260705906803245056
+X-Application-Id: 264842046211883008
+
+{
+
+}

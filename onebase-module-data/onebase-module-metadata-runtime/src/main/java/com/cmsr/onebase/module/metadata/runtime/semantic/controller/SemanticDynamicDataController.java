@@ -154,7 +154,7 @@ public class SemanticDynamicDataController {
         return CommonResult.success(resp);
     }
 
-    @PostMapping("/page")
+    @PostMapping("{}/page")
     @Operation(summary = "分页")
     /**
      * 语义分页查询
