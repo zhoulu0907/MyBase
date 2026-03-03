@@ -2,8 +2,8 @@ import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../hooks/useI18n';
-import { tiangongLogin } from '@onebase/platform-center';
-import { TokenManager, getOrCreateDeviceInfo } from '@onebase/common';
+import { tiangongLogin, getPermissionInfo, CodeType } from '@onebase/platform-center';
+import { TokenManager, UserPermissionManager, getOrCreateDeviceInfo } from '@onebase/common';
 import styles from './index.module.less';
 
 const OAuthCallback: React.FC = () => {
@@ -26,7 +26,7 @@ const OAuthCallback: React.FC = () => {
             
             const response = await tiangongLogin({ code, deviceId });
             if (response && response.accessToken) {
-              TokenManager.setCurIdentifyId(response.tenantId);
+              // 先设置token，再设置curIdentifyId
               TokenManager.setToken({
                 userId: response.userId,
                 accessToken: response.accessToken,
@@ -36,6 +36,22 @@ const OAuthCallback: React.FC = () => {
                 loginSource: 'tiangong',
                 loginURL: window.location.href
               }, true);
+              
+              // 然后设置当前身份ID
+              TokenManager.setCurIdentifyId(response.tenantId);
+              
+              // 获取并设置用户权限信息
+              try {
+                const permissionInfo = await getPermissionInfo(CodeType.TENANT);
+                UserPermissionManager.setUserPermissionInfo(permissionInfo);
+                // 同时设置到信号中
+                import('@/store/singals/user_permission').then(({ userPermissionSignal }) => {
+                  userPermissionSignal.setPermissionInfo(permissionInfo);
+                });
+              } catch (error) {
+                console.error('获取权限信息失败:', error);
+              }
+              
               navigate(`/onebase/${response.tenantId}/home/enterprise-app`);
             }
           } catch (error) {
