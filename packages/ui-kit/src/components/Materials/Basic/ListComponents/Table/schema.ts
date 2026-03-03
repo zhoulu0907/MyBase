@@ -19,6 +19,9 @@ import {
     tableShowTotalConfig,
     tableStripeConfig,
     widthConfig,
+    dataSortByConfig,
+    dataFilterConfig,
+    groupFilterConfig,
     type ICommonBaseType,
     type TButtonSelectKeyType,
     type TPagePositionSelectKeyType,
@@ -240,6 +243,12 @@ const XTable: XTableSchema = {
     tableMetaDataConfig,
     // keyDataConfig,
     // labelColSpanConfig,
+    // 数据排序规则
+    dataSortByConfig,
+    // 数据过滤
+    dataFilterConfig,
+    // 绑定分组筛选
+    groupFilterConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
