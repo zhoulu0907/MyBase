@@ -56,7 +56,7 @@ public class OAuth2OpenController {
      *
      * 注意，默认需要传递 client_id + client_secret 参数
      */
-    @PostMapping("/token")
+    @PostMapping("/authorize/token")
     @PermitAll
     @ApiSignIgnore
     @Operation(summary = "获得访问令牌", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
@@ -82,7 +82,7 @@ public class OAuth2OpenController {
         return oauth2OpenService.postAccessToken(request, grantType, code, redirectUri, state, username, password, scope, refreshToken, RunModeEnum.BUILD.getValue());
     }
 
-    @PostMapping("/revoke-token")
+    @PostMapping("/authorize/revoke-token")
     @PermitAll
     @Operation(summary = "删除访问令牌")
     @Parameter(name = "token", required = true, description = "访问令牌", example = "biu")
@@ -94,7 +94,7 @@ public class OAuth2OpenController {
     /**
      * 对应 Spring Security OAuth 的 CheckTokenEndpoint 类的 checkToken 方法
      */
-    @PostMapping("/check-token")
+    @PostMapping("/authorize/check-token")
     @PermitAll
     @Operation(summary = "校验访问令牌")
     @Parameter(name = "token", required = true, description = "访问令牌", example = "biu")
@@ -106,7 +106,7 @@ public class OAuth2OpenController {
     /**
      * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 authorize 方法
      */
-    @GetMapping("/authorize")
+    @GetMapping("/authorize/client")
     @Operation(summary = "获得授权信息", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
     @Parameter(name = "clientId", required = true, description = "客户端编号", example = "tudou")
     public CommonResult<OAuth2OpenAuthorizeInfoRespVO> authorize(@RequestParam("clientId") String clientId) {
