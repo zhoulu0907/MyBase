@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useI18n } from '../../hooks/useI18n';
 import { tiangongLogin } from '@onebase/platform-center';
-import { TokenManager } from '@onebase/common';
+import { TokenManager, getOrCreateDeviceInfo } from '@onebase/common';
 import styles from './index.module.less';
 
 const OAuthCallback: React.FC = () => {
@@ -17,10 +17,14 @@ const OAuthCallback: React.FC = () => {
     if (!processedRef.current) {
       processedRef.current = true;
       
-      const code = searchParams.get('code');
-      if (code) {
-        tiangongLogin({ code })
-          .then(response => {
+      const handleOAuthCallback = async () => {
+        const code = searchParams.get('code');
+        if (code) {
+          try {
+            // 获取设备ID
+            const deviceId = await getOrCreateDeviceInfo();
+            
+            const response = await tiangongLogin({ code, deviceId });
             if (response && response.accessToken) {
               TokenManager.setCurIdentifyId(response.tenantId);
               TokenManager.setToken({
@@ -34,18 +38,20 @@ const OAuthCallback: React.FC = () => {
               }, true);
               navigate(`/onebase/${response.tenantId}/home/enterprise-app`);
             }
-          })
-          .catch(error => {
+          } catch (error) {
             console.error('天工登录失败:', error);
             if ((error as any)?.response?.status !== 302) {
               Message.error((error as any)?.message || t('oauth.callback.loginFailed'));
               navigate('/login');
             }
-          });
-      } else {
-        Message.error(t('oauth.callback.codeMissing'));
-        navigate('/login');
-      }
+          }
+        } else {
+          Message.error(t('oauth.callback.codeMissing'));
+          navigate('/login');
+        }
+      };
+      
+      handleOAuthCallback();
     }
   }, []); // 空依赖数组，确保只执行一次
 

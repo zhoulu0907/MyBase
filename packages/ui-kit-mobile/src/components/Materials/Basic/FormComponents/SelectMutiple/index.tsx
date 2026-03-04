@@ -6,7 +6,7 @@ import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUn
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { DictData } from '@onebase/platform-center';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
 
 import '../index.css';
 import './index.css';
@@ -26,7 +26,6 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
     status,
     verify,
     layout,
-    defaultValueConfig,
     runtime = true,
     detailMode,
     form
@@ -102,7 +101,6 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
       field={fieldId}
       rules={rules}
       layout={layout}
-      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       style={{
         textAlign,
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
