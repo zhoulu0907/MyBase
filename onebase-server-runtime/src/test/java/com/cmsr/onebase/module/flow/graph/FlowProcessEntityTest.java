@@ -1,41 +1,45 @@
-// package com.cmsr.onebase.module.flow.graph;
+package com.cmsr.onebase.module.flow.graph;
 
-// import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
-// import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
-// import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
-// import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
-// import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
-// import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
-// import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
-// import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
-// import lombok.Setter;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.boot.test.context.SpringBootTest;
+import com.cmsr.onebase.module.flow.core.impl.FlowProcessExecApiImpl;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
+import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
+import com.cmsr.onebase.module.flow.api.dto.TriggerEventEnum;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowProcessRepository;
+import com.cmsr.onebase.module.flow.core.flow.FlowRemoteCallExecutor;
+import com.cmsr.onebase.module.flow.runtime.service.FlowProcessExecService;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.cmsr.onebase.server.runtime.OneBaseServerRuntimeApplication;
+import lombok.Setter;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-// import java.io.IOException;
-// import java.time.LocalDate;
-// import java.util.Map;
-// import java.util.UUID;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-// @Setter
-// @SpringBootTest(classes = OneBaseServerRuntimeApplication.class)
-// public class FlowProcessEntityTest {
+@Setter
+@SpringBootTest(classes = OneBaseServerRuntimeApplication.class)
+public class FlowProcessEntityTest {
 
 
-//         @Autowired
-//         private FlowProcessRepository flowProcessRepository;
+        @Autowired
+        private FlowProcessRepository flowProcessRepository;
 
-//         @Autowired
-//         private FlowProcessExecApiImpl flowProcessExecApi;
+        @Autowired
+        private FlowProcessExecApiImpl flowProcessExecApi;
 
-//         @Autowired
-//         private FlowRemoteCallExecutor flowRemoteCallExecutor;
+        @Autowired
+        private FlowRemoteCallExecutor flowRemoteCallExecutor;
 
-//         @Autowired
-//         private FlowProcessExecService flowProcessExecService;
+        @Autowired
+        private FlowProcessExecService flowProcessExecService;
 
-//         //表单实体测试  前置 创建前 过滤条件 TEXT 字段类型 等于 公式 CONCATENATE("new","123")
+//     //表单实体测试  前置 创建前 过滤条件 TEXT 字段类型 等于 公式 CONCATENATE("new","123")
 //     @Test
 //     public void testEntity1() throws IOException {
 //         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
@@ -463,23 +467,35 @@
 //     }
 
 
-//     //表单实体测试  后置 创建后 过滤条件 数字 字段类型 121313069396492288 数字流
-// //   且
-// //   等于 -101
-//     @Test
-//     public void testEntity21() throws IOException {
-//         EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
-//         reqDTO.setTraceId(UUID.randomUUID().toString());
-//         System.out.println("reqDTO.getTraceId()::::::::::::::::::::::::::"+reqDTO.getTraceId());
-//         reqDTO.setEntityId(112241703294926848L);
-//         reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
-//         reqDTO.setFieldData(Map.of(
-// //            "115291181633175552", "888",
-//                 "121313069396492288", -102
-//         ));
-//         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
-//         System.out.println("respDTO==========================================="+respDTO);
-//     }
+    //表单实体测试  后置 创建后 过滤条件 数字 字段类型 121313069396492288 数字流
+//   且
+//   等于 -101
+    @Test
+    public void testEntity21() throws IOException {
+        EntityTriggerReqDTO reqDTO = new EntityTriggerReqDTO();
+        reqDTO.setTraceId(UUID.randomUUID().toString());
+        System.out.println("reqDTO.getTraceId()::::::::::::::::::::::::::"+reqDTO.getTraceId());
+        reqDTO.setApplicationId(199535642507476992L);
+        reqDTO.setTableName("j5ot_mission_info");
+
+        SemanticFieldValueDTO<Object> missionName = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.TEXT);
+        missionName.setTableName("j5ot_mission_info");
+        missionName.setFieldName("mission_name");
+        missionName.setRawValue("CAAAAA");
+
+        SemanticFieldValueDTO<Object> id = SemanticFieldValueDTO.ofType(SemanticFieldTypeEnum.NUMBER);
+        id.setTableName("j5ot_mission_info");
+        id.setFieldName("id");
+        id.setRawValue("299434606179647488");
+         
+        reqDTO.setFieldData(List.of(
+            missionName, id
+        ));
+        reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_CREATE);
+
+        EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        System.out.println("respDTO==========================================="+respDTO);
+    }
 
 
 //     //表单实体测试  后置 创建后 过滤条件 数字 字段类型 121313069396492288 数字流 公式
@@ -667,4 +683,4 @@
 
 
 
-// }
+}

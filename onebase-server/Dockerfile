@@ -1,12 +1,12 @@
 ## AdoptOpenJDK 停止发布 OpenJDK 二进制，而 Eclipse Temurin 是它的延伸，提供更好的稳定性
 ## 感谢复旦核博士的建议！灰子哥，牛皮！
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:17-jre
 
 ## 创建目录，并使用它作为工作目录
-RUN mkdir -p /onebase-cloud
-WORKDIR /onebase-cloud
+RUN mkdir -p /onebase-server
+WORKDIR /onebase-server
 ## 将后端项目的 Jar 文件，复制到镜像中
-COPY ./target/onebase-cloud.jar app.jar
+COPY ./target/onebase-server.jar app.jar
 
 ## 设置 TZ 时区
 ENV TZ=Asia/Shanghai
