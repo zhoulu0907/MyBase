@@ -14,8 +14,11 @@ import {
   ConnectorActionStatusText,
   deleteHTTPAction,
   listConnectorActionInfos,
+  deleteScriptAction,
+  listScriptAction,
   type ConnectorActionStatus,
   type ListConnectorActionReq,
+  type ListScriptActionReq,
   type ScriptActionItem
 } from '@onebase/app';
 import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
@@ -24,12 +27,17 @@ import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import CreateHTTPActionPage from '../createHTTP';
+import CreateScriptActionPage from '../createJS';
 import styles from './index.module.less';
 
 /**
  * 连接器动作列表页面
  */
-const ScriptActionListPage: React.FC = () => {
+interface ScriptActionListPageProps {
+  isScript?: boolean;
+}
+
+const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = false }) => {
   const [searchActionName, setSearchActionName] = useState('');
   const [pageSize, setPageSize] = useState<number>(8);
   const [pageNo, setPageNo] = useState(1);
@@ -65,47 +73,68 @@ const ScriptActionListPage: React.FC = () => {
     const id = getHashQueryParam('id');
 
     if (id) {
-      const req: ListConnectorActionReq = {
-        id: id,
-        pageNo: pageNo,
-        pageSize: pageSize
-      };
-
-      const res = await getCommonPaginationList(
-        (param: any) => listConnectorActionInfos(param as ListConnectorActionReq),
-        req,
-        setPageNo
-      );
-
-      if (res) {
-        type RowItem = ScriptActionItem & { actionName?: string };
-        const list = (res || []).map((item: RowItem, index: number) => ({
-          ...item,
-          _rowKey: item.id ?? item.actionName ?? item.scriptName ?? `row-${index}`
-        }));
-        setActionList(list);
-        setTotal(list.length);
-        setLoading(false);
+      if (isScript) {
+        const req: ListScriptActionReq = {
+          connectorId: id,
+          pageNo: pageNo,
+          pageSize: pageSize,
+          scriptName: actionName || undefined
+        };
+        const res = await getCommonPaginationList(
+          (param: any) => listScriptAction(param as ListScriptActionReq),
+          req,
+          setPageNo
+        );
+        if (res) {
+          const list = (res.list || []).map((item: any, index: number) => ({
+            ...item,
+            _rowKey: item.id ?? item.scriptName ?? `row-${index}`
+          }));
+          setActionList(list);
+          setTotal(res.total || list.length);
+          setLoading(false);
+        }
+      } else {
+        const req: ListConnectorActionReq = {
+          id: id,
+          pageNo: pageNo,
+          pageSize: pageSize
+        };
+        const res = await getCommonPaginationList(
+          (param: any) => listConnectorActionInfos(param as ListConnectorActionReq),
+          req,
+          setPageNo
+        );
+        if (res) {
+          type RowItem = ScriptActionItem & { actionName?: string };
+          const list = (res || []).map((item: RowItem, index: number) => ({
+            ...item,
+            _rowKey: item.id ?? item.actionName ?? item.scriptName ?? `row-${index}`
+          }));
+          setActionList(list);
+          setTotal(list.length);
+          setLoading(false);
+        }
       }
     }
   };
 
-  //   const handleDelete = async (scriptId: string) => {
-  //     try {
-  //       const res = await deleteScriptAction(scriptId);
-  //       if (res) {
-  //         Message.success('删除成功');
-  //         handleGetScriptActionList(searchActionName);
-  //       } else {
-  //         Message.error('删除失败');
-  //       }
-  //     } catch (error) {
-  //       Message.error('删除失败，请稍后重试');
-  //       console.error('删除动作失败:', error);
-  //     }
-  //   };
+  const handleDeleteScript = async (scriptId: string) => {
+    try {
+      const res = await deleteScriptAction(scriptId);
+      if (res) {
+        Message.success('删除成功');
+        handleGetScriptActionList(searchActionName);
+      } else {
+        Message.error('删除失败');
+      }
+    } catch (error) {
+      Message.error('删除失败，请稍后重试');
+      console.error('删除动作失败:', error);
+    }
+  };
 
-  const handleDelete = async (connectorId: string, actionName: string) => {
+  const handleDeleteHttp = async (connectorId: string, actionName: string) => {
     try {
       const res = await deleteHTTPAction(connectorId, actionName);
       if (res) {
@@ -140,7 +169,7 @@ const ScriptActionListPage: React.FC = () => {
     },
     {
       title: '动作名称',
-      dataIndex: 'actionName',
+      dataIndex: isScript ? 'scriptName' : 'actionName',
       width: 200
     },
     {
@@ -182,7 +211,11 @@ const ScriptActionListPage: React.FC = () => {
           <Popconfirm
             title="确定删除吗？"
             content="删除后不可恢复"
-            onOk={() => handleDelete(getHashQueryParam('id') || '', record.actionName)}
+            onOk={() =>
+              isScript
+                ? handleDeleteScript(record.id)
+                : handleDeleteHttp(getHashQueryParam('id') || '', record.actionName)
+            }
           >
             <Button type="text" size="mini" status="danger">
               删除
@@ -197,13 +230,23 @@ const ScriptActionListPage: React.FC = () => {
     <div className={styles.scriptActionListPage}>
       <div className={styles.title}>动作配置</div>
       {isCreate || editingScriptId ? (
-        <CreateHTTPActionPage
-          editActionName={editingScriptId ?? undefined}
-          onSuccess={() => {
-            setIsCreate(false);
-            setEditingScriptId(null);
-          }}
-        />
+        isScript ? (
+          <CreateScriptActionPage
+            editData={editingScriptId ? ({ id: editingScriptId } as any) : undefined}
+            onSuccess={() => {
+              setIsCreate(false);
+              setEditingScriptId(null);
+            }}
+          />
+        ) : (
+          <CreateHTTPActionPage
+            editActionName={editingScriptId ?? undefined}
+            onSuccess={() => {
+              setIsCreate(false);
+              setEditingScriptId(null);
+            }}
+          />
+        )
       ) : (
         <>
           <div className={styles.header}>

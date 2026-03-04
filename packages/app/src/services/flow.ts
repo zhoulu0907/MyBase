@@ -138,8 +138,7 @@ export const getScriptAction = (id: string) => {
 };
 
 export const listScriptAction = (params: ListScriptActionReq) => {
-  const { connectorId, ...rest } = params;
-  return flowService.get(`/connector/${connectorId}/actions`, { params: rest });
+  return flowService.get('/connector/script/page', params);
 };
 
 export const createScriptAction = (params: CreateScriptActionReq) => {

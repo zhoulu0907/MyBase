@@ -268,7 +268,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
         {activeKey === 'action' && (
           <div className={styles.actionContainer}>
             {!isCreateMode ? (
-              <ScriptActionListPage />
+              <ScriptActionListPage isScript={baseInfo?.typeCode === TypeCode.SCRIPT} />
             ) : (
               <div className={styles.actionContainer}>
                 <div className={styles.content}>
