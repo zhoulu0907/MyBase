@@ -116,6 +116,9 @@ const XCard = memo(
     useEffect(() => {
       if (metaData) {
         getMainMetaData();
+        if(!runtime){
+          setCardData([{},{},{}]);
+        }
       }
     }, [metaData]);
 
@@ -270,6 +273,10 @@ const XCard = memo(
     };
 
     const renderItem = (_record: any, fieldName: string, index: number, isTitle: boolean, column?: any) => {
+      if(!runtime && isTitle){
+        const dataFieldInfo = mainMetaData.parentFields?.find((field: AppEntityField) => field.fieldName === fieldName);
+        return <span>{dataFieldInfo?.displayName || fieldName}</span>
+      }
       const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
       if (!mainMetaData?.parentFields) {
         return <span>{_record[fieldName]}</span>;
