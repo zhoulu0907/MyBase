@@ -5,7 +5,7 @@ import type { DictData } from '@onebase/platform-center';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
-import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import '../index.css';
 import type { XInputRadioConfig } from './schema';
 
@@ -18,7 +18,6 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
     tooltip,
     tooltipPosition,
     status,
-    defaultValueConfig,
     verify,
     layout,
     direction,
@@ -74,9 +73,6 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
           margin: 0,
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        initialValue={
-          defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined
-        }
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
           <div>
