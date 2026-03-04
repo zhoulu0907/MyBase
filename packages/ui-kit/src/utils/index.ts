@@ -6,6 +6,7 @@ export * from './entityFieldConfig';
 export * from './getPopupContainer';
 export * from './menuIcons';
 export * from './normalizeFormValues';
+export * from '../components/Materials/Workbench/utils/page-config-util';
 export * from './security';
 export * from './theme';
 export * from './workbench_resource';

@@ -66,6 +66,12 @@ export const hiddenFieldTypes = [
   ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
 ];
 
+const FLOATING_COMPONENT_TYPES = ['XChatbot'];
+
+const isFloatingComponent = (type: string): boolean => {
+  return FLOATING_COMPONENT_TYPES.includes(type);
+};
+
 export default function EditorWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
   const [isFormEditor, setIsFormEditor] = useState(false);
@@ -393,6 +399,80 @@ export default function EditorWorkspace() {
             }
           }}
         >
+          {/* 浮动组件 - 渲染在 ReactSortable 外面 */}
+          {components
+            .filter((cp: GridItem) => cp.type !== 'entity' && isFloatingComponent(cp.type))
+            .map((cp: GridItem) => {
+              const floatingConfig = pageComponentSchemas[cp.id]?.config?.floatingConfig;
+              const right = floatingConfig?.right ?? 80;
+              const bottom = floatingConfig?.bottom ?? 80;
+              const width = floatingConfig?.width ?? 80;
+              const height = floatingConfig?.height ?? 80;
+              
+              return (
+                <div
+                  key={cp.id}
+                  data-cp-type={cp.type}
+                  data-cp-displayname={cp.displayName}
+                  data-cp-id={cp.id}
+                  style={{
+                    position: 'absolute',
+                    right,
+                    bottom,
+                    width,
+                    height,
+                    zIndex: 100,
+                    border: curComponentID === cp.id ? '2px solid rgb(var(--primary-6))' : 'none',
+                    borderRadius: 8,
+                  }}
+                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                    e.stopPropagation();
+                    setCurComponentID(cp.id);
+                    const curComponentSchema = {
+                      id: cp.id,
+                      type: cp.type,
+                      displayName: cp.displayName,
+                      ...pageComponentSchemas[cp.id]
+                    };
+                    setCurComponentSchema(curComponentSchema);
+                    setShowDeleteButton(true);
+                  }}
+                >
+                  <EditRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    runtime={false}
+                    pageComponentSchema={pageComponentSchemas[cp.id]}
+                    pageSetType={curMenu?.value?.pagesetType}
+                  />
+
+                  {curComponentID === cp.id && showDeleteButton && (
+                    <div className={styles.operationArea}>
+                      <div
+                        className={styles.copyButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
+                        }}
+                      >
+                        <img src={CompCopyIcon} alt="component copy" />
+                      </div>
+                      <Divider className={styles.divider} type="vertical" />
+                      <div
+                        className={styles.deleteButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteComponent(cp.id);
+                        }}
+                      >
+                        <img src={CompDeleteIcon} alt="component delete" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
           <ReactSortable
             id="workspace-content"
             list={components}
@@ -765,7 +845,7 @@ export default function EditorWorkspace() {
             }}
           >
             {components
-              .filter((cp: GridItem) => cp.type !== 'entity')
+              .filter((cp: GridItem) => cp.type !== 'entity' && !isFloatingComponent(cp.type))
               .map((cp: GridItem) => (
                 <div
                   key={cp.id}
@@ -841,8 +921,6 @@ export default function EditorWorkspace() {
                         <img src={CompCopyIcon} alt="component copy" />
                       </div>
                       <Divider className={styles.divider} type="vertical" />
-                      {/* 删除按钮 */}
-                      {/* TODO(mickey): 组件继续封装，和layout中的共用一套 */}
                       <div
                         className={styles.deleteButton}
                         onClick={(e) => {

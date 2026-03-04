@@ -15,14 +15,12 @@ import {
   type TWidthSelectKeyType
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  DEFAULT_VALUE_TYPES
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
   IDataFieldConfigType,
@@ -85,11 +83,6 @@ export interface XInputSelectMutipleConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 默认值
-   */
-  defaultValueConfig?: any;
-
-  /**
    * required：是否必填，未填写时提交报错
    */
   verify: {
@@ -124,11 +117,6 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-    },
     // 选项
     mutipleSelectOptionsConfig,
     // 选项分布方式
@@ -148,11 +136,6 @@ const XSelectMutiple: XInputSelectMutipleSchema = {
     },
     tooltip: '',
     dataField: [],
-    defaultValueConfig: {
-      type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: '',
-      formulaValue: ''
-    },
     verify: {
       required: false,
       checkedLimit: false,

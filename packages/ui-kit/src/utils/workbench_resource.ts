@@ -13,6 +13,7 @@ import { WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP } from 'src/components';
 import type { EditConfig } from 'src/components/Materials/types';
 import { useWorkbenchEditorSignal } from 'src/signals/workbench_editor';
 import { isBlank } from './common';
+import { findPageConfig, isPageConfig, PAGE_CONFIG_TYPE } from '../components/Materials/Workbench/utils/page-config-util';
 
 export interface SaveWorkbenchPageSetParams {
   pageSetId: string;
@@ -65,6 +66,22 @@ export async function startSaveWorkbenchPageSet(
       containerIndex: 0
     } as ComponentConfig;
   });
+
+  // 保存页面配置（使用工具函数查找）
+  const pageConfigEntry = findPageConfig(wbComponentSchemas);
+  
+  if (pageConfigEntry) {
+    const [pageConfigId, pageConfigSchema] = pageConfigEntry;
+    normalizedComponents.push({
+      componentCode: pageConfigId,
+      componentType: PAGE_CONFIG_TYPE,
+      config: JSON.stringify(pageConfigSchema.config || {}),
+      editData: JSON.stringify(pageConfigSchema.editData || {}),
+      parentCode: '',
+      blockIndex: 0,
+      containerIndex: 0
+    } as ComponentConfig);
+  }
 
   // 更新工作台页面数据
   loadPagesetResp.pages[workbenchPageIndex] = {
@@ -130,22 +147,35 @@ export async function startLoadWorkbenchPageSet(params: LoadWorkbenchPageSetPara
 
   workbenchPage.components.forEach((component: ComponentConfig) => {
     if (isBlank(component.parentCode)) {
-      newComponents.push({
-        id: component.componentCode,
-        chosen: false,
-        selected: false,
-        type: component.componentType,
-        displayName: WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType as keyof typeof WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP] || ''
-      });
+      // 判断是否是页面配置组件（使用工具函数判断）
+      if (isPageConfig({ type: component.componentType })) {
+        newPageComponentSchemas[component.componentCode] = {
+          id: component.componentCode,
+          type: PAGE_CONFIG_TYPE, // 统一转换为新类型
+          config: JSON.parse(component.config),
+          editData: JSON.parse(component.editData)
+        };
+      } else {
+        // 普通组件，添加到组件列表和 schema
+        newComponents.push({
+          id: component.componentCode,
+          chosen: false,
+          selected: false,
+          type: component.componentType,
+          displayName: WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType as keyof typeof WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP] || ''
+        });
 
-      newPageComponentSchemas[component.componentCode] = {
-        id: component.componentCode,
-        type: component.componentType,
-        config: JSON.parse(component.config),
-        editData: JSON.parse(component.editData)
-      };
+        newPageComponentSchemas[component.componentCode] = {
+          id: component.componentCode,
+          type: component.componentType,
+          config: JSON.parse(component.config),
+          editData: JSON.parse(component.editData)
+        };
+      }
     }
   });
+
+  // 如果没有页面配置，不需要在这里创建，会在 WorkbenchWorkspace 初始化时创建
 
   // 更新signal
   setWorkbenchComponents(newComponents);

@@ -220,7 +220,11 @@ export interface XTableConfig extends ICommonBaseType {
   /**
    * 数据选择过滤条件
    */
-  filterCondition?: any
+  filterCondition?: any;
+  /**
+   * 绑定分组筛选
+   */
+  groupFilter?:string;
 }
 
 export interface OperationButtonConfig {
@@ -247,8 +251,6 @@ const XTable: XTableSchema = {
     dataSortByConfig,
     // 数据过滤
     dataFilterConfig,
-    // 绑定分组筛选
-    groupFilterConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
@@ -259,11 +261,8 @@ const XTable: XTableSchema = {
     tableShowTotalConfig,
     tableShowOperateConfig,
     tableFixedOperateConfig,
-    // {
-    //   key: 'saveWithHidden',
-    //   name: '隐藏时提交数据',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
+    // 绑定分组筛选
+    groupFilterConfig,
     widthConfig,
     statusConfig,
     rowRedirectConfig,
@@ -291,11 +290,11 @@ const XTable: XTableSchema = {
     pageSize: 10,
     metaData: '',
     tableName: '',
-    filterCondition:{},
+    filterCondition: [],
     // labelColSpan: 100,
     defaultValue: [],
     columns: [],
-
+    groupFilter: '',
     searchItems: [],
     advancedRowRedirect: true,
     redirectPageId: '',

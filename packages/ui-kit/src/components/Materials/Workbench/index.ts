@@ -70,3 +70,4 @@ export {
 // 工具函数导出
 export { menuCacheManager } from './utils/menu-cache';
 export { getWorkbenchRuntimeUserInfo } from './utils/user-avatar';
+export * from  './utils/page-config-util';

@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
 import { DictData } from '@onebase/platform-center';
 import '../index.css';
 
@@ -18,7 +18,6 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
     verify,
     layout,
     runtime = true,
-    defaultValueConfig,
     detailMode
   } = props;
 
@@ -59,7 +58,6 @@ const XSelectOne = memo((props: XSelectOneConfig & { runtime?: boolean; detailMo
       rules={rules}
       layout={layout}
       displayType={FormInternalComponentType.Picker}
-      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       style={{
         textAlign: layout === 'vertical' ? 'left' : 'right',
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
