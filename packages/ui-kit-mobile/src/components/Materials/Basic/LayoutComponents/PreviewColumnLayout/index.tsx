@@ -5,6 +5,13 @@ import { PreviewRender } from '@/components/render';
 import { COMPONENT_GROUP_NAME, EDITOR_TYPES, getComponentWidth, GridItem, LayoutSchema, STATUS_OPTIONS, STATUS_VALUES, usePageEditorSignal } from '@onebase/ui-kit';
 import './index.css';
 
+// 判断分栏组件是否为空
+function isAllEmpty(arr: any[]): boolean {
+  if (!Array.isArray(arr)) return false;
+  if (arr.length === 0) return true;
+  return arr.every(item => Array.isArray(item) && isAllEmpty(item));
+}
+
 type XColumnLayoutConfig = typeof LayoutSchema.XPreviewColumnLayoutSchema.config;
 const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolean }) => {
   const { colCount, id, pageType, detailMode } = props;
@@ -34,62 +41,67 @@ const XPreviewColumnLayout = (props: XColumnLayoutConfig & { detailMode?: boolea
     }
   }, [colCount, id, colComponents]);
 
+  if (isAllEmpty(colComponents)) return null;
+
   return (
     <div className="XPreviewColumnLayout">
-      {colComponents.map((_colComponents: any, index: number) => (
-        <div key={index} className="item">
-          <ReactSortable
-            id={`workspace-content-${id}-${index}`}
-            list={colComponents[index]}
-            setList={(newList) => {
-              colComponents[index] = newList;
-            }}
-            group={{
-              name: COMPONENT_GROUP_NAME
-            }}
-            animation={150}
-            className="content"
-            disabled
-          >
-            {colComponents[index] &&
-              colComponents[index].map((cp: GridItem) => (
-                <Fragment key={cp.id}>
-                  {pageComponentSchemas[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      data-cp-type={cp.type}
-                      data-cp-displayname={cp.displayName}
-                      data-cp-id={cp.id}
-                      className="componentItem"
-                      style={{
-                        width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
-                        margin: '4px'
-                      }}
-                      onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                        e.stopPropagation();
-                        console.log('点击组件: ', cp.id);
-                        setCurComponentID(cp.id);
+      {colComponents.map((_colComponents: any, index: number) => {
+        if (_colComponents.length === 0) return null;
+        return (
+          <div key={index} className="item">
+            <ReactSortable
+              id={`workspace-content-${id}-${index}`}
+              list={colComponents[index]}
+              setList={(newList) => {
+                colComponents[index] = newList;
+              }}
+              group={{
+                name: COMPONENT_GROUP_NAME
+              }}
+              animation={150}
+              className="content"
+              disabled
+            >
+              {colComponents[index] &&
+                colComponents[index].map((cp: GridItem) => (
+                  <Fragment key={cp.id}>
+                    {pageComponentSchemas[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      <div
+                        key={cp.id}
+                        data-cp-type={cp.type}
+                        data-cp-displayname={cp.displayName}
+                        data-cp-id={cp.id}
+                        className="componentItem"
+                        style={{
+                          width: `calc(${getComponentWidth(pageComponentSchemas[cp.id], cp.type)} - 8px)`,
+                          margin: '4px'
+                        }}
+                        onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                          e.stopPropagation();
+                          console.log('点击组件: ', cp.id);
+                          setCurComponentID(cp.id);
 
-                        const curComponentSchema = pageComponentSchemas[cp.id];
-                        setCurComponentSchema(curComponentSchema);
-                        setShowDeleteButton(true);
-                      }}
-                    >
-                      <PreviewRender
-                        {...props}
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={pageComponentSchemas[cp.id]}
-                        runtime={true}
-                        detailMode={detailMode}
-                      />
-                    </div>
-                  )}
-                </Fragment>
-              ))}
-          </ReactSortable>
-        </div>
-      ))}
+                          const curComponentSchema = pageComponentSchemas[cp.id];
+                          setCurComponentSchema(curComponentSchema);
+                          setShowDeleteButton(true);
+                        }}
+                      >
+                        <PreviewRender
+                          {...props}
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageComponentSchema={pageComponentSchemas[cp.id]}
+                          runtime={true}
+                          detailMode={detailMode}
+                        />
+                      </div>
+                    )}
+                  </Fragment>
+                ))}
+            </ReactSortable>
+          </div>
+        )
+      })}
     </div>
   );
 };
