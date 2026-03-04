@@ -87,6 +87,7 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
   const columnsKey = 'columns';
   const searchItemsKey = 'searchItems';
   const tableNameKey = 'tableName';
+  const sortByObject = 'sortByObject';
 
   const { form } = Form.useFormContext();
 
@@ -253,7 +254,8 @@ const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
               { key: item.key, value: value },
               { key: tableNameKey, value: entityList.find((item) => item.entityUuid === value)?.tableName || '' },
               { key: searchItemsKey, value: [] },
-              { key: columnsKey, value: [] }
+              { key: columnsKey, value: [] },
+              { key: sortByObject, value: [] }
             ]);
 
             setEntityUuid(value);
