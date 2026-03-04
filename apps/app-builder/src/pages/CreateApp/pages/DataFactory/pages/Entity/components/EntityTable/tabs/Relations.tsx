@@ -128,8 +128,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
           <Button type="text" size="mini" onClick={() => handleEditRelation(record)}>
             编辑
           </Button>
-          {/* 本期不支持删除 */}
-          <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)} disabled>
+          <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)}>
             删除
           </Button>
         </Space>

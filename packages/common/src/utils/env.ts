@@ -12,7 +12,7 @@ export const getProdConfig = (key = 'CONFIG') => {
 
 export const envConfig = process.env.NODE_ENV === 'production' ? getProdConfig() : (window as any).global_config;
 export const aiConfig = process.env.NODE_ENV === 'production' ? getProdConfig('AI_CONFIG') : (window as any).global_config;
-
+console.log("engconfig:" , envConfig)
 // 平台、空间、应用端环境
 export const getEnv = (): string => {
   const environment = envConfig?.ENVIRONMENT;

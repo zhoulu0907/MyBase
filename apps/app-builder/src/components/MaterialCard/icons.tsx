@@ -55,6 +55,7 @@ import ImageWorkbenchIcon from '@/assets/images/cp/image_workbench_cp.svg';
 
 import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
 import DataListIcon from '@/assets/images/cp/data_list_cp.svg';
+import ChatbotIcon from '@/assets/images/cp/chatbot_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
@@ -120,7 +121,8 @@ export const ICON_Map: Record<string, React.ReactNode> = {
 
   // 工作台高级组件
   'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
-  'data_list_cp.svg': <img src={DataListIcon} alt="XDataList" />
+  'data_list_cp.svg': <img src={DataListIcon} alt="XDataList" />,
+  'chatbot_cp.svg': <img src={ChatbotIcon} alt="XChatbot" />
 };
 
 // TODO 图标更新

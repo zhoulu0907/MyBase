@@ -114,7 +114,8 @@ const COMPONENT_TYPE = {
   WELCOME_CARD: 'XWelcomeCard',
   INFORMATION_LIST: 'XInformationList',
   DATA_LIST: 'XDataList',
-  IMAGE_WORKBENCH: 'XImageWorkbench'
+  IMAGE_WORKBENCH: 'XImageWorkbench',
+  CHATBOT: 'XChatbot'
 } as const
 
 /**
@@ -646,6 +647,13 @@ const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescr
     template: { h: 36, w: 118, displayName: '图片', icon: 'image_workbench_cp.svg', category: 'workbench' },
     fieldMap: [],
     entityMap: []
+  },
+  [COMPONENT_TYPE.CHATBOT]: {
+    type: COMPONENT_TYPE.CHATBOT,
+    schema: cloneDeep(workbenchSchema.XChatbot),
+    template: { h: 80, w: 80, displayName: '聊天助手', icon: 'chatbot_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
   }
 }
 
@@ -1147,3 +1155,17 @@ export function listMaterialsPlugins(): Array<{ id: string; status: 'registered'
 export function getMaterialsPluginStatus(id: string): 'registered' | 'loaded' | 'unloaded' | 'invalidated' | undefined {
   return PLUGIN_STATUS.get(id)
 }
+
+// 注册 Chatbot 为默认插件组件，使其显示在自定义分类中（使用 override 允许覆盖）
+const ChatbotDescriptor: ComponentDescriptor = {
+  type: 'XChatbot',
+  schema: cloneDeep(workbenchSchema.XChatbot),
+  template: { h: 80, w: 80, displayName: '聊天助手', icon: 'chatbot_cp.svg', category: 'workbench' },
+  fieldMap: [],
+  entityMap: []
+};
+
+registerMaterialsPlugin({
+  id: 'builtin-chatbot',
+  components: [ChatbotDescriptor]
+}, { override: true });
