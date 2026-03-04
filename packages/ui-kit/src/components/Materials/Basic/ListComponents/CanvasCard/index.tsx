@@ -1,7 +1,7 @@
 import { Card, Button, Menu, Popover, Message, Popconfirm } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
-import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
+import { RedirectMethod, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { isRuntimeEnv, menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
 import {
   CATEGORY_TYPE,
@@ -40,7 +40,8 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
 }) => {
   useSignals();
   const { canCreate, canEdit, canDelete } = menuPermissionSignal;
-  const { curPage, setRowDataId, setFlows, setBpmInstanceId, setRowDataType } = pagesRuntimeSignal;
+  const { curPage, setRowDataId, setFlows, setBpmInstanceId, setRowDataType, setDrawerVisible,
+    setDetailPageViewId } = pagesRuntimeSignal;
   const { curMenu } = menuSignal;
   const { status, runtime = true, componentName = 'CanvasCardType1', showFromPageData, tableName, metaData, displayFields, refresh, fieldList: propFieldList, preview } = props;
 
@@ -197,6 +198,43 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
     handleFetchData();
   };
 
+  // 同Table组件行点击查看表单详情逻辑
+  const handleRowClick = (record: any) => {
+    if (!runtime) {
+      return;
+    }
+
+    if (!record) {
+      return;
+    }
+
+    // 从 curPage.pages 中查找表单详情页面uuid
+    const formPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
+    const detailPageId = formPage?.pageUuid;
+
+    if (!detailPageId) {
+      console.warn('未找到表单详情页面');
+      return;
+    }
+
+    setDrawerVisible(true);
+    
+    if (record.bpm_instance_id) {
+      setRowDataType(PageType.BPM);
+      setBpmInstanceId(record.bpm_instance_id);
+    } else {
+      setRowDataType(PageType.NORMAL);
+      setBpmInstanceId('');
+    }
+    
+    // 设置详情页面ID
+    setDetailPageViewId(detailPageId);
+    
+    // 设置行数据ID并加载数据
+    setRowDataId(record.id);
+    showFromPageData?.(record.id, false);
+  };
+
   const renderComponent = (record?: Record<string, unknown>) => {
     const cardProps = {
       ...props,
@@ -290,7 +328,7 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
     return (
       <div className="canvas-card-list">
         {cardData.map((record) => (
-          <Card key={record.id as string} className="XCanvasCard">
+          <Card key={record.id as string} className="XCanvasCard" onClick={() => handleRowClick(record)}>
             {renderComponent(record)}
             {renderOperateBtns(record)}
           </Card>
