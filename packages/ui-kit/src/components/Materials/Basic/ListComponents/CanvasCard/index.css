@@ -232,6 +232,18 @@
   white-space: nowrap;
 }
 
+.canvas-card-field-item-label {
+  width: 66px;
+}
+
+.canvas-card-field-item-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  width: calc(100% - 74px);
+}
+
 @media (max-width: 768px) {
   .canvas-card-body-type2 {
     flex-direction: column;
