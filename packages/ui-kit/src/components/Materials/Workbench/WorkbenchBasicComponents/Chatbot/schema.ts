@@ -4,12 +4,14 @@ import {
   workbenchWidthConfig,
   type ICommonBaseWorkbenchType,
   type TWorkbenchWidthSelectKeyType,
-  type TSelectDefaultType
+  type TSelectDefaultType,
+  type ITextConfigType,
+  type IWidthConfigType
 } from '../../config/workbenchShared';
-import { WORKBENCH_WIDTH_OPTIONS, WORKBENCH_WIDTH_VALUES } from '../../core/constants';
+import { WORKBENCH_WIDTH_OPTIONS, WORKBENCH_WIDTH_VALUES, WORKBENCH_CONFIG_TYPES } from '../../core/constants';
 
 export interface XChatbotSchema {
-  editData: any[];
+  editData: Array<ITextConfigType | IWidthConfigType<TWorkbenchWidthSelectKeyType>>;
   config: XChatbotConfig;
 }
 
@@ -17,31 +19,34 @@ export interface XChatbotConfig extends ICommonBaseWorkbenchType {
   componentName: string;
   iframeUrl: string;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
+  floatingConfig?: {
+    right: number;
+    bottom: number;
+    width: number;
+    height: number;
+  };
 }
 
 const XChatbot: XChatbotSchema = {
   editData: [
     ...workbenchBaseConfig,
-    workbenchWidthConfig,
     {
-      id: 'iframeUrl',
-      label: 'iframe地址',
       key: 'iframeUrl',
-      type: 'Input',
-      component: {
-        type: 'Input',
-        props: {
-          placeholder: '请输入iframe地址'
-        }
-      },
-      value: ''
+      name: 'URL地址',
+      type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT
     }
   ],
   config: {
     ...workbenchBaseDefault,
     componentName: 'Chatbot',
     iframeUrl: '',
-    width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL]
+    width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
+    floatingConfig: {
+      right: 24,
+      bottom: 24,
+      width: 56,
+      height: 56
+    }
   }
 };
 

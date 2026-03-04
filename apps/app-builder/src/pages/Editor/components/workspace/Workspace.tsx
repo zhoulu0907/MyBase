@@ -387,6 +387,12 @@ export default function EditorWorkspace() {
           {components
             .filter((cp: GridItem) => cp.type !== 'entity' && isFloatingComponent(cp.type))
             .map((cp: GridItem) => {
+              const floatingConfig = pageComponentSchemas[cp.id]?.config?.floatingConfig;
+              const right = floatingConfig?.right ?? 80;
+              const bottom = floatingConfig?.bottom ?? 80;
+              const width = floatingConfig?.width ?? 80;
+              const height = floatingConfig?.height ?? 80;
+              
               return (
                 <div
                   key={cp.id}
@@ -395,10 +401,10 @@ export default function EditorWorkspace() {
                   data-cp-id={cp.id}
                   style={{
                     position: 'absolute',
-                    right: 80,
-                    bottom: 80,
-                    width: 80,
-                    height: 80,
+                    right,
+                    bottom,
+                    width,
+                    height,
                     zIndex: 100,
                     border: curComponentID === cp.id ? '2px solid rgb(var(--primary-6))' : 'none',
                     borderRadius: 8,

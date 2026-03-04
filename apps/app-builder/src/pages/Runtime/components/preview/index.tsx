@@ -28,6 +28,12 @@ import {
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
+
+const FLOATING_COMPONENT_TYPES = ['XChatbot'];
+
+const isFloatingComponent = (type: string): boolean => {
+  return FLOATING_COMPONENT_TYPES.includes(type);
+};
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -264,31 +270,33 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
             <Spin size={40} tip="加载中..." />
           </div>
         ) : pageType === EDITOR_TYPES.LIST_EDITOR && listComponents.value.length > 0 ? (
-          listComponents.value.map((cp: GridItem) => (
-            <Fragment key={cp.id}>
-              {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                <div
-                  key={cp.id}
-                  className={styles.componentItem}
-                  style={{
-                    width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                    margin: '4px'
-                  }}
-                >
-                  <PreviewRender
-                    cpId={cp.id}
-                    cpType={cp.type}
-                    pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                    runtime={runtime}
-                    preview={preview}
-                    showFromPageData={showFromPageData}
-                    pageSetType={pagesetType}
-                    pageType={pageType}
-                  />
-                </div>
-              )}
-            </Fragment>
-          ))
+          listComponents.value
+            .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+            .map((cp: GridItem) => (
+              <Fragment key={cp.id}>
+                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                      runtime={runtime}
+                      preview={preview}
+                      showFromPageData={showFromPageData}
+                      pageSetType={pagesetType}
+                      pageType={pageType}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))
         ) : (
           pageType === EDITOR_TYPES.LIST_EDITOR && (
             <div className={styles.noData}>
@@ -296,6 +304,45 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
             </div>
           )
         )}
+
+        {/* 浮动组件 - 在 LIST_EDITOR 模式下也渲染 */}
+        {pageType === EDITOR_TYPES.LIST_EDITOR &&
+          listComponents.value.some((cp: GridItem) => isFloatingComponent(cp.type)) && (
+            <div>
+              {listComponents.value
+                .filter((cp: GridItem) => isFloatingComponent(cp.type))
+                .map((cp: GridItem) => {
+                  const floatingConfig = listPageComponentSchemas.value[cp.id]?.config?.floatingConfig;
+                  const right = floatingConfig?.right ?? 80;
+                  const bottom = floatingConfig?.bottom ?? 80;
+                  const width = floatingConfig?.width ?? 80;
+                  const height = floatingConfig?.height ?? 80;
+
+                  return (
+                    <div
+                      key={cp.id}
+                      style={{
+                        position: 'fixed',
+                        right,
+                        bottom,
+                        width,
+                        height,
+                        zIndex: 100
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                        runtime={true}
+                        preview={preview}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+
         {pageType == EDITOR_TYPES.FORM_EDITOR && (
           <Form layout="inline" form={form}>
             {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
@@ -344,33 +391,76 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         )}
 
         {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
-          <Form layout="inline" form={form}>
-            {workbenchComponents.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
-                {wbComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+          <>
+            {/* 浮动组件 */}
+            {console.log(
+              '[Preview] workbenchComponents:',
+              workbenchComponents.value.map((cp) => cp.type)
+            )}
+            {workbenchComponents.value
+              .filter((cp: GridItem) => isFloatingComponent(cp.type))
+              .map((cp: GridItem) => {
+                console.log('[Preview] 渲染浮动组件:', cp.type, cp.id);
+                const floatingConfig = wbComponentSchemas.value[cp.id]?.config?.floatingConfig;
+                const right = floatingConfig?.right ?? 80;
+                const bottom = floatingConfig?.bottom ?? 80;
+                const width = floatingConfig?.width ?? 80;
+                const height = floatingConfig?.height ?? 80;
+
+                return (
                   <div
                     key={cp.id}
-                    className={styles.componentItem}
                     style={{
-                      width: `calc(${getWorkbenchComponentWidth(
-                        wbComponentSchemas.value[cp.id],
-                        cp.type as WorkbenchComponentType
-                      )} - 8px)`,
-                      margin: '8px'
+                      position: 'fixed',
+                      right,
+                      bottom,
+                      width,
+                      height,
+                      zIndex: 100
                     }}
                   >
                     <PreviewRender
                       cpId={cp.id}
                       cpType={cp.type}
                       pageComponentSchema={wbComponentSchemas.value[cp.id]}
-                      runtime={false}
+                      runtime={true}
                       preview={preview}
                     />
                   </div>
-                )}
-              </Fragment>
-            ))}
-          </Form>
+                );
+              })}
+
+            {/* 普通组件 */}
+            <Form layout="inline" form={form}>
+              {workbenchComponents.value
+                .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+                .map((cp: GridItem) => (
+                  <Fragment key={cp.id}>
+                    {wbComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                      <div
+                        key={cp.id}
+                        className={styles.componentItem}
+                        style={{
+                          width: `calc(${getWorkbenchComponentWidth(
+                            wbComponentSchemas.value[cp.id],
+                            cp.type as WorkbenchComponentType
+                          )} - 8px)`,
+                          margin: '8px'
+                        }}
+                      >
+                        <PreviewRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageComponentSchema={wbComponentSchemas.value[cp.id]}
+                          runtime={false}
+                          preview={preview}
+                        />
+                      </div>
+                    )}
+                  </Fragment>
+                ))}
+            </Form>
+          </>
         )}
 
         {pageType === EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardImgUrl && (

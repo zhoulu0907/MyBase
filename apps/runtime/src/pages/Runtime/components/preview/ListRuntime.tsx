@@ -12,6 +12,12 @@ import {
   useListEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
+
+const FLOATING_COMPONENT_TYPES = ['XChatbot'];
+
+const isFloatingComponent = (type: string): boolean => {
+  return FLOATING_COMPONENT_TYPES.includes(type);
+};
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { Fragment, useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -61,35 +67,76 @@ const ListRuntime: React.FC<ListRuntimeProps> = ({ pageSetId, runtime, showFromP
           <Spin size={40} tip="加载中..." />
         </div>
       ) : listComponents.value.length > 0 ? (
-        listComponents.value.map((cp: GridItem) => {
-          const schema = listPageComponentSchemas.value[cp.id];
-          const sanitizedSchema = {
-            ...schema
-          };
-          return (
-            <Fragment key={cp.id}>
-              <div
-                key={cp.id}
-                className={styles.componentItem}
-                style={{
-                  width: `calc(${getComponentWidth(sanitizedSchema, cp.type)} - 8px)`,
-                  margin: '4px'
-                }}
-              >
-                <PreviewRender
-                  cpId={cp.id}
-                  cpType={cp.type}
-                  pageType={EDITOR_TYPES.LIST_EDITOR}
-                  pageComponentSchema={sanitizedSchema}
-                  runtime={runtime}
-                  showFromPageData={showFromPageData}
-                  refresh={refresh}
-                  pageSetType={pageSetType}
-                />
-              </div>
-            </Fragment>
-          );
-        })
+        <>
+          {/* 浮动组件 */}
+          {listComponents.value
+            .filter((cp: GridItem) => isFloatingComponent(cp.type))
+            .map((cp: GridItem) => {
+              const floatingConfig = listPageComponentSchemas.value[cp.id]?.config?.floatingConfig;
+              const right = floatingConfig?.right ?? 80;
+              const bottom = floatingConfig?.bottom ?? 80;
+              const width = floatingConfig?.width ?? 80;
+              const height = floatingConfig?.height ?? 80;
+
+              return (
+                <div
+                  key={cp.id}
+                  style={{
+                    position: 'fixed',
+                    right,
+                    bottom,
+                    width,
+                    height,
+                    zIndex: 100
+                  }}
+                >
+                  <PreviewRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    pageType={EDITOR_TYPES.LIST_EDITOR}
+                    pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                    runtime={true}
+                    showFromPageData={showFromPageData}
+                    refresh={refresh}
+                    pageSetType={pageSetType}
+                  />
+                </div>
+              );
+            })}
+
+          {/* 普通组件 */}
+          {listComponents.value
+            .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+            .map((cp: GridItem) => {
+              const schema = listPageComponentSchemas.value[cp.id];
+              const sanitizedSchema = {
+                ...schema
+              };
+              return (
+                <Fragment key={cp.id}>
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(${getComponentWidth(sanitizedSchema, cp.type)} - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageType={EDITOR_TYPES.LIST_EDITOR}
+                      pageComponentSchema={sanitizedSchema}
+                      runtime={runtime}
+                      showFromPageData={showFromPageData}
+                      refresh={refresh}
+                      pageSetType={pageSetType}
+                    />
+                  </div>
+                </Fragment>
+              );
+            })}
+        </>
       ) : (
         <div className={styles.noData}>
           <img src={DevelopEmpty} alt="暂无数据" />
