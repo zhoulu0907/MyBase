@@ -21,6 +21,13 @@
   color: #1d2129;
 }
 
+.showMore {
+  font-size: 14px;
+  color: #6B7785;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .todoListContent {
   display: flex;
   align-items: center;
