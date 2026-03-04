@@ -54,12 +54,13 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         onCancel={() => setVisible(false)}
         autoFocus={false}
         focusLock={true}
+        footer={null}
         style={{ width: 800 }}
       >
         {iframeUrl ? (
           <iframe
             src={iframeUrl}
-            style={{ width: '100%', height: 500, border: 'none' }}
+            style={{ width: '100%', height: 800, border: 'none' }}
             title="Chatbot"
           />
         ) : (
