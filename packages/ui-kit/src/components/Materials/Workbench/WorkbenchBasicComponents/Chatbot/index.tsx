@@ -1,7 +1,6 @@
 import { Modal } from '@arco-design/web-react';
 import { useState } from 'react';
-
-const CHATBOX_IMAGE = '/chatbox.png';
+import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
 
 export interface XChatbotProps {
   config?: {
@@ -39,7 +38,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         onClick={handleClick}
       >
         <img
-          src={CHATBOX_IMAGE}
+          src={ChatboxIcon}
           alt="聊天助手"
           style={{
             width: 80,

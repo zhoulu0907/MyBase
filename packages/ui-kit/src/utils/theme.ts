@@ -9,7 +9,7 @@ export async function loadTheme(themeLoaders: ThemeLoaders): Promise<void> {
       : undefined;
       console.log('[ThemeLoader] Raw theme:', rawTheme);
   const theme: string =
-    typeof rawTheme === 'string' && rawTheme in themeLoaders ? rawTheme : 'default';
+    typeof rawTheme === 'string' && rawTheme in themeLoaders ? rawTheme : 'tiangong';
     console.log('[ThemeLoader] Loading theme:', theme);
   
   const loader = themeLoaders[theme] ?? themeLoaders.default;
