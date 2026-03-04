@@ -16,7 +16,7 @@ import {
 } from '@onebase/app';
 import { menuPermissionSignal, TokenManager, UserPermissionManager } from '@onebase/common';
 import { getPermissionInfo } from '@onebase/platform-center';
-import { menuDictSignal, setMainMetaData, useAppEntityStore } from '@onebase/ui-kit';
+import { menuDictSignal, setMainMetaData, useAppEntityStore, pageLayoutSignal } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -52,6 +52,7 @@ const Runtime: React.FC = () => {
   const { setMainEntity, setSubEntities } = useAppEntityStore();
   const { setMenuPermission } = menuPermissionSignal;
   const { batchSetAppDict } = menuDictSignal;
+  const { pageLayout } = pageLayoutSignal;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -258,43 +259,49 @@ const Runtime: React.FC = () => {
 
   return (
     <Layout className={styles.runtimePage}>
-      <AppHeader />
+      {pageLayout.value.showHeader && <AppHeader />}
       <Layout>
-        <Sider className={styles.sider}>
-          <div className={styles.siderHeader}>
-            <div className={styles.siderHeaderInput}>
-              <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
+        {pageLayout.value.showSidebar && (
+          <Sider className={styles.sider}>
+            <div className={styles.siderHeader}>
+              <div className={styles.siderHeaderInput}>
+                <Input allowClear suffix={<IconSearch />} placeholder={t('app.searchPlaceHolder')} />
+              </div>
             </div>
-          </div>
-          <Tree
-            blockNode
-            draggable
-            treeData={treeData}
-            selectedKeys={[curMenu.value?.menuCode!]}
-            expandedKeys={expandedKeys}
-            onExpand={setExpandedKeys}
-            className={`menuTree ${styles.tree}`}
-            showLine={false}
-            icons={{
-              switcherIcon: <IconDown />,
-              dragIcon: null
-            }}
-            actionOnClick={'expand'}
-            style={{
-              width: '200px',
-              overflow: 'hidden',
-              boxSizing: 'border-box',
-              padding: '4px 8px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          />
-        </Sider>
-        <Content className={styles.content} id="runtime-content">
+            <Tree
+              blockNode
+              draggable
+              treeData={treeData}
+              selectedKeys={[curMenu.value?.menuCode!]}
+              expandedKeys={expandedKeys}
+              onExpand={setExpandedKeys}
+              className={`menuTree ${styles.tree}`}
+              showLine={false}
+              icons={{
+                switcherIcon: <IconDown />,
+                dragIcon: null
+              }}
+              actionOnClick={'expand'}
+              style={{
+                width: '200px',
+                overflow: 'hidden',
+                boxSizing: 'border-box',
+                padding: '4px 8px',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            />
+          </Sider>
+        )}
+        <Content
+          className={styles.content}
+          id="runtime-content"
+          style={{ width: !pageLayout.value.showSidebar ? '100vw' : 'calc(100vw - 200px)' }}
+        >
           {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 ? (
             <TaskCenterPage curMenuCode={curMenu.value.menuCode} />
           ) : (
-            <div className={styles.contentBody}>
+            <div className={styles.contentBody} id="runtime-content-body">
               <PreviewContainer
                 menuId={curMenu.value?.id || ''}
                 runtime={true}
