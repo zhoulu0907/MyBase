@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Input, Switch, Form, Message, Select } from '@arco-design/web-react';
+import { Button, Input, InputNumber, Switch, Form, Message, Select } from '@arco-design/web-react';
 import { FIELD_CONSTRAINT_LENGTH_ENABLED, FIELD_CONSTRAINT_REGEX_ENABLED } from '@onebase/ui-kit';
 import { REGEX_LIST } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/CreateEditRuleModal/rule';
 import styles from '../index.module.less';
@@ -113,7 +113,13 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                       rules={[{ required: true, message: '请填写最小长度' }]}
                       style={{ marginBottom: 0 }}
                     >
-                      <Input type="number" placeholder="0" style={{ width: '120px' }} defaultValue="0" />
+                      <InputNumber
+                        placeholder="请填写最小长度"
+                        style={{ width: '120px' }}
+                        defaultValue={0}
+                        min={0}
+                        max={8000}
+                      />
                     </Form.Item>
                   </div>
 
@@ -124,7 +130,13 @@ export const FieldConstraint: React.FC<FieldConstraintProps> = ({ onConfirm, onC
                       rules={[{ required: true, message: '请填写最大长度' }]}
                       style={{ marginBottom: 0 }}
                     >
-                      <Input type="number" placeholder="800" style={{ width: '120px' }} defaultValue="800" />
+                      <InputNumber
+                        placeholder="请填写最大长度"
+                        style={{ width: '120px' }}
+                        min={0}
+                        max={8000}
+                        defaultValue={800}
+                      />
                     </Form.Item>
                   </div>
 

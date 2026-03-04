@@ -27,7 +27,7 @@ class DefaultLineWidget extends WidgetType {
         margin-bottom: 12px;
       `;
     const textSpan = document.createElement('span');
-    textSpan.textContent = this.fieldName ? `${this.fieldName} =` : '=';
+    textSpan.textContent = this.fieldName ? `${this.fieldName} =` : ''; // 没有传入fieldName隐藏‘=’
     textSpan.style.flexGrow = '1';
 
     const createButton = (

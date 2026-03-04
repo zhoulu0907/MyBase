@@ -119,8 +119,8 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
           <div className="canvas-card-fields-type2">
             {filteredList.map((fieldName: string, index: number) => (
               <div key={index} className="canvas-card-field-item">
-                <Text type="secondary">{getFieldName(fieldName)}</Text>
-                <Text>{renderContent(fieldName, renderFieldPreview(fieldName, ''))}</Text>
+                <Text type="secondary" className="canvas-card-field-item-label">{getFieldName(fieldName)}</Text>
+                <Text className="canvas-card-field-item-text">{renderContent(fieldName, renderFieldPreview(fieldName, ''))}</Text>
               </div>
             ))}
           </div>

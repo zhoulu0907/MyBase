@@ -28,6 +28,7 @@ import {
   statusConfig,
   layoutConfig,
   cardWidthConfig,
+  rowRedirectConfig,
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
@@ -41,6 +42,8 @@ import {
   STATUS_VALUES,
   WIDTH_OPTIONS,
   WIDTH_VALUES,
+  RedirectMethod,
+  TableOperationButton
 } from '../../../constants';
 
 export interface XCardSchema {
@@ -136,6 +139,27 @@ export interface XCardConfig extends ICommonBaseType {
    * 卡片宽度
    */
   cardWidth: TSelectDefaultType<TWidthSelectKeyType>;
+
+  /**
+   * 行点击跳转
+   */
+  advancedRowRedirect?: TBooleanDefaultType;
+  redirectPageId?: TTextDefaultType;
+  redirectMethod?: TTextDefaultType;
+  /**
+   * 操作按钮
+   */
+  operationButton: {
+    type: string;
+    buttonName: string;
+    buttonIcon: string;
+    iconColor: string;
+    redirectPageId?: string;
+    redirectMethod?: string;
+    confirmText?: string;
+    deletedAction?: string;
+    display: boolean;
+  }[];
 }
 
 const XCard: XCardSchema = {
@@ -147,9 +171,9 @@ const XCard: XCardSchema = {
     // 封面图片
     coverImageConfig,
     // 数据排序规则
-    // dataSortByConfig,
+    dataSortByConfig,
     // 数据过滤
-    // dataFilterConfig,
+    dataFilterConfig,
     // 绑定分组筛选
     groupFilterConfig,
     // 显示状态
@@ -157,7 +181,15 @@ const XCard: XCardSchema = {
     // 字段布局方式
     layoutConfig,
     // 宽度
-    cardWidthConfig
+    cardWidthConfig,
+    // 点击跳转
+    {
+      key: 'advancedRowRedirect',
+      name: '行点击跳转',
+      type: 'TableData',
+      advanced: true,
+      showOpearate: false
+    },
   ],
   config: {
     ...baseDefault,
@@ -179,7 +211,31 @@ const XCard: XCardSchema = {
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
-    cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER]
+    cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
+    advancedRowRedirect: false,
+    redirectPageId: '',
+    redirectMethod: RedirectMethod.DRAWER,
+    // 操作按钮
+    operationButton: [
+      {
+        type: TableOperationButton.EDIT,
+        buttonName: '编辑',
+        buttonIcon: 'edit',
+        iconColor: '#C9CDD4',
+        redirectPageId: '',
+        redirectMethod: RedirectMethod.NEW_TAB,
+        display: true
+      },
+      {
+        type: TableOperationButton.DELETE,
+        buttonName: '删除',
+        buttonIcon: 'delete',
+        iconColor: '#F53F3F',
+        confirmText: '确定删除？删除后不可恢复',
+        deletedAction: RedirectMethod.REFRESH,
+        display: true
+      }
+    ],
   }
 };
 

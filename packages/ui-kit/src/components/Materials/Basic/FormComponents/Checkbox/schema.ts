@@ -19,14 +19,12 @@ import {
 import {
   ALIGN_VALUES,
   ALIGN_OPTIONS,
-  CONFIG_TYPES,
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
-  WIDTH_VALUES,
-  DEFAULT_VALUE_TYPES
+  WIDTH_VALUES
 } from '../../../constants';
 import type {
   ICheckboxDataConfigType,
@@ -89,11 +87,6 @@ export interface XInputCheckboxConfig extends ICommonBaseType {
   dataField: TTextDefaultType[];
 
   /**
-   * 默认值
-   */
-  defaultValueConfig?: any;
-
-  /**
    * 单选框方向：水平（默认）、垂直
    * 可选值: 'vertical' | 'horizontal'
    */
@@ -140,11 +133,6 @@ const XCheckbox: XInputCheckboxSchema = {
     tooltipConfig,
     //  数据绑定
     ...dataFieldConfig,
-    {
-      key: 'defaultValueConfig',
-      name: '默认值',
-      type: CONFIG_TYPES.DEFAULT_VALUE,
-    },
     // 选项
     checkboxDataConfig,
     // 选项分布方式
@@ -165,11 +153,6 @@ const XCheckbox: XInputCheckboxSchema = {
     },
     tooltip: '',
     dataField: [],
-    defaultValueConfig: {
-      type: DEFAULT_VALUE_TYPES.CUSTOM,
-      customValue: '',
-      formulaValue: ''
-    },
     direction: LAYOUT_VALUES[LAYOUT_OPTIONS.HORIZONTAL],
     verify: {
       required: false,
