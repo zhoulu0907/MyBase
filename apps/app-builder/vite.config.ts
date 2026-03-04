@@ -10,7 +10,12 @@ export default defineConfig({
   },
   base: './',
   build: {
-    minify: 'esbuild'
+    minify: 'esbuild',
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html')
+      }
+    }
   },
   plugins: [
     react({

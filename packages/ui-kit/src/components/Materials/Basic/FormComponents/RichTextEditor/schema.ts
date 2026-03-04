@@ -18,7 +18,6 @@ import {
   type TAlignSelectKeyType,
 } from '../../../common';
 import {
-  CONFIG_TYPES,
   ALIGN_VALUES,
   ALIGN_OPTIONS,
   LAYOUT_OPTIONS,
@@ -31,21 +30,16 @@ import {
 } from '../../../constants';
 import type {
   IAlignConfigType,
-  IBooleanConfigType,
   IDataFieldConfigType,
   ILabelConfigType,
   ILayoutConfigType,
-  INumberConfigType,
   IPlaceholderConfigType,
   IStatusConfigType,
-  ITextAreaConfigType,
-  ITextConfigType,
   ITooltipConfigType,
   IVerifyConfigType,
   IWidthConfigType,
   ICommonConfigType,
   TBooleanDefaultType,
-  TNumberDefaultType,
   TSelectDefaultType,
   TTextAreaDefaultType,
   TTextDefaultType,
@@ -108,6 +102,7 @@ export interface XRichTextConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
   };
 
   /**
@@ -170,6 +165,7 @@ const XRichText: XRichTextSchema = {
     },
     verify: {
       required: false,
+      noRepeat: false
     },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],

@@ -32,7 +32,7 @@ const DeptTreeCmp: React.FC<DeptTreeProps> = ({
   const [search, setSearch] = useState('');
   const [selectedKeys, setSelectedKeys] = useState<string[]>(selectedDeptId ? [String(selectedDeptId)] : []);
 
-  let filteredTree = useMemo(() => treeFilter(treeData, search), [treeData, search]);
+  const filteredTree = useMemo(() => treeFilter(treeData, search), [treeData, search]);
   // 同步外部选中状态
   useEffect(() => {
     const keys = selectedDeptId ? [String(selectedDeptId)] : [];

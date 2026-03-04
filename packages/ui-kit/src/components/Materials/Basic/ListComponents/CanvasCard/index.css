@@ -33,10 +33,52 @@
   margin: 0;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 
 .XCanvasCard:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+.operate-popover .pc-popover-content{
+  padding: 6px;
+}
+
+.operate-more-btn {
+  display: none;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #E5E6EB;
+  background-color: #F5F5F5;
+}
+
+.XCanvasCard:hover .operate-more-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.operate-more-btn-item {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;;
+  gap: 6px;
+  padding: 0px 10px;
+  border-radius: 4px;
+}
+
+.operate-more-btn-item:hover {
+  background-color: #F5F5F5;
+  cursor: pointer;
+}
+
+.delete-text {
+  color: rgb(var(--danger-5));
 }
 
 .canvas-card-image {
@@ -79,6 +121,7 @@
   color: #666;
   height: 48px;
   overflow: hidden;
+  flex: 1;
 }
 
 .canvas-card-footer {
@@ -104,6 +147,13 @@
 .canvas-card-stats {
   font-size: 12px;
   color: #999;
+  display: flex;
+  align-items: center;
+}
+
+.pc-typography-secondary {
+  display: flex;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
@@ -180,6 +230,18 @@
 .canvas-card-field-item .arco-text:first-child {
   color: #86909C;
   white-space: nowrap;
+}
+
+.canvas-card-field-item-label {
+  width: 66px;
+}
+
+.canvas-card-field-item-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  width: calc(100% - 74px);
 }
 
 @media (max-width: 768px) {

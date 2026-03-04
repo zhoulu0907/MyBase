@@ -19,6 +19,9 @@ import {
     tableShowTotalConfig,
     tableStripeConfig,
     widthConfig,
+    dataSortByConfig,
+    dataFilterConfig,
+    groupFilterConfig,
     type ICommonBaseType,
     type TButtonSelectKeyType,
     type TPagePositionSelectKeyType,
@@ -211,13 +214,17 @@ export interface XTableConfig extends ICommonBaseType {
    */
   sortByObject?: {
     fieldName: TTextDefaultType;
-    sortBy: TNumberDefaultType;
-  };
+    sortBy: string;
+  }[];
 
   /**
    * 数据选择过滤条件
    */
-  filterCondition?: any
+  filterCondition?: any;
+  /**
+   * 绑定分组筛选
+   */
+  groupFilter?:string;
 }
 
 export interface OperationButtonConfig {
@@ -240,6 +247,10 @@ const XTable: XTableSchema = {
     tableMetaDataConfig,
     // keyDataConfig,
     // labelColSpanConfig,
+    // 数据排序规则
+    dataSortByConfig,
+    // 数据过滤
+    dataFilterConfig,
     tablePagePositionConfig,
     tablePageSizeConfig,
     tableBorderConfig,
@@ -250,11 +261,8 @@ const XTable: XTableSchema = {
     tableShowTotalConfig,
     tableShowOperateConfig,
     tableFixedOperateConfig,
-    // {
-    //   key: 'saveWithHidden',
-    //   name: '隐藏时提交数据',
-    //   type: CONFIG_TYPES.SWITCH_INPUT
-    // },
+    // 绑定分组筛选
+    groupFilterConfig,
     widthConfig,
     statusConfig,
     rowRedirectConfig,
@@ -282,13 +290,13 @@ const XTable: XTableSchema = {
     pageSize: 10,
     metaData: '',
     tableName: '',
-    filterCondition:{},
+    filterCondition: [],
     // labelColSpan: 100,
     defaultValue: [],
     columns: [],
-
+    groupFilter: '',
     searchItems: [],
-    advancedRowRedirect: false,
+    advancedRowRedirect: true,
     redirectPageId: '',
     redirectMethod: RedirectMethod.DRAWER,
 

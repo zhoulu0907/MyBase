@@ -80,6 +80,8 @@ export interface RuntimeAccountLoginRequest {
    * 登录平台 判断手机还是PC端登录
    */
   loginPlatform?: LoginPlatform;
+
+  isDev?: boolean;
 }
 
 export interface RuntimeCorpLoginRequest {
@@ -194,6 +196,26 @@ export interface TenantLoginResponse {
   tenantId: string; // 租户id
   tenantWebsite: string; // 租户网址
   corpId: string; // 企业id
+}
+
+export interface TiangongLoginRequest {
+  code: string;
+  deviceId: string;
+}
+
+export interface TiangongLoginResponse {
+  userId: string; // 用户ID
+  accessToken: string; // 访问令牌
+  refreshToken: string; // 刷新令牌
+  expiresTime: number; // 令牌过期时间（时间戳，毫秒）
+  tenantId: string; // 租户id
+  tenantWebsite: string; // 租户网址
+  passwordExpiryInfo: {
+    type: string;
+    message: string;
+    passwordAge: number;
+    expiryDays: number;
+  };
 }
 
 export interface ThirdUserLoginResponse {

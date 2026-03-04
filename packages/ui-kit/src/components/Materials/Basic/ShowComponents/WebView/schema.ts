@@ -5,6 +5,7 @@ import {
     widthConfig,
     titleTextConfig,
     webViewUrlConfig,
+    webViewParamsConfig,
     type ICommonBaseType,
     type TStatusSelectKeyType,
     type TWidthSelectKeyType
@@ -20,10 +21,18 @@ import type {
     IStatusConfigType,
     ITextConfigType,
     IWidthConfigType,
+    IWebViewParamsConfigType,
     TRadioDefaultType,
     TSelectDefaultType,
     TTextDefaultType
 } from '../../../types';
+
+export interface WebViewParamConfig {
+  key: string;
+  fieldName: string;
+  displayName: string;
+  fieldType: string;
+}
 
 export interface XWebViewSchema {
   editData: TXWebViewEditData;
@@ -31,7 +40,11 @@ export interface XWebViewSchema {
 }
 
 export type TXWebViewEditData = Array<
-  ITextConfigType | IWidthConfigType<TWidthSelectKeyType> | IStatusConfigType<TStatusSelectKeyType> | IBooleanConfigType
+  ITextConfigType
+  | IWidthConfigType<TWidthSelectKeyType>
+  | IStatusConfigType<TStatusSelectKeyType>
+  | IBooleanConfigType
+  | IWebViewParamsConfigType
 >;
 
 export interface XWebViewConfig extends ICommonBaseType {
@@ -55,6 +68,21 @@ export interface XWebViewConfig extends ICommonBaseType {
    * 网页链接
    */
   webViewUrl: TTextDefaultType;
+
+  /**
+   * 数据绑定
+   */
+  metaData: TTextDefaultType;
+
+  /**
+   * 表名
+   */
+  tableName: TTextDefaultType;
+
+  /**
+   * 参数列表
+   */
+  params?: WebViewParamConfig[];
 }
 
 const XWebView: XWebViewSchema = {
@@ -62,6 +90,7 @@ const XWebView: XWebViewSchema = {
     ...baseConfig,
     titleTextConfig,
     webViewUrlConfig,
+    webViewParamsConfig,
     widthConfig,
     statusConfig
     // TODO(mickey): 补充颜色 背景色配置
@@ -70,6 +99,9 @@ const XWebView: XWebViewSchema = {
     ...baseDefault,
     title: '网页浏览器',
     webViewUrl: 'https://example.com', // 使用支持 iframe 的示例网站
+    metaData: '',
+    tableName: '',
+    params: [],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT]
   }

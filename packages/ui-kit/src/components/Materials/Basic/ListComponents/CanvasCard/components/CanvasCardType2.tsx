@@ -1,12 +1,13 @@
-import { Card, Image, Tag, Typography, Avatar } from '@arco-design/web-react';
+import { Card, Tag, Typography, Avatar } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
 import { attachmentDownload, menuSignal } from '@onebase/app';
 import type { XCanvasCardConfig } from '../schema';
 import '../index.css';
+import defaultImage from '@/assets/images/cp/canvascard-default.svg';
 
 const { Text, Paragraph } = Typography;
 
-const DEFAULT_IMAGE = '/CanvasCardType2Pic.png';
+const PREVIEW_IMAGE = '/CanvasCardType2Pic.png';
 
 interface CanvasCardType2Props extends XCanvasCardConfig {
   runtime?: boolean;
@@ -14,6 +15,7 @@ interface CanvasCardType2Props extends XCanvasCardConfig {
   record?: Record<string, unknown>;
   displayFields?: {
     avatar?: string;
+    avatarFill?: string;
     mainTitle?: string;
     categoryTags?: string[];
     cardFields?: string[];
@@ -24,13 +26,13 @@ interface CanvasCardType2Props extends XCanvasCardConfig {
 const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
   const { status, runtime = true, record, displayFields, fieldList = [], tableName } = props;
   const { curMenu } = menuSignal;
-  const [avatarUrl, setAvatarUrl] = useState(DEFAULT_IMAGE);
+  const [avatarUrl, setAvatarUrl] = useState(runtime ? defaultImage : PREVIEW_IMAGE);
   
   const getFieldValue = (fieldName?: string): string => {
     if (!fieldName || !record) return '';
     const value = record[fieldName];
     if (value === null || value === undefined) return '';
-    if (typeof value === 'object') return (value as any).id || '';
+    if (typeof value === 'object') return (value as any).name || '';
     return String(value);
   };
 
@@ -50,7 +52,7 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
     if (runtime && record && fieldName) {
       const value = getFieldValue(fieldName);
       if (value) return value;
-      return '';
+      return null;
     }
     return defaultValue || '';
   };
@@ -105,16 +107,25 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
   const renderCardFields = () => {
     const renderList = cardFields.filter((field: string) => field);
     if (renderList.length > 0) {
-      return (
-        <div className="canvas-card-fields-type2">
-          {renderList.map((fieldName: string, index: number) => (
-            <div key={index} className="canvas-card-field-item">
-              <Text type="secondary">{getFieldName(fieldName)}</Text>
-              <Text>{renderContent(fieldName, renderFieldPreview(fieldName, ''))}</Text>
-            </div>
-          ))}
-        </div>
-      );
+      const filteredList = runtime && record
+        ? renderList.filter(fieldName => {
+            const value = getFieldValue(fieldName);
+            return value && value.trim() !== '';
+          })
+        : renderList;
+
+      if (filteredList.length > 0) {
+        return (
+          <div className="canvas-card-fields-type2">
+            {filteredList.map((fieldName: string, index: number) => (
+              <div key={index} className="canvas-card-field-item">
+                <Text type="secondary" className="canvas-card-field-item-label">{getFieldName(fieldName)}</Text>
+                <Text className="canvas-card-field-item-text">{renderContent(fieldName, renderFieldPreview(fieldName, ''))}</Text>
+              </div>
+            ))}
+          </div>
+        );
+      }
     }
     return null;
   };
@@ -150,13 +161,15 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
   return (
     <div className="canvas-card-body-type2">
       <div className="canvas-card-image-type2">
-        <Image
+        <img
           src={avatarUrl}
           alt="card image"
           width={72}
           height={72}
-          style={{ '--fit': 'cover' } as React.CSSProperties}
-          preview={false}
+          style={{ objectFit: displayFields?.avatarFill || 'fill' }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = defaultImage;
+          }}
         />
       </div>
       

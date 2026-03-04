@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Button, Form, Message, Modal, Switch, Input, ColorPicker, Spin } from '@arco-design/web-react';
 import { IconDelete, IconTranslate, IconPlusCircle } from '@arco-design/web-react/icon';
 import { arrayMove } from '@/pages/CreateApp/pages/DataFactory/pages/Entity/components/Modals/ConfigFieldModal/utils/transform';
-import { getDictDataListByType, StatusEnum, type DictData } from '@onebase/platform-center';
+import { getDictDataListDictTypeId, StatusEnum, type DictData } from '@onebase/platform-center';
 import { useCodeGenerator } from '../../hooks/useCodeGenerator';
 import CodeGenerationConfirmModal from '../code-generation-confirm-modal';
 import SortableTable from './SortableTable';
@@ -30,10 +30,10 @@ interface BatchConfigModalProps {
   onCancel: () => void;
   onOk: (values: DictData[]) => void;
   loading?: boolean;
-  dictType: string;
+  dictTypeId: string;
 }
 
-const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, onOk, loading = false, dictType }) => {
+const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, onOk, loading = false, dictTypeId }) => {
   const [form] = Form.useForm();
   const [colorMode, setColorMode] = useState(false);
   const [dictValues, setDictValues] = useState<DictValueItem[]>([]);
@@ -100,7 +100,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
   const loadAllDictDataList = useCallback(async () => {
     try {
       setTableLoading(true);
-      const res = await getDictDataListByType(dictType);
+      const res = await getDictDataListDictTypeId(dictTypeId);
       let colorEnabled = false;
       if (res.some((item) => item?.colorType?.startsWith('#'))) {
         colorEnabled = true;
@@ -115,7 +115,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
         setTableLoading(false);
       }, 500);
     }
-  }, [dictType, form]);
+  }, [dictTypeId, form]);
 
   // 使用编码生成hook
   const { isGenerating, generateCodes, canGenerate } = useCodeGenerator({

@@ -2,7 +2,7 @@ import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Ellipsis, Form, Radio, Tag } from '@arco-design/mobile-react';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
-import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, DEFAULT_VALUE_TYPES, menuDictSignal } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
 import { DictData } from '@onebase/platform-center';
 import '../index.css';
 import './index.css';
@@ -17,7 +17,6 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
     dataField,
     tooltip,
     status,
-    defaultValueConfig,
     verify,
     layout,
     direction,
@@ -61,7 +60,6 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
       field={fieldId}
       layout={layout}
       rules={rules}
-      initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1

@@ -18,6 +18,7 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     verify,
     layout,
     selectScope,
+    isSelectScope,
     defaultDeptValue,
     runtime = true,
     detailMode
@@ -81,12 +82,6 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     }
   };
 
-  const buildIndexFromTree = (tree: any[]) => {
-    const map = new Map<string, any>();
-    deepFind(map, tree);
-    return map;
-  };
-
   const deepFind = (map: Map<string, any>, nodes: any[]) => {
     for (const n of nodes) {
       map.set(n.id, n);
@@ -94,13 +89,43 @@ const XDeptSelect = memo((props: XInputDeptSelectConfig & { runtime?: boolean; d
     }
   };
 
+  const buildIndexFromTree = (tree: any[]) => {
+    const map = new Map<string, any>();
+    deepFind(map, tree);
+    return map;
+  };
+
   const extractFromTree = (tree: any[], ids: any[]) => {
     const map = buildIndexFromTree(tree);
     const clone = (n: any): any => ({ ...n, children: (n.children || []).map((c: any) => clone(c)) });
-    return ids
-      .map((i) => map.get(i.key))
+
+    const selectedTree = ids
+      .map(i => map.get(i.key))
       .filter(Boolean)
-      .map((n) => clone(n!));
+      .map(n => clone(n));
+
+    return isSelectScope ? flattenTree(selectedTree) : selectedTree;
+  };
+
+  const flattenTree = (tree: any[]) => {
+    const result: any[] = [];
+
+    const loop = (nodes: any[]) => {
+      for (const node of nodes) {
+        result.push({
+          ...node,
+          children: []
+        });
+
+        if (node.children?.length) {
+          loop(node.children);
+        }
+      }
+    };
+
+    loop(tree);
+
+    return result;
   };
 
   // 获取部门列表

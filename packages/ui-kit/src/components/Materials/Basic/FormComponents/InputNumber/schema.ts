@@ -137,6 +137,7 @@ export interface XInputNumberConfig extends ICommonBaseType {
   */
   verify: {
     required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
     numberLimit?: boolean;
     min?: number;
     max?: number;
@@ -224,6 +225,7 @@ const XInputNumber: XInputNumberSchema = {
     step: 1,
     verify: {
       required: false,
+      noRepeat: false,
       numberLimit: false,
       min: 0,
       max: Infinity

@@ -102,7 +102,7 @@ const renderConfigButton = (
         }
       }}
       getPopupContainer={() => document.body}
-      placement="auto"
+      placement="right"
       inModal={true}
       stopPropagation={true}
     >

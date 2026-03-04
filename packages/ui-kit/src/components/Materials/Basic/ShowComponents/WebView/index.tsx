@@ -1,14 +1,20 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
+import { useSignals } from '@preact/signals-react/runtime';
+import { pagesRuntimeSignal } from '@onebase/common';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XWebViewConfig } from './schema';
 import './index.css';
 
 const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { status, title, webViewUrl, runtime = true } = props;
+  useSignals();
+
+  const { status, title, webViewUrl, runtime = true, params } = props;
 
   const [iframeError, setIframeError] = useState(false);
+  const [validUrl, setValidUrl] = useState('');
+  const [iframeHeight, setIframeHeight] = useState('900px');
+  const { rowData } = pagesRuntimeSignal;
 
-  // 处理 URL，确保有协议前缀
   const getValidUrl = (url: string) => {
     if (!url) return '';
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -17,7 +23,54 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
     return `https://${url}`;
   };
 
-  const validUrl = getValidUrl(webViewUrl);
+  const buildUrlWithParams = (baseUrl: string) => {
+    if (!runtime || !params || params.length === 0) {
+      return getValidUrl(baseUrl);
+    }
+
+    const tableRowData = rowData.value;
+    const searchParams = new URLSearchParams();
+
+    params.forEach(param => {
+      const value = tableRowData[param.key];
+      if (value !== undefined && value !== null && value !== '') {
+        searchParams.append(param.key, String(value));
+      }
+    });
+
+    const queryString = searchParams.toString();
+    const validBaseUrl = getValidUrl(baseUrl);
+
+    return queryString ? `${validBaseUrl}?${queryString}` : validBaseUrl;
+  };
+
+  useEffect(() => {
+    const url = buildUrlWithParams(webViewUrl);
+    setValidUrl(url);
+  }, [webViewUrl, params, runtime, rowData.value]);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'iframeHeight') {
+        setIframeHeight(`${event.data.height + 10}px`);
+      }
+    };
+
+    const handleResize = () => {
+      const iframe = document.querySelector('iframe[title="WebView"]');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: 'recalculateHeight' }, '*');
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // 如果 iframe 加载失败，显示备用内容
   if (iframeError) {
@@ -66,9 +119,8 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
         src={validUrl}
         style={{
           width: '100%',
-          height: '400px', // 设置固定高度，避免 auto 导致的问题
-          border: '1px solid #e0e0e0',
-          borderRadius: '8px',
+          height: iframeHeight,
+          border: 'none',
           boxSizing: 'border-box'
         }}
         title="WebView"

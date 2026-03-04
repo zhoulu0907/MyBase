@@ -230,6 +230,7 @@ export default function EditorHeader() {
   const onFlowSave = async (isCreate?: boolean) => {
     const data = editorRef?.document.toJSON();
     const errorMsgList: any = [];
+    const conditionalBranch: any = []; // 条件节点
     data?.nodes.forEach((item) => {
       if (item.type === 'approver') {
         if (
@@ -260,7 +261,26 @@ export default function EditorHeader() {
           errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少抄送人' });
         }
       }
+      if (item.id.startsWith('conditional_branch')) {
+        conditionalBranch.push(item.id);
+      }
     });
+
+    let haveDefault = false;
+    conditionalBranch.forEach((conditionalId: any) => {
+      let innerHaveDefault = false;
+      data?.edges.forEach((item) => {
+        if (item.sourceNodeID === conditionalId && item?.data?.isDefault) {
+          innerHaveDefault = true;
+        }
+      });
+      haveDefault = innerHaveDefault;
+    });
+
+    if(!haveDefault){
+       errorMsgList.push({ nodeName: '条件分支', errorMsg: '未设置默认分支' });
+    }
+
     if (errorMsgList.length) {
       showConfirm(errorMsgList);
       return;
@@ -488,9 +508,15 @@ export default function EditorHeader() {
   const handleSavePageSet = async (exit?: boolean) => {
     setSaveLoading(true);
     if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
-      await onFlowSave();
-      setSaveLoading(false);
-      return;
+      try {
+        await onFlowSave();
+        return;
+      } catch (error) {
+        console.error('保存失败:', error);
+        return;
+      } finally {
+        setSaveLoading(false);
+      }
     }
 
     const { dataTitleType, redirectType, dataTitle } = usePageSettingSignal;

@@ -3,10 +3,11 @@ import { Button, Form } from '@arco-design/web-react';
 import { IconSearch, IconSync } from '@arco-design/web-react/icon';
 import { useSignals } from '@preact/signals-react/runtime';
 import { memo } from 'react';
+import { nanoid } from 'nanoid';
 import { COMPONENT_MAP, FORM_COMPONENT_TYPES, FormComp, getComponentSchema } from 'src/components/Materials';
 import { useFormEditorSignal } from 'src/signals/page_editor';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES,SELECT_OPTIONS_BPM } from '../../../constants';
+import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES, SELECT_OPTIONS_BPM } from '../../../constants';
 import { PageType } from '@onebase/app';
 import './index.css';
 
@@ -16,29 +17,63 @@ interface TableSearchConfig {
   runtime: boolean;
   onSearch?: () => void;
   onReset?: () => void;
-  pageSetType?:number
+  pageSetType?: number;
+  tableName?: string;
 }
 
 const TableSearch = memo((props: TableSearchConfig) => {
   useSignals();
 
-  const { searchItems, labelColSpan, runtime, onSearch, onReset, pageSetType } = props;
+  const { searchItems, labelColSpan, runtime, onSearch, onReset, pageSetType, tableName } = props;
   const count = searchItems?.length || 0;
   const remainder = count % 4;
   const placeholderCount = remainder === 0 ? 3 : 4 - remainder - 1;
   const { pageComponentSchemas: fromPageComponentSchemas, components } = useFormEditorSignal;
   const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
 
-  const { mainEntity } = useAppEntityStore();
+  const { mainEntity, subEntities } = useAppEntityStore();
 
   const renderSearchItem = (item: any) => {
-    const copyMainEntity = { ...mainEntity };
-
-    if(pageSetType === PageType.BPM){
-      copyMainEntity.fields = [...copyMainEntity.fields, ...SELECT_OPTIONS_BPM];
+    // todo 数据标题 需要和后端确定
+    if (item.value?.indexOf('-') !== -1) {
+      const schema = getComponentSchema(COMPONENT_MAP.TEXT);
+      const cpId = nanoid()
+      const componentConfig = {
+        ...schema.config,
+        label: {
+          display: true,
+          text: item.label
+        },
+        layout: 'vertical',
+        labelColSpan,
+        dataField: [],
+        defaultValue: undefined,
+        defaultValueConfig: { type: DEFAULT_VALUE_TYPES.CUSTOM, customValue: null },
+        defaultDeptValue: undefined,     // 清空search是部门选择的默认值
+        defaultUserValue: undefined,     // 清空search是人员选择的默认值
+        status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+        verify: { required: false },
+        tooltip: ''
+      };
+      return <FormComp.XInputText cpName={cpId} id={cpId} {...componentConfig} runtime={runtime} />;
     }
     
-    const fieldType = copyMainEntity.fields.find((field) => field.fieldName === item.value)?.fieldType;
+    let copyMainEntity: any = { ...mainEntity };
+
+    if (pageSetType === PageType.BPM) {
+      copyMainEntity.fields = [...copyMainEntity.fields, ...SELECT_OPTIONS_BPM];
+    }
+
+    let fieldType = copyMainEntity.fields.find((field: any) => field.fieldName === item.value)?.fieldType;
+    if (!fieldType) {
+      copyMainEntity = subEntities.entities.find((field) => tableName && field.tableName === tableName);
+      if (copyMainEntity) {
+        if (pageSetType === PageType.BPM) {
+          copyMainEntity.fields = [...copyMainEntity.fields, ...SELECT_OPTIONS_BPM];
+        }
+        fieldType = copyMainEntity?.fields.find((field: any) => field.fieldName === item.value)?.fieldType;
+      }
+    }
 
     if (!fieldType) {
       return;
@@ -84,9 +119,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
 
     if (cpId) {
       const currentComponentSchemas = fromPageComponentSchemas.value[cpId];
-      // 组件类型
-      const cpType = components.value?.find((ele) => ele.id === cpId)?.type;
-
       componentConfig = {
         ...currentComponentSchemas.config,
         layout: 'vertical',
@@ -103,6 +135,16 @@ const TableSearch = memo((props: TableSearchConfig) => {
       };
     } else {
       cpId = `${cpType}-${uuidv4()}`;
+    }
+
+    // 日期范围选择器统一使用「开始日期」「结束日期」占位，日期类型使用date
+    if (
+      cpType === FORM_COMPONENT_TYPES.DATE_RANGE_PICKER ||
+      cpType === FORM_COMPONENT_TYPES.DATE_PICKER ||
+      cpType === FORM_COMPONENT_TYPES.DATE_TIME_PICKER
+    ) {
+      componentConfig.dateType = 'date';
+      componentConfig.placeholder = ['开始日期', '结束日期'];
     }
 
     switch (cpType) {
@@ -148,26 +190,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
             detailMode={detailMode}
           />
         );
-      case FORM_COMPONENT_TYPES.DATE_PICKER:
-        return (
-          <FormComp.XDatePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
-        return (
-          <FormComp.XDateRangePicker
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
       case FORM_COMPONENT_TYPES.TIME_PICKER:
         return (
           <FormComp.XTimePicker
@@ -178,9 +200,12 @@ const TableSearch = memo((props: TableSearchConfig) => {
             detailMode={detailMode}
           />
         );
+      case FORM_COMPONENT_TYPES.DATE_PICKER:
+      case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
       case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
+        console.log('componentConfig', componentConfig);
         return (
-          <FormComp.XDateTimePicker
+          <FormComp.XDateRangePicker
             cpName={cpId}
             id={cpId}
             {...componentConfig}

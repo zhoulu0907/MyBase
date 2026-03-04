@@ -15,6 +15,11 @@ const RadioGroup = Radio.Group;
 const Option = Select.Option;
 const userMaxCount = 100;
 const roleMaxCount = 10;
+const enum UserOptsEnum {
+  Initial = 0,
+  Ready = 1,
+  Done = 2
+}
 const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -27,7 +32,10 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
   const [selectedUser, setSelectedUser] = useState<string[]>([]);
   const [selectedRole, setSelectedRole] = useState<string[]>([]);
   const { curAppInfo } = useAppStore();
-  
+  const [userNoPower, setUserNoPower] = useState<boolean>(false);
+  // 标记获取userOptions列表数据的接口已经执行完成
+  const [userOptsStatus, setUserOptsStatus] = useState<number>(UserOptsEnum.Initial);
+
   const handleChangeUser = (val: string[]) => {
     if (val.length <= userMaxCount) {
       setSelectedUser(val);
@@ -56,8 +64,12 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     if (curAppInfo.publishModel && curAppInfo.publishModel === PUBLISH_MODULE.SASS) {
       params.userType = userType.SAAS;
     }
+    setUserOptsStatus(UserOptsEnum.Ready);
     getUserPage(params)
       .then((res: any) => {
+        if (userNoPower) {
+          setUserNoPower(false);
+        }
         if (Array.isArray(res?.list)) {
           const selectArr: any[] = [];
           res.list?.forEach((item: any) => {
@@ -68,9 +80,14 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
           });
           setUserOptions(selectArr);
         }
+        setUserOptsStatus(UserOptsEnum.Done);
       })
       .catch((err: any) => {
         console.info('Api getUserPage Error:', err);
+        if (typeof err === 'string' && err.indexOf('没有该操作权限') > -1) {
+          setUserNoPower(true);
+        }
+        setUserOptsStatus(UserOptsEnum.Done);
       });
   }
   function initRoleData() {
@@ -150,20 +167,22 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     return !isSame;
   }
   useEffect(() => {
-    const configMap = {
-      role: { key: 'roles', formField: 'role', idField: 'roleId' },
-      user: { key: 'users', formField: 'user', idField: 'userId' }
-    } as const;
-    const config = configMap[approverConfig?.handlerType as keyof typeof configMap];
-    const dataArray = config ? approverConfig?.[config.key] : undefined;
-    if (dataArray && dataArray.length > 0) {
-      const formData = form.getFieldsValue([config.formField]);
-      const isChange = needFormFill(dataArray, formData?.[config.formField], config.idField);
-      if (isChange) {
-        setInitData();
+    if (approverConfig?.handlerType && userOptsStatus === 2) {
+      const configMap = {
+        role: { key: 'roles', formField: 'role', idField: 'roleId' },
+        user: { key: 'users', formField: 'user', idField: 'userId' }
+      } as const;
+      const config = configMap[approverConfig?.handlerType as keyof typeof configMap];
+      const dataArray = config ? approverConfig?.[config.key] : undefined;
+      if (dataArray && dataArray.length > 0) {
+        const formData = form.getFieldsValue([config.formField]);
+        const isChange = needFormFill(dataArray, formData?.[config.formField], config.idField);
+        if (isChange) {
+          setInitData();
+        }
       }
     }
-  }, [approverConfig]);
+  }, [approverConfig, userOptsStatus]);
 
   useEffect(() => {
     initUserData();
@@ -175,7 +194,14 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
     if (handlerType) {
       setSimpleCkType(handlerType);
       if (handlerType === 'user') {
-        const userArr = users.map((item: any) => item.userId);
+        let userArr = users.map((item: any) => item.userId);
+        // 如果审批人下拉列表有数据，需要进行过滤，把不存在于列表的项，删除
+        if (userOptions?.length > 0) {
+          const listUserIds = userOptions.map((item: any) => item.userId);
+          userArr = userArr.filter((uid: any) => {
+            return listUserIds.indexOf(uid) > -1;
+          });
+        }
         prevUserIdsRef.current = userArr;
         form.setFieldsValue({
           user: userArr
@@ -235,26 +261,32 @@ const SimpleMode = ({ setApprovalConfigData, approverConfig }: ApproverConfig) =
             rules={approverFormRules.user}
             wrapperCol={{ style: { width: '100%' } }}
           >
-            <Select
-              mode="multiple"
-              placeholder="选择审批人"
-              value={selectedUser}
-              onChange={handleChangeUser}
-              filterOption={(inputValue, option) =>
-                option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
-              }
-              allowClear
-            >
-              {userOptions?.map((option: any) => (
-                <Option
-                  key={option?.userId}
-                  value={option?.userId}
-                  disabled={selectedUser.length === userMaxCount && !selectedUser.includes(option.userId)}
-                >
-                  {option.name}
-                </Option>
-              ))}
-            </Select>
+            {!userNoPower ? (
+              <Select
+                mode="multiple"
+                placeholder="选择审批人"
+                value={selectedUser}
+                onChange={handleChangeUser}
+                filterOption={(inputValue, option) =>
+                  option.props.children?.toLowerCase().indexOf(inputValue?.toLowerCase()) >= 0
+                }
+                allowClear
+              >
+                {userOptions?.map((option: any) => (
+                  <Option
+                    key={option?.userId}
+                    value={option?.userId}
+                    disabled={selectedUser.length === userMaxCount && !selectedUser.includes(option.userId)}
+                  >
+                    {option.name}
+                  </Option>
+                ))}
+              </Select>
+            ) : (
+              <Select disabled mode="multiple" placeholder="选择审批人" defaultValue={['no_power']}>
+                <Option value="no_power">无权限</Option>
+              </Select>
+            )}
           </FormItem>
         )}
         {simpleCkType === 'role' && (

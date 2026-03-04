@@ -60,26 +60,29 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
 
       // 对于 CONNECTOR 节点，从 signal 中读取数据（因为数据保存在 signal 中作为缓存）
       let param: Record<string, any>;
-      if (curNode && curNode.type === NodeType.CONNECTOR) {
+      if (curNode && curNode.type === NodeType.HTTP) {
         // 先调用保存方法，将最新的 actionParams 保存到 signal
-        console.log('CONNECTOR saveNode - checking saveActionParamsToSignal:', nodeInfo.props.form?.saveActionParamsToSignal);
+        console.log(
+          'HTTP saveNode - checking saveActionParamsToSignal:',
+          nodeInfo.props.form?.saveActionParamsToSignal
+        );
         // @ts-ignore - 调用表单实例上挂载的保存方法
         if (nodeInfo.props.form?.saveActionParamsToSignal) {
-          console.log('CONNECTOR saveNode - calling saveActionParamsToSignal');
+          console.log('HTTP saveNode - calling saveActionParamsToSignal');
           nodeInfo.props.form.saveActionParamsToSignal();
         } else {
-          console.warn('CONNECTOR saveNode - saveActionParamsToSignal not found on form');
+          console.warn('HTTP saveNode - saveActionParamsToSignal not found on form');
         }
 
         // 从 signal 中读取最新的数据（包含 actionParams 等）
         const signalData = nodeData.value[nodeId.value] || {};
-        console.log('CONNECTOR saveNode - signalData:', signalData);
-        console.log('CONNECTOR saveNode - formInfo:', formInfo);
+        console.log('HTTP saveNode - signalData:', signalData);
+        console.log('HTTP saveNode - formInfo:', formInfo);
 
         // 合并数据：先使用 signal 数据，然后用表单数据覆盖（表单数据可能是最新的）
         param = { ...signalData, ...formInfo };
 
-        // 确保 actionParams 从 signal 中读取（因为它按 actionKey 存储，包含所有动作的参数）
+        // 确保 actionParams 从 signal 中读取（因为它按 actionName 存储，包含所有动作的参数）
         if (signalData.actionParams) {
           param.actionParams = signalData.actionParams;
         }

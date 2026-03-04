@@ -90,6 +90,13 @@ export interface ITreeDataConfigType extends ICommonConfigType {
   advanced?: boolean;
 }
 
+export interface IWebViewParamsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.WEB_VIEW_PARAMS;
+  advanced?: boolean;
+}
+
 export interface ICardDataConfigType extends ICommonConfigType {
   key: string;
   name: string;
@@ -475,6 +482,37 @@ export interface ITabsTypeConfigType<KeyType> extends ICommonConfigType {
 
 // 页签组件位置
 export interface ITabsPositionConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_POSITION;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 步骤条组件类型
+export interface IStepsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.STEPS;
+}
+
+// 页签组件类型
+export interface ITabsTypeConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_TYPE;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 步骤条标签位置
+export interface IStepsLabelPlacementConfigType<KeyType> extends ICommonConfigType {
   key: string;
   name: string;
   type: typeof CONFIG_TYPES.TABS_POSITION;

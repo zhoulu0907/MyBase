@@ -27,7 +27,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  const iconStyle = { fontSize: '18px' };
+
   // 默认菜单项
   const defaultMenuItems = useMemo(
     () => [
@@ -179,7 +179,6 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       onCollapse={onCollapse}
       trigger={null}
       width={240}
-      collapsedWidth={64}
     >
       <div className={styles.siderContent}>
         <div className={styles.menuContainer}>

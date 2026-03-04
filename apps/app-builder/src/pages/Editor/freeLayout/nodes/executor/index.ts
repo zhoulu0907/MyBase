@@ -15,8 +15,12 @@ export const ExecutorNodeRegistry: FlowNodeRegistry = {
     expandable: false,
     addDisable: false,
     defaultPorts: [
-      { type: 'output', location: 'bottom' },
-      { type: 'input', location: 'top' }
+      { type: 'output', portID: 'executor1', location: 'bottom' },
+      { type: 'input', portID: 'executor2', location: 'top' },
+      { type: 'output', portID: 'executor3', location: 'left' },
+      { type: 'output', portID: 'executor4', location: 'right' },
+      { type: 'input', portID: 'executor5', location: 'left' },
+      { type: 'input', portID: 'executor6', location: 'right' },
     ]
   },
   info: {

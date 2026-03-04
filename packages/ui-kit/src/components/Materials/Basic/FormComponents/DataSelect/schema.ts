@@ -240,7 +240,7 @@ const XDataSelect: XDataSelectSchema = {
         display: true
       },
       tableName: '',
-      filterCondition: {},
+      filterCondition: [],
       stripe: true,
       border: true,
       borderCell: true,
@@ -259,10 +259,10 @@ const XDataSelect: XDataSelectSchema = {
       defaultValue: [],
       columns: [],
       searchItems: [],
-      sortByObject: {
+      sortByObject: [{
         fieldName: '',
-        sortBy: 1
-      },
+        sortBy: 'ASC'
+      }],
       operationButton: []
     }
   }

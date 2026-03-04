@@ -4,7 +4,6 @@
   background: #f7f8fa;
   display: flex;
   .leftPanel {
-    margin-right: 16px;
     background: #fff;
     height: 100%;
     box-shadow: 1px 0 0 #f0f0f0;
@@ -20,7 +19,7 @@
     flex: 1;
     min-width: 0;
     overflow: auto;
-    padding: 16px;
+    padding: 20px;
     box-sizing: border-box;
   }
 }
@@ -42,22 +41,45 @@
 
 .inputSearch {
   margin-bottom: 16px;
-  :global(.pc-input-inner-wrapper) {
-    border-radius: 24px;
-  }
 }
 
 .deptTreeNode {
   :global(.pc-tree-node) {
+    height: 36px;
     margin-bottom: 4px;
 
+    :global(.pc-tree-node-switcher) {
+      width: 4px;
+      height: 100%;
+      margin-right: 20px;
+      background: transparent;
+    }
+
     &-selected {
-      :global(.pc-tree-node-title) {
-        background: #f7f8fa !important;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: rgb(var(--primary-6));
+      }
+      background: rgb(var(--primary-6), 0.15);
+
+      :global(.pc-tree-node-switcher-icon) {
+        padding: 6px;
+        box-sizing: border-box;
       }
     }
     :global(.pc-tree-node-title) {
-      padding: 7px 5px 7px 4px;
+      padding: 6px 6px 6px 0;
+
+      &:hover {
+        background-color: transparent;
+      }
     }
   }
 }

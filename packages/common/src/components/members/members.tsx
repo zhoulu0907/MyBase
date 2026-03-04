@@ -56,7 +56,7 @@ const AddMembers = (props: IProps) => {
 
   // 点击取消时的处理函数
   const handleCancel = () => {
-    setResetFlag((flag) => !flag);
+    // setResetFlag((flag) => !flag);
     onCancel();
   };
 

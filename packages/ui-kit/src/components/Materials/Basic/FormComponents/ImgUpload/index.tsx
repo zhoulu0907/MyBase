@@ -7,6 +7,7 @@ import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from '../../../constants';
+import { downloadFileByUrl } from 'src/utils/downloadFile';
 import './index.css';
 import type { XInputImgUploadConfig } from './schema';
 
@@ -42,11 +43,11 @@ const XImgUpload = memo(
 
       const progressAdapter = onProgress
         ? (progressEvent: ProgressEvent) => {
-            if (progressEvent.lengthComputable) {
-              const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-              onProgress(percent, progressEvent);
-            }
+          if (progressEvent.lengthComputable) {
+            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(percent, progressEvent);
           }
+        }
         : undefined;
 
       if (runtime) {
@@ -234,10 +235,18 @@ const XImgUpload = memo(
                       }}
                     />
                     <IconDownload
-                      onClick={() => {
-                        if (file.url && file.name) {
-                          // todo
-                        }
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const lastIndexOf = fieldName.lastIndexOf('.');
+                        const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
+                        const param = {
+                          menuId: curMenu.value?.id,
+                          id: recordId || rowDataId.value,
+                          fieldName: curFieldName,
+                          fileId: file.response.fileId || file.uid
+                        };
+                        const fileUrl = await attachmentDownload(tableName, param);
+                        downloadFileByUrl(fileUrl, file.name);
                       }}
                     />
                     {!detailMode && (
@@ -275,12 +284,12 @@ const XImgUpload = memo(
                         ) : null}
                       </div>
                     </div>
-                    <IconClose
+                    {!detailMode && <IconClose
                       className="uplaodImgList-list-item-close"
                       onClick={() => {
                         handleRemoveFile(file, index, fileProps);
                       }}
-                    />
+                    />}
                   </div>
                   {file.percent && file.percent !== 100 ? (
                     <Progress color="rgb(var(--primary-7))" percent={file.percent} showText={false}></Progress>
@@ -346,7 +355,7 @@ const XImgUpload = memo(
           }
           field={fieldId}
           layout={layout}
-          tooltip={ tooltip && {
+          tooltip={tooltip && {
             content: tooltip,
             position: tooltipPosition
           }}
@@ -365,8 +374,8 @@ const XImgUpload = memo(
               (status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode) && fieldValue
                 ? fieldValue?.length
                 : verify?.maxCountLimit
-                  ? undefined
-                  : verify?.maxCount
+                  ? verify?.maxCount
+                  : undefined
             }
             accept='image/*'
             listType={'text'}
@@ -385,7 +394,7 @@ const XImgUpload = memo(
               if (verify?.fileFormatLimit && verify?.fileFormat) {
                 const lastIndexOf = file.name.lastIndexOf('.');
                 const type = file.name.slice(lastIndexOf + 1);
-                if (verify.fileFormat.toLocaleLowerCase().split(',').includes(type.toLocaleLowerCase())) {
+                if (!verify.fileFormat.toLocaleLowerCase().split(',').includes(type.toLocaleLowerCase())) {
                   Message.warning(`不支持该格式，仅支持 ${verify.fileFormat}`);
                   return false;
                 }
@@ -402,6 +411,7 @@ const XImgUpload = memo(
                 const fileId = await handleUpload(file, onProgress);
                 // 文件上传文件id
                 if (fileId) {
+                  Message.success('上传成功');
                   onSuccess({ fileId: fileId });
                 } else {
                   onError({
@@ -436,6 +446,20 @@ const XImgUpload = memo(
             disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode || !isRuntimeEnv()}
             drag={uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.LIST]}
             renderUploadList={renderUploadList}
+            tip={!detailMode && (uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] || uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) ? <>
+              {verify?.fileFormatLimit && (
+                <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
+              )}
+              <span>
+                {verify?.maxCountLimit && (
+                  <span>
+                    最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                    {verify?.maxSizeLimit ? '，' : ''}
+                  </span>
+                )}
+                {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
+              </span>
+            </> : undefined}
           >
             {detailMode ? null : (
               <div className="uplaodTrigger">

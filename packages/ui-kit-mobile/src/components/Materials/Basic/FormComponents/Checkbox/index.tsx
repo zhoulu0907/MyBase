@@ -5,7 +5,6 @@ import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUn
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { DictData } from '@onebase/platform-center';
 import {
-  DEFAULT_VALUE_TYPES,
   FORM_COMPONENT_TYPES,
   FormSchema,
   getFieldOptionsConfig,
@@ -30,14 +29,13 @@ const squareIcon = {
 };
 
 const XCheckbox = memo(
-  (props: XCheckboxConfig & { runtime?: boolean; detailMode?: boolean; defaultOptionsConfig?: any; form?: any }) => {
+  (props: XCheckboxConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
     const {
       form,
       label,
       align,
       dataField,
       status,
-      defaultValueConfig,
       verify,
       layout,
       direction,
@@ -111,9 +109,6 @@ const XCheckbox = memo(
         label={label.display && <Ellipsis text={label.text} maxLine={2} />}
         rules={rules}
         layout={layout}
-        initialValue={
-          defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : undefined
-        }
         style={{
           pointerEvents: !runtime || detailMode ? 'none' : 'unset',
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1

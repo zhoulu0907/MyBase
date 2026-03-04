@@ -19,7 +19,7 @@
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    padding: 20px 22px 0 18px;
+    padding: 0 20px 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -55,6 +55,78 @@
       flex-direction: column;
     }
 
+    .appCreate {
+      margin-bottom: 16px;
+      .aiCreate {
+        height: 120px;
+        border-radius: 8px;
+        background-position: 100% 100%;
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        box-sizing: border-box;
+        padding: 26px 20px;
+        cursor: pointer;
+        background-image:
+          linear-gradient(
+            99.09deg,
+            #badaff 0%,
+            #eff6ff 42.07%,
+            rgba(239, 246, 255, 0) 56.73%,
+            rgba(239, 246, 255, 0) 87.76%
+          ),
+          url('@/assets/images/appBasic/app_ai.png');
+
+        &:hover {
+          box-shadow: 4px 4px 16px 0px #24515d1a;
+        }
+        .aiCreateTitle {
+          font-weight: 700;
+          font-size: 22px;
+          line-height: 26px;
+          color: #272e3b;
+        }
+        .aiCreateDesc {
+          padding-top: 8px;
+          width: 150px;
+          color: #547781;
+          font-size: 12px;
+          line-height: 17px;
+        }
+      }
+      .otherCreate {
+        height: 120px;
+        border-radius: 8px;
+        border: 1px solid #eaeeef;
+        box-sizing: border-box;
+        cursor: pointer;
+        padding: 26px 12px 26px 16px;
+        display: flex;
+        &:hover {
+          box-shadow: 4px 4px 16px 0px #24515d1a;
+        }
+        .otherCreateContent {
+          flex: 1;
+          overflow: hidden;
+          .otherCreateTitle {
+            color: #24515d;
+            font-weight: 500;
+            font-size: 18px;
+            line-height: 32px;
+          }
+          .otherCreateDesc {
+            width: 132px;
+            color: #7c979e;
+            font-size: 12px;
+            line-height: 17px;
+          }
+        }
+        .otherCreateImg {
+          width: 60px;
+          height: 60px;
+        }
+      }
+    }
+
     .appFilter {
       height: @appFilterHeight;
       display: flex;
@@ -65,25 +137,6 @@
       .appInput {
         width: 240px;
         height: 32px;
-
-        & span {
-          border-radius: 16px;
-        }
-      }
-      .cteateBtn {
-        display: flex;
-        align-items: center;
-        .aiCteateApp {
-          background: linear-gradient(to bottom right, rgb(162, 245, 208), rgb(48, 136, 250), rgb(18, 80, 255));
-          border: none;
-          margin-left: 16px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          img {
-            margin-right: 8px;
-          }
-        }
       }
     }
 

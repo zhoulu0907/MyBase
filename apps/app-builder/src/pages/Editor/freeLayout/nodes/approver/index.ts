@@ -15,8 +15,12 @@ export const ApproverNodeRegistry: FlowNodeRegistry = {
     expandable: false,
     addDisable: false,
     defaultPorts: [
-      { type: 'output', location: 'bottom' },
-      { type: 'input', location: 'top' }
+      { type: 'output', portID: 'approver1', location: 'bottom' },
+      { type: 'input', portID: 'approver2', location: 'top' },
+      { type: 'output', portID: 'approver3', location: 'left' },
+      { type: 'output', portID: 'approver4', location: 'right' },
+      { type: 'input', portID: 'approver5', location: 'left' },
+      { type: 'input', portID: 'approver6', location: 'right' },
     ]
   },
   info: {
@@ -32,8 +36,8 @@ export const ApproverNodeRegistry: FlowNodeRegistry = {
   },
   onAdd() {
     return {
-      id: `executor_${nanoid(5)}`,
-      type: 'executor',
+      id: `approver_${nanoid(5)}`,
+      type: 'approver',
       data: {
         name: '审批人',
         errorMsg: '节点缺少审批人',

@@ -171,21 +171,19 @@ const OrganizationPage: React.FC = () => {
   return (
     <div className={styles.organizationPage}>
       <div className={styles.pageHeader}>
-        <div className={styles.leftContent}>
-          <Button permission={ACTIONS.CREATE} type="primary" onClick={handleAdd} icon={<IconPlus />}>
-            添加部门
-          </Button>
-        </div>
         <div className={styles.rightContent}>
           <Input
             className={styles.inputSearch}
-            placeholder="请输入部门名称"
+            placeholder="输入部门名称"
             prefix={<IconSearch />}
             value={searchValue}
             onChange={handleSearch}
             onPressEnter={(e) => handleSearch(e.target.value)}
           />
         </div>
+        <Button permission={ACTIONS.CREATE} type="primary" onClick={handleAdd} icon={<IconPlus />}>
+          添加部门
+        </Button>
       </div>
       <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
         <Table
@@ -193,6 +191,7 @@ const OrganizationPage: React.FC = () => {
           columns={filteredColumns}
           data={data}
           rowKey="id"
+          stripe
           childrenColumnName="children"
           pagination={false}
           virtualized={true}

@@ -9,6 +9,7 @@ window.global_config = {
     'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/infra/file/download',
 
   MOBILE_EDITOR_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/mobileeditor/',
+  AI_COPILOT_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1/aicopilot/',
 
   RUNTIME_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/appruntimemt',
   RUNTIME_MOBILE_URL: 'http://localhost:9528',

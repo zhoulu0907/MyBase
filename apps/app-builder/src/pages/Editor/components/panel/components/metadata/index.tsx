@@ -3,7 +3,7 @@ import IconCollapsed from '@/assets/images/collapsed_left_icon.svg';
 import IconSearchForm from '@/assets/images/search_form_icon.svg';
 import FieldCard from '@/components/FieldCard';
 import { Collapse, Input, Layout } from '@arco-design/web-react';
-import { ENTITY_TYPE_VALUE, FilterEntityFields, type AppEntityField } from '@onebase/app';
+import { ENTITY_TYPE, ENTITY_TYPE_VALUE, FilterEntityFields, type AppEntityField } from '@onebase/app';
 import {
   COMPONENT_GROUP_NAME,
   COMPONENT_MAP,
@@ -223,12 +223,14 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                 >
                   <ReactSortable
                     list={[
-                      ...subEntities.entities.map((subEntity) => ({
-                        ...subEntity,
-                        id: subEntity.entityId,
-                        type: ENTITY_TYPE_VALUE.SUB,
-                        displayName: ENTITY_TYPE_VALUE.SUB
-                      }))
+                      ...subEntities.entities
+                        .filter((subEntity) => subEntity.entityType === ENTITY_TYPE.SUB)
+                        .map((subEntity) => ({
+                          ...subEntity,
+                          id: subEntity.entityId,
+                          type: ENTITY_TYPE_VALUE.SUB,
+                          displayName: ENTITY_TYPE_VALUE.SUB
+                        }))
                     ]}
                     setList={() => {}}
                     group={{
@@ -241,19 +243,21 @@ const MetadataContainer: React.FC<MetadataContainerProps> = ({ childCollapsed, s
                     forceFallback={true}
                     animation={150}
                   >
-                    {subEntities.entities.map((subEntity) => (
-                      <div
-                        className={styles.subEntityHeader}
-                        key={subEntity.entityId}
-                        onClick={() => setActiveEntityID(subEntity.entityId)}
-                        data-cp-type={ENTITY_COMPONENT_TYPES.SUB_ENTITY}
-                        data-entity-id={subEntity.entityUuid}
-                        data-table-name={subEntity.tableName}
-                      >
-                        <div className={styles.subEntityHeaderIcon}>子</div>
-                        {subEntity.entityName || '无'}
-                      </div>
-                    ))}
+                    {subEntities.entities
+                      .filter((subEntity) => subEntity.entityType === ENTITY_TYPE.SUB)
+                      .map((subEntity) => (
+                        <div
+                          className={styles.subEntityHeader}
+                          key={subEntity.entityId}
+                          onClick={() => setActiveEntityID(subEntity.entityId)}
+                          data-cp-type={ENTITY_COMPONENT_TYPES.SUB_ENTITY}
+                          data-entity-id={subEntity.entityUuid}
+                          data-table-name={subEntity.tableName}
+                        >
+                          <div className={styles.subEntityHeaderIcon}>子</div>
+                          {subEntity.entityName || '无'}
+                        </div>
+                      ))}
                   </ReactSortable>
 
                   {/* <div className={styles.relEntityHeader}>

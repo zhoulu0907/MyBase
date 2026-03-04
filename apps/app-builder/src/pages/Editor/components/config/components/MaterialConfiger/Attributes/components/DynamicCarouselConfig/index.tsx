@@ -26,15 +26,8 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
   const maxCount = configs.verify?.maxCount || 10;
 
   useEffect(() => {
-    if (configs.carouselConfig.length > 0) {
-      // const newData = configs.carouselConfig.map((conf, index) => ({
-      //   uid: index,
-      //   name: conf.image,
-      //   url: conf.image
-      // }));
-      // setCarouselConfig(configs.carouselConfig);
-    }
-  }, [configs]);
+    setCarouselConfig(configs[carouselKey] || []);
+  }, [id, configs]);
 
   const handleTextChange = (value: string, index: number) => {
     const newData = carouselConfig.map((car, idx) => {
@@ -61,6 +54,7 @@ const DynamicCarouselConfig: React.FC<DynamicCarouselConfigProps> = ({ handlePro
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('visitMode', 'public');
 
     const progressAdapter = onProgress
       ? (progressEvent: ProgressEvent) => {

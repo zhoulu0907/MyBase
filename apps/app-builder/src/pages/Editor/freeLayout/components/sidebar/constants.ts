@@ -78,7 +78,7 @@ export interface OpOptions {
 
 export interface ConditionRule {
   fieldScope: string;
-  fieldUuid: string;
+  fieldName: string;
   op: string;
   operatorType: string;
   value: any;
@@ -333,19 +333,6 @@ export const instanceOptions = [
     label: '更新时间',
     value: Instance.UPDATE_TIME,
     type: FieldType.DATETIME
-  }
-];
-
-export const entityOptions = [
-  {
-    label: '表单字段1',
-    value: 'field1',
-    type: FieldType.USER
-  },
-  {
-    label: '表单字段2',
-    value: 'field2',
-    type: FieldType.DATE
   }
 ];
 

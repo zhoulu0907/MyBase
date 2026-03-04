@@ -77,7 +77,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
         return VARIABLE_MAP[item.fieldType as FieldType]?.includes(fieldType) ?? false;
       })
       .map((optionItem) => (
-        <Option key={optionItem.fieldUuid} value={optionItem.fieldUuid}>
+        <Option key={optionItem.fieldName} value={optionItem.fieldName}>
           {optionItem.displayName}
         </Option>
       ));

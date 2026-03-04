@@ -266,6 +266,42 @@ const XTable = memo(
       if (Object.keys(columns as any).length) {
         const mainMetaData = await getEntityFieldsWithChildren(metaData);
         newColumns = (columns || []).map((column) => {
+          // 数据标题
+          if (column.dataIndex?.indexOf('-') !== -1) {
+            return {
+              ...column,
+              dataIndex: 'dataTitle',
+              ellipsis: true,
+              width: column.width + 'px',
+              bodyCellStyle: { padding: '0 12px' },
+              render: (_text: any, _record: any, index: number) => {
+                const _index = column.dataIndex.indexOf('-');
+                const dataTitleType = column.dataIndex.slice(0, _index);
+                const dataTitle = column.dataIndex.slice(_index + 1);
+                // 1默认标题  2自定义标题
+                if (dataTitleType == '1') {
+                  // 发起人发起的页面名称
+                  return <span>{`${_record.creator?.name}发起的${curMenu.value?.menuName}`}</span>;
+                } else {
+                  // 自定义标题  "11{{创建人ID}}22{{常规文本}}33{{邮箱}}44"
+                  const dataTitleArr = dataTitle.match(/\{\{(.+?)\}\}/g)
+                  mainMetaData?.parentFields?.length
+                  if (dataTitleArr && dataTitleArr.length > 0 && mainMetaData?.parentFields?.length) {
+                    let dataTitleStr = dataTitle;
+                    dataTitleArr.forEach((e:string)=>{
+                      const _fieldNameArr = e.match(/\{\{(.+?)\}\}/)
+                      const _fieldName = _fieldNameArr?.[1] || '';
+                      const fieldObj = mainMetaData.parentFields.find((ele:any)=>_fieldName && ele.displayName === _fieldName);
+                      const fieldValue = _record?.[fieldObj.fieldName]?.name || _record?.[fieldObj.fieldName] || '';
+                      dataTitleStr = dataTitleStr.replace(e,fieldValue)
+                    })
+                    return <span>{dataTitleStr}</span>
+                  }
+                  return <span>{dataTitle}</span>
+                }
+              }
+            }
+          }
           return {
             ...column,
             ellipsis: true,
@@ -457,13 +493,16 @@ const XTable = memo(
 
       queryData = form.getFieldsValue();
 
-      // TODO(mickey): 后续调试
-      // if (sortByObject?.fieldName) {
-      //   req.sortField = sortByObject.fieldName;
-      //   req.sortDirection = sortByObject.sortBy === 1 ? 'asc' : 'desc';
-      // }
+      // 数据排序
+      if (sortByObject?.length) {
+        const sortBy = sortByObject.map(ele => ({
+          field: ele.fieldName,
+          direction: ele.sortBy
+        }))
+        queryData = { ...queryData, sortBy }
+      }
 
-      // TODO(mickey): 考虑模糊查询和范围查询
+      // 考虑模糊查询和范围查询
       const conditions: any[] = [];
       Object.entries(queryData).forEach(([key, value]) => {
         if (typeof value === 'object' && !Array.isArray(value)) {
@@ -473,14 +512,35 @@ const XTable = memo(
         }
 
         if (value != undefined && value != null && value !== '') {
-          conditions.push({
-            nodeType: 'CONDITION',
-            fieldName: key,
-            operator: VALIDATION_TYPE.EQUALS,
-            fieldValue: Array.isArray(value) ? value : (typeof value === 'object' ? [value?.id] : [value])
-          });
+          // 日期范围选择器提交 [start, end]，使用 RANGE 条件；结束日取 23:59:59 以包含当天全天（兼容精确到秒的日期时间字段）
+          const isDateRange = Array.isArray(value) && value.length === 2;
+          if (isDateRange) {
+            const toDayjs = (v: any) =>
+              v && typeof v === 'object' && typeof v.startOf === 'function' ? v : null;
+            const start = toDayjs(value[0]);
+            const end = toDayjs(value[1]);
+            const startStr = start ? start.startOf('day').format('YYYY-MM-DD HH:mm:ss') : value[0];
+            const endStr = end ? end.endOf('day').format('YYYY-MM-DD HH:mm:ss') : value[1];
+            conditions.push({
+              nodeType: 'CONDITION',
+              fieldName: key,
+              operator: VALIDATION_TYPE.RANGE,
+              fieldValue: [startStr, endStr]
+            });
+          } else {
+            conditions.push({
+              nodeType: 'CONDITION',
+              fieldName: key,
+              operator: VALIDATION_TYPE.EQUALS,
+              fieldValue: Array.isArray(value) ? value : (typeof value === 'object' ? [value?.id] : [value])
+            });
+          };
         }
       });
+      // 数据过滤 filterCondition
+      if (filterCondition && filterCondition.length > 0) {
+        conditions.push.apply(conditions, filterCondition)
+      }
 
       const filters = {
         nodeType: 'GROUP',
@@ -491,7 +551,7 @@ const XTable = memo(
       const req: PageMethodV2Params = {
         pageNo: tablePageNo,
         pageSize: pageSize || 10,
-        filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
+        filters: filters
       };
       let res: any;
       if (props?.pageSetType === PageType.BPM) {
@@ -524,17 +584,6 @@ const XTable = memo(
                 newItem[key] = dateValue.toLocaleDateString();
               }
             }
-
-            // // 部门选择单选 TODO
-            // const deptSelectField = mainMetaData.parentFields.find(
-            //   (field: AppEntityField) =>
-            //     field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.DEPARTMENT.VALUE
-            // );
-            // if (deptSelectField && newItem[key]) {
-            //   if (newItem[key]) {
-            //     newItem[key] = newItem[key]?.deptName || '';
-            //   }
-            // }
           }
         });
 
@@ -592,12 +641,12 @@ const XTable = memo(
       if (!runtime) {
         return;
       }
-      if(record) {
+      if (record) {
         if (record.bpm_instance_id) {
           setRowDataType(PageType.BPM);
           setBpmInstanceId(record.bpm_instance_id);
         } else {
-           setRowDataType(PageType.NORMAL);
+          setRowDataType(PageType.NORMAL);
           setBpmInstanceId('');
         }
       }
@@ -647,6 +696,7 @@ const XTable = memo(
               <Form form={form} layout="vertical" className="searchItems">
                 <TableSearch
                   searchItems={searchItems}
+                  tableName={tableName}
                   labelColSpan={labelColSpan}
                   runtime={runtime}
                   onSearch={handleSearch}

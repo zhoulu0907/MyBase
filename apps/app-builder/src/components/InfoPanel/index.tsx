@@ -31,7 +31,7 @@ const InfoPanel: React.FC<InfoPanelProps> = ({
           <div className="info-panel__title">{title}</div>
           {titleChildren && <div className="info-panel__title-children">{titleChildren}</div>}
           {type === RoleType.SYSTEM && (
-            <Tag color="cyan">
+            <Tag style={{ color: 'rgb(var(--primary-6))', backgroundColor: 'rgb(var(--primary-6), 0.15)' }}>
               系统
             </Tag>
           )}
