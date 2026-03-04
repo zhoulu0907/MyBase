@@ -25,7 +25,6 @@ import {
   useEditorSignalMap,
   useListEditorSignal,
   useWorkbenchEditorSignal,
-  useAppEntityStore,
   getOrCreatePageConfig,
   PAGE_CONFIG_DEFAULT,
   type GridItem,
