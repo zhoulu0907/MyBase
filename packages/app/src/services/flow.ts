@@ -126,11 +126,16 @@ export const getConnectorByUuid = (connectorUuid: string) => {
 
 export const updateConnectInstance = (params: UpdateConnectInstanceReq) => {
   const { id, ...data } = params;
-  return flowService.put(`/connector/${id}`, data);
+  return flowService.post(`/connector/${id}/update`, data);
+};
+
+export const updateConnectInstanceBaseInfo = (params: UpdateConnectInstanceReq) => {
+  const { id, ...data } = params;
+  return flowService.post(`/connector/${id}/update-base-info`, data);
 };
 
 export const deleteConnectInstance = (id: string) => {
-  return flowService.delete(`/connector/${id}`);
+  return flowService.post(`/connector/${id}/delete`);
 };
 
 export const getScriptAction = (id: string) => {

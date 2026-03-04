@@ -1,5 +1,5 @@
 import { Button, Input, Message } from '@arco-design/web-react';
-import { updateConnectInstance, type ConnectInstance, type UpdateConnectInstanceReq } from '@onebase/app';
+import { updateConnectInstanceBaseInfo, type ConnectInstance, type UpdateConnectInstanceReq } from '@onebase/app';
 import React, { useState } from 'react';
 import styles from './index.module.less';
 
@@ -25,7 +25,7 @@ const ConnectorBaseInfo: React.FC<ConnectorBaseInfoProps> = ({
   };
 
   const updateBaseInfo = async () => {
-    const res = await updateConnectInstance({
+    const res = await updateConnectInstanceBaseInfo({
       id: baseInfo?.id,
       connectorName: baseInfo?.connectorName,
       description: description
@@ -44,7 +44,7 @@ const ConnectorBaseInfo: React.FC<ConnectorBaseInfoProps> = ({
         Message.warning('请输入实例名称');
         return;
       }
-      onCreate({ description });
+      onCreate({ description: description || '' });
     }
   };
 
