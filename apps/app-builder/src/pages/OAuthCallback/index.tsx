@@ -16,17 +16,19 @@ const OAuthCallback: React.FC = () => {
     // 确保登录逻辑只执行一次
     if (!processedRef.current) {
       processedRef.current = true;
-      
+
       const handleOAuthCallback = async () => {
         const code = searchParams.get('code');
         if (code) {
           try {
             // 获取设备ID
             const deviceId = await getOrCreateDeviceInfo();
-            
+
             const response = await tiangongLogin({ code, deviceId });
             if (response && response.accessToken) {
-              // 先设置token，再设置curIdentifyId
+              // 先设置当前身份ID，再设置token
+              TokenManager.setCurIdentifyId(response.tenantId);
+              
               TokenManager.setToken({
                 userId: response.userId,
                 accessToken: response.accessToken,
@@ -36,10 +38,7 @@ const OAuthCallback: React.FC = () => {
                 loginSource: 'tiangong',
                 loginURL: window.location.href
               }, true);
-              
-              // 然后设置当前身份ID
-              TokenManager.setCurIdentifyId(response.tenantId);
-              
+
               // 获取并设置用户权限信息
               try {
                 const permissionInfo = await getPermissionInfo(CodeType.TENANT);
@@ -51,7 +50,7 @@ const OAuthCallback: React.FC = () => {
               } catch (error) {
                 console.error('获取权限信息失败:', error);
               }
-              
+
               navigate(`/onebase/${response.tenantId}/home/enterprise-app`);
             }
           } catch (error) {
@@ -66,7 +65,7 @@ const OAuthCallback: React.FC = () => {
           navigate('/login');
         }
       };
-      
+
       handleOAuthCallback();
     }
   }, []); // 空依赖数组，确保只执行一次
