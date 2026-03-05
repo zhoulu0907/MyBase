@@ -50,4 +50,6 @@ public interface AppErrorCodeConstants {
 
     ErrorCode APP_VERSION_EXPORT_RECORD_NOT_EXIST = new ErrorCode(10022, "应用导出记录不存在");
 
+    ErrorCode PAGE_SET_DATA_ASSET_NOT_EMPTY = new ErrorCode(10023, "表单数据资产不能为空");
+
 }

@@ -217,4 +217,15 @@ public interface ErrorCodeConstants {
 
     ErrorCode AUTH_VERIFY_NO_CORP_LOGIN_ERROR = new ErrorCode(1_002_000_105, "非企业账号无法登录");
 
+    // ========== 天工 OAuth2 登录 1-002-031-000 ==========
+    ErrorCode TIAN_GONG_OAUTH2_CONFIG_NOT_EXISTS = new ErrorCode(1_002_031_000, "天工登录失败：找不到 OAuth2 配置，请检查 system_oauth2_client_out_config 表");
+    ErrorCode TIAN_GONG_OAUTH2_CONFIG_DISABLED = new ErrorCode(1_002_031_001, "天工登录失败：OAuth2 配置已禁用");
+    ErrorCode TIAN_GONG_OAUTH2_CONFIG_INCOMPLETE = new ErrorCode(1_002_031_002, "天工登录失败：OAuth2 配置不完整");
+    ErrorCode TIAN_GONG_OAUTH2_ACCESS_TOKEN_EMPTY = new ErrorCode(1_002_031_003, "天工登录失败：获取 access_token 为空，token 响应={}");
+    ErrorCode TIAN_GONG_OAUTH2_USER_INFO_EMPTY = new ErrorCode(1_002_031_004, "天工登录失败：用户信息为空");
+    ErrorCode TIAN_GONG_OAUTH2_GET_USER_INFO_FAILED = new ErrorCode(1_002_031_005, "获取用户信息失败，msg={}");
+    ErrorCode TIAN_GONG_OAUTH2_TENANT_NOT_FOUND = new ErrorCode(1_002_031_006, "天工登录失败：找不到租户");
+    ErrorCode TIAN_GONG_OAUTH2_CREATE_TOKEN_FAILED = new ErrorCode(1_002_031_007, "天工登录失败：创建本地登录令牌失败");
+    ErrorCode TIAN_GONG_OAUTH2_GET_TOKEN_FAILED = new ErrorCode(1_002_031_008, "获取token信息失败，msg={}");
+
 }

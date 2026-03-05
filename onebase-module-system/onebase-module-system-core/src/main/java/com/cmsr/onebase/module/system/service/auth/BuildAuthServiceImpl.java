@@ -35,6 +35,8 @@ import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
+import com.cmsr.onebase.module.system.service.oauth2.OAuth2ClientOutConfigService;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientOutConfigDO;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
@@ -44,7 +46,6 @@ import com.cmsr.onebase.module.system.util.oauth2.OkHttpClientUtils;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
@@ -127,24 +128,11 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     @Resource
     private PwdEnHelper pwdEnHelper;
 
-    @Value("${onebase.auth.tiangong.tenant-code:tenant_tiangong}")
-    private String tianGongTenantCode;
-    @Value("${onebase.auth.tiangong.client-id:onebase}")
-    private String tianGongClientId;
-    @Value("${onebase.auth.tiangong.client-secret:onebasekey}")
-    private String tianGongClientSecret;
-    @Value("${onebase.auth.tiangong.access-token-url:https://sso.sit.artifex-cmcc.com.cn/api/auth/oauth2/token}")
-    private String tianGongAccessTokenUrl;
-    @Value("${onebase.auth.tiangong.user-info-url:https://sso.sit.artifex-cmcc.com.cn/api/portal/oauth2/userinfo}")
-    private String tianGongUserInfoUrl;
-    @Value("${onebase.auth.tiangong.redirect-uri:http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/system/auth/tiangong-login}")
-    private String tianGongRedirectUri;
-    @Value("${onebase.auth.tiangong.scope:server}")
-    private String tianGongScope;
-//    @Value("${onebase.auth.tiangong.device-id:tianGong}")
-//    private String tianGongDeviceId;
-    @Value("${onebase.auth.tiangong.http-debug-log-enabled:false}")
-    private Boolean tianGongHttpDebugLogEnabled;
+    @Resource
+    private OAuth2ClientOutConfigService oauth2ClientOutConfigService;
+
+    // 天工租户配置 (从 database 读取)
+    private static final String TIAN_GONG_TENANT_CODE = "tenant_tiangong";
 
     @Override
     public AdminUserDO authenticate(String username, String password) {
@@ -539,96 +527,157 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
     @Override
     public AuthLoginRespVO tianGongLogin(String code, String deviceId) {
+        // 1. 从数据库获取天工 OAuth2 配置
+        OAuth2ClientOutConfigDO config = oauth2ClientOutConfigService.getConfigByTenantCode(TIAN_GONG_TENANT_CODE);
+        if (config == null) {
+            throw exception(TIAN_GONG_OAUTH2_CONFIG_NOT_EXISTS);
+        }
+        
+        // 校验配置是否启用
+        if (!CommonStatusEnum.ENABLE.getStatus().equals(config.getStatus())) {
+            throw exception(TIAN_GONG_OAUTH2_CONFIG_DISABLED);
+        }
+        
+        // 校验配置完整性
+        if (StringUtils.isBlank(config.getClientId())
+            || StringUtils.isBlank(config.getClientSecret())
+            || StringUtils.isBlank(config.getAccessTokenUrl())
+            || StringUtils.isBlank(config.getUserInfoUrl())
+            || StringUtils.isBlank(config.getRedirectUri())) {
+            throw exception(TIAN_GONG_OAUTH2_CONFIG_INCOMPLETE);
+        }
 
-        TenantDO tenantDo = tenantService.getTenantByCode(tianGongTenantCode);
+        // 2. 获取租户信息
+        TenantDO tenantDo = tenantService.getTenantByCode(config.getTenantCode());
         if (tenantDo == null) {
-            throw new RuntimeException("天工登录失败: 找不到租户");
+            throw exception(TIAN_GONG_OAUTH2_TENANT_NOT_FOUND);
         }
 
-        if (StringUtils.isBlank(tianGongClientId)
-            || StringUtils.isBlank(tianGongClientSecret)
-            || StringUtils.isBlank(tianGongAccessTokenUrl)
-            || StringUtils.isBlank(tianGongUserInfoUrl)
-            || StringUtils.isBlank(tianGongRedirectUri)) {
-            throw new RuntimeException("天工登录失败: 天工OAuth2配置不完整");
-        }
+//        if (StringUtils.isBlank(deviceId)) {
+//            deviceId = UUID.randomUUID().toString().replace("-", "");
+//        }
 
-        //2.通过code获取access_token
-        // 构建Basic认证头
-        String credentials = tianGongClientId + ":" + tianGongClientSecret;
+        // 3. 通过 code 获取 access_token
+        String accessToken = getTianGongAccessToken(config, code);
+        
+        // 4. 通过 access_token 获取用户信息
+        JSONObject userInfo = getTianGongUserInfo(config, accessToken);
+        
+        // 5. 处理用户信息并登录
+        return processTianGongUserLogin(userInfo, config, deviceId, tenantDo);
+    }
+
+    /**
+     * 获取天工访问令牌
+     */
+    private String getTianGongAccessToken(OAuth2ClientOutConfigDO config, String code) {
+        // 构建 Basic 认证头
+        String credentials = config.getClientId() + ":" + config.getClientSecret();
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
 
         // 构建请求体
         FormBody requestBody = new FormBody.Builder()
             .add("grant_type", "authorization_code")
-            .add("scope", tianGongScope)
+            .add("scope", config.getScope())
             .add("code", code)
-            .add("redirect_uri", tianGongRedirectUri)
+            .add("redirect_uri", config.getRedirectUri())
             .build();
+        
         // 创建请求
         Request request = new Request.Builder()
-            .url(tianGongAccessTokenUrl)
+            .url(config.getAccessTokenUrl())
             .post(requestBody)
-                .addHeader("Authorization", "Basic " + encodedCredentials)
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .build();
+            .addHeader("Authorization", "Basic " + encodedCredentials)
+            .addHeader("Content-Type", "application/x-www-form-urlencoded")
+            .build();
 
         // 发送请求
-        String responseBody = OkHttpClientUtils.sendRequest(request, Boolean.TRUE.equals(tianGongHttpDebugLogEnabled));
+        String responseBody = OkHttpClientUtils.sendRequest(request, Boolean.TRUE.equals(config.getHttpDebugLogEnabled()));
         JSONObject tokenObj = JSONUtil.parseObj(responseBody);
         String accessToken = tokenObj.getStr("access_token");
         if (StringUtils.isBlank(accessToken)) {
-            throw new RuntimeException("天工登录失败: 获取access_token为空, token响应=" + responseBody);
+            throw exception(TIAN_GONG_OAUTH2_ACCESS_TOKEN_EMPTY, responseBody);
         }
-        OAuth2OpenAccessTokenRespVO oAuth2OpenAccessTokenRespVO = new OAuth2OpenAccessTokenRespVO();
-        oAuth2OpenAccessTokenRespVO.setAccessToken(accessToken);
-        oAuth2OpenAccessTokenRespVO.setRefreshToken(tokenObj.getStr("refresh_token"));
-        oAuth2OpenAccessTokenRespVO.setTokenType(tokenObj.getStr("token_type"));
-        oAuth2OpenAccessTokenRespVO.setExpiresIn(tokenObj.getLong("expires_in"));
-        oAuth2OpenAccessTokenRespVO.setScope(tokenObj.getStr("scope"));
-        //3.通过access_token获取用户信息
+        
+        return accessToken;
+    }
+
+    /**
+     * 获取天工用户信息
+     */
+    private JSONObject getTianGongUserInfo(OAuth2ClientOutConfigDO config, String accessToken) {
         // 创建请求
-        Request request1 = new Request.Builder()
-                .url(tianGongUserInfoUrl)
+        Request request = new Request.Builder()
+                .url(config.getUserInfoUrl())
                 .get()
-                .addHeader("Authorization", (oAuth2OpenAccessTokenRespVO.getTokenType() + " " + oAuth2OpenAccessTokenRespVO.getAccessToken()))
+                .addHeader("Authorization", "Bearer " + accessToken)
                 .build();
-        String userInfoResponseBody = OkHttpClientUtils.sendRequest(request1, Boolean.TRUE.equals(tianGongHttpDebugLogEnabled));
+        
+        String userInfoResponseBody = OkHttpClientUtils.sendRequest(request, Boolean.TRUE.equals(config.getHttpDebugLogEnabled()));
+        
         // 解析响应
         JSONObject userObj = JSONUtil.parseObj(userInfoResponseBody);
         Integer status = userObj.getInt("code");
-        if (NumberUtils.INTEGER_ZERO.equals(status)) {
-            JSONObject result = (JSONObject) userObj.get("data");
-            if (result == null) {
-                throw new RuntimeException("天工登录失败: 用户信息为空");
-            }
-            AdminUserDO adminUserDO = JSONUtil.toBean(result, AdminUserDO.class);
-            String phone = (String) result.get("phone");
+        
+        if (!NumberUtils.INTEGER_ZERO.equals(status)) {
+            log.info("获取用户信息失败，msg={}", userObj.get("message"));
+            throw exception(TIAN_GONG_OAUTH2_GET_USER_INFO_FAILED, userObj.get("message"));
+        }
+        
+        JSONObject result = (JSONObject) userObj.get("data");
+        if (result == null) {
+            throw exception(TIAN_GONG_OAUTH2_USER_INFO_EMPTY);
+        }
+        
+        return result;
+    }
 
-            //todo 返回的username与phone为加密字段，需解密后存入数据库，要与天工沟通加密方式
-            if (StrUtil.isNotEmpty(adminUserDO.getUsername())) {
-                adminUserDO.setUsername(AesCfbCryptoUtil.decrypt(adminUserDO.getUsername()));
-            }
-            if (StrUtil.isNotEmpty(phone)){
-                adminUserDO.setMobile(AesCfbCryptoUtil.decrypt(phone));
-            }
+    /**
+     * 处理天工用户登录
+     */
+    private AuthLoginRespVO processTianGongUserLogin(JSONObject userInfo, OAuth2ClientOutConfigDO config, String deviceId, TenantDO tenantDo) {
+        
+        // 构建用户对象
+        AdminUserDO adminUserDO = JSONUtil.toBean(userInfo, AdminUserDO.class);
+        String phone = userInfo.getStr("phone");
 
-            AtomicReference<AuthLoginRespVO> loginRespRef = new AtomicReference<>();
-            TenantUtils.execute(tenantDo.getId(), () -> {
-                //4.保存用户信息
-                AdminUserDO adminUser = userService.updateOrAddUser(adminUserDO);
-                //5.创建Token
-                AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(adminUser.getUserType(), adminUser.getId(), adminUser.getUsername(), deviceId, LoginLogTypeEnum.LOGIN_USERNAME, null);
-                loginRespRef.set(authLoginRespVO);
-            });
-            AuthLoginRespVO authLoginRespVO = loginRespRef.get();
-            if (authLoginRespVO == null) {
-                throw new RuntimeException("天工登录失败: 创建本地登录令牌失败");
-            }
-            return authLoginRespVO;
-        } else {
-            log.info("获取用户信息失败, msg={}", userObj.get("message"));
-            throw new RuntimeException("获取用户信息失败, msg=" + userObj.get("message"));
+        // 解密敏感字段（username 和 phone 为加密字段）
+        decryptSensitiveFields(adminUserDO, phone);
+
+        // 保存用户信息并创建 Token
+        AtomicReference<AuthLoginRespVO> loginRespRef = new AtomicReference<>();
+        TenantUtils.execute(tenantDo.getId(), () -> {
+            // 保存用户信息
+            AdminUserDO adminUser = userService.updateOrAddUser(adminUserDO);
+            // 创建 Token
+            AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(
+                adminUser.getUserType(), 
+                adminUser.getId(), 
+                adminUser.getUsername(), 
+                deviceId, 
+                LoginLogTypeEnum.LOGIN_USERNAME, 
+                null
+            );
+            loginRespRef.set(authLoginRespVO);
+        });
+        
+        AuthLoginRespVO authLoginRespVO = loginRespRef.get();
+        if (authLoginRespVO == null) {
+            throw exception(TIAN_GONG_OAUTH2_CREATE_TOKEN_FAILED);
+        }
+        authLoginRespVO.setRedirectUri(config.getRedirectUri());
+        return authLoginRespVO;
+    }
+
+    /**
+     * 解密敏感字段
+     */
+    private void decryptSensitiveFields(AdminUserDO adminUserDO, String phone) {
+        if (StrUtil.isNotEmpty(adminUserDO.getUsername())) {
+            adminUserDO.setUsername(AesCfbCryptoUtil.decrypt(adminUserDO.getUsername()));
+        }
+        if (StrUtil.isNotEmpty(phone)) {
+            adminUserDO.setMobile(AesCfbCryptoUtil.decrypt(phone));
         }
     }
 
