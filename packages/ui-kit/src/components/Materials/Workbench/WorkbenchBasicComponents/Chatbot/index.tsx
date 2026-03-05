@@ -33,7 +33,8 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
     }
   };
 
-  const iframeUrl = propIframeUrl || config?.iframeUrl;
+  const DEFAULT_URL = 'http://10.11.112.38:9500/bote/#/driver/bot?tenantId=0&botId=1338078781184737280&modeType=single&token=4f0fc76675484ad8a2ab29941debf7f4&pattern=S';
+  const iframeUrl = propIframeUrl || config?.iframeUrl || DEFAULT_URL;
 
   return (
     <>
@@ -71,17 +72,11 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         style={{ width: 800 }}
         className="chatbot-modal"
       >
-        {iframeUrl ? (
-          <iframe
-            src={iframeUrl}
-            style={{ width: '100%', height: iframeHeight, border: 'none' }}
-            title="Chatbot"
-          />
-        ) : (
-          <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>
-            请在配置面板中设置 URL 地址
-          </div>
-        )}
+        <iframe
+          src={iframeUrl}
+          style={{ width: '100%', height: iframeHeight, border: 'none' }}
+          title="Chatbot"
+        />
       </Modal>
     </>
   );
