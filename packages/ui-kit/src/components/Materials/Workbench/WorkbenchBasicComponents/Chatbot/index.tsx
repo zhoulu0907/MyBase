@@ -39,8 +39,8 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
     <>
       <div
         style={{
-          width: 80,
-          height: 80,
+          width: 60,
+          height: 60,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -54,8 +54,8 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
           src={ChatboxIcon}
           alt="聊天助手"
           style={{
-            width: 80,
-            height: 80,
+            width: 60,
+            height: 60,
             objectFit: 'contain'
           }}
         />
