@@ -1,6 +1,7 @@
 import { Modal } from '@arco-design/web-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
+import './index.css';
 
 export interface XChatbotProps {
   config?: {
@@ -13,6 +14,18 @@ export interface XChatbotProps {
 
 const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl: propIframeUrl }) => {
   const [visible, setVisible] = useState(false);
+  const [iframeHeight, setIframeHeight] = useState(200);
+
+  useEffect(() => {
+    const calculateHeight = () => {
+      const bodyHeight = document.body.offsetHeight;
+      setIframeHeight(bodyHeight - 200);
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, []);
 
   const handleClick = () => {
     if (runtime) {
@@ -26,8 +39,8 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
     <>
       <div
         style={{
-          width: 80,
-          height: 80,
+          width: 60,
+          height: 60,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -41,14 +54,14 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
           src={ChatboxIcon}
           alt="聊天助手"
           style={{
-            width: 80,
-            height: 80,
+            width: 60,
+            height: 60,
             objectFit: 'contain'
           }}
         />
       </div>
       <Modal
-        title="聊天助手"
+        title={null}
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
@@ -56,11 +69,12 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         focusLock={true}
         footer={null}
         style={{ width: 800 }}
+        className="chatbot-modal"
       >
         {iframeUrl ? (
           <iframe
             src={iframeUrl}
-            style={{ width: '100%', height: 800, border: 'none' }}
+            style={{ width: '100%', height: iframeHeight, border: 'none' }}
             title="Chatbot"
           />
         ) : (
