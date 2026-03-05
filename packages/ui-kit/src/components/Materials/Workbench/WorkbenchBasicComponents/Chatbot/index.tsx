@@ -69,7 +69,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         autoFocus={false}
         focusLock={true}
         footer={null}
-        style={{ width: 800 }}
+        style={{ width: 800, borderRadius: '10px', overflow: 'hidden' }}
         className="chatbot-modal"
       >
         <iframe
