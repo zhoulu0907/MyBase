@@ -27,8 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
