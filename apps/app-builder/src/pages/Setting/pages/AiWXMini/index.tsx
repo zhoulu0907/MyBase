@@ -1,11 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { loadMicroApp } from 'qiankun';
 import { getAiCopilotURL } from '@onebase/common';
-
+import { generateSignature, TokenManager } from '@onebase/common';
 const AiWXMini: React.FC = () => {
   const containerRef = useRef(null);
   const microAppRef = useRef(null);
   const loadedRef = useRef(false);
+  const tokenInfo = TokenManager.getTokenInfo();
+  const tenantInfo = TokenManager.getTenantInfo();
+
   useEffect(() => {
     if (containerRef.current && !loadedRef.current) {
       loadedRef.current = true;
@@ -15,7 +18,10 @@ const AiWXMini: React.FC = () => {
         container: containerRef.current,
         props: {
           defaultPage: 'wxMini-list',
-          fromMain: true
+          fromMain: true,
+          generateSignature: generateSignature,
+          tokenInfo: tokenInfo,
+          tenantInfo: tenantInfo
         }
       });
     }
