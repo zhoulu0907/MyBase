@@ -2,11 +2,11 @@
 FROM eclipse-temurin:17-jre
 
 ## 创建目录，并使用它作为工作目录
-RUN mkdir -p /onebase-server-platform
-WORKDIR /onebase-server-platform
+RUN mkdir -p /onebase-server-flink
+WORKDIR /onebase-server-flink
 
 ## 将后端项目的 Jar 文件，复制到镜像中
-COPY ./target/onebase-server-platform.jar app.jar
+COPY ./target/onebase-server-flink.jar app.jar
 
 ## 设置 TZ 时区
 ENV TZ=Asia/Shanghai
