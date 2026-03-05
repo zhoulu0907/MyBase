@@ -1,5 +1,5 @@
 import { Modal } from '@arco-design/web-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
 import './index.css';
 
@@ -14,6 +14,18 @@ export interface XChatbotProps {
 
 const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl: propIframeUrl }) => {
   const [visible, setVisible] = useState(false);
+  const [iframeHeight, setIframeHeight] = useState(200);
+
+  useEffect(() => {
+    const calculateHeight = () => {
+      const bodyHeight = document.body.offsetHeight;
+      setIframeHeight(bodyHeight - 200);
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, []);
 
   const handleClick = () => {
     if (runtime) {
@@ -62,7 +74,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         {iframeUrl ? (
           <iframe
             src={iframeUrl}
-            style={{ width: '100%', height: 800, border: 'none' }}
+            style={{ width: '100%', height: iframeHeight, border: 'none' }}
             title="Chatbot"
           />
         ) : (
