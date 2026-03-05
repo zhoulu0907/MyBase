@@ -596,7 +596,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         JSONObject tokenObj = JSONUtil.parseObj(responseBody);
         String accessToken = tokenObj.getStr("access_token");
         if (StringUtils.isBlank(accessToken)) {
-            throw exception(TIAN_GONG_OAUTH2_ACCESS_TOKEN_EMPTY, responseBody);
+            throw exception(TIAN_GONG_OAUTH2_ACCESS_TOKEN_EMPTY);
         }
         
         return accessToken;
@@ -621,7 +621,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         
         if (!NumberUtils.INTEGER_ZERO.equals(status)) {
             log.info("获取用户信息失败，msg={}", userObj.get("message"));
-            throw exception(TIAN_GONG_OAUTH2_GET_USER_INFO_FAILED, userObj.get("message"));
+            throw exception(TIAN_GONG_OAUTH2_GET_USER_INFO_FAILED);
         }
         
         JSONObject result = (JSONObject) userObj.get("data");
@@ -643,6 +643,10 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
         // 解密敏感字段（username 和 phone 为加密字段）
         decryptSensitiveFields(adminUserDO, phone);
+
+        if (StringUtils.isBlank(adminUserDO.getNickname())) {
+            adminUserDO.setNickname(adminUserDO.getUsername());
+        }
 
         // 保存用户信息并创建 Token
         AtomicReference<AuthLoginRespVO> loginRespRef = new AtomicReference<>();
