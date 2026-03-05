@@ -759,6 +759,23 @@ export default function EditorWorkspace() {
                 schema.config.redirectPageId = defaultView?.pageUuid;
               }
 
+              // 卡片 配置【数据绑定】为当前表单绑定实体  表头为前3个自定义字段
+              if(itemType === LIST_COMPONENT_TYPES.CARD){
+                schema.config.tableName = mainEntity.tableName;
+                schema.config.metaData = mainEntity.entityUuid;
+                schema.config.columns = mainEntity.fields
+                  .filter(
+                    (item) => item.isSystemField !== 1 && item.fieldType && !hiddenFieldTypes.includes(item.fieldType)
+                  )
+                  .map((item) => ({
+                    // 保留已有的命名，如果没有则使用字段展示名称
+                    title: item.displayName,
+                    dataIndex: item.fieldName,
+                    disabled: item.disabled,
+                    id: item.id
+                  })).slice(0,3);
+              }
+
               // 主表 字段组件
               if (tableName && fieldName) {
                 // 获取当前字段数据源配置
