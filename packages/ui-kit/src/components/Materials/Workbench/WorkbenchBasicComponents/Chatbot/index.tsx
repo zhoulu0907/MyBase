@@ -1,6 +1,7 @@
 import { Modal } from '@arco-design/web-react';
 import { useState } from 'react';
 import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
+import './index.css';
 
 export interface XChatbotProps {
   config?: {
@@ -48,7 +49,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         />
       </div>
       <Modal
-        title="聊天助手"
+        title={null}
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
@@ -56,6 +57,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         focusLock={true}
         footer={null}
         style={{ width: 800 }}
+        className="chatbot-modal"
       >
         {iframeUrl ? (
           <iframe
