@@ -55,7 +55,4 @@ public class AuthLoginRespVO {
 
     @Schema(description = "登录来源类型")
     private String loginPlatform;
-
-    @Schema(description = "回调地址")
-    private String redirectUri;
 }

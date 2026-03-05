@@ -665,7 +665,6 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         if (authLoginRespVO == null) {
             throw exception(TIAN_GONG_OAUTH2_CREATE_TOKEN_FAILED);
         }
-        authLoginRespVO.setRedirectUri(config.getRedirectUri());
         return authLoginRespVO;
     }
 
