@@ -3,6 +3,7 @@ package com.cmsr.onebase.framework.security.build.config;
 import com.cmsr.onebase.framework.security.build.filter.BuildApplicationContextHeaderFilter;
 import com.cmsr.onebase.framework.security.build.filter.BuildApplicationModificationFilter;
 import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
+import com.cmsr.onebase.framework.security.build.filter.BuildAiBridgeFilter;
 import com.cmsr.onebase.framework.security.config.AuthorizeRequestsCustomizer;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.web.config.WebProperties;
@@ -65,6 +66,9 @@ public class BuildWebSecurityConfigurerAdapter {
 
     @Autowired
     private BuildApplicationModificationFilter applicationModificationFilter;
+
+    @Autowired
+    private BuildAiBridgeFilter aiBridgeFilter;
 
     /**
      * 自定义的权限映射 Bean 们
@@ -144,6 +148,7 @@ public class BuildWebSecurityConfigurerAdapter {
         httpSecurity.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
         httpSecurity.addFilterAfter(applicationContextHeaderFilter, BuildAuthenticationFilter.class);
         httpSecurity.addFilterAfter(applicationModificationFilter, BuildApplicationContextHeaderFilter.class);
+        httpSecurity.addFilterAfter(aiBridgeFilter, BuildApplicationContextHeaderFilter.class);
         return httpSecurity.build();
     }
 
