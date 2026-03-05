@@ -195,7 +195,7 @@ public class TGDashboardController {
         DeviceHazardResVO hazard = new DeviceHazardResVO();
         hazard.setId(id);
         hazard.setProvince(province);
-        hazard.setDeviceName(deviceName);
+        hazard.setHazardName(deviceName);
         hazard.setPredictTime(predictTime);
         return hazard;
     }
