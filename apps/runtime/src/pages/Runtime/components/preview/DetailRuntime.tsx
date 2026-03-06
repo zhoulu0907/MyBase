@@ -42,7 +42,7 @@ const DetailRuntime: React.FC<DetailRuntimeProps> = ({
 
   return (
     <Drawer
-      width={fullScreen ? '98vw' : '60vw'}
+      width={fullScreen ? '98vw' : '80vw'}
       title={
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>详情</div>

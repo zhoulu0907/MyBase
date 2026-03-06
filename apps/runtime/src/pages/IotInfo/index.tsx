@@ -198,7 +198,7 @@ export default function IotInfo() {
   return (
     <div className={styles.iotInfoPage}>
       {/* 设备概览 */}
-      <Card className={styles.deviceOverview}>
+      <Card className={styles.deviceOverview} bordered={false}>
         <Title heading={4} style={{ margin: 0, padding: '16px 0' }}>
           设备概览
         </Title>
@@ -220,7 +220,7 @@ export default function IotInfo() {
       </Card>
 
       {/* 设备运行参数 */}
-      <Card className={styles.deviceParams}>
+      <Card className={styles.deviceParams} bordered={false}>
         <div className={styles.header}>
           <Title heading={4} style={{ margin: 0, padding: '16px 0' }}>
             设备运行参数
@@ -256,8 +256,7 @@ export default function IotInfo() {
         {/* 参数卡片列表 */}
         <div className={styles.paramsGrid}>
           {paginatedParams.map((param) => (
-            <Card key={param.id} bordered={false} hoverable>
-              <div className={styles.paramCard}>
+              <div className={styles.paramCard} >
                 <div className={styles.paramName}>{param.name}</div>
                 <div className={styles.paramValue}>
                   <span
@@ -269,7 +268,6 @@ export default function IotInfo() {
                 </div>
                 <div className={styles.updateTime}>{param.updateTime}</div>
               </div>
-            </Card>
           ))}
         </div>
 
