@@ -85,9 +85,9 @@ public class TGDashboardController {
     @Operation(summary ="获取设备隐患列表")
     public CommonResult<List<DeviceHazardResVO>> getDeviceHazards() {
         List<DeviceHazardResVO> hazardList = List.of(
-                createDeviceHazard(1, "浙江省", "主轴断裂", "2026-02-10"),
-                createDeviceHazard(2, "江苏省", "主轴断裂", "2026-02-10"),
-                createDeviceHazard(3, "山东省", "主轴断裂", "2026-02-10")
+                createDeviceHazard(1, "浙江省", "直连泵1","主轴断裂", "2026-02-10"),
+                createDeviceHazard(2, "江苏省", "直连泵2","主轴断裂", "2026-02-10"),
+                createDeviceHazard(3, "山东省", "直连泵3","主轴断裂", "2026-02-10")
         );
         return success(hazardList);
     }
@@ -191,11 +191,12 @@ public class TGDashboardController {
         return item;
     }
     //
-    private DeviceHazardResVO createDeviceHazard(Integer id, String province, String deviceName, String predictTime) {
+    private DeviceHazardResVO createDeviceHazard(Integer id, String province, String deviceName, String hazardName, String predictTime) {
         DeviceHazardResVO hazard = new DeviceHazardResVO();
         hazard.setId(id);
         hazard.setProvince(province);
         hazard.setDeviceName(deviceName);
+        hazard.setHazardName(hazardName);
         hazard.setPredictTime(predictTime);
         return hazard;
     }
