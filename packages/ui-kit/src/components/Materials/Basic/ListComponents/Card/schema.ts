@@ -212,7 +212,7 @@ const XCard: XCardSchema = {
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
-    advancedRowRedirect: false,
+    advancedRowRedirect: true,
     redirectPageId: '',
     redirectMethod: RedirectMethod.DRAWER,
     // 操作按钮
