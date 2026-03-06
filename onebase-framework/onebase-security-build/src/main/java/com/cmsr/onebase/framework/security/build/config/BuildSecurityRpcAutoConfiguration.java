@@ -1,6 +1,8 @@
 package com.cmsr.onebase.framework.security.build.config;
 
 import com.cmsr.onebase.framework.security.core.rpc.LoginUserRequestInterceptor;
+import com.cmsr.onebase.framework.security.build.config.AiBridgeProperties;
+import com.cmsr.onebase.framework.security.build.rpc.AiBridgeRequestInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -16,6 +18,11 @@ public class BuildSecurityRpcAutoConfiguration {
     @Bean
     public LoginUserRequestInterceptor loginUserRequestInterceptor() {
         return new LoginUserRequestInterceptor();
+    }
+
+    @Bean
+    public AiBridgeRequestInterceptor aiBridgeRequestInterceptor(AiBridgeProperties properties) {
+        return new AiBridgeRequestInterceptor(properties);
     }
 
 }
