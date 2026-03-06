@@ -77,7 +77,6 @@ const COMPONENT_TYPE = {
   IMG_UPLOAD: 'XImgUpload',
   AUTO_CODE: 'XAutoCode',
   RELATED_FORM: 'XRelatedForm',
-  STATIC_TEXT: 'XStaticText',
   RICH_TEXT: 'XRichText',
   CAROUSEL_FORM: 'XCarouselForm',
   SUB_TABLE: 'XSubTable',
@@ -188,14 +187,6 @@ const BASIC_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescripto
     entityMap: [
       ENTITY_FIELD_TYPE.LONG_TEXT.VALUE
     ]
-  },
-  [COMPONENT_TYPE.STATIC_TEXT]: {
-    type: COMPONENT_TYPE.STATIC_TEXT,
-    schema: cloneDeep(BasicSchema.XStaticText),
-    validate: BaseValidate.XStaticText,
-    template: { h: 36, w: 118, displayName: '静态文本', icon: 'static_text_cp.svg', category: 'form' },
-    fieldMap: [],
-    entityMap: []
   },
   [COMPONENT_TYPE.RICH_TEXT]: {
     type: COMPONENT_TYPE.RICH_TEXT,

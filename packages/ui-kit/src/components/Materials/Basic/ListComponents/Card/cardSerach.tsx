@@ -244,16 +244,6 @@ const CardSearch = memo((props: CardSearchConfig) => {
             detailMode={detailMode}
           />
         );
-      case FORM_COMPONENT_TYPES.STATIC_TEXT:
-        return (
-          <FormComp.XStaticText
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
       case FORM_COMPONENT_TYPES.DATA_SELECT:
         return (
           <FormComp.XDataSelect
