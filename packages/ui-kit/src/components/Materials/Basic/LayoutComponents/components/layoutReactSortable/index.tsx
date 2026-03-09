@@ -151,6 +151,10 @@ const LayoutReactSortable: React.FC<LayoutReactSortableProps> = ({
           disabled: item.disabled,
           id: item.id
         })).slice(0, 3);
+      const defaultView = (Object.values(pageViews.value) as PageView[]).find(
+        (item: PageView) => item.isDefaultDetailViewMode
+      );
+      schema.config.redirectPageId = defaultView?.pageUuid;
     }
 
     // 主表 字段组件

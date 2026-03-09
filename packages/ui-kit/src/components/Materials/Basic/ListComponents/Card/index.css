@@ -35,9 +35,9 @@
 .cardContent {
   .cardItem {
     position: relative;
-    
+
     &:hover {
-      .cardExtra{
+      .cardExtra {
         display: block;
       }
     }
@@ -48,6 +48,14 @@
       border: 1px solid #E5E6EB;
       overflow: hidden;
       cursor: pointer;
+
+      .pc-card-body {
+        color: #1D2129;
+      }
+
+      .pc-form-label-item>label {
+        color: #86909C;
+      }
     }
 
     .cardExtra {

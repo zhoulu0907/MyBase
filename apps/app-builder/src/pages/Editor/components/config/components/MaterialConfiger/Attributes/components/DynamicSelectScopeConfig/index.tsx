@@ -135,7 +135,7 @@ const DynamicSelectScopeConfig: React.FC<DynamicSelectScopeConfigProps> = ({
         onUpdateSelectedMembers={handleUpdateSelectedDepts}
         onCancel={() => {
           setDeptsVisible(false);
-          setSelectedDepts([]);
+          // setSelectedDepts([]);
         }}
       />
     </>
