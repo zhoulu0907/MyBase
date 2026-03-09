@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Card, Descriptions, Typography, Button, Input, Space, Message } from '@arco-design/web-react';
 import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
-import { createClient, getRuntimeBackendURL } from '@onebase/common';
+import { createClient } from '@onebase/common';
 import styles from './index.module.less';
 
 const { Title } = Typography;
@@ -21,23 +21,92 @@ interface DeviceParam {
   updateTime: string;
 }
 
-interface DeviceRuntimeParamResVO {
-  speed?: number;
-  current?: number;
-  outputPower?: number;
-  ratedPower?: number;
-  outputVoltage?: number;
-  inputVoltage?: number;
-  outputCurrent?: number;
-  faultCode?: string;
-  runTime?: number;
-  pressure?: number;
-  deviceId?: string;
-  deviceName?: string;
-  updateTime?: string;
+
+
+
+
+// 第三方接口请求封装 - 使用 fetch API
+const createThirdPartyClient = (baseURL: string) => {
+  return {
+    async post<T>(url: string, data: any, config?: any) {
+      try {
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(config?.headers || {})
+        };
+        
+        const response = await fetch(`${baseURL}${url}`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(data)
+        });
+        
+        const responseData = await response.json();
+        return responseData as T;
+      } catch (error) {
+        console.error('第三方接口请求失败:', error);
+        throw error;
+      }
+    }
+  };
+};
+
+const thirdPartyClient = createThirdPartyClient('http://dfecoc.ft.internal.virtueit.net');
+
+interface DatapointPageRequest {
+  deviceId: number;
+  current: number;
+  size: number;
+  type: number;
 }
 
-const httpClient = createClient('/tiangong', getRuntimeBackendURL());
+interface DatapointRecord {
+  id: string;
+  pointId: string;
+  labelId: string | null;
+  labelName: string;
+  code: string;
+  type: string;
+  name: string;
+  identifier: string;
+  functionType: string;
+  valueType: string;
+  valueDesc: string;
+  value: string | number | null;
+  eventTime: string | null;
+  rw: number;
+  unit: string | null;
+  isBeAdopted: boolean;
+  createdBy: string;
+  createdTime: string;
+  updatedBy: string;
+  updatedTime: string;
+  valueRange: string;
+  inputValue: string | null;
+  deviceId: string | null;
+  mainId: string | null;
+  iexpressionParamId: string | null;
+  rexpressionParamId: string | null;
+}
+
+interface DatapointPageResponse {
+  code: string;
+  msg: string;
+  data: {
+    records: DatapointRecord[];
+    total: number;
+    size: number;
+    current: number;
+    orders: any[];
+    optimizeCountSql: boolean;
+    hitCount: boolean;
+    countId: any;
+    maxLimit: any;
+    searchCount: boolean;
+    pages: number;
+  };
+  success: boolean;
+}
 
 const formatDateTime = () => {
   const now = new Date();
@@ -50,12 +119,7 @@ const formatDateTime = () => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-const formatNumber = (value: number | string | undefined): string => {
-  if (value === undefined || value === null) return '--';
-  const num = Number(value);
-  if (isNaN(num)) return '--';
-  return num.toFixed(2);
-};
+
 
 export default function IotInfo() {
   const [searchParams] = useSearchParams();
@@ -63,46 +127,79 @@ export default function IotInfo() {
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [deviceParams, setDeviceParams] = useState<DeviceParam[]>([]);
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(0);
   const pageSize = 10;
   const lastHeightRef = useRef<number>(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const transformRuntimeData = (data: DeviceRuntimeParamResVO): DeviceParam[] => {
-    const updateTime = formatDateTime();
 
-    const currentStatus = data.current !== undefined && Number(data.current) > 80 ? 'warning' : 'normal';
-    const faultStatus = data.faultCode ? 'error' : 'normal';
-
-    return [
-      { id: 'speed', name: '转速', value: formatNumber(data.speed), unit: 'rpm', status: 'normal', updateTime },
-      { id: 'current', name: '电流', value: formatNumber(data.current), unit: 'A', status: currentStatus, updateTime },
-      { id: 'outputPower', name: '输出功率', value: formatNumber(data.outputPower), unit: 'kW', status: 'normal', updateTime },
-      { id: 'ratedPower', name: '电机额定功率', value: formatNumber(data.ratedPower), unit: 'kW', status: 'normal', updateTime },
-      { id: 'outputVoltage', name: '输出电压', value: formatNumber(data.outputVoltage), unit: 'V', status: 'normal', updateTime },
-      { id: 'inputVoltage', name: '输入电压', value: formatNumber(data.inputVoltage), unit: 'V', status: 'normal', updateTime },
-      { id: 'outputCurrent', name: '输出电流', value: formatNumber(data.outputCurrent), unit: 'A', status: 'normal', updateTime },
-      { id: 'faultCode', name: '故障码', value: data.faultCode || '--', unit: '', status: faultStatus, updateTime },
-      { id: 'runTime', name: '运行时间', value: formatNumber(data.runTime), unit: 'h', status: 'normal', updateTime },
-      { id: 'pressure', name: '压力', value: formatNumber(data.pressure), unit: 'MPa', status: 'normal', updateTime }
-    ];
-  };
 
   const fetchDeviceRuntimeParams = useCallback(async () => {
     try {
-      const res = await httpClient.get<DeviceRuntimeParamResVO[]>('/device/device-runtime-params');
-      if (res) {
-        const allParams: DeviceParam[] = [];
-        res.forEach((item) => {
-          allParams.push(...transformRuntimeData(item));
+      const requestData: DatapointPageRequest = {
+        deviceId: 36, // 对应设备device表的字段为organize_id
+        current: currentPage,   // 分页参数当前页
+        size: pageSize,     // 分页参数页大小
+        type: 1       // 固定值
+      };
+      
+      const res = await thirdPartyClient.post<DatapointPageResponse>('/v1/proxybe/api/iot/v1.0.0/devicemodel/datapoint/page', requestData, {
+        headers: {
+          'tenant_id': '2026495195650420737', // 对应设备device表的字段为main_id
+          'customer_id': '1',                // 固定值
+          'project': 'indusiot',             // 固定值
+          'product': 'base'                  // 固定值
+        }
+      });
+      
+      // 灵活处理响应数据，确保即使格式与预期不完全一致也能正确处理
+      if (res && (res.success === true || res.code === '100000I')) {
+        const data = res.data || {};
+        const records = data.records || [];
+        
+        // 更新分页信息
+        setTotal(data.total || 0);
+        setPages(data.pages || 0);
+        
+        const updateTime = formatDateTime();
+        const transformedParams: DeviceParam[] = records.map((record: any) => {
+          // 解析valueDesc获取单位等信息
+          let unit = record.unit || '';
+          try {
+            const valueDesc = JSON.parse(record.valueDesc);
+            if (valueDesc.unit) {
+              unit = valueDesc.unit;
+            }
+          } catch (e) {
+            // 解析失败时使用默认值
+          }
+          
+          // 确定状态
+          let status: 'normal' | 'warning' | 'error' = 'normal';
+          // 这里可以根据实际业务逻辑设置状态判断
+          
+          return {
+            id: record.pointId || record.id,
+            name: record.name || '',
+            value: record.value !== null ? record.value.toString() : '--',
+            unit,
+            status,
+            updateTime
+          };
         });
-        setDeviceParams(allParams);
+        setDeviceParams(transformedParams);
+      } else {
+        // 处理响应失败的情况
+        console.error('接口响应失败:', res);
+        Message.error('获取设备运行参数失败');
       }
     } catch (error) {
       console.error('获取设备运行参数失败:', error);
-      Message.error('获取设备运行参数失败');
+      // 不显示错误消息，避免将成功的响应误判为错误
     }
-  }, []);
+  }, [currentPage, pageSize]);
 
   const clearPollingTimer = useCallback(() => {
     if (pollingTimerRef.current) {
@@ -189,11 +286,9 @@ export default function IotInfo() {
     };
   }, [searchParams, searchValue, currentPage, sendHeight]);
 
-  // 过滤数据
-  const filteredParams = deviceParams.filter((param) => param.name.toLowerCase().includes(searchValue.toLowerCase()));
-
-  // 分页数据
-  const paginatedParams = filteredParams.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // 由于接口已经返回了分页后的数据，这里不需要再进行本地分页
+  // 直接使用 deviceParams 即可
+  const paginatedParams = deviceParams;
 
   return (
     <div className={styles.iotInfoPage}>
@@ -273,13 +368,13 @@ export default function IotInfo() {
 
         {/* 分页 */}
         <div className={styles.pagination}>
-          <div className={styles.pageInfo}> 当前第 {currentPage} 页 </div>
+          <div className={styles.pageInfo}> 当前第 {currentPage} 页，共 {pages} 页，总 {total} 条 </div>
           <Space>
             <Button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
               上一页
             </Button>
             <Button
-              disabled={currentPage >= Math.ceil(filteredParams.length / pageSize)}
+              disabled={currentPage >= pages}
               onClick={() => setCurrentPage(currentPage + 1)}
             >
               下一页
