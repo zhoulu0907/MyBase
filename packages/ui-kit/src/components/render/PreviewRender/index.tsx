@@ -122,9 +122,14 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
   // 基于视图规则渲染
 
   const renderComponent = useCallback(() => {
-    const descriptor = getComponentDescriptor(cpType as any);
+    let descriptor: any;
+    try {
+      descriptor = getComponentDescriptor(cpType as any);
+    } catch {
+      descriptor = undefined;
+    }
     const Impl: any = getComponentImpl(cpType as any, runtime) ?? (WORKBENCH_COMPONENT_MAP as any)[cpType];
-    if (!Impl) return <div>未知组件类型: {cpType}</div>;
+    if (!Impl) return null;
 
     // 预览状态下首行tooltip位置控制
     const previewTooltipPosition = preview ? tooltipPosition : 'top';
@@ -152,6 +157,7 @@ const PreviewRender: React.FC<PreviewRenderProps> = ({
         baseProps.preview = preview;
       }
     } else {
+      if (isPluginComponentType(cpType)) return null;
       baseProps.runtime = runtime;
       baseProps.detailMode = detailMode;
       baseProps.preview = preview;

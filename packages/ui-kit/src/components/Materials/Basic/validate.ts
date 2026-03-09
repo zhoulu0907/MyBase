@@ -17,7 +17,6 @@ import XRelatedFormValidate from './FormComponents/RelatedForm/validate';
 import XRichTextValidate from './FormComponents/RichTextEditor/validate';
 import XSelectMutipleValidate from './FormComponents/SelectMutiple/validate';
 import XSelectOneValidate from './FormComponents/SelectOne/validate';
-import XStaticTextValidate from './FormComponents/StaticText/validate';
 import XSubTableValidate from './FormComponents/SubTable/validate';
 import XSwitchValidate from './FormComponents/Switch/validate';
 import XTimePickerValidate from './FormComponents/TimePicker/validate';
@@ -70,7 +69,6 @@ export const baseValidate = {
   XFileUpload: XFileUploadValidate,
   XImgUpload: XImgUploadValidate,
   XRelatedForm: XRelatedFormValidate,
-  XStaticText: XStaticTextValidate,
   XRichText: XRichTextValidate,
   XSubTable: XSubTableValidate,
   XDataSelect: XDataSelectValidate,

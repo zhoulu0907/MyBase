@@ -276,7 +276,7 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
     }
 
     return (
-      <Popover position='rt' trigger='hover' className='operate-popover' content={
+      <Popover position='rt' trigger={['hover', 'click']} className='operate-popover' content={
         <>
           {canEdit.value && (
             <div
@@ -318,7 +318,7 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
           )}
         </>
       }>
-        <div className='operate-more-btn' >
+        <div className='operate-more-btn' onClick={(e) => e.stopPropagation()}>
           <IconMoreVertical />
         </div>
       </Popover>

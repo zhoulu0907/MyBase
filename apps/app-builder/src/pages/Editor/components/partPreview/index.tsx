@@ -13,6 +13,12 @@ import {
   useWorkbenchEditorSignal,
   type GridItem
 } from '@onebase/ui-kit';
+
+const FLOATING_COMPONENT_TYPES = ['XChatbot'];
+
+const isFloatingComponent = (type: string): boolean => {
+  return FLOATING_COMPONENT_TYPES.includes(type);
+};
 import classNames from 'classnames';
 import { initGlobalState, loadMicroApp, type MicroApp } from 'qiankun';
 
@@ -204,29 +210,68 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
             (editMode.value === EditMode.MOBILE ? (
               <div id="mobile-editor-preview-list" style={{ width: '100%' }}></div>
             ) : (
-              listComponents.value.map((cp: GridItem) => (
-                <Fragment key={cp.id}>
-                  {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                    <div
-                      key={cp.id}
-                      className={styles.componentItem}
-                      style={{
-                        width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                        margin: '4px'
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={listPageComponentSchemas.value[cp.id]}
-                        runtime={true}
-                        pageType={pageType}
-                        preview={true}
-                      />
-                    </div>
-                  )}
-                </Fragment>
-              ))
+              <>
+                {/* 浮动组件 */}
+                {listComponents.value
+                  .filter((cp: GridItem) => isFloatingComponent(cp.type))
+                  .map((cp: GridItem) => {
+                    const floatingConfig = listPageComponentSchemas.value[cp.id]?.config?.floatingConfig;
+                    const right = floatingConfig?.right ?? 80;
+                    const bottom = floatingConfig?.bottom ?? 80;
+                    const width = floatingConfig?.width ?? 80;
+                    const height = floatingConfig?.height ?? 80;
+
+                    return (
+                      <div
+                        key={cp.id}
+                        style={{
+                          position: 'fixed',
+                          right,
+                          bottom,
+                          width,
+                          height,
+                          zIndex: 100
+                        }}
+                      >
+                        <PreviewRender
+                          cpId={cp.id}
+                          cpType={cp.type}
+                          pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                          runtime={true}
+                          pageType={pageType}
+                          preview={true}
+                        />
+                      </div>
+                    );
+                  })}
+
+                {/* 普通组件 */}
+                {listComponents.value
+                  .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+                  .map((cp: GridItem) => (
+                    <Fragment key={cp.id}>
+                      {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <div
+                          key={cp.id}
+                          className={styles.componentItem}
+                          style={{
+                            width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                            margin: '4px'
+                          }}
+                        >
+                          <PreviewRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                            runtime={true}
+                            pageType={pageType}
+                            preview={true}
+                          />
+                        </div>
+                      )}
+                    </Fragment>
+                  ))}
+              </>
             ))}
 
           {pageType == EDITOR_TYPES.FORM_EDITOR && (
@@ -250,16 +295,27 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
           {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
             <div className={styles.fromContain}>
               <div className={styles.previewForm}>
-                <Form form={form} layout="inline">
-                  {workbenchComponents.value.map((cp: GridItem) => (
-                    <Fragment key={cp.id}>
-                      {wbComponentSchemas?.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                <>
+                  {/* 浮动组件 */}
+                  {workbenchComponents.value
+                    .filter((cp: GridItem) => isFloatingComponent(cp.type))
+                    .map((cp: GridItem) => {
+                      const floatingConfig = wbComponentSchemas.value[cp.id]?.config?.floatingConfig;
+                      const right = floatingConfig?.right ?? 80;
+                      const bottom = floatingConfig?.bottom ?? 80;
+                      const width = floatingConfig?.width ?? 80;
+                      const height = floatingConfig?.height ?? 80;
+
+                      return (
                         <div
                           key={cp.id}
-                          className={styles.componentItem}
                           style={{
-                            width: `calc(${getWorkbenchComponentWidth(wbComponentSchemas.value[cp.id], cp.type)} - 8px)`,
-                            margin: '8px'
+                            position: 'fixed',
+                            right,
+                            bottom,
+                            width,
+                            height,
+                            zIndex: 100
                           }}
                         >
                           <PreviewRender
@@ -270,10 +326,37 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
                             preview={true}
                           />
                         </div>
-                      )}
-                    </Fragment>
-                  ))}
-                </Form>
+                      );
+                    })}
+
+                  {/* 普通组件 */}
+                  <Form form={form} layout="inline">
+                    {workbenchComponents.value
+                      .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+                      .map((cp: GridItem) => (
+                        <Fragment key={cp.id}>
+                          {wbComponentSchemas?.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                            <div
+                              key={cp.id}
+                              className={styles.componentItem}
+                              style={{
+                                width: `calc(${getWorkbenchComponentWidth(wbComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                                margin: '8px'
+                              }}
+                            >
+                              <PreviewRender
+                                cpId={cp.id}
+                                cpType={cp.type}
+                                pageComponentSchema={wbComponentSchemas.value[cp.id]}
+                                runtime={true}
+                                preview={true}
+                              />
+                            </div>
+                          )}
+                        </Fragment>
+                      ))}
+                  </Form>
+                </>
               </div>
             </div>
           )}

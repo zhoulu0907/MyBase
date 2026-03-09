@@ -9,6 +9,12 @@ import '../index.css';
 import WangEditor from './editor';
 import type { XRichTextConfig } from './schema';
 
+const RichTextReadonlyDisplay = memo((props: { value?: string; defaultValueHtml?: string }) => {
+  const html =
+    (typeof props.value === 'string' && props.value) || props.defaultValueHtml || '';
+  return <div className="rich-text-readonly" dangerouslySetInnerHTML={{ __html: html }} />;
+});
+
 const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
   const {
     align,
@@ -26,6 +32,8 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
   } = props;
 
   const { form } = Form.useFormContext();
+  const defaultValueHtml =
+    defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '';
 
   const fallbackFieldName = useMemo(() => `${FORM_COMPONENT_TYPES.RICH_TEXT}_${nanoid()}`, []);
   const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : fallbackFieldName;
@@ -73,7 +81,7 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
         }}
       >
         {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
-          <div dangerouslySetInnerHTML={{ __html: defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : '' }}></div>
+          <RichTextReadonlyDisplay defaultValueHtml={defaultValueHtml} />
         ) : (
           <WangEditor
             value={fieldValue}

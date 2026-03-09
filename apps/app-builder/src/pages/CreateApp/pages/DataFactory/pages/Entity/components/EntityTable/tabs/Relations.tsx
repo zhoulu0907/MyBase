@@ -167,9 +167,10 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
               <Menu.Item key="1" onClick={() => handleCreate('master_child')}>
                 添加主子关系
               </Menu.Item>
-              <Menu.Item key="2" onClick={() => handleCreate('relation')}>
+              {/* 暂时隐藏 */}
+              {/* <Menu.Item key="2" onClick={() => handleCreate('relation')}>
                 添加关联关系
-              </Menu.Item>
+              </Menu.Item> */}
             </Menu>
           }
           trigger="hover"

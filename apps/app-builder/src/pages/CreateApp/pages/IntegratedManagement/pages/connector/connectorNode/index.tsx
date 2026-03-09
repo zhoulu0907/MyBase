@@ -140,12 +140,6 @@ const ConnectorPage: React.FC = () => {
           {isSelectMode ? '新建连接器实例' : '连接器类型'}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Input.Search
-            allowClear
-            placeholder="请输入类型名称搜索"
-            style={{ width: 240 }}
-            onChange={handleSearch}
-          />
           {isSelectMode && (
             <Button icon={<IconClose />} shape="circle" type="text" onClick={handleClose} />
           )}
@@ -157,6 +151,14 @@ const ConnectorPage: React.FC = () => {
           activeTab={activeTab}
           onChange={(key) => handleTabChange(key)}
           className={styles.tabsContainer}
+          extra={
+            <Input.Search
+              allowClear
+              placeholder="请输入类型名称搜索"
+              style={{ width: 240 }}
+              onChange={handleSearch}
+            />
+          }
         >
           {CATEGORIES.map(category => (
             <TabPane key={category.key} title={category.label} />

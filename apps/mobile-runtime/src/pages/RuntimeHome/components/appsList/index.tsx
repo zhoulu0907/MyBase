@@ -81,7 +81,7 @@ const AppsList: React.FC<IProps> = ({ treeData, mobileNavLayout, loading }) => {
                 svg.setAttribute('height', '0.48rem');
               }}
             />
-            <Ellipsis text={level + '--' + itemData.menuName} />
+            <Ellipsis text={itemData.menuName} />
           </div>
         }
         value={itemData.key}

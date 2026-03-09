@@ -10,7 +10,8 @@ import {
   type ConnectInstance,
   type ListConnectInstanceReq,
   type ListScriptActionReq,
-  type ScriptActionItem
+  type ScriptActionItem,
+  TypeCode
 } from '@onebase/app';
 import { getCommonPaginationList, getHashQueryParam } from '@onebase/common';
 import { useCallback, useEffect, useState } from 'react';
@@ -54,10 +55,10 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
   }, []);
 
   useEffect(() => {
-    if (selectedInstanceId) {
+    if (currentStep === 1 && !onSwap && selectedInstanceId) {
       handleGetScriptActionList(selectedInstanceId);
     }
-  }, [selectedInstanceId]);
+  }, [selectedInstanceId, pageNo, pageSize, currentStep, onSwap]);
 
   // 初始化时，如果已有 selectedActionId，立即获取 inputParameter
   useEffect(() => {
@@ -71,7 +72,8 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
     const req: ListConnectInstanceReq = {
       applicationId: curAppId || '',
       pageNo: pageNo,
-      pageSize: pageSize || 8
+      pageSize: pageSize || 8,
+      level1Code: TypeCode.SCRIPT
     };
     const res = await getCommonPaginationList(
       (param) => listConnectInstance(param as ListConnectInstanceReq),

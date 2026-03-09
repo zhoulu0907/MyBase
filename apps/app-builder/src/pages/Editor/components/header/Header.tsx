@@ -277,8 +277,8 @@ export default function EditorHeader() {
       haveDefault = innerHaveDefault;
     });
 
-    if(!haveDefault){
-       errorMsgList.push({ nodeName: '条件分支', errorMsg: '未设置默认分支' });
+    if (!haveDefault && conditionalBranch.length) {
+      errorMsgList.push({ nodeName: '条件分支', errorMsg: '未设置默认分支' });
     }
 
     if (errorMsgList.length) {

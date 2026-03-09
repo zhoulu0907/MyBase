@@ -266,9 +266,10 @@ const EntityNodeComponent: React.FC<X6NodeProps> = ({ node }) => {
               <Button type="text" onClick={handleAddMasterDetail}>
                 添加主子关系
               </Button>
-              <Button type="text" onClick={handleAddRelation}>
+              {/* 暂时隐藏 */}
+              {/* <Button type="text" onClick={handleAddRelation}>
                 添加关联关系
-              </Button>
+              </Button> */}
             </Space>
           }
           className={styles.relationPopover}

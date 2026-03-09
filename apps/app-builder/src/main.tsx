@@ -2,7 +2,7 @@ import '@arco-design/web-react/dist/css/arco.css';
 import '@arco-themes/react-tiangong/index.less';
 
 import { ConfigProvider } from '@arco-design/web-react';
-import { ErrorPage, getAiGenURL, TokenManager } from '@onebase/common';
+import { ErrorPage, getAiGenURL, TokenManager, generateSignature } from '@onebase/common';
 import { loadTheme } from '@onebase/ui-kit/src/utils/theme';
 import { registerMicroApps, start } from 'qiankun';
 import { StrictMode } from 'react';
@@ -12,13 +12,19 @@ import App from './App.tsx';
 import './i18n';
 import './index.css';
 import { initPlugins } from './plugin';
-
+const tokenInfo = TokenManager.getTokenInfo();
+const tenantInfo = TokenManager.getTenantInfo();
 registerMicroApps([
   {
     name: 'chat',
     entry: getAiGenURL(),
     container: '#ai-genapp-container',
-    activeRule: (location) => location.hash.startsWith('#/aigen')
+    activeRule: (location) => location.hash.startsWith('#/aigen'),
+    props: {
+      generateSignature: generateSignature,
+      tokenInfo: tokenInfo,
+      tenantInfo: tenantInfo
+    }
   }
 ]);
 

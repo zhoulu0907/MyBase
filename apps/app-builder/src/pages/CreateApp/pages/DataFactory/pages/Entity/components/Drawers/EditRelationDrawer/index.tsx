@@ -253,8 +253,8 @@ const EditRelationDrawer: React.FC<EditRelationDrawerProps> = ({ visible, setVis
                   options.unshift({ label: currentLabel, value: currentValue, disabled: true });
                 }
               }
-
-              return <Select placeholder="请选择关联关系" options={options} allowClear />;
+              // 2026.3.5 禁用
+              return <Select placeholder="请选择关联关系" options={options} allowClear disabled />;
             }}
           </Form.Item>
 
