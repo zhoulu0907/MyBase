@@ -9,6 +9,7 @@ interface IProps {
   editModalVisible: boolean;
   setEditModalVisible: any;
   appData: Application;
+  onUpdate?: () => void;
 }
 
 const EditAppModal = (props: IProps) => {
@@ -40,6 +41,7 @@ const EditAppModal = (props: IProps) => {
             appName: appName || '--'
           });
         }
+        props.onUpdate?.();
         setEditModalVisible(false);
       } catch (_error) {
         console.error('保存失败 _error:', _error);
