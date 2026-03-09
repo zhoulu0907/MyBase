@@ -77,7 +77,7 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       const newValue = configs[defaultValueConfigKey].customValue === true ? 'true' : 'false';
       setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey], customValue: newValue }));
     } else {
-      setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+      setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey], customValue: configs[defaultValueConfigKey]?.customValue || '' }));
     }
   }, [configs[defaultValueConfigKey]]);
 
