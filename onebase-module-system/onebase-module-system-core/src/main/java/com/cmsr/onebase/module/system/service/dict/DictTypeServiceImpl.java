@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.system.service.dict;
 
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
@@ -65,9 +67,20 @@ public class DictTypeServiceImpl implements DictTypeService {
             dictType.setDictOwnerType(DictOwnerTypeEnum.TENANT.getType());
         }
 
-        // 校验字典类型的名字的唯一性（同一所有者范围内）
-        validateDictTypeNameUnique(null, createReqVO.getName(), dictType.getDictOwnerType(), dictType.getDictOwnerId());
-        // 校验字典类型的类型的唯一性（同一所有者范围内）
+        if (dictType.getDictOwnerId() == null) {
+            if(DictOwnerTypeEnum.GLOBAL.getType().equalsIgnoreCase(dictType.getDictOwnerType())){
+                dictType.setDictOwnerId(DictOwnerTypeEnum.TYPE_GLOBAL_DEFAULT_ID);
+            } else if (DictOwnerTypeEnum.TENANT.getType().equalsIgnoreCase(dictType.getDictOwnerType())) {
+                dictType.setDictOwnerId(TenantContextHolder.getTenantId());
+            } else if (DictOwnerTypeEnum.APP.getType().equalsIgnoreCase(dictType.getDictOwnerType())) {
+                dictType.setDictOwnerId(ApplicationManager.getApplicationId());
+            }
+        }
+
+        // 校验字典类型的名字的唯一性（同一所有者范围内）不需要
+        // validateDictTypeNameUnique(null, createReqVO.getName(), dictType.getDictOwnerType(), dictType.getDictOwnerId());
+
+        // 校验字典类型的类型的唯一性（同一所有者范围内） 校验getDictOwnerType/getDictOwnerId/type联合唯一
         validateDictTypeUnique(null, createReqVO.getType(), dictType.getDictOwnerType(), dictType.getDictOwnerId());
 
         dictType.setDeletedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())); // 唯一索引，避免
@@ -85,8 +98,8 @@ public class DictTypeServiceImpl implements DictTypeService {
         DictTypeDO updateObj = BeanUtils.toBean(updateReqVO, DictTypeDO.class);
         
         // 校验字典类型的名字的唯一性（使用现有的所有者信息）
-        validateDictTypeNameUnique(updateReqVO.getId(), updateReqVO.getName(), 
-                existingDictType.getDictOwnerType(), existingDictType.getDictOwnerId());
+        // validateDictTypeNameUnique(updateReqVO.getId(), updateReqVO.getName(),
+        //         existingDictType.getDictOwnerType(), existingDictType.getDictOwnerId());
         // 校验字典类型的类型的唯一性（使用现有的所有者信息）
         validateDictTypeUnique(updateReqVO.getId(), updateReqVO.getType(), 
                 existingDictType.getDictOwnerType(), existingDictType.getDictOwnerId());
