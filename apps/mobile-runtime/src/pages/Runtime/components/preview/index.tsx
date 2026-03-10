@@ -43,11 +43,12 @@ import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
 import { startLoadPageSet, useEditorSignalMap, useListEditorSignal } from '@onebase/ui-kit';
 import { PreviewRender, CustomNav } from '@onebase/ui-kit-mobile';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import styles from './index.module.less';
 import EditRuntime from './EditRuntime';
 import { normalizeFormValues } from '@/utils';
 import FlowPredict from './flowPredict';
+import EmptySVG from '@/assets/images/empty.svg';
 
 interface PreviewProps {
   menuId: string;
@@ -115,6 +116,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
   const [draftLoading, setDraftLoading] = useState<boolean>(false);
 
+  const [listLoading, setListLoading] = useState(false);
+  const listLoadSeqRef = useRef(0);
+
   // 当前时间戳
   const [detailMode, setDetailMode] = useState(true);
   const [userSelectData, setUserSelectData] = useState<any[]>([]); // 人员选择数据
@@ -170,6 +174,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({
 
   useEffect(() => {
     if (menuId) {
+      // 切换 menuId 时先进入加载态，避免空态/旧数据闪烁
+      setListLoading(true);
+      listLoadSeqRef.current += 1;
       handleGetPageSetId(menuId);
       setEditTargetId('');
       resetFlows();
@@ -185,13 +192,30 @@ const PreviewContainer: React.FC<PreviewProps> = ({
 
   useEffect(() => {
     if (pageSetId) {
-      // 工作台页面使用专门的加载方法，不获取主表数据
-      if (pageSetType === PageType.WORKBENCH) {
-        startLoadWorkbenchPageSet({ pageSetId });
-      } else {
-        loadPageSetInfo(pageSetId);
-        getMainMetaData(pageSetId);
-      }
+      const currentSeq = listLoadSeqRef.current;
+      const loadData = async () => {
+        setListLoading(true);
+        try {
+          // 工作台页面使用专门的加载方法，不获取主表数据
+          if (pageSetType === PageType.WORKBENCH) {
+            await startLoadWorkbenchPageSet({ pageSetId });
+          } else {
+            await Promise.all([loadPageSetInfo(pageSetId), getMainMetaData(pageSetId)]);
+          }
+        } catch (e) {
+          console.error('加载页面集失败: ', e);
+        } finally {
+          // 避免并发/快速切换时旧请求覆盖新状态
+          if (currentSeq !== listLoadSeqRef.current) return;
+          // signals 更新可能是异步批量更新，延迟一小段时间避免瞬间空态闪烁
+          setTimeout(() => {
+            if (currentSeq === listLoadSeqRef.current) {
+              setListLoading(false);
+            }
+          }, 100);
+        }
+      };
+      loadData();
     }
     // 优先切换到列表页
     setPageType(pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
@@ -204,7 +228,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({
   };
 
   const loadPageSetInfo = async (pageSetId: string) => {
-    startLoadPageSet({ pageSetId: pageSetId, allowViewUuids: menuPermission.value?.viewUuids || [] });
+    await startLoadPageSet({ pageSetId: pageSetId, allowViewUuids: menuPermission.value?.viewUuids || [] });
   };
 
   // 信息收集弹窗
@@ -575,11 +599,11 @@ const PreviewContainer: React.FC<PreviewProps> = ({
         {/* 列表页面渲染 */}
         {pageSetType !== PageType.WORKBENCH &&
           pageType === EDITOR_TYPES.LIST_EDITOR &&
-          (!listComponents.value?.length ? (
+          (listLoading ? (
             <div className={styles.noData}>
-              <Loading type='circle' color='rgb(var(--primary-6))' />
+              <Loading type="circle" color="rgb(var(--primary-6))" />
             </div>
-          ) : (
+          ) : listComponents.value?.length ? (
             listComponents.value.map((cp: GridItem, index: number) => (
               <Fragment key={cp.id}>
                 {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
@@ -603,6 +627,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                 )}
               </Fragment>
             ))
+          ) : (
+            <div className={styles.noData}>
+              <img src={EmptySVG} alt='暂无数据' />
+            </div>
           ))}
 
         {pageSetType !== PageType.WORKBENCH && pageType == EDITOR_TYPES.FORM_EDITOR && (
@@ -648,28 +676,28 @@ const PreviewContainer: React.FC<PreviewProps> = ({
                 <Fragment key={cp.id}>
                   {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
                     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <div
-                        key={cp.id}
-                        className={styles.componentItem}
-                        style={{
-                          width: getComponentWidth(
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                            cp.type
-                          )
-                        }}
-                      >
-                        <PreviewRender
-                          cpId={cp.id}
-                          cpType={cp.type}
-                          pageComponentSchema={
-                            useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                          }
-                          runtime={true}
-                          detailMode={detailMode}
-                          showFromPageData={() => { }}
-                        />
-                      </div>
-                    )}
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        detailMode={detailMode}
+                        showFromPageData={() => {}}
+                      />
+                    </div>
+                  )}
                 </Fragment>
               ))}
 

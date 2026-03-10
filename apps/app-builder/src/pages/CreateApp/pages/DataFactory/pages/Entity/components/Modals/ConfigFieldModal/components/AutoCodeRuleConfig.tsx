@@ -193,6 +193,7 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
             <Input
               value={displayText}
               readOnly
+              tabIndex={-1}
               className={styles.ruleInput}
               suffix={<IconEdit onClick={() => editRule(rule.id || '')} className={styles.editBtn} />}
             />
