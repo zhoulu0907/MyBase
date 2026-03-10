@@ -1,4 +1,4 @@
-import { Button, Form, List, Card, Empty, Message, Tooltip, Popconfirm } from '@arco-design/web-react';
+import { Button, Form, List, Card, Empty, Message, Tooltip, Popconfirm, Spin } from '@arco-design/web-react';
 import { IconPlus, IconRefresh, IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -24,7 +24,14 @@ import { useFormEditorSignal } from 'src/signals/page_editor';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
 import type { XCardConfig } from './schema';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, RedirectMethod, TableOperationButton } from '../../../constants';
+import {
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  RedirectMethod,
+  TableOperationButton
+} from '../../../constants';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import PreviewRender from 'src/components/render/PreviewRender';
 import CardSearch from './cardSerach';
@@ -81,6 +88,7 @@ const XCard = memo(
       columns,
       layout,
       filterCondition,
+      paginationConfig,
       showAddBtn = true,
       searchItems,
       pageSetType,
@@ -99,7 +107,6 @@ const XCard = memo(
     const [cardForm] = Form.useForm();
     // 实际查询用的参数
     let queryData: object = {};
-    let scrollLoad = false;
 
     const [cardData, setCardData] = useState<any[]>([]);
     const [cardTotal, setCardTotal] = useState<number>(0);
@@ -109,15 +116,16 @@ const XCard = memo(
 
     useEffect(() => {
       if (refresh) {
-        handlePage();
+        handlePage(true);
       }
     }, [refresh]);
 
     useEffect(() => {
       if (metaData) {
         getMainMetaData();
-        if(!runtime){
-          setCardData([{},{},{}]);
+        if (!runtime) {
+          setCardData([{}, {}, {}]);
+          setCardTotal(3);
         }
       }
     }, [metaData]);
@@ -126,7 +134,7 @@ const XCard = memo(
       if (metaData) {
         handlePage();
       }
-    }, [cardPageNo, metaData, sortBy]);
+    }, [cardPageNo]);
 
     const getMainMetaData = async () => {
       const res = await getEntityFieldsWithChildren(metaData);
@@ -144,7 +152,6 @@ const XCard = memo(
     // 查询
     const handleSearch = () => {
       setCardPageNo(1);
-      handlePage();
     };
 
     // 重置
@@ -152,10 +159,9 @@ const XCard = memo(
       form.resetFields();
       queryData = {};
       setCardPageNo(1);
-      handlePage();
     };
 
-    const handlePage = async () => {
+    const handlePage = async (reset?: boolean) => {
       if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
@@ -188,7 +194,7 @@ const XCard = memo(
 
       const req: PageMethodV2Params = {
         pageNo: cardPageNo,
-        pageSize: 12,
+        pageSize: paginationConfig?.pageSize || 20,
         filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
       };
       let res: any;
@@ -207,8 +213,8 @@ const XCard = memo(
 
       const { list, total } = res;
 
-      let newCardData = [];
-      for (let item of (list || [])) {
+      let newCardData: any[] = [];
+      for (let item of list || []) {
         const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
@@ -237,7 +243,7 @@ const XCard = memo(
               id: rowId,
               fieldName: coverField,
               fileId: fileId
-            })
+            });
           }
         }
         newCardData.push({
@@ -245,18 +251,22 @@ const XCard = memo(
           ...newItem,
           key: rowId,
           [coverField]: coverFieldValue
-        })
+        });
       }
 
-      cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
-      if (scrollLoad) {
-        setCardData((prev) => prev.concat(...newCardData));
-        setCardTotal(total);
-      } else {
+      if (paginationConfig?.display || reset) {
+        cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
         setCardData(newCardData);
-        setCardTotal(total);
+      } else {
+        setCardData((prev) => {
+          // 去重
+          newCardData = newCardData.filter((ele) => !prev.some((e) => e.id === ele.id));
+          const newData = prev.concat(...newCardData);
+          cardForm.setFieldsValue({ [mainMetaData.tableName]: newData });
+          return newData;
+        });
       }
-      scrollLoad = false;
+      setCardTotal(total);
     };
 
     const getSpan = () => {
@@ -273,9 +283,9 @@ const XCard = memo(
     };
 
     const renderItem = (_record: any, fieldName: string, index: number, isTitle: boolean, column?: any) => {
-      if(!runtime && isTitle){
+      if (!runtime && isTitle) {
         const dataFieldInfo = mainMetaData.parentFields?.find((field: AppEntityField) => field.fieldName === fieldName);
-        return <span>{dataFieldInfo?.displayName || fieldName}</span>
+        return <span>{dataFieldInfo?.displayName || fieldName}</span>;
       }
       const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
       if (!mainMetaData?.parentFields) {
@@ -453,7 +463,23 @@ const XCard = memo(
         Message.success('删除成功');
       }
 
-      handlePage();
+      handlePage(true);
+    };
+
+    const getListClass = () => {
+      if (
+        paginationConfig.display &&
+        (paginationConfig.pagePosition === 'tl' || paginationConfig.pagePosition === 'bl')
+      ) {
+        return 'list-left';
+      }
+      if (
+        paginationConfig.display &&
+        (paginationConfig.pagePosition === 'topCenter' || paginationConfig.pagePosition === 'bottomCenter')
+      ) {
+        return 'list-center';
+      }
+      return 'list-right';
     };
 
     return (
@@ -488,7 +514,7 @@ const XCard = memo(
 
               {/* todo 草稿 */}
             </div>
-            <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
+            <Button type="text" onClick={() => handlePage(true)} icon={<IconRefresh />}></Button>
           </div>
         </div>
         <div className="cardContent">
@@ -496,18 +522,33 @@ const XCard = memo(
           {/* 滚动加载 */}
           <Form
             form={cardForm}
-            className="cardListForm"
+            className={
+              paginationConfig.display &&
+              (paginationConfig.pagePosition === 'tl' ||
+                paginationConfig.pagePosition === 'topCenter' ||
+                paginationConfig.pagePosition === 'tr')
+                ? `cardListForm reverse ${getListClass()}`
+                : `cardListForm ${getListClass()}`
+            }
             labelCol={layout === 'horizontal' ? { span: 10 } : {}}
             wrapperCol={layout === 'horizontal' ? { span: 14 } : {}}
           >
             <List
               bordered={false}
+              className={paginationConfig?.display || !runtime ? 'pageList' : undefined}
               dataSource={cardData}
+              scrollLoading={
+                !paginationConfig.display && cardData.length < Number(cardTotal) ? <Spin loading={true} /> : undefined
+              }
               grid={{ span: getSpan(), gutter: [20, 20] }}
-              noDataElement={<div style={{ padding: '10px 0 20px' }}><Empty /></div>}
+              noDataElement={
+                <div style={{ padding: '10px 0 20px' }}>
+                  <Empty />
+                </div>
+              }
               render={(item, index) => {
                 return (
-                  <div className='cardItem'>
+                  <div className="cardItem">
                     <Card
                       className="card"
                       bordered={false}
@@ -535,7 +576,7 @@ const XCard = memo(
                         }
                       />
                     </Card>
-                    <div className='cardExtra'>
+                    <div className="cardExtra">
                       {operationButton?.map((opearate, index) => (
                         <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
                           {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
@@ -573,8 +614,7 @@ const XCard = memo(
                                   }}
                                   status={'danger'}
                                   icon={<IconDelete />}
-                                >
-                                </Button>
+                                ></Button>
                               </Popconfirm>
                             </div>
                           )}
@@ -582,14 +622,33 @@ const XCard = memo(
                       ))}
                     </div>
                   </div>
-                )
+                );
               }}
-              onReachBottom={(currentPage) => {
-                if (currentPage < cardTotal) {
-                  scrollLoad = true;
-                  setCardPageNo((prev) => prev + 1)
+              style={paginationConfig?.display ? undefined : { maxHeight: 'calc(100vh - 180px)', minHeight: '100px' }}
+              onListScroll={(element) => {
+                if (paginationConfig?.display || cardData.length >= Number(cardTotal)) {
+                  return;
+                }
+                if (element.scrollTop) {
+                  // 小于12+scrollLoading的height(64)
+                  if (element.scrollHeight - element.scrollTop - element.clientHeight <= 76) {
+                    setCardPageNo((prev) => prev + 1);
+                  }
                 }
               }}
+              pagination={
+                paginationConfig?.display
+                  ? {
+                      pageSize: paginationConfig.pageSize,
+                      showTotal: true,
+                      current: cardPageNo,
+                      total: cardTotal,
+                      onChange: (pageNo: number) => {
+                        setCardPageNo(pageNo);
+                      }
+                    }
+                  : false
+              }
             ></List>
           </Form>
         </div>

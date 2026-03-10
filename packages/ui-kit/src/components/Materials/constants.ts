@@ -154,7 +154,9 @@ export const CONFIG_TYPES = {
   // 指标卡样式库
   INDICATOR_CARD_STYLE: 'IndicatorCardStyle',
   // 指标配置
-  INDICATOR_CARD_CONFIG: 'IndicatorCardConfig'
+  INDICATOR_CARD_CONFIG: 'IndicatorCardConfig',
+  // 卡片、画布卡片等 的分页配置
+  PAGINATION_CONFIG: 'PaginationConfig'
 } as const;
 
 // 状态选项常量

@@ -56,6 +56,18 @@
       .pc-form-label-item>label {
         color: #86909C;
       }
+
+      .pc-form-item-control-children {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &>div {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
     }
 
     .cardExtra {
@@ -69,6 +81,10 @@
 
 
   .pc-list {
+    overflow-x: hidden;
+  }
+
+  .pageList .pc-list-content {
     overflow: hidden;
   }
 
@@ -78,9 +94,35 @@
 }
 
 .cardListForm {
+  .pc-list-wrapper {
+    display: flex;
+    flex-direction: column;
+  }
+
   .pc-form-label-item {
     text-align: left;
   }
+}
+
+.cardListForm.reverse .pc-list-wrapper {
+  flex-direction: column-reverse;
+}
+
+.list-left .pc-list-pagination {
+  margin-left: 0;
+}
+
+.list-center .pc-list-pagination {
+  margin: 24px auto 0;
+}
+
+.list-right .pc-list-pagination {
+  margin-left: auto;
+}
+
+.cardListForm.reverse .pc-list-pagination {
+  margin-top: 0;
+  margin-bottom: 12px;
 }
 
 .tableFormItem {
