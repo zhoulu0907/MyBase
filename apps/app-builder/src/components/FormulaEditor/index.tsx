@@ -356,7 +356,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         variablesMapping[nodeName] = nodeId;
       } else {
         fieldId = temp[0] || '';
-        fieldName = temp[1] || '';
+        fieldName = temp.slice(1).join('.') || '';
       }
       variablesMapping[fieldName] = fieldId;
     });
