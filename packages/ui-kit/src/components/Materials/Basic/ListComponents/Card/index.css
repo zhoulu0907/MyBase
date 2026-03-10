@@ -56,6 +56,18 @@
       .pc-form-label-item>label {
         color: #86909C;
       }
+
+      .pc-form-item-control-children {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &>div {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
     }
 
     .cardExtra {
@@ -69,7 +81,7 @@
 
 
   .pc-list {
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   .pc-list-row-col {

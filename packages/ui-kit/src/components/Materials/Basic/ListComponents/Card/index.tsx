@@ -1,4 +1,4 @@
-import { Button, Form, List, Card, Empty, Message, Tooltip, Popconfirm, Pagination } from '@arco-design/web-react';
+import { Button, Form, List, Card, Empty, Message, Tooltip, Popconfirm, Spin } from '@arco-design/web-react';
 import { IconPlus, IconRefresh, IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -107,7 +107,6 @@ const XCard = memo(
     const [cardForm] = Form.useForm();
     // 实际查询用的参数
     let queryData: object = {};
-    let scrollLoad = false;
 
     const [cardData, setCardData] = useState<any[]>([]);
     const [cardTotal, setCardTotal] = useState<number>(0);
@@ -117,7 +116,7 @@ const XCard = memo(
 
     useEffect(() => {
       if (refresh) {
-        handlePage();
+        handlePage(true);
       }
     }, [refresh]);
 
@@ -135,7 +134,7 @@ const XCard = memo(
       if (metaData) {
         handlePage();
       }
-    }, [cardPageNo, metaData, sortBy]);
+    }, [cardPageNo]);
 
     const getMainMetaData = async () => {
       const res = await getEntityFieldsWithChildren(metaData);
@@ -153,7 +152,6 @@ const XCard = memo(
     // 查询
     const handleSearch = () => {
       setCardPageNo(1);
-      handlePage();
     };
 
     // 重置
@@ -161,10 +159,9 @@ const XCard = memo(
       form.resetFields();
       queryData = {};
       setCardPageNo(1);
-      handlePage();
     };
 
-    const handlePage = async () => {
+    const handlePage = async (reset?: boolean) => {
       if (!runtime || !metaData || !isRuntimeEnv()) {
         return;
       }
@@ -216,7 +213,7 @@ const XCard = memo(
 
       const { list, total } = res;
 
-      let newCardData = [];
+      let newCardData: any[] = [];
       for (let item of list || []) {
         const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
@@ -257,19 +254,19 @@ const XCard = memo(
         });
       }
 
-      cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
-      if (scrollLoad) {
-        if (paginationConfig?.display) {
-          setCardData(newCardData);
-        } else {
-          setCardData((prev) => prev.concat(...newCardData));
-        }
-        setCardTotal(total);
-      } else {
+      if (paginationConfig?.display || reset) {
+        cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
         setCardData(newCardData);
-        setCardTotal(total);
+      } else {
+        setCardData((prev) => {
+          // 去重
+          newCardData = newCardData.filter((ele) => !prev.some((e) => e.id === ele.id));
+          const newData = prev.concat(...newCardData);
+          cardForm.setFieldsValue({ [mainMetaData.tableName]: newData });
+          return newData;
+        });
       }
-      scrollLoad = false;
+      setCardTotal(total);
     };
 
     const getSpan = () => {
@@ -466,7 +463,7 @@ const XCard = memo(
         Message.success('删除成功');
       }
 
-      handlePage();
+      handlePage(true);
     };
 
     const getListClass = () => {
@@ -517,7 +514,7 @@ const XCard = memo(
 
               {/* todo 草稿 */}
             </div>
-            <Button type="text" onClick={() => handlePage()} icon={<IconRefresh />}></Button>
+            <Button type="text" onClick={() => handlePage(true)} icon={<IconRefresh />}></Button>
           </div>
         </div>
         <div className="cardContent">
@@ -623,13 +620,16 @@ const XCard = memo(
                   </div>
                 );
               }}
-              onReachBottom={(currentPage) => {
-                if (paginationConfig?.display) {
+              style={paginationConfig?.display ? undefined : { maxHeight: 'calc(100vh - 180px)', minHeight: '100px' }}
+              onListScroll={(element) => {
+                if (paginationConfig?.display || cardData.length >= Number(cardTotal)) {
                   return;
                 }
-                if (currentPage < cardTotal) {
-                  scrollLoad = true;
-                  setCardPageNo((prev) => prev + 1);
+                if (element.scrollTop) {
+                  // 小于12+scrollLoading的height(64)
+                  if (element.scrollHeight - element.scrollTop - element.clientHeight <= 76) {
+                    setCardPageNo((prev) => prev + 1);
+                  }
                 }
               }}
               pagination={
