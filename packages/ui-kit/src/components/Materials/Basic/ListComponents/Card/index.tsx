@@ -535,7 +535,11 @@ const XCard = memo(
           >
             <List
               bordered={false}
+              className={paginationConfig?.display || !runtime ? 'pageList' : undefined}
               dataSource={cardData}
+              scrollLoading={
+                !paginationConfig.display && cardData.length < Number(cardTotal) ? <Spin loading={true} /> : undefined
+              }
               grid={{ span: getSpan(), gutter: [20, 20] }}
               noDataElement={
                 <div style={{ padding: '10px 0 20px' }}>

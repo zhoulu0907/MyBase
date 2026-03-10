@@ -84,6 +84,10 @@
     overflow-x: hidden;
   }
 
+  .pageList .pc-list-content {
+    overflow: hidden;
+  }
+
   .pc-list-row-col {
     box-sizing: border-box;
   }
