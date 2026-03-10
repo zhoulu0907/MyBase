@@ -17,7 +17,6 @@ import XRelatedForm from './FormComponents/RelatedForm/schema';
 import XRichText from './FormComponents/RichTextEditor/schema';
 import XSelectMutiple from './FormComponents/SelectMutiple/schema';
 import XSelectOne from './FormComponents/SelectOne/schema';
-import XStaticText from './FormComponents/StaticText/schema';
 import XSubTable from './FormComponents/SubTable/schema';
 import XSwitch from './FormComponents/Switch/schema';
 import XTimePicker from './FormComponents/TimePicker/schema';
@@ -70,7 +69,6 @@ export const baseSchema = {
   XFileUpload,
   XImgUpload,
   XRelatedForm,
-  XStaticText,
   XRichText,
   XSubTable,
   XDataSelect,

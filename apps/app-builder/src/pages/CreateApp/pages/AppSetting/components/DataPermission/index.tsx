@@ -137,7 +137,7 @@ const DataPermission: FC<IProps> = ({ appId, menuId, roleId, roleType }: IProps)
 
   const normalizeCondition = (c: any) => ({
     fieldId: c?.fieldName == null ? '' : String(c.fieldName),
-    fieldIKey: c?.fieldName == null ? '' : String(c.fieldName),
+    fieldKey: c?.fieldName == null ? '' : String(c.fieldName),
     op: c?.fieldOperator ?? '',
     operatorType: c?.fieldValueType ?? 'value',
     value: c?.fieldValue

@@ -105,14 +105,6 @@ const ConnectorInstancesPage: React.FC = () => {
           className={styles.searchContainer}
           style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}
         >
-          <Input.Search
-            allowClear
-            placeholder="请输入实例名称搜索"
-            style={{ width: 300 }}
-            onSearch={(val) => {
-              setKeyword(val);
-            }}
-          />
           <div style={{ display: 'flex', gap: 8 }}>
             <Select placeholder="全部类型" style={{ width: 120 }} allowClear>
               {/* Options will be populated possibly from API */}
@@ -121,16 +113,24 @@ const ConnectorInstancesPage: React.FC = () => {
               <Select.Option value="enabled">已启用</Select.Option>
               <Select.Option value="disabled">已禁用</Select.Option>
             </Select>
-            <Button type="primary" icon={<IconPlus />} onClick={handleCreateInstance}>
-              创建实例
-            </Button>
+            <Input.Search
+              allowClear
+              placeholder="请输入实例名称搜索"
+              style={{ width: 300 }}
+              onSearch={(val) => {
+                setKeyword(val);
+              }}
+            />
           </div>
+          <Button type="primary" icon={<IconPlus />} onClick={handleCreateInstance}>
+            创建实例
+          </Button>
         </div>
       </div>
 
       <div className={styles.body}>
         <div className={styles.content}>
-          <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
+          <Spin loading={loading} size={40} style={{ width: '100%', minHeight: '100%' }} tip="加载中...">
             <div className={styles.tableContainer}>
               {instanceList?.map((item, index) => (
                 <ConnectInstanceCard key={`flow-${index}`} data={item} onEdit={handleEdit} onDelete={handleDelete} />

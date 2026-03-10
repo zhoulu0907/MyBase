@@ -203,7 +203,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
       case FORM_COMPONENT_TYPES.DATE_PICKER:
       case FORM_COMPONENT_TYPES.DATE_RANGE_PICKER:
       case FORM_COMPONENT_TYPES.DATE_TIME_PICKER:
-        console.log('componentConfig', componentConfig);
         return (
           <FormComp.XDateRangePicker
             cpName={cpId}
@@ -262,16 +261,6 @@ const TableSearch = memo((props: TableSearchConfig) => {
       case FORM_COMPONENT_TYPES.RELATED_FORM:
         return (
           <FormComp.XRelatedForm
-            cpName={cpId}
-            id={cpId}
-            {...componentConfig}
-            runtime={runtime}
-            detailMode={detailMode}
-          />
-        );
-      case FORM_COMPONENT_TYPES.STATIC_TEXT:
-        return (
-          <FormComp.XStaticText
             cpName={cpId}
             id={cpId}
             {...componentConfig}

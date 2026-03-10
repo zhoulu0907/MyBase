@@ -127,8 +127,8 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         id: editData.id,
         scriptName: form.getFieldValue('scriptName'),
         description: form.getFieldValue('description'),
-        inputParameter: inputParameterValue || '',
-        outputParameter: outputParameterValue || '',
+        inputParameter: inputParameterValue ? JSON.parse(inputParameterValue) : {},
+        outputParameter: outputParameterValue ? JSON.parse(outputParameterValue) : {},
         rawScript: form.getFieldValue('rawScript') || '',
         inputSchema: inputSchemaValue,
         outputSchema: outputSchemaValue
@@ -145,8 +145,8 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
         connectorId: id || '',
         scriptName: form.getFieldValue('scriptName'),
         description: form.getFieldValue('description'),
-        inputParameter: inputParameterValue || '',
-        outputParameter: outputParameterValue || '',
+        inputParameter: inputParameterValue ? JSON.parse(inputParameterValue) : {},
+        outputParameter: outputParameterValue ? JSON.parse(outputParameterValue) : {},
         rawScript: form.getFieldValue('rawScript'),
         inputSchema: inputSchemaValue,
         outputSchema: outputSchemaValue
@@ -418,6 +418,11 @@ const CreateScriptActionPage: React.FC<CreateScriptActionPageProps> = ({ onSucce
           <Col span={1.5}>
             <Button type="primary" onClick={handleSubmit}>
               {isEdit ? '更新' : '保存'}
+            </Button>
+          </Col>
+          <Col span={1.5}>
+            <Button type="secondary" onClick={handleCancel}>
+              返回
             </Button>
           </Col>
           <Col span={1.5}>

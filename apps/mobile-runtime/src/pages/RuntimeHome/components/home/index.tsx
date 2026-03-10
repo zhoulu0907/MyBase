@@ -91,7 +91,7 @@ const Home: React.FC<{ nickname: string }> = ({ nickname }) => {
     const resPageList = res && res.length > 0 ? dealPage(res) : [];
     const pageList: any[] = bpmData.concat(resPageList);
 
-    const treeData = convertMenuToTreeData(pageList);
+    const treeData = convertMenuToTreeData(resPageList);
     setTreeData(treeData);
     // 如果菜单列表不为空，默认选中第一个菜单
     if (pageList && pageList.length > 0) {

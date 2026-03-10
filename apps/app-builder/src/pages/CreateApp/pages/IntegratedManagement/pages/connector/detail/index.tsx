@@ -3,6 +3,7 @@ import { IconArrowLeft, IconCheck, IconClose, IconEdit } from '@arco-design/web-
 import {
   getConnectInstance,
   updateConnectInstance,
+  updateConnectInstanceBaseInfo,
   createConnectInstance,
   getConnectorTypeInfo,
   TypeCode,
@@ -67,7 +68,8 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
           setBaseInfo(tempBaseInfo);
           // 默认名称规则：{连接器类型}实例-{实例数量 + 1}
           const count = parseInt(instanceCountParam || '0', 10);
-          const initialName = `${connectorNameParam || '连接器'}实例-${count + 1}`;
+          const typeName = connectorNameParam || typeInfo?.nodeName || '连接器';
+          const initialName = `${typeName}实例-${count + 1}`;
 
           setEditName(initialName);
           setCreateName(initialName);
@@ -141,10 +143,10 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
 
     try {
       // 编辑模式：调用更新接口
-      const res = await updateConnectInstance({
-        id: baseInfo.id,
+      const res = await updateConnectInstanceBaseInfo({
+        id: baseInfo!.id,
         connectorName: editName.trim(),
-        description: baseInfo.description
+        description: baseInfo!.description
       } as UpdateConnectInstanceReq);
 
       if (res) {
@@ -170,7 +172,6 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
         description: data.description,
         typeCode: connectorType as any
       });
-
       if (res) {
         Message.success('创建成功');
         // 获取新创建的实例详情
@@ -180,6 +181,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
         setIsCreateMode(false);
         // 切换到环境配置页面
         setActiveKey('env');
+        navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${appId}&id=${res.id}`);
       }
     } catch (error) {
       console.error('Failed to create connector:', error);
@@ -268,7 +270,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
         {activeKey === 'action' && (
           <div className={styles.actionContainer}>
             {!isCreateMode ? (
-              <ScriptActionListPage />
+              <ScriptActionListPage isScript={baseInfo?.typeCode === TypeCode.SCRIPT} />
             ) : (
               <div className={styles.actionContainer}>
                 <div className={styles.content}>

@@ -25,6 +25,8 @@ import {
   useEditorSignalMap,
   useListEditorSignal,
   useWorkbenchEditorSignal,
+  getOrCreatePageConfig,
+  PAGE_CONFIG_DEFAULT,
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
@@ -72,6 +74,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   const [loading, setLoading] = useState(false);
   const preview = true;
   const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
+
+  // 获取页面配置
+  const getPageConfig = () => {
+    if (pagesetType === PageType.WORKBENCH && wbComponentSchemas.value) {
+      const [, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas.value);
+      return pageConfigSchema.config;
+    }
+    return PAGE_CONFIG_DEFAULT;
+  };
+
+  const pageConfig = getPageConfig();
 
   useEffect(() => {
     const appId = getHashQueryParam('appId');
@@ -259,12 +272,26 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     };
   }, [form, appId, pageSetId, menuId]);
 
+  // 判断是否为工作台页面
+  const isWorkbenchPage = pageType === EDITOR_TYPES.WORKBENCH_EDITOR;
+
+  // 获取工作台页面的样式
+  const getWbPageStyle = () => {
+    if (isWorkbenchPage) {
+      return {
+        backgroundColor: pageConfig.pageBgColor || 'transparent',
+        backgroundImage: pageConfig.pageBgImg ? `url(${pageConfig.pageBgImg})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      };
+    }
+    return { backgroundColor: '#fff' };
+  };
+
   return (
     <div className={styles.previewPage}>
-      <div
-        className={styles.content}
-        style={{ backgroundColor: pageType == EDITOR_TYPES.WORKBENCH_EDITOR ? '#f2f3f5' : '#fff' }}
-      >
+      <div className={styles.content} style={getWbPageStyle()}>
         {loading ? (
           <div className={styles.loading}>
             <Spin size={40} tip="加载中..." />

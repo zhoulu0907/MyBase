@@ -38,7 +38,7 @@ const ConnectorCreateWizard: React.FC = () => {
           // 设置默认实例名称
           useConnectorWizardStore.getState().updateFormData({
             basicInfo: {
-              connectorName: `${typeInfo.nodeName}+实例`,
+              connectorName: `${typeInfo.nodeName}实例`,
               description: '',
             },
           });
@@ -85,7 +85,7 @@ const ConnectorCreateWizard: React.FC = () => {
       if (res) {
         Message.success('创建成功');
         reset();
-        navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-instances?appId=${appId}`);
+        navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${appId}&id=${res.id}`);
       }
     } catch (error) {
       console.error('创建失败:', error);

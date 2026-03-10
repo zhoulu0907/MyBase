@@ -177,6 +177,7 @@
 
 .canvas-card-image-type2 {
   overflow: hidden;
+  height: 72px;
   border-radius: 8px;
 }
 

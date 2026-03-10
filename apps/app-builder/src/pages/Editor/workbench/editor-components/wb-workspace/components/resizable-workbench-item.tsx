@@ -133,8 +133,7 @@ export function ResizableWorkbenchItem({
           style={{
             width: '100%',
             borderColor: isSelected ? 'rgb(var(--primary-6))' : '',
-            borderStyle: isSelected ? 'solid' : 'dashed',
-            background: isSelected ? 'rgb(var(--primary-1))' : ''
+            borderStyle: isSelected ? 'solid' : 'dashed'
           }}
           onMouseDown={handleClick}
           onClick={handleClick}

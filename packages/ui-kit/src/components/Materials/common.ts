@@ -47,6 +47,7 @@ import type {
     IDataFilterConfigType,
     ICoverImageConfigType,
     IGroupFilterConfigType,
+    IPaginationConfigType,
     ITableOperationConfigType,
     ITablePagePositionConfigType,
     ITablePageSizeConfigType,
@@ -529,6 +530,12 @@ export const groupFilterConfig: IGroupFilterConfigType = {
   name: '绑定分组筛选',
   type: 'GroupFilter'
 };
+
+export const paginationConfig: IPaginationConfigType = {
+  key: 'paginationConfig',
+  name: '分页配置',
+  type: 'PaginationConfig',
+}
 
 // ==================== 指标卡 ====================
 export const indicatorCardStyleConfig:IIndicatorCardStyleConfigType ={

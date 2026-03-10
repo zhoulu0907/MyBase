@@ -98,7 +98,7 @@
 
   .todoListContentItemRightBottom {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     gap: 16px;
     font-size: 12px;
     color: #86909C;

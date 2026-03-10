@@ -72,6 +72,9 @@ function SortableTable({ data, columns, onSortEnd }) {
           min-width: 90px;
           text-align: center;
         }
+        .pc-table-td {
+          border-bottom: 0;
+        }
       `}</style>
     </div>
   );

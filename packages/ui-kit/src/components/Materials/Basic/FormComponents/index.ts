@@ -17,7 +17,6 @@ import XRelatedForm from './RelatedForm';
 import XRichText from './RichTextEditor';
 import XSelectMutiple from './SelectMutiple';
 import XSelectOne from './SelectOne';
-import XStaticText from './StaticText';
 import XSwitch from './Switch';
 import XTimePicker from './TimePicker';
 import XUserSelect from './UserSelect';
@@ -44,7 +43,6 @@ import XRelatedFormSchema from './RelatedForm/schema';
 import XRichTextSchema from './RichTextEditor/schema';
 import XSelectMutipleSchema from './SelectMutiple/schema';
 import XSelectOneSchema from './SelectOne/schema';
-import XStaticTextSchema from './StaticText/schema';
 import XSwitchSchema from './Switch/schema';
 import XTimePickerSchema from './TimePicker/schema';
 import XUserSelectSchema from './UserSelect/schema';
@@ -73,7 +71,6 @@ export const FormComp = {
   XImgUpload,
   XAutoCode,
   XRelatedForm,
-  XStaticText,
   XRichText,
   XSubTable,
   XDataSelect,
@@ -102,7 +99,6 @@ export const FormSchema = {
   XImgUploadSchema,
   XAutoCodeSchema,
   XRelatedFormSchema,
-  XStaticTextSchema,
   XRichTextSchema,
   XSubTableSchema,
   XDataSelectSchema,
