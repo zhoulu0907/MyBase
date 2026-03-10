@@ -197,7 +197,7 @@ const XCard = memo(
 
       const req: PageMethodV2Params = {
         pageNo: cardPageNo,
-        pageSize: 12,
+        pageSize: paginationConfig?.pageSize || 20,
         filters: filterCondition && Object.keys(filterCondition).length > 0 ? filterCondition : filters
       };
       let res: any;
@@ -259,7 +259,11 @@ const XCard = memo(
 
       cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
       if (scrollLoad) {
-        setCardData((prev) => prev.concat(...newCardData));
+        if (paginationConfig?.display) {
+          setCardData(newCardData);
+        } else {
+          setCardData((prev) => prev.concat(...newCardData));
+        }
         setCardTotal(total);
       } else {
         setCardData(newCardData);
