@@ -465,15 +465,21 @@ const XCard = memo(
       handlePage();
     };
 
-    const getListClass = ()=>{
-      if(paginationConfig.display && (paginationConfig.pagePosition==='tl' || paginationConfig.pagePosition==='bl')){
-        return 'list-left'
+    const getListClass = () => {
+      if (
+        paginationConfig.display &&
+        (paginationConfig.pagePosition === 'tl' || paginationConfig.pagePosition === 'bl')
+      ) {
+        return 'list-left';
       }
-      if(paginationConfig.display && (paginationConfig.pagePosition==='topCenter' || paginationConfig.pagePosition==='bottomCenter')){
-        return 'list-center'
+      if (
+        paginationConfig.display &&
+        (paginationConfig.pagePosition === 'topCenter' || paginationConfig.pagePosition === 'bottomCenter')
+      ) {
+        return 'list-center';
       }
       return 'list-right';
-    }
+    };
 
     return (
       <div
