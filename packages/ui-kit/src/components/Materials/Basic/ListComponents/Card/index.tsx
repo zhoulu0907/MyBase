@@ -552,7 +552,7 @@ const XCard = memo(
                     <Card
                       className="card"
                       bordered={false}
-                      onClick={handleRowClick}
+                      onClick={() => handleRowClick(item)}
                       cover={
                         coverField ? (
                           <img
