@@ -17,6 +17,7 @@ import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
+import org.apache.commons.lang3.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -94,6 +95,10 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         } else {
             // 其他接口，需要获取token和登录用户信息
+            if (hasAiHeaders(request)) {
+                chain.doFilter(request, response);
+                return;
+            }
             // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
             // LoginUser loginUser = buildLoginUserByHeader(request);
             LoginUser loginUser = null;
@@ -152,6 +157,13 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             // 清理租户信息
             TenantContextHolder.clear();
         }
+    }
+
+    private boolean hasAiHeaders(HttpServletRequest request) {
+        return StringUtils.isNotBlank(request.getHeader("X-AI-KeyId")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Signature")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Request-Id")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Tenant-Id"));
     }
 
     private LoginUser buildLoginUserByToken(String runMode, String token) {

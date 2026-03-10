@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.system.runtime.controller.oauth2;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2OpenService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
@@ -110,6 +111,7 @@ public class RuntimeOauth2OpenController {
     @Operation(summary = "获取用户信息")
     @PermitAll
     @ApiSignIgnore
+    @TenantIgnore
     CommonResult<OAuth2UserInfoRespVO> getUser(@RequestParam("access_token") String accessToken) {
 
         return CommonResult.success(userService.getUserInfoByToken(accessToken));

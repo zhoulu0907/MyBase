@@ -1,0 +1,140 @@
+@host = localhost
+@port = 48081
+@prefix = /runtime
+
+@base = http://{{host}}:{{port}}{{prefix}}
+
+@tenantId = 153935442021842944
+@applicationId = 239961317826822144
+@traceId = {{$uuid}}
+
+@metaData = 019c27db-7562-7953-a514-944f4f3ced3c
+@tableName = n851_info
+
+### 数据卡片批量查询 - 按前端配置示例（4 个卡片）
+POST {{base}}/metadata/data-card/query
+Content-Type: application/json
+X-Trace-Id: {{traceId}}
+X-Tenant-Id: {{tenantId}}
+X-Application-Id: {{applicationId}}
+
+[
+  {
+    "label": { "display": true, "text": "发布数量" },
+    "describe": "发布数量",
+    "metaData": "{{metaData}}",
+    "tableName": "{{tableName}}",
+    "calculateField": "title",
+    "calculateType": "count",
+    "filterCondition": [
+      {
+        "conditions": [
+          { "fieldKey": "author", "op": "NOT_EQUALS", "operatorType": "value", "value": "杨晓艺" }
+        ]
+      }
+    ],
+    "precisionLimit": false,
+    "precision": 0,
+    "percent": false,
+    "unitLimit": true,
+    "unit": "篇",
+    "thousandsSeparator": false,
+    "absoluteValue": true,
+    "icon": { "display": true, "name": "", "color": "#19bbff" },
+    "backgroundColor": "#FFFFFF",
+    "compareLimit": false,
+    "compareDescribe": "较上月",
+    "timeField": "",
+    "timeDimension": "month",
+    "compareCalculate": "compare",
+    "compareCalculateType": "rate",
+    "status": "default",
+    "width": "25%",
+    "chosen": false,
+    "selected": false
+  },
+  {
+    "label": { "display": true, "text": "刮刮表记录数" },
+    "describe": "刮刮表记录数",
+    "metaData": "",
+    "tableName": "{{tableName}}",
+    "calculateField": "",
+    "calculateType": "count",
+    "filterCondition": [],
+    "precisionLimit": false,
+    "precision": 0,
+    "percent": false,
+    "unitLimit": false,
+    "unit": "",
+    "thousandsSeparator": false,
+    "absoluteValue": false,
+    "icon": { "display": true, "name": "", "color": "#19bbff" },
+    "backgroundColor": "#FFFFFF",
+    "compareLimit": false,
+    "compareDescribe": "较上月",
+    "timeField": "",
+    "timeDimension": "month",
+    "compareCalculate": "compare",
+    "compareCalculateType": "rate",
+    "status": "default",
+    "width": "25%",
+    "chosen": false,
+    "selected": false
+  },
+  {
+    "label": { "display": true, "text": "学生表记录数" },
+    "describe": "学生表记录数",
+    "metaData": "",
+    "tableName": "{{tableName}}",
+    "calculateField": "",
+    "calculateType": "count",
+    "filterCondition": [],
+    "precisionLimit": false,
+    "precision": 0,
+    "percent": false,
+    "unitLimit": false,
+    "unit": "",
+    "thousandsSeparator": false,
+    "absoluteValue": false,
+    "icon": { "display": true, "name": "", "color": "#19bbff" },
+    "backgroundColor": "#FFFFFF",
+    "compareLimit": false,
+    "compareDescribe": "较上月",
+    "timeField": "",
+    "timeDimension": "month",
+    "compareCalculate": "compare",
+    "compareCalculateType": "rate",
+    "status": "default",
+    "width": "25%",
+    "chosen": false,
+    "selected": false
+  },
+  {
+    "label": { "display": true, "text": "承包商记录数" },
+    "describe": "承包商记录数",
+    "metaData": "",
+    "tableName": "{{tableName}}",
+    "calculateField": "",
+    "calculateType": "count",
+    "filterCondition": [],
+    "precisionLimit": false,
+    "precision": 0,
+    "percent": false,
+    "unitLimit": false,
+    "unit": "",
+    "thousandsSeparator": false,
+    "absoluteValue": false,
+    "icon": { "display": true, "name": "", "color": "#19bbff" },
+    "backgroundColor": "#FFFFFF",
+    "compareLimit": false,
+    "compareDescribe": "较上月",
+    "timeField": "",
+    "timeDimension": "month",
+    "compareCalculate": "compare",
+    "compareCalculateType": "rate",
+    "status": "default",
+    "width": "25%",
+    "chosen": false,
+    "selected": false
+  }
+]
