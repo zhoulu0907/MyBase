@@ -147,6 +147,7 @@ export default function IotInfo() {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
   const [deviceDetail, setDeviceDetail] = useState<DeviceDetail>({});
+  const deviceDetailRef = useRef<DeviceDetail>({});
   const pageSize = 10;
   const lastHeightRef = useRef<number>(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -155,13 +156,13 @@ export default function IotInfo() {
 
 
   const fetchDeviceRuntimeParams = useCallback(async () => {
-    if (!deviceDetail.id || !deviceDetail.tenant_id) {
+    if (!deviceDetailRef.current.id || !deviceDetailRef.current.tenant_id) {
       return;
     }
 
     try {
       const requestData: DatapointPageRequest = {
-        deviceId: Number(deviceDetail.id),
+        deviceId: Number(deviceDetailRef.current.id),
         current: currentPage,
         size: pageSize,
         type: 1
@@ -169,7 +170,7 @@ export default function IotInfo() {
       
       const res = await thirdPartyClient.post<DatapointPageResponse>('/v1/proxybe/api/iot/v1.0.0/devicemodel/datapoint/page', requestData, {
         headers: {
-          'tenant_id': String(deviceDetail.tenant_id),
+          'tenant_id': String(deviceDetailRef.current.tenant_id),
           'customer_id': '1',
           'project': 'indusiot',
           'product': 'base'
@@ -215,12 +216,11 @@ export default function IotInfo() {
       } else {
         // 处理响应失败的情况
         console.error('接口响应失败:', res);
-        Message.error('获取设备运行参数失败');
       }
     } catch (error) {
       console.error('获取设备运行参数失败:', error);
     }
-  }, [currentPage, pageSize, deviceDetail]);
+  }, [currentPage, pageSize]);
 
   const lastFetchedRecordIdRef = useRef<string | null>(null);
   const recordIdRef = useRef<string | null>(null);
@@ -256,6 +256,7 @@ export default function IotInfo() {
         console.log('设备详情数据:', res);
         const detailData = res.data || res;
         const processedDetail: DeviceDetail = {
+          id: detailData.id,
           updated_time: detailData.updated_time || '--',
           device_name: typeof detailData.device_name === 'string' ? detailData.device_name : '--',
           device_id: detailData.device_id || '--',
@@ -270,6 +271,14 @@ export default function IotInfo() {
           rated_current: detailData.rated_current || '--'
         };
         setDeviceDetail(processedDetail);
+        deviceDetailRef.current = processedDetail;
+
+        if (processedDetail.device_id && processedDetail.tenant_id) {
+          fetchDeviceRuntimeParams();
+          pollingTimerRef.current = setInterval(() => {
+            fetchDeviceRuntimeParams();
+          }, 3000);
+        }
       }
     } catch (error) {
       console.error('获取设备详情失败:', error);
@@ -284,33 +293,14 @@ export default function IotInfo() {
   }, []);
 
   useEffect(() => {
-    fetchDeviceRuntimeParams();
-    fetchDeviceDetail();
-
-    pollingTimerRef.current = setInterval(() => {
-      fetchDeviceRuntimeParams();
-    }, 3000);
-
-    const handleBeforeUnload = () => {
-      clearPollingTimer();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      clearPollingTimer();
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [fetchDeviceRuntimeParams, clearPollingTimer]);
-
-  useEffect(() => {
     const paramArray: ParamData[] = [];
     searchParams.forEach((value, key) => {
       paramArray.push({ key, value });
     });
     setParams(paramArray);
-    // 控制台输出参数
     console.log('URL参数:', Object.fromEntries(searchParams));
+    
+    fetchDeviceDetail();
   }, [searchParams]);
 
   const sendHeight = useCallback(() => {
