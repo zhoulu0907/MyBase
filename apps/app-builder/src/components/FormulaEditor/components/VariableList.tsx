@@ -94,6 +94,7 @@ export function VariableList({
     return (
       <div style={{ minWidth: '200px', maxHeight: '215px', overflowY: 'auto' }}>
         <Menu
+          className={styles.dropMenu}
           onClickMenuItem={(key: string) => {
             handleChangeVariables(key);
           }}
