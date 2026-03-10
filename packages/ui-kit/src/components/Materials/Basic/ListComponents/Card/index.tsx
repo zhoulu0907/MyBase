@@ -1,4 +1,4 @@
-import { Button, Form, List, Card, Empty, Message, Tooltip, Popconfirm } from '@arco-design/web-react';
+import { Button, Form, List, Card, Empty, Message, Tooltip, Popconfirm, Pagination } from '@arco-design/web-react';
 import { IconPlus, IconRefresh, IconEdit, IconDelete } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -24,7 +24,14 @@ import { useFormEditorSignal } from 'src/signals/page_editor';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
 import type { XCardConfig } from './schema';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES, RedirectMethod, TableOperationButton } from '../../../constants';
+import {
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  RedirectMethod,
+  TableOperationButton
+} from '../../../constants';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import PreviewRender from 'src/components/render/PreviewRender';
 import CardSearch from './cardSerach';
@@ -81,6 +88,7 @@ const XCard = memo(
       columns,
       layout,
       filterCondition,
+      paginationConfig,
       showAddBtn = true,
       searchItems,
       pageSetType,
@@ -116,8 +124,9 @@ const XCard = memo(
     useEffect(() => {
       if (metaData) {
         getMainMetaData();
-        if(!runtime){
-          setCardData([{},{},{}]);
+        if (!runtime) {
+          setCardData([{}, {}, {}]);
+          setCardTotal(3);
         }
       }
     }, [metaData]);
@@ -208,7 +217,7 @@ const XCard = memo(
       const { list, total } = res;
 
       let newCardData = [];
-      for (let item of (list || [])) {
+      for (let item of list || []) {
         const newItem = item;
         Object.entries(newItem).forEach(([key, value]) => {
           // 优化：减少重复查找，提升可读性和性能
@@ -237,7 +246,7 @@ const XCard = memo(
               id: rowId,
               fieldName: coverField,
               fileId: fileId
-            })
+            });
           }
         }
         newCardData.push({
@@ -245,7 +254,7 @@ const XCard = memo(
           ...newItem,
           key: rowId,
           [coverField]: coverFieldValue
-        })
+        });
       }
 
       cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
@@ -273,9 +282,9 @@ const XCard = memo(
     };
 
     const renderItem = (_record: any, fieldName: string, index: number, isTitle: boolean, column?: any) => {
-      if(!runtime && isTitle){
+      if (!runtime && isTitle) {
         const dataFieldInfo = mainMetaData.parentFields?.find((field: AppEntityField) => field.fieldName === fieldName);
-        return <span>{dataFieldInfo?.displayName || fieldName}</span>
+        return <span>{dataFieldInfo?.displayName || fieldName}</span>;
       }
       const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
       if (!mainMetaData?.parentFields) {
@@ -456,6 +465,16 @@ const XCard = memo(
       handlePage();
     };
 
+    const getListClass = ()=>{
+      if(paginationConfig.display && (paginationConfig.pagePosition==='tl' || paginationConfig.pagePosition==='bl')){
+        return 'list-left'
+      }
+      if(paginationConfig.display && (paginationConfig.pagePosition==='topCenter' || paginationConfig.pagePosition==='bottomCenter')){
+        return 'list-center'
+      }
+      return 'list-right';
+    }
+
     return (
       <div
         style={{
@@ -496,7 +515,14 @@ const XCard = memo(
           {/* 滚动加载 */}
           <Form
             form={cardForm}
-            className="cardListForm"
+            className={
+              paginationConfig.display &&
+              (paginationConfig.pagePosition === 'tl' ||
+                paginationConfig.pagePosition === 'topCenter' ||
+                paginationConfig.pagePosition === 'tr')
+                ? `cardListForm reverse ${getListClass()}`
+                : `cardListForm ${getListClass()}`
+            }
             labelCol={layout === 'horizontal' ? { span: 10 } : {}}
             wrapperCol={layout === 'horizontal' ? { span: 14 } : {}}
           >
@@ -504,10 +530,14 @@ const XCard = memo(
               bordered={false}
               dataSource={cardData}
               grid={{ span: getSpan(), gutter: [20, 20] }}
-              noDataElement={<div style={{ padding: '10px 0 20px' }}><Empty /></div>}
+              noDataElement={
+                <div style={{ padding: '10px 0 20px' }}>
+                  <Empty />
+                </div>
+              }
               render={(item, index) => {
                 return (
-                  <div className='cardItem'>
+                  <div className="cardItem">
                     <Card
                       className="card"
                       bordered={false}
@@ -535,7 +565,7 @@ const XCard = memo(
                         }
                       />
                     </Card>
-                    <div className='cardExtra'>
+                    <div className="cardExtra">
                       {operationButton?.map((opearate, index) => (
                         <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
                           {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
@@ -573,8 +603,7 @@ const XCard = memo(
                                   }}
                                   status={'danger'}
                                   icon={<IconDelete />}
-                                >
-                                </Button>
+                                ></Button>
                               </Popconfirm>
                             </div>
                           )}
@@ -582,14 +611,30 @@ const XCard = memo(
                       ))}
                     </div>
                   </div>
-                )
+                );
               }}
               onReachBottom={(currentPage) => {
+                if (paginationConfig?.display) {
+                  return;
+                }
                 if (currentPage < cardTotal) {
                   scrollLoad = true;
-                  setCardPageNo((prev) => prev + 1)
+                  setCardPageNo((prev) => prev + 1);
                 }
               }}
+              pagination={
+                paginationConfig?.display
+                  ? {
+                      pageSize: paginationConfig.pageSize,
+                      showTotal: true,
+                      current: cardPageNo,
+                      total: cardTotal,
+                      onChange: (pageNo: number) => {
+                        setCardPageNo(pageNo);
+                      }
+                    }
+                  : false
+              }
             ></List>
           </Form>
         </div>

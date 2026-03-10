@@ -78,9 +78,30 @@
 }
 
 .cardListForm {
+  .pc-list-wrapper {
+    display: flex;
+   flex-direction: column;
+  }
+
   .pc-form-label-item {
     text-align: left;
   }
+}
+.cardListForm.reverse .pc-list-wrapper{
+  flex-direction: column-reverse;
+}
+.list-left .pc-list-pagination {
+  margin-left: 0;
+}
+.list-center .pc-list-pagination {
+  margin: 24px auto 0;
+}
+.list-right .pc-list-pagination {
+  margin-left: auto;
+}
+.cardListForm.reverse .pc-list-pagination{
+  margin-top: 0;
+  margin-bottom: 12px;
 }
 
 .tableFormItem {
