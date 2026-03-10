@@ -85,7 +85,7 @@ public class DictDataServiceImpl implements DictDataService {
         // 校验字典类型有效
         validateDictTypeExists(createReqVO.getDictType());
         // 校验字典数据的值的唯一性
-        validateDictDataValueUnique(null, createReqVO.getDictType(), createReqVO.getValue());
+//        validateDictDataValueUnique(null, createReqVO.getDictType(), createReqVO.getValue());
 
         // 插入字典类型
         DictDataDO dictData = BeanUtils.toBean(createReqVO, DictDataDO.class);
@@ -150,9 +150,9 @@ public class DictDataServiceImpl implements DictDataService {
             return;
         }
         // 如果 id 为空，说明不用比较是否为相同 id 的字典数据
-        if (id == null) {
-            throw exception(DICT_DATA_VALUE_DUPLICATE);
-        }
+//        if (id == null) {
+//            throw exception(DICT_DATA_VALUE_DUPLICATE);
+//        }
         if (!dictData.getId().equals(id)) {
             throw exception(DICT_DATA_VALUE_DUPLICATE);
         }

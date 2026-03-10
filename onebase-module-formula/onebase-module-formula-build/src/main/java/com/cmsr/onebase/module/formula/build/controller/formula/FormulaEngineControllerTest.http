@@ -3,12 +3,18 @@
 # 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
 # 或者手动修改上面的@变量值
 ### CONCATENATE
-POST {{baseUrl}}/formula/engine/execute-formula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "CONCATENATE(0)" }
+{
+  "formula":"CONCATENATE('abc',ab)",
+  "parameters":
+  {
+    "ab":258966874542899200
+  }
+}
 
 ### LEFT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -417,7 +423,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
- { "formula": "COUNT(1,2,4,3)" }
+ { "formula": "COUNT(1,2,\"苹果\",3)" }
 
 ### LOG
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -721,7 +727,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "AND(true,true)" }
+{ "formula": "AND(1==1,1!=2)" }
 
 ### IF
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -729,7 +735,14 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "IF(数学成绩>90)" }
+{
+  "formula":"IF(AND(英语成绩>90,数学成绩>90,语文成绩>90),\"优秀\",\"其他\")",
+  "parameters":{
+    "英语成绩":"302285656641273858",
+    "数学成绩":"302285656641273857",
+    "语文成绩":"302285656641273856"
+  }
+}
 
 ### RANDOMBETWEEN
 POST {{baseUrl}}/formula/engine/execute-formula
