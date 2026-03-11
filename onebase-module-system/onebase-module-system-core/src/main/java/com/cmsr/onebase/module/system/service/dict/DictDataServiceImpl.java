@@ -85,7 +85,7 @@ public class DictDataServiceImpl implements DictDataService {
         // 校验字典类型有效
         validateDictTypeExists(createReqVO.getDictType());
         // 校验字典数据的值的唯一性
-//        validateDictDataValueUnique(null, createReqVO.getDictType(), createReqVO.getValue());
+        validateDictDataValueUnique(null, createReqVO.getDictType(), createReqVO.getValue());
 
         // 插入字典类型
         DictDataDO dictData = BeanUtils.toBean(createReqVO, DictDataDO.class);

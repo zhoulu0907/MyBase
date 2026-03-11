@@ -737,7 +737,7 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula":"LOWER(CONCATENATE(RIGHT(LEFT(IF(AND(英语成绩>90,数学成绩>90,语文成绩>90),'ABC',\"其，他\"),2),1),\"E，F\"))",
+  "formula":"LOWER(CONCATENATE(RIGHT(LEFT(IF(AND(英语成绩>90,数学成绩>90,语文成绩>90),'A[B（）()C】',\"其，（）{}他\"),6),1),\"E，F\"))",
   "parameters":{
     "英语成绩":"302285656641273858",
     "数学成绩":"302285656641273857",
