@@ -45,9 +45,13 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, al
       const $placeholder = editor.getEditableContainer().querySelector('.w-e-text-placeholder');
       if ($placeholder) {
         $placeholder.innerHTML = placeholder;
+        // placeholder 的对齐需要跟随正文对齐
+        if (align) {
+          ($placeholder as HTMLElement).style.textAlign = String(align);
+        }
       }
     }
-  }, [placeholder, editor]);
+  }, [placeholder, editor, align]);
 
   useEffect(() => {
     const customValue =
@@ -62,7 +66,29 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, al
       : null);
 
     isSyncingFromConfigRef.current = true;
-    editor.setHtml(customValue);
+    
+    // 延迟到下一帧再 setHtml，避免 Slate 内部 DOM 尚未完全 ready 时出现
+    // “Cannot resolve a DOM node from Slate node: { text: '' }” 等错误
+    setTimeout(() => {
+      if (!editor) {
+        isSyncingFromConfigRef.current = false;
+        return;
+      }
+      try {
+        editor.setHtml(customValue);
+        // 默认值设置完后，如果有对齐要求，顺便应用一次
+        if (align) {
+          try {
+            editor.selectAll();
+            SlateTransforms.setNodes(editor, { textAlign: align }, { mode: 'all' });
+          } catch { }
+        }
+      } catch {
+        // 避免 setHtml 异常导致页面白屏
+      } finally {
+        isSyncingFromConfigRef.current = false;
+      }
+    }, 0);
 
     if (activeElement && typeof activeElement.focus === 'function') {
       // 异步恢复焦点，确保在编辑器内部处理完成后执行
@@ -74,13 +100,14 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, al
         }
       }, 0);
     }
-  }, [defaultValueConfig, editor]);
+  }, [defaultValueConfig, editor, align]);
 
   useEffect(() => {
-    if (editor && align) {
+    if (!editor || !align) return;
+    try {
       editor.selectAll();
       SlateTransforms.setNodes(editor, { textAlign: align }, { mode: 'all' });
-    }
+    } catch { }
   }, [align, editor]);
 
   // 使用 useCallback 确保 onChange 函数引用稳定
@@ -90,10 +117,18 @@ const WangEditorWrapper: React.FC<WangEditorProps> = ({ value = '', onChange, al
 
   // 同步外部的 value 到编辑器
   useEffect(() => {
-    // 确保 editor 实例已创建，并且外部 value 与内部 value 不一致时才更新
-    if (editor && value !== editor.getHtml()) {
-      isSyncingFromConfigRef.current = true;
+    if (!editor) return;
+    // 如果外部 value 是空字符串/未定义，认为走“默认值配置”逻辑，不再用空值覆盖 defaultValueConfig.customValue
+    if (value === '' || value === undefined || value === null) return;
+    if (value === editor.getHtml()) return;
+
+    isSyncingFromConfigRef.current = true;
+    try {
       editor.setHtml(value);
+    } catch {
+      // 避免 setHtml 异常导致页面白屏
+    } finally {
+      isSyncingFromConfigRef.current = false;
     }
   }, [value, editor]);
 
