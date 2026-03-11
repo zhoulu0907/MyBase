@@ -26,6 +26,7 @@ interface DeviceDetail {
   updated_time?: string;
   device_name?: string;
   device_id?: string | number;
+  organize_id?: string | number;
   device_encoding?: string;
   device_model?: string;
   tenant_id?: string | number;
@@ -156,13 +157,13 @@ export default function IotInfo() {
 
 
   const fetchDeviceRuntimeParams = useCallback(async () => {
-    if (!deviceDetailRef.current.id || !deviceDetailRef.current.tenant_id) {
+    if (!deviceDetailRef.current.organize_id || !deviceDetailRef.current.tenant_id) {
       return;
     }
 
     try {
       const requestData: DatapointPageRequest = {
-        deviceId: Number(deviceDetailRef.current.id),
+        deviceId: Number(deviceDetailRef.current.organize_id),
         current: currentPage,
         size: pageSize,
         type: 1
@@ -260,6 +261,7 @@ export default function IotInfo() {
           updated_time: detailData.updated_time || '--',
           device_name: typeof detailData.device_name === 'string' ? detailData.device_name : '--',
           device_id: detailData.device_id || '--',
+          organize_id: detailData.organize_id || detailData.device_id || '--',
           device_encoding: typeof detailData.device_encoding === 'string' ? detailData.device_encoding : '--',
           device_model: detailData.device_model?.id || detailData.device_model || '--',
           tenant_id: detailData.tenant_id || '--',
@@ -273,7 +275,7 @@ export default function IotInfo() {
         setDeviceDetail(processedDetail);
         deviceDetailRef.current = processedDetail;
 
-        if (processedDetail.device_id && processedDetail.tenant_id) {
+        if (processedDetail.organize_id && processedDetail.tenant_id) {
           fetchDeviceRuntimeParams();
           pollingTimerRef.current = setInterval(() => {
             fetchDeviceRuntimeParams();
