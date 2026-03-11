@@ -116,7 +116,7 @@ const XCard = memo(
 
     useEffect(() => {
       if (refresh) {
-        handlePage(true);
+        setCardPageNo(1);
       }
     }, [refresh]);
 
@@ -253,8 +253,7 @@ const XCard = memo(
           [coverField]: coverFieldValue
         });
       }
-
-      if (paginationConfig?.display || reset) {
+      if (paginationConfig?.display || reset || cardPageNo === 1) {
         cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
         setCardData(newCardData);
       } else {
@@ -597,7 +596,7 @@ const XCard = memo(
 
               {/* todo 草稿 */}
             </div>
-            <Button type="text" onClick={() => handlePage(true)} icon={<IconRefresh />}></Button>
+            <Button type="text" onClick={() => setCardPageNo(1)} icon={<IconRefresh />}></Button>
           </div>
         </div>
         <div className="cardContent">
