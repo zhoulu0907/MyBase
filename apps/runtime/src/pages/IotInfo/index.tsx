@@ -26,6 +26,7 @@ interface DeviceDetail {
   updated_time?: string;
   device_name?: string;
   device_id?: string | number;
+  organize_id?: string | number;
   device_encoding?: string;
   device_model?: string;
   tenant_id?: string | number;
@@ -143,6 +144,7 @@ export default function IotInfo() {
   const [params, setParams] = useState<ParamData[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const currentPageRef = useRef(1);
   const [deviceParams, setDeviceParams] = useState<DeviceParam[]>([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
@@ -156,14 +158,14 @@ export default function IotInfo() {
 
 
   const fetchDeviceRuntimeParams = useCallback(async () => {
-    if (!deviceDetailRef.current.id || !deviceDetailRef.current.tenant_id) {
+    if (!deviceDetailRef.current.organize_id || !deviceDetailRef.current.tenant_id) {
       return;
     }
 
     try {
       const requestData: DatapointPageRequest = {
-        deviceId: Number(deviceDetailRef.current.id),
-        current: currentPage,
+        deviceId: Number(deviceDetailRef.current.organize_id),
+        current: currentPageRef.current,
         size: pageSize,
         type: 1
       };
@@ -220,7 +222,7 @@ export default function IotInfo() {
     } catch (error) {
       console.error('获取设备运行参数失败:', error);
     }
-  }, [currentPage, pageSize]);
+  }, [pageSize]);
 
   const lastFetchedRecordIdRef = useRef<string | null>(null);
   const recordIdRef = useRef<string | null>(null);
@@ -260,10 +262,11 @@ export default function IotInfo() {
           updated_time: detailData.updated_time || '--',
           device_name: typeof detailData.device_name === 'string' ? detailData.device_name : '--',
           device_id: detailData.device_id || '--',
+          organize_id: detailData.organize_id || detailData.device_id || '--',
           device_encoding: typeof detailData.device_encoding === 'string' ? detailData.device_encoding : '--',
           device_model: detailData.device_model?.id || detailData.device_model || '--',
           tenant_id: detailData.tenant_id || '--',
-          status: detailData.status ?? '--',
+          status: detailData.status !== undefined && detailData.status !== null ? detailData.status : '--',
           installation_site: detailData.installation_site?.id || detailData.installation_site || '--',
           rated_power: detailData.rated_power || '--',
           rated_speed: detailData.rated_speed || '--',
@@ -273,7 +276,7 @@ export default function IotInfo() {
         setDeviceDetail(processedDetail);
         deviceDetailRef.current = processedDetail;
 
-        if (processedDetail.device_id && processedDetail.tenant_id) {
+        if (processedDetail.organize_id && processedDetail.tenant_id) {
           fetchDeviceRuntimeParams();
           pollingTimerRef.current = setInterval(() => {
             fetchDeviceRuntimeParams();
@@ -368,7 +371,7 @@ export default function IotInfo() {
             { label: '设备名称', value: deviceDetail.device_name || '--' },
             { label: '设备型号', value: deviceDetail.device_model || '--' },
             { label: '设备编号', value: deviceDetail.device_encoding || '--' },
-            { label: '设备状态', value: deviceDetail.status === 1 ? '在线' : deviceDetail.status === 0 ? '离线' : '--' },
+            { label: '设备状态', value: deviceDetail.status == 1 ? '在线' : deviceDetail.status == 0 ? '离线' : '--' },
             { label: '安装位置', value: deviceDetail.installation_site || '--' },
             { label: '额定功率', value: deviceDetail.rated_power || '--' },
             { label: '额定转速', value: deviceDetail.rated_speed || '--' },
@@ -436,12 +439,12 @@ export default function IotInfo() {
         <div className={styles.pagination}>
           <div className={styles.pageInfo}> 当前第 {currentPage} 页，共 {pages} 页，总 {total} 条 </div>
           <Space>
-            <Button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
+            <Button disabled={currentPage === 1} onClick={() => { currentPageRef.current = currentPage - 1; setCurrentPage(currentPage - 1); fetchDeviceRuntimeParams(); }}>
               上一页
             </Button>
             <Button
               disabled={currentPage >= pages}
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => { currentPageRef.current = currentPage + 1; setCurrentPage(currentPage + 1); fetchDeviceRuntimeParams(); }}
             >
               下一页
             </Button>
