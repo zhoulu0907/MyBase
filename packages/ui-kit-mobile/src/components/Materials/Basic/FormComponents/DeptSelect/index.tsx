@@ -17,6 +17,7 @@ import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUn
 import { getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { memo, useCallback, useEffect, useState } from 'react';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 
 import deptIcon from '@/assets/images/dept_icon.svg';
 import { formatDeptAndUsers, getDeptData, parseDeptName } from './const';
@@ -153,11 +154,20 @@ const XDeptSelect = memo(
       await getDeptUsers({ deptId: renderData?.parentId });
     };
 
+    const rules: ITypeRules<ValidatorType.Custom>[] = [
+      {
+        required: verify?.required,
+        type: ValidatorType.Custom,
+        message: `${label.text}是必填项`
+      }
+    ];
+
     return (
       <Form.Item
         className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
         label={label.display && <Ellipsis text={label.text} maxLine={2} />}
         field={fieldId}
+        rules={rules}
         layout={layout}
         style={{
           textAlign: layout === 'vertical' ? 'left' : 'right',

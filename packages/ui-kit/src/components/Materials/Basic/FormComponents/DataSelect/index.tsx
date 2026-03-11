@@ -30,9 +30,9 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     layout,
     labelColSpan = 0,
     runtime,
-    displayFields,
+    displayFields = [],
     detailMode,
-    fillRuleSetting
+    fillRuleSetting = []
   } = props;
   const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
   // ===== 外部 props end =====
@@ -110,17 +110,16 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       }
     },
     fillDatabyRule: (data: any) => {
-      if (fillRuleSetting.length > 0) {
-        fillRuleSetting.forEach((item) => {
-          const value = data?.[item.fieldName];
-          const dataField = fromPageComponentSchemas.value[item.selectComponentID].config.dataField;
-          if (dataField.length > 0) {
-            const fieldName =
-              fromPageComponentSchemas.value[item.selectComponentID].config.dataField[dataField.length - 1];
-            form.setFieldValue(fieldName, value);
-          }
-        });
-      }
+      if (!Array.isArray(fillRuleSetting) || fillRuleSetting.length === 0) return;
+      fillRuleSetting.forEach((item) => {
+        const value = data?.[item.fieldName];
+        const dataField = fromPageComponentSchemas.value[item.selectComponentID].config.dataField;
+        if (dataField.length > 0) {
+          const fieldName =
+            fromPageComponentSchemas.value[item.selectComponentID].config.dataField[dataField.length - 1];
+          form.setFieldValue(fieldName, value);
+        }
+      });
     }
   };
   // ===== 内部事件 =====
@@ -255,7 +254,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           <PreviewDataSelectModal
             visible={uiState.previewVisible}
             onCancel={internalEvents.closePreview}
-            tableConfig={props.dynamicTableConfig}
+            tableConfig={props.dynamicTableConfig ?? null}
             defaultSelectedId={helpers.getSelectedId(dataState)}
             onSelect={internalEvents.selectData}
           />

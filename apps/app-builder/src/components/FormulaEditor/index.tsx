@@ -322,10 +322,8 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     return newFormula
       .replace(/,(?=\s*\))/g, '')
       .replace(/,+/g, ',')
-      .replace(
-        /([\u4e00-\u9fa5]+),([>=|<=|>|<<|==|!=]+)/g,
-        (_, chinesePart, logicSymbol) => `${chinesePart}${logicSymbol}`
-      );
+      .replace(/([\u4e00-\u9fa5]+(?:\.[\u4e00-\u9fa5]+)?),(>=|<=|>|<<|==|!=|\*)/g, '$1$2')
+      .replace(/,$/, '');
   };
 
   /**

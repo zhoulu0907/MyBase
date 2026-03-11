@@ -223,7 +223,7 @@ const FuncPermission: FC<IProps> = ({ appId, menuId, roleId, activeMenuPageType 
             </div>
           </div>
 
-          {activeMenuPageType !== PageType.WORKBENCH && (
+          {activeMenuPageType !== PageType.WORKBENCH && !!funcPermission?.isPageAllowed && (
             <>
               <div className={styles.formItem}>
                 <div className={styles.itemHeader}>

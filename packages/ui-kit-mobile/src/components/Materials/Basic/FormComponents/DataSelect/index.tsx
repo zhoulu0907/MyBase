@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import { debounce } from 'lodash-es';
 import { IconArrowBack } from '@arco-design/mobile-react/esm/icon';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { PopupSwiper, Cell, SearchBar, Radio, Button, Checkbox, Avatar, Form, Loading, Ellipsis } from '@arco-design/mobile-react';
 import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 
@@ -17,6 +18,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     dataField,
     status,
     layout,
+    verify,
     runtime = true,
     isMultiple = false,
     displayFields,
@@ -126,6 +128,14 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     setOptions([]);
   };
 
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`
+    }
+  ];
+
   const LoadingComp = () => <div className="loading"><Loading type="circle" color="rgb(var(--primary-6))" /></div>
   const selectedParseDataName = options.find((item) => item.id === selectedKeys[0])?.name || formValue?.name;
 
@@ -134,6 +144,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
       className="inputTextWrapperOBMobile inputDataSelectOBMobile"
       label={label.display && <Ellipsis text={label.text} maxLine={2} />}
       field={fieldId}
+      rules={rules}
       layout={layout}
       style={{
         pointerEvents: runtime ? 'unset' : 'none',
