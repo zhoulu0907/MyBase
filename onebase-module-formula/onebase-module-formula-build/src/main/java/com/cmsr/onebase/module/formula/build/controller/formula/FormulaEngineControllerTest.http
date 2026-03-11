@@ -9,12 +9,13 @@ tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula":"CONCATENATE('abc',ab)",
-  "parameters":
-  {
-    "ab":258966874542899200
+  "formula":"CONCATENATE('22',$界面交互触发节点.资产)",
+  "parameters":{
+    "$界面交互触发节点.资产":"\\nihao"
   }
 }
+
+
 
 ### LEFT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -730,13 +731,13 @@ Content-Type: application/json
 { "formula": "AND(1==1,1!=2)" }
 
 ### IF
-POST {{baseUrl}}/formula/engine/execute-formula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula":"IF(AND(英语成绩>90,数学成绩>90,语文成绩>90),\"优秀\",\"其他\")",
+  "formula":"LOWER(CONCATENATE(RIGHT(LEFT(IF(AND(英语成绩>90,数学成绩>90,语文成绩>90),'ABC',\"其，他\"),2),1),\"E，F\"))",
   "parameters":{
     "英语成绩":"302285656641273858",
     "数学成绩":"302285656641273857",

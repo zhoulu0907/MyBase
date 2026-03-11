@@ -80,26 +80,60 @@ public class FormulaValidate {
      * @param formula 公式内容
      */
     private static void validateBrackets(String formula) {
-        // 检查中文括号
-        if (formula.contains("（") || formula.contains("）")) {
+        // 首先提取所有字符串字面量（双引号和单引号），并标记它们的位置
+        Set<String> stringLiterals = new HashSet<>();
+            
+        // 匹配双引号字符串
+        Pattern doubleQuotePattern = Pattern.compile("\"[^\"]*\"");
+        Matcher doubleQuoteMatcher = doubleQuotePattern.matcher(formula);
+        while (doubleQuoteMatcher.find()) {
+            stringLiterals.add(doubleQuoteMatcher.group());
+        }
+            
+        // 匹配单引号字符串
+        Pattern singleQuotePattern = Pattern.compile("'[^']*'");
+        Matcher singleQuoteMatcher = singleQuotePattern.matcher(formula);
+        while (singleQuoteMatcher.find()) {
+            stringLiterals.add(singleQuoteMatcher.group());
+        }
+            
+        // 创建一个临时公式，将字符串字面量替换为占位符
+        String tempFormula = formula;
+        int placeholderIndex = 0;
+        for (String literal : stringLiterals) {
+            tempFormula = tempFormula.replace(literal, "@STRING_" + placeholderIndex++ + "@");
+        }
+            
+        // 在临时公式中检查中文标点符号（只检查字符串外部的内容）
+        if (tempFormula.contains("（") || tempFormula.contains("）")) {
             throw new IllegalArgumentException("公式中包含中文括号，请使用英文半角括号 () ");
         }
-
-        // 检查中文逗号
-        if (formula.contains("，")) {
+        
+        // 检查中文逗号（只检查字符串外部的内容）
+        if (tempFormula.contains("，")) {
             throw new IllegalArgumentException("公式中包含中文逗号，请使用英文半角逗号 , ");
         }
-
-        // 检查中文引号
-        if (formula.contains("‘") || formula.contains("’") ||
-            formula.contains("“") || formula.contains("”")) {
-            throw new IllegalArgumentException("公式中包含中文引号，请使用英文半角引号 ‘ 或 ” ");
+        
+        // 检查中文引号（只检查字符串外部的内容）
+        if (tempFormula.contains("‘") || tempFormula.contains("’") ||
+            tempFormula.contains("“") || tempFormula.contains("”")) {
+            throw new IllegalArgumentException("公式中包含中文引号，请使用英文半角引号 ‘ ’ 或 “ ” ");
         }
-
+            
+        // 验证原始公式中的字符串字面量是否使用英文引号（双引号或单引号）
+        for (String literal : stringLiterals) {
+            boolean isDoubleQuoted = literal.startsWith("\"") && literal.endsWith("\"");
+            boolean isSingleQuoted = literal.startsWith("'") && literal.endsWith("'");
+                
+            if (!isDoubleQuoted && !isSingleQuoted) {
+                throw new IllegalArgumentException("字符串字面量必须使用英文双引号或单引号包裹");
+            }
+        }
+        
         // 验证英文括号是否成对出现
         int leftParenCount = 0;
         int rightParenCount = 0;
-        
+            
         for (char c : formula.toCharArray()) {
             if (c == '(') {
                 leftParenCount++;
@@ -107,7 +141,7 @@ public class FormulaValidate {
                 rightParenCount++;
             }
         }
-
+        
         if (leftParenCount != rightParenCount) {
             throw new IllegalArgumentException(
                 String.format("公式中括号不匹配：左括号 (%d 个，右括号 )%d 个", 
