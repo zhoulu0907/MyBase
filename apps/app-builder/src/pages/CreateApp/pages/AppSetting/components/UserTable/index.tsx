@@ -269,8 +269,16 @@ const UserMembers = (props: IProps) => {
     const leaves = items.filter((i) => !parentIdSet.has(i.id));
     if (leaves.length === 0) return '';
     const leaf = leaves[0]; // 只会有一条链路，取第一个叶子
-    const parent = map.get(leaf.parentId);
-    return parent ? `${parent.name} / ${leaf.name}` : leaf.name;
+
+    // 从叶子向上追溯到根，收集整条路径的名称（根 -> 叶）
+    const pathNames: string[] = [];
+    let current: any = leaf;
+    while (current) {
+      pathNames.unshift(current.name);
+      if (current.parentId === '0' || current.parentId == null) break;
+      current = map.get(current.parentId);
+    }
+    return pathNames.join(' / ');
   };
 
   const columns: TableColumnProps[] = [
