@@ -68,6 +68,8 @@ export const CONFIG_TYPES = {
   COVER_IMAGE: 'CoverImage',
   // 绑定分组筛选
   GROUP_FILTER: 'GroupFilter',
+  // 卡片、画布卡片等 的分页配置
+  PAGINATION_CONFIG: 'PaginationConfig'
 } as const;
 
 export const WIDTH_OPTIONS = {

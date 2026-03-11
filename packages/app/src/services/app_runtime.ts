@@ -12,7 +12,7 @@ import {
   SubMitInstanceReq,
   GetTaskCenterOverviewReq
 } from '../types';
-import { appService, runtimeAppService, runtimeListdataService } from './clients';
+import { appService, runtimeAppService, runtimeListdataService, runtimeMetadataService } from './clients';
 
 export const getTodoPageList = (params: GetRunTimePageSetIdReq) => {
   return runtimeListdataService.get('/task-center/todo/page', params);
@@ -51,4 +51,9 @@ export const getMyCCPageList = (params: GetMyCCPageListReq) => {
 
 export const getTaskCenterOverview = (params: GetTaskCenterOverviewReq) => {
   return runtimeListdataService.get('/task-center/overview', params);
+};
+
+// 运行态数据卡片查询
+export const queryRuntimeDataCards = (params: any) => {
+  return runtimeMetadataService.post('/data-card/query', params);
 };
