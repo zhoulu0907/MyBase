@@ -8,7 +8,7 @@ import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
 import { addParentIdToChildren } from '@/utils/menu';
-import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
+import { Button, Dropdown, Form, Input, Layout, Menu, Message, Modal, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
@@ -438,8 +438,14 @@ const PageManagerPage: FC = () => {
     getMenuList();
   };
 
-  const triggerDelete = (menuID: string) => {
-    handleDelete(menuID);
+  const triggerDelete = (menuID: string, menuName: string) => {
+    Modal.confirm({
+      title: `你确定要删除${menuName}吗？`,
+      content: `删除页面将同时删除页面设计与权限配置等，且无法还原，请谨慎操作。`,
+      onOk: async () => {
+        handleDelete(menuID);
+      }
+    });
   };
 
   //页面设计新建大屏创建
