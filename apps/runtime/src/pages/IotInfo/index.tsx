@@ -144,6 +144,7 @@ export default function IotInfo() {
   const [params, setParams] = useState<ParamData[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const currentPageRef = useRef(1);
   const [deviceParams, setDeviceParams] = useState<DeviceParam[]>([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
@@ -164,7 +165,7 @@ export default function IotInfo() {
     try {
       const requestData: DatapointPageRequest = {
         deviceId: Number(deviceDetailRef.current.organize_id),
-        current: currentPage,
+        current: currentPageRef.current,
         size: pageSize,
         type: 1
       };
@@ -221,7 +222,7 @@ export default function IotInfo() {
     } catch (error) {
       console.error('获取设备运行参数失败:', error);
     }
-  }, [currentPage, pageSize]);
+  }, [pageSize]);
 
   const lastFetchedRecordIdRef = useRef<string | null>(null);
   const recordIdRef = useRef<string | null>(null);
@@ -438,12 +439,12 @@ export default function IotInfo() {
         <div className={styles.pagination}>
           <div className={styles.pageInfo}> 当前第 {currentPage} 页，共 {pages} 页，总 {total} 条 </div>
           <Space>
-            <Button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
+            <Button disabled={currentPage === 1} onClick={() => { currentPageRef.current = currentPage - 1; setCurrentPage(currentPage - 1); fetchDeviceRuntimeParams(); }}>
               上一页
             </Button>
             <Button
               disabled={currentPage >= pages}
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => { currentPageRef.current = currentPage + 1; setCurrentPage(currentPage + 1); fetchDeviceRuntimeParams(); }}
             >
               下一页
             </Button>
