@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+﻿import type { CSSProperties } from 'react';
 import { memo, useState, useEffect } from 'react';
 import { Table, TableColumnProps } from '@arco-design/web-react';
 import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
@@ -20,6 +20,7 @@ const initColumns = [
 ];
 const initDataSource = [
   {
+    id: 'init-1',
     title: '标题1',
     content: '内容1'
   }
@@ -115,7 +116,7 @@ const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
       </div>
 
       <div>
-        <Table data={finalData} columns={finalCols} pagination={pagination} />
+        <Table data={finalData} columns={finalCols} pagination={pagination} rowKey="id" />
       </div>
     </div>
   );
