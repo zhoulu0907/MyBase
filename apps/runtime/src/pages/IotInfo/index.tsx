@@ -69,7 +69,7 @@ const createThirdPartyClient = (baseURL: string) => {
   };
 };
 
-const thirdPartyClient = createThirdPartyClient('http://dfecoc.ft.internal.virtueit.net');
+const thirdPartyClient = createThirdPartyClient('https://api.sit.artifex-cmcc.com.cn');
 
 interface DatapointPageRequest {
   deviceId: number;
@@ -296,6 +296,21 @@ export default function IotInfo() {
   }, []);
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      console.log('收到消息:', event.data);
+      if (event.data && event.data.type === 'drawerClose') {
+        console.log('收到drawerClose消息,清除轮询');
+        clearPollingTimer();
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [clearPollingTimer]);
+
+  useEffect(() => {
     const paramArray: ParamData[] = [];
     searchParams.forEach((value, key) => {
       paramArray.push({ key, value });
@@ -424,7 +439,7 @@ export default function IotInfo() {
                 <div className={styles.paramName}>{param.name}</div>
                 <div className={styles.paramValue}>
                   <span
-                    className={`${styles.value} ${param.status === 'error' ? styles.error : param.status === 'warning' ? styles.warning : ''}`}
+                    className={`${styles.value} ${param.status === 'error' ? styles.error : param.status === 'warning' ? styles.warning : ''} ${param.value.length > 7 ? styles.smallValue : ''}`}
                   >
                     {param.value}
                   </span>
