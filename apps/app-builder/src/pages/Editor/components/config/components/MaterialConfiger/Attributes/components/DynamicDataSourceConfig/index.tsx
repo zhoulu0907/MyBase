@@ -9,7 +9,7 @@ import { getEntityGraph } from '@onebase/app';
 import { getPopupContainer } from '@onebase/ui-kit';
 import { hiddenFieldTypes } from '../DynamicTableConfig';
 import DataSelectionProcessConfig from './components/DataSelectionProcessConfig';
-// import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
+import FillingRuleSettingsModal from './components/FillingRuleSettingsModal';
 import styles from './index.module.less';
 
 const FormItem = Form.Item;
@@ -54,27 +54,27 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
 
   // 设置显示字段
   const [displayFieldOptions, setDisplayFieldOptions] = useState<any[]>(configs[ATTR_KEY.DISPLAYFIELDSOPTIONS]);
-  // const [filteredFieldsData, setFilteredFieldsData] = useState<any[]>(configs[ATTR_KEY.FILLFORMFIELDOPTIONS]);
-  // const [selected, setSelected] = useState<string[]>([]);
+  const [filteredFieldsData, setFilteredFieldsData] = useState<any[]>(configs[ATTR_KEY.FILLFORMFIELDOPTIONS]);
+  const [selected, setSelected] = useState<string[]>([]);
 
-  // const [ruleSettingVisible, setRuleSettingVisible] = useState(false); //填充规则设置popup
-  // const [selectRule, setSelectRule] = useState<any[]>(configs[ATTR_KEY.FILLRULESETTING]);
+  const [ruleSettingVisible, setRuleSettingVisible] = useState(false); //填充规则设置popup
+  const [selectRule, setSelectRule] = useState<any[]>(configs[ATTR_KEY.FILLRULESETTING]);
 
   useEffect(() => {
     curAppId && curDataSourceId && getDataSource();
   }, [curAppId, curDataSourceId, id]);
 
-  // useEffect(() => {
-  //   setSelectRule(configs[ATTR_KEY.FILLRULESETTING]);
-  // }, [configs[ATTR_KEY.FILLRULESETTING]]);
+  useEffect(() => {
+    setSelectRule(configs[ATTR_KEY.FILLRULESETTING]);
+  }, [configs[ATTR_KEY.FILLRULESETTING]]);
 
-  // useEffect(() => {
-  //   const displayFields = configs[ATTR_KEY.DISPLAYFIELDS];
-  //   if (displayFields.length > 0) {
-  //     const selectItems = displayFields.map((item: any) => item.value);
-  //     setSelected(selectItems);
-  //   }
-  // }, []);
+  useEffect(() => {
+    const displayFields = configs[ATTR_KEY.DISPLAYFIELDS];
+    if (displayFields.length > 0) {
+      const selectItems = displayFields.map((item: any) => item.value);
+      setSelected(selectItems);
+    }
+  }, []);
 
   useEffect(() => {
     const fieldsMap = new Map<string, any[]>(
@@ -137,12 +137,12 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     const filteredFieldsData = (fieldsMap.get(value) ?? []).filter(
       (f: any) => !f.isSystemField && !hiddenFieldTypes.includes(f.fieldType)
     );
-    // setFilteredFieldsData(filteredFieldsData);
+    setFilteredFieldsData(filteredFieldsData);
 
     //reset 数据选择过程 显示在表单中 填充规则
     setIsSetted(false);
-    // setSelected([]);
-    // setSelectRule([]);
+    setSelected([]);
+    setSelectRule([]);
     const displayFields: any[] = [];
 
     // 选择数据时的显示字段 默认选中.  TODO
@@ -211,11 +211,11 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
     handlePropsChange(ATTR_KEY.DISPLAYFIELDS, displayFields);
   };
 
-  // const handleOKModal = (values: any) => {
-  //   setSelectRule(values);
-  //   handlePropsChange(ATTR_KEY.FILLRULESETTING, values);
-  //   setRuleSettingVisible(false);
-  // };
+  const handleOKModal = (values: any) => {
+    setSelectRule(values);
+    handlePropsChange(ATTR_KEY.FILLRULESETTING, values);
+    setRuleSettingVisible(false);
+  };
 
   return (
     <>
@@ -293,7 +293,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                     ))}
                   </Select>
                 </FormItem>
-                {/* <FormItem
+                <FormItem
                   layout="vertical"
                   labelAlign="left"
                   label={'填充到表单字段'}
@@ -309,7 +309,7 @@ const DynamicDataSourceConfig: React.FC<DynamicSelectDataSourceConfigProps> = ({
                     onCancel={() => setRuleSettingVisible(false)}
                     onOk={(values: any) => handleOKModal(values)}
                   />
-                </FormItem> */}
+                </FormItem>
               </FormItem>
             </div>
           )}

@@ -1,6 +1,7 @@
 import { memo, useState, useEffect } from 'react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { pagesRuntimeSignal } from '@onebase/common';
+import { menuSignal } from '@onebase/app';
 import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import { type XWebViewConfig } from './schema';
 import './index.css';
@@ -8,12 +9,24 @@ import './index.css';
 const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?: boolean }) => {
   useSignals();
 
-  const { status, title, webViewUrl, runtime = true, params } = props;
+  const { status, title, webViewUrl, runtime = true, params, tableName: configTableName } = props;
 
   const [iframeError, setIframeError] = useState(false);
   const [validUrl, setValidUrl] = useState('');
   const [iframeHeight, setIframeHeight] = useState('900px');
-  const { rowData } = pagesRuntimeSignal;
+  const { rowData, rowDataId, drawerVisible } = pagesRuntimeSignal;
+  const { curMenu } = menuSignal;
+
+  useEffect(() => {
+    console.log('drawerVisible变化:', drawerVisible.value);
+    if (!drawerVisible.value) {
+      const iframe = document.querySelector('iframe');
+      if (iframe && iframe.contentWindow) {
+        console.log('发送drawerClose消息');
+        iframe.contentWindow.postMessage({ type: 'drawerClose' }, '*');
+      }
+    }
+  }, [drawerVisible.value]);
 
   const getValidUrl = (url: string) => {
     if (!url) return '';
@@ -24,19 +37,31 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
   };
 
   const buildUrlWithParams = (baseUrl: string) => {
-    if (!runtime || !params || params.length === 0) {
-      return getValidUrl(baseUrl);
-    }
-
     const tableRowData = rowData.value;
     const searchParams = new URLSearchParams();
 
-    params.forEach(param => {
-      const value = tableRowData[param.key];
-      if (value !== undefined && value !== null && value !== '') {
-        searchParams.append(param.key, String(value));
+    if (runtime) {
+      const currentRecordId = rowDataId.value;
+      if (currentRecordId) {
+        searchParams.append('recordId', currentRecordId);
       }
-    });
+      if (configTableName) {
+        searchParams.append('tableName', configTableName);
+      }
+      const currentMenuId = curMenu.value?.id;
+      if (currentMenuId) {
+        searchParams.append('menuId', currentMenuId);
+      }
+    }
+
+    if (params && params.length > 0) {
+      params.forEach(param => {
+        const value = tableRowData[param.key];
+        if (value !== undefined && value !== null && value !== '') {
+          searchParams.append(param.key, String(value));
+        }
+      });
+    }
 
     const queryString = searchParams.toString();
     const validBaseUrl = getValidUrl(baseUrl);
@@ -47,7 +72,7 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
   useEffect(() => {
     const url = buildUrlWithParams(webViewUrl);
     setValidUrl(url);
-  }, [webViewUrl, params, runtime, rowData.value]);
+  }, [webViewUrl, params, runtime, rowData.value, rowDataId.value, curMenu.value?.id, configTableName]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {

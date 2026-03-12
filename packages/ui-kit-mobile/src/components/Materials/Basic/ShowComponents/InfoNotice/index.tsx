@@ -11,6 +11,7 @@ const XInfoNotice = memo((props: XInfoNoticeConfig & { runtime?: boolean; detail
   return (
     <NoticeBar
       leftContent={<IconNotice />}
+      closeable={false}
       style={{
         width: '100%',
         borderRadius: '0.16rem',

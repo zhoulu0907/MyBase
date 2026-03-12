@@ -33,7 +33,7 @@
 }
 
 .cardContent {
-  .cardItem {
+  .listItem {
     position: relative;
 
     &:hover {

@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, Descriptions, Typography, Button, Input, Space, Message } from '@arco-design/web-react';
 import { IconSearch, IconRefresh } from '@arco-design/web-react/icon';
 import { createClient } from '@onebase/common';
+import { dataMethodDetailV2 } from '@onebase/app';
 import styles from './index.module.less';
 
 const { Title } = Typography;
@@ -19,6 +20,23 @@ interface DeviceParam {
   unit: string;
   status: 'normal' | 'warning' | 'error';
   updateTime: string;
+}
+
+interface DeviceDetail {
+  updated_time?: string;
+  device_name?: string;
+  device_id?: string | number;
+  organize_id?: string | number;
+  device_encoding?: string;
+  device_model?: string;
+  tenant_id?: string | number;
+  status?: number | null | string;
+  installation_site?: string;
+  rated_power?: string;
+  rated_speed?: string;
+  nominal_voltage?: string;
+  rated_current?: string;
+  id?: string;
 }
 
 
@@ -51,7 +69,7 @@ const createThirdPartyClient = (baseURL: string) => {
   };
 };
 
-const thirdPartyClient = createThirdPartyClient('http://dfecoc.ft.internal.virtueit.net');
+const thirdPartyClient = createThirdPartyClient('https://api.sit.artifex-cmcc.com.cn');
 
 interface DatapointPageRequest {
   deviceId: number;
@@ -126,9 +144,12 @@ export default function IotInfo() {
   const [params, setParams] = useState<ParamData[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const currentPageRef = useRef(1);
   const [deviceParams, setDeviceParams] = useState<DeviceParam[]>([]);
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(0);
+  const [deviceDetail, setDeviceDetail] = useState<DeviceDetail>({});
+  const deviceDetailRef = useRef<DeviceDetail>({});
   const pageSize = 10;
   const lastHeightRef = useRef<number>(0);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -137,20 +158,24 @@ export default function IotInfo() {
 
 
   const fetchDeviceRuntimeParams = useCallback(async () => {
+    if (!deviceDetailRef.current.organize_id || !deviceDetailRef.current.tenant_id) {
+      return;
+    }
+
     try {
       const requestData: DatapointPageRequest = {
-        deviceId: 36, // 对应设备device表的字段为organize_id
-        current: currentPage,   // 分页参数当前页
-        size: pageSize,     // 分页参数页大小
-        type: 1       // 固定值
+        deviceId: Number(deviceDetailRef.current.organize_id),
+        current: currentPageRef.current,
+        size: pageSize,
+        type: 1
       };
       
       const res = await thirdPartyClient.post<DatapointPageResponse>('/v1/proxybe/api/iot/v1.0.0/devicemodel/datapoint/page', requestData, {
         headers: {
-          'tenant_id': '2026495195650420737', // 对应设备device表的字段为main_id
-          'customer_id': '1',                // 固定值
-          'project': 'indusiot',             // 固定值
-          'product': 'base'                  // 固定值
+          'tenant_id': String(deviceDetailRef.current.tenant_id),
+          'customer_id': '1',
+          'project': 'indusiot',
+          'product': 'base'
         }
       });
       
@@ -193,13 +218,75 @@ export default function IotInfo() {
       } else {
         // 处理响应失败的情况
         console.error('接口响应失败:', res);
-        Message.error('获取设备运行参数失败');
       }
     } catch (error) {
       console.error('获取设备运行参数失败:', error);
-      // 不显示错误消息，避免将成功的响应误判为错误
     }
-  }, [currentPage, pageSize]);
+  }, [pageSize]);
+
+  const lastFetchedRecordIdRef = useRef<string | null>(null);
+  const recordIdRef = useRef<string | null>(null);
+  const tableNameRef = useRef<string | null>(null);
+  const menuIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    recordIdRef.current = searchParams.get('recordId');
+    tableNameRef.current = searchParams.get('tableName');
+    menuIdRef.current = searchParams.get('menuId');
+  }, [searchParams]);
+
+  const fetchDeviceDetail = useCallback(async () => {
+    const recordId = recordIdRef.current;
+    const tableName = tableNameRef.current;
+    const menuId = menuIdRef.current;
+    
+    if (lastFetchedRecordIdRef.current === recordId && recordId) {
+      return;
+    }
+    
+    try {
+      if (!recordId || !tableName || !menuId) {
+        console.log('缺少必要的参数:', { recordId, tableName, menuId });
+        return;
+      }
+
+      lastFetchedRecordIdRef.current = recordId;
+      
+      const res = await dataMethodDetailV2(tableName, menuId, { id: recordId });
+      
+      if (res) {
+        console.log('设备详情数据:', res);
+        const detailData = res.data || res;
+        const processedDetail: DeviceDetail = {
+          id: detailData.id,
+          updated_time: detailData.updated_time || '--',
+          device_name: typeof detailData.device_name === 'string' ? detailData.device_name : '--',
+          device_id: detailData.device_id || '--',
+          organize_id: detailData.organize_id || detailData.device_id || '--',
+          device_encoding: typeof detailData.device_encoding === 'string' ? detailData.device_encoding : '--',
+          device_model: detailData.device_model?.id || detailData.device_model || '--',
+          tenant_id: detailData.tenant_id || '--',
+          status: detailData.status !== undefined && detailData.status !== null ? detailData.status : '--',
+          installation_site: detailData.installation_site?.id || detailData.installation_site || '--',
+          rated_power: detailData.rated_power || '--',
+          rated_speed: detailData.rated_speed || '--',
+          nominal_voltage: detailData.nominal_voltage || '--',
+          rated_current: detailData.rated_current || '--'
+        };
+        setDeviceDetail(processedDetail);
+        deviceDetailRef.current = processedDetail;
+
+        if (processedDetail.organize_id && processedDetail.tenant_id) {
+          fetchDeviceRuntimeParams();
+          pollingTimerRef.current = setInterval(() => {
+            fetchDeviceRuntimeParams();
+          }, 3000);
+        }
+      }
+    } catch (error) {
+      console.error('获取设备详情失败:', error);
+    }
+  }, []);
 
   const clearPollingTimer = useCallback(() => {
     if (pollingTimerRef.current) {
@@ -209,23 +296,19 @@ export default function IotInfo() {
   }, []);
 
   useEffect(() => {
-    fetchDeviceRuntimeParams();
-
-    pollingTimerRef.current = setInterval(() => {
-      fetchDeviceRuntimeParams();
-    }, 3000);
-
-    const handleBeforeUnload = () => {
-      clearPollingTimer();
+    const handleMessage = (event: MessageEvent) => {
+      console.log('收到消息:', event.data);
+      if (event.data && event.data.type === 'drawerClose') {
+        console.log('收到drawerClose消息,清除轮询');
+        clearPollingTimer();
+      }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
+    window.addEventListener('message', handleMessage);
     return () => {
-      clearPollingTimer();
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('message', handleMessage);
     };
-  }, [fetchDeviceRuntimeParams, clearPollingTimer]);
+  }, [clearPollingTimer]);
 
   useEffect(() => {
     const paramArray: ParamData[] = [];
@@ -233,8 +316,9 @@ export default function IotInfo() {
       paramArray.push({ key, value });
     });
     setParams(paramArray);
-    // 控制台输出参数
     console.log('URL参数:', Object.fromEntries(searchParams));
+    
+    fetchDeviceDetail();
   }, [searchParams]);
 
   const sendHeight = useCallback(() => {
@@ -299,16 +383,16 @@ export default function IotInfo() {
         </Title>
         <Descriptions
           data={[
-            { label: '设备名称', value: '离心式压缩机' },
-            { label: '设备型号', value: 'C1200-15-4.5/0.8' },
-            { label: '设备编号', value: '8888202502050001' },
-            { label: '设备状态', value: '运行中' },
-            { label: '安装位置', value: '一号厂房' },
-            { label: '额定功率', value: '1000kW' },
-            { label: '额定转速', value: '1500rpm' },
-            { label: '额定电压', value: '10kV' },
-            { label: '额定电流', value: '65A' },
-            { label: '上次维护', value: '2026-02-01' }
+            { label: '设备名称', value: deviceDetail.device_name || '--' },
+            { label: '设备型号', value: deviceDetail.device_model || '--' },
+            { label: '设备编号', value: deviceDetail.device_encoding || '--' },
+            { label: '设备状态', value: deviceDetail.status == 1 ? '在线' : deviceDetail.status == 0 ? '离线' : '--' },
+            { label: '安装位置', value: deviceDetail.installation_site || '--' },
+            { label: '额定功率', value: deviceDetail.rated_power || '--' },
+            { label: '额定转速', value: deviceDetail.rated_speed || '--' },
+            { label: '额定电压', value: deviceDetail.nominal_voltage || '--' },
+            { label: '额定电流', value: deviceDetail.rated_current || '--' },
+            { label: '上次维护', value: deviceDetail.updated_time || '--' }
           ]}
           column={2}
         />
@@ -351,11 +435,11 @@ export default function IotInfo() {
         {/* 参数卡片列表 */}
         <div className={styles.paramsGrid}>
           {paginatedParams.map((param) => (
-              <div className={styles.paramCard} >
+              <div key={param.id} className={styles.paramCard} >
                 <div className={styles.paramName}>{param.name}</div>
                 <div className={styles.paramValue}>
                   <span
-                    className={`${styles.value} ${param.status === 'error' ? styles.error : param.status === 'warning' ? styles.warning : ''}`}
+                    className={`${styles.value} ${param.status === 'error' ? styles.error : param.status === 'warning' ? styles.warning : ''} ${param.value.length > 7 ? styles.smallValue : ''}`}
                   >
                     {param.value}
                   </span>
@@ -370,12 +454,12 @@ export default function IotInfo() {
         <div className={styles.pagination}>
           <div className={styles.pageInfo}> 当前第 {currentPage} 页，共 {pages} 页，总 {total} 条 </div>
           <Space>
-            <Button disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
+            <Button disabled={currentPage === 1} onClick={() => { currentPageRef.current = currentPage - 1; setCurrentPage(currentPage - 1); fetchDeviceRuntimeParams(); }}>
               上一页
             </Button>
             <Button
               disabled={currentPage >= pages}
-              onClick={() => setCurrentPage(currentPage + 1)}
+              onClick={() => { currentPageRef.current = currentPage + 1; setCurrentPage(currentPage + 1); fetchDeviceRuntimeParams(); }}
             >
               下一页
             </Button>
