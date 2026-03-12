@@ -99,7 +99,7 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
   {
     key: 'CHATBOT',
     type: 'XChatbot',
-    displayName: '聊天助手',
+    displayName: '智能体对话',
     icon: 'chatbot_cp.svg',
     category: 'basic',
     size: { h: 80, w: 80 }
