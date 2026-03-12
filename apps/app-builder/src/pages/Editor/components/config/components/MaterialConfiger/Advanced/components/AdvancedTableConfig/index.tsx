@@ -18,7 +18,7 @@ import {
 } from '@arco-design/web-react';
 import { IconDragDotVertical, IconEdit, IconExclamationCircle } from '@arco-design/web-react/icon';
 import { IconEditStroked } from '@douyinfe/semi-icons';
-import { type PageView, menuSignal } from '@onebase/app';
+import { type PageView, menuSignal, PageType } from '@onebase/app';
 import {
   getPopupContainer,
   iconColorList,
@@ -365,7 +365,7 @@ const AdvancedTableOperationConfig: React.FC<AdvancedTableOperationConfigProps> 
                         />
                         <Switch
                           size="small"
-                          disabled={op.type === 'edit' && curMenu?.value?.pagesetType === 2}
+                          disabled={op.type === 'edit' && curMenu?.value?.pagesetType === PageType.BPM}
                           defaultChecked={op.type === 'edit' ? false : op.display}
                           onChange={(value) => {
                             const newArr = [...configs[operationButton]];
