@@ -106,6 +106,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
         const desc = COMPONENT_REGISTRY[type];
         if (!desc) return null;
         if (keyword && !desc.template.displayName.toLowerCase().includes(lowerKeyword)) return null;
+        if (desc.editorType && desc.editorType !== activeTab) return null;
         return {
           type: desc.type,
           displayName: desc.template.displayName,
@@ -115,7 +116,7 @@ const MaterialContainer: React.FC<MaterialContainerProps> = ({ activeTab, childC
       })
       .filter((item) => item !== null);
     setCustomItems(newCustomItems);
-  }, [keyword, templateStr]);
+  }, [keyword, templateStr, activeTab]);
 
   useEffect(() => {
     if (!keyword) return setComponents(baseCategories); // 没关键词直接返回原数据

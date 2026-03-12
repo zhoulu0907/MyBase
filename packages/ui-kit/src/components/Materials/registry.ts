@@ -39,6 +39,7 @@ export interface ComponentDescriptor {
   fieldMap?: string[]
   entityMap?: string[]
   component?: ReactComponentType<any>
+  editorType?: 'form_editor' | 'list_editor'
 }
 
 /**
@@ -1153,7 +1154,8 @@ const ChatbotDescriptor: ComponentDescriptor = {
   schema: cloneDeep(workbenchSchema.XChatbot),
   template: { h: 80, w: 80, displayName: '智能体对话', icon: 'chatbot_cp.svg', category: 'workbench' },
   fieldMap: [],
-  entityMap: []
+  entityMap: [],
+  editorType: 'list_editor'
 };
 
 registerMaterialsPlugin({
