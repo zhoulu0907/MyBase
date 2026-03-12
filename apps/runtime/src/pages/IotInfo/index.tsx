@@ -439,7 +439,7 @@ export default function IotInfo() {
                 <div className={styles.paramName}>{param.name}</div>
                 <div className={styles.paramValue}>
                   <span
-                    className={`${styles.value} ${param.status === 'error' ? styles.error : param.status === 'warning' ? styles.warning : ''}`}
+                    className={`${styles.value} ${param.status === 'error' ? styles.error : param.status === 'warning' ? styles.warning : ''} ${param.value.length > 7 ? styles.smallValue : ''}`}
                   >
                     {param.value}
                   </span>
