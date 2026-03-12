@@ -7,7 +7,13 @@ import com.cmsr.onebase.framework.web.core.filter.LogMdcFilter;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.annotation.Resource;
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,9 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.modelmapper.ModelMapper;
+
+import java.io.IOException;
 
 @AutoConfiguration
 @EnableConfigurationProperties(WebProperties.class)
@@ -119,6 +128,14 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
         return createFilterBean(new LogMdcFilter(), WebFilterOrderEnum.REQUEST_BODY_CACHE_FILTER + 1);
     }
 
+    @Bean
+    public FilterRegistrationBean<DoubleSlashNormalizeFilter> doubleSlashNormalizeFilter() {
+        FilterRegistrationBean<DoubleSlashNormalizeFilter> bean =
+                createFilterBean(new DoubleSlashNormalizeFilter(), WebFilterOrderEnum.CORS_FILTER + 1);
+        bean.setDispatcherTypes(DispatcherType.REQUEST);
+        return bean;
+    }
+
 
     public static <T extends Filter> FilterRegistrationBean<T> createFilterBean(T filter, Integer order) {
         FilterRegistrationBean<T> bean = new FilterRegistrationBean<>(filter);
@@ -127,4 +144,73 @@ public class OneBaseWebAutoConfiguration implements WebMvcConfigurer {
     }
 
 
+}
+
+class DoubleSlashNormalizeFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        String requestUri = request.getRequestURI();
+        if (requestUri == null || requestUri.indexOf("//") < 0) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String normalizedRequestUri = collapseSlashes(requestUri);
+        if (requestUri.equals(normalizedRequestUri)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        filterChain.doFilter(new NormalizedPathRequestWrapper(request, normalizedRequestUri), response);
+    }
+
+    private String collapseSlashes(String path) {
+        int len = path.length();
+        StringBuilder sb = new StringBuilder(len);
+        char prev = 0;
+        for (int i = 0; i < len; i++) {
+            char c = path.charAt(i);
+            if (c == '/' && prev == '/') {
+                continue;
+            }
+            sb.append(c);
+            prev = c;
+        }
+        return sb.toString();
+    }
+
+    private static final class NormalizedPathRequestWrapper extends HttpServletRequestWrapper {
+
+        private final String normalizedRequestUri;
+
+        private NormalizedPathRequestWrapper(HttpServletRequest request, String normalizedRequestUri) {
+            super(request);
+            this.normalizedRequestUri = normalizedRequestUri;
+        }
+
+        @Override
+        public String getRequestURI() {
+            return normalizedRequestUri;
+        }
+
+        @Override
+        public StringBuffer getRequestURL() {
+            HttpServletRequest request = (HttpServletRequest) getRequest();
+            String scheme = request.getScheme();
+            int port = request.getServerPort();
+            boolean standardPort = ("http".equalsIgnoreCase(scheme) && port == 80)
+                    || ("https".equalsIgnoreCase(scheme) && port == 443);
+
+            StringBuffer sb = new StringBuffer();
+            sb.append(scheme).append("://").append(request.getServerName());
+            if (!standardPort) {
+                sb.append(':').append(port);
+            }
+            sb.append(normalizedRequestUri);
+            return sb;
+        }
+    }
 }

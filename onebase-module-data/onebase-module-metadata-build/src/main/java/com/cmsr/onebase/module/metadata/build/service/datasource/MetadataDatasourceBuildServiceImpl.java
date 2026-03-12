@@ -171,20 +171,15 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
             table.setSchema(queryVO.getSchemaName());
         }
 
-        // 获取表的所有字段信息
-        List<String> columnNames = temporaryService.columns(table);
-
         List<ColumnInfoRespVO> result = new ArrayList<>();
-        for (String columnName : columnNames) {
-            // 构建Column对象来获取详细信息
-            Column column = new Column(columnName);
+        java.util.LinkedHashMap<String, Column> columns = temporaryService.metadata().columns(table);
+        if (columns == null || columns.isEmpty()) {
+            return result;
+        }
 
-            // 获取字段的详细信息
-            Column columnDetail = temporaryService.metadata().column(table, columnName);
-            if (columnDetail == null) {
-                columnDetail = column; // 如果获取不到详细信息，使用基本信息
-            }
-
+        for (Column columnDetail : columns.values().stream()
+                .sorted(java.util.Comparator.comparingInt(Column::getPosition))
+                .toList()) {
             ColumnInfoRespVO columnInfo = new ColumnInfoRespVO();
             columnInfo.setColumnName(columnDetail.getName());
             columnInfo.setDisplayName(StringUtils.hasText(columnDetail.getComment()) ? columnDetail.getComment() : columnDetail.getName());

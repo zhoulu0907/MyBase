@@ -87,6 +87,9 @@ sessionStore
 # documentation (local only)
 docs/
 
+# http debug (local only)
+/http-debug/
+
 # requirements documentation
 /需求文档
 /.github/copilot-instructions.md

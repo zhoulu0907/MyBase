@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.security.runtime.service;
 
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.web.config.WebProperties;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -32,6 +33,57 @@ public class AuthPermitService implements ApplicationContextAware {
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    private String collapseSlashes(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+        int len = path.length();
+        StringBuilder sb = new StringBuilder(len);
+        char prev = 0;
+        for (int i = 0; i < len; i++) {
+            char c = path.charAt(i);
+            if (c == '/' && prev == '/') {
+                continue;
+            }
+            sb.append(c);
+            prev = c;
+        }
+        return sb.toString();
+    }
+
+    private String normalizeApiPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+        int idx = Integer.MAX_VALUE;
+        int buildIdx = path.indexOf(WebProperties.BUILD);
+        if (buildIdx >= 0) {
+            idx = Math.min(idx, buildIdx);
+        }
+        int platformIdx = path.indexOf(WebProperties.PLATFORM);
+        if (platformIdx >= 0) {
+            idx = Math.min(idx, platformIdx);
+        }
+        int runtimeIdx = path.indexOf(WebProperties.RUNTIME);
+        if (runtimeIdx >= 0) {
+            idx = Math.min(idx, runtimeIdx);
+        }
+        if (idx == Integer.MAX_VALUE) {
+            return path;
+        }
+        return path.substring(idx);
+    }
+
+    private String requestPath(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String path = requestUri;
+        if (contextPath != null && !contextPath.isEmpty() && requestUri != null && requestUri.startsWith(contextPath)) {
+            path = requestUri.substring(contextPath.length());
+        }
+        return normalizeApiPath(collapseSlashes(path));
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
@@ -52,7 +104,7 @@ public class AuthPermitService implements ApplicationContextAware {
      * @return 是否为免登录请求
      */
     public boolean isPermitAllRequest(HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
+        String requestUri = requestPath(request);
         if (permitAllUrls != null) {
             for (String pattern : permitAllUrls) {
                 if (pathMatcher.match(pattern, requestUri)) {

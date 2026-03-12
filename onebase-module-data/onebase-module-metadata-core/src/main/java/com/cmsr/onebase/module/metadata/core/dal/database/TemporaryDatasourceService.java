@@ -147,7 +147,7 @@ public class TemporaryDatasourceService {
             // dsConfig.put("fail-fast", true);          // 移除快速失败，避免过早关闭
             // dsConfig.put("break-after-acquire-failure", true); // 移除，避免获取失败后立即中断
 
-            log.info("临时数据源配置: {}", dsConfig);
+            log.info("临时数据源配置: {}", maskSensitive(dsConfig));
 
             // 创建数据源和临时服务 - 增强错误处理和连接验证
             DataSource dataSource = null;
@@ -201,6 +201,8 @@ public class TemporaryDatasourceService {
                         errorMsg.contains("timeout") ||
                         errorMsg.contains("Network is unreachable") ||
                         errorMsg.contains("No route to host") ||
+                        errorMsg.contains("尝试连线已失败") ||
+                        errorMsg.contains("连接尝试失败") ||
                         errorMsg.contains("connect timed out")) {
                         throw new RuntimeException("数据源网络不可达或连接超时，请检查数据源配置: " + errorMsg, e);
                     }
@@ -214,6 +216,17 @@ public class TemporaryDatasourceService {
             log.error("创建数据库连接失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
+    }
+
+    private Map<String, Object> maskSensitive(Map<String, Object> config) {
+        if (config == null || config.isEmpty()) {
+            return config;
+        }
+        Map<String, Object> masked = new HashMap<>(config);
+        if (masked.containsKey("password")) {
+            masked.put("password", "******");
+        }
+        return masked;
     }
 
     /**
