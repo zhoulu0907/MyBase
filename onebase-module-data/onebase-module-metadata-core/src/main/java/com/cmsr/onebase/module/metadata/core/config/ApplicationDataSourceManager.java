@@ -106,9 +106,11 @@ public class ApplicationDataSourceManager {
             String username = str(cfg.get("username"));
             if (username == null) { username = str(cfg.get("user")); }
             String password = str(cfg.get("password"));
+            String driverClassName = resolveDriverClassName(cfg, null);
 
             HikariDataSource hikari = new HikariDataSource();
             if (url != null) { hikari.setJdbcUrl(url); }
+            if (driverClassName != null) { hikari.setDriverClassName(driverClassName); }
             if (username != null) { hikari.setUsername(username); }
             if (password != null) { hikari.setPassword(password); }
             hikari.setMaximumPoolSize(5);
@@ -164,9 +166,11 @@ public class ApplicationDataSourceManager {
             String username = str(cfg.get("username"));
             if (username == null) { username = str(cfg.get("user")); }
             String password = str(cfg.get("password"));
+            String driverClassName = resolveDriverClassName(cfg, dsDo);
 
             HikariDataSource hikari = new HikariDataSource();
             if (url != null) { hikari.setJdbcUrl(url); }
+            if (driverClassName != null) { hikari.setDriverClassName(driverClassName); }
             if (username != null) { hikari.setUsername(username); }
             if (password != null) { hikari.setPassword(password); }
             hikari.setMaximumPoolSize(5);
@@ -198,11 +202,92 @@ public class ApplicationDataSourceManager {
             String port = str(cfg.get("port"));
             String database = str(cfg.get("database"));
             if (host != null && database != null) {
-                String p = (port == null || port.isBlank()) ? "5432" : port;
-                url = "jdbc:postgresql://" + host + ":" + p + "/" + database;
+                String datasourceType = str(cfg.get("datasourceType"));
+                if (datasourceType == null) { datasourceType = str(cfg.get("type")); }
+                String p = (port == null || port.isBlank()) ? defaultPort(datasourceType) : port;
+                String prefix = jdbcPrefix(datasourceType);
+                url = prefix + host + ":" + p + "/" + database;
             }
         }
         return url;
+    }
+
+    private static String resolveDriverClassName(Map<String, Object> cfg, MetadataDatasourceDO dsDo) {
+        String driverClassName = str(cfg.get("driverClassName"));
+        if (driverClassName == null) { driverClassName = str(cfg.get("driver-class-name")); }
+        if (driverClassName == null) { driverClassName = str(cfg.get("jdbcDriverClass")); }
+        if (driverClassName != null && !driverClassName.isBlank()) {
+            return driverClassName;
+        }
+
+        String datasourceType = dsDo == null ? null : dsDo.getDatasourceType();
+        if (datasourceType == null) { datasourceType = str(cfg.get("datasourceType")); }
+        if (datasourceType == null) { datasourceType = str(cfg.get("type")); }
+
+        String normalizedType = normalizeType(datasourceType);
+        if ("POSTGRESQL".equals(normalizedType)) {
+            return "org.postgresql.Driver";
+        }
+        if ("OPENGAUSS".equals(normalizedType)) {
+            return "org.opengauss.Driver";
+        }
+        if ("MYSQL".equals(normalizedType)) {
+            return "com.mysql.cj.jdbc.Driver";
+        }
+        if ("CLICKHOUSE".equals(normalizedType)) {
+            return "com.clickhouse.jdbc.ClickHouseDriver";
+        }
+        if ("KINGBASE".equals(normalizedType)) {
+            return "com.kingbase8.Driver";
+        }
+        if ("TDENGINE".equals(normalizedType)) {
+            return "com.taosdata.jdbc.TSDBDriver";
+        }
+        return null;
+    }
+
+    private static String jdbcPrefix(String datasourceType) {
+        String normalizedType = normalizeType(datasourceType);
+        if ("MYSQL".equals(normalizedType)) {
+            return "jdbc:mysql://";
+        }
+        if ("CLICKHOUSE".equals(normalizedType)) {
+            return "jdbc:clickhouse://";
+        }
+        if ("KINGBASE".equals(normalizedType)) {
+            return "jdbc:kingbase8://";
+        }
+        if ("TDENGINE".equals(normalizedType)) {
+            return "jdbc:TAOS://";
+        }
+        if ("OPENGAUSS".equals(normalizedType)) {
+            return "jdbc:opengauss://";
+        }
+        return "jdbc:postgresql://";
+    }
+
+    private static String defaultPort(String datasourceType) {
+        String normalizedType = normalizeType(datasourceType);
+        if ("MYSQL".equals(normalizedType)) {
+            return "3306";
+        }
+        if ("CLICKHOUSE".equals(normalizedType)) {
+            return "8123";
+        }
+        if ("KINGBASE".equals(normalizedType)) {
+            return "54321";
+        }
+        if ("TDENGINE".equals(normalizedType)) {
+            return "6030";
+        }
+        return "5432";
+    }
+
+    private static String normalizeType(String datasourceType) {
+        if (datasourceType == null) {
+            return "";
+        }
+        return datasourceType.replace("_", "").replace("-", "").trim().toUpperCase();
     }
 
     private static String computeConfigKey(Map<String, Object> cfg) {

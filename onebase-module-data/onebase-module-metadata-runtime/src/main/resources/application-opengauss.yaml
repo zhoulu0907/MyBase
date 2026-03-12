@@ -1,0 +1,91 @@
+--- #################### 注册中心 + 配置中心相关配置 ####################
+
+spring:
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      username:
+      password:
+      discovery:
+        namespace: dev
+        group: DEFAULT_GROUP
+        metadata:
+          version: 1.0.0
+      config:
+        namespace: dev
+        group: DEFAULT_GROUP
+
+--- #################### 数据库相关配置 ####################
+spring:
+  autoconfigure:
+    exclude:
+      - de.codecentric.boot.admin.client.config.SpringBootAdminClientAutoConfiguration
+  datasource:
+    druid:
+      web-stat-filter:
+        enabled: true
+      stat-view-servlet:
+        enabled: true
+        allow:
+        url-pattern: /druid/*
+        login-username:
+        login-password:
+      filter:
+        stat:
+          enabled: true
+          log-slow-sql: true
+          slow-sql-millis: 100
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+    dynamic:
+      druid:
+        initial-size: 1
+        min-idle: 1
+        max-active: 20
+        max-wait: 600000
+        time-between-eviction-runs-millis: 60000
+        min-evictable-idle-time-millis: 300000
+        max-evictable-idle-time-millis: 900000
+        validation-query: SELECT 1
+        test-while-idle: true
+        test-on-borrow: false
+        test-on-return: false
+      primary: master
+      datasource:
+        master:
+          url: jdbc:opengauss://10.0.104.38:5432/onebase_cloud_v3?currentSchema=public
+          username: gaussdb
+          password: onebase@2025
+          driver-class-name: org.opengauss.Driver
+        slave:
+          lazy: true
+          url: jdbc:opengauss://10.0.104.38:5432/onebase_cloud_v3?currentSchema=public
+          username: gaussdb
+          password: onebase@2025
+          driver-class-name: org.opengauss.Driver
+
+  data:
+    redis:
+      host: 10.0.104.38
+      port: 6379
+      database: 0
+
+--- #################### OneBase相关配置 ####################
+
+onebase:
+  metadata:
+    default-datasource:
+      type: OpenGauss
+      host: 10.0.104.38
+      port: 5432
+      database: onebase_business
+      username: gaussdb
+      password: onebase@2025
+      description: OpenGauss默认数据源
+
+logging:
+  level:
+    org.opengauss: INFO
+    org.anyline.data.jdbc.opengauss: DEBUG

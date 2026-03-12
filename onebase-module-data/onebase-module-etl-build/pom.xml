@@ -58,8 +58,16 @@
             <artifactId>anyline-data-jdbc-postgresql</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-opengauss</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.opengauss</groupId>
+            <artifactId>opengauss-jdbc</artifactId>
         </dependency>
 
         <dependency>

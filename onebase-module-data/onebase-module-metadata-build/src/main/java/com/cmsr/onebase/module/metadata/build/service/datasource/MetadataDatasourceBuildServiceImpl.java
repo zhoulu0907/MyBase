@@ -85,9 +85,10 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
-        // 定义支持的数据库类型：PostgreSQL、达梦、人大金仓
+        // 定义支持的数据库类型：PostgreSQL、OpenGauss、达梦、人大金仓
         DatabaseType[] supportedTypes = {
                 DatabaseType.PostgreSQL,
+            DatabaseType.OpenGauss,
                 DatabaseType.DM,
                 DatabaseType.KingBase
         };
