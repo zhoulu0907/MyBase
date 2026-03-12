@@ -29,6 +29,7 @@ import './index.css';
 import type { XLoadMoreConfig } from './schema';
 import TableSearch from './tableSerach';
 import { getSimpleUserList } from '@onebase/platform-center';
+import EmptySVG from '@/assets/images/empty.svg';
 
 type XTableSelectProps = {
   showSelect: boolean;
@@ -493,7 +494,11 @@ const XLoadMore = memo(
         return null;
       }
       if (!loading && !tableData.length && typeof tableTotal === 'number' && tableTotal === 0) {
-        return <div className="no-data">暂无数据</div>;
+        return (
+          <div className='no-data'>
+            <img src={EmptySVG} alt='暂无数据' />
+          </div>
+        )
       }
       if (loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
         return tableTotal ? <div className="total-data">共{tableTotal}条数据</div> : null;
