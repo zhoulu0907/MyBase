@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import org.springframework.stereotype.Component;
 
 
@@ -18,10 +18,11 @@ import java.util.Map;
  *
  */
 @Component
-public class RequiredValidationService implements ValidationService {
+public class RequiredValidationService implements PrefetchableValidationService {
 
 
     private final MetadataValidationRequiredRepository requiredRepository;
+    private transient Map<String, java.util.List<MetadataValidationRequiredDO>> prefetched;
 
     public RequiredValidationService(MetadataValidationRequiredRepository requiredRepository) {
         this.requiredRepository = requiredRepository;
@@ -30,7 +31,13 @@ public class RequiredValidationService implements ValidationService {
     @Override
     public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
         // 查询必填规则
-        List<MetadataValidationRequiredDO> rules = requiredRepository.findByFieldUuid(fieldUuid);
+        List<MetadataValidationRequiredDO> rules = null;
+        if (prefetched != null) {
+            rules = prefetched.get(fieldUuid);
+        }
+        if (rules == null) {
+            rules = requiredRepository.findByFieldUuid(fieldUuid);
+        }
         
         if (rules.isEmpty()) {
             return; // 没有必填规则，跳过校验
@@ -55,6 +62,24 @@ public class RequiredValidationService implements ValidationService {
             
             throw new IllegalArgumentException(errorMessage);
         }
+    }
+
+    @Override
+    public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("REQUIRED") : null;
+        if (m != null) {
+            this.prefetched = new java.util.HashMap<>();
+            for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
+                @SuppressWarnings("unchecked")
+                java.util.List<MetadataValidationRequiredDO> list = (java.util.List<MetadataValidationRequiredDO>) (java.util.List<?>) e.getValue();
+                this.prefetched.put(e.getKey(), list);
+            }
+        }
+    }
+
+    @Override
+    public void clearPrefetchedRules() {
+        this.prefetched = null;
     }
 
     @Override

@@ -65,7 +65,6 @@ import org.anyline.entity.DataSet;
 import org.anyline.entity.DataRow;
 
 import org.anyline.metadata.Column;
-import org.anyline.metadata.Table;
 import org.anyline.metadata.type.DatabaseType;
 import org.anyline.service.AnylineService;
 import org.springframework.stereotype.Service;
@@ -78,7 +77,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
@@ -699,15 +700,30 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
     @Override
     @Transactional(rollbackFor = Exception.class)
     public EntityFieldBatchSaveRespVO batchSaveEntityFields(@Valid EntityFieldBatchSaveReqVO reqVO) {
+        String traceId = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        long totalStartNs = System.nanoTime();
+        int itemCount = reqVO.getItems() != null ? reqVO.getItems().size() : 0;
+        log.info("metadata.entityField.batchSave start traceId={}, entityId={}, appId={}, items={}",
+                traceId, reqVO.getEntityId(), reqVO.getApplicationId(), itemCount);
+
+        long stageStartNs = System.nanoTime();
         // ID/UUID兼容处理：支持前端传入Long ID或UUID，自动识别并转换为Long ID
         Long resolvedEntityId = idUuidConverter.resolveEntityId(reqVO.getEntityId());
+        long resolveEntityIdMs = (System.nanoTime() - stageStartNs) / 1_000_000;
 
         EntityFieldBatchSaveRespVO resp = new EntityFieldBatchSaveRespVO();
 
+        stageStartNs = System.nanoTime();
         // 1. 获取实体与数据源（通过ID查询，兼容entity_uuid为null的情况）
         MetadataBusinessEntityDO businessEntity = metadataBusinessEntityRepository.getById(resolvedEntityId);
         if (businessEntity == null) {
             throw new IllegalArgumentException("业务实体不存在");
+        }
+        if (!BusinessEntityTypeEnum.allowModifyTableStructure(businessEntity.getEntityType())) {
+            BusinessEntityTypeEnum entityType = BusinessEntityTypeEnum.getByCode(businessEntity.getEntityType());
+            String typeName = entityType != null ? entityType.getName() : "未知类型";
+            throw new IllegalArgumentException(
+                    String.format("实体类型为 %s (%s)，不允许修改表结构", typeName, businessEntity.getEntityType()));
         }
         // 使用实体的entityUuid（可能为null），后续操作需要兼容处理
         String entityUuidForField = businessEntity.getEntityUuid();
@@ -721,13 +737,28 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (businessEntity.getTableName() != null && !businessEntity.getTableName().trim().isEmpty()) {
             datasource = metadataDatasourceBuildService.getDatasourceByUuid(businessEntity.getDatasourceUuid());
         }
+        long loadEntityAndDatasourceMs = (System.nanoTime() - stageStartNs) / 1_000_000;
 
+        stageStartNs = System.nanoTime();
         // 1.5 校验本次提交的字段名是否有重复
         validateFieldNameDuplicationInBatch(reqVO.getItems());
+        List<MetadataEntityFieldDO> existingFields = metadataEntityFieldRepository
+                .getEntityFieldListByEntityUuid(entityUuidForField);
+        Map<Long, MetadataEntityFieldDO> fieldsById = loadFieldsByIds(reqVO.getItems());
+        validateBatchFieldUniqueness(entityUuidForField, reqVO.getApplicationId(), reqVO.getItems(), existingFields, fieldsById);
+        long validateBatchDuplicationMs = (System.nanoTime() - stageStartNs) / 1_000_000;
 
         // 用于收集需要执行的物理表操作
         List<PhysicalTableOperation> physicalTableOps = new java.util.ArrayList<>();
+        Map<String, MetadataEntityFieldDO> touchedFieldsByUuid = new HashMap<>();
+        Map<String, MetadataEntityFieldDO> validationChangedFieldsByUuid = new HashMap<>();
+        Set<String> requiredValidationSyncFieldUuids = new TreeSet<>();
+        Set<String> uniqueValidationSyncFieldUuids = new TreeSet<>();
+        Set<String> lengthValidationSyncFieldUuids = new TreeSet<>();
+        Set<String> validationUniquenessCheckFieldUuids = new TreeSet<>();
 
+        stageStartNs = System.nanoTime();
+        int deletedCount = 0;
         // 2. 先删除
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             if (Boolean.TRUE.equals(item.getIsDeleted())) {
@@ -735,11 +766,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if (item.getId() == null || item.getId().trim().isEmpty()) {
                     throw new IllegalArgumentException("删除操作必须提供字段ID");
                 }
-                // 校验存在
-                validateEntityFieldExists(item.getId());
-
-                // 获取字段完整信息用于物理删除
-                MetadataEntityFieldDO existing = metadataEntityFieldRepository.getById(Long.valueOf(item.getId()));
+                Long fieldId;
+                try {
+                    fieldId = Long.valueOf(item.getId().trim());
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("删除操作必须提供字段ID");
+                }
+                MetadataEntityFieldDO existing = fieldsById.get(fieldId);
 
                 // 关键安全校验：验证字段归属，防止跨实体/跨应用删除
                 if (existing == null) {
@@ -755,9 +788,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                             item.getId(), existing.getApplicationId(), reqVO.getApplicationId());
                     throw new IllegalArgumentException("字段不属于当前应用，禁止跨应用删除");
                 }
-
-                // 实体是否允许改表结构
-                validateEntityAllowModifyStructure(existing.getEntityUuid());
 
                 // 先删子配置（选项、约束、自动编号、校验规则）
                 // 注意：这些删除操作必须在同一事务中执行，不要捕获并忽略异常，否则会导致事务回滚异常
@@ -784,17 +814,24 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     physicalTableOps.add(op);
                 }
                 resp.getDeletedIds().add(item.getId());
+                deletedCount++;
             }
         }
+        long deletePhaseMs = (System.nanoTime() - stageStartNs) / 1_000_000;
 
+        stageStartNs = System.nanoTime();
+        int updatedCount = 0;
         // 3. 再更新
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             // 更新：要求提供有效ID（非空非空白）
             if (!Boolean.TRUE.equals(item.getIsDeleted()) && item.getId() != null && !item.getId().trim().isEmpty()) {
-                validateEntityFieldExists(item.getId());
-
-                // 拉取原字段
-                MetadataEntityFieldDO origin = metadataEntityFieldRepository.getById(Long.valueOf(item.getId()));
+                Long fieldId;
+                try {
+                    fieldId = Long.valueOf(item.getId().trim());
+                } catch (NumberFormatException e) {
+                    throw exception(ENTITY_FIELD_NOT_EXISTS);
+                }
+                MetadataEntityFieldDO origin = fieldsById.get(fieldId);
 
                 // 关键安全校验：验证字段归属，防止跨实体/跨应用操作
                 if (origin == null) {
@@ -810,14 +847,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                             item.getId(), origin.getApplicationId(), reqVO.getApplicationId());
                     throw new IllegalArgumentException("字段不属于当前应用，禁止跨应用操作");
                 }
-
-                // 名称唯一性（若改名）
-                String newName = item.getFieldName() != null ? item.getFieldName() : origin.getFieldName();
-                validateEntityFieldNameUnique(item.getId(), origin.getEntityUuid(), newName);
-                String newDisplayName = item.getDisplayName() != null ? item.getDisplayName() : origin.getDisplayName();
-                validateEntityFieldDisplayNameUnique(item.getId(), origin.getEntityUuid(), newDisplayName);
-
-                validateEntityAllowModifyStructure(origin.getEntityUuid());
 
                 Integer maxLength = extractMaxLength(item);
 
@@ -853,6 +882,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 metadataEntityFieldRepository.updateById(upd);
+                MetadataEntityFieldDO updatedSnapshot = buildUpdatedSnapshot(origin, item, maxLength);
+                touchedFieldsByUuid.put(updatedSnapshot.getFieldUuid(), updatedSnapshot);
+                validationUniquenessCheckFieldUuids.add(updatedSnapshot.getFieldUuid());
 
                 // 收集物理表更新操作
                 if (datasource != null && businessEntity.getTableName() != null) {
@@ -900,10 +932,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     
                     // 只有当需要修改物理表时才收集 ALTER 操作
                     if (needAlter) {
-                        MetadataEntityFieldDO full = metadataEntityFieldRepository.getById(origin.getId());
                         PhysicalTableOperation alterOp = new PhysicalTableOperation();
                         alterOp.setOperationType("ALTER");
-                        alterOp.setFieldInfo(full);
+                        alterOp.setFieldInfo(updatedSnapshot);
                         physicalTableOps.add(alterOp);
                         log.info("字段 {} 需要修改物理表结构", origin.getFieldName());
                     } else {
@@ -913,19 +944,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 resp.getUpdatedIds().add(item.getId());
 
                 // 同步选项、约束和自动编号（使用智能更新逻辑）
-                Long fieldId = origin.getId();
                 String fieldUuid = origin.getFieldUuid();
-                MetadataEntityFieldDO fullForRelated = metadataEntityFieldRepository.getById(origin.getId());
-                processFieldRelatedData(fieldUuid, fullForRelated, item.getOptions(), item.getConstraints(), item.getAutoNumber());
+                processFieldRelatedData(fieldUuid, updatedSnapshot, item.getOptions(), item.getConstraints(), item.getAutoNumber());
 
                 // 特别处理：如果 isRequired 字段发生了变更，需要额外同步到 MetadataValidationRequiredDO
                 if (item.getIsRequired() != null && !item.getIsRequired().equals(origin.getIsRequired())) {
-                    processRequiredValidation(fieldId, fullForRelated);
+                    requiredValidationSyncFieldUuids.add(updatedSnapshot.getFieldUuid());
+                    validationChangedFieldsByUuid.put(updatedSnapshot.getFieldUuid(), updatedSnapshot);
                 }
 
                 // 特别处理：如果 isUnique 字段发生了变更，需要额外同步到 MetadataValidationUniqueDO
                 if (item.getIsUnique() != null && !item.getIsUnique().equals(origin.getIsUnique())) {
-                    processUniqueValidation(fieldId, fullForRelated);
+                    uniqueValidationSyncFieldUuids.add(updatedSnapshot.getFieldUuid());
+                    validationChangedFieldsByUuid.put(updatedSnapshot.getFieldUuid(), updatedSnapshot);
                 }
 
                 // 特别处理：如果 dataLength 字段发生了变更，需要额外同步到 MetadataValidationLengthDO
@@ -935,19 +966,22 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                                 item.getConstraints().getMaxLength() != null ||
                                 StringUtils.hasText(item.getConstraints().getLengthPrompt()));
                 if (maxLength != null && !maxLength.equals(origin.getDataLength()) && !hasConstraintsLengthConfig) {
-                    processLengthValidation(fieldId, fullForRelated);
+                    lengthValidationSyncFieldUuids.add(updatedSnapshot.getFieldUuid());
+                    validationChangedFieldsByUuid.put(updatedSnapshot.getFieldUuid(), updatedSnapshot);
                 }
-
-                validateValidationRuleUniqueness(fullForRelated.getFieldUuid(), origin.getEntityUuid());
 
                 // 特别处理：如果数据选择类型的字段发生了变化，需要额外同步到关联关系表中
                 if ("DATA_SELECTION".equalsIgnoreCase(item.getFieldType()) 
                         || "MULTI_DATA_SELECTION".equalsIgnoreCase(item.getFieldType())) {
-                    processEntityRelation(reqVO.getApplicationId(), fieldId, fullForRelated, item);
+                    processEntityRelation(reqVO.getApplicationId(), fieldId, updatedSnapshot, item);
                 }
+                updatedCount++;
             }
         }
+        long updatePhaseMs = (System.nanoTime() - stageStartNs) / 1_000_000;
 
+        stageStartNs = System.nanoTime();
+        int createdCount = 0;
         // 4. 最后新增
         for (EntityFieldUpsertItemVO item : reqVO.getItems()) {
             // 新增：当未提供ID或ID为空白时进入
@@ -960,9 +994,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                 // 新增字段的情况
                 validateFieldNameNotDatabaseKeyword(item.getFieldName());
-                validateEntityFieldNameUnique(null, reqVO.getEntityId(), item.getFieldName());
-                validateEntityFieldDisplayNameUnique(null, reqVO.getEntityId(), item.getDisplayName());
-                validateEntityAllowModifyStructure(reqVO.getEntityId());
 
                 Integer maxLength = extractMaxLength(item);
 
@@ -991,6 +1022,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 }
 
                 metadataEntityFieldRepository.save(toCreate);
+                touchedFieldsByUuid.put(toCreate.getFieldUuid(), toCreate);
+                validationUniquenessCheckFieldUuids.add(toCreate.getFieldUuid());
 
                 // 收集物理表新增操作
                 if (datasource != null && businessEntity.getTableName() != null) {
@@ -1008,11 +1041,13 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                         item.getAutoNumber());
 
                 if (item.getIsRequired() != null && item.getIsRequired() == 1) {
-                    processRequiredValidation(fieldId, toCreate);
+                    requiredValidationSyncFieldUuids.add(fieldUuid);
+                    validationChangedFieldsByUuid.put(fieldUuid, toCreate);
                 }
 
                 if (item.getIsUnique() != null && item.getIsUnique() == 1) {
-                    processUniqueValidation(fieldId, toCreate);
+                    uniqueValidationSyncFieldUuids.add(fieldUuid);
+                    validationChangedFieldsByUuid.put(fieldUuid, toCreate);
                 }
 
                 boolean hasConstraintsLengthConfig = item.getConstraints() != null &&
@@ -1021,10 +1056,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                                 item.getConstraints().getMaxLength() != null ||
                                 StringUtils.hasText(item.getConstraints().getLengthPrompt()));
                 if (maxLength != null && maxLength > 0 && !hasConstraintsLengthConfig) {
-                    processLengthValidation(fieldId, toCreate);
+                    lengthValidationSyncFieldUuids.add(fieldUuid);
+                    validationChangedFieldsByUuid.put(fieldUuid, toCreate);
                 }
-
-                validateValidationRuleUniqueness(toCreate.getFieldUuid(), toCreate.getEntityUuid());
 
                 // 特别处理：如果数据选择类型的字段发生了变化，需要额外同步到关联关系表中
                 if ("DATA_SELECTION".equalsIgnoreCase(item.getFieldType())
@@ -1032,16 +1066,394 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     processEntityRelation(reqVO.getApplicationId(), fieldId, toCreate, item);
                 }
 
+                createdCount++;
 
             }
         }
+        long createPhaseMs = (System.nanoTime() - stageStartNs) / 1_000_000;
 
+        stageStartNs = System.nanoTime();
+        if (!validationChangedFieldsByUuid.isEmpty()) {
+            syncValidationRulesForFields(businessEntity, validationChangedFieldsByUuid,
+                    requiredValidationSyncFieldUuids, uniqueValidationSyncFieldUuids, lengthValidationSyncFieldUuids);
+        }
+        long validationSyncMs = (System.nanoTime() - stageStartNs) / 1_000_000;
+
+        validateValidationRuleUniquenessBatch(touchedFieldsByUuid, validationUniquenessCheckFieldUuids);
+
+        stageStartNs = System.nanoTime();
         // 5. 统一执行所有物理表操作
         if (datasource != null && businessEntity.getTableName() != null && !physicalTableOps.isEmpty()) {
             executePhysicalTableOperations(datasource, businessEntity.getTableName(), physicalTableOps);
         }
+        long physicalOpsMs = (System.nanoTime() - stageStartNs) / 1_000_000;
+
+        long totalMs = (System.nanoTime() - totalStartNs) / 1_000_000;
+        log.info("metadata.entityField.batchSave done traceId={}, totalMs={}, resolveEntityIdMs={}, loadEntityAndDatasourceMs={}, validateBatchDuplicationMs={}, deleteMs={}, updateMs={}, createMs={}, validationSyncMs={}, physicalOpsMs={}, deleted={}, updated={}, created={}, physicalOps={}",
+                traceId, totalMs, resolveEntityIdMs, loadEntityAndDatasourceMs, validateBatchDuplicationMs,
+                deletePhaseMs, updatePhaseMs, createPhaseMs, validationSyncMs, physicalOpsMs,
+                deletedCount, updatedCount, createdCount, physicalTableOps.size());
 
         return resp;
+    }
+
+    void syncValidationRulesForFields(MetadataBusinessEntityDO businessEntity,
+            Map<String, MetadataEntityFieldDO> fieldsByUuid,
+            Set<String> requiredFieldUuids,
+            Set<String> uniqueFieldUuids,
+            Set<String> lengthFieldUuids) {
+        if (fieldsByUuid == null || fieldsByUuid.isEmpty()) {
+            return;
+        }
+        if (businessEntity == null) {
+            return;
+        }
+        if (requiredFieldUuids != null && !requiredFieldUuids.isEmpty()) {
+            syncRequiredValidations(businessEntity, fieldsByUuid, requiredFieldUuids);
+        }
+        if (uniqueFieldUuids != null && !uniqueFieldUuids.isEmpty()) {
+            syncUniqueValidations(businessEntity, fieldsByUuid, uniqueFieldUuids);
+        }
+        if (lengthFieldUuids != null && !lengthFieldUuids.isEmpty()) {
+            syncLengthValidations(businessEntity, fieldsByUuid, lengthFieldUuids);
+        }
+    }
+
+    void validateValidationRuleUniquenessBatch(Map<String, MetadataEntityFieldDO> fieldsByUuid, Set<String> fieldUuids) {
+        if (fieldUuids == null || fieldUuids.isEmpty()) {
+            return;
+        }
+        Map<String, Integer> requiredEnabledCount = new HashMap<>();
+        Map<String, Integer> uniqueEnabledCount = new HashMap<>();
+        Map<String, Integer> lengthEnabledCount = new HashMap<>();
+        Map<String, Integer> formatEnabledCount = new HashMap<>();
+
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO> requiredList = validationRequiredRepository
+                .findByFieldUuids(fieldUuids);
+        for (var r : requiredList) {
+            if (r == null || r.getFieldUuid() == null) {
+                continue;
+            }
+            if (r.getIsEnabled() != null && r.getIsEnabled() == 1) {
+                requiredEnabledCount.put(r.getFieldUuid(), requiredEnabledCount.getOrDefault(r.getFieldUuid(), 0) + 1);
+            }
+        }
+
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO> uniqueList = validationUniqueRepository
+                .findByFieldUuids(fieldUuids);
+        for (var u : uniqueList) {
+            if (u == null || u.getFieldUuid() == null) {
+                continue;
+            }
+            if (u.getIsEnabled() != null && u.getIsEnabled() == 1) {
+                uniqueEnabledCount.put(u.getFieldUuid(), uniqueEnabledCount.getOrDefault(u.getFieldUuid(), 0) + 1);
+            }
+        }
+
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO> lengthList = validationLengthRepository
+                .findByFieldUuids(fieldUuids);
+        for (var l : lengthList) {
+            if (l == null || l.getFieldUuid() == null) {
+                continue;
+            }
+            if (l.getIsEnabled() != null && l.getIsEnabled() == 1) {
+                lengthEnabledCount.put(l.getFieldUuid(), lengthEnabledCount.getOrDefault(l.getFieldUuid(), 0) + 1);
+            }
+        }
+
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO> formatList = validationFormatRepository
+                .findByFieldUuids(fieldUuids);
+        for (var f : formatList) {
+            if (f == null || f.getFieldUuid() == null) {
+                continue;
+            }
+            if (f.getIsEnabled() != null && f.getIsEnabled() == 1) {
+                formatEnabledCount.put(f.getFieldUuid(), formatEnabledCount.getOrDefault(f.getFieldUuid(), 0) + 1);
+            }
+        }
+
+        for (String fieldUuid : fieldUuids) {
+            int reqCnt = requiredEnabledCount.getOrDefault(fieldUuid, 0);
+            if (reqCnt > 1) {
+                throw new IllegalArgumentException(String.format(
+                        "字段【%s】存在多条生效的必填校验规则，同一字段的同一种校验类型只能有一条生效规则",
+                        resolveFieldDisplayName(fieldsByUuid, fieldUuid)));
+            }
+            int uniqCnt = uniqueEnabledCount.getOrDefault(fieldUuid, 0);
+            if (uniqCnt > 1) {
+                throw new IllegalArgumentException(String.format(
+                        "字段【%s】存在多条生效的唯一性校验规则，同一字段的同一种校验类型只能有一条生效规则",
+                        resolveFieldDisplayName(fieldsByUuid, fieldUuid)));
+            }
+            int lenCnt = lengthEnabledCount.getOrDefault(fieldUuid, 0);
+            if (lenCnt > 1) {
+                throw new IllegalArgumentException(String.format(
+                        "字段【%s】存在多条生效的长度校验规则，同一字段的同一种校验类型只能有一条生效规则",
+                        resolveFieldDisplayName(fieldsByUuid, fieldUuid)));
+            }
+            int fmtCnt = formatEnabledCount.getOrDefault(fieldUuid, 0);
+            if (fmtCnt > 1) {
+                throw new IllegalArgumentException(String.format(
+                        "字段【%s】存在多条生效的格式校验规则，同一字段的同一种校验类型只能有一条生效规则",
+                        resolveFieldDisplayName(fieldsByUuid, fieldUuid)));
+            }
+        }
+    }
+
+    private String resolveFieldDisplayName(Map<String, MetadataEntityFieldDO> fieldsByUuid, String fieldUuid) {
+        if (fieldsByUuid != null) {
+            MetadataEntityFieldDO field = fieldsByUuid.get(fieldUuid);
+            if (field != null) {
+                if (field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty()) {
+                    return field.getDisplayName();
+                }
+                if (field.getFieldName() != null && !field.getFieldName().trim().isEmpty()) {
+                    return field.getFieldName();
+                }
+            }
+        }
+        return fieldUuid != null ? fieldUuid : "未知字段";
+    }
+
+    private void syncRequiredValidations(MetadataBusinessEntityDO businessEntity,
+            Map<String, MetadataEntityFieldDO> fieldsByUuid,
+            Set<String> fieldUuids) {
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO> existingList = validationRequiredRepository
+                .findByFieldUuids(fieldUuids);
+        Map<String, com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO> existingByFieldUuid = new HashMap<>();
+        for (var r : existingList) {
+            if (r != null && r.getFieldUuid() != null && !existingByFieldUuid.containsKey(r.getFieldUuid())) {
+                existingByFieldUuid.put(r.getFieldUuid(), r);
+            }
+        }
+
+        for (String fieldUuid : fieldUuids) {
+            MetadataEntityFieldDO field = fieldsByUuid.get(fieldUuid);
+            if (field == null) {
+                continue;
+            }
+            boolean enabled = field.getIsRequired() != null && field.getIsRequired() == 1;
+            var existing = existingByFieldUuid.get(fieldUuid);
+
+            if (enabled) {
+                if (existing != null) {
+                    if (existing.getIsEnabled() == null || existing.getIsEnabled() != 1) {
+                        existing.setIsEnabled(1);
+                        validationRequiredRepository.updateById(existing);
+                    }
+                } else {
+                    Long groupId = createValidationRuleGroup(businessEntity, field, "REQUIRED", null);
+                    if (groupId == null) {
+                        continue;
+                    }
+                    String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty()
+                            ? field.getDisplayName()
+                            : (field.getFieldName() != null ? field.getFieldName() : "此字段");
+                    String promptMsg = fieldDisplayName + "为必填项";
+
+                    com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO data = new com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO();
+                    data.setEntityUuid(field.getEntityUuid());
+                    data.setApplicationId(field.getApplicationId());
+                    data.setFieldUuid(fieldUuid);
+                    data.setIsEnabled(1);
+                    data.setPromptMessage(promptMsg);
+                    data.setGroupUuid(String.valueOf(groupId));
+                    validationRequiredRepository.saveOrUpdate(data);
+                }
+            } else {
+                if (existing != null) {
+                    validationRequiredRepository.deleteByFieldUuid(fieldUuid);
+                    safeDeleteRuleGroup(existing.getGroupUuid());
+                }
+            }
+        }
+    }
+
+    private void syncUniqueValidations(MetadataBusinessEntityDO businessEntity,
+            Map<String, MetadataEntityFieldDO> fieldsByUuid,
+            Set<String> fieldUuids) {
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO> existingList = validationUniqueRepository
+                .findByFieldUuids(fieldUuids);
+        Map<String, com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO> existingByFieldUuid = new HashMap<>();
+        for (var r : existingList) {
+            if (r != null && r.getFieldUuid() != null && !existingByFieldUuid.containsKey(r.getFieldUuid())) {
+                existingByFieldUuid.put(r.getFieldUuid(), r);
+            }
+        }
+
+        for (String fieldUuid : fieldUuids) {
+            MetadataEntityFieldDO field = fieldsByUuid.get(fieldUuid);
+            if (field == null) {
+                continue;
+            }
+            boolean enabled = field.getIsUnique() != null && field.getIsUnique() == 1;
+            var existing = existingByFieldUuid.get(fieldUuid);
+
+            if (enabled) {
+                if (existing != null) {
+                    if (existing.getIsEnabled() == null || existing.getIsEnabled() != 1) {
+                        existing.setIsEnabled(1);
+                        validationUniqueRepository.updateById(existing);
+                    }
+                } else {
+                    Long groupId = createValidationRuleGroup(businessEntity, field, "UNIQUE", null);
+                    if (groupId == null) {
+                        continue;
+                    }
+                    com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO group = validationRuleGroupService
+                            .getValidationRuleGroup(groupId);
+                    if (group == null || group.getGroupUuid() == null || group.getGroupUuid().isBlank()) {
+                        continue;
+                    }
+                    String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty()
+                            ? field.getDisplayName()
+                            : (field.getFieldName() != null ? field.getFieldName() : "此字段");
+                    String promptMsg = fieldDisplayName + "必须唯一";
+
+                    com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO data = new com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO();
+                    data.setEntityUuid(field.getEntityUuid());
+                    data.setApplicationId(field.getApplicationId());
+                    data.setFieldUuid(fieldUuid);
+                    data.setIsEnabled(1);
+                    data.setPromptMessage(promptMsg);
+                    data.setGroupUuid(group.getGroupUuid());
+                    validationUniqueRepository.saveOrUpdate(data);
+                }
+            } else {
+                if (existing != null) {
+                    String groupUuid = existing.getGroupUuid();
+                    validationUniqueRepository.deleteByFieldUuid(fieldUuid);
+                    if (groupUuid != null && !groupUuid.isBlank()) {
+                        validationRuleGroupService.safeDeleteGroupDirect(groupUuid);
+                    }
+                }
+            }
+        }
+    }
+
+    private void syncLengthValidations(MetadataBusinessEntityDO businessEntity,
+            Map<String, MetadataEntityFieldDO> fieldsByUuid,
+            Set<String> fieldUuids) {
+        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO> existingList = validationLengthRepository
+                .findByFieldUuids(fieldUuids);
+        Map<String, com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO> existingByFieldUuid = new HashMap<>();
+        for (var r : existingList) {
+            if (r != null && r.getFieldUuid() != null && !existingByFieldUuid.containsKey(r.getFieldUuid())) {
+                existingByFieldUuid.put(r.getFieldUuid(), r);
+            }
+        }
+
+        for (String fieldUuid : fieldUuids) {
+            MetadataEntityFieldDO field = fieldsByUuid.get(fieldUuid);
+            if (field == null) {
+                continue;
+            }
+            boolean enabled = field.getDataLength() != null && field.getDataLength() > 0;
+            var existing = existingByFieldUuid.get(fieldUuid);
+
+            if (enabled) {
+                if (existing != null) {
+                    boolean changed = false;
+                    if (existing.getIsEnabled() == null || existing.getIsEnabled() != 1) {
+                        existing.setIsEnabled(1);
+                        changed = true;
+                    }
+                    if (existing.getMaxLength() == null || !existing.getMaxLength().equals(field.getDataLength())) {
+                        existing.setMaxLength(field.getDataLength());
+                        changed = true;
+                    }
+                    if (changed) {
+                        validationLengthRepository.updateById(existing);
+                    }
+                } else {
+                    String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty()
+                            ? field.getDisplayName()
+                            : (field.getFieldName() != null ? field.getFieldName() : "字段");
+                    String promptMsg = String.format("%s长度不能超过%d个字符", fieldDisplayName, field.getDataLength());
+                    Long groupId = createValidationRuleGroup(businessEntity, field, "LENGTH", promptMsg);
+                    if (groupId == null) {
+                        continue;
+                    }
+                    com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO group = validationRuleGroupService
+                            .getValidationRuleGroup(groupId);
+                    if (group == null || group.getGroupUuid() == null || group.getGroupUuid().isBlank()) {
+                        continue;
+                    }
+
+                    com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO data = new com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO();
+                    data.setEntityUuid(field.getEntityUuid());
+                    data.setApplicationId(field.getApplicationId());
+                    data.setFieldUuid(fieldUuid);
+                    data.setIsEnabled(1);
+                    data.setMinLength(null);
+                    data.setMaxLength(field.getDataLength());
+                    data.setPromptMessage(promptMsg);
+                    data.setGroupUuid(group.getGroupUuid());
+                    validationLengthRepository.saveOrUpdate(data);
+                }
+            } else {
+                if (existing != null) {
+                    String groupUuid = existing.getGroupUuid();
+                    boolean canDeleteGroup = true;
+                    if (groupUuid != null && !groupUuid.isBlank()) {
+                        List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO> referenced = validationLengthRepository
+                                .findByGroupUuid(groupUuid);
+                        canDeleteGroup = referenced.size() <= 1;
+                    }
+                    validationLengthRepository.deleteByFieldUuid(fieldUuid);
+                    if (canDeleteGroup && groupUuid != null && !groupUuid.isBlank()) {
+                        validationRuleGroupService.safeDeleteGroupDirect(groupUuid);
+                    }
+                }
+            }
+        }
+    }
+
+    private Long createValidationRuleGroup(MetadataBusinessEntityDO businessEntity, MetadataEntityFieldDO field, String validationType,
+            String popPrompt) {
+        String rgName = buildRuleGroupName(field, businessEntity, validationType);
+        if (rgName == null || rgName.isBlank()) {
+            return null;
+        }
+        com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO groupVO = new com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO();
+        groupVO.setRgName(rgName);
+        groupVO.setRgDesc("自动创建的规则组：" + rgName);
+        groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+        groupVO.setValidationType(validationType);
+        groupVO.setEntityUuid(field.getEntityUuid());
+        groupVO.setApplicationId(field.getApplicationId());
+        if (popPrompt != null) {
+            groupVO.setPopPrompt(popPrompt);
+        }
+        return validationRuleGroupService.createValidationRuleGroup(groupVO);
+    }
+
+    private void safeDeleteRuleGroup(String groupUuidOrId) {
+        if (groupUuidOrId == null || groupUuidOrId.isBlank()) {
+            return;
+        }
+        try {
+            validationRuleGroupService.safeDeleteGroupDirect(Long.valueOf(groupUuidOrId));
+        } catch (NumberFormatException ignore) {
+            validationRuleGroupService.safeDeleteGroupDirect(groupUuidOrId);
+        }
+    }
+
+    private String buildRuleGroupName(MetadataEntityFieldDO field, MetadataBusinessEntityDO businessEntity, String validationType) {
+        try {
+            String fieldDisplayName = field.getDisplayName() != null && !field.getDisplayName().trim().isEmpty()
+                    ? field.getDisplayName()
+                    : (field.getFieldName() != null ? field.getFieldName() : "未知字段");
+            String entityDisplayName = businessEntity.getDisplayName() != null && !businessEntity.getDisplayName().trim().isEmpty()
+                    ? businessEntity.getDisplayName()
+                    : (businessEntity.getTableName() != null ? businessEntity.getTableName() : "未知实体");
+            String validationTypeName = getValidationTypeName(validationType);
+            return String.format("%s-%s-%s", validationTypeName, fieldDisplayName, entityDisplayName);
+        } catch (Exception e) {
+            log.error("构建规则组名称时发生异常，字段UUID: {}, 校验类型: {}, 错误: {}", field != null ? field.getFieldUuid() : null, validationType,
+                    e.getMessage(), e);
+            return getValidationTypeName(validationType) + "-未知字段-未知实体";
+        }
     }
 
     private void processEntityRelation(String appId, Long fieldId, MetadataEntityFieldDO full, EntityFieldUpsertItemVO item) {
@@ -1461,7 +1873,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      *
      * @param fieldName 字段名
      */
-    private void validateFieldNameNotDatabaseKeyword(String fieldName) {
+    private static void validateFieldNameNotDatabaseKeyword(String fieldName) {
         if (fieldName == null || fieldName.trim().isEmpty()) {
             return;
         }
@@ -1669,6 +2081,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * 使用 Anyline 原生 API 添加列，自动适配不同数据库（PostgreSQL、达梦、人大金仓等）。
      */
     private void addColumnToTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
+        addColumnToTable(datasource, tableName, field, null);
+    }
+
+    private void addColumnToTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field,
+            java.util.Set<String> existingColumns) {
         try {
             log.info("开始为表 {} 添加列 {}, 数据源: {} ({})",
                     tableName, field.getFieldName(),
@@ -1680,14 +2097,20 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
                 // 首先检查表是否存在
-                if (!AnylineDdlHelper.tableExists(service, tableName)) {
-                    String errorMessage = "表 " + tableName + " 不存在，请先创建表。";
-                    log.error("添加字段失败: {}", errorMessage);
-                    throw new RuntimeException(errorMessage);
+                if (existingColumns == null) {
+                    if (!AnylineDdlHelper.tableExists(service, tableName)) {
+                        String errorMessage = "表 " + tableName + " 不存在，请先创建表。";
+                        log.error("添加字段失败: {}", errorMessage);
+                        throw new RuntimeException(errorMessage);
+                    }
                 }
 
                 // 检查列是否已存在
-                if (AnylineDdlHelper.columnExists(service, tableName, field.getFieldName())) {
+                String normalizedColumnName = normalizeColumnName(field.getFieldName());
+                boolean columnExists = existingColumns != null
+                        ? existingColumns.contains(normalizedColumnName)
+                        : AnylineDdlHelper.columnExists(service, tableName, field.getFieldName());
+                if (columnExists) {
                     log.warn("列 {} 已存在于表 {} 中，跳过添加操作", field.getFieldName(), tableName);
                     return null;
                 }
@@ -1702,6 +2125,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     AnylineDdlHelper.executeDDL(service, ddl);
                     AnylineDdlHelper.clearMetadataCache();
                     log.info("成功为表 {} 添加列: {} (使用自定义DDL)", tableName, field.getFieldName());
+                    if (existingColumns != null) {
+                        existingColumns.add(normalizedColumnName);
+                    }
                     return null;
                 }
 
@@ -1723,6 +2149,9 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 AnylineDdlHelper.addColumn(service, column);
 
                 log.info("成功为表 {} 添加列: {}", tableName, field.getFieldName());
+                if (existingColumns != null) {
+                    existingColumns.add(normalizedColumnName);
+                }
                 return null;
             });
         } catch (Exception e) {
@@ -1805,13 +2234,20 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * @param field      字段信息
      */
     private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field) {
+        alterColumnInTable(datasource, tableName, field, null);
+    }
+
+    private void alterColumnInTable(MetadataDatasourceDO datasource, String tableName, MetadataEntityFieldDO field,
+            java.util.Set<String> existingColumns) {
         try {
             TenantUtils.executeIgnore(() -> {
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
                 // 先校验表是否存在
-                if (!AnylineDdlHelper.tableExists(service, tableName)) {
-                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                if (existingColumns == null) {
+                    if (!AnylineDdlHelper.tableExists(service, tableName)) {
+                        throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                    }
                 }
 
                 // 检查列是否存在，避免元数据与物理表不一致导致的问题
@@ -1820,13 +2256,15 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 if ("user".equalsIgnoreCase(fieldName)) {
                     fieldName = "\"" + fieldName + "\"";
                 }
-                boolean columnExists = AnylineDdlHelper.columnExists(service, tableName, fieldName);
+                boolean columnExists = existingColumns != null
+                        ? existingColumns.contains(normalizeColumnName(fieldName))
+                        : AnylineDdlHelper.columnExists(service, tableName, fieldName);
 
                 if (!columnExists) {
                     // 列不存在，应该使用ADD操作而非ALTER
                     log.warn("准备修改表 {} 的列 {} 时发现列不存在（字段ID: {}），将改为新增列操作",
                             tableName, fieldName, field.getId());
-                    addColumnToTable(datasource, tableName, field);
+                    addColumnToTable(datasource, tableName, field, existingColumns);
                 } else {
                     // 列存在，正常执行ALTER操作
                     log.info("准备修改表 {} 的列: {}, 字段ID: {}", tableName, fieldName, field.getId());
@@ -1889,16 +2327,51 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      */
     private void renameColumnInTable(MetadataDatasourceDO datasource, String tableName, String oldName,
             String newName) {
+        renameColumnInTable(datasource, tableName, oldName, newName, null);
+    }
+
+    private void renameColumnInTable(MetadataDatasourceDO datasource, String tableName, String oldName,
+            String newName, java.util.Set<String> existingColumns) {
         try {
             TenantUtils.executeIgnore(() -> {
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-                if (!AnylineDdlHelper.tableExists(service, tableName)) {
-                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                if (existingColumns == null) {
+                    if (!AnylineDdlHelper.tableExists(service, tableName)) {
+                        throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                    }
+
+                    // 使用 Anyline 原生 API 重命名列（内部会检查列是否存在）
+                    AnylineDdlHelper.renameColumn(service, tableName, oldName, newName);
+                    return null;
                 }
 
-                // 使用 Anyline 原生 API 重命名列（内部会检查列是否存在）
-                AnylineDdlHelper.renameColumn(service, tableName, oldName, newName);
+                String normalizedOld = normalizeColumnName(oldName);
+                String normalizedNew = normalizeColumnName(newName);
+                if (!existingColumns.contains(normalizedOld)) {
+                    log.warn("列 {} 不存在于表 {} 中，跳过重命名", oldName, tableName);
+                    return null;
+                }
+                if (existingColumns.contains(normalizedNew)) {
+                    log.warn("列 {} 已存在于表 {} 中，跳过重命名", newName, tableName);
+                    return null;
+                }
+
+                String datasourceType = datasource.getDatasourceType();
+                DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+                String oldUnquoted = oldName == null ? null : oldName.replace("\"", "");
+                String newUnquoted = newName == null ? null : newName.replace("\"", "");
+
+                if (dbType == DatabaseType.PostgreSQL || dbType == DatabaseType.KingBase) {
+                    String ddl = "ALTER TABLE \"" + tableName + "\" RENAME COLUMN \"" + oldUnquoted + "\" TO \"" + newUnquoted + "\";";
+                    AnylineDdlHelper.executeDDL(service, ddl);
+                    AnylineDdlHelper.clearMetadataCache();
+                } else {
+                    org.anyline.metadata.Column column = new org.anyline.metadata.Column(oldUnquoted);
+                    column.setTable(new org.anyline.metadata.Table<>(tableName));
+                    service.ddl().rename(column, newUnquoted);
+                    AnylineDdlHelper.clearMetadataCache();
+                }
                 return null;
             });
         } catch (Exception e) {
@@ -1913,14 +2386,40 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      * 使用 Anyline 原生 API 删除列，自动适配不同数据库（PostgreSQL、达梦、人大金仓等）。
      */
     private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName) {
+        dropColumnFromTable(datasource, tableName, fieldName, null);
+    }
+
+    private void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName,
+            java.util.Set<String> existingColumns) {
         try {
             // 使用TenantUtils.executeIgnore包装操作，忽略租户条件
             TenantUtils.executeIgnore(() -> {
                 // 创建 AnylineService 实例
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
-                // 使用 Anyline 原生 API 删除列（内部会检查列是否存在）
-                AnylineDdlHelper.dropColumn(service, tableName, fieldName);
+                if (existingColumns == null) {
+                    // 使用 Anyline 原生 API 删除列（内部会检查列是否存在）
+                    AnylineDdlHelper.dropColumn(service, tableName, fieldName);
+                } else {
+                    String normalized = normalizeColumnName(fieldName);
+                    if (!existingColumns.contains(normalized)) {
+                        log.info("列 {} 不存在于表 {}，跳过删除", fieldName, tableName);
+                        return null;
+                    }
+                    String datasourceType = datasource.getDatasourceType();
+                    DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+                    String unquoted = fieldName == null ? null : fieldName.replace("\"", "");
+                    if (dbType == DatabaseType.PostgreSQL || dbType == DatabaseType.KingBase) {
+                        String ddl = "ALTER TABLE \"" + tableName + "\" DROP COLUMN \"" + unquoted + "\";";
+                        AnylineDdlHelper.executeDDL(service, ddl);
+                        AnylineDdlHelper.clearMetadataCache();
+                    } else {
+                        org.anyline.metadata.Column column = new org.anyline.metadata.Column(unquoted);
+                        column.setTable(new org.anyline.metadata.Table<>(tableName));
+                        service.ddl().drop(column);
+                        AnylineDdlHelper.clearMetadataCache();
+                    }
+                }
 
                 log.info("成功从表 {} 删除列: {}", tableName, fieldName);
                 return null;
@@ -2117,7 +2616,10 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             return;
         }
 
+        long totalStartNs = System.nanoTime();
         log.info("开始批量执行物理表操作，表名: {}, 操作数量: {}", tableName, operations.size());
+
+        java.util.Set<String> existingColumns = fetchExistingColumns(datasource, tableName);
 
         // 分类收集操作
         List<PhysicalTableOperation> dropOps = new java.util.ArrayList<>();
@@ -2144,49 +2646,67 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             }
         }
 
+        long dropStartNs = System.nanoTime();
         // 1. 先执行 DROP 操作
         for (PhysicalTableOperation op : dropOps) {
             try {
-                dropColumnFromTable(datasource, tableName, op.getFieldName());
+                dropColumnFromTable(datasource, tableName, op.getFieldName(), existingColumns);
+                if (existingColumns != null) {
+                    existingColumns.remove(normalizeColumnName(op.getFieldName()));
+                }
             } catch (Exception e) {
                 log.error("执行 DROP 操作失败，字段名: {}, 错误: {}", op.getFieldName(), e.getMessage(), e);
                 throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
             }
         }
+        long dropMs = (System.nanoTime() - dropStartNs) / 1_000_000;
 
+        long renameStartNs = System.nanoTime();
         // 2. 执行 RENAME 操作
         for (PhysicalTableOperation op : renameOps) {
             try {
-                renameColumnInTable(datasource, tableName, op.getOldFieldName(), op.getFieldName());
+                renameColumnInTable(datasource, tableName, op.getOldFieldName(), op.getFieldName(), existingColumns);
+                if (existingColumns != null) {
+                    existingColumns.remove(normalizeColumnName(op.getOldFieldName()));
+                    existingColumns.add(normalizeColumnName(op.getFieldName()));
+                }
             } catch (Exception e) {
                 log.error("执行 RENAME 操作失败，旧字段名: {}, 新字段名: {}, 错误: {}",
                         op.getOldFieldName(), op.getFieldName(), e.getMessage(), e);
                 throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
             }
         }
+        long renameMs = (System.nanoTime() - renameStartNs) / 1_000_000;
 
+        long alterStartNs = System.nanoTime();
         // 3. 合并执行 ALTER 操作（优化性能）
         if (!alterOps.isEmpty()) {
             try {
-                executeBatchAlterOperations(datasource, tableName, alterOps);
+                executeBatchAlterOperations(datasource, tableName, alterOps, existingColumns);
             } catch (Exception e) {
                 log.error("执行批量 ALTER 操作失败，错误: {}", e.getMessage(), e);
                 throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
             }
         }
+        long alterMs = (System.nanoTime() - alterStartNs) / 1_000_000;
 
+        long addStartNs = System.nanoTime();
         // 4. 最后执行 ADD 操作
         for (PhysicalTableOperation op : addOps) {
             try {
-                addColumnToTable(datasource, tableName, op.getFieldInfo());
+                addColumnToTable(datasource, tableName, op.getFieldInfo(), existingColumns);
             } catch (Exception e) {
                 log.error("执行 ADD 操作失败，字段名: {}, 错误: {}",
                         op.getFieldInfo().getFieldName(), e.getMessage(), e);
                 throw new RuntimeException("物理表操作失败: " + e.getMessage(), e);
             }
         }
+        long addMs = (System.nanoTime() - addStartNs) / 1_000_000;
 
-        log.info("批量执行物理表操作完成，表名: {}", tableName);
+        long totalMs = (System.nanoTime() - totalStartNs) / 1_000_000;
+        log.info("批量执行物理表操作完成，表名: {}, totalMs={}, dropMs={}, renameMs={}, alterMs={}, addMs={}, dropOps={}, renameOps={}, alterOps={}, addOps={}",
+                tableName, totalMs, dropMs, renameMs, alterMs, addMs,
+                dropOps.size(), renameOps.size(), alterOps.size(), addOps.size());
     }
 
     /**
@@ -2201,6 +2721,11 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      */
     private void executeBatchAlterOperations(MetadataDatasourceDO datasource, String tableName,
             List<PhysicalTableOperation> alterOps) {
+        executeBatchAlterOperations(datasource, tableName, alterOps, null);
+    }
+
+    private void executeBatchAlterOperations(MetadataDatasourceDO datasource, String tableName,
+            List<PhysicalTableOperation> alterOps, java.util.Set<String> existingColumns) {
         if (alterOps == null || alterOps.isEmpty()) {
             return;
         }
@@ -2213,7 +2738,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             log.warn("未知的数据库类型: {}，使用逐个执行方式", datasourceType);
             // 未知数据库类型，逐个执行
             for (PhysicalTableOperation op : alterOps) {
-                alterColumnInTable(datasource, tableName, op.getFieldInfo());
+                alterColumnInTable(datasource, tableName, op.getFieldInfo(), existingColumns);
             }
             return;
         }
@@ -2222,12 +2747,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             // 达梦数据库：使用 Anyline API 逐个执行（因为 MODIFY 语法不支持合并）
             log.info("达梦数据库逐个执行 ALTER 操作，操作数量: {}", alterOps.size());
             for (PhysicalTableOperation op : alterOps) {
-                alterColumnInTable(datasource, tableName, op.getFieldInfo());
+                alterColumnInTable(datasource, tableName, op.getFieldInfo(), existingColumns);
             }
         } else {
             // PostgreSQL/KingBase：合并为一条 DDL 语句执行
             log.info("合并执行 ALTER 操作，操作数量: {}", alterOps.size());
-            executeMergedAlterDDL(datasource, tableName, alterOps, datasourceType);
+            executeMergedAlterDDL(datasource, tableName, alterOps, datasourceType, existingColumns);
         }
     }
 
@@ -2249,13 +2774,33 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
      */
     private void executeMergedAlterDDL(MetadataDatasourceDO datasource, String tableName,
             List<PhysicalTableOperation> alterOps, String datasourceType) {
+        executeMergedAlterDDL(datasource, tableName, alterOps, datasourceType, null);
+    }
+
+    private void executeMergedAlterDDL(MetadataDatasourceDO datasource, String tableName,
+            List<PhysicalTableOperation> alterOps, String datasourceType, java.util.Set<String> existingColumns) {
         try {
             TenantUtils.executeIgnore(() -> {
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
                 // 先校验表是否存在
-                if (!AnylineDdlHelper.tableExists(service, tableName)) {
-                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                if (existingColumns == null) {
+                    if (!AnylineDdlHelper.tableExists(service, tableName)) {
+                        throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                    }
+                }
+
+                java.util.Set<String> columns = existingColumns != null ? existingColumns : new java.util.HashSet<>();
+                if (existingColumns == null) {
+                    AnylineDdlHelper.clearMetadataCache();
+                    org.anyline.metadata.Table<?> table = service.metadata().table(tableName);
+                    if (table != null && table.getColumns() != null) {
+                        for (org.anyline.metadata.Column col : table.getColumns().values()) {
+                            if (col != null && col.getName() != null) {
+                                columns.add(normalizeColumnName(col.getName()));
+                            }
+                        }
+                    }
                 }
 
                 // 生成合并的 DDL 语句
@@ -2268,7 +2813,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     String fieldName = field.getFieldName();
 
                     // 检查列是否存在
-                    if (!AnylineDdlHelper.columnExists(service, tableName, fieldName)) {
+                    if (!columns.contains(normalizeColumnName(fieldName))) {
                         log.warn("列 {} 不存在于表 {} 中，跳过 ALTER 操作", fieldName, tableName);
                         continue;
                     }
@@ -2330,6 +2875,218 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             log.error("执行合并 ALTER DDL 失败: {}", e.getMessage(), e);
             throw new RuntimeException("修改列失败", e);
         }
+    }
+
+    private java.util.Set<String> fetchExistingColumns(MetadataDatasourceDO datasource, String tableName) {
+        try {
+            return TenantUtils.executeIgnore(() -> {
+                AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
+                AnylineDdlHelper.clearMetadataCache();
+                org.anyline.metadata.Table<?> table = service.metadata().table(tableName);
+                if (table == null) {
+                    throw new RuntimeException("表 " + tableName + " 不存在，请先创建表");
+                }
+                java.util.Set<String> result = new java.util.HashSet<>();
+                if (table != null && table.getColumns() != null) {
+                    for (org.anyline.metadata.Column col : table.getColumns().values()) {
+                        if (col != null && col.getName() != null) {
+                            result.add(normalizeColumnName(col.getName()));
+                        }
+                    }
+                }
+                return result;
+            });
+        } catch (Exception e) {
+            log.warn("获取表 {} 列元数据失败，将退化为按列查询: {}", tableName, e.getMessage());
+            return null;
+        }
+    }
+
+    static void validateBatchFieldUniqueness(String entityUuid, String applicationId, List<EntityFieldUpsertItemVO> items,
+            List<MetadataEntityFieldDO> existingFields, Map<Long, MetadataEntityFieldDO> fieldsById) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+        String appIdStr = applicationId != null ? applicationId.trim() : null;
+
+        java.util.Set<String> deletedFieldUuids = new java.util.HashSet<>();
+        java.util.Set<String> updatedFieldUuids = new java.util.HashSet<>();
+
+        for (EntityFieldUpsertItemVO item : items) {
+            if (Boolean.TRUE.equals(item.getIsDeleted())) {
+                Long id = parseIdOrNull(item.getId());
+                if (id == null) {
+                    continue;
+                }
+                MetadataEntityFieldDO f = fieldsById.get(id);
+                if (f != null && f.getFieldUuid() != null) {
+                    deletedFieldUuids.add(f.getFieldUuid());
+                }
+                continue;
+            }
+            Long id = parseIdOrNull(item.getId());
+            if (id != null) {
+                MetadataEntityFieldDO f = fieldsById.get(id);
+                if (f != null && f.getFieldUuid() != null) {
+                    updatedFieldUuids.add(f.getFieldUuid());
+                }
+            }
+        }
+
+        Map<String, String> fieldNameOwner = new HashMap<>();
+        Map<String, String> displayNameOwner = new HashMap<>();
+
+        if (existingFields != null) {
+            for (MetadataEntityFieldDO f : existingFields) {
+                if (f == null || f.getFieldUuid() == null) {
+                    continue;
+                }
+                if (deletedFieldUuids.contains(f.getFieldUuid()) || updatedFieldUuids.contains(f.getFieldUuid())) {
+                    continue;
+                }
+                if (appIdStr != null && f.getApplicationId() != null && !appIdStr.equals(String.valueOf(f.getApplicationId()))) {
+                    continue;
+                }
+                String name = trimToNull(f.getFieldName());
+                if (name != null) {
+                    fieldNameOwner.put(name, f.getFieldUuid());
+                }
+                String display = trimToNull(f.getDisplayName());
+                if (display != null) {
+                    displayNameOwner.put(display, f.getFieldUuid());
+                }
+            }
+        }
+
+        for (EntityFieldUpsertItemVO item : items) {
+            if (Boolean.TRUE.equals(item.getIsDeleted())) {
+                continue;
+            }
+            Long id = parseIdOrNull(item.getId());
+            String fieldUuid = null;
+            String finalFieldName;
+            String finalDisplayName;
+            if (id != null) {
+                MetadataEntityFieldDO origin = fieldsById.get(id);
+                if (origin == null) {
+                    throw exception(ENTITY_FIELD_NOT_EXISTS);
+                }
+                fieldUuid = origin.getFieldUuid();
+                finalFieldName = trimToNull(item.getFieldName());
+                if (finalFieldName == null) {
+                    finalFieldName = trimToNull(origin.getFieldName());
+                } else {
+                    validateFieldNameNotDatabaseKeyword(finalFieldName);
+                }
+                finalDisplayName = trimToNull(item.getDisplayName());
+                if (finalDisplayName == null) {
+                    finalDisplayName = trimToNull(origin.getDisplayName());
+                }
+            } else {
+                finalFieldName = trimToNull(item.getFieldName());
+                if (finalFieldName != null) {
+                    validateFieldNameNotDatabaseKeyword(finalFieldName);
+                }
+                finalDisplayName = trimToNull(item.getDisplayName());
+            }
+
+            if (finalFieldName != null) {
+                String owner = fieldNameOwner.get(finalFieldName);
+                if (owner != null && (fieldUuid == null || !owner.equals(fieldUuid))) {
+                    throw exception(ENTITY_FIELD_NAME_DUPLICATE, finalFieldName);
+                }
+                fieldNameOwner.put(finalFieldName, fieldUuid != null ? fieldUuid : "NEW#" + System.identityHashCode(item));
+            }
+
+            if (finalDisplayName != null) {
+                String owner = displayNameOwner.get(finalDisplayName);
+                if (owner != null && (fieldUuid == null || !owner.equals(fieldUuid))) {
+                    throw exception(ENTITY_FIELD_DISPLAY_NAME_DUPLICATE, finalDisplayName);
+                }
+                displayNameOwner.put(finalDisplayName, fieldUuid != null ? fieldUuid : "NEW#" + System.identityHashCode(item));
+            }
+        }
+    }
+
+    private static Long parseIdOrNull(String id) {
+        if (id == null || id.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return Long.valueOf(id.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String t = value.trim();
+        return t.isEmpty() ? null : t;
+    }
+
+    private static String normalizeColumnName(String name) {
+        String n = name != null ? name.trim() : "";
+        if (n.isEmpty()) {
+            return "";
+        }
+        String unquoted = n.replace("\"", "").replace("'", "");
+        return unquoted.toLowerCase();
+    }
+
+    private Map<Long, MetadataEntityFieldDO> loadFieldsByIds(List<EntityFieldUpsertItemVO> items) {
+        if (items == null || items.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+        java.util.Set<Long> ids = new java.util.HashSet<>();
+        for (EntityFieldUpsertItemVO item : items) {
+            Long id = parseIdOrNull(item.getId());
+            if (id != null) {
+                ids.add(id);
+            }
+        }
+        if (ids.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+        QueryWrapper queryWrapper = QueryWrapper.create().in(MetadataEntityFieldDO::getId, ids);
+        List<MetadataEntityFieldDO> list = metadataEntityFieldRepository.list(queryWrapper);
+        if (list == null || list.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+        Map<Long, MetadataEntityFieldDO> map = new HashMap<>();
+        for (MetadataEntityFieldDO f : list) {
+            if (f != null && f.getId() != null) {
+                map.put(f.getId(), f);
+            }
+        }
+        return map;
+    }
+
+    private MetadataEntityFieldDO buildUpdatedSnapshot(MetadataEntityFieldDO origin, EntityFieldUpsertItemVO item, Integer maxLength) {
+        MetadataEntityFieldDO snapshot = new MetadataEntityFieldDO();
+        snapshot.setId(origin.getId());
+        snapshot.setFieldUuid(origin.getFieldUuid());
+        snapshot.setEntityUuid(origin.getEntityUuid());
+        snapshot.setApplicationId(origin.getApplicationId());
+        snapshot.setFieldName(item.getFieldName() != null ? item.getFieldName() : origin.getFieldName());
+        snapshot.setDisplayName(item.getDisplayName() != null ? item.getDisplayName() : origin.getDisplayName());
+        snapshot.setFieldType(item.getFieldType() != null ? item.getFieldType() : origin.getFieldType());
+        snapshot.setDataLength(maxLength != null ? maxLength : origin.getDataLength());
+        snapshot.setDecimalPlaces(item.getDecimalPlaces() != null ? item.getDecimalPlaces() : origin.getDecimalPlaces());
+        snapshot.setDefaultValue(item.getDefaultValue() != null ? item.getDefaultValue() : origin.getDefaultValue());
+        snapshot.setDescription(item.getDescription() != null ? item.getDescription() : origin.getDescription());
+        snapshot.setIsRequired(item.getIsRequired() != null ? item.getIsRequired() : origin.getIsRequired());
+        snapshot.setIsUnique(item.getIsUnique() != null ? item.getIsUnique() : origin.getIsUnique());
+        snapshot.setSortOrder(item.getSortOrder() != null ? item.getSortOrder() : origin.getSortOrder());
+        snapshot.setIsSystemField(item.getIsSystemField() != null ? item.getIsSystemField() : origin.getIsSystemField());
+        snapshot.setIsPrimaryKey(origin.getIsPrimaryKey());
+        snapshot.setVersionTag(origin.getVersionTag());
+        snapshot.setDictTypeId(item.getDictTypeId() != null ? item.getDictTypeId() : origin.getDictTypeId());
+        snapshot.setStatus(origin.getStatus());
+        snapshot.setFieldCode(origin.getFieldCode());
+        return snapshot;
     }
 
     /**
@@ -2607,7 +3364,6 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 处理约束 - 修复：只有当 constraints 不为空对象时才执行删除和处理
         // 空对象判断：所有字段都为 null 时视为空对象，不应该删除现有约束
         if (constraints != null && !isConstraintsEmpty(constraints)) {
-            fieldConstraintService.deleteByFieldId(fieldUuid);
             processFieldConstraints(fieldUuid, entityField, constraints);
         }
 
@@ -2627,14 +3383,22 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         if (constraints == null) {
             return true;
         }
-        // 检查所有字段是否都为 null
-        return constraints.getLengthEnabled() == null
-                && constraints.getMinLength() == null
-                && constraints.getMaxLength() == null
-                && constraints.getLengthPrompt() == null
-                && constraints.getRegexEnabled() == null
-                && constraints.getRegexPattern() == null
-                && constraints.getRegexPrompt() == null;
+        boolean lengthEnabledEmpty = constraints.getLengthEnabled() == null || constraints.getLengthEnabled() == 0;
+        boolean minLengthEmpty = constraints.getMinLength() == null || constraints.getMinLength() == 0;
+        boolean maxLengthEmpty = constraints.getMaxLength() == null || constraints.getMaxLength() == 0;
+        boolean lengthPromptEmpty = !StringUtils.hasText(constraints.getLengthPrompt());
+
+        boolean regexEnabledEmpty = constraints.getRegexEnabled() == null || constraints.getRegexEnabled() == 0;
+        boolean regexPatternEmpty = !StringUtils.hasText(constraints.getRegexPattern());
+        boolean regexPromptEmpty = !StringUtils.hasText(constraints.getRegexPrompt());
+
+        return lengthEnabledEmpty
+                && minLengthEmpty
+                && maxLengthEmpty
+                && lengthPromptEmpty
+                && regexEnabledEmpty
+                && regexPatternEmpty
+                && regexPromptEmpty;
     }
 
     /**
@@ -2653,6 +3417,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         // 长度
         boolean lengthEnabled = constraints.getLengthEnabled() != null
                 && CommonStatusEnum.isEnabled(constraints.getLengthEnabled());
+        boolean lengthExplicitDisabled = constraints.getLengthEnabled() != null
+                && !CommonStatusEnum.isEnabled(constraints.getLengthEnabled());
         boolean hasLengthRange = (constraints.getMinLength() != null && constraints.getMinLength() > 0)
                 || (constraints.getMaxLength() != null && constraints.getMaxLength() > 0);
         boolean hasLengthPrompt = StringUtils.hasText(constraints.getLengthPrompt());
@@ -2672,11 +3438,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
             req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
+        } else if (lengthExplicitDisabled && (hasLengthRange || hasLengthPrompt)) {
+            fieldConstraintService.delete(fieldUuid, "LENGTH_RANGE");
         }
 
         // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
-        if (constraints.getRegexPattern() != null && !constraints.getRegexPattern().trim().isEmpty() &&
-                constraints.getRegexEnabled() != null && constraints.getRegexEnabled() == 1) {
+        boolean regexEnabled = constraints.getRegexEnabled() != null && constraints.getRegexEnabled() == 1;
+        boolean regexExplicitDisabled = constraints.getRegexEnabled() != null && constraints.getRegexEnabled() == 0;
+        boolean hasRegexPattern = StringUtils.hasText(constraints.getRegexPattern());
+        boolean hasRegexPrompt = StringUtils.hasText(constraints.getRegexPrompt());
+        if (regexEnabled && hasRegexPattern) {
             FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
             req.setFieldUuid(fieldUuid);
             req.setConstraintType("REGEX");
@@ -2686,43 +3457,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
             req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
-        }
-
-        // 必填（与 isRequired 联动）
-        if (entityField != null && entityField.getIsRequired() != null) {
-            // 只有当 isRequired = 1 时才创建约束配置，为0时删除已有配置
-            if (entityField.getIsRequired() == 1) {
-                // 原有的字段约束逻辑
-                FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
-                req.setFieldUuid(fieldUuid);
-                req.setConstraintType("REQUIRED");
-                req.setIsEnabled(entityField.getIsRequired());
-                req.setPromptMessage(null);
-                req.setVersionTag(entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
-                req.setApplicationId(entityField.getApplicationId());
-                fieldConstraintService.saveFieldConstraintConfig(req);
-            } else {
-                // isRequired = 0 时删除已有的必填约束配置
-                fieldConstraintService.delete(fieldUuid, "REQUIRED");
-            }
-        }
-
-        // 唯一（与 isUnique 联动）
-        if (entityField != null && entityField.getIsUnique() != null) {
-            // 只有当 isUnique = 1 时才创建约束配置，为0时删除已有配置
-            if (entityField.getIsUnique() == 1) {
-                FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
-                req.setFieldUuid(fieldUuid);
-                req.setConstraintType("UNIQUE");
-                req.setIsEnabled(entityField.getIsUnique());
-                req.setPromptMessage(null);
-                req.setVersionTag(entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
-                req.setApplicationId(entityField.getApplicationId());
-                fieldConstraintService.saveFieldConstraintConfig(req);
-            } else {
-                // isUnique = 0 时删除已有的唯一性约束配置
-                fieldConstraintService.delete(fieldUuid, "UNIQUE");
-            }
+        } else if (regexExplicitDisabled && (hasRegexPattern || hasRegexPrompt)) {
+            fieldConstraintService.delete(fieldUuid, "REGEX");
         }
     }
 

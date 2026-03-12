@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRangeRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -20,9 +20,10 @@ import java.util.Map;
  *
  */
 @Component
-public class RangeValidationService implements ValidationService {
+public class RangeValidationService implements PrefetchableValidationService {
 
     private final MetadataValidationRangeRepository rangeRepository;
+    private transient Map<String, java.util.List<MetadataValidationRangeDO>> prefetched;
 
     public RangeValidationService(MetadataValidationRangeRepository rangeRepository) {
         this.rangeRepository = rangeRepository;
@@ -44,7 +45,13 @@ public class RangeValidationService implements ValidationService {
         }
 
         // 查询范围规则
-        List<MetadataValidationRangeDO> rules = rangeRepository.findByFieldUuid(fieldUuid);
+        List<MetadataValidationRangeDO> rules = null;
+        if (prefetched != null) {
+            rules = prefetched.get(fieldUuid);
+        }
+        if (rules == null) {
+            rules = rangeRepository.findByFieldUuid(fieldUuid);
+        }
         
         if (rules.isEmpty()) {
             return; // 没有范围规则，跳过校验
@@ -175,5 +182,23 @@ public class RangeValidationService implements ValidationService {
     @Override
     public String getValidationType() {
         return "RANGE";
+    }
+
+    @Override
+    public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("RANGE") : null;
+        if (m != null) {
+            this.prefetched = new java.util.HashMap<>();
+            for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
+                @SuppressWarnings("unchecked")
+                java.util.List<MetadataValidationRangeDO> list = (java.util.List<MetadataValidationRangeDO>) (java.util.List<?>) e.getValue();
+                this.prefetched.put(e.getKey(), list);
+            }
+        }
+    }
+
+    @Override
+    public void clearPrefetchedRules() {
+        this.prefetched = null;
     }
 }

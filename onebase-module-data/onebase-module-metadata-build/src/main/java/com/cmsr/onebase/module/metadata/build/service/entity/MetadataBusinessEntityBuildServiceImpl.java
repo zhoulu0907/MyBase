@@ -399,12 +399,15 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      */
     private void saveEntityFields(String entityUuid, List<MetadataSystemFieldsDO> systemFields, Long appId) {
         int sortOrder = 1;
+        java.util.Map<String, FieldTypeMappingDO> mappingCache = new java.util.HashMap<>();
         for (MetadataSystemFieldsDO systemField : systemFields) {
             // 特殊处理 parent_id：不是主键、不是必填、不是唯一
             boolean isParentId = "parent_id".equalsIgnoreCase(systemField.getFieldName());
             int isPrimaryKey = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
             int isRequired = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsRequired());
             int isUnique = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
+
+            FieldTypeMappingDO mapping = getDefaultMappingCached(systemField.getFieldType(), mappingCache);
             
             MetadataEntityFieldDO entityField = new MetadataEntityFieldDO();
             entityField.setEntityUuid(entityUuid);
@@ -414,8 +417,10 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 ? systemField.getDisplayName()
                 : systemField.getFieldName());
             entityField.setFieldType(systemField.getFieldType());
-            entityField.setDataLength(getDefaultDataLength(systemField.getFieldType())); // 根据字段类型设置默认长度
-            entityField.setDecimalPlaces(getDefaultDecimalPlaces(systemField.getFieldType())); // 根据字段类型设置默认小数位
+            entityField.setDataLength(mapping != null ? mapping.getDefaultLength() : null);
+            entityField.setDecimalPlaces(mapping != null && mapping.getDefaultDecimalPlaces() != null && mapping.getDefaultDecimalPlaces() > 0
+                    ? mapping.getDefaultDecimalPlaces()
+                    : null);
             entityField.setDefaultValue(systemField.getDefaultValue());
             entityField.setDescription(systemField.getDescription());
             // 使用新的枚举值：1-是，0-否
@@ -434,6 +439,24 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         }
 
         log.info("成功保存 {} 个系统字段到实体字段表", systemFields.size());
+    }
+
+    private FieldTypeMappingDO getDefaultMappingCached(String fieldType, java.util.Map<String, FieldTypeMappingDO> cache) {
+        if (fieldType == null || fieldType.trim().isEmpty()) {
+            return null;
+        }
+        String key = fieldType.trim().toUpperCase();
+        if (cache != null) {
+            FieldTypeMappingDO cached = cache.get(key);
+            if (cached != null) {
+                return cached;
+            }
+        }
+        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(key);
+        if (cache != null && mapping != null) {
+            cache.put(key, mapping);
+        }
+        return mapping;
     }
 
     /**
@@ -576,6 +599,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         String detectedIdField = null;
         String candidatePk = null;
+        java.util.Map<String, FieldTypeMappingDO> mappingCache = new java.util.HashMap<>();
 
         // 预扫描是否已有 id 列
         for (MetadataSystemFieldsDO f : systemFields) {
@@ -597,7 +621,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
             Column column = new Column(fieldName);
             column.setTable(table);
-            column.setTypeName(mapFieldType(field.getFieldType()));
+            FieldTypeMappingDO mapping = getDefaultMappingCached(field.getFieldType(), mappingCache);
+            column.setTypeName(mapFieldType(mapping, field.getFieldType()));
 
             // id 强制 NOT NULL；parent_id 永不加 NOT NULL；其它按 isRequired
             if (isId) {
@@ -732,6 +757,10 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         
         // 从映射表查询业务类型对应的数据库类型
         FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(fieldType);
+        return mapFieldType(mapping, fieldType);
+    }
+
+    private String mapFieldType(FieldTypeMappingDO mapping, String fieldType) {
         if (mapping != null && mapping.getDatabaseField() != null) {
             return buildDatabaseTypeString(mapping);
         }

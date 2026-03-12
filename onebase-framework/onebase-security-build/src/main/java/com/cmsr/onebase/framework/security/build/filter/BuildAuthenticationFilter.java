@@ -153,6 +153,21 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
             // LoginUser loginUser = buildLoginUserByHeader(request);
             LoginUser loginUser = null;
+            if (Boolean.TRUE.equals(securityProperties.getLoginUserHeaderEnable())) {
+                try {
+                    loginUser = buildLoginUserByHeader(request);
+                    if (loginUser != null && loginUser.getTenantId() == null) {
+                        loginUser.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+                    }
+                    if (loginUser != null && (loginUser.getId() == null || loginUser.getTenantId() == null)) {
+                        loginUser = null;
+                    }
+                } catch (Throwable ex) {
+                    CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                    ServletUtils.writeJSON(response, result);
+                    return;
+                }
+            }
             // 情况二，基于 Token 获得用户
             // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
             String token = null;
@@ -260,6 +275,9 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
 
     public boolean isTokenMockable(String token){
         // 必须开启且token以“mock-secret”配置项的值为开头
+        if (StrUtil.isBlank(token)) {
+            return false;
+        }
         return securityProperties.getMockEnable() && token.startsWith(securityProperties.getMockSecret());
     }
 

@@ -7,7 +7,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
@@ -34,11 +34,12 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DAT
  *
  */
 @Component
-public class UniqueValidationService implements ValidationService {
+public class UniqueValidationService implements PrefetchableValidationService {
 
     private static final Logger log = Logger.getLogger(UniqueValidationService.class.getName());
 
     private final MetadataValidationUniqueRepository uniqueRepository;
+    private transient Map<String, java.util.List<MetadataValidationUniqueDO>> prefetched;
 
     @Resource
     protected MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
@@ -63,7 +64,13 @@ public class UniqueValidationService implements ValidationService {
         }
 
         // 查询唯一性规则（使用字段UUID）
-        List<MetadataValidationUniqueDO> rules = uniqueRepository.findByFieldUuid(fieldUuid);
+        List<MetadataValidationUniqueDO> rules = null;
+        if (prefetched != null) {
+            rules = prefetched.get(fieldUuid);
+        }
+        if (rules == null) {
+            rules = uniqueRepository.findByFieldUuid(fieldUuid);
+        }
         
         if (rules.isEmpty()) {
             return; // 没有唯一性规则，跳过校验
@@ -105,6 +112,24 @@ public class UniqueValidationService implements ValidationService {
     public boolean supports(String fieldType) {
         // 唯一性校验支持所有字段类型
         return true;
+    }
+
+    @Override
+    public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("UNIQUE") : null;
+        if (m != null) {
+            this.prefetched = new java.util.HashMap<>();
+            for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
+                @SuppressWarnings("unchecked")
+                java.util.List<MetadataValidationUniqueDO> list = (java.util.List<MetadataValidationUniqueDO>) (java.util.List<?>) e.getValue();
+                this.prefetched.put(e.getKey(), list);
+            }
+        }
+    }
+
+    @Override
+    public void clearPrefetchedRules() {
+        this.prefetched = null;
     }
 
     /**
