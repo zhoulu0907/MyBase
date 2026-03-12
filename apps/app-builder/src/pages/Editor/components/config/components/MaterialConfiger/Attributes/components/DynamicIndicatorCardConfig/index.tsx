@@ -187,6 +187,7 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
     setFormulaVisible(false);
     const filterCondition = [...currentIndicator.filterCondition];
     filterCondition[formulaKey.index || 0].conditions[formulaKey.i || 0].value = formulaData;
+    filterCondition[formulaKey.index || 0].conditions[formulaKey.i || 0].formattedFormula = formattedFormula;
     setCurrentIndicator((prev: any) => ({
       ...prev,
       filterCondition: filterCondition
@@ -670,7 +671,8 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                                   fieldKey: value,
                                   op: undefined,
                                   operatorType: undefined,
-                                  value: undefined
+                                  value: undefined,
+                                  formattedFormula: ''
                                 };
                                 setCurrentIndicator((prev: any) => ({ ...prev, filterCondition: filterCondition }));
                               }}
@@ -694,7 +696,8 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                                   fieldKey: item.fieldKey,
                                   op: value,
                                   operatorType: undefined,
-                                  value: undefined
+                                  value: undefined,
+                                  formattedFormula: ''
                                 };
                                 setCurrentIndicator((prev: any) => ({ ...prev, filterCondition: filterCondition }));
                               }}
@@ -724,7 +727,8 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                                       fieldKey: item.fieldKey,
                                       op: item.op,
                                       operatorType: value,
-                                      value: item.op === VALIDATION_TYPE.RANGE ? [undefined, undefined] : undefined
+                                      value: item.op === VALIDATION_TYPE.RANGE ? [undefined, undefined] : undefined,
+                                      formattedFormula: ''
                                     };
                                     setCurrentIndicator((prev: any) => ({
                                       ...prev,
@@ -773,8 +777,12 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                                 )}
 
                                 {item.operatorType === FieldType.FORMULA && (
-                                  <Button onClick={() => openFormulaEditor(item, index, i)} long>
-                                    {item.value ? '已设置公式' : 'ƒx 编辑公式'}
+                                  <Button
+                                    onClick={() => openFormulaEditor(item, index, i)}
+                                    long
+                                    className={styles.formulaBtn}
+                                  >
+                                    {item.value ? item?.formattedFormula : 'ƒx 编辑公式'}
                                     {item.value ? <IconLaunch /> : ''}
                                   </Button>
                                 )}
@@ -808,7 +816,8 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                             fieldKey: undefined,
                             op: undefined,
                             operatorType: undefined,
-                            value: undefined
+                            value: undefined,
+                            formattedFormula: ''
                           });
                           setCurrentIndicator((prev: any) => ({ ...prev, filterCondition }));
                         }}
@@ -830,7 +839,8 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                           fieldKey: undefined,
                           op: undefined,
                           operatorType: undefined,
-                          value: undefined
+                          value: undefined,
+                          formattedFormula: ''
                         }
                       ]
                     }

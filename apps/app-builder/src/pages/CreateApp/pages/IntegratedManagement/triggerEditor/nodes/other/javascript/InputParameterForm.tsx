@@ -10,6 +10,7 @@ import { NodeType } from '@onebase/common';
 import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getPrecedingNodes } from '../../../nodes/utils';
+import styles from './index.module.less';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -111,8 +112,11 @@ export const InputParameterFieldItem: React.FC<InputParameterFieldItemProps> = (
               long
               style={{ width: '210px' }}
               type={form.getFieldValue(`${fieldName}.value`) ? 'secondary' : 'outline'}
+              className={styles.formulaBtn}
             >
-              {form.getFieldValue(`${fieldName}.value`) ? '已设置公式' : 'ƒx 编辑公式'}
+              {form.getFieldValue(`${fieldName}.value`)
+                ? form.getFieldValue(`${fieldName}.value.formula`)
+                : 'ƒx 编辑公式'}
               {form.getFieldValue(`${fieldName}.value`) && <IconLaunch style={{ marginLeft: 4 }} />}
             </Button>
           </Form.Item>

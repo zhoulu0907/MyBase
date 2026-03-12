@@ -90,8 +90,10 @@ const FlowManagementPage: React.FC = () => {
     return () => debouncedSearch.cancel();
   }, [debouncedSearch]);
 
-  const toFlowEditor = (appId: string, flowId: string) => {
-    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}`);
+  const toFlowEditor = (appId: string, flowId: string, processName: string) => {
+    navigate(
+      `/onebase/${tenantId}/home/create-app/integrated-management/flow-editor?appId=${appId}&flowId=${flowId}&processName=${processName}`
+    );
   };
 
   const handleGetEntityListByApp = async () => {
@@ -130,7 +132,7 @@ const FlowManagementPage: React.FC = () => {
       const res = await createFlowMgmt(req);
       console.log('创建流程成功:', res);
 
-      toFlowEditor(curAppId, res);
+      toFlowEditor(curAppId, res, form.getFieldValue('processName'));
 
       setModalVisible('');
       getFlowMgmtList();

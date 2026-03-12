@@ -109,8 +109,14 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
 
                         {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
                           <Form.Item field={item.field + '.value'}>
-                            <Button onClick={() => openFormulaEditor(item.field)} long>
-                              {form.getFieldValue(item.field + '.value') ? '已设置公式' : 'ƒx 编辑公式'}
+                            <Button
+                              onClick={() => openFormulaEditor(item.field)}
+                              long
+                              className={styles.formaluShowBtn}
+                            >
+                              {form.getFieldValue(item.field + '.value')
+                                ? form.getFieldValue(item.field + '.value.formula')
+                                : 'ƒx 编辑公式'}
                               {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
                             </Button>
                           </Form.Item>

@@ -37,6 +37,7 @@ const CreateEntityModal: React.FC<{
   const { newNodes, setNewNodes } = useGraphEntitytore();
   const [form] = Form.useForm<EntityFormValues>();
   const [dsResource, setDsResource] = useState<string>(DS_RESOURCE_TYPE.EXTERNAL); // 数据源来源：内部数据源、外部数据源、外部数据源中引用自有数据源已有资产
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   // 提交
   const handleFinish = () => {
@@ -47,6 +48,7 @@ const CreateEntityModal: React.FC<{
     }
 
     form.validate().then(async (values) => {
+      setConfirmLoading(true);
       // 获取新节点位置
       const { x, y } = getNewNodePosition();
 
@@ -64,15 +66,20 @@ const CreateEntityModal: React.FC<{
         })
       };
 
-      const res = await createEntity(params);
-      console.log('createEntity', res);
-
-      if (res) {
-        setNewNodes([...newNodes, res.id]);
-        form.resetFields();
-        Message.success('保存成功');
-        successCallback();
-        setVisible(false);
+      try {
+        const res = await createEntity(params);
+        if (res) {
+          setNewNodes([...newNodes, res.id]);
+          form.resetFields();
+          Message.success('创建成功');
+          successCallback();
+          setVisible(false);
+        }
+      } catch (err) {
+        console.log('err', err);
+        Message.error('创建失败');
+      } finally {
+        setConfirmLoading(false);
       }
     });
   };
@@ -96,6 +103,7 @@ const CreateEntityModal: React.FC<{
       visible={visible}
       onOk={handleFinish}
       onCancel={handleCancel}
+      confirmLoading={confirmLoading}
       okText="创建"
       cancelText="取消"
     >
