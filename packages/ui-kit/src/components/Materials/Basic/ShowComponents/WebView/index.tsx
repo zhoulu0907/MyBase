@@ -14,8 +14,19 @@ const XWebView = memo((props: XWebViewConfig & { runtime?: boolean; detailMode?:
   const [iframeError, setIframeError] = useState(false);
   const [validUrl, setValidUrl] = useState('');
   const [iframeHeight, setIframeHeight] = useState('900px');
-  const { rowData, rowDataId } = pagesRuntimeSignal;
+  const { rowData, rowDataId, drawerVisible } = pagesRuntimeSignal;
   const { curMenu } = menuSignal;
+
+  useEffect(() => {
+    console.log('drawerVisible变化:', drawerVisible.value);
+    if (!drawerVisible.value) {
+      const iframe = document.querySelector('iframe');
+      if (iframe && iframe.contentWindow) {
+        console.log('发送drawerClose消息');
+        iframe.contentWindow.postMessage({ type: 'drawerClose' }, '*');
+      }
+    }
+  }, [drawerVisible.value]);
 
   const getValidUrl = (url: string) => {
     if (!url) return '';

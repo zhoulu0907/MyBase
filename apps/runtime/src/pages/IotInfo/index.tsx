@@ -296,6 +296,21 @@ export default function IotInfo() {
   }, []);
 
   useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      console.log('收到消息:', event.data);
+      if (event.data && event.data.type === 'drawerClose') {
+        console.log('收到drawerClose消息,清除轮询');
+        clearPollingTimer();
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [clearPollingTimer]);
+
+  useEffect(() => {
     const paramArray: ParamData[] = [];
     searchParams.forEach((value, key) => {
       paramArray.push({ key, value });
