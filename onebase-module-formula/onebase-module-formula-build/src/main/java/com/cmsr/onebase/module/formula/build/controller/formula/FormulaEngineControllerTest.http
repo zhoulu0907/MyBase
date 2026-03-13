@@ -3,12 +3,19 @@
 # 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
 # 或者手动修改上面的@变量值
 ### CONCATENATE
-POST {{baseUrl}}/formula/engine/execute-formula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "CONCATENATE(0)" }
+{
+  "formula":"CONCATENATE('22',$界面交互触发节点.资产)",
+  "parameters":{
+    "$界面交互触发节点.资产":"\\nihao"
+  }
+}
+
+
 
 ### LEFT
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -417,7 +424,7 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
- { "formula": "COUNT(1,2,4,3)" }
+ { "formula": "COUNT(1,2,\"苹果\",3)" }
 
 ### LOG
 POST {{baseUrl}}/formula/engine/execute-formula
@@ -721,15 +728,22 @@ Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "AND(true,true)" }
+{ "formula": "AND(1==1,1!=2)" }
 
 ### IF
-POST {{baseUrl}}/formula/engine/execute-formula
+POST {{baseUrl}}/formula/engine/debug-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
-{ "formula": "IF(数学成绩>90)" }
+{
+  "formula":"LOWER(CONCATENATE(RIGHT(LEFT(IF(AND(英语成绩>90,数学成绩>90,语文成绩>90),'A[B（）()C】',\"其，（）{}他\"),6),1),\"E，F\"))",
+  "parameters":{
+    "英语成绩":"302285656641273858",
+    "数学成绩":"302285656641273857",
+    "语文成绩":"302285656641273856"
+  }
+}
 
 ### RANDOMBETWEEN
 POST {{baseUrl}}/formula/engine/execute-formula
