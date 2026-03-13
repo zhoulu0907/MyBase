@@ -53,7 +53,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
       >
         <img
           src={ChatboxIcon}
-          alt="聊天助手"
+          alt="智能体对话"
           style={{
             width: 60,
             height: 60,
