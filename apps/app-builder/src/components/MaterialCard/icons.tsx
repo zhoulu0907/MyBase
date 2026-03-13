@@ -122,7 +122,7 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   // 工作台高级组件
   'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
   'data_list_cp.svg': <img src={DataListIcon} alt="XDataList" />,
-  'chatbot_cp.svg': <img src={ChatbotIcon} alt="XChatbot" />
+  'chatbot_cp.svg': <img src={ChatbotIcon} alt="XChatbot" height={16} />
 };
 
 // TODO 图标更新
@@ -191,5 +191,6 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
 
   // 工作台高级组件
   XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
-  XDataList: <img src={DataListIcon} alt="XDataList" />
+  XDataList: <img src={DataListIcon} alt="XDataList" />,
+  XChatbot: <img src={ChatbotIcon} alt="XChatbot" height={16} />
 };

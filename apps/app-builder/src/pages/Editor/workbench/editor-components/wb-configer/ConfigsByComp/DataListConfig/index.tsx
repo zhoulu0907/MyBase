@@ -19,6 +19,7 @@ const DataListConfig = () => {
       renderPanels={({ editData, renderEditItem }) => {
         const labelItem = findItem(editData, 'label');
         const tableItem = findItem(editData, 'tableInfo');
+        const dataCountItem = findItem(editData, 'dataCount');
 
         return (
           <Collapse
@@ -34,6 +35,7 @@ const DataListConfig = () => {
             </CollapseItem>
             <CollapseItem header="数据列表配置" name={SECTION_KEYS.TABLE_CONFIG} contentStyle={PanelContentStyle}>
               {tableItem && <div>{renderEditItem(tableItem)}</div>}
+              {dataCountItem && <div>{renderEditItem(dataCountItem)}</div>}
             </CollapseItem>
           </Collapse>
         );
