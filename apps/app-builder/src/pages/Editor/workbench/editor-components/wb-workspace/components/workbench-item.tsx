@@ -1,4 +1,4 @@
-import { EditRender, WORKBENCH_COMPONENT_TYPES } from '@onebase/ui-kit';
+import { EditRender, WORKBENCH_COMPONENT_TYPES, type GridItem } from '@onebase/ui-kit';
 import { ResizableWorkbenchItem } from './resizable-workbench-item';
 import { OperationButtons } from './operatio-buttons';
 import type { WorkbenchItemProps } from '../../../types/workbench-component';
@@ -31,8 +31,16 @@ export function WorkbenchItem({
       currentWidth={currentWidth}
       containerWidth={containerWidth}
       onWidthChange={onOperation.widthChange}
+      onHeightChange={onOperation.heightChange}
       isSelected={isSelected}
       onSelect={handleSelect}
+      layout={
+        (
+          component as GridItem & {
+            layout?: { row: number; column: number; rowSpan?: number; colSpan?: number };
+          }
+        ).layout
+      }
     >
       <div data-cp-type={component.type} data-cp-displayname={component.displayName} data-cp-id={component.id}>
         <EditRender

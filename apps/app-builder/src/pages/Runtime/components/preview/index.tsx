@@ -30,6 +30,8 @@ import {
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
+import { percentageToColSpan } from '@/pages/Editor/workbench/utils/grid-layout';
+import { WB_GRID_CONFIG } from '@/pages/Editor/workbench/utils/constants';
 
 const FLOATING_COMPONENT_TYPES = ['XChatbot'];
 
@@ -283,7 +285,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         backgroundImage: pageConfig.pageBgImg ? `url(${pageConfig.pageBgImg})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundRepeat: 'no-repeat',
+        '--wb-row-height': `${WB_GRID_CONFIG.rowHeight}px`
       };
     }
     return { backgroundColor: '#fff' };
@@ -291,7 +294,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
 
   return (
     <div className={styles.previewPage}>
-      <div className={styles.content} style={getWbPageStyle()}>
+      <div
+        className={`${styles.content} ${isWorkbenchPage ? styles.workbenchContent : ''}`}
+        style={{
+          ...getWbPageStyle()
+        }}
+      >
         {loading ? (
           <div className={styles.loading}>
             <Spin size={40} tip="加载中..." />
@@ -420,14 +428,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
           <>
             {/* 浮动组件 */}
-            {console.log(
-              '[Preview] workbenchComponents:',
-              workbenchComponents.value.map((cp) => cp.type)
-            )}
             {workbenchComponents.value
               .filter((cp: GridItem) => isFloatingComponent(cp.type))
               .map((cp: GridItem) => {
-                console.log('[Preview] 渲染浮动组件:', cp.type, cp.id);
                 const floatingConfig = wbComponentSchemas.value[cp.id]?.config?.floatingConfig;
                 const right = floatingConfig?.right ?? 80;
                 const bottom = floatingConfig?.bottom ?? 80;
@@ -458,35 +461,31 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
               })}
 
             {/* 普通组件 */}
-            <Form layout="inline" form={form}>
-              {workbenchComponents.value
-                .filter((cp: GridItem) => !isFloatingComponent(cp.type))
-                .map((cp: GridItem) => (
-                  <Fragment key={cp.id}>
-                    {wbComponentSchemas.value[cp.id]?.config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <div
-                        key={cp.id}
-                        className={styles.componentItem}
-                        style={{
-                          width: `calc(${getWorkbenchComponentWidth(
-                            wbComponentSchemas.value[cp.id],
-                            cp.type as WorkbenchComponentType
-                          )} - 8px)`,
-                          margin: '8px'
-                        }}
-                      >
-                        <PreviewRender
-                          cpId={cp.id}
-                          cpType={cp.type}
-                          pageComponentSchema={wbComponentSchemas.value[cp.id]}
-                          runtime={false}
-                          preview={preview}
-                        />
-                      </div>
-                    )}
-                  </Fragment>
-                ))}
-            </Form>
+            {workbenchComponents.value
+              .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+              .map((cp: GridItem) => {
+                const schema = wbComponentSchemas.value[cp.id];
+                if (!schema) return null;
+                if (schema.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) return null;
+                const widthStr = getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType);
+                const colSpan = percentageToColSpan(widthStr);
+                const rowSpan = schema?.config?.gridLayout?.rowSpan ?? 1;
+                return (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={schema}
+                      runtime={false}
+                      preview={preview}
+                    />
+                  </div>
+                );
+              })}
           </>
         )}
 

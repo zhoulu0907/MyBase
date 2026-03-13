@@ -104,9 +104,18 @@ export function useWorkbenchHandlers({
   const handleWidthChange = (componentId: string, newWidth: string) => {
     const schema = wbComponentSchemas[componentId];
     if (schema && schema.config) {
-      schema.config.width = newWidth;
-      setWbComponentSchemas(componentId, schema);
+      const updatedSchema = {
+        ...schema,
+        config: {
+          ...schema.config,
+          width: newWidth
+        }
+      };
+      setWbComponentSchemas(componentId, updatedSchema);
     }
+
+    // 宽度变化后根据最新宽度和顺序重新计算布局（由上层包裹的 setWorkbenchComponents 完成）
+    setWorkbenchComponents(workbenchComponents);
   };
 
   // 选择组件
@@ -136,6 +145,11 @@ export function useWorkbenchHandlers({
       return;
     }
 
+    if (!cpID) {
+      console.error('组件 ID 为空，无法创建组件');
+      return;
+    }
+
     // 校验组件类型是否为有效的工作台组件类型
     if (!hasWorkbenchComponentSchema(itemType)) {
       console.error(`无效的工作台组件类型: ${itemType}`);
@@ -143,36 +157,32 @@ export function useWorkbenchHandlers({
     }
 
     // 如果组件已存在且类型匹配, 则不进行创建
-    if (cpID) {
-      const cpSchema = wbComponentSchemas[cpID];
-      if (cpSchema && cpSchema.config && cpSchema.editData) {
-        // 检查组件类型是否匹配，如果不匹配则创建新组件
-        const existingType = (cpSchema as any).type || '';
-        if (existingType && existingType !== itemType) {
-          console.log(`组件 ${cpID} 已存在但类型不匹配（${existingType} !== ${itemType}），创建新组件`);
-          // 类型不匹配，继续创建新组件
-        } else {
-          console.log(`组件 ${cpID} 已存在，不进行创建`);
-          // 确保使用正确的类型（优先使用 itemType，如果不存在则使用已保存的 schema 中的类型）
-          const schemaType = itemType || existingType || '';
-          const completeSchema = {
-            id: cpID,
-            type: schemaType,
-            displayName: itemDisplayName || '',
-            ...cpSchema
-          } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
-          setCurComponentID(cpID);
-          setCurComponentSchema(completeSchema);
-          setShowDeleteButton(false);
-          return;
-        }
+    const cpSchema = wbComponentSchemas[cpID];
+    if (cpSchema && cpSchema.config && cpSchema.editData) {
+      // 检查组件类型是否匹配，如果不匹配则创建新组件
+      const existingType = (cpSchema as any).type || '';
+      if (existingType && existingType !== itemType) {
+        console.log(`组件 ${cpID} 已存在但类型不匹配（${existingType} !== ${itemType}），创建新组件`);
+        // 类型不匹配，继续创建新组件
+      } else {
+        console.log(`组件 ${cpID} 已存在，不进行创建`);
+        const completeSchema = {
+          id: cpID,
+          type: itemType,
+          displayName: itemDisplayName || '',
+          ...cpSchema
+        } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
+        setCurComponentID(cpID);
+        setCurComponentSchema(completeSchema);
+        setShowDeleteButton(false);
+        return;
       }
     }
 
     // 使用正确的类型创建 schema
     const schema = getWorkbenchComponentSchema(itemType as WorkbenchComponentType) as WorkbenchComponentSchema;
     schema.config.cpName = itemDisplayName || undefined;
-    schema.config.id = cpID ? cpID : undefined;
+    schema.config.id = cpID;
     schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
 
     // 确保宽度已设置（如果schema中没有宽度，使用默认值）
@@ -180,19 +190,24 @@ export function useWorkbenchHandlers({
       schema.config.width = getDefaultWidth(itemType as string, WORKBENCH_DEFAULT_WIDTHS);
     }
 
-    // 新创建的组件
-    if (cpID) {
-      setWbComponentSchemas(cpID, schema);
-      const completeSchema = {
-        id: cpID,
-        type: itemType,
-        displayName: itemDisplayName || '',
-        ...schema
-      } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
-      setCurComponentID(cpID);
-      setCurComponentSchema(completeSchema);
-      setShowDeleteButton(false);
-    }
+    setWbComponentSchemas(cpID, schema);
+
+    const newGridItem: GridItem = {
+      id: cpID,
+      type: itemType,
+      displayName: itemDisplayName || ''
+    };
+    setWorkbenchComponents([...workbenchComponents, newGridItem]);
+
+    const completeSchema = {
+      id: cpID,
+      type: itemType,
+      displayName: itemDisplayName || '',
+      ...schema
+    } as WorkbenchComponentSchema & { id: string; type: string; displayName: string };
+    setCurComponentID(cpID);
+    setCurComponentSchema(completeSchema);
+    setShowDeleteButton(false);
   };
 
   // 处理拖拽开始

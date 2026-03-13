@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
 import {
-  getWorkbenchComponentWidth,
   COMPONENT_GROUP_NAME,
   type GridItem,
-  type WorkbenchComponentType,
   useWorkbenchSignal,
   getOrCreatePageConfig,
   shouldShowInWorkspace,
-  isPageConfig
+  isPageConfig,
+  getWorkbenchComponentWidth,
+  type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { loadMicroApp, initGlobalState, type MicroApp } from 'qiankun';
@@ -19,7 +19,9 @@ import { useWorkbenchContainer } from '../../hooks/use-workbench-container';
 import { useWorkbenchHandlers } from '../../hooks/use-workbench-handlers';
 import { WorkbenchItem } from './components/workbench-item';
 import { EmptyState } from './components/empty-state';
-import { SORTABLE_CONFIG } from '../../utils/constants';
+import { SORTABLE_CONFIG, WB_GRID_CONFIG } from '../../utils/constants';
+import { applyGridLayout } from '../../utils/grid-layout';
+import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
 
 import NextIcon from '@/assets/images/next_icon.svg';
@@ -27,9 +29,6 @@ import PrevActiveIcon from '@/assets/images/prev_icon_active.svg';
 import MobileIcon from '@/assets/images/mobile_icon.svg';
 import PCActiveIcon from '@/assets/images/pc_icon_active.svg';
 
-/**
- * 工作台工作区组件
- */
 export default function WorkbenchWorkspace() {
   const [showEmpty, setShowEmpty] = useState(true);
   const { editMode, setEditMode } = currentEditorSignal;
@@ -55,9 +54,25 @@ export default function WorkbenchWorkspace() {
     setShowDeleteButton
   } = useWorkbenchSignal();
 
-  const updateComponents = setWorkbenchComponents as (items: GridItem[]) => void;
+  const updateComponents = (items: GridItem[], rowSpanOverrides?: Record<string, number>) => {
+    const laid = applyGridLayout(items, (id) => wbComponentSchemas[id], rowSpanOverrides);
+    setWorkbenchComponents(laid);
+  };
 
-  // 初始化 qiankun 全局状态，明确列出需要传递的属性
+  // 子组件上报内容高度 → 更新 rowSpan 并重新布局
+  const handleHeightChange = (componentId: string, rowSpan: number) => {
+    const schema = wbComponentSchemas[componentId];
+    if (!schema) return;
+    if ((schema.config?.gridLayout?.rowSpan ?? 1) === rowSpan) return;
+
+    setWbComponentSchemas(componentId, {
+      ...schema,
+      config: { ...schema.config, gridLayout: { rowSpan } }
+    });
+    // 直接传入新 rowSpan，避免等待 signal 更新导致布局滞后
+    updateComponents(workbenchComponents, { [componentId]: rowSpan });
+  };
+
   const qiankunActions = initGlobalState({
     drag: true,
     editMode: editMode.value,
@@ -76,18 +91,12 @@ export default function WorkbenchWorkspace() {
     setShowDeleteButton
   });
 
-  // 处理组件列表变化
   useEffect(() => {
     setShowEmpty(workbenchComponents?.length === 0);
   }, [workbenchComponents]);
 
-  // 加载移动端拖拽子应用
   useEffect(() => {
-    if (mobileEditorDragRef.current) {
-      return;
-    }
-    console.log('loading mobile-wb-editor-drag-list');
-
+    if (mobileEditorDragRef.current) return;
     const mobileEditorDrag = loadMicroApp({
       name: 'mobile-wb-editor-drag-list',
       entry: getMobileEditorURL(),
@@ -99,20 +108,17 @@ export default function WorkbenchWorkspace() {
       }
     });
     mobileEditorDragRef.current = mobileEditorDrag;
-
-    // 只在组件卸载时卸载子应用
     return () => {
       mobileEditorDrag?.unmount();
       mobileEditorDragRef.current = null;
     };
   }, []);
 
-  // 事件处理
   const handlers = useWorkbenchHandlers({
     wbComponentSchemas,
     setWbComponentSchemas,
     delWbComponentSchemas,
-    setWorkbenchComponents,
+    setWorkbenchComponents: updateComponents,
     setCurComponentID,
     clearCurComponentID,
     setCurComponentSchema,
@@ -120,7 +126,16 @@ export default function WorkbenchWorkspace() {
     workbenchComponents
   });
 
-  // 获取并设置页面配置
+  // 兼容旧数据：schemas 就绪后为缺少 layout 的组件补全一次
+  useEffect(() => {
+    if (!workbenchComponents?.length) return;
+    const allReady = workbenchComponents.every((cp: GridItem) => wbComponentSchemas[cp.id] != null);
+    if (!allReady) return;
+    if (!workbenchComponents.every((cp: GridItem) => 'layout' in cp)) {
+      updateComponents(workbenchComponents);
+    }
+  }, [workbenchComponents, wbComponentSchemas]);
+
   const loadPageConfig = () => {
     const [pageConfigId, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas);
 
@@ -133,14 +148,9 @@ export default function WorkbenchWorkspace() {
   };
 
   // 获取页面配置
-  const getPageConfig = () => {
-    const [, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas);
-    return pageConfigSchema.config;
-  };
+  const pageConfig = getOrCreatePageConfig(wbComponentSchemas)[1].config;
 
-  const pageConfig = getPageConfig();
-
-  // 处理空白区域点击
+  // 处理空白区域点击 
   const handleBodyMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).id === 'workspace-content') {
       clearCurComponentID?.();
@@ -149,7 +159,7 @@ export default function WorkbenchWorkspace() {
     }
   };
 
-  // 初始化页面配置（等待数据加载完成）
+  // 首次加载时初始化页面配置
   useEffect(() => {
     if (!isInitialized.current && !curComponentID && Object.keys(wbComponentSchemas).length > 0) {
       isInitialized.current = true;
@@ -157,14 +167,13 @@ export default function WorkbenchWorkspace() {
     }
   }, [wbComponentSchemas, curComponentID]);
 
-  // 同步页面配置更新
+  // 无选中组件时同步页面配置
   useEffect(() => {
     if (!curComponentID && isPageConfig(curComponentSchema)) {
       const [pageConfigId] = getOrCreatePageConfig(wbComponentSchemas);
-      const latestConfig = wbComponentSchemas[pageConfigId];
-
-      if (latestConfig && JSON.stringify(latestConfig.config) !== JSON.stringify(curComponentSchema?.config)) {
-        setCurComponentSchema(latestConfig);
+      const latest = wbComponentSchemas[pageConfigId];
+      if (latest && JSON.stringify(latest.config) !== JSON.stringify(curComponentSchema?.config)) {
+        setCurComponentSchema(latest);
       }
     }
   }, [wbComponentSchemas, curComponentID]);
@@ -212,13 +221,16 @@ export default function WorkbenchWorkspace() {
               sort={SORTABLE_CONFIG.sort}
               forceFallback={SORTABLE_CONFIG.forceFallback}
               className={styles.workspaceContent}
-              style={{
-                backgroundColor: pageConfig.pageBgColor || undefined,
-                backgroundImage: pageConfig.pageBgImg ? `url(${pageConfig.pageBgImg})` : undefined,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat'
-              }}
+              style={
+                {
+                  backgroundColor: pageConfig.pageBgColor || undefined,
+                  backgroundImage: pageConfig.pageBgImg ? `url(${pageConfig.pageBgImg})` : undefined,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  '--wb-row-height': `${WB_GRID_CONFIG.rowHeight}px`
+                } as React.CSSProperties
+              }
               onAdd={handlers.handleComponentAdd}
               onStart={handlers.handleDragStart}
               group={{ name: COMPONENT_GROUP_NAME }}
@@ -245,6 +257,7 @@ export default function WorkbenchWorkspace() {
                         copy: handlers.handleCopyComponent,
                         delete: handlers.handleDeleteComponent,
                         widthChange: handlers.handleWidthChange,
+                        heightChange: handleHeightChange,
                         select: handlers.handleSelectComponent
                       }}
                     />
