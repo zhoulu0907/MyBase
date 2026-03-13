@@ -28,16 +28,16 @@ const INIT_COLUMNS: ColumnDef[] = [
 ];
 
 const INIT_DATA_SOURCE: RowData[] = [
-  { index: 1, no: 'NO20260312001', title: '项目立项申请-01', type: '立项申请', status: '待提交', owner: '张三', department: '技术部', createdAt: '2026-3-12 9:00' },
-  { index: 2, no: 'NO20260312002', title: '项目立项申请-02', type: '立项申请', status: '审批中', owner: '李四', department: '运营部', createdAt: '2026-3-13 9:00' },
-  { index: 3, no: 'NO20260312003', title: '设备维修工单-01', type: '维修工单', status: '已完成', owner: '王五', department: '设备部', createdAt: '2026-3-14 9:00' },
-  { index: 4, no: 'NO20260312004', title: '采购申请单-01', type: '采购申请', status: '已驳回', owner: '赵六', department: '采购部', createdAt: '2026-3-15 9:00' },
-  { index: 5, no: 'NO20260312005', title: '巡检任务-01', type: '巡检任务', status: '处理中', owner: '陈晨', department: '安全部', createdAt: '2026-3-16 9:00' },
-  { index: 6, no: 'NO20260312006', title: '合同审批-01', type: '合同审批', status: '待审核', owner: '孙敏', department: '法务部', createdAt: '2026-3-17 9:00' },
-  { index: 7, no: 'NO20260312007', title: '资产入库登记-01', type: '资产管理', status: '已完成', owner: '周婷', department: '行政部', createdAt: '2026-3-18 9:00' },
-  { index: 8, no: 'NO20260312008', title: '用印申请-01', type: '行政申请', status: '已撤回', owner: '吴杰', department: '综合部', createdAt: '2026-3-19 9:00' },
-  { index: 9, no: 'NO20260312009', title: '费用报销申请-01', type: '费用报销', status: '审核中', owner: '刘洋', department: '财务部', createdAt: '2026-3-20 9:00' },
-  { index: 10, no: 'NO20260312010', title: '会议室申请-01', type: '行政申请', status: '已完成', owner: '何静', department: '综合管理部', createdAt: '2026-3-21 9:00' },
+  { index: 1, id: 'NO20260312001', title: '项目立项申请-01', type: '立项申请', status: '待提交', owner: '张三', department: '技术部', createdAt: '2026-3-12 9:00' },
+  { index: 2, id: 'NO20260312002', title: '项目立项申请-02', type: '立项申请', status: '审批中', owner: '李四', department: '运营部', createdAt: '2026-3-13 9:00' },
+  { index: 3, id: 'NO20260312003', title: '设备维修工单-01', type: '维修工单', status: '已完成', owner: '王五', department: '设备部', createdAt: '2026-3-14 9:00' },
+  { index: 4, id: 'NO20260312004', title: '采购申请单-01', type: '采购申请', status: '已驳回', owner: '赵六', department: '采购部', createdAt: '2026-3-15 9:00' },
+  { index: 5, id: 'NO20260312005', title: '巡检任务-01', type: '巡检任务', status: '处理中', owner: '陈晨', department: '安全部', createdAt: '2026-3-16 9:00' },
+  { index: 6, id: 'NO20260312006', title: '合同审批-01', type: '合同审批', status: '待审核', owner: '孙敏', department: '法务部', createdAt: '2026-3-17 9:00' },
+  { index: 7, id: 'NO20260312007', title: '资产入库登记-01', type: '资产管理', status: '已完成', owner: '周婷', department: '行政部', createdAt: '2026-3-18 9:00' },
+  { index: 8, id: 'NO20260312008', title: '用印申请-01', type: '行政申请', status: '已撤回', owner: '吴杰', department: '综合部', createdAt: '2026-3-19 9:00' },
+  { index: 9, id: 'NO20260312009', title: '费用报销申请-01', type: '费用报销', status: '审核中', owner: '刘洋', department: '财务部', createdAt: '2026-3-20 9:00' },
+  { index: 10, id: 'NO20260312010', title: '会议室申请-01', type: '行政申请', status: '已完成', owner: '何静', department: '综合管理部', createdAt: '2026-3-21 9:00' },
 ];
 
 function flattenRowValue(value: unknown): unknown {
@@ -72,6 +72,7 @@ function generateMockData(columns: ColumnDef[], count: number): RowData[] {
     const row: RowData = {};
     columns.forEach((col) => {
       row[col.dataIndex] = `${col.title}${i + 1}`;
+      row.id = i + 1;
     });
     return row;
   });
@@ -94,21 +95,30 @@ const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
   const { curMenu } = menuSignal;
 
   // 运行态：从接口获取表格数据
-  const loadRuntimeData = useCallback(async () => {
+  const loadRuntimeData = useCallback(async (current?: number) => {
     const req: PageMethodV2Params = {
-      pageNo: 1,
+      pageNo: current || 1,
       pageSize: dataCount,
     };
     try {
       const res = await dataMethodPageV2(tableInfo.tableName, curMenu.value?.id, req);
       if (res) {
         setFinalData(processTableData(res.list || []));
-        setPagination((prev) => ({ ...prev, total: res.total, pageSize: dataCount }));
+        setPagination((prev) => ({ ...prev, total: res.total, pageSize: dataCount, current: current || 1 }));
       }
     } catch (error) {
       console.error('[XDataList] 获取表格数据失败', error);
     }
   }, [tableInfo?.tableName, curMenu.value?.id, dataCount]);
+
+  const onChangeTable = (pagination: any) => {
+    const { current, pageSize } = pagination;
+
+    if (runtime) {
+      loadRuntimeData(current);
+    }
+
+  };
 
   useEffect(() => {
     const customCols = tableInfo?.columns as ColumnDef[] | undefined;
@@ -119,12 +129,12 @@ const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
         loadRuntimeData();
       } else {
         setFinalData(generateMockData(customCols, dataCount));
-        setPagination({...pagination, total: dataCount});
+        setPagination({...pagination, total: dataCount, pageSize: dataCount});
       }
     } else {
       setFinalCols(INIT_COLUMNS);
       setFinalData(INIT_DATA_SOURCE.slice(0, dataCount));
-      setPagination({...pagination, total: dataCount});
+      setPagination({...pagination, total: dataCount, pageSize: dataCount});
     }
   }, [tableInfo, dataCount, runtime]);
 
@@ -144,6 +154,8 @@ const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
           data={finalData}
           columns={finalCols}
           pagination={pagination}
+          rowKey="id"
+          onChange={onChangeTable}
           noDataElement={
             <div className={styles.emptyText}>
               <img src={tableIcon} alt="tableIcon" />

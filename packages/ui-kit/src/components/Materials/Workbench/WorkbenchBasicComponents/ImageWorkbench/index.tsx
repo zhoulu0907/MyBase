@@ -36,6 +36,7 @@ const XImageWorkbench = memo((props: XImageConfig & { runtime?: boolean; detailM
 
       <Image
         className={styles.imageStyle}
+        height={label?.display ? 'calc(100% - 36px)' : '100%'}
         width={'100%'}
         preview={false}
         src={getFileUrlById(imageConfig)}
