@@ -39,6 +39,7 @@ export interface ComponentDescriptor {
   fieldMap?: string[]
   entityMap?: string[]
   component?: ReactComponentType<any>
+  editorType?: 'form_editor' | 'list_editor'
 }
 
 /**
@@ -642,7 +643,7 @@ const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescr
   [COMPONENT_TYPE.CHATBOT]: {
     type: COMPONENT_TYPE.CHATBOT,
     schema: cloneDeep(workbenchSchema.XChatbot),
-    template: { h: 80, w: 80, displayName: '聊天助手', icon: 'chatbot_cp.svg', category: 'workbench' },
+    template: { h: 80, w: 80, displayName: '智能体对话', icon: 'chatbot_cp.svg', category: 'workbench' },
     fieldMap: [],
     entityMap: []
   }
@@ -1151,9 +1152,10 @@ export function getMaterialsPluginStatus(id: string): 'registered' | 'loaded' | 
 const ChatbotDescriptor: ComponentDescriptor = {
   type: 'XChatbot',
   schema: cloneDeep(workbenchSchema.XChatbot),
-  template: { h: 80, w: 80, displayName: '聊天助手', icon: 'chatbot_cp.svg', category: 'workbench' },
+  template: { h: 80, w: 80, displayName: '智能体对话', icon: 'chatbot_cp.svg', category: 'workbench' },
   fieldMap: [],
-  entityMap: []
+  entityMap: [],
+  editorType: 'list_editor'
 };
 
 registerMaterialsPlugin({

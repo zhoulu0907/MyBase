@@ -23,3 +23,13 @@ export const SORTABLE_CONFIG = {
  * 工作台容器最小宽度百分比
  */
 export const MIN_WIDTH_PERCENTAGE = 25;
+
+/**
+ * 工作台网格配置
+ */
+export const WB_GRID_CONFIG = {
+  rowHeight: 32,
+  gap: 16,
+  columns: 12,
+  minCols: 3 // 最小列数
+} as const;

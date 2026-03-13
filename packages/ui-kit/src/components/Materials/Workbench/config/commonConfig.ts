@@ -109,7 +109,11 @@ export const themeConfig: IThemeConfigType = {
 export const dataCountConfig: INumberConfigType = {
   key: 'dataCount',
   name: '数据条数',
-  type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT
+  type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT,
+  defaultValue: 2,
+  min: 0,
+  max: 10,
+  range: [0, 10]
 };
 
 /**

@@ -50,7 +50,8 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   const [defaultValueConfig, setDefaultValueConfig] = useState({
     type: '',
     customValue: undefined,
-    formulaValue: undefined
+    formulaValue: undefined,
+    formattedFormula: ''
   });
   const [errorText, setErrorText] = useState('');
   // 公式计算弹窗
@@ -97,9 +98,14 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   };
 
   // 公式编辑器弹窗确定
-  const handleFormulaConfirm = (formulaData: string) => {
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string) => {
     setFormulaVisible(false);
-    handleChange('formulaValue', formulaData);
+    const newConfig = {
+      ...configs[defaultValueConfigKey],
+      formulaValue: formulaData,
+      formattedFormula: formattedFormula
+    };
+    handlePropsChange(defaultValueConfigKey, newConfig);
   };
 
   const renderCustomValue = () => {
@@ -371,10 +377,10 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
       )}
       {/* 公式计算 */}
       {defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA && (
-        <Button onClick={openFormulaEditor} long style={{ marginBottom: '20px' }}>
+        <Button onClick={openFormulaEditor} long style={{ marginBottom: '20px' }} className={styles.formulaBtn}>
           {defaultValueConfig?.formulaValue ? (
             <>
-              <span>已设置公式</span>
+              <span>{defaultValueConfig?.formattedFormula}</span>
               <IconLaunch />
             </>
           ) : (

@@ -98,10 +98,12 @@
     padding: 16px;
     box-sizing: border-box;
     border-radius: 4px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    // 行高固定 32px，组件通过 rowSpan 反推填满内容高度
+    grid-auto-rows: 32px;
+    grid-auto-flow: row dense;
+    gap: 16px;
 
     /* 自定义滚动条样式 */
     &::-webkit-scrollbar {
@@ -158,8 +160,7 @@
   // 工作台组件可调整大小相关样式
   .resizableWorkbenchItemWrapper {
     position: relative;
-    display: inline-block;
-    margin: 8px;
+    display: block;
   }
 
   .resizableWorkbenchItem {

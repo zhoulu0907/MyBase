@@ -28,7 +28,7 @@ const XImageWorkbench = memo((props: XImageConfig & { runtime?: boolean; detailM
 
   return (
     <div className={styles.containerStyle}>
-      <div className={styles.imageHeader}>
+      <div className={styles.imageHeader} style={label?.display ? {marginBottom: '12px'} : {}}>
         {label?.display ? (
           <span className={styles.imageHeaderTitle}>{label?.text}</span>
         ) : null}
@@ -36,6 +36,7 @@ const XImageWorkbench = memo((props: XImageConfig & { runtime?: boolean; detailM
 
       <Image
         className={styles.imageStyle}
+        height={label?.display ? 'calc(100% - 36px)' : '100%'}
         width={'100%'}
         preview={false}
         src={getFileUrlById(imageConfig)}

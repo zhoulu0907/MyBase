@@ -1,115 +1,142 @@
 import { Resizable, type ResizeCallbackData } from 'react-resizable';
 import 'react-resizable/css/styles.css';
-import { useRef, useEffect, useState } from 'react';
-import { useWorkbenchResize } from '../../../hooks/use-workbench-resize';
-import { parseWidthToPixel } from '../../../utils/width-utils';
-import { MIN_WIDTH_PERCENTAGE } from '../../../utils/constants';
+import { useRef, useEffect, useState, useCallback } from 'react';
+import { WB_GRID_CONFIG } from '../../../utils/constants';
+import {
+  calcRowSpan,
+  colSpanToPixels,
+  percentageToColSpan,
+  snapToCol,
+  colSpanToPercentage
+} from '../../../utils/grid-layout';
 import styles from '../index.module.less';
+
+interface WorkbenchItemLayout {
+  row: number;
+  column: number;
+  rowSpan?: number;
+  colSpan?: number;
+}
 
 interface ResizableWorkbenchItemProps {
   componentId: string;
   componentType: string;
   currentWidth: string;
   containerWidth: number;
+  rowHeight?: number;
   onWidthChange: (componentId: string, newWidth: string) => void;
+  onHeightChange: (componentId: string, rowSpan: number) => void;
   children: React.ReactNode;
   isSelected: boolean;
   onSelect: () => void;
+  layout?: WorkbenchItemLayout;
 }
 
 /**
- * 可调整宽度的工作台组件项
+ * 可调整宽度的工作台组件项。
+ *
+ * 宽度调整策略：
+ * - wrapper 只做 grid 占位（gridColumn span），不设 width
+ * - 拖动中：内容区使用像素 width 覆盖视觉宽度，避免触发 grid reflow
+ * - 松手时：吸附到最近列，更新 schema width，draggingWidth 在 grid reflow 完成后（rAF）清除
  */
 export function ResizableWorkbenchItem({
   componentId,
   componentType,
   currentWidth,
   containerWidth,
+  rowHeight,
   onWidthChange,
+  onHeightChange,
   children,
   isSelected,
-  onSelect
+  onSelect,
+  layout
 }: ResizableWorkbenchItemProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [actualContainerWidth, setActualContainerWidth] = useState(containerWidth);
-  const [localWidth, setLocalWidth] = useState<string>(currentWidth);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [draggingWidth, setDraggingWidth] = useState<number | null>(null);
+  const pendingCommitRef = useRef(false);
+  const lastRowSpanRef = useRef<number>(0);
 
-  // 当外部宽度变化时，同步本地宽度
+  // 监听内容高度，计算 rowSpan 并上报
   useEffect(() => {
-    setLocalWidth(currentWidth);
-  }, [currentWidth]);
-
-  // 监听容器宽度变化（响应式支持）
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      const newWidth = entries[0].contentRect.width;
-      if (newWidth !== actualContainerWidth) {
-        setActualContainerWidth(newWidth);
+    if (!contentRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      const rowSpan = calcRowSpan(entries[0].contentRect.height);
+      if (rowSpan !== lastRowSpanRef.current) {
+        lastRowSpanRef.current = rowSpan;
+        onHeightChange(componentId, rowSpan);
       }
     });
+    observer.observe(contentRef.current);
+    return () => observer.disconnect();
+  }, [componentId, onHeightChange]);
 
-    resizeObserver.observe(containerRef.current);
+  const committedColSpan = percentageToColSpan(currentWidth);
+  const minWidthPixel = colSpanToPixels(WB_GRID_CONFIG.minCols, containerWidth);
+  const maxWidthPixel = colSpanToPixels(WB_GRID_CONFIG.columns, containerWidth);
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [actualContainerWidth]);
+  const handleResizeStart = useCallback(() => {
+    pendingCommitRef.current = false;
+    if (contentRef.current) {
+      setDraggingWidth(contentRef.current.getBoundingClientRect().width);
+    }
+  }, []);
 
-  // 使用实际的容器宽度
-  const effectiveContainerWidth = actualContainerWidth || containerWidth;
-  const currentWidthPixel = parseWidthToPixel(localWidth, effectiveContainerWidth);
+  const handleResizeDuring = useCallback((_e: React.SyntheticEvent, data: ResizeCallbackData) => {
+    setDraggingWidth(data.size.width);
+  }, []);
 
-  const handleWidthChangeCallback = (newWidth: string) => {
-    onWidthChange(componentId, newWidth);
-  };
-
-  const { handleResize } = useWorkbenchResize(
-    componentType,
-    effectiveContainerWidth,
-    localWidth,
-    handleWidthChangeCallback
+  const handleResizeStop = useCallback(
+    (_e: React.SyntheticEvent, data: ResizeCallbackData) => {
+      const snappedCols = snapToCol(data.size.width, containerWidth);
+      const snappedPixels = colSpanToPixels(snappedCols, containerWidth);
+      const snappedWidth = colSpanToPercentage(snappedCols, containerWidth);
+      setDraggingWidth(snappedPixels);
+      pendingCommitRef.current = true;
+      onWidthChange(componentId, snappedWidth);
+    },
+    [containerWidth, componentId, onWidthChange]
   );
 
-  // 计算最小和最大宽度约束
-  const minWidth = (MIN_WIDTH_PERCENTAGE / 100) * effectiveContainerWidth;
-  const maxWidth = effectiveContainerWidth;
+  // currentWidth 更新（schema 落地）后，等 grid reflow 完成再清除 draggingWidth
+  useEffect(() => {
+    if (!pendingCommitRef.current) return;
+    const raf = requestAnimationFrame(() => {
+      pendingCommitRef.current = false;
+      setDraggingWidth(null);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [currentWidth]);
 
-  // 处理拖拽过程中的宽度变化（实时更新本地状态）
-  const handleResizeDuring = (_e: React.SyntheticEvent, data: ResizeCallbackData) => {
-    const percentage = (data.size.width / effectiveContainerWidth) * 100;
-    const newWidthStr = `${percentage}%`;
-    setLocalWidth(newWidthStr);
-  };
-
-  // 处理拖拽结束
-  const handleResizeStop = (e: React.SyntheticEvent, data: ResizeCallbackData) => {
-    const snappedWidth = handleResize(e, data);
-    if (snappedWidth) {
-      setLocalWidth(snappedWidth);
-    }
-  };
-
-  // 处理点击事件（排除调整手柄）
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    if (target.closest(`.${styles.resizeHandle}`)) {
-      return;
-    }
+    if ((e.target as HTMLElement).closest(`.${styles.resizeHandle}`)) return;
     e.stopPropagation();
     onSelect();
   };
 
+  const gridStyle: React.CSSProperties = layout?.row
+    ? {
+        gridRow: `${layout.row} / span ${layout.rowSpan ?? 1}`,
+        gridColumn: `${layout.column} / span ${committedColSpan}`
+      }
+    : { gridColumn: `span ${committedColSpan}` };
+
+  const contentWidthStyle: React.CSSProperties =
+    draggingWidth !== null ? { width: `${draggingWidth}px`, transition: 'none' } : { width: '100%' };
+
+  const resizableWidth = draggingWidth ?? colSpanToPixels(committedColSpan, containerWidth);
+
   return (
-    <div ref={containerRef} className={styles.resizableWorkbenchItemWrapper} style={{ width: `${localWidth}` }}>
+    <div className={styles.resizableWorkbenchItemWrapper} style={gridStyle}>
       <Resizable
-        width={currentWidthPixel}
+        width={resizableWidth}
         height={0}
+        onResizeStart={handleResizeStart}
         onResize={handleResizeDuring}
         onResizeStop={handleResizeStop}
-        minConstraints={[minWidth, 0]}
-        maxConstraints={[maxWidth, 0]}
+        minConstraints={[minWidthPixel, 0]}
+        maxConstraints={[maxWidthPixel, 0]}
         handle={
           <span
             className={`${styles.resizeHandle} ${styles.resizeHandleRight}`}
@@ -129,9 +156,10 @@ export function ResizableWorkbenchItem({
         resizeHandles={['e']}
       >
         <div
+          ref={contentRef}
           className={styles.resizableWorkbenchItem}
           style={{
-            width: '100%',
+            ...contentWidthStyle,
             borderColor: isSelected ? 'rgb(var(--primary-6))' : '',
             borderStyle: isSelected ? 'solid' : 'dashed'
           }}
