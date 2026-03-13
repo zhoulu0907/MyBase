@@ -175,6 +175,10 @@
             <artifactId>opengauss-jdbc</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-opengauss</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-codegen</artifactId>
             <scope>test</scope>

@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.config;
 
+import com.cmsr.onebase.module.metadata.core.dal.database.OpenGaussCompatibleDriver;
 import com.mybatisflex.core.FlexGlobalConfig;
 import com.mybatisflex.core.datasource.FlexDataSource;
 import com.mybatisflex.core.datasource.DataSourceKey;
@@ -154,6 +155,7 @@ public class ApplicationDataSourceManager {
                 String defaultPort = null;
                 String prefix = "jdbc:postgresql://";
                 if ("POSTGRESQL".equals(tp)) { defaultPort = "5432"; prefix = "jdbc:postgresql://"; }
+                else if ("OPENGAUSS".equals(tp)) { defaultPort = "5432"; prefix = "jdbc:opengauss://"; }
                 else if ("MYSQL".equals(tp)) { defaultPort = "3306"; prefix = "jdbc:mysql://"; }
                 else if ("CLICKHOUSE".equals(tp)) { defaultPort = "8123"; prefix = "jdbc:clickhouse://"; }
                 else if ("KINGBASE".equals(tp)) { defaultPort = "54321"; prefix = "jdbc:kingbase8://"; }
@@ -217,6 +219,9 @@ public class ApplicationDataSourceManager {
         if (driverClassName == null) { driverClassName = str(cfg.get("driver-class-name")); }
         if (driverClassName == null) { driverClassName = str(cfg.get("jdbcDriverClass")); }
         if (driverClassName != null && !driverClassName.isBlank()) {
+            if ("org.opengauss.Driver".equals(driverClassName)) {
+                return OpenGaussCompatibleDriver.class.getName();
+            }
             return driverClassName;
         }
 
@@ -229,7 +234,7 @@ public class ApplicationDataSourceManager {
             return "org.postgresql.Driver";
         }
         if ("OPENGAUSS".equals(normalizedType)) {
-            return "org.opengauss.Driver";
+            return OpenGaussCompatibleDriver.class.getName();
         }
         if ("MYSQL".equals(normalizedType)) {
             return "com.mysql.cj.jdbc.Driver";

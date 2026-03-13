@@ -131,6 +131,10 @@
             <artifactId>opengauss-jdbc</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.anyline</groupId>
+            <artifactId>anyline-data-jdbc-opengauss</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.cmsr.onebase</groupId>
             <artifactId>onebase-spring-boot-starter-plugin</artifactId>
         </dependency>
