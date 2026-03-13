@@ -148,6 +148,15 @@ const XFileUpload = memo(
       }
     ];
 
+    const formatAccept = (verify: any) => {
+      if (!verify?.fileFormatLimit) return 'undefined';
+      return verify?.fileFormat
+        .split(',')
+        .map(i => i.trim().replace(/^\./, '').toLowerCase())
+        .map(ext => `.${ext}`)
+        .join(',')
+    };
+
     return (
       <Form.Item
         className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
@@ -162,16 +171,16 @@ const XFileUpload = memo(
         }}
       >
         <Uploader
-          accept={verify?.fileFormat}
+          accept={formatAccept(verify)}
           files={filesList}
-          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
-          onMaxSizeExceed={(file) =>
+          limit={verify?.maxCountLimit ? verify?.maxCount : 0}
+          onMaxSizeExceed={() =>
             Toast.toast({
               content: '文件大小超出限制',
               duration: 2000
             })
           }
-          onLimitExceed={(file) =>
+          onLimitExceed={() =>
             Toast.toast({
               content: '文件数量超出限制',
               duration: 2000

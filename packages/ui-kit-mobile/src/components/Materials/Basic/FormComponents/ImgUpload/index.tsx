@@ -139,6 +139,15 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     }
   ];
 
+  const formatAccept = (verify: any) => {
+    if (!verify?.fileFormatLimit) return 'image/*';
+    return verify?.fileFormat
+      .split(',')
+      .map(i => i.trim().replace(/^\./, '').toLowerCase())
+      .map(ext => `.${ext}`)
+      .join(',')
+  };
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
@@ -171,7 +180,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
       }
     >
       <ImagePicker
-        accept="image/*"
+        accept={formatAccept(verify)}
         limit={verify?.maxCountLimit ? verify?.maxCount : 0}
         maxSize={verify?.maxSizeLimit ? verify?.maxSize * 1024 : undefined}
         onClick={onClick}
