@@ -107,6 +107,16 @@ public class RuntimeOauth2OpenController {
         return oAuth2OpenService.approveOrDeny(responseType, clientId, scope, redirectUri, autoApprove, state);
     }
 
+    /**
+     * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 authorize 方法
+     */
+    @GetMapping("/authorize/client")
+    @Operation(summary = "获得授权信息", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
+    @Parameter(name = "clientId", required = true, description = "客户端编号", example = "tudou")
+    public CommonResult<AuthorizeURIRespVO> authorize(@RequestParam("clientId") String clientId) {
+        return oAuth2OpenService.authorize(clientId);
+    }
+
     @PostMapping("/user/get")
     @Operation(summary = "获取用户信息")
     @PermitAll

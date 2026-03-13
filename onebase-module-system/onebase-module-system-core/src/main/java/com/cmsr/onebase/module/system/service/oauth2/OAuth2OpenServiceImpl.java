@@ -127,15 +127,15 @@ public class OAuth2OpenServiceImpl implements OAuth2OpenService {
     }
 
     @Override
-    public CommonResult<OAuth2OpenAuthorizeInfoRespVO> authorize(String clientId) {
+    public CommonResult<AuthorizeURIRespVO> authorize(String clientId) {
         // 0. 校验用户已经登录。通过 Spring Security 实现
 
         // 1. 获得 Client 客户端的信息
         OAuth2ClientDO client = oauth2ClientService.validOAuthClientFromCache(clientId);
-        // 2. 获得用户已经授权的信息
-        List<OAuth2ApproveDO> approves = oauth2ApproveService.getApproveList(getLoginUserId(), getUserType(), clientId);
-        // 拼接返回
-        return success(OAuth2OpenConvert.INSTANCE.convert(client, approves));
+        if (client == null){
+            throw exception(BAD_REQUEST.getCode(), "客户端不存在");
+        }
+        return approveOrDeny("code", clientId, null, client.getRedirectUris().get(0), null, null);
     }
 
     @Override
