@@ -144,8 +144,8 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     if (!verify?.fileFormatLimit) return 'image/*';
     return verify?.fileFormat
       .split(',')
-      .map(i => i.trim().replace(/^\./, '').toLowerCase())
-      .map(ext => `.${ext}`)
+      .map((i: any) => i.trim().replace(/^\./, '').toLowerCase())
+      .map((ext: any) => `.${ext}`)
       .join(',')
   };
 
