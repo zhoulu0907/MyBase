@@ -13,29 +13,28 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.cmsr.onebase.module.bpm.core.expression;
+package org.dromara.warm.flow.core.handler;
 
-import com.cmsr.onebase.module.bpm.core.helper.SpelHelper;
-import org.dromara.warm.flow.core.strategy.ListenerStrategy;
+import org.dromara.warm.flow.core.strategy.HandlerStrategy;
 
 import java.util.Map;
 
 /**
- * spel监听器表达式 #{@user.eval()}
+ * 默认办理人表达式策略： @@default@@|${flag}
  *
  * @author warm
  */
-public class ListenerStrategySpel implements ListenerStrategy {
+public class DefaultHandlerStrategy implements HandlerStrategy {
 
     @Override
     public String getType() {
-        return "#";
+        return "$";
     }
 
     @Override
-    public Boolean eval(String expression, Map<String, Object> variable) {
-        SpelHelper.parseExpression(expression, variable);
-        // 恒返回true，说明匹配上监听器表达式，扩展策略也一定要返回true
-        return true;
+    public Object preEval(String expression, Map<String, Object> variable) {
+        String result = expression.replace("${", "").replace("}", "");
+        return variable.get(result);
     }
+
 }

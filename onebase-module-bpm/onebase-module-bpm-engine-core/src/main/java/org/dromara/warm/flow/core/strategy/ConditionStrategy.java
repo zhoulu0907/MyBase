@@ -13,10 +13,9 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package org.dromara.warm.flow.core.condition;
+package org.dromara.warm.flow.core.strategy;
 
 import org.dromara.warm.flow.core.constant.FlowCons;
-import org.dromara.warm.flow.core.strategy.ExpressionStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
