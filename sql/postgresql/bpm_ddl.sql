@@ -566,3 +566,11 @@ COMMENT ON COLUMN bpm_flow_agent_ins.update_time IS '更新时间';
 COMMENT ON COLUMN bpm_flow_agent_ins.updater IS '更新人';
 COMMENT ON COLUMN bpm_flow_agent_ins.deleted IS '删除标志';
 COMMENT ON COLUMN bpm_flow_agent_ins.tenant_id IS '租户id';
+
+
+-- warmflow 1.8.2 -> 1.8.4 升级
+ALTER TABLE bpm_flow_node ALTER COLUMN node_ratio TYPE varchar(200);
+
+-- 此处影响不大，可以暂时不删除，等后续有其他修改时再一起删除
+-- ALTER TABLE bpm_flow_node DROP COLUMN handler_type;
+-- ALTER TABLE bpm_flow_node DROP COLUMN handler_path;
