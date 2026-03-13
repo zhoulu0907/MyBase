@@ -65,7 +65,7 @@ public interface OAuth2OpenService {
      * @param clientId 客户端编号
      * @return 授权信息
      */
-    CommonResult<OAuth2OpenAuthorizeInfoRespVO> authorize(String clientId);
+    CommonResult<AuthorizeURIRespVO> authorize(String clientId);
 
     /**
      * 申请授权

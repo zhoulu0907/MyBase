@@ -111,7 +111,7 @@ public class OAuth2OpenController {
     @GetMapping("/authorize/client")
     @Operation(summary = "获得授权信息", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
     @Parameter(name = "clientId", required = true, description = "客户端编号", example = "tudou")
-    public CommonResult<OAuth2OpenAuthorizeInfoRespVO> authorize(@RequestParam("clientId") String clientId) {
+    public CommonResult<AuthorizeURIRespVO> authorize(@RequestParam("clientId") String clientId) {
         return oauth2OpenService.authorize(clientId);
     }
 

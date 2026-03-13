@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.core.provider.auth;
 
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleDeptRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
@@ -83,7 +84,7 @@ public class AppAuthSecurityRoleProvider {
         if (roleIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return TenantManager.withoutTenantCondition(() -> appAuthRoleRepository.listByIds(roleIds));
+        return TenantManager.withoutTenantCondition(() -> ApplicationManager.withoutApplicationCondition(() -> appAuthRoleRepository.listByIds(roleIds)));
     }
 
     private Set<Long> findRolesByDept(List<AppAuthRoleDeptDO> authRoleDeptDOS, List<Long> deptTree) {

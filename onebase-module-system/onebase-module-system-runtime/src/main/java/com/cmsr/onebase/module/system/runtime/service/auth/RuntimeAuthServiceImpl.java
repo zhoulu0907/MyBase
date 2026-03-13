@@ -348,10 +348,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     }
 
     private void checkPermission(Long appId, Long userId) {
-        List<Long> roleIdsByAppId = ApplicationManager.withoutApplicationCondition(() ->
-                appAuthRoleUserService.findRoleIdsByAppId(appId));
-        List<Long> userIdsByRoleIds = appAuthRoleUserService.findUserIdsByRoleIds(roleIdsByAppId);
-        if (userIdsByRoleIds.isEmpty() || !userIdsByRoleIds.contains(userId)) {
+        if (!appAuthSecurityApi.hasApplicationPermission(userId, appId)) {
             throw exception(AUTH_LOGIN_NO_PERMISSION);
         }
     }
