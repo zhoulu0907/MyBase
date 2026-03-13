@@ -1,4 +1,5 @@
-import { Ellipsis, Form, ImagePicker, ImagePreview, Toast } from '@arco-design/mobile-react';
+import { Ellipsis, Form, ImagePicker, ImagePreview, Popover, Toast } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
@@ -139,10 +140,28 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     }
   ];
 
+  const formatAccept = (verify: any) => {
+    if (!verify?.fileFormatLimit) return 'image/*';
+    return verify?.fileFormat
+      .split(',')
+      .map(i => i.trim().replace(/^\./, '').toLowerCase())
+      .map(ext => `.${ext}`)
+      .join(',')
+  };
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       layout="vertical"
       field={fieldId}
       rules={rules}
@@ -171,7 +190,7 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
       }
     >
       <ImagePicker
-        accept="image/*"
+        accept={formatAccept(verify)}
         limit={verify?.maxCountLimit ? verify?.maxCount : 0}
         maxSize={verify?.maxSizeLimit ? verify?.maxSize * 1024 : undefined}
         onClick={onClick}

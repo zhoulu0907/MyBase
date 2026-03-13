@@ -6,11 +6,12 @@ import {
   Ellipsis,
   Form,
   Loading,
+  Popover,
   PopupSwiper,
   Radio,
   SearchBar
 } from '@arco-design/mobile-react';
-import { IconArrowBack } from '@arco-design/mobile-react/esm/icon';
+import { IconArrowBack, IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
@@ -165,7 +166,16 @@ const XDeptSelect = memo(
     return (
       <Form.Item
         className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
-        label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+        label={
+          <>
+            {label.display && <Ellipsis text={label.text} maxLine={2} />}
+            {props?.tooltip && (
+              <Popover content={props?.tooltip} direction='bottomCenter' >
+                <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+              </Popover>
+            )}
+          </>
+        }
         field={fieldId}
         rules={rules}
         layout={layout}

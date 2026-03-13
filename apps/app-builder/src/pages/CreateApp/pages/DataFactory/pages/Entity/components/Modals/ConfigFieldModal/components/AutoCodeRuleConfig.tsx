@@ -88,11 +88,9 @@ export const AutoCodeRuleConfig: React.FC<AutoCodeRuleConfigProps> = ({
       return '';
     }
     const numberingMethodText =
-      sequenceRule.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : '指定位数编号';
-    const digitsText =
-      sequenceRule.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '' : `${sequenceRule.digitWidth}位数`;
+      sequenceRule.numberMode === AUTO_CODE_NUMBER_MODE.NATURAL ? '自然数编号' : `${sequenceRule.digitWidth}位数编号`;
     const resetText = sequenceRule.resetCycle === AUTO_CODE_RESET_CYCLE.NONE ? '不自动重置' : '自动重置';
-    return `${numberingMethodText},${digitsText}${resetText}`;
+    return `${numberingMethodText},${resetText}`;
   };
 
   const [displayText, setDisplayText] = useState(getDisplayText());

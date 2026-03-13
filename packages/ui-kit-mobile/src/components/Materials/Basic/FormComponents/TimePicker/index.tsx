@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
 import '../index.css';
@@ -34,7 +35,16 @@ const XTimePicker = memo((props: XTimePickerConfig & { runtime?: boolean; detail
       field=''
       rules={rules}
       layout={layout}
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       required={verify?.required}
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{

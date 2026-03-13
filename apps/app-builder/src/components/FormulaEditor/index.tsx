@@ -102,7 +102,8 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
                   entityId: item.entityId
                 });
                 // 子表字段：例如子表叫“订单明细”、字段叫“数量”，则这个字段在此处的列表里叫“订单明细.数量”
-                if (item.relationType === RELATION_TYPE.SLAVE) {
+                const hasChildTable = item.relationshipTypes.includes('SUBTABLE_ONE_TO_MANY');
+                if (item.relationType === RELATION_TYPE.SLAVE && hasChildTable) {
                   return {
                     ...item,
                     variableId: item.entityId,
@@ -309,10 +310,12 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         content = content.replace(/^[^.]+\./, '');
       } else {
         content = match.slice(2, -2);
-        content = content.replace(/^[^\.]+\.(.+)$/, '$1,');
+        content = content.replace(/^[^.]+\./, '');
         const temp = content.split('$');
         if (temp.length > 1) {
           content = `$${temp[1]}`;
+        } else {
+          content = `$${content}`;
         }
       }
       return content;
@@ -343,18 +346,22 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       const temp = match[1].split('.');
       let fieldName = '';
       let fieldId = '';
-      let nodeName = '';
-      let nodeId = '';
-      //[nodeid->temp[0], variableid->temp[1], nodeName->temp[2], variableName->temp[3]]
       if (temp.length > 3) {
-        nodeName = temp[2];
-        nodeId = temp[0];
-        fieldName = `${temp[2] + '.' + temp[3]}`;
-        fieldId = temp[1];
-        variablesMapping[nodeName] = nodeId;
+        const variableId = temp[1];
+        const nodeName = temp[2];
+        const variableName = temp[3];
+
+        fieldId = variableId;
+
+        const node = nodeName.startsWith('$') ? nodeName : `$${nodeName}`;
+        fieldName = `${node}.${variableName}`;
       } else {
         fieldId = temp[0] || '';
-        fieldName = temp.slice(1).join('.') || '';
+        let name = temp.slice(1).join('.');
+        if (!name.startsWith('$')) {
+          name = `$${name}`;
+        }
+        fieldName = name;
       }
       variablesMapping[fieldName] = fieldId;
     });
@@ -407,7 +414,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     let newVariablesData: variableItem[] = [];
     if (variables.length > 0) {
       Object.keys(currentVariablesObj).forEach((key) => {
-        if (!key.includes('$')) {
+        if (key.includes('$')) {
           newVariablesData.push({
             fieldName: key,
             fieldId: currentVariablesObj[key],

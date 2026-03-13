@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useState } from 'react';
 import { debounce } from 'lodash-es';
-import { IconArrowBack } from '@arco-design/mobile-react/esm/icon';
+import { IconArrowBack, IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
-import { PopupSwiper, Cell, SearchBar, Radio, Button, Checkbox, Avatar, Form, Loading, Ellipsis } from '@arco-design/mobile-react';
+import { PopupSwiper, Cell, SearchBar, Radio, Button, Form, Loading, Ellipsis, Popover } from '@arco-design/mobile-react';
 import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
 
 import { isRuntimeEnv } from '@onebase/common';
@@ -142,7 +142,16 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
   return (
     <Form.Item
       className="inputTextWrapperOBMobile inputDataSelectOBMobile"
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       field={fieldId}
       rules={rules}
       layout={layout}

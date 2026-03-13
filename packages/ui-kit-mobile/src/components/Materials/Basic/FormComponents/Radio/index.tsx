@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Ellipsis, Form, Radio, Tag } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Popover, Radio, Tag } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema, getFieldOptionsConfig, useAppEntityStore, menuDictSignal } from '@onebase/ui-kit';
 import { DictData } from '@onebase/platform-center';
@@ -56,7 +57,16 @@ const XRadio = memo((props: XRadioConfig & { runtime?: boolean; detailMode?: boo
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       field={fieldId}
       layout={layout}
       rules={rules}

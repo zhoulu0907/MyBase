@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
-import { Textarea, Form, Ellipsis } from '@arco-design/mobile-react';
+import { Textarea, Form, Ellipsis, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema, securityEncodeText } from '@onebase/ui-kit';
@@ -81,7 +82,16 @@ const XInputTextArea = memo((props: XInputTextAreaConfig & { runtime?: boolean; 
       field={fieldId}
       rules={rules}
       layout={layout}
-      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
