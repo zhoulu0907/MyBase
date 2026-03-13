@@ -27,7 +27,6 @@ import org.dromara.warm.flow.core.entity.Skip;
 import org.dromara.warm.flow.core.utils.CollUtil;
 import org.dromara.warm.flow.core.utils.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -154,6 +153,11 @@ public class DefJson {
     private Long applicationId;
 
     /**
+     * 自定义表单的唯一标识：如formCode+version
+     */
+    private List<Tree> formPathList;
+
+    /**
      * 定义UUID
      */
     private String definitionUuid;
@@ -199,8 +203,6 @@ public class DefJson {
                     .setAnyNodeSkip(node.getAnyNodeSkip())
                     .setListenerType(node.getListenerType())
                     .setListenerPath(node.getListenerPath())
-                    .setHandlerType(node.getHandlerType())
-                    .setHandlerPath(node.getHandlerPath())
                     .setFormCustom(node.getFormCustom())
                     .setFormPath(node.getFormPath())
                     .setExt(node.getExt())
@@ -259,13 +261,11 @@ public class DefJson {
                     .setNodeCode(nodeJson.getNodeCode())
                     .setNodeName(nodeJson.getNodeName())
                     .setPermissionFlag(nodeJson.getPermissionFlag())
-                    .setNodeRatio(nodeJson.getNodeRatio() != null ? nodeJson.getNodeRatio() : BigDecimal.ZERO)
+                    .setNodeRatio(nodeJson.getNodeRatio() != null ? nodeJson.getNodeRatio() : "0")
                     .setCoordinate(nodeJson.getCoordinate())
                     .setAnyNodeSkip(nodeJson.getAnyNodeSkip())
                     .setListenerType(nodeJson.getListenerType())
                     .setListenerPath(nodeJson.getListenerPath())
-                    .setHandlerType(nodeJson.getHandlerType())
-                    .setHandlerPath(nodeJson.getHandlerPath())
                     .setFormCustom(nodeJson.getFormCustom())
                     .setFormPath(nodeJson.getFormPath())
                     .setExt(nodeJson.getExt())

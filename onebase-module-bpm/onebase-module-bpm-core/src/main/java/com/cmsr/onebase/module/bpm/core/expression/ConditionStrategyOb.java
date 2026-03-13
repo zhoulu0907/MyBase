@@ -26,7 +26,7 @@ import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
-import org.dromara.warm.flow.core.condition.ConditionStrategy;
+import org.dromara.warm.flow.core.strategy.ConditionStrategy;
 import org.dromara.warm.flow.core.entity.HisTask;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;

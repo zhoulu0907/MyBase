@@ -20,7 +20,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.dromara.warm.flow.core.utils.MapUtil;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +59,7 @@ public class NodeJson {
     /**
      * 流程签署比例值
      */
-    private BigDecimal nodeRatio;
+    private String nodeRatio;
     /**
      * 流程节点坐标
      */
@@ -77,15 +76,6 @@ public class NodeJson {
      * 监听器路径
      */
     private String listenerPath;
-    /**
-     * 处理器类型
-     */
-    private String handlerType;
-    /**
-     * 处理器路径
-     */
-    private String handlerPath;
-
     /**
      * 审批表单是否自定义（Y=是 N=否）
      */
