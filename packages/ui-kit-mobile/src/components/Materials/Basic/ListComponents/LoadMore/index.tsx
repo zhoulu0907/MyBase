@@ -139,10 +139,14 @@ const XLoadMore = memo(
                 if (result.length === 0) return;
                 if (['FILE', 'IMAGE'].includes(dataFieldInfo.fieldType)) {
                   const file = result[0];
+                  const componentSchemasKeys = Object.keys(pageComponentSchemas.value || {});
+                  const enableDownload = componentSchemasKeys.find((ele) => {
+                    return pageComponentSchemas.value[ele]?.config?.showDownload || dataFieldInfo.fieldType === 'IMAGE';
+                  });
                   return (
                     <div className="fileWrapper">
                       <Ellipsis className="filename" text={file.name} />
-                      <IconDownload
+                      {enableDownload && <IconDownload
                         style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.28rem' }}
                         onClick={async () => {
                           const param = {
@@ -154,7 +158,7 @@ const XLoadMore = memo(
                           const fileUrl = await attachmentDownload(tableName, param);
                           downloadFileByUrl(fileUrl, file.name);
                         }}
-                      />
+                      />}
                     </div>
                   );
                 }
