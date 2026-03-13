@@ -152,8 +152,8 @@ const XFileUpload = memo(
       if (!verify?.fileFormatLimit) return 'undefined';
       return verify?.fileFormat
         .split(',')
-        .map(i => i.trim().replace(/^\./, '').toLowerCase())
-        .map(ext => `.${ext}`)
+        .map((i: any) => i.trim().replace(/^\./, '').toLowerCase())
+        .map((ext: any) => `.${ext}`)
         .join(',')
     };
 
