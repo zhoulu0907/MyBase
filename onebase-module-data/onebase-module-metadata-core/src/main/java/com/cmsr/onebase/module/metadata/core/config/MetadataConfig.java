@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class MetadataConfig {
 
+    private static final String DEFAULT_DATASOURCE_TYPE_FALLBACK = DatabaseType.PostgreSQL.name();
+
     // ========== 默认数据源配置 ==========
 
     /**
@@ -56,6 +58,24 @@ public class MetadataConfig {
      */
     @Value("${onebase.metadata.default-datasource.type:PostgreSQL}")
     private String defaultDatasourceType;
+
+    /**
+     * 获取默认数据源类型（标准化后的DatabaseType名称）
+     * <p>
+     * 当配置缺失、为空或非法时，回退为 PostgreSQL，避免下游写入空类型。
+     *
+     * @return 标准化后的数据源类型
+     */
+    public String getDefaultDatasourceType() {
+        DatabaseType databaseType = parseDatabaseType(defaultDatasourceType);
+        if (databaseType != null) {
+            return databaseType.name();
+        }
+
+        log.warn("默认数据源类型配置为空或非法，使用兜底类型: {}，原始值: {}",
+                DEFAULT_DATASOURCE_TYPE_FALLBACK, defaultDatasourceType);
+        return DEFAULT_DATASOURCE_TYPE_FALLBACK;
+    }
 
     /**
      * 默认数据源描述
@@ -110,11 +130,7 @@ public class MetadataConfig {
      * @return DatabaseType枚举，如果不是有效枚举则返回null
      */
     public DatabaseType getDefaultDatasourceTypeEnum() {
-        DatabaseType databaseType = parseDatabaseType(defaultDatasourceType);
-        if (databaseType == null) {
-            log.warn("配置的默认数据源类型[{}]不是有效的DatabaseType枚举值，请检查配置", defaultDatasourceType);
-        }
-        return databaseType;
+        return parseDatabaseType(getDefaultDatasourceType());
     }
     
     /**
