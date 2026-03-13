@@ -143,7 +143,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 用户列表
      */
     public List<AdminUserDO> findNoneDeptUserList(Integer userType) {
-        return list(buildQueryWrapperByType(userType).isNull(DEPT_ID).eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL));
+        return list(buildQueryWrapperByType(userType).isNull(DEPT_ID).eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
     }
 
     /**
@@ -153,7 +153,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 用户列表
      */
     public List<AdminUserDO> findAllByNicknameLike(String nickname, Integer userType) {
-        return list(buildQueryWrapperByType(userType).like(NICKNAME, nickname).eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL));
+        return list(buildQueryWrapperByType(userType).like(NICKNAME, nickname).eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
     }
 
     /**
