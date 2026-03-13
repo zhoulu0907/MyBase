@@ -1,7 +1,8 @@
 import { memo } from 'react';
 import { nanoid } from 'nanoid';
 import dayjs from 'dayjs';
-import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
 
 import {
@@ -110,7 +111,16 @@ const XDateTimePicker = memo((props: XDateTimePickerConfig & { runtime?: boolean
   return (
     <Form.Item
       className="inputTextWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       field={fieldId}
       rules={rules}
       layout={layout}

@@ -1,7 +1,7 @@
 import DownloadLink from '@/assets/images/download_link.svg';
-import { Ellipsis, Form, Loading, Toast, Uploader } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Loading, Popover, Toast, Uploader } from '@arco-design/mobile-react';
 import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
-import { IconClose, IconDelete, IconDownload } from '@arco-design/mobile-react/esm/icon';
+import { IconClose, IconDelete, IconDownload, IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES, downloadFileByUrl } from '@onebase/ui-kit';
@@ -160,7 +160,16 @@ const XFileUpload = memo(
     return (
       <Form.Item
         className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
-        label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+        label={
+          <>
+            {label.display && <Ellipsis text={label.text} maxLine={2} />}
+            {props?.tooltip && (
+              <Popover content={props?.tooltip} direction='bottomCenter' >
+                <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+              </Popover>
+            )}
+          </>
+        }
         layout="vertical"
         field={fieldId}
         rules={rules}

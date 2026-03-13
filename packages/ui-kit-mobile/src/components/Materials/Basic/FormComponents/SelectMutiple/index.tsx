@@ -1,6 +1,7 @@
 import { memo, useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Checkbox, Ellipsis, Form, PopupSwiper, Cell } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form, PopupSwiper, Cell, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
@@ -97,7 +98,16 @@ const XSelectMutiple = memo((props: XSelectMutipleConfig & { runtime?: boolean; 
   return (
     <Form.Item
       className="inputTextWrapperOBMobile selectMultipleWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       field={fieldId}
       rules={rules}
       layout={layout}
