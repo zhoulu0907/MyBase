@@ -151,7 +151,14 @@ public interface DictDataService {
      * @param dictTypeIds 字典类型ID集合
      * @return 按dictTypeId分组的字典数据 Map
      */
-    Map<Long, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds);
+    Map<Long, List<DictDataDO>> getDictDataMapByTypesAndTypeIds(Collection<String> dictTypes, Collection<Long> dictTypeIds);    /**
+     * 根据字典类型ID和状态查询字典数据列表
+     *
+     * @param dictTypeId 字典类型ID
+     * @param status     状态
+     * @return 字典数据列表
+     */
+    List<DictDataDO> getDictDataListByDictTypeId(Long dictTypeId, Integer status);
 
 
 

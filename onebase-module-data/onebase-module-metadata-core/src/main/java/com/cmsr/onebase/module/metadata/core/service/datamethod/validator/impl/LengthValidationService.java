@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -21,10 +21,11 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-public class LengthValidationService implements ValidationService {
+public class LengthValidationService implements PrefetchableValidationService {
 
 
     private final MetadataValidationLengthRepository lengthRepository;
+    private transient Map<String, java.util.List<MetadataValidationLengthDO>> prefetched;
 
     public LengthValidationService(MetadataValidationLengthRepository lengthRepository) {
         this.lengthRepository = lengthRepository;
@@ -37,7 +38,13 @@ public class LengthValidationService implements ValidationService {
         }
 
         // 查询长度规则
-        List<MetadataValidationLengthDO> rules = lengthRepository.findByFieldUuid(fieldUuid);
+        List<MetadataValidationLengthDO> rules = null;
+        if (prefetched != null) {
+            rules = prefetched.get(fieldUuid);
+        }
+        if (rules == null) {
+            rules = lengthRepository.findByFieldUuid(fieldUuid);
+        }
 
         if (rules.isEmpty()) {
             return; // 没有长度规则，跳过校验
@@ -92,6 +99,24 @@ public class LengthValidationService implements ValidationService {
                 throw new IllegalArgumentException(errorMessage);
             }
         }
+    }
+
+    @Override
+    public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("LENGTH") : null;
+        if (m != null) {
+            this.prefetched = new java.util.HashMap<>();
+            for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
+                @SuppressWarnings("unchecked")
+                java.util.List<MetadataValidationLengthDO> list = (java.util.List<MetadataValidationLengthDO>) (java.util.List<?>) e.getValue();
+                this.prefetched.put(e.getKey(), list);
+            }
+        }
+    }
+
+    @Override
+    public void clearPrefetchedRules() {
+        this.prefetched = null;
     }
 
     @Override

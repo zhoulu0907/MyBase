@@ -48,6 +48,15 @@ onebase:
   security:
     mock-enable: true
     mock-secret: inner-
+    login-user-header-enable: true
+  ai:
+    bridge:
+      enabled: true
+      sm3-key: ONEBASE_AI_BRIDGE_SM3_KEY
+      proxy-base-url: http://10.0.104.69:16000/obai/
+      path-patterns:
+        - /admin-api/**
+        - /platform/**
   access-log: # 访问日志的配置项
     enable: false
   web:
@@ -62,6 +71,16 @@ onebase:
     tenant: root
   flink:
     address: http://10.0.104.41:30692
+  auth:
+    tiangong:
+      tenant-code: tenant_tiangong
+      client-id: onebase
+      client-secret: onebasekey
+      access-token-url: https://sso.sit.artifex-cmcc.com.cn/api/auth/oauth2/token
+      user-info-url: https://sso.sit.artifex-cmcc.com.cn/api/portal/oauth2/userinfo
+      redirect-uri: http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/system/auth/tiangong-login
+      scope: server
+      device-id: tianGong
 
 justauth:
   enabled: true

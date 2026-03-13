@@ -150,9 +150,9 @@ public class DictDataServiceImpl implements DictDataService {
             return;
         }
         // 如果 id 为空，说明不用比较是否为相同 id 的字典数据
-        if (id == null) {
-            throw exception(DICT_DATA_VALUE_DUPLICATE);
-        }
+//        if (id == null) {
+//            throw exception(DICT_DATA_VALUE_DUPLICATE);
+//        }
         if (!dictData.getId().equals(id)) {
             throw exception(DICT_DATA_VALUE_DUPLICATE);
         }
@@ -221,6 +221,18 @@ public class DictDataServiceImpl implements DictDataService {
             // 创建可变列表的副本以支持排序
             List<DictDataDO> mutableList = new ArrayList<>(list);
             mutableList.sort(Comparator.comparing(DictDataDO::getSort));
+            return mutableList;
+        });
+    }
+
+    @Override
+    @TenantIgnore
+    public List<DictDataDO> getDictDataListByDictTypeId(Long dictTypeId, Integer status) {
+        return TenantUtils.executeIgnore(() -> {
+            List<DictDataDO> list = dictDataRepository.findListByDictTypeIdAndStatus(dictTypeId, status);
+            // 创建可变列表的副本以支持排序
+            List<DictDataDO> mutableList = new ArrayList<>(list);
+            mutableList.sort(Comparator.comparingInt(DictDataDO::getSort));
             return mutableList;
         });
     }

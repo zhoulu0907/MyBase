@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import cn.hutool.core.util.IdUtil;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -40,7 +42,9 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
                 .setUserId(userId).setUserType(userType)
                 .setClientId(clientId).setScopes(scopes)
                 .setExpiresTime(LocalDateTime.now().plusSeconds(TIMEOUT))
-                .setRedirectUri(redirectUri).setState(state);
+                .setRedirectUri(redirectUri).setState(state)
+                .setTenantId(TenantContextHolder.getTenantId())
+                .setApplicationId(ApplicationManager.getApplicationId());
         oauth2CodeDataRepository.insert(codeDO);
         return codeDO;
     }
@@ -54,8 +58,8 @@ public class OAuth2CodeServiceImpl implements OAuth2CodeService {
         if (DateUtils.isExpired(codeDO.getExpiresTime())) {
             throw exception(OAUTH2_CODE_EXPIRE);
         }
-        // 删除授权码，避免被二次使用
-        oauth2CodeDataRepository.deleteById(codeDO.getId());
+        // 删除授权码，避免被二次使用  todo 调试时暂时注掉该代码方便调试,待联调完成后恢复
+//        oauth2CodeDataRepository.deleteById(codeDO.getId());
         return codeDO;
     }
 

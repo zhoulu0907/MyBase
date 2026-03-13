@@ -128,7 +128,7 @@ public class DeptServiceImpl implements DeptService {
             throw exception(DEPT_EXITS_CHILDREN);
         }
         // 如果一个部门有用户，则不能删除
-        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id), null);
+        List<AdminUserDO> userListByDeptIds = userService.getUserListByDeptIds(Collections.singleton(id), null,  null);
         if (CollectionUtils.isNotEmpty(userListByDeptIds)) {
             throw exception(DEPT_DEL_FAILD_EXISTS_USERS);
         }
@@ -415,7 +415,7 @@ public class DeptServiceImpl implements DeptService {
             respVO.setDeptList(BeanUtils.toBean(childDepts, DeptRespVO.class));
 
             // 获取直属用户
-            List<AdminUserDO> directUsers = userService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()), userType);
+            List<AdminUserDO> directUsers = userService.getUserListByDeptIds(Collections.singletonList(reqVO.getDeptId()), userType, UserStatusEnum.NORMAL.getStatus());
             respVO.setUserList(BeanUtils.toBean(directUsers, UserSimpleRespVO.class));
 
         } else {

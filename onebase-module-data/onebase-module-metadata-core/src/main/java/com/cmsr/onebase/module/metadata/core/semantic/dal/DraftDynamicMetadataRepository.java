@@ -123,6 +123,9 @@ public class DraftDynamicMetadataRepository {
     public int updateByQuery(String tableName, Row row, QueryWrapper qw) {
         ApplicationDataSourceManager.useBizDatasourceByAppId(ApplicationManager.getApplicationId());
         try {
+            // 移除值为 null 的系统字段，避免覆盖原值
+            removeSystemFieldsIfNull(row);
+
             LocalDateTime now = LocalDateTime.now();
             Long userId = SecurityFrameworkUtils.getLoginUserId();
             if (!row.containsKey(SystemFieldConstants.OPTIONAL.UPDATED_TIME) || row.get(SystemFieldConstants.OPTIONAL.UPDATED_TIME) == null) { row.set(SystemFieldConstants.OPTIONAL.UPDATED_TIME, now); }
@@ -133,6 +136,28 @@ public class DraftDynamicMetadataRepository {
             return Db.updateByQuery(tableName, row, qw);
         } finally {
             ApplicationDataSourceManager.clear();
+        }
+    }
+
+    /**
+     * 移除值为 null 或 "null" 的系统字段
+     *
+     * @param row 行数据
+     */
+    private void removeSystemFieldsIfNull(Row row) {
+        String[] checkFields = {
+                SystemFieldConstants.REQUIRE.OWNER_ID,
+                SystemFieldConstants.REQUIRE.OWNER_DEPT,
+                SystemFieldConstants.REQUIRE.CREATOR,
+                SystemFieldConstants.REQUIRE.UPDATER
+        };
+        for (String field : checkFields) {
+            if (row.containsKey(field)) {
+                Object val = row.get(field);
+                if (val == null || "null".equals(String.valueOf(val))) {
+                    row.remove(field);
+                }
+            }
         }
     }
 

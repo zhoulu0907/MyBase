@@ -46,7 +46,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
     private RequestMatcher systemRequestMatcher   = new AntPathRequestMatcher("/runtime/system/**");
     private RequestMatcher corpRequestMatcher     = new AntPathRequestMatcher("/runtime/corp/**");
-    private RequestMatcher corpFileRequestMatcher     = new AntPathRequestMatcher("/runtime/infra/file/corp/**");
+    private RequestMatcher fileRequestMatcher     = new AntPathRequestMatcher("/runtime/infra/file/**");
     private RequestMatcher tiangongRequestMatcher     = new AntPathRequestMatcher("/runtime/tiangong/**");
 
     // todo 这里要删除
@@ -73,7 +73,7 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
         return systemRequestMatcher.matches(request)
                 || corpRequestMatcher.matches(request)
-                || corpFileRequestMatcher.matches(request)
+                || fileRequestMatcher.matches(request)
                 || tiangongRequestMatcher.matches(request)
                 || appRoleRequestMatcher.matches(request)
                 || appGetRequestMatcher.matches(request)

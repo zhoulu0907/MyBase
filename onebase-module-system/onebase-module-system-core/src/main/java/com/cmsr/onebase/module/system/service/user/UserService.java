@@ -171,7 +171,7 @@ public interface UserService {
      * @param deptIds 部门数组
      * @return 用户数组
      */
-    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType);
+    List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType, Integer status);
 
     /**
      * 获得没有部门的用户List
@@ -451,5 +451,5 @@ public interface UserService {
      * @param accessToken 访问令牌
      * @return 用户信息
      */
-    UserSimpleRespVO getUserInfoByToken(String accessToken);
+    OAuth2UserInfoRespVO getUserInfoByToken(String accessToken);
 }

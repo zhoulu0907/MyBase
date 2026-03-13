@@ -110,12 +110,11 @@ public class MetadataConfig {
      * @return DatabaseType枚举，如果不是有效枚举则返回null
      */
     public DatabaseType getDefaultDatasourceTypeEnum() {
-        try {
-            return DatabaseType.valueOf(defaultDatasourceType);
-        } catch (IllegalArgumentException e) {
+        DatabaseType databaseType = parseDatabaseType(defaultDatasourceType);
+        if (databaseType == null) {
             log.warn("配置的默认数据源类型[{}]不是有效的DatabaseType枚举值，请检查配置", defaultDatasourceType);
-            return null;
         }
+        return databaseType;
     }
     
     /**
@@ -125,12 +124,7 @@ public class MetadataConfig {
      * @return true-有效，false-无效
      */
     public static boolean isValidDatabaseType(String datasourceType) {
-        try {
-            DatabaseType.valueOf(datasourceType);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+        return parseDatabaseType(datasourceType) != null;
     }
     
     /**
@@ -140,11 +134,35 @@ public class MetadataConfig {
      * @return DatabaseType枚举
      */
     public static DatabaseType toDatabaseType(String datasourceType) {
+        DatabaseType databaseType = parseDatabaseType(datasourceType);
+        if (databaseType == null) {
+            log.warn("无法将字符串[{}]转换为DatabaseType枚举", datasourceType);
+        }
+        return databaseType;
+    }
+
+    private static DatabaseType parseDatabaseType(String datasourceType) {
+        if (datasourceType == null || datasourceType.isBlank()) {
+            return null;
+        }
         try {
             return DatabaseType.valueOf(datasourceType);
-        } catch (IllegalArgumentException e) {
-            log.warn("无法将字符串[{}]转换为DatabaseType枚举，使用默认值PostgreSQL", datasourceType);
+        } catch (IllegalArgumentException ignored) {
+        }
+
+        String normalized = datasourceType.replace("_", "").replace("-", "").trim().toUpperCase();
+        if ("POSTGRESQL".equals(normalized)) {
             return DatabaseType.PostgreSQL;
         }
+        if ("OPENGAUSS".equals(normalized)) {
+            return DatabaseType.OpenGauss;
+        }
+        if ("KINGBASE".equals(normalized)) {
+            return DatabaseType.KingBase;
+        }
+        if ("DM".equals(normalized)) {
+            return DatabaseType.DM;
+        }
+        return null;
     }
 }

@@ -175,6 +175,15 @@ public class FlowProcessMgmtServiceImpl implements FlowProcessMgmtService {
         return flowProcessDO;
     }
 
+    @Override
+    public String getProcessDefinitionByProcessId(Long processId) {
+        FlowProcessDO flowProcessDO = flowProcessRepository.getById(processId);
+        if (flowProcessDO == null) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.FLOW_NOT_EXIST);
+        }
+        return flowProcessDO.getProcessDefinition();
+    }
+
     /**
      * DO转换为VO
      */

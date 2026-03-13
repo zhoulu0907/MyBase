@@ -31,7 +31,7 @@ import java.util.List;
  * <p>配置示例：
  * <pre>{@code
  * {
- *   "nodeCode": "api_http",
+ *   "nodeCode": "http",
  *   "url": "https://api.example.com/users/${userId}",
  *   "method": "GET",
  *   "headers": [
@@ -47,7 +47,8 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@NodeType("api_http")
+@NodeType("http")
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class HttpNodeData extends NodeData implements Serializable {
 
     /**
@@ -313,7 +314,7 @@ public class HttpNodeData extends NodeData implements Serializable {
     private String connectorUuid;
 
     /**
-     * 动作名称
+     * 动作标识
      * 用于从 action_config.properties 中按名称索引动作配置
      */
     private String actionName;
@@ -321,7 +322,6 @@ public class HttpNodeData extends NodeData implements Serializable {
     /**
      * 环境名称
      * 用于从 connector.config.properties 中按名称查找环境配置
-     * 为空时 fallback 取第一个环境
      */
     private String envName;
 

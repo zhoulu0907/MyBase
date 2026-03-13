@@ -19,33 +19,134 @@ public class FormulaValidate {
      * @param formula 公式内容
      */
     public static String validateSupportedFunctions(String formula) {
-        // 使用正则表达式提取可能的函数名（大写字母开头，后面跟着字母、数字和下划线，后跟括号）
-        Pattern functionPattern = Pattern.compile("\\b([A-Z][A-Z0-9_]*)\\s*\\(([^)]*)\\)");
-        Matcher matcher = functionPattern.matcher(formula);
-
+        // 首先检查是否包含中文标点符号
+        validateBrackets(formula);
+        
         // 创建支持函数集合，便于快速查找
         Set<String> supportedFunctionSet = new HashSet<>(Arrays.asList(SUPPORTED_FUNCTIONS));
 
-        // 检查每个匹配的函数名
-        while (matcher.find()) {
-            String functionName = matcher.group(1);
-            String params = matcher.group(2);
+        // 使用循环逐步验证所有函数，从内层到外层
+        String workingFormula = formula;
+        int maxIterations = 100; // 防止无限循环
+        int iteration = 0;
 
-            // 如果函数不在支持列表中，则抛出异常
-            if (!supportedFunctionSet.contains(functionName)) {
-                throw new IllegalArgumentException("不支持" + functionName + "函数");
+        while (iteration < maxIterations) {
+            // 使用正则表达式提取最内层的函数（括号内不包含其他括号的函数）
+            Pattern functionPattern = Pattern.compile("\\b([A-Z][A-Z0-9_]*)\\s*\\(([^()]*)\\)");
+            Matcher matcher = functionPattern.matcher(workingFormula);
+
+            boolean foundFunction = false;
+
+            // 检查每个匹配的函数名
+            while (matcher.find()) {
+                foundFunction = true;
+                String functionName = matcher.group(1);
+                String params = matcher.group(2);
+
+                // 如果函数不在支持列表中，则抛出异常
+                if (!supportedFunctionSet.contains(functionName)) {
+                    throw new IllegalArgumentException("不支持" + functionName + "函数");
+                }
+
+                // 验证参数个数
+                validateFunctionParameters(functionName, params);
+
+                // 验证参数类型
+                validateFunctionParameterTypes(functionName, params);
             }
 
-            // 验证参数个数
-            validateFunctionParameters(functionName, params);
+            // 如果没有找到任何函数，说明已经验证完成
+            if (!foundFunction) {
+                break;
+            }
 
-            // 验证参数类型
-            validateFunctionParameterTypes(functionName, params);
+            // 将所有已验证的内层函数替换为占位符，以便外层函数可以被匹配
+            // 使用特殊字符替代，确保不会再次被匹配
+            workingFormula = workingFormula.replaceAll("\\b([A-Z][A-Z0-9_]*)\\s*\\([^()]*\\)", "@VALIDATED@");
+            
+            iteration++;
         }
-        // if (formula.contains(REGEX)) {
-        //     formula = formula.replace("\\","\\\\");
-        // }
+
+        if (iteration >= maxIterations) {
+            throw new IllegalArgumentException("公式验证失败：可能存在无效的嵌套结构");
+        }
+
         return formula;
+    }
+
+    /**
+     * 验证公式中的括号是否为英文半角括号，并且成对出现
+     *
+     * @param formula 公式内容
+     */
+    private static void validateBrackets(String formula) {
+        // 首先提取所有字符串字面量（双引号和单引号），并标记它们的位置
+        Set<String> stringLiterals = new HashSet<>();
+            
+        // 匹配双引号字符串
+        Pattern doubleQuotePattern = Pattern.compile("\"[^\"]*\"");
+        Matcher doubleQuoteMatcher = doubleQuotePattern.matcher(formula);
+        while (doubleQuoteMatcher.find()) {
+            stringLiterals.add(doubleQuoteMatcher.group());
+        }
+            
+        // 匹配单引号字符串
+        Pattern singleQuotePattern = Pattern.compile("'[^']*'");
+        Matcher singleQuoteMatcher = singleQuotePattern.matcher(formula);
+        while (singleQuoteMatcher.find()) {
+            stringLiterals.add(singleQuoteMatcher.group());
+        }
+            
+        // 创建一个临时公式，将字符串字面量替换为占位符
+        String tempFormula = formula;
+        int placeholderIndex = 0;
+        for (String literal : stringLiterals) {
+            tempFormula = tempFormula.replace(literal, "@STRING_" + placeholderIndex++ + "@");
+        }
+            
+        // 在临时公式中检查中文标点符号（只检查字符串外部的内容）
+        if (tempFormula.contains("（") || tempFormula.contains("）")) {
+            throw new IllegalArgumentException("公式中包含中文括号，请使用英文半角括号 () ");
+        }
+        
+        // 检查中文逗号（只检查字符串外部的内容）
+        if (tempFormula.contains("，")) {
+            throw new IllegalArgumentException("公式中包含中文逗号，请使用英文半角逗号 , ");
+        }
+        
+        // 检查中文引号（只检查字符串外部的内容）
+        if (tempFormula.contains("‘") || tempFormula.contains("’") ||
+            tempFormula.contains("“") || tempFormula.contains("”")) {
+            throw new IllegalArgumentException("公式中包含中文引号，请使用英文半角引号 ‘ ’ 或 “ ” ");
+        }
+            
+        // 验证原始公式中的字符串字面量是否使用英文引号（双引号或单引号）
+        for (String literal : stringLiterals) {
+            boolean isDoubleQuoted = literal.startsWith("\"") && literal.endsWith("\"");
+            boolean isSingleQuoted = literal.startsWith("'") && literal.endsWith("'");
+                
+            if (!isDoubleQuoted && !isSingleQuoted) {
+                throw new IllegalArgumentException("字符串字面量必须使用英文双引号或单引号包裹");
+            }
+        }
+        
+        // 验证英文括号是否成对出现
+        int leftParenCount = 0;
+        int rightParenCount = 0;
+            
+        for (char c : formula.toCharArray()) {
+            if (c == '(') {
+                leftParenCount++;
+            } else if (c == ')') {
+                rightParenCount++;
+            }
+        }
+        
+        if (leftParenCount != rightParenCount) {
+            throw new IllegalArgumentException(
+                String.format("公式中括号不匹配：左括号 (%d 个，右括号 )%d 个", 
+                            leftParenCount, rightParenCount));
+        }
     }
 
     /**

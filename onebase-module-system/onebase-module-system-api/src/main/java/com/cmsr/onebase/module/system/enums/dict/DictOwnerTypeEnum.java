@@ -16,6 +16,7 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum DictOwnerTypeEnum implements ArrayValuable<String> {
+
     /**
      * 全局字典
      */
@@ -42,6 +43,8 @@ public enum DictOwnerTypeEnum implements ArrayValuable<String> {
      * 类型名称
      */
     private final String name;
+
+    public static final long TYPE_GLOBAL_DEFAULT_ID = 1L;
 
     @Override
     public String[] array() {

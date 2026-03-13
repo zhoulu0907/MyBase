@@ -547,6 +547,11 @@
             </dependency>
             <dependency>
                 <groupId>org.anyline</groupId>
+                <artifactId>anyline-data-jdbc-opengauss</artifactId>
+                <version>${anyline.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.anyline</groupId>
                 <artifactId>anyline-data-jdbc-mysql</artifactId>
                 <version>${anyline.version}</version>
             </dependency>

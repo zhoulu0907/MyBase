@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.system.service.dict;
 
 import cn.hutool.core.util.StrUtil;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.metadata.api.entity.MetadataEntityFieldApi;
 import com.cmsr.onebase.module.system.dal.database.DictTypeRepository;
@@ -65,9 +67,17 @@ public class DictTypeServiceImpl implements DictTypeService {
             dictType.setDictOwnerType(DictOwnerTypeEnum.TENANT.getType());
         }
 
-        // 校验字典类型的名字的唯一性（同一所有者范围内）
-        validateDictTypeNameUnique(null, createReqVO.getName(), dictType.getDictOwnerType(), dictType.getDictOwnerId());
-        // 校验字典类型的类型的唯一性（同一所有者范围内）
+        if (dictType.getDictOwnerId() == null) {
+            if(DictOwnerTypeEnum.GLOBAL.getType().equalsIgnoreCase(dictType.getDictOwnerType())){
+                dictType.setDictOwnerId(DictOwnerTypeEnum.TYPE_GLOBAL_DEFAULT_ID);
+            } else if (DictOwnerTypeEnum.TENANT.getType().equalsIgnoreCase(dictType.getDictOwnerType())) {
+                dictType.setDictOwnerId(TenantContextHolder.getTenantId());
+            } else if (DictOwnerTypeEnum.APP.getType().equalsIgnoreCase(dictType.getDictOwnerType())) {
+                dictType.setDictOwnerId(ApplicationManager.getApplicationId());
+            }
+        }
+
+        // 校验字典类型的类型的唯一性（同一所有者范围内） 校验getDictOwnerType/getDictOwnerId/type联合唯一
         validateDictTypeUnique(null, createReqVO.getType(), dictType.getDictOwnerType(), dictType.getDictOwnerId());
 
         dictType.setDeletedTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault())); // 唯一索引，避免
@@ -83,10 +93,7 @@ public class DictTypeServiceImpl implements DictTypeService {
         
         // 更新字典类型
         DictTypeDO updateObj = BeanUtils.toBean(updateReqVO, DictTypeDO.class);
-        
-        // 校验字典类型的名字的唯一性（使用现有的所有者信息）
-        validateDictTypeNameUnique(updateReqVO.getId(), updateReqVO.getName(), 
-                existingDictType.getDictOwnerType(), existingDictType.getDictOwnerId());
+
         // 校验字典类型的类型的唯一性（使用现有的所有者信息）
         validateDictTypeUnique(updateReqVO.getId(), updateReqVO.getType(), 
                 existingDictType.getDictOwnerType(), existingDictType.getDictOwnerId());
@@ -129,62 +136,6 @@ public class DictTypeServiceImpl implements DictTypeService {
     @Override
     public List<DictTypeDO> getDictTypesByTypes(Collection<String> types) {
         return dictTypeRepository.findListByTypes(types);
-    }
-
-    @VisibleForTesting
-    void validateDictTypeNameUnique(Long id, String name) {
-        DictTypeDO dictType = dictTypeRepository.findOneByName(name);
-        if (dictType == null) {
-            return;
-        }
-        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
-        if (id == null) {
-            throw exception(DICT_TYPE_NAME_DUPLICATE);
-        }
-        if (!dictType.getId().equals(id)) {
-            throw exception(DICT_TYPE_NAME_DUPLICATE);
-        }
-    }
-
-    /**
-     * 校验字典类型名称的唯一性（同一所有者范围内）
-     *
-     * @param id 字典类型ID（更新时使用，新建时传null）
-     * @param name 字典类型名称
-     * @param dictOwnerType 字典所有者类型
-     * @param dictOwnerId 字典所有者ID
-     */
-    @VisibleForTesting
-    void validateDictTypeNameUnique(Long id, String name, String dictOwnerType, Long dictOwnerId) {
-        DictTypeDO dictType = dictTypeRepository.findOneByNameAndOwner(name, dictOwnerType, dictOwnerId);
-        if (dictType == null) {
-            return;
-        }
-        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
-        if (id == null) {
-            throw exception(DICT_TYPE_NAME_DUPLICATE);
-        }
-        if (!dictType.getId().equals(id)) {
-            throw exception(DICT_TYPE_NAME_DUPLICATE);
-        }
-    }
-
-    @VisibleForTesting
-    void validateDictTypeUnique(Long id, String type) {
-        if (StrUtil.isEmpty(type)) {
-            return;
-        }
-        DictTypeDO dictType = dictTypeRepository.findOneByType(type);
-        if (dictType == null) {
-            return;
-        }
-        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
-        if (id == null) {
-            throw exception(DICT_TYPE_TYPE_DUPLICATE);
-        }
-        if (!dictType.getId().equals(id)) {
-            throw exception(DICT_TYPE_TYPE_DUPLICATE);
-        }
     }
 
     /**

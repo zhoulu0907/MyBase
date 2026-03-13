@@ -17,6 +17,7 @@ import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
 import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
+import org.apache.commons.lang3.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,6 +64,57 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
 
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
+    private String collapseSlashes(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+        int len = path.length();
+        StringBuilder sb = new StringBuilder(len);
+        char prev = 0;
+        for (int i = 0; i < len; i++) {
+            char c = path.charAt(i);
+            if (c == '/' && prev == '/') {
+                continue;
+            }
+            sb.append(c);
+            prev = c;
+        }
+        return sb.toString();
+    }
+
+    private String normalizeApiPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+        int idx = Integer.MAX_VALUE;
+        int buildIdx = path.indexOf(WebProperties.BUILD);
+        if (buildIdx >= 0) {
+            idx = Math.min(idx, buildIdx);
+        }
+        int platformIdx = path.indexOf(WebProperties.PLATFORM);
+        if (platformIdx >= 0) {
+            idx = Math.min(idx, platformIdx);
+        }
+        int runtimeIdx = path.indexOf(WebProperties.RUNTIME);
+        if (runtimeIdx >= 0) {
+            idx = Math.min(idx, runtimeIdx);
+        }
+        if (idx == Integer.MAX_VALUE) {
+            return path;
+        }
+        return path.substring(idx);
+    }
+
+    private String requestPath(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String path = requestUri;
+        if (contextPath != null && !contextPath.isEmpty() && requestUri != null && requestUri.startsWith(contextPath)) {
+            path = requestUri.substring(contextPath.length());
+        }
+        return normalizeApiPath(collapseSlashes(path));
+    }
+
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
@@ -94,9 +146,28 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
         } else {
             // 其他接口，需要获取token和登录用户信息
+            if (hasAiHeaders(request)) {
+                chain.doFilter(request, response);
+                return;
+            }
             // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
             // LoginUser loginUser = buildLoginUserByHeader(request);
             LoginUser loginUser = null;
+            if (Boolean.TRUE.equals(securityProperties.getLoginUserHeaderEnable())) {
+                try {
+                    loginUser = buildLoginUserByHeader(request);
+                    if (loginUser != null && loginUser.getTenantId() == null) {
+                        loginUser.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+                    }
+                    if (loginUser != null && (loginUser.getId() == null || loginUser.getTenantId() == null)) {
+                        loginUser = null;
+                    }
+                } catch (Throwable ex) {
+                    CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                    ServletUtils.writeJSON(response, result);
+                    return;
+                }
+            }
             // 情况二，基于 Token 获得用户
             // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
             String token = null;
@@ -154,6 +225,13 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
         }
     }
 
+    private boolean hasAiHeaders(HttpServletRequest request) {
+        return StringUtils.isNotBlank(request.getHeader("X-AI-KeyId")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Signature")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Request-Id")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Tenant-Id"));
+    }
+
     private LoginUser buildLoginUserByToken(String runMode, String token) {
         try {
             // 校验访问令牌
@@ -197,6 +275,9 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
 
     public boolean isTokenMockable(String token){
         // 必须开启且token以“mock-secret”配置项的值为开头
+        if (StrUtil.isBlank(token)) {
+            return false;
+        }
         return securityProperties.getMockEnable() && token.startsWith(securityProperties.getMockSecret());
     }
 
@@ -243,7 +324,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
      * @return
      */
     private String getRunModeByUri(HttpServletRequest request) {
-        String uri = request.getRequestURI();
+        String uri = requestPath(request);
         if (uri == null) {
             return null;
         }
@@ -263,7 +344,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
      * @return 是否为登录/登出请求
      */
     private boolean isLoginOrLogoutRequest(HttpServletRequest request) {
-        String uri = request.getRequestURI();
+        String uri = requestPath(request);
         if (uri == null) {
             return false;
         }
@@ -329,7 +410,7 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
      * @return 是否为免登录请求
      */
     private boolean isPermitAllRequest(HttpServletRequest request) {
-        String requestUri = request.getRequestURI();
+        String requestUri = requestPath(request);
         if (permitAllUrls != null) {
             for (String pattern : permitAllUrls) {
                 if (pathMatcher.match(pattern, requestUri)) {

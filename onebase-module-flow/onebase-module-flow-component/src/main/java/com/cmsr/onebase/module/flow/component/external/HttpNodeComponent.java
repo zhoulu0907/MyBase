@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 @Setter
-@LiteflowComponent("api_http")
+@LiteflowComponent("http")
 public class HttpNodeComponent extends SkippableNodeComponent {
 
     /**
@@ -57,15 +57,6 @@ public class HttpNodeComponent extends SkippableNodeComponent {
     /**
      * HTTP 请求节点处理方法
      * 这是 LiteFlow 组件的核心执行方法，在流程执行到该节点时被调用
-     *
-     * 执行流程：
-     * 1. 初始化上下文 - 获取执行上下文、变量上下文和节点数据
-     * 2. 解析循环变量 - 处理在循环中的变量引用（如 item.index, item.value）
-     * 3. 变量替换 - 将 URL、Body、Headers 中的占位符替换为实际值
-     * 4. 构建请求 - 创建 HttpRequest 对象并设置所有参数
-     * 5. 执行请求 - 调用 HttpExecuteService 发送 HTTP 请求
-     * 6. 构建输出 - 将响应数据转换为标准输出格式
-     * 7. 保存结果 - 将输出保存到变量上下文供后续节点使用
      *
      * @throws Exception 请求执行过程中的任何异常
      */
@@ -91,208 +82,185 @@ public class HttpNodeComponent extends SkippableNodeComponent {
                 this, inLoopDepth, variableContext.getNodeVariables()
         );
 
-        // ========== 步骤 3: 获取配置（动态加载 vs 内联 fallback） ==========
+        // ========== 步骤 3: 配置校验（早返回） ==========
         Map<String, Object> connectorConfig = nodeData.getConnectorConfig();
         Map<String, Object> actionConfig = nodeData.getActionConfig();
 
-        String method;
-        String requestPath;
-        List<HttpNodeData.Header> headers;
-        String bodyContent;
-        int timeout;
-        int retryCount;
-
-        if (connectorConfig != null && actionConfig != null) {
-            // ===== 动态加载配置路径 =====
-            log.info("[FLOW-TRACE] HTTP节点使用动态加载配置: nodeId={}", nodeId);
-
-            // 从 actionConfig.debug 获取 method/url
-            Map<String, Object> debug = getNestedMap(actionConfig, "debug");
-            method = debug != null ? (String) debug.get("method") : null;
-            requestPath = debug != null ? (String) debug.get("url") : null;
-
-            // 从 actionConfig.request 获取 headers/body/params
-            Map<String, Object> requestConfig = getNestedMap(actionConfig, "request");
-
-            // 构建 headers（从 List<Map> 手动提取，避免 ClassCastException）
-            headers = new ArrayList<>();
-            if (requestConfig != null) {
-                Object requestHeadersObj = requestConfig.get("requestHeaders");
-                if (requestHeadersObj instanceof List<?> headerList) {
-                    for (Object item : headerList) {
-                        if (item instanceof Map<?, ?> headerMap) {
-                            HttpNodeData.Header h = new HttpNodeData.Header();
-                            h.setKey((String) headerMap.get("key"));
-                            Object val = headerMap.get("fieldValue");
-                            if (val == null) {
-                                val = headerMap.get("value");
-                            }
-                            h.setValue(val != null ? val.toString() : "");
-                            headers.add(h);
-                        }
-                    }
-                }
-            }
-
-            // 认证处理 — 从 connectorConfig.authInfo 读取
-            Map<String, Object> authInfo = getNestedMap(connectorConfig, "authInfo");
-            if (authInfo != null) {
-                String authType = (String) authInfo.get("authType");
-                if ("basic".equalsIgnoreCase(authType)) {
-                    String username = (String) authInfo.get("username");
-                    String password = (String) authInfo.get("password");
-                    if (username != null && password != null) {
-                        String encoded = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
-                        HttpNodeData.Header authHeader = new HttpNodeData.Header();
-                        authHeader.setKey("Authorization");
-                        authHeader.setValue("Basic " + encoded);
-                        headers.add(authHeader);
-                    }
-                } else if ("bearer".equalsIgnoreCase(authType)) {
-                    String token = (String) authInfo.get("token");
-                    if (token != null) {
-                        HttpNodeData.Header authHeader = new HttpNodeData.Header();
-                        authHeader.setKey("Authorization");
-                        authHeader.setValue("Bearer " + token);
-                        headers.add(authHeader);
-                    }
-                }
-                // "none" 或其他值不添加认证头
-            }
-
-            // 构建请求体（从 request.requestBody 数组构建 JSON）
-            bodyContent = buildRequestBody(requestConfig);
-
-            // 超时 — 从 connectorConfig.basicInfo.timeout 获取
-            Map<String, Object> basicInfo = getNestedMap(connectorConfig, "basicInfo");
-            timeout = basicInfo != null ? toInteger(basicInfo.get("timeout"), 5000) : 5000;
-            retryCount = nodeData.getRetry() != null ? nodeData.getRetry() : 0;
-
-            // ===== 构建完整 URL =====
-            String baseUrl = basicInfo != null ? (String) basicInfo.get("baseUrl") : null;
-            String resolvedPath = replaceVariables(requestPath != null ? requestPath : "", expressionContext);
-
-            // pathParams 替换 — 替换 URL 中的 {paramName}
-            if (requestConfig != null) {
-                Object pathParamsObj = requestConfig.get("pathParams");
-                if (pathParamsObj instanceof List<?> pathParamsList) {
-                    for (Object item : pathParamsList) {
-                        if (item instanceof Map<?, ?> paramMap) {
-                            String paramName = (String) paramMap.get("paramName");
-                            Object paramValue = paramMap.get("fieldValue");
-                            if (paramValue == null) {
-                                paramValue = paramMap.get("value");
-                            }
-                            if (paramName != null && paramValue != null) {
-                                String resolvedParamValue = replaceVariables(paramValue.toString(), expressionContext);
-                                resolvedPath = resolvedPath.replace("{" + paramName + "}", resolvedParamValue);
-                            }
-                        }
-                    }
-                }
-            }
-
-            String fullUrl = baseUrl != null ? baseUrl + resolvedPath : resolvedPath;
-
-            // queryParams 拼接
-            fullUrl = appendQueryParams(fullUrl, debug, requestConfig, expressionContext);
-
-            // 构建 HttpRequest
-            HttpRequest request = new HttpRequest();
-            request.setProcessId(String.valueOf(processId));
-            request.setTraceId(traceId);
-            request.setExecutionUuid(executionUuid);
-            request.setNodeId(nodeId);
-            request.setUrl(fullUrl);
-            request.setMethod(method);
-            request.setTimeout(timeout);
-            request.setRetry(retryCount);
-
-            // 变量替换 headers
-            List<HttpNodeData.Header> resolvedHeaders = new ArrayList<>();
-            for (HttpNodeData.Header header : headers) {
-                HttpNodeData.Header resolved = new HttpNodeData.Header();
-                resolved.setKey(header.getKey());
-                resolved.setValue(replaceVariables(header.getValue(), expressionContext));
-                resolvedHeaders.add(resolved);
-            }
-            request.setHeaders(resolvedHeaders);
-
-            // 变量替换 body
-            String resolvedBody = replaceVariables(bodyContent != null ? bodyContent : "", expressionContext);
-            request.setBodyContent(resolvedBody);
-
-            log.info("[FLOW-TRACE] HTTP请求头: nodeId={}, headerCount={}", nodeId, resolvedHeaders.size());
-            log.info("[FLOW-TRACE] HTTP请求体: nodeId={}, body={}",
-                    nodeId, resolvedBody != null && resolvedBody.length() > 500
-                            ? resolvedBody.substring(0, 500) + "...(truncated)" : resolvedBody);
-
-            executeRequest(request, executeContext, variableContext, nodeId, processId, traceId, executionUuid);
-
-        } else {
-            // ===== 内联配置 fallback =====
-            log.info("[FLOW-TRACE] HTTP节点使用内联配置: nodeId={}, method={}, url={}",
-                    nodeId, nodeData.getMethod(), nodeData.getUrl());
-
-            method = nodeData.getMethod();
-            requestPath = nodeData.getUrl();
-            headers = nodeData.getHeaders();
-            bodyContent = nodeData.getBodyContent();
-            timeout = nodeData.getTimeout() != null ? nodeData.getTimeout() : 5000;
-            retryCount = nodeData.getRetry() != null ? nodeData.getRetry() : 0;
-
-            String resolvedUrl = replaceVariables(requestPath != null ? requestPath : "", expressionContext);
-            String resolvedBody = replaceVariables(bodyContent != null ? bodyContent : "", expressionContext);
-
-            HttpRequest request = new HttpRequest();
-            request.setProcessId(String.valueOf(processId));
-            request.setTraceId(traceId);
-            request.setExecutionUuid(executionUuid);
-            request.setNodeId(nodeId);
-            request.setUrl(resolvedUrl);
-            request.setMethod(method);
-            request.setTimeout(timeout);
-            request.setRetry(retryCount);
-
-            // 变量替换 headers（新建对象避免缓存污染）
-            List<HttpNodeData.Header> resolvedHeaders = new ArrayList<>();
-            if (headers != null) {
-                for (HttpNodeData.Header header : headers) {
-                    HttpNodeData.Header resolved = new HttpNodeData.Header();
-                    resolved.setKey(header.getKey());
-                    resolved.setValue(replaceVariables(header.getValue(), expressionContext));
-                    resolvedHeaders.add(resolved);
-                }
-            }
-            request.setHeaders(resolvedHeaders);
-            request.setBodyContent(resolvedBody);
-
-            log.info("[FLOW-TRACE] HTTP请求头: nodeId={}, headerCount={}", nodeId, resolvedHeaders.size());
-
-            executeRequest(request, executeContext, variableContext, nodeId, processId, traceId, executionUuid);
+        if (connectorConfig == null || actionConfig == null) {
+            String errorMsg = String.format(
+                "HTTP节点配置缺失：connectorConfig=%s, actionConfig=%s, nodeId=%s",
+                connectorConfig != null ? "已加载" : "null",
+                actionConfig != null ? "已加载" : "null",
+                nodeId);
+            log.error("[FLOW-TRACE] {}", errorMsg);
+            executeContext.addLog(errorMsg);
+            throw new IllegalStateException(errorMsg);
         }
+
+        log.debug("[FLOW-TRACE] HTTP节点使用动态加载配置: nodeId={}", nodeId);
+
+        String method = (String) actionConfig.get("method");
+        String requestPath = (String) actionConfig.get("url");
+        log.debug("[FLOW-TRACE] 从actionConfig获取到: method={}, url={}", method, requestPath);
+
+        Map<String, Object> paramTabs = getNestedMap(actionConfig, "tabs");
+        if (paramTabs == null) {
+            String errorMsg = String.format(
+                "HTTP节点配置错误：缺少请求参数配置。请检查连接器动作配置中的 tabs。nodeId=%s, actionConfig=%s",
+                nodeId, actionConfig);
+            log.error(errorMsg);
+            executeContext.addLog(errorMsg);
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        log.debug("[FLOW-TRACE] 使用参数来源: tabs, paramTabs中包含的keys: {}",
+                paramTabs.keySet());
+
+        // ========== 步骤 4: 构建请求各部分 ==========
+        List<HttpNodeData.Header> headers = buildHeaders(paramTabs, connectorConfig, expressionContext, nodeId);
+        String bodyContent = buildRequestBody(paramTabs);
+        String finalUrl = buildFullUrl(requestPath, paramTabs, expressionContext, nodeId);
+        int timeout = 5000;
+        int retryCount = nodeData.getRetry() != null ? nodeData.getRetry() : 0;
+
+        // ========== 步骤 5: 组装 HttpRequest ==========
+        HttpRequest request = new HttpRequest();
+        request.setProcessId(String.valueOf(processId));
+        request.setTraceId(traceId);
+        request.setExecutionUuid(executionUuid);
+        request.setNodeId(nodeId);
+        request.setUrl(finalUrl);
+        request.setMethod(method);
+        request.setTimeout(timeout);
+        request.setRetry(retryCount);
+
+        String resolvedBody = replaceVariables(bodyContent != null ? bodyContent : "", expressionContext);
+        request.setBodyContent(resolvedBody);
+        request.setHeaders(headers);
+
+        log.debug("[FLOW-TRACE] HTTP请求头: nodeId={}, headerCount={}", nodeId, headers.size());
+        log.debug("[FLOW-TRACE] HTTP请求体: nodeId={}, bodyLength={}",
+                nodeId, resolvedBody != null ? resolvedBody.length() : 0);
+
+        // ========== 步骤 6: 执行请求 ==========
+        executeRequest(request, executeContext, variableContext, nodeId);
+    }
+
+    /**
+     * 构建请求头列表
+     * 从 paramTabs.requestHeaders 获取自定义请求头，并从 connectorConfig 获取认证信息
+     *
+     * @param paramTabs        请求参数配置
+     * @param connectorConfig  连接器配置
+     * @param expressionContext 变量替换上下文
+     * @param nodeId           节点 ID（用于日志）
+     * @return 经过变量替换的请求头列表
+     */
+    private List<HttpNodeData.Header> buildHeaders(Map<String, Object> paramTabs,
+            Map<String, Object> connectorConfig, Map<String, Object> expressionContext, String nodeId) {
+        List<HttpNodeData.Header> headers = new ArrayList<>();
+
+        // 从 paramTabs.requestHeaders 获取自定义请求头
+        List<?> requestHeadersList = (List<?>) paramTabs.get("requestHeaders");
+        if (requestHeadersList != null && !requestHeadersList.isEmpty()) {
+            for (Object item : requestHeadersList) {
+                if (item instanceof Map<?, ?> headerMap) {
+                    HttpNodeData.Header h = new HttpNodeData.Header();
+                    h.setKey((String) headerMap.get("key"));
+                    Object val = headerMap.get("fieldValue");
+                    if (val == null) {
+                        val = headerMap.get("value");
+                    }
+                    h.setValue(val != null ? val.toString() : "");
+                    headers.add(h);
+                }
+            }
+        }
+        log.debug("[FLOW-TRACE] 构建的请求头数量: nodeId={}, headers={}", nodeId, headers.size());
+
+        // 认证处理 — 从 connectorConfig.properties.headers.Authorization 读取
+        Map<String, Object> connectorProps = getNestedMap(connectorConfig, "properties");
+        Map<String, Object> headersConfig = connectorProps != null ? getNestedMap(connectorProps, "headers") : null;
+        Map<String, Object> authHeaderConfig = headersConfig != null ? getNestedMap(headersConfig, "Authorization") : null;
+        if (authHeaderConfig != null) {
+            String token = (String) authHeaderConfig.get("value");
+            log.debug("[FLOW-TRACE] 从环境配置获取到认证token: nodeId={}, tokenLength={}", nodeId,
+                    token != null ? token.length() : 0);
+            if (token != null && !token.isEmpty()) {
+                HttpNodeData.Header authHeader = new HttpNodeData.Header();
+                authHeader.setKey("Authorization");
+                authHeader.setValue(token);
+                headers.add(authHeader);
+            }
+        }
+
+        // 变量替换 headers
+        List<HttpNodeData.Header> resolvedHeaders = new ArrayList<>();
+        for (HttpNodeData.Header header : headers) {
+            HttpNodeData.Header resolved = new HttpNodeData.Header();
+            resolved.setKey(header.getKey());
+            resolved.setValue(replaceVariables(header.getValue(), expressionContext));
+            resolvedHeaders.add(resolved);
+        }
+        return resolvedHeaders;
+    }
+
+    /**
+     * 构建完整的请求 URL
+     * 对 URL 模板进行变量替换，然后替换 pathParams 和拼接 queryParams
+     *
+     * @param requestPath       原始请求路径模板
+     * @param paramTabs         请求参数配置（含 pathParams、queryParams）
+     * @param expressionContext  变量替换上下文
+     * @param nodeId            节点 ID（用于日志）
+     * @return 完整的请求 URL
+     */
+    private String buildFullUrl(String requestPath, Map<String, Object> paramTabs,
+            Map<String, Object> expressionContext, String nodeId) {
+        // 变量替换
+        String fullUrl = replaceVariables(requestPath != null ? requestPath : "", expressionContext);
+        log.debug("[FLOW-TRACE] URL变量替换后: nodeId={}, fullUrl={}", nodeId, fullUrl);
+
+        // pathParams 替换 — 从 paramTabs.pathParams 获取并替换 URL 中的 {paramName}
+        Object pathParamsObj = paramTabs.get("pathParams");
+        if (pathParamsObj instanceof List<?> pathParamsList) {
+            for (Object item : pathParamsList) {
+                if (item instanceof Map<?, ?> paramMap) {
+                    String paramName = (String) paramMap.get("key");
+                    Object paramValue = paramMap.get("fieldValue");
+                    if (paramName != null && paramValue != null) {
+                        String resolvedParamValue = replaceVariables(paramValue.toString(), expressionContext);
+                        fullUrl = fullUrl.replace("{" + paramName + "}", resolvedParamValue);
+                    }
+                }
+            }
+        }
+
+        // queryParams 拼接
+        String finalUrl = appendQueryParams(fullUrl, paramTabs, expressionContext);
+        log.debug("[FLOW-TRACE] 添加queryParams后的最终URL: nodeId={}, finalUrl={}", nodeId, finalUrl);
+        return finalUrl;
     }
 
     /**
      * 执行 HTTP 请求并保存结果
      */
     private void executeRequest(HttpRequest request, ExecuteContext executeContext,
-                                VariableContext variableContext, String nodeId,
-                                Long processId, String traceId, String executionUuid) throws Exception {
+                                VariableContext variableContext, String nodeId) throws Exception {
+        Long processId = executeContext.getProcessId();
         try {
-            log.info("[FLOW-TRACE] HTTP请求准备: processId={}, traceId={}, executionUuid={}, nodeId={}, method={}, url={}",
-                    processId, traceId, executionUuid, nodeId, request.getMethod(), request.getUrl());
+            log.info("[FLOW-TRACE] HTTP请求准备: processId={}, nodeId={}, method={}, url={}",
+                    processId, nodeId, request.getMethod(), request.getUrl());
 
             HttpServiceResponse serviceResponse = httpExecuteService.execute(request);
 
-            log.info("[FLOW-TRACE] HTTP响应接收: processId={}, traceId={}, executionUuid={}, nodeId={}, statusCode={}, duration={}ms",
-                    processId, traceId, executionUuid, nodeId, serviceResponse.getStatusCode(), serviceResponse.getDuration());
+            log.info("[FLOW-TRACE] HTTP响应接收: processId={}, nodeId={}, statusCode={}, duration={}ms",
+                    processId, nodeId, serviceResponse.getStatusCode(), serviceResponse.getDuration());
 
             // rawBody 截断日志
             String rawBody = serviceResponse.getRawBody();
-            log.info("[FLOW-TRACE] HTTP响应体: nodeId={}, rawBody={}", nodeId,
-                    rawBody != null && rawBody.length() > 500
-                            ? rawBody.substring(0, 500) + "...(truncated)" : rawBody);
+            log.debug("[FLOW-TRACE] HTTP响应体: nodeId={}, rawBodyLength={}", nodeId,
+                    rawBody != null ? rawBody.length() : 0);
 
             // 构建输出
             Map<String, Object> output = new HashMap<>();
@@ -310,8 +278,7 @@ public class HttpNodeComponent extends SkippableNodeComponent {
 
             variableContext.putNodeVariables(this.getTag(), output);
 
-            log.info("[FLOW-TRACE] HTTP节点执行完成: processId={}, traceId={}, executionUuid={}, nodeId={}, outputKeys={}",
-                    processId, traceId, executionUuid, nodeId, output.keySet());
+            log.debug("[FLOW-TRACE] HTTP节点执行完成: processId={}, nodeId={}", processId, nodeId);
         } catch (Exception e) {
             log.error("[FLOW-TRACE] HTTP节点执行异常: processId={}, nodeId={}, method={}, url={}, error={}",
                     processId, nodeId, request.getMethod(), request.getUrl(), e.getMessage(), e);
@@ -332,22 +299,8 @@ public class HttpNodeComponent extends SkippableNodeComponent {
     }
 
     /**
-     * 安全转换为 Integer
-     */
-    private int toInteger(Object value, int defaultValue) {
-        if (value == null) return defaultValue;
-        if (value instanceof Number) return ((Number) value).intValue();
-        try {
-            return Integer.parseInt(value.toString());
-        } catch (NumberFormatException e) {
-            return defaultValue;
-        }
-    }
-
-    /**
      * 从 request.requestBody 数组构建请求体 JSON
      */
-    @SuppressWarnings("unchecked")
     private String buildRequestBody(Map<String, Object> requestConfig) {
         if (requestConfig == null) return null;
         Object requestBodyObj = requestConfig.get("requestBody");
@@ -359,19 +312,16 @@ public class HttpNodeComponent extends SkippableNodeComponent {
 
         if (requestBodyObj instanceof List<?> bodyList) {
             if (bodyList.isEmpty()) return null;
-            // 将 [{fieldName: "key", fieldValue: "val"}, ...] 转换为 JSON 对象
+            // 将 [{key: "paramKey", fieldValue: "val"}, ...] 转换为 JSON 对象
             StringBuilder sb = new StringBuilder("{");
             boolean first = true;
             for (Object item : bodyList) {
                 if (item instanceof Map<?, ?> bodyField) {
-                    String fieldName = (String) bodyField.get("fieldName");
+                    String key = (String) bodyField.get("key");
                     Object fieldValue = bodyField.get("fieldValue");
-                    if (fieldValue == null) {
-                        fieldValue = bodyField.get("value");
-                    }
-                    if (fieldName != null) {
+                    if (key != null) {
                         if (!first) sb.append(",");
-                        sb.append("\"").append(fieldName).append("\":");
+                        sb.append("\"").append(key).append("\":");
                         if (fieldValue instanceof String) {
                             sb.append("\"").append(fieldValue).append("\"");
                         } else {
@@ -391,31 +341,28 @@ public class HttpNodeComponent extends SkippableNodeComponent {
     /**
      * 拼接 queryParams 到 URL
      */
-    private String appendQueryParams(String url, Map<String, Object> debug,
-                                     Map<String, Object> requestConfig,
+    private String appendQueryParams(String url, Map<String, Object> paramTabs,
                                      Map<String, Object> expressionContext) {
         List<String> queryParts = new ArrayList<>();
 
-        // 从 debug.queryParams 获取
-        if (debug != null) {
-            Object debugQueryParams = debug.get("queryParams");
-            if (debugQueryParams instanceof List<?> paramsList) {
+        // 从 paramTabs.queryParams 获取
+        if (paramTabs != null) {
+            Object queryParams = paramTabs.get("queryParams");
+            if (queryParams instanceof List<?> paramsList) {
+                log.debug("[FLOW-TRACE] 处理queryParams: paramsCount={}", paramsList.size());
                 collectQueryParams(paramsList, queryParts, expressionContext);
             }
         }
 
-        // 从 request.queryParams 获取
-        if (requestConfig != null) {
-            Object reqQueryParams = requestConfig.get("queryParams");
-            if (reqQueryParams instanceof List<?> paramsList) {
-                collectQueryParams(paramsList, queryParts, expressionContext);
-            }
+        if (queryParts.isEmpty()) {
+            log.debug("[FLOW-TRACE] 无queryParams需要添加");
+            return url;
         }
-
-        if (queryParts.isEmpty()) return url;
 
         String separator = url.contains("?") ? "&" : "?";
-        return url + separator + String.join("&", queryParts);
+        String result = url + separator + String.join("&", queryParts);
+        log.debug("[FLOW-TRACE] 拼接queryParams后的URL: url={}", result);
+        return result;
     }
 
     private void collectQueryParams(List<?> paramsList, List<String> queryParts,
@@ -473,8 +420,8 @@ public class HttpNodeComponent extends SkippableNodeComponent {
 
         // 创建正则匹配器，用于查找所有变量占位符
         Matcher matcher = VARIABLE_PATTERN.matcher(template);
-        // 使用 StringBuffer 存储替换结果（比 String 更高效，支持频繁修改）
-        StringBuffer result = new StringBuffer();
+        // 使用 StringBuilder 存储替换结果
+        StringBuilder result = new StringBuilder();
 
         // 遍历所有匹配的占位符
         while (matcher.find()) {

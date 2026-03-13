@@ -3,11 +3,12 @@ package com.cmsr.onebase.module.system.runtime.controller.oauth2;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2OpenService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
-import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
+import com.cmsr.onebase.module.system.vo.user.OAuth2UserInfoRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -106,11 +107,22 @@ public class RuntimeOauth2OpenController {
         return oAuth2OpenService.approveOrDeny(responseType, clientId, scope, redirectUri, autoApprove, state);
     }
 
+    /**
+     * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 authorize 方法
+     */
+    @GetMapping("/authorize/client")
+    @Operation(summary = "获得授权信息", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
+    @Parameter(name = "clientId", required = true, description = "客户端编号", example = "tudou")
+    public CommonResult<AuthorizeURIRespVO> authorize(@RequestParam("clientId") String clientId) {
+        return oAuth2OpenService.authorize(clientId);
+    }
+
     @PostMapping("/user/get")
     @Operation(summary = "获取用户信息")
     @PermitAll
     @ApiSignIgnore
-    CommonResult<UserSimpleRespVO> getUser(@RequestParam("access_token") String accessToken) {
+    @TenantIgnore
+    CommonResult<OAuth2UserInfoRespVO> getUser(@RequestParam("access_token") String accessToken) {
 
         return CommonResult.success(userService.getUserInfoByToken(accessToken));
     }

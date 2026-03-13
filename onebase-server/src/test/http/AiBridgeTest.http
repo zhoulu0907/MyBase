@@ -1,0 +1,59 @@
+### 环境变量示例（可结合 script/idea/http-client.env.json 使用）
+@baseUrl = http://localhost:48080/admin-api
+@runtimeBaseUrl = http://localhost:48081/runtime
+@token = 9ce4e541423b47fd9429049715ae8c8d
+@sm3KeyHex = 11223344556677889900aabbccddeeff
+@userId = 10001
+@tenantId = 1
+@appId =
+@uuid = 1f2e3d4c5b6a7c8090aa112233445566
+@ts = 1710000000123
+@nonce = 9c4f8e1b2a3d4c5f6e7a8b9012345678
+
+### 登录获取平台 token（如已在 env 中配置可跳过）
+POST http://localhost:48080/admin-api/system/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "AdminChina2025!"
+}
+
+### AI → 平台：创建应用（入站验签）
+# 规范串：POST|/app/application/create|ts|nonce|userId|tenantId|appId|SM3(body)
+# 请将 X-AI-Signature 替换为使用 sm3KeyHex 计算的 HMAC‑SM3 十六进制值
+POST http://localhost:48080/admin-api/app/application/create
+Authorization: Bearer 9ce4e541423b47fd9429049715ae8c8d
+Content-Type: application/json
+X-AI-Timestamp: 1710000000123
+X-AI-Nonce: 9c4f8e1b2a3d4c5f6e7a8b9012345678
+X-AI-Request-Id: 1f2e3d4c5b6a7c8090aa112233445566
+X-AI-User-Id: 10001
+X-AI-Tenant-Id: 1
+X-AI-App-Id:
+X-AI-Signature: 00000000000000000000000000000000
+
+{
+  "appName": "AI创建的应用",
+  "appCode": "ai_app_001",
+  "appMode": "standard",
+  "themeColor": "#2F54EB",
+  "iconName": "AppIcon",
+  "iconColor": "#2F54EB",
+  "description": "由AI服务自动创建的应用",
+  "tagIds": [1, 2],
+  "publishModel": "PRIVATE"
+}
+
+### 平台 → AI：通过代理调用（自动注入签名与上下文）
+# 代理地址：http://10.0.104.69:16000/obai/
+# 此请求由后端自动生成 X-AI-* 头并转发到上述代理地址
+POST http://localhost:48080/admin-api/build/ai/v1/chat/stream?model=glm
+Content-Type: application/json
+
+{
+  "prompt": "你好，来一段测试对话"
+}
+
+### 平台 → AI：简单心跳
+GET http://localhost:48080/admin-api/build/ai/v1/ping

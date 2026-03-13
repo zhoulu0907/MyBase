@@ -147,7 +147,7 @@ public class TemporaryDatasourceService {
             // dsConfig.put("fail-fast", true);          // 移除快速失败，避免过早关闭
             // dsConfig.put("break-after-acquire-failure", true); // 移除，避免获取失败后立即中断
 
-            log.info("临时数据源配置: {}", dsConfig);
+            log.info("临时数据源配置: {}", maskSensitive(dsConfig));
 
             // 创建数据源和临时服务 - 增强错误处理和连接验证
             DataSource dataSource = null;
@@ -170,7 +170,12 @@ public class TemporaryDatasourceService {
                     log.info("数据源连接测试成功");
                 }
 
-                AnylineService<?> service = ServiceProxy.temporary(dataSource);
+                AnylineService<?> service;
+                if (isOpenGaussType(datasourceType)) {
+                    service = ServiceProxy.temporary(dataSource, DatabaseType.OpenGauss);
+                } else {
+                    service = ServiceProxy.temporary(dataSource);
+                }
 
                 // 缓存创建的服务和数据源
                 serviceCache.put(cacheKey, service);
@@ -201,6 +206,8 @@ public class TemporaryDatasourceService {
                         errorMsg.contains("timeout") ||
                         errorMsg.contains("Network is unreachable") ||
                         errorMsg.contains("No route to host") ||
+                        errorMsg.contains("尝试连线已失败") ||
+                        errorMsg.contains("连接尝试失败") ||
                         errorMsg.contains("connect timed out")) {
                         throw new RuntimeException("数据源网络不可达或连接超时，请检查数据源配置: " + errorMsg, e);
                     }
@@ -214,6 +221,17 @@ public class TemporaryDatasourceService {
             log.error("创建数据库连接失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建数据库连接失败: " + e.getMessage(), e);
         }
+    }
+
+    private Map<String, Object> maskSensitive(Map<String, Object> config) {
+        if (config == null || config.isEmpty()) {
+            return config;
+        }
+        Map<String, Object> masked = new HashMap<>(config);
+        if (masked.containsKey("password")) {
+            masked.put("password", "******");
+        }
+        return masked;
     }
 
     /**
@@ -460,6 +478,12 @@ public class TemporaryDatasourceService {
             throw new IllegalArgumentException("不支持的数据源类型: " + datasourceType);
         }
         
+        // OpenGauss 场景保持 jdbc:opengauss 前缀，底层由兼容驱动做协议转换
+        if (DatabaseType.OpenGauss == dbType) {
+            String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
+            return "jdbc:opengauss://" + host + ":" + port + "/" + databasePart;
+        }
+
         // 使用Anyline的url()方法获取URL模板，然后替换占位符
         // Anyline模板格式: jdbc:postgresql://{host}:{port:5432}/{database}
         String urlTemplate = dbType.url();
@@ -487,6 +511,9 @@ public class TemporaryDatasourceService {
      */
     public String getDriverByType(String datasourceType) {
         DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+        if (DatabaseType.OpenGauss == dbType) {
+            return OpenGaussCompatibleDriver.class.getName();
+        }
         return dbType.driver();
     }
 
@@ -523,6 +550,14 @@ public class TemporaryDatasourceService {
             log.warn("无法识别的数据库类型[{}]，使用默认测试查询SELECT 1", datasourceType);
             return "SELECT 1";
         }
+    }
+
+    private boolean isOpenGaussType(String datasourceType) {
+        if (datasourceType == null) {
+            return false;
+        }
+        String normalized = datasourceType.replace("_", "").replace("-", "").trim().toUpperCase();
+        return "OPENGAUSS".equals(normalized);
     }
 
 }

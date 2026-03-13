@@ -15,3 +15,11 @@
   - 其他：Swagger (SpringDoc), Spring Security (如需权限控制)
   - 日志：SLF4J + Logback
   - 测试：JUnit 5, Mockito
+
+## 三、构建与运行约定
+
+- 本地开发默认跳过测试：所有 Maven 构建一律加 `-DskipTests`
+- 本地验证优先“直接运行服务”而非跑测试，例如：
+  - 运行主服务：`mvn -q -pl :onebase-server -am -DskipTests spring-boot:run`
+  - 或仅编译：`mvn -q -DskipTests -pl <模块坐标> -am compile`
+- 仅在需要时（如 CI/代码合并）再执行单元测试与覆盖率校验

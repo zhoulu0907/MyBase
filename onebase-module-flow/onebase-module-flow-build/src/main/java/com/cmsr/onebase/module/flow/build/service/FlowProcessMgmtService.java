@@ -71,7 +71,6 @@ public interface FlowProcessMgmtService {
      */
     void disableFlowProcess(Long id);
 
-
     /**
      * 删除流程
      *
@@ -86,5 +85,11 @@ public interface FlowProcessMgmtService {
      */
     void batchDelete(List<Long> ids);
 
-
+    /**
+     * 根据 processId 查询流程定义 JSON
+     *
+     * @param processId 流程ID
+     * @return 流程定义 JSON 字符串
+     */
+    String getProcessDefinitionByProcessId(Long processId);
 }

@@ -48,7 +48,7 @@ public class JsonGraphMapper {
                     }
                 }
             }
-            log.debug("初始化节点数据类型映射成功");
+            log.debug("初始化节点数据类型映射成功，注册的节点类型: {}", TYPE_CLASS_MAP.keySet());
         } catch (Exception e) {
             log.error("初始化节点数据类型映射失败", e);
         }
@@ -79,15 +79,18 @@ public class JsonGraphMapper {
         private NodeData getNodeDataByType(JsonNode dataNode, String type, ObjectMapper mapper)
                 throws com.fasterxml.jackson.core.JsonProcessingException {
             Class<? extends NodeData> dataClass = TYPE_CLASS_MAP.get(type);
-            log.debug("获取到节点类型:{}, 节点内容: {}", type, dataNode.toString());
+            log.debug("获取到节点类型:{}, 映射到类:{}", type,
+                    dataClass != null ? dataClass.getSimpleName() : "null");
+
             if (dataClass != null) {
                 return mapper.treeToValue(dataNode, dataClass);
             }
-            // 兼容性处理：connectr 类型映射到 CommonNodeData
+            // 兼容性处理：connector 类型映射到 CommonNodeData
             if ("connector".equals(type)) {
                 return mapper.treeToValue(dataNode,
                         com.cmsr.onebase.module.flow.context.graph.nodes.CommonNodeData.class);
             }
+            log.warn("未知节点类型:{}, 使用基类NodeData", type);
             return mapper.treeToValue(dataNode, NodeData.class);
         }
     }

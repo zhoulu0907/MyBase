@@ -3,12 +3,14 @@ package com.cmsr.onebase.module.system.build.controller.oauth2;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2OpenService;
+import com.cmsr.onebase.module.system.vo.user.OAuth2UserInfoRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -56,7 +58,7 @@ public class OAuth2OpenController {
      *
      * 注意，默认需要传递 client_id + client_secret 参数
      */
-    @PostMapping("/token")
+    @PostMapping("/authorize/token")
     @PermitAll
     @ApiSignIgnore
     @Operation(summary = "获得访问令牌", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
@@ -82,7 +84,7 @@ public class OAuth2OpenController {
         return oauth2OpenService.postAccessToken(request, grantType, code, redirectUri, state, username, password, scope, refreshToken, RunModeEnum.BUILD.getValue());
     }
 
-    @PostMapping("/revoke-token")
+    @PostMapping("/authorize/revoke-token")
     @PermitAll
     @Operation(summary = "删除访问令牌")
     @Parameter(name = "token", required = true, description = "访问令牌", example = "biu")
@@ -94,7 +96,7 @@ public class OAuth2OpenController {
     /**
      * 对应 Spring Security OAuth 的 CheckTokenEndpoint 类的 checkToken 方法
      */
-    @PostMapping("/check-token")
+    @PostMapping("/authorize/check-token")
     @PermitAll
     @Operation(summary = "校验访问令牌")
     @Parameter(name = "token", required = true, description = "访问令牌", example = "biu")
@@ -106,10 +108,10 @@ public class OAuth2OpenController {
     /**
      * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 authorize 方法
      */
-    @GetMapping("/authorize")
+    @GetMapping("/authorize/client")
     @Operation(summary = "获得授权信息", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
     @Parameter(name = "clientId", required = true, description = "客户端编号", example = "tudou")
-    public CommonResult<OAuth2OpenAuthorizeInfoRespVO> authorize(@RequestParam("clientId") String clientId) {
+    public CommonResult<AuthorizeURIRespVO> authorize(@RequestParam("clientId") String clientId) {
         return oauth2OpenService.authorize(clientId);
     }
 
@@ -147,7 +149,8 @@ public class OAuth2OpenController {
     @Operation(summary = "获取用户信息")
     @PermitAll
     @ApiSignIgnore
-    CommonResult<UserSimpleRespVO> getUser(@RequestParam("access_token") String accessToken) {
+    @TenantIgnore
+    CommonResult<OAuth2UserInfoRespVO> getUser(@RequestParam("access_token") String accessToken) {
 
         return CommonResult.success(userService.getUserInfoByToken(accessToken));
     }

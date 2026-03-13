@@ -20,6 +20,7 @@ import com.cmsr.onebase.module.app.core.dto.resource.CreatePageSetDTO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.menu.BpmMenuEnum;
 import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
+import com.cmsr.onebase.module.app.core.enums.resource.PageTypeSetEnum;
 import com.cmsr.onebase.module.app.core.utils.MenuUtils;
 import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
 import lombok.Setter;
@@ -267,6 +268,12 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
         // 菜单类型校验
         MenuTypeEnum.validate(createReqVO.getMenuType());
         AppApplicationDO applicationDO = appCommonService.validateApplicationExist(createReqVO.getApplicationId());
+
+        if ((PageTypeSetEnum.NORMAL_FORM.getCode().equals(createReqVO.getPageSetType())
+                || PageTypeSetEnum.PROCESS_FORM.getCode().equals(createReqVO.getPageSetType()))
+                && StringUtils.isBlank(createReqVO.getEntityUuid())) {
+            throw ServiceExceptionUtil.exception(AppErrorCodeConstants.PAGE_SET_DATA_ASSET_NOT_EMPTY);
+        }
         // 创建菜单
         AppMenuDO menuDO = new AppMenuDO();
         menuDO.setMenuUuid(UuidUtils.getUuid());
@@ -288,7 +295,7 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
         createPageSetDTO.setPageSetType(createReqVO.getPageSetType());
         createPageSetDTO.setPageSetName(menuDO.getMenuName());
         createPageSetDTO.setDisplayName(menuDO.getMenuName());
-        createPageSetDTO.setMainMetadata(String.valueOf(createReqVO.getEntityUuid()));
+        createPageSetDTO.setMainMetadata(createReqVO.getEntityUuid());
         createPageSetDTO.setCreateDashboardType(createReqVO.getCreateDashboardType());
         createPageSetDTO.setDashboardId(createReqVO.getDashboardId());
         pageSetService.createPageSet(createPageSetDTO);

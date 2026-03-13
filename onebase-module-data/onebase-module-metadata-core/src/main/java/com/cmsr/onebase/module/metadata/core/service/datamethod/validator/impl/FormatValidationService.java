@@ -4,7 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
-import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import org.springframework.stereotype.Component;
 
 import java.util.logging.Logger;
@@ -20,11 +20,12 @@ import java.util.regex.Pattern;
  *
  */
 @Component
-public class FormatValidationService implements ValidationService {
+public class FormatValidationService implements PrefetchableValidationService {
 
     private static final Logger log = Logger.getLogger(FormatValidationService.class.getName());
 
     private final MetadataValidationFormatRepository formatRepository;
+    private transient Map<String, java.util.List<MetadataValidationFormatDO>> prefetched;
 
     public FormatValidationService(MetadataValidationFormatRepository formatRepository) {
         this.formatRepository = formatRepository;
@@ -37,7 +38,13 @@ public class FormatValidationService implements ValidationService {
         }
 
         // 查询格式规则
-        List<MetadataValidationFormatDO> rules = formatRepository.findByFieldUuid(fieldUuid);
+        List<MetadataValidationFormatDO> rules = null;
+        if (prefetched != null) {
+            rules = prefetched.get(fieldUuid);
+        }
+        if (rules == null) {
+            rules = formatRepository.findByFieldUuid(fieldUuid);
+        }
 
         if (rules.isEmpty()) {
             return; // 没有格式规则，跳过校验
@@ -106,5 +113,23 @@ public class FormatValidationService implements ValidationService {
     public boolean supports(String fieldType) {
         // 格式校验支持所有字段类型
         return true;
+    }
+
+    @Override
+    public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("FORMAT") : null;
+        if (m != null) {
+            this.prefetched = new java.util.HashMap<>();
+            for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
+                @SuppressWarnings("unchecked")
+                java.util.List<MetadataValidationFormatDO> list = (java.util.List<MetadataValidationFormatDO>) (java.util.List<?>) e.getValue();
+                this.prefetched.put(e.getKey(), list);
+            }
+        }
+    }
+
+    @Override
+    public void clearPrefetchedRules() {
+        this.prefetched = null;
     }
 }

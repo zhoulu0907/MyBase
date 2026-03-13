@@ -27,6 +27,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -127,7 +128,14 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     public List<Long> getVisibleMenuIds(Long userId, Long applicationId) {
         String key = CacheUtils.authHashKey(userId, applicationId);
         String field = CacheUtils.fieldForVisibleMenuIds();
-        return getFromCache(key, field, () -> doGetVisibleMenuIds(userId, applicationId));
+        return getFromCache(key, field, () -> doGetVisibleMenuIds(userId, applicationId, null ));
+    }
+
+    @Override
+    public List<Long> getVisibleMenuIds(Long userId, Long applicationId, String menuName) {
+        String key = CacheUtils.authHashKey(userId, applicationId);
+        String field = CacheUtils.fieldForVisibleMenuIds();
+        return getFromCache(key, field, () -> doGetVisibleMenuIds(userId, applicationId, menuName));
     }
 
     @Override
@@ -183,10 +191,10 @@ public class AppAuthSecurityApiImpl implements AppAuthSecurityApi {
     }
 
 
-    public List<Long> doGetVisibleMenuIds(Long userId, Long applicationId) {
+    public List<Long> doGetVisibleMenuIds(Long userId, Long applicationId, String menuName) {
         UserRoleDTO userRoleDTO = getUserRoleDTO(userId, applicationId);
-        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
-                Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()));
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndTypeAndName(applicationId,
+                Set.of(MenuTypeEnum.PAGE.getValue(), MenuTypeEnum.GROUP.getValue()), menuName);
         if (userRoleDTO.isAdminRole()) {
             return menuDOS.stream().map(AppMenuDO::getId).toList();
         }

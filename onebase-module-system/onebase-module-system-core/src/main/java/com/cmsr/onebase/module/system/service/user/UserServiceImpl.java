@@ -660,8 +660,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType) {
-        return userDataRepository.findAllByDeptIds(deptIds, userType);
+    public List<AdminUserDO> getUserListByDeptIds(Collection<Long> deptIds, Integer userType, Integer status) {
+        return userDataRepository.findAllByDeptIds(deptIds, userType, status);
     }
 
     @Override
@@ -1032,7 +1032,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 批量查询指定部门的所有用户（不过滤状态）
-        List<AdminUserDO> users = userDataRepository.findAllByDeptIds(deptIds, null);
+        List<AdminUserDO> users = userDataRepository.findAllByDeptIds(deptIds, null, null);
 
         // 按部门ID分组统计人数
         return users.stream()
@@ -1060,7 +1060,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 2. 批量查询所有相关部门的用户
-        List<AdminUserDO> allUsers = userDataRepository.findAllByDeptIds(allDeptIds, null);
+        List<AdminUserDO> allUsers = userDataRepository.findAllByDeptIds(allDeptIds, null,  null);
 
         // 3. 按部门ID分组统计直属人数
         Map<Long, Integer> directUserCountMap = allUsers.stream()
@@ -1566,13 +1566,15 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public UserSimpleRespVO getUserInfoByToken(String accessToken) {
+    public OAuth2UserInfoRespVO getUserInfoByToken(String accessToken) {
         OAuth2AccessTokenDO token = oauth2TokenService.getAccessToken(accessToken);
         if (token == null) {
             throw exception(GlobalErrorCodeConstants.UNAUTHORIZED);
         }
         AdminUserDO user = userDataRepository.getById(token.getUserId());
-        return BeanUtils.toBean(user, UserSimpleRespVO.class);
+        OAuth2UserInfoRespVO oAuth2UserInfoRespVO = BeanUtils.toBean(user, OAuth2UserInfoRespVO.class);
+        oAuth2UserInfoRespVO.setApplicationId(token.getAppId());
+        return oAuth2UserInfoRespVO;
     }
 
 }
