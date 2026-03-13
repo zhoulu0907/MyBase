@@ -620,4 +620,75 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         return result;
     }
 
+
+
+    @Override
+    public Object executeJS(String script) {
+
+        if (!StringUtils.hasText(script)) {
+            throw new IllegalArgumentException("JS不能为空");
+        }
+        // 创建GraalVM JavaScript上下文
+        Context.Builder contextBuilder = Context.newBuilder("js")
+                .allowHostAccess(HostAccess.CONSTRAINED)
+                .allowPolyglotAccess(org.graalvm.polyglot.PolyglotAccess.NONE)
+                .allowNativeAccess(false)
+                .allowCreateThread(false)
+                .allowIO(false)
+                .allowEnvironmentAccess(org.graalvm.polyglot.EnvironmentAccess.NONE)
+                // 禁用解释器模式警告
+                .option("engine.WarnInterpreterOnly", "false");
+        String parameters = "";
+        try (Context context = contextBuilder.build()) {
+            // 设置执行超时时间
+            if (properties.getTimeoutMs() > 0) {
+                context.enter();
+                try {
+                    // 执行JS
+                    Value formulaResult = context.eval("js", script);
+                    return convertResult(formulaResult);
+                } finally {
+                    context.leave();
+                }
+            } else {
+                throw new IllegalStateException("超时时间配置无效");
+            }
+        } catch (PolyglotException e) {
+            if (e.isSyntaxError()) {
+                log.error("公式执行异常，SyntaxError，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_SYNTAX_ERROR);
+            } else if (e.isGuestException()) {
+                log.error("公式执行异常，GuestException，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_GUEST_EXCEPTION);
+            } else if (e.isHostException()) {
+                log.error("公式执行异常，HostException，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_HOST_EXCEPTION);
+            } else if (e.isCancelled()) {
+                log.error("公式执行异常，Cancelled，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_IS_CANCELLED);
+            } else if (e.isExit()) {
+                log.error("公式执行异常，Exit，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_ISEXIT_ERROR);
+            } else if (e.isIncompleteSource()) {
+                log.error("公式执行异常，IncompleteSource，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_INCOMPLETESOURCE_ERROR);
+            } else if (e.isInternalError()) {
+                log.error("公式执行异常，InternalError，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_INTERNAL_ERROR);
+            } else if (e.isInterrupted()) {
+                log.error("公式执行异常，Interrupted，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_INTERRUPTED_ERROR);
+            } else if (e.isResourceExhausted()) {
+                log.error("公式执行异常，ResourceExhausted，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_RESOURCEEXHAUSTED_ERROR);
+            } else  {
+                log.error("公式执行异常，其他异常 PolyglotException，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+                throw exception(FORMULA_OTHER_ERROR);
+            }
+        } catch (Exception e) {
+            log.error("公式执行异常，其他异常 Exception，公式：{}, 参数：{},错误：{}", script, parameters, e.getMessage());
+            throw exception(FORMULA_OTHER_ERROR);
+        }
+    }
+
 }
