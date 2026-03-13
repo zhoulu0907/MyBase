@@ -170,7 +170,12 @@ public class TemporaryDatasourceService {
                     log.info("数据源连接测试成功");
                 }
 
-                AnylineService<?> service = ServiceProxy.temporary(dataSource);
+                AnylineService<?> service;
+                if (isOpenGaussType(datasourceType)) {
+                    service = ServiceProxy.temporary(dataSource, DatabaseType.OpenGauss);
+                } else {
+                    service = ServiceProxy.temporary(dataSource);
+                }
 
                 // 缓存创建的服务和数据源
                 serviceCache.put(cacheKey, service);
@@ -545,6 +550,14 @@ public class TemporaryDatasourceService {
             log.warn("无法识别的数据库类型[{}]，使用默认测试查询SELECT 1", datasourceType);
             return "SELECT 1";
         }
+    }
+
+    private boolean isOpenGaussType(String datasourceType) {
+        if (datasourceType == null) {
+            return false;
+        }
+        String normalized = datasourceType.replace("_", "").replace("-", "").trim().toUpperCase();
+        return "OPENGAUSS".equals(normalized);
     }
 
 }
