@@ -2119,8 +2119,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 String datasourceType = datasource.getDatasourceType();
                 DatabaseType dbType = DatabaseType.valueOf(datasourceType);
 
-                if (dbType == DatabaseType.PostgreSQL || dbType == DatabaseType.KingBase) {
-                    // PostgreSQL/KingBase：使用手动 DDL（解决保留字和类型兼容性问题）
+                if (useCustomPgCompatibleDdl(dbType)) {
+                    // PostgreSQL/OpenGauss/KingBase：使用手动 DDL（解决保留字和类型兼容性问题）
                     String ddl = generateAddColumnDDL(tableName, field);
                     AnylineDdlHelper.executeDDL(service, ddl);
                     AnylineDdlHelper.clearMetadataCache();
@@ -2362,7 +2362,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 String oldUnquoted = oldName == null ? null : oldName.replace("\"", "");
                 String newUnquoted = newName == null ? null : newName.replace("\"", "");
 
-                if (dbType == DatabaseType.PostgreSQL || dbType == DatabaseType.KingBase) {
+                if (useCustomPgCompatibleDdl(dbType)) {
                     String ddl = "ALTER TABLE \"" + tableName + "\" RENAME COLUMN \"" + oldUnquoted + "\" TO \"" + newUnquoted + "\";";
                     AnylineDdlHelper.executeDDL(service, ddl);
                     AnylineDdlHelper.clearMetadataCache();
@@ -2409,7 +2409,7 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     String datasourceType = datasource.getDatasourceType();
                     DatabaseType dbType = DatabaseType.valueOf(datasourceType);
                     String unquoted = fieldName == null ? null : fieldName.replace("\"", "");
-                    if (dbType == DatabaseType.PostgreSQL || dbType == DatabaseType.KingBase) {
+                    if (useCustomPgCompatibleDdl(dbType)) {
                         String ddl = "ALTER TABLE \"" + tableName + "\" DROP COLUMN \"" + unquoted + "\";";
                         AnylineDdlHelper.executeDDL(service, ddl);
                         AnylineDdlHelper.clearMetadataCache();
@@ -2464,6 +2464,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
         }
 
         return ddl.toString();
+    }
+
+    private boolean useCustomPgCompatibleDdl(DatabaseType dbType) {
+        return dbType == DatabaseType.PostgreSQL
+                || dbType == DatabaseType.OpenGauss
+                || dbType == DatabaseType.KingBase;
     }
 
     /**

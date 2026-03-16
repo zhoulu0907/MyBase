@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.flow.core.flow;
 
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartDateFieldNodeData;
 import com.cmsr.onebase.module.flow.context.graph.nodes.start.StartTimeNodeData;
 import com.cmsr.onebase.module.flow.context.table.RowData;
@@ -74,10 +75,12 @@ public class FlowRemoteCallExecutor {
         executorInput.setTriggerUserId(flowProcessDO.getCreator());
         executorInput.setInputParams(inputParams);
         try {
-            //todo 忽略租户条件，等待删除
-            TenantContextHolder.setIgnore(true);
-            Long userDeptId = flowSystemProvider.findUserDeptId(flowProcessDO.getCreator());
-            executorInput.setTriggerUserDeptId(userDeptId);
+//            //todo 忽略租户条件，等待删除
+//            TenantContextHolder.setIgnore(true);
+            TenantUtils.execute(flowProcessDO.getTenantId(), () -> {
+                Long userDeptId = flowSystemProvider.findUserDeptId(flowProcessDO.getCreator());
+                executorInput.setTriggerUserDeptId(userDeptId);
+            });
         } catch (Exception e) {
             log.warn("获取用户部门信息异常：{}", e.getMessage(), e);
         }

@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.Dat
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceTestConnectionRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.DatasourceTypeRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.datasource.vo.TableInfoRespVO;
+import com.cmsr.onebase.module.metadata.core.dal.database.OpenGaussCompatibleDriver;
 import com.cmsr.onebase.module.metadata.core.dal.database.TemporaryDatasourceService;
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.ColumnQueryVO;
 import com.cmsr.onebase.module.metadata.build.service.datasource.vo.TableQueryVO;
@@ -85,9 +86,10 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
 
     @Override
     public List<DatasourceTypeRespVO> getDatasourceTypes() {
-        // 定义支持的数据库类型：PostgreSQL、达梦、人大金仓
+        // 定义支持的数据库类型：PostgreSQL、OpenGauss、达梦、人大金仓
         DatabaseType[] supportedTypes = {
                 DatabaseType.PostgreSQL,
+            DatabaseType.OpenGauss,
                 DatabaseType.DM,
                 DatabaseType.KingBase
         };
@@ -110,7 +112,6 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
             throw exception(DATASOURCE_NOT_EXISTS);
         }
 
-        // 创建临时数据源连接
         AnylineService<?> temporaryService = temporaryDatasourceService.createTemporaryService(datasource);
 
         // 获取所有表信息
@@ -651,7 +652,12 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
             DataSource dataSource = DataSourceUtil.build(config);
 
             // 创建临时的 AnylineService 来测试连接
-            AnylineService<?> temporaryService = ServiceProxy.temporary(dataSource);
+            AnylineService<?> temporaryService;
+            if (isOpenGaussType(datasourceType)) {
+                temporaryService = ServiceProxy.temporary(dataSource, DatabaseType.OpenGauss);
+            } else {
+                temporaryService = ServiceProxy.temporary(dataSource);
+            }
 
             // 使用 query 方法执行查询语句，避免框架的租户、软删除等特性影响
             // 根据数据库类型使用不同的测试查询
@@ -676,7 +682,18 @@ public class MetadataDatasourceBuildServiceImpl implements MetadataDatasourceBui
      */
     private String getDriverByType(String datasourceType) {
         DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+        if (DatabaseType.OpenGauss == dbType) {
+            return OpenGaussCompatibleDriver.class.getName();
+        }
         return dbType.driver();
+    }
+
+    private boolean isOpenGaussType(String datasourceType) {
+        if (datasourceType == null) {
+            return false;
+        }
+        String normalized = datasourceType.replace("_", "").replace("-", "").trim().toUpperCase();
+        return "OPENGAUSS".equals(normalized);
     }
 
     /**

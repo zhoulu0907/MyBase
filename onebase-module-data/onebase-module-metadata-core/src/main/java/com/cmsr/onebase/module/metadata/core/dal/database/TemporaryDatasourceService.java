@@ -170,7 +170,12 @@ public class TemporaryDatasourceService {
                     log.info("数据源连接测试成功");
                 }
 
-                AnylineService<?> service = ServiceProxy.temporary(dataSource);
+                AnylineService<?> service;
+                if (isOpenGaussType(datasourceType)) {
+                    service = ServiceProxy.temporary(dataSource, DatabaseType.OpenGauss);
+                } else {
+                    service = ServiceProxy.temporary(dataSource);
+                }
 
                 // 缓存创建的服务和数据源
                 serviceCache.put(cacheKey, service);
@@ -473,6 +478,12 @@ public class TemporaryDatasourceService {
             throw new IllegalArgumentException("不支持的数据源类型: " + datasourceType);
         }
         
+        // OpenGauss 场景保持 jdbc:opengauss 前缀，底层由兼容驱动做协议转换
+        if (DatabaseType.OpenGauss == dbType) {
+            String databasePart = (database != null && !database.trim().isEmpty()) ? database : "";
+            return "jdbc:opengauss://" + host + ":" + port + "/" + databasePart;
+        }
+
         // 使用Anyline的url()方法获取URL模板，然后替换占位符
         // Anyline模板格式: jdbc:postgresql://{host}:{port:5432}/{database}
         String urlTemplate = dbType.url();
@@ -500,6 +511,9 @@ public class TemporaryDatasourceService {
      */
     public String getDriverByType(String datasourceType) {
         DatabaseType dbType = DatabaseType.valueOf(datasourceType);
+        if (DatabaseType.OpenGauss == dbType) {
+            return OpenGaussCompatibleDriver.class.getName();
+        }
         return dbType.driver();
     }
 
@@ -536,6 +550,14 @@ public class TemporaryDatasourceService {
             log.warn("无法识别的数据库类型[{}]，使用默认测试查询SELECT 1", datasourceType);
             return "SELECT 1";
         }
+    }
+
+    private boolean isOpenGaussType(String datasourceType) {
+        if (datasourceType == null) {
+            return false;
+        }
+        String normalized = datasourceType.replace("_", "").replace("-", "").trim().toUpperCase();
+        return "OPENGAUSS".equals(normalized);
     }
 
 }

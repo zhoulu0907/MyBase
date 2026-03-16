@@ -1,11 +1,11 @@
 package com.cmsr.onebase.module.bpm.build.vo.design.strategy;
 
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dto.node.ApproverNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.NodePermFlagDTO;
 import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.ApprovalModeEnum;
-import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.NodeJson;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +172,7 @@ public class NodeVOStrategyManager {
 
             // 设置会签参数，默认为或签
             if (Objects.equals(approvalMode, ApprovalModeEnum.COUNTER_SIGN.getCode())) {
-                nodeJson.setNodeRatio(new BigDecimal("100"));
+                nodeJson.setNodeRatio("100");
             }
         }
     }

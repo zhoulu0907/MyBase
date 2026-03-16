@@ -66,7 +66,7 @@
         'user' AS member_type
         from
         app_auth_role_user aaru
-        left join system_users u on aaru.user_id = u.id and u.deleted = 0
+        left join system_users u on aaru.user_id = u.id and u.deleted = 0 and u.status = 1
         left join system_dept d on u.dept_id = d.id
         where
         aaru.role_id = #{roleId}

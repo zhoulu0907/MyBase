@@ -613,7 +613,9 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
             int dotIdx = key.indexOf('.', 1); // 从$之后开始找.
             if (dotIdx > 0) {
                 // 提取字段名，用于替换
-                result = result.replace(key, val);
+                // 使用 toJsLiteral 方法处理值，确保字符串类型被正确转义并加上引号
+                String jsValue = toJsLiteral(valObj).trim();
+                result = result.replace(key, jsValue);
             }
         }
 

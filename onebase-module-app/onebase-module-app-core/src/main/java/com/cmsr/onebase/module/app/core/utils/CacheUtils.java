@@ -13,7 +13,7 @@ public class CacheUtils {
     public static Kryo5Codec KRYO5_CODEC = new Kryo5Codec();
 
     public static Long CACHE_TTL = 60L;
-    public static TimeUnit CACHE_TTL_UNIT = TimeUnit.MINUTES;
+    public static TimeUnit CACHE_TTL_UNIT = TimeUnit.SECONDS;
 
     public static String authHashKey(Long userId, Long applicationId) {
         return "app:auth:" + userId + ":" + applicationId;

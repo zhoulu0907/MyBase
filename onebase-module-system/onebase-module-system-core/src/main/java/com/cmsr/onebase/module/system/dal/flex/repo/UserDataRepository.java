@@ -118,11 +118,15 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @param deptIds 部门ID列表
      * @return 用户列表
      */
-    public List<AdminUserDO> findAllByDeptIds(Collection<Long> deptIds, Integer userType) {
+    public List<AdminUserDO> findAllByDeptIds(Collection<Long> deptIds, Integer userType, Integer status) {
         if (deptIds == null || deptIds.isEmpty()) {
             return Collections.emptyList();
         }
-        return list(buildQueryWrapperByType(userType).in(DEPT_ID, deptIds));
+        QueryWrapper queryWrapper = buildQueryWrapperByType(userType).in(DEPT_ID, deptIds);
+        if (status != null){
+            queryWrapper.eq(AdminUserDO.STATUS, status);
+        }
+        return list(queryWrapper);
     }
 
     public List<AdminUserDO> getUserByCorpId(Long corpId){
@@ -139,7 +143,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 用户列表
      */
     public List<AdminUserDO> findNoneDeptUserList(Integer userType) {
-        return list(buildQueryWrapperByType(userType).isNull(DEPT_ID));
+        return list(buildQueryWrapperByType(userType).isNull(DEPT_ID).eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
     }
 
     /**
@@ -149,7 +153,7 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
      * @return 用户列表
      */
     public List<AdminUserDO> findAllByNicknameLike(String nickname, Integer userType) {
-        return list(buildQueryWrapperByType(userType).like(NICKNAME, nickname));
+        return list(buildQueryWrapperByType(userType).like(NICKNAME, nickname).eq(AdminUserDO.STATUS, UserStatusEnum.NORMAL.getStatus()));
     }
 
     /**
