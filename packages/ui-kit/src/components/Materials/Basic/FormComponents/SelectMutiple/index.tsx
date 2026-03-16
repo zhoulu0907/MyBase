@@ -33,6 +33,21 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
     setOptions(newOptions);
   };
 
+  const getTagColor = (ele: any, isBackground?: boolean) => {
+    const curTag = options.find((e) => e.value === ele || e.value === ele?.id || e.id === ele?.id || e.id === ele)
+    if (isBackground) {
+      if (curTag?.colorType) {
+        return `${curTag.colorType}11`;
+      }
+      return 'var(--color-fill-2)'
+    }
+
+    if (curTag?.colorType) {
+      return curTag.colorType;
+    }
+    return 'var(--color-text-1)'
+  }
+
   return (
     <div className="formWrapper">
       <Form.Item
@@ -42,7 +57,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
         }
         field={fieldId}
         layout={layout}
-        tooltip={ tooltip && {
+        tooltip={tooltip && {
           content: tooltip,
           position: tooltipPosition
         }}
@@ -65,7 +80,7 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
             {fieldValue &&
               Array.isArray(fieldValue) &&
               fieldValue.map((ele: any, index: number) => (
-                <Tag key={index} style={{ marginBottom: '0' }}>
+                <Tag key={index} style={{ marginBottom: '0', color: getTagColor(ele), backgroundColor: getTagColor(ele, true) }}>
                   {ele?.name || options.find((e) => e.value === ele || e.value === ele?.id || e.id === ele?.id || e.id === ele)?.label || '--'}
                 </Tag>
               ))}

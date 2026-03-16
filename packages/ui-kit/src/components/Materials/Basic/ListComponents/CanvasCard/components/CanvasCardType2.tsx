@@ -1,5 +1,6 @@
 import { Card, Tag, Typography, Avatar } from '@arco-design/web-react';
 import { memo, useEffect, useState } from 'react';
+import dayjs from 'dayjs';
 import { attachmentDownload, menuSignal } from '@onebase/app';
 import type { XCanvasCardConfig } from '../schema';
 import '../index.css';
@@ -27,12 +28,21 @@ const CanvasCardType2 = memo((props: CanvasCardType2Props) => {
   const { status, runtime = true, record, displayFields, fieldList = [], tableName } = props;
   const { curMenu } = menuSignal;
   const [avatarUrl, setAvatarUrl] = useState(runtime ? defaultImage : PREVIEW_IMAGE);
+
+  // 粗略匹配 ISO 8601 格式（如 "2026-03-04T15:09:03.156612"）
+  function isISODateString(value: string) {
+    if (typeof value !== 'string') return false;
+    return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value);
+  }
   
   const getFieldValue = (fieldName?: string): string => {
     if (!fieldName || !record) return '';
     const value = record[fieldName];
     if (value === null || value === undefined) return '';
     if (typeof value === 'object') return (value as any).name || '';
+    if (typeof value === 'string' && isISODateString(value)) {
+      return dayjs(value).format('YYYY-MM-DD HH:mm:ss');
+    }
     return String(value);
   };
 

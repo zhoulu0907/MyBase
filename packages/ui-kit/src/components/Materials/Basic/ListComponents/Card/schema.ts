@@ -12,6 +12,7 @@ import type {
   IDataFilterConfigType,
   ICoverImageConfigType,
   IGroupFilterConfigType,
+  IPaginationConfigType,
   IStatusConfigType,
   ILayoutConfigType,
   IWidthConfigType
@@ -25,6 +26,7 @@ import {
   dataFilterConfig,
   coverImageConfig,
   groupFilterConfig,
+  paginationConfig,
   statusConfig,
   layoutConfig,
   cardWidthConfig,
@@ -32,12 +34,15 @@ import {
   type ICommonBaseType,
   type TStatusSelectKeyType,
   type TLayoutSelectKeyType,
+  type TPagePositionSelectKeyType,
   type TWidthSelectKeyType,
   type TFillSelectKeyType
 } from '../../../common';
 import {
   LAYOUT_OPTIONS,
   LAYOUT_VALUES,
+  PAGINATION_POSITION_OPTIONS,
+  PAGINATION_POSITION_VALUES,
   STATUS_OPTIONS,
   STATUS_VALUES,
   WIDTH_OPTIONS,
@@ -60,6 +65,7 @@ export type TXCardEditData = Array<
   | IDataFilterConfigType
   | ICoverImageConfigType
   | IGroupFilterConfigType
+  | IPaginationConfigType
   | IStatusConfigType<TStatusSelectKeyType>
   | ILayoutConfigType<TLayoutSelectKeyType>
   | IWidthConfigType<TWidthSelectKeyType>
@@ -119,6 +125,15 @@ export interface XCardConfig extends ICommonBaseType {
   groupFilter?: TTextDefaultType;
 
   /**
+   * 分页  开启分页 分页数 分页位置
+   */
+  paginationConfig: {
+    display: TBooleanDefaultType;
+    pageSize: TNumberDefaultType;
+    pagePosition: TSelectDefaultType<TPagePositionSelectKeyType>;
+  }
+
+  /**
    * 显示状态：可用、隐藏、只读
    * 可选值: 'default' | 'hidden' | 'readonly'
    */
@@ -176,6 +191,8 @@ const XCard: XCardSchema = {
     dataFilterConfig,
     // 绑定分组筛选
     groupFilterConfig,
+    // 分页配置
+    paginationConfig,
     // 显示状态
     statusConfig,
     // 字段布局方式
@@ -208,11 +225,16 @@ const XCard: XCardSchema = {
     sortBy: [],
     filterCondition: [],
     groupFilter: '',
+    paginationConfig: {
+      display: true,
+      pageSize: 20,
+      pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR]
+    },
     status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
     layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
     width: WIDTH_VALUES[WIDTH_OPTIONS.FULL],
     cardWidth: WIDTH_VALUES[WIDTH_OPTIONS.QUARTER],
-    advancedRowRedirect: false,
+    advancedRowRedirect: true,
     redirectPageId: '',
     redirectMethod: RedirectMethod.DRAWER,
     // 操作按钮

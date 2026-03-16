@@ -1496,7 +1496,7 @@ packages:
       '@arco-design/web-react': ^2.66.10
 
   '@arco-themes/react-tiangong@0.0.1':
-    resolution: {integrity: sha512-XbGM5ZfaOb/3NcNQE+aB73sPgWlYp0KStWMyyggVNuEI09KowMs7Re0Lm0bbiriIkAhP0rLDc4t+GRuo9CDuKg==, tarball: https://registry.npmjs.org/@arco-themes/react-tiangong/-/react-tiangong-0.0.1.tgz}
+    resolution: {integrity: sha512-XbGM5ZfaOb/3NcNQE+aB73sPgWlYp0KStWMyyggVNuEI09KowMs7Re0Lm0bbiriIkAhP0rLDc4t+GRuo9CDuKg==}
     peerDependencies:
       '@arco-design/web-react': ^2.66.10
 

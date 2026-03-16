@@ -8,6 +8,7 @@ export interface WorkbenchComponentOperation {
   copy: (comp: GridItem, originId: string) => void;
   delete: (componentId: string) => void;
   widthChange: (componentId: string, newWidth: string) => void;
+  heightChange: (componentId: string, rowSpan: number) => void;
   select: (componentId: string, component: GridItem) => void;
 }
 
@@ -20,6 +21,8 @@ export interface WorkbenchComponentSchema {
     cpName?: string;
     status?: string;
     width?: string;
+    rowSpan?: number;
+    gridLayout?: { row: number; column: number; rowSpan: number; colSpan: number };
   };
   editData?: unknown;
 }

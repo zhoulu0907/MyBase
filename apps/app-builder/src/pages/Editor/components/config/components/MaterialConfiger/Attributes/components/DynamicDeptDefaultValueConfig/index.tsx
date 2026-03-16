@@ -6,6 +6,7 @@ import { listToTree } from '@onebase/common';
 import { getPopupContainer, CONFIG_TYPES, DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS } from '@onebase/ui-kit';
 import { registerConfigRenderer } from '../../registry';
 import { IconLaunch } from '@arco-design/web-react/icon';
+import styles from '../../index.module.less';
 
 export interface DynamicDeptDefaultValueConfigProps {
   handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
@@ -28,7 +29,8 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
   const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
   const [defaultValueConfig, setDefaultValueConfig] = useState({
     type: '',
-    formulaValue: undefined
+    formulaValue: undefined,
+    formattedFormula: ''
   });
 
   // dept tree
@@ -116,14 +118,14 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
     setDefaultValue(value);
   };
 
-  const handleFormulaValueChange = (key: string, value: boolean | string | number) => {
-    const newConfig = { ...configs[defaultValueConfigKey], [key]: value };
-    handlePropsChange(defaultValueConfigKey, newConfig);
-  };
-
-  const handleFormulaConfirm = (formulaData: any) => {
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string) => {
     setFormulaVisible(false);
-    handleFormulaValueChange('formulaValue', formulaData);
+    const newConfig = {
+      ...configs[defaultValueConfigKey],
+      formulaValue: formulaData,
+      formattedFormula: formattedFormula
+    };
+    handlePropsChange(defaultValueConfigKey, newConfig);
   };
 
   return (
@@ -161,10 +163,10 @@ const DynamicDeptDefaultValueConfig: React.FC<DynamicDeptDefaultValueConfigProps
 
       {defaultValueConfig.type === DEFAULT_VALUE_TYPES.FORMULA && (
         <FormItem>
-          <Button long onClick={() => setFormulaVisible(true)}>
+          <Button long onClick={() => setFormulaVisible(true)} className={styles.formulaBtn}>
             {defaultValueConfig?.formulaValue ? (
               <>
-                <span>已设置公式</span>
+                <span>{defaultValueConfig?.formattedFormula}</span>
                 <IconLaunch />
               </>
             ) : (

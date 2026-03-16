@@ -59,7 +59,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
         value = Number(value);
         result = value;
       }
-      if (showPrecision && value) {
+      // 确保value为0时可以被处理
+      if (showPrecision && value !== undefined) {
         result = Number(value).toFixed(precision);
       }
       if (useThousandsSeparator) {

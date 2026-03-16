@@ -514,9 +514,13 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
                                                   field={item.field + '.value'}
                                                   rules={required ? addRules.formula : []}
                                                 >
-                                                  <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
+                                                  <Button
+                                                    onClick={() => openFormulaEditor(item.field + '.value')}
+                                                    long
+                                                    className={styles.formulaBtn}
+                                                  >
                                                     {form.getFieldValue(item.field + '.value')
-                                                      ? '已设置公式'
+                                                      ? form.getFieldValue(item.field + '.value.formula')
                                                       : 'ƒx 编辑公式'}
                                                     {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
                                                   </Button>

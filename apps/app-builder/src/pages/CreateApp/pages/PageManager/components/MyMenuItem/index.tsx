@@ -58,7 +58,7 @@ interface MenuItemProps {
   triggerRename?: () => void;
   triggerCopy?: () => void;
   triggerHide?: (menuID: string, isVisible: number, platform: 'pc' | 'mobile') => void;
-  triggerDelete?: (menuID: string) => void;
+  triggerDelete?: (menuID: string, menuName: string) => void;
   maxWidth: number;
   renameForm: FormInstance;
   copyForm?: FormInstance;
@@ -228,7 +228,7 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           key="delete"
           onClick={(e) => {
             e.stopPropagation();
-            triggerDelete(menuID);
+            triggerDelete(menuID, menuName);
           }}
           style={{ color: 'red' }}
         >

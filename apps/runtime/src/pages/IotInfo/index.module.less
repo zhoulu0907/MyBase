@@ -1,5 +1,4 @@
 .iotInfoPage {
-  padding: 20px;
   background: #f5f5f5;
   box-sizing: border-box;
 }
@@ -29,7 +28,7 @@
     margin-bottom: 20px;
     grid-template-columns: repeat(2, 1fr);
 
-    @media (min-width: 800px) {
+    @media (min-width: 300px) {
       grid-template-columns: repeat(5, 1fr);
     }
   }
@@ -74,6 +73,10 @@
   &.warning {
     color: #faad14;
   }
+}
+
+.smallValue {
+  font-size: 14px;
 }
 
 .unit {

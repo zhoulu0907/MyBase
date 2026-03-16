@@ -1,6 +1,7 @@
 import launchSVG from '@/assets/images/launch.svg';
 import appExportSVG from '@/assets/images/appExport.svg';
 import appUpdateSVG from '@/assets/images/appUpdate.svg';
+import appConfigSVG from '@/assets/images/appRelease/base_setting.svg';
 import DynamicIcon from '@/components/DynamicIcon';
 import { Avatar, Divider, Dropdown, Menu, Space, Tag, Tooltip, Typography } from '@arco-design/web-react';
 import { IconDelete, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
@@ -15,6 +16,7 @@ import type { developUser } from '@onebase/app/src/types';
 import { hasPermission, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import AppExportModal from '@/components/AppExportModal';
 import AppImportModal from '@/components/AppImportModal';
+import EditAppModal from '@/pages/CreateApp/pages/AppSetting/components/BasicSetting/components/EditAppModal';
 
 const AvatarGroup = Avatar.Group;
 
@@ -69,9 +71,23 @@ const AppCard: React.FC<AppCardProps> = ({
   const [exportVisible, setExportVisible] = useState(false);
   // 应用导入/更新弹窗
   const [importVisible, setImportVisible] = useState(false);
+  // 基础信息编辑弹窗
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   const menu = (
     <Menu style={{ marginRight: '10px' }}>
+      <Menu.Item
+        key="0"
+        onClick={(e) => {
+          e.stopPropagation();
+          setEditModalVisible(true);
+        }}
+      >
+        <div className={styles.menuItem}>
+          <img src={appConfigSVG} alt="应用配置" style={{ marginRight: 4, width: 16 }} />
+          应用配置
+        </div>
+      </Menu.Item>
       <Menu.Item
         key="1"
         onClick={(e) => {
@@ -286,6 +302,12 @@ const AppCard: React.FC<AppCardProps> = ({
             onUpdate();
           }
         }}
+      />
+      <EditAppModal
+        editModalVisible={editModalVisible}
+        setEditModalVisible={setEditModalVisible}
+        appData={item}
+        onUpdate={onUpdate}
       />
     </div>
   );

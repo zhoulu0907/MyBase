@@ -1,9 +1,12 @@
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
 import { Button, Input, Modal, Select, Switch, Table, Tabs, Message } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
+import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
 import React from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import TriggerEditor from '../../triggerEditor';
 import styles from './index.module.less';
 
@@ -73,6 +76,11 @@ const FlowEditorPage: React.FC = () => {
     if (kind === 'input') setDraftInputs(updater);
     else setDraftOutputs(updater);
   };
+  const { curAppId } = useAppStore();
+  const navigate = useNavigate();
+  const { tenantId } = useParams();
+  const [searchParams] = useSearchParams();
+  const processName = searchParams.get('processName') ? decodeURIComponent(searchParams.get('processName')!) : '';
 
   const dealProcessDefinition = (newNodes: any[]): any[] => {
     const processDefinitionJson = newNodes.map((item) => {
@@ -151,9 +159,17 @@ const FlowEditorPage: React.FC = () => {
     }
   };
 
+  const clickBack = () => {
+    navigate(`/onebase/${tenantId}/home/create-app/integrated-management/flow-management?appId=${curAppId}`);
+  };
+
   return (
     <div className={styles.flowEditorPage}>
       <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <IconArrowLeft onClick={clickBack} />
+          <span>{processName}</span>
+        </div>
         <Button type="primary" onClick={handleSaveAndRelease}>
           保存
         </Button>

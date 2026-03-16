@@ -39,7 +39,7 @@ const XChatbot: XChatbotSchema = {
   config: {
     ...workbenchBaseDefault,
     componentName: 'Chatbot',
-    iframeUrl: '',
+    iframeUrl: 'http://10.11.112.38:9500/bote/#/driver/bot?tenantId=0&botId=1338078781184737280&modeType=single&token=4f0fc76675484ad8a2ab29941debf7f4&pattern=S',
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
     floatingConfig: {
       right: 24,

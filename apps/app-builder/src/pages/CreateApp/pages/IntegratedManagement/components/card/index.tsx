@@ -54,7 +54,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
       <div
         className={styles.cardHeader}
         onClick={() => {
-          toFlowEditor(data.applicationId, data.id);
+          toFlowEditor(data.applicationId, data.id, data.processName);
         }}
       >
         <div className={styles.cardHeaderIcon}>
@@ -82,7 +82,7 @@ const FlowCard: React.FC<FlowCardProps> = ({ data, handleEdit, handleDelete, ref
       <div
         className={styles.cardBody}
         onClick={() => {
-          toFlowEditor(data.applicationId, data.id);
+          toFlowEditor(data.applicationId, data.id, data.processName);
         }}
       >
         <div className={styles.cardBodyRow}>

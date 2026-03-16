@@ -21,7 +21,7 @@ import {
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType } from '../../core/types';
 import { IDataConfigConfigType, IThemeConfigType, INumberConfigType } from '../../core/types';
-import { labelNameConfig, themeConfig, dataConfigConfig, dataCountConfig } from '../../config/commonConfig';
+import { labelNameConfig, themeConfig, dataConfigConfig, dataCountConfig, showMoreLinkConfig, showMoreConfig } from '../../config/commonConfig';
 
 // 待办事项数据结构
 export interface ITodoItem {
@@ -108,6 +108,8 @@ export interface XTodoListConfig extends ICommonBaseWorkbenchType {
     showHandled: boolean;
     showCc: boolean;
   }
+  showMore: boolean,
+  showMoreLink: string;
   theme: string;
   dataCount: number;
   userAvatar: TTextDefaultType;
@@ -121,7 +123,9 @@ const XTodoList: XTodoListSchema = {
     labelNameConfig,
     dataConfigConfig,
     themeConfig,
-    dataCountConfig
+    dataCountConfig,
+    showMoreConfig,
+    showMoreLinkConfig
   ],
   config: {
     ...workbenchBaseDefault,
@@ -137,7 +141,9 @@ const XTodoList: XTodoListSchema = {
       showHandled: true,
       showCc: true
     },
-    dataCount: 5,
+    showMore: false,
+    showMoreLink: '',
+    dataCount: 2,
     userAvatar: '',
     userName: '',
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],

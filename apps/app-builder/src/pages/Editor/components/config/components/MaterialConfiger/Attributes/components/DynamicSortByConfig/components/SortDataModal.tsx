@@ -24,7 +24,7 @@ const SORT_TEXT_MAP = {
   NUMBER: { asc: '0 → 9', desc: '9 → 0' },
   DATE: { asc: '早 → 晚', desc: '晚 → 早' },
   DATETIME: { asc: '早 → 晚', desc: '晚 → 早' },
-  BOOLEAN: { asc: '否 → 是', desc: '选 → 否' },
+  BOOLEAN: { asc: '否 → 是', desc: '是 → 否' },
   SELECT: { asc: '选项顺序', desc: '选项倒序' },
   TEXT: { asc: 'A → Z', desc: 'Z → A' }
 };
@@ -119,17 +119,20 @@ const SortDataModal: React.FC<IProps> = ({ visible, sortBy, configs, mainEntity,
         if (!text) return null;
 
         return (
-          <Radio.Group
-            type="button"
-            value={val}
-            onChange={(newOrder) => {
-              console.log(newOrder, record);
-              handleUpdate(record.key, 'sortBy', newOrder);
-            }}
-          >
-            <Radio value={0}>{text.asc}</Radio>
-            <Radio value={1}>{text.desc}</Radio>
-          </Radio.Group>
+          <div style={{ display: 'flex' }}>
+            <Radio.Group
+              type="button"
+              value={val}
+              onChange={(newOrder) => {
+                console.log(newOrder, record);
+                handleUpdate(record.key, 'sortBy', newOrder);
+              }}
+              style={{ width: '100%', display: 'flex' }}
+            >
+              <Radio value={0} style={{ flex: '1', textAlign: 'center' }}>{text.asc}</Radio>
+              <Radio value={1} style={{ flex: '1', textAlign: 'center' }}>{text.desc}</Radio>
+            </Radio.Group>
+          </div>
         );
       }
     },

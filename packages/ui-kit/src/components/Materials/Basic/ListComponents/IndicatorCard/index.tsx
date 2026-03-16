@@ -20,6 +20,7 @@ import {
   INDICATOR_COMPARE_CALCULATE_METHOD,
   INDICATOR_COMPARE_CALCULATE_TYPE
 } from '../../../constants';
+import { queryRuntimeDataCards } from '@onebase/app/src/services/app_runtime';
 import type { XIndicatorCardConfig } from './schema';
 import './index.css';
 
@@ -34,13 +35,22 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
   }, []);
 
   const getData = async () => {
-    // todo 接口获取数据
-    setData([
-      { value: '1256', comparePercent: '3%', type: 'rise' },
-      { value: '1256', comparePercent: '3%', type: 'rise' },
-      { value: '1256', comparePercent: '3%', type: 'decline' },
-      { value: '1256', comparePercent: '3%', type: 'decline' }
-    ]);
+    if (!runtime || !indicatorList?.length) return;
+    const params = JSON.stringify(indicatorList);
+    try {
+      const res = await queryRuntimeDataCards(params);
+      // 将响应结果映射为组件内部 data 格式
+      const mapped = (res || []).map((item: any) => ({
+        value: item.value ?? 0,
+        displayValue: item.displayValue ?? '',
+        comparePercent: item.compareDisplay ?? '0%',
+        type: item.compareType === 'up' ? 'rise' : item.compareType === 'down' ? 'decline' : 'equal',
+        compareAvailable: item.compareAvailable
+      }));
+      setData(mapped);
+    } catch (e) {
+      console.error('数据卡片查询失败', e);
+    }
   };
 
   const getSpan = (width: string) => {

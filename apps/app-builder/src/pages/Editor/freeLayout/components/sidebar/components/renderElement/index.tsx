@@ -232,7 +232,7 @@ export const RenderElement: React.FC<RenderElementProps> = ({
           onClick={() => onOpenFormula(index)}
           disabled={isDisabled}
         >
-          {item.value ? '已设置公式' : 'ƒx 编辑公式'}
+          {item.value ? item.value?.formula : 'ƒx 编辑公式'}
           {item.value ? <IconLaunch /> : ''}
         </Button>
       </>

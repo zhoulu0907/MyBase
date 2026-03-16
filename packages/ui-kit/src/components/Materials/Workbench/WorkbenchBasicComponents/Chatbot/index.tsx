@@ -1,6 +1,7 @@
 import { Modal } from '@arco-design/web-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
+import './index.css';
 
 export interface XChatbotProps {
   config?: {
@@ -13,6 +14,18 @@ export interface XChatbotProps {
 
 const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl: propIframeUrl }) => {
   const [visible, setVisible] = useState(false);
+  const [iframeHeight, setIframeHeight] = useState(200);
+
+  useEffect(() => {
+    const calculateHeight = () => {
+      const bodyHeight = document.body.offsetHeight;
+      setIframeHeight(bodyHeight - 200);
+    };
+
+    calculateHeight();
+    window.addEventListener('resize', calculateHeight);
+    return () => window.removeEventListener('resize', calculateHeight);
+  }, []);
 
   const handleClick = () => {
     if (runtime) {
@@ -20,14 +33,15 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
     }
   };
 
-  const iframeUrl = propIframeUrl || config?.iframeUrl;
+  const DEFAULT_URL = 'http://10.11.112.38:9500/bote/#/driver/bot?tenantId=0&botId=1338078781184737280&modeType=single&token=4f0fc76675484ad8a2ab29941debf7f4&pattern=S';
+  const iframeUrl = propIframeUrl || config?.iframeUrl || DEFAULT_URL;
 
   return (
     <>
       <div
         style={{
-          width: 80,
-          height: 80,
+          width: 60,
+          height: 60,
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -39,35 +53,30 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
       >
         <img
           src={ChatboxIcon}
-          alt="聊天助手"
+          alt="智能体对话"
           style={{
-            width: 80,
-            height: 80,
+            width: 60,
+            height: 60,
             objectFit: 'contain'
           }}
         />
       </div>
       <Modal
-        title="聊天助手"
+        title={null}
         visible={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
         autoFocus={false}
         focusLock={true}
         footer={null}
-        style={{ width: 800 }}
+        style={{ width: 800, borderRadius: '10px', overflow: 'hidden' }}
+        className="chatbot-modal"
       >
-        {iframeUrl ? (
-          <iframe
-            src={iframeUrl}
-            style={{ width: '100%', height: 800, border: 'none' }}
-            title="Chatbot"
-          />
-        ) : (
-          <div style={{ padding: 20, textAlign: 'center', color: '#999' }}>
-            请在配置面板中设置 URL 地址
-          </div>
-        )}
+        <iframe
+          src={iframeUrl}
+          style={{ width: '100%', height: iframeHeight, border: 'none' }}
+          title="Chatbot"
+        />
       </Modal>
     </>
   );

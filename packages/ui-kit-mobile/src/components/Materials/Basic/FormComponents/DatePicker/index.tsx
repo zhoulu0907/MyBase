@@ -1,4 +1,5 @@
-import { DatePicker, Ellipsis, Form } from '@arco-design/mobile-react';
+import { DatePicker, Ellipsis, Form, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
@@ -183,7 +184,16 @@ const XDatePicker = memo((props: XDatePickerConfig & { runtime?: boolean; detail
       field={fieldId}
       rules={rules}
       layout={layout}
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       style={{
         textAlign,
         pointerEvents: !runtime || detailMode ? 'none' : 'unset',

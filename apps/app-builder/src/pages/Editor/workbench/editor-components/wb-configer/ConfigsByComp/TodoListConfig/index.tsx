@@ -55,6 +55,8 @@ const TodoListPanels = ({
   const titleConfig = findItem(editData, 'label');
   const dataConfig = findItem(editData, 'dataConfig');
   const dataCountConfig = findItem(editData, 'dataCount');
+  const showMoreConfig = findItem(editData, 'showMore');
+  const showMoreLinkConfig = findItem(editData, 'showMoreLink');
 
   return (
     <Collapse
@@ -86,6 +88,8 @@ const TodoListPanels = ({
         contentStyle={PanelContentStyle}
       >
         {titleConfig && renderEditItem(titleConfig)}
+        {showMoreConfig && renderEditItem(showMoreConfig)}
+        {showMoreLinkConfig && renderEditItem(showMoreLinkConfig)}
       </CollapseItem>
       <CollapseItem
         key={SECTION_KEYS.DATA_CONFIG}
