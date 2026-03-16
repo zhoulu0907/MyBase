@@ -16,4 +16,12 @@ public interface OAuth2ClientOutConfigService {
      */
     OAuth2ClientOutConfigDO getConfigByTenantCode(String tenantCode);
 
+    /**
+     * 更新企业租户映射配置
+     *
+     * @param id 配置ID
+     * @param enterpriseMapping 企业租户映射JSON
+     */
+    void updateEnterpriseMapping(Long id, String enterpriseMapping);
+
 }

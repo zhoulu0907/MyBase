@@ -92,6 +92,7 @@ docs/
 
 # requirements documentation
 /需求文档
+/requirements
 /.github/copilot-instructions.md
 /元数据管理接口实现情况检查报告.md
 /元数据管理接口单元测试报告.md

@@ -683,5 +683,4 @@ public class BuildAuthServiceImpl implements BuildAuthService {
             adminUserDO.setMobile(AesCfbCryptoUtil.decrypt(phone));
         }
     }
-
 }

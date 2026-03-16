@@ -7,7 +7,9 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 字段类型映射仓储类
@@ -115,5 +117,31 @@ public class FieldTypeMappingRepository extends ServiceImpl<FieldTypeMappingMapp
      */
     public FieldTypeMappingDO getDefaultMappingByBusinessType(String businessFieldType) {
         return getDefaultMappingByBusinessType(businessFieldType, "PostgreSQL");
+    }
+
+    public Map<String, FieldTypeMappingDO> getDefaultMappingsByDatabaseType(String databaseType) {
+        if (databaseType == null || databaseType.trim().isEmpty()) {
+            return Map.of();
+        }
+
+        QueryWrapper queryWrapper = this.query()
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .orderBy(FieldTypeMappingDO::getBusinessFieldType, true)
+                .orderBy(FieldTypeMappingDO::getIsDefault, false)
+                .orderBy(FieldTypeMappingDO::getId, true);
+        List<FieldTypeMappingDO> list = list(queryWrapper);
+        if (list == null || list.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, FieldTypeMappingDO> result = new HashMap<>();
+        for (FieldTypeMappingDO item : list) {
+            if (item == null || item.getBusinessFieldType() == null || item.getBusinessFieldType().isBlank()) {
+                continue;
+            }
+            String key = item.getBusinessFieldType().trim().toUpperCase();
+            result.putIfAbsent(key, item);
+        }
+        return result;
     }
 }
