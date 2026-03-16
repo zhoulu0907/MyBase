@@ -1,4 +1,5 @@
 import { memo, useState, useEffect, useCallback } from 'react';
+import type React from 'react';
 import { Table } from '@arco-design/web-react';
 import { dataMethodPageV2, menuSignal, type PageMethodV2Params } from '@onebase/app';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES } from '../../core/constants';
@@ -11,6 +12,8 @@ interface ColumnDef {
   title: string;
   dataIndex: string;
   key: string;
+  ellipsis?: boolean;
+  headerCellStyle?: React.CSSProperties;
   [key: string]: unknown;
 }
 
@@ -121,7 +124,11 @@ const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
   };
 
   useEffect(() => {
-    const customCols = tableInfo?.columns as ColumnDef[] | undefined;
+    const customCols = tableInfo?.columns.map(item => ({
+      ...(item as ColumnDef),
+      ellipsis: true,
+      headerCellStyle: { whiteSpace: 'nowrap' as const },
+    }));
 
     if (customCols && customCols.length > 0) {
       setFinalCols(customCols);
