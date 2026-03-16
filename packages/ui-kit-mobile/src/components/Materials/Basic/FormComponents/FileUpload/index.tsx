@@ -224,7 +224,7 @@ const XFileUpload = memo(
             <div>
               {detailMode ? null : (
                 <div className="uplaodTrigger">
-                  <Button type={UploadButtonType[buttonType] || 'primary'}>
+                  <Button type={UploadButtonType[buttonType || 'primary']}>
                     <div className="uploadTextWrapper">
                       <IconUpload />
                       <span className="uploadText">{buttonName || '点击上传'}</span>
