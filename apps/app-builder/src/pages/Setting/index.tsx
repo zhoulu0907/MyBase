@@ -33,6 +33,7 @@ const Content = Layout.Content;
 const SettingPage: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [isIframe, setIsIframe] = useState(false);
   const { tenantId } = useParams();
 
   const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(() => getTenantInfoFromSession());
@@ -45,6 +46,10 @@ const SettingPage: React.FC = () => {
   const handleCollapse = (collapsed: boolean) => {
     setCollapsed(collapsed);
   };
+
+  useEffect(() => {
+    setIsIframe(window.self !== window.top);
+  }, []);
 
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
@@ -65,7 +70,7 @@ const SettingPage: React.FC = () => {
 
   return (
     <Layout className={styles.settingPage}>
-      <AppHeader className={styles.settingPageHeader} avatarUrl={avatarUrl} tenantInfo={tenantInfo} />
+      {!isIframe && <AppHeader className={styles.settingPageHeader} avatarUrl={avatarUrl} tenantInfo={tenantInfo} />}
 
       <Layout className={styles.settingPageContent}>
         <AppSider collapsed={collapsed} onCollapse={handleCollapse} />
