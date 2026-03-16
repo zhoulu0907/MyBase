@@ -21,6 +21,7 @@ import { updateDataQueryOutputs } from '../../nodes/data/data-query/output';
 import { updateDataUpdateOutputs } from '../../nodes/data/data-update/output';
 import { updateModalOutputs } from '../../nodes/interaction/modal/output';
 import { updateJavascriptOutputs } from '../../nodes/other/javascript/output';
+import { updateHTTPOutputs } from '../../nodes/other/http-legacy/output';
 import {
   clearDataOriginNodeId,
   getDataNodeSource,
@@ -189,6 +190,33 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
 
       // 更新outputs
       switch (curNode.type) {
+        case NodeType.HTTP: {
+          const actionName: string | undefined = param.actionName || formInfo.actionName;
+          const tabs = actionName && param?.actionParams?.[actionName]?.tabs;
+          const responseHeaders = Array.isArray(tabs?.responseHeaders) ? tabs.responseHeaders : [];
+          const responseBody = Array.isArray(tabs?.responseBody) ? tabs.responseBody : [];
+          const rows = [...responseHeaders, ...responseBody];
+          const mapType = (t: string | undefined) => {
+            switch (t) {
+              case 'number':
+                return ENTITY_FIELD_TYPE.NUMBER.VALUE;
+              case 'object':
+              case 'array':
+                return ENTITY_FIELD_TYPE.LONG_TEXT.VALUE;
+              case 'string':
+              case 'boolean':
+              default:
+                return ENTITY_FIELD_TYPE.TEXT.VALUE;
+            }
+          };
+          const httpFields: ConditionField[] = rows.map((item: any) => ({
+            label: item.fieldName || item.key || '',
+            value: item.key || item.fieldName || '',
+            fieldType: mapType(item.fieldType)
+          }));
+          updateHTTPOutputs(curNode.id, httpFields);
+          break;
+        }
         case NodeType.LOOP:
           const originDataSource = getDataNodeSource(formInfo.dataNodeId);
           const handleSetConditionFields = (conditionFields: ConditionField[]) => {

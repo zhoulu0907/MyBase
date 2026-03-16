@@ -23,8 +23,18 @@ import { FlowNodeRegistries } from './nodes';
 const TriggerEditor = () => {
   const editorProps = useEditorProps(FlowNodeRegistries);
 
-  const { setNodeId, nodeId, setFlowId, setNodeData, setAllNodeData, setMainEntities, setSubEntities } =
-    triggerEditorSignal;
+  const {
+    setNodeId,
+    nodeId,
+    setFlowId,
+    setNodeData,
+    setAllNodeData,
+    setMainEntities,
+    setSubEntities,
+    setFlowInputs,
+    setFlowOutputs,
+    clearFlowIO
+  } = triggerEditorSignal;
 
   const [initData, setInitData] = useState<FlowDocumentJSON>();
   const sidebarContainerRef = useRef<HTMLDivElement>(null);
@@ -69,6 +79,9 @@ const TriggerEditor = () => {
       const processDefinitionJson = JSON.parse(res.processDefinition);
       let data = {};
       let nodes = processDefinitionJson.nodes || [];
+      const ioConfig = processDefinitionJson.ioConfig;
+      setFlowInputs(ioConfig?.inputs || []);
+      setFlowOutputs(ioConfig?.outputs || []);
 
       for (let item of nodes) {
         data = { ...data, [item.id]: { ...item.data, id: item.id, output: item.output } };
@@ -92,6 +105,7 @@ const TriggerEditor = () => {
       setAllNodeData(data);
       setInitData({ nodes: nodes });
     } else {
+      clearFlowIO();
       // 对开始节点数据初始化
       switch (res.triggerType) {
         case TriggerType.FORM: {

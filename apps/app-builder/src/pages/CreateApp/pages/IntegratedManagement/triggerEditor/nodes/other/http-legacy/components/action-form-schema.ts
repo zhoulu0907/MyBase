@@ -19,7 +19,13 @@ export function getDefaultActionSchema(): ISchema {
         title: '接口方法',
         type: 'string',
         default: 'GET',
-        enum: ['GET', 'POST', 'PUT', 'DELETE'],
+        enum: [
+          { label: 'GET', value: 'GET' },
+          { label: 'POST', value: 'POST' },
+          { label: 'POST(JSON)', value: 'POST_JSON' },
+          { label: 'PUT', value: 'PUT' },
+          { label: 'DELETE', value: 'DELETE' }
+        ],
         'x-decorator': 'FormItem',
         'x-component': 'Select',
         'x-component-props': { placeholder: '请选择' }

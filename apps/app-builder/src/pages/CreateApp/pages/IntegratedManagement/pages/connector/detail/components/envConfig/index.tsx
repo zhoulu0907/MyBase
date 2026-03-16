@@ -31,6 +31,12 @@ const SchemaField = createSchemaField({
   }
 });
 
+const genRandomEnvCode = () => {
+  const ts = Date.now().toString(36).toUpperCase();
+  const rand = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `ENV_${ts}_${rand}`;
+};
+
 const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNext, onPrev }) => {
   const [configType, setConfigType] = useState<'existing' | 'create'>('existing');
   const [loading, setLoading] = useState(false);
@@ -47,7 +53,11 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
       createForm({
         values: {
           envMode: 'create',
-          authType: 'none'
+          envConfig: {
+            authInfo: {
+              authType: 'none'
+            }
+          }
         }
       }),
     []
@@ -57,7 +67,17 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
   const createEnvForm = useMemo(
     () =>
       createForm({
-        initialValues: { envMode: 'create' }
+        initialValues: {
+          envMode: 'create',
+          envConfig: {
+            basicInfo: {
+              envCode: genRandomEnvCode()
+            },
+            authInfo: {
+              authType: 'none'
+            }
+          }
+        }
       }),
     []
   );
@@ -280,7 +300,7 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
                     basicAuthConfig: {
                       title: 'Basic Auth配置',
                       type: 'object',
-                      // 'ui:hidden': "{{$form.values.envConfig.authInfo.authType !== 'basic'}}",
+                      'x-visible': "{{$form.values.envConfig?.authInfo?.authType === 'basic'}}",
                       properties: {
                         username: {
                           title: '用户名',
@@ -305,7 +325,7 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
                     bearerAuthConfig: {
                       title: 'Bearer Token配置',
                       type: 'object',
-                      // 'ui:hidden': "{{$form.values.envConfig.authInfo.authType !== 'bearer'}}",
+                      'x-visible': "{{$form.values.envConfig?.authInfo?.authType === 'bearer'}}",
                       properties: {
                         tokenType: {
                           title: 'Token类型',
@@ -339,7 +359,7 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
                     apiKeyAuthConfig: {
                       title: 'API Key配置',
                       type: 'object',
-                      // 'ui:hidden': "{{$form.values.envConfig.authInfo.authType !== 'apikey'}}",
+                      'x-visible': "{{$form.values.envConfig?.authInfo?.authType === 'apikey'}}",
                       properties: {
                         headerName: {
                           title: '请求头名称',
@@ -382,7 +402,7 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
                     oauth2AuthConfig: {
                       title: 'OAuth 2.0配置',
                       type: 'object',
-                      // 'ui:hidden': "{{$form.values.envConfig.authInfo.authType !== 'oauth2'}}",
+                      'x-visible': "{{$form.values.envConfig?.authInfo?.authType === 'oauth2'}}",
                       properties: {
                         authUrl: {
                           title: '授权URL',
@@ -461,7 +481,7 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
                     customAuthConfig: {
                       title: '自定义签名配置',
                       type: 'object',
-                      // 'ui:hidden': "{{$form.values.envConfig.authInfo.authType !== 'custom'}}",
+                      'x-visible': "{{$form.values.envConfig?.authInfo?.authType === 'custom'}}",
                       properties: {
                         locationType: {
                           title: '签名位置',
@@ -594,21 +614,21 @@ const ConnectorEnvConfig: React.FC<ConnectorEnvConfigProps> = ({ baseInfo, onNex
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>环境配置</div>
+      <div className={styles.header}>认证配置</div>
 
       <div className={styles.formItem}>
-        <div className={styles.label}>认证方式</div>
+        <div className={styles.label}>配置方式</div>
         <Radio.Group value={configType} onChange={setConfigType} type="button">
-          <Radio value="existing">选择已有环境信息</Radio>
-          <Radio value="create">创建环境信息</Radio>
+          <Radio value="existing">选择已有认证配置</Radio>
+          <Radio value="create">创建认证配置</Radio>
         </Radio.Group>
       </div>
 
       {configType === 'existing' ? (
         <div className={styles.formItem}>
-          <div className={styles.label}>环境信息</div>
+          <div className={styles.label}>认证配置</div>
           <Select
-            placeholder="请选择环境信息"
+            placeholder="请选择认证配置"
             style={{ width: 480 }}
             value={selectedEnv}
             onChange={handleEnvChange}

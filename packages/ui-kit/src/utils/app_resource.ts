@@ -16,7 +16,8 @@ import {
   COMPONENT_TYPE_DISPLAY_NAME_MAP,
   EditConfig,
   FORM_COMPONENT_TYPES,
-  LAYOUT_COMPONENT_TYPES
+  LAYOUT_COMPONENT_TYPES,
+  hasComponentSchema
 } from 'src/components';
 import {
   createPageEditorSignal,
@@ -311,6 +312,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
     let newSubTableComponentsMap = new Map<string, any[]>();
 
     page.components.forEach((component: ComponentConfig) => {
+      if (!hasComponentSchema(component.componentType)) {
+        console.warn('[PageSet] 未找到组件类型:', component.componentType, 'componentCode:', component.componentCode, '已跳过');
+        return;
+      }
       if (isBlank(component.parentCode)) {
         newComponents.push({
           id: component.componentCode,
@@ -356,6 +361,10 @@ export async function startLoadPageSet(params: LoadPageSetParams) {
 
     //   载入布局组件内的组件配置
     page.components.forEach((component: ComponentConfig) => {
+      if (!hasComponentSchema(component.componentType)) {
+        console.warn('[PageSet] 未找到组件类型:', component.componentType, 'componentCode:', component.componentCode, '已跳过');
+        return;
+      }
       if (!isBlank(component.parentCode)) {
         if (component.parentCode.indexOf(FORM_COMPONENT_TYPES.SUB_TABLE) !== -1) {
           const colComponents = newSubTableComponentsMap.get(component.parentCode);
