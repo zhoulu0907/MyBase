@@ -349,7 +349,7 @@ const XLoadMore = memo(
                     field.fieldName === key && field.fieldType === ENTITY_FIELD_TYPE.BOOLEAN.VALUE
                 );
                 if (switchField && typeof newItem[key] === 'boolean') {
-                  newItem[key] = newItem[key] ? '是' : '否';
+                  newItem[key] = newItem[key] ? '开启' : '关闭';
                 }
 
                 // 单选列表 - 根据id返回对应label

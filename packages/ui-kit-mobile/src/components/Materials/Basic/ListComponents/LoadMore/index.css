@@ -343,6 +343,6 @@
 .arco-masking-mask {
   @media screen and (min-width: 900px) {
     max-width: 450px !important;
-    left: calc(50vw - 225px);
+    left: calc(50vw - 225px) !important;
   }
 }
