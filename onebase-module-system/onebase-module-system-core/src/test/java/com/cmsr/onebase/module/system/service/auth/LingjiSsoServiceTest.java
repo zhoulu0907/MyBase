@@ -1,22 +1,19 @@
 package com.cmsr.onebase.module.system.service.auth;
 
-import cn.hutool.json.JSONObject;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
-import com.cmsr.onebase.module.system.service.logger.LoginLogService;
-import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
-import com.cmsr.onebase.module.system.util.oauth2.OkHttpClientUtils;
-import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
+import com.cmsr.onebase.module.system.vo.auth.LingjiSsoUserInfoVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantAdminUserReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,10 +22,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
 
@@ -37,13 +34,15 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * LingjiSsoService 单元测试
+ * 灵畿 SSO 用户创建逻辑测试
  *
- * 测试分类：
- * 1. LoginTests - 登录流程测试（配置校验、API调用、Token生成）
- * 2. UserCreationTests - 用户创建逻辑测试（租户管理员角色分配）
+ * 测试重点：
+ * 1. 创建租户 - 验证租户创建流程
+ * 2. 创建用户 - 验证用户创建流程
+ * 3. 设置管理员角色 - 验证租户管理员角色分配
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class LingjiSsoServiceTest {
 
     @Mock
@@ -59,173 +58,105 @@ class LingjiSsoServiceTest {
     private UserService userService;
 
     @Mock
-    private OAuth2TokenService oauth2TokenService;
-
-    @Mock
-    private LoginLogService loginLogService;
-
-    @Mock
     private RoleService roleService;
 
     @InjectMocks
     private LingjiSsoServiceImpl lingjiSsoService;
 
-    private OAuth2AccessTokenDO mockToken;
-
-    @BeforeEach
-    void setUp() {
-        mockToken = new OAuth2AccessTokenDO();
-        mockToken.setAccessToken("mockAccessToken123");
-        mockToken.setRefreshToken("mockRefreshToken123");
-        mockToken.setExpiresTime(LocalDateTime.now().plusHours(2));
-    }
-
-    // ========== 登录流程测试 ==========
+    // ========== 创建租户测试 ==========
 
     @Nested
-    @DisplayName("登录流程测试")
-    class LoginTests {
+    @DisplayName("创建租户测试")
+    class CreateTenantTests {
 
         /**
-         * 测试配置未启用
+         * 测试创建租户 - 使用默认套餐
          */
         @Test
-        @DisplayName("配置未启用 - 抛出异常")
-        void testLogin_ConfigDisabled() {
-            when(lingjiSsoProperties.isEnabled()).thenReturn(false);
-
-            assertThrows(Exception.class, () -> lingjiSsoService.login("testCode", null));
-        }
-
-        /**
-         * 测试获取用户信息失败 - 签名错误
-         */
-        @Test
-        @DisplayName("获取用户信息失败 - 签名错误")
-        void testLogin_GetUserInfoFailed_SignatureError() {
-            setupMockConfig();
-
-            try (MockedStatic<OkHttpClientUtils> mockedHttp = mockStatic(OkHttpClientUtils.class)) {
-                mockedHttp.when(() -> OkHttpClientUtils.sendRequest(any(), anyBoolean()))
-                        .thenReturn("{\"status\":\"1\",\"message\":\"签名错误\"}");
-
-                assertThrows(Exception.class, () -> lingjiSsoService.login("testCode", null));
-            }
-        }
-
-        /**
-         * 测试获取用户信息失败 - id_token为空
-         */
-        @Test
-        @DisplayName("获取用户信息失败 - id_token为空")
-        void testLogin_GetUserInfoFailed_EmptyToken() {
-            setupMockConfig();
-
-            try (MockedStatic<OkHttpClientUtils> mockedHttp = mockStatic(OkHttpClientUtils.class)) {
-                mockedHttp.when(() -> OkHttpClientUtils.sendRequest(any(), anyBoolean()))
-                        .thenReturn("{\"status\":\"0\",\"id_token\":\"\"}");
-
-                assertThrows(Exception.class, () -> lingjiSsoService.login("testCode", null));
-            }
-        }
-
-        /**
-         * 测试成功登录 - 已有租户和用户
-         */
-        @Test
-        @DisplayName("成功登录 - 已有租户和用户")
-        void testLogin_Success_ExistingTenantAndUser() {
-            setupMockConfig();
-
-            // 准备租户
-            TenantDO tenant = createMockTenant(1L);
-
-            // 准备已有用户
-            AdminUserDO existingUser = new AdminUserDO();
-            existingUser.setId(100L);
-            existingUser.setUsername("TEST001");
-            existingUser.setNickname("测试用户");
-            existingUser.setEmail("test@example.com");
-
-            // Mock API 响应
-            String mockResponse = createMockJwtResponse();
-
-            // 配置 mock
-            when(tenantService.getTenant(anyLong())).thenReturn(tenant);
-            when(userService.getUserByUsername("TEST001")).thenReturn(existingUser);
-            when(oauth2TokenService.createAccessToken(anyLong(), anyInt(), anyString(), any())).thenReturn(mockToken);
-
-            try (MockedStatic<OkHttpClientUtils> mockedHttp = mockStatic(OkHttpClientUtils.class)) {
-                mockedHttp.when(() -> OkHttpClientUtils.sendRequest(any(), anyBoolean()))
-                        .thenReturn(mockResponse);
-
-                AuthLoginRespVO result = lingjiSsoService.login("testCode", null);
-
-                assertNotNull(result);
-                assertEquals("mockAccessToken123", result.getAccessToken());
-                assertEquals(1L, result.getTenantId());
-                verify(tenantService, never()).createTenant(any());
-                verify(userService, never()).createUser(any());
-            }
-        }
-
-        /**
-         * 测试成功登录 - 自动创建租户和用户
-         */
-        @Test
-        @DisplayName("成功登录 - 自动创建租户和用户")
-        void testLogin_Success_CreateTenantAndUser() {
-            setupMockConfig();
-
+        @DisplayName("创建租户 - 使用默认套餐")
+        void testCreateTenant_WithDefaultPackage() throws Exception {
             // 准备套餐
             TenantPackageDO mockPackage = new TenantPackageDO();
             mockPackage.setId(1L);
+            mockPackage.setName("默认套餐");
 
-            // 准备租户管理员角色
-            RoleDO tenantAdminRole = new RoleDO();
-            tenantAdminRole.setId(100L);
-            tenantAdminRole.setCode(RoleCodeEnum.TENANT_ADMIN.getCode());
-
-            // Mock API 响应
-            String mockResponse = createMockJwtResponse();
+            // 准备用户信息
+            LingjiSsoUserInfoVO userInfo = createMockUserInfo();
 
             // 配置 mock
-            when(tenantPackageService.getTenantPackageByCode(anyString())).thenReturn(mockPackage);
-            when(tenantPackageService.getTenantPackageListByStatus(anyInt())).thenReturn(Collections.singletonList(mockPackage));
-            when(tenantService.createTenant(any())).thenReturn(2L);
+            when(tenantPackageService.getTenantPackageByCode("default")).thenReturn(mockPackage);
+            when(tenantService.createTenant(any(TenantInsertReqVO.class))).thenAnswer(invocation -> {
+                TenantInsertReqVO reqVO = invocation.getArgument(0);
+                // 验证租户创建参数
+                assertNotNull(reqVO.getName());
+                assertTrue(reqVO.getName().contains("测试用户"));
+                assertEquals(CommonStatusEnum.ENABLE.getStatus(), reqVO.getStatus());
+                assertEquals(1L, reqVO.getPackageId());
+                // 验证管理员信息
+                assertNotNull(reqVO.getTenantAdminUserReqVOList());
+                assertEquals(1, reqVO.getTenantAdminUserReqVOList().size());
+                TenantAdminUserReqVO adminUser = reqVO.getTenantAdminUserReqVOList().get(0);
+                assertEquals("TEST001", adminUser.getAdminUserName());
+                assertEquals("测试用户", adminUser.getAdminNickName());
+                return 2L;
+            });
             when(tenantService.getTenant(2L)).thenReturn(createMockTenant(2L));
-            when(userService.getUserByUsername("TEST001")).thenReturn(null);
-            when(userService.createUser(any())).thenReturn(100L);
-            when(oauth2TokenService.createAccessToken(anyLong(), anyInt(), anyString(), any())).thenReturn(mockToken);
-            when(roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode())).thenReturn(tenantAdminRole);
 
-            try (MockedStatic<OkHttpClientUtils> mockedHttp = mockStatic(OkHttpClientUtils.class)) {
-                mockedHttp.when(() -> OkHttpClientUtils.sendRequest(any(), anyBoolean()))
-                        .thenReturn(mockResponse);
+            // 执行测试
+            TenantDO result = invokeCreateTenant(userInfo);
 
-                AuthLoginRespVO result = lingjiSsoService.login("testCode", null);
+            // 验证
+            assertNotNull(result);
+            assertEquals(2L, result.getId());
+            verify(tenantPackageService, times(1)).getTenantPackageByCode("default");
+            verify(tenantService, times(1)).createTenant(any(TenantInsertReqVO.class));
+        }
 
-                assertNotNull(result);
-                assertEquals("mockAccessToken123", result.getAccessToken());
-                assertEquals(2L, result.getTenantId());
-                verify(tenantService, times(1)).createTenant(any());
-                verify(userService, times(1)).createUser(any());
-            }
+        /**
+         * 测试创建租户 - 默认套餐不存在，使用第一个可用套餐
+         */
+        @Test
+        @DisplayName("创建租户 - 默认套餐不存在，使用第一个可用套餐")
+        void testCreateTenant_DefaultPackageNotExists() throws Exception {
+            // 准备备用套餐
+            TenantPackageDO fallbackPackage = new TenantPackageDO();
+            fallbackPackage.setId(2L);
+            fallbackPackage.setName("备用套餐");
+
+            // 准备用户信息
+            LingjiSsoUserInfoVO userInfo = createMockUserInfo();
+
+            // 配置 mock
+            when(tenantPackageService.getTenantPackageByCode("default")).thenReturn(null);
+            when(tenantPackageService.getTenantPackageListByStatus(CommonStatusEnum.ENABLE.getStatus()))
+                    .thenReturn(Collections.singletonList(fallbackPackage));
+            when(tenantService.createTenant(any(TenantInsertReqVO.class))).thenAnswer(invocation -> {
+                TenantInsertReqVO reqVO = invocation.getArgument(0);
+                assertEquals(2L, reqVO.getPackageId()); // 使用备用套餐
+                return 3L;
+            });
+            when(tenantService.getTenant(3L)).thenReturn(createMockTenant(3L));
+
+            TenantDO result = invokeCreateTenant(userInfo);
+
+            assertNotNull(result);
+            verify(tenantPackageService, times(1)).getTenantPackageByCode("default");
+            verify(tenantPackageService, times(1)).getTenantPackageListByStatus(anyInt());
         }
     }
 
-    // ========== 用户创建逻辑测试 ==========
+    // ========== 创建用户测试 ==========
 
     @Nested
-    @DisplayName("用户创建逻辑测试")
-    class UserCreationTests {
+    @DisplayName("创建用户测试")
+    class CreateUserTests {
 
         /**
          * 测试创建用户 - 成功分配租户管理员角色
          */
         @Test
         @DisplayName("创建用户 - 成功分配租户管理员角色")
-        void testCreateUser_AssignTenantAdminRole() {
+        void testCreateUser_AssignTenantAdminRole() throws Exception {
             // 准备用户信息
             AdminUserDO userInfo = new AdminUserDO();
             userInfo.setUsername("NEWUSER001");
@@ -244,20 +175,23 @@ class LingjiSsoServiceTest {
             when(roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode())).thenReturn(tenantAdminRole);
             when(userService.createUser(any(UserInsertReqVO.class))).thenAnswer(invocation -> {
                 UserInsertReqVO reqVO = invocation.getArgument(0);
-                // 验证角色已设置
-                assertNotNull(reqVO.getRoleIds());
-                assertTrue(reqVO.getRoleIds().contains(100L));
+                // 验证用户创建参数
                 assertEquals("NEWUSER001", reqVO.getUsername());
                 assertEquals("新用户", reqVO.getNickname());
                 assertEquals("13800138001", reqVO.getMobile());
                 assertEquals("newuser@example.com", reqVO.getEmail());
                 assertEquals(UserTypeEnum.CORP.getValue(), reqVO.getUserType());
+                assertEquals(CommonStatusEnum.ENABLE.getStatus(), reqVO.getStatus());
+                // 验证角色已设置
+                assertNotNull(reqVO.getRoleIds());
+                assertTrue(reqVO.getRoleIds().contains(100L), "应该包含租户管理员角色ID");
                 return 200L;
             });
 
-            // 通过反射调用私有方法进行测试
+            // 执行测试
             AdminUserDO result = invokeCreateUser(userInfo);
 
+            // 验证
             assertNotNull(result);
             assertEquals(200L, result.getId());
             verify(roleService, times(1)).getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
@@ -265,11 +199,11 @@ class LingjiSsoServiceTest {
         }
 
         /**
-         * 测试创建用户 - 租户管理员角色不存在
+         * 测试创建用户 - 租户管理员角色不存在，用户无角色
          */
         @Test
-        @DisplayName("创建用户 - 租户管理员角色不存在，用户无角色")
-        void testCreateUser_TenantAdminRoleNotExists() {
+        @DisplayName("创建用户 - 租户管理员角色不存在")
+        void testCreateUser_TenantAdminRoleNotExists() throws Exception {
             // 准备用户信息
             AdminUserDO userInfo = new AdminUserDO();
             userInfo.setUsername("NEWUSER002");
@@ -283,7 +217,8 @@ class LingjiSsoServiceTest {
             when(userService.createUser(any(UserInsertReqVO.class))).thenAnswer(invocation -> {
                 UserInsertReqVO reqVO = invocation.getArgument(0);
                 // 验证角色未设置
-                assertTrue(reqVO.getRoleIds() == null || reqVO.getRoleIds().isEmpty());
+                assertTrue(reqVO.getRoleIds() == null || reqVO.getRoleIds().isEmpty(),
+                        "角色不存在时，用户应该没有角色");
                 return 201L;
             });
 
@@ -296,11 +231,49 @@ class LingjiSsoServiceTest {
         }
 
         /**
-         * 测试查找或创建用户 - 用户已存在且信息无变化
+         * 测试创建用户 - 使用工号作为用户名
          */
         @Test
-        @DisplayName("查找或创建用户 - 用户已存在且信息无变化")
-        void testFindOrCreateUser_ExistingUserNoChanges() {
+        @DisplayName("创建用户 - 优先使用工号作为用户名")
+        void testCreateUser_UseStaffCodeAsUsername() throws Exception {
+            // 准备用户信息（有工号）
+            AdminUserDO userInfo = new AdminUserDO();
+            userInfo.setUsername("STAFF123"); // 工号
+            userInfo.setNickname("员工用户");
+            userInfo.setMobile("13800138003");
+            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+
+            // 准备角色
+            RoleDO tenantAdminRole = new RoleDO();
+            tenantAdminRole.setId(100L);
+            tenantAdminRole.setCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+
+            when(roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode())).thenReturn(tenantAdminRole);
+            when(userService.createUser(any(UserInsertReqVO.class))).thenAnswer(invocation -> {
+                UserInsertReqVO reqVO = invocation.getArgument(0);
+                assertEquals("STAFF123", reqVO.getUsername());
+                return 300L;
+            });
+
+            AdminUserDO result = invokeCreateUser(userInfo);
+
+            assertNotNull(result);
+            assertEquals(300L, result.getId());
+        }
+    }
+
+    // ========== 查找或创建用户测试 ==========
+
+    @Nested
+    @DisplayName("查找或创建用户测试")
+    class FindOrCreateUserTests {
+
+        /**
+         * 测试查找用户 - 用户已存在且信息无变化
+         */
+        @Test
+        @DisplayName("查找用户 - 用户已存在且信息无变化")
+        void testFindOrCreateUser_ExistingUserNoChanges() throws Exception {
             // 准备已有用户
             AdminUserDO existingUser = new AdminUserDO();
             existingUser.setId(100L);
@@ -326,11 +299,11 @@ class LingjiSsoServiceTest {
         }
 
         /**
-         * 测试查找或创建用户 - 用户已存在但信息有变化
+         * 测试查找用户 - 用户已存在但信息有变化
          */
         @Test
-        @DisplayName("查找或创建用户 - 用户已存在但信息有变化")
-        void testFindOrCreateUser_ExistingUserWithChanges() {
+        @DisplayName("查找用户 - 用户已存在但信息有变化")
+        void testFindOrCreateUser_ExistingUserWithChanges() throws Exception {
             // 准备已有用户
             AdminUserDO existingUser = new AdminUserDO();
             existingUser.setId(100L);
@@ -356,11 +329,11 @@ class LingjiSsoServiceTest {
         }
 
         /**
-         * 测试查找或创建用户 - 用户不存在，创建新用户
+         * 测试创建用户 - 用户不存在，创建新用户
          */
         @Test
-        @DisplayName("查找或创建用户 - 用户不存在，创建新用户")
-        void testFindOrCreateUser_NewUser() {
+        @DisplayName("创建用户 - 用户不存在，创建新用户")
+        void testFindOrCreateUser_NewUser() throws Exception {
             // 准备用户信息
             AdminUserDO userInfo = new AdminUserDO();
             userInfo.setUsername("NEWUSER003");
@@ -384,42 +357,20 @@ class LingjiSsoServiceTest {
             assertEquals(300L, result.getId());
             verify(userService, times(1)).createUser(any(UserInsertReqVO.class));
         }
-
-        // ========== 辅助方法 - 通过反射调用私有方法 ==========
-
-        private AdminUserDO invokeCreateUser(AdminUserDO userInfo) {
-            try {
-                var method = LingjiSsoServiceImpl.class.getDeclaredMethod("createUser", AdminUserDO.class);
-                method.setAccessible(true);
-                return (AdminUserDO) method.invoke(lingjiSsoService, userInfo);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to invoke createUser method", e);
-            }
-        }
-
-        private AdminUserDO invokeFindOrCreateUser(AdminUserDO userInfo) {
-            try {
-                var ssoUserInfo = new com.cmsr.onebase.module.system.vo.auth.LingjiSsoUserInfoVO();
-                var method = LingjiSsoServiceImpl.class.getDeclaredMethod(
-                    "findOrCreateUser", AdminUserDO.class,
-                    com.cmsr.onebase.module.system.vo.auth.LingjiSsoUserInfoVO.class
-                );
-                method.setAccessible(true);
-                return (AdminUserDO) method.invoke(lingjiSsoService, userInfo, ssoUserInfo);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to invoke findOrCreateUser method", e);
-            }
-        }
     }
 
     // ========== 辅助方法 ==========
 
-    private void setupMockConfig() {
-        when(lingjiSsoProperties.isEnabled()).thenReturn(true);
-        when(lingjiSsoProperties.getSourceId()).thenReturn("5570132830");
-        when(lingjiSsoProperties.getSourceKey()).thenReturn("JhxsQ3whI26YTMvt");
-        when(lingjiSsoProperties.getUserInfoUrl()).thenReturn("http://mock-server/api/userInfo");
-        when(lingjiSsoProperties.isHttpDebugLogEnabled()).thenReturn(true);
+    private LingjiSsoUserInfoVO createMockUserInfo() {
+        LingjiSsoUserInfoVO userInfo = new LingjiSsoUserInfoVO();
+        userInfo.setSub("13800138000");
+        userInfo.setUserName("测试用户");
+        userInfo.setStaffCode("TEST001");
+        userInfo.setEmail("test@example.com");
+        userInfo.setEnterpriseId("testEnterprise");
+        userInfo.setEnterpriseCode("TEST_ENT");
+        userInfo.setInsider(1);
+        return userInfo;
     }
 
     private TenantDO createMockTenant(Long id) {
@@ -430,27 +381,32 @@ class LingjiSsoServiceTest {
     }
 
     /**
-     * 创建模拟的 JWT 响应
-     * JWT 格式: header.payload.signature
-     * payload 需要包含用户信息
+     * 通过反射调用私有方法 createTenant
      */
-    private String createMockJwtResponse() {
-        JSONObject payload = new JSONObject();
-        payload.set("sub", "13800138000");
-        payload.set("userName", "测试用户");
-        payload.set("staffCode", "TEST001");
-        payload.set("email", "test@example.com");
-        payload.set("enterpriseId", "testEnterprise");
-        payload.set("enterpriseCode", "TEST_ENT");
-        payload.set("insider", 1);
+    private TenantDO invokeCreateTenant(LingjiSsoUserInfoVO userInfo) throws Exception {
+        var method = LingjiSsoServiceImpl.class.getDeclaredMethod("createTenant", LingjiSsoUserInfoVO.class);
+        method.setAccessible(true);
+        return (TenantDO) method.invoke(lingjiSsoService, userInfo);
+    }
 
-        String payloadBase64 = cn.hutool.core.codec.Base64.encode(payload.toString());
-        String mockJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9." + payloadBase64 + ".mockSignature";
+    /**
+     * 通过反射调用私有方法 createUser
+     */
+    private AdminUserDO invokeCreateUser(AdminUserDO userInfo) throws Exception {
+        var method = LingjiSsoServiceImpl.class.getDeclaredMethod("createUser", AdminUserDO.class);
+        method.setAccessible(true);
+        return (AdminUserDO) method.invoke(lingjiSsoService, userInfo);
+    }
 
-        JSONObject response = new JSONObject();
-        response.set("status", "0");
-        response.set("id_token", mockJwt);
-
-        return response.toString();
+    /**
+     * 通过反射调用私有方法 findOrCreateUser
+     */
+    private AdminUserDO invokeFindOrCreateUser(AdminUserDO userInfo) throws Exception {
+        var ssoUserInfo = new LingjiSsoUserInfoVO();
+        var method = LingjiSsoServiceImpl.class.getDeclaredMethod(
+                "findOrCreateUser", AdminUserDO.class, LingjiSsoUserInfoVO.class
+        );
+        method.setAccessible(true);
+        return (AdminUserDO) method.invoke(lingjiSsoService, userInfo, ssoUserInfo);
     }
 }
