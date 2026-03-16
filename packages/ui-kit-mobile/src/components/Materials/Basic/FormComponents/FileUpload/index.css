@@ -1,4 +1,5 @@
 .fileUploadWrapperOBMobile {
+  margin-bottom: 0.24rem;
   .arco-form-label-item {
     margin-top: 0.24rem;
   }
@@ -61,5 +62,8 @@
       align-items: center;
       flex: unset;
     }
+  }
+  .fileUploadBottomTips {
+    font-size: 0.28rem;
   }
 }

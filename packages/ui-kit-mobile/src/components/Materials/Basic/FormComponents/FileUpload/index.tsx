@@ -185,20 +185,24 @@ const XFileUpload = memo(
           pointerEvents: runtime ? 'unset' : 'none',
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
-        extra={!detailMode && uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] ? <>
-          {verify?.fileFormatLimit && (
-            <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
-          )}
-          <span>
-            {verify?.maxCountLimit && (
+        extra={
+          <div className="fileUploadBottomTips">
+            {!detailMode && uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] ? <>
+              {verify?.fileFormatLimit && (
+                <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
+              )}
               <span>
-                最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
-                {verify?.maxSizeLimit ? '，' : ''}
+                {verify?.maxCountLimit && (
+                  <span>
+                    最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                    {verify?.maxSizeLimit ? '，' : ''}
+                  </span>
+                )}
+                {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
               </span>
-            )}
-            {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
-          </span>
-        </> : undefined}
+            </> : undefined}
+          </div>
+        }
       >
         <Uploader
           accept={formatAccept(verify)}
