@@ -1,7 +1,7 @@
 import '@arco-design/web-react/dist/css/arco.css';
 
 import { ConfigProvider } from '@arco-design/web-react';
-import { ErrorPage, getAiGenURL, TokenManager, generateSignature } from '@onebase/common';
+import { envConfig, ErrorPage, getAiGenURL, TokenManager, generateSignature } from '@onebase/common';
 import { loadTheme } from '@onebase/ui-kit/src/utils/theme';
 import { registerMicroApps, start } from 'qiankun';
 import { StrictMode } from 'react';
@@ -12,8 +12,9 @@ import './i18n';
 import './index.css';
 import { initPlugins } from './plugin';
 
+
 async function loadArcoTheme() {
-  const rawTheme = (window as unknown as { global_config?: { THEME?: string } }).global_config?.THEME;
+  const rawTheme = envConfig?.THEME;
   const theme = rawTheme === 'lingji' ? 'lingji' : 'tiangong';
   console.log('[ThemeLoader] Loading arco theme:', theme);
   

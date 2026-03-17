@@ -14,44 +14,53 @@ export const scanExposedFields = (values: Record<string, unknown>): ExposedField
   const fields: ExposedField[] = [];
   const addedKeys = new Set<string>();
 
-  const addField = (row: Record<string, unknown>, mapKind: string) => {
+  const addFieldFromVariable = (row: Record<string, unknown>, mapKind: string) => {
     if (!isRecord(row)) return;
-    const expose = row.expose === true;
-    if (!expose) return;
-    
-    const key = typeof row.key === 'string' ? row.key : '';
-    const fieldName = typeof row.fieldName === 'string' ? row.fieldName : key;
-    const fieldType = typeof row.fieldType === 'string' ? row.fieldType : 'string';
-    const description = typeof row.description === 'string' ? row.description : '';
-    const required = row.required === true;
+
     const defaultValue = typeof row.defaultValue === 'string' ? row.defaultValue : '';
-    
-    if (!key || addedKeys.has(key)) return;
-    addedKeys.add(key);
-    
-    fields.push({
-      key,
-      fieldName,
-      fieldType,
-      description,
-      mapKind,
-      mapKey: key,
-      required,
-      defaultValue
+    // 从 defaultValue 中提取 ${xxx} 变量
+    const vars = extractVariables(defaultValue);
+    if (vars.length === 0) return;
+
+    vars.forEach((v) => {
+      if (addedKeys.has(v)) return;
+      addedKeys.add(v);
+
+      const key = typeof row.key === 'string' ? row.key : '';
+      const fieldName = typeof row.fieldName === 'string' ? row.fieldName : key;
+      const fieldType = typeof row.fieldType === 'string' ? row.fieldType : 'string';
+      const description = typeof row.description === 'string' ? row.description : '';
+      const required = row.required === true;
+
+      fields.push({
+        key: v,                          // 变量名作为入参 key
+        fieldName: fieldName || v,       // 显示名称
+        fieldType,
+        description,
+        mapKind,
+        mapKey: key,                     // 映射到底层的 key
+        required,
+        defaultValue
+      });
     });
   };
 
+  // 扫描各区域的变量
   const headers = getTabArray(values, 'requestHeaders');
-  headers.forEach((row) => addField(row as Record<string, unknown>, 'header'));
+  headers.forEach((row) => addFieldFromVariable(row as Record<string, unknown>, 'header'));
 
   const queryParams = getTabArray(values, 'queryParams');
-  queryParams.forEach((row) => addField(row as Record<string, unknown>, 'query'));
+  queryParams.forEach((row) => addFieldFromVariable(row as Record<string, unknown>, 'query'));
 
   const pathParams = getTabArray(values, 'pathParams');
-  pathParams.forEach((row) => addField(row as Record<string, unknown>, 'path'));
+  pathParams.forEach((row) => addFieldFromVariable(row as Record<string, unknown>, 'path'));
 
   const bodyMode = getTabString(values, 'bodyMode');
-  if (bodyMode === 'json') {
+  if (bodyMode === 'kv') {
+    const bodyRows = getTabArray(values, 'requestBody');
+    bodyRows.forEach((row) => addFieldFromVariable(row as Record<string, unknown>, 'body'));
+  } else if (bodyMode === 'json') {
+    // JSON body 中也可能有 ${xxx} 变量
     const jsonBody = getTabString(values, 'requestBodyJson');
     if (jsonBody) {
       const vars = extractVariables(jsonBody);
@@ -70,48 +79,14 @@ export const scanExposedFields = (values: Record<string, unknown>): ExposedField
         });
       });
     }
-  } else if (bodyMode === 'kv') {
-    const bodyRows = getTabArray(values, 'requestBody');
-    bodyRows.forEach((row) => addField(row as Record<string, unknown>, 'body'));
   }
 
   return fields;
 };
 
 export const scanExposedOutputFields = (values: Record<string, unknown>): ExposedField[] => {
-  const fields: ExposedField[] = [];
-  const addedKeys = new Set<string>();
-
-  const responseTabs = isRecord(values.responseTabs) ? (values.responseTabs as Record<string, unknown>) : {};
-  const responseHeaders = Array.isArray(responseTabs.responseHeaders) ? responseTabs.responseHeaders : [];
-  
-  responseHeaders.forEach((row) => {
-    if (!isRecord(row)) return;
-    const expose = row.expose === true;
-    if (!expose) return;
-    
-    const key = typeof row.key === 'string' ? row.key : '';
-    const fieldName = typeof row.fieldName === 'string' ? row.fieldName : key;
-    const fieldType = typeof row.fieldType === 'string' ? row.fieldType : 'string';
-    const description = typeof row.description === 'string' ? row.description : '';
-    const jsonPath = typeof row.jsonPath === 'string' ? row.jsonPath : '';
-    
-    if (!key || addedKeys.has(key)) return;
-    addedKeys.add(key);
-    
-    fields.push({
-      key,
-      fieldName,
-      fieldType,
-      description,
-      mapKind: 'header',
-      mapKey: jsonPath || key,
-      required: false,
-      defaultValue: ''
-    });
-  });
-
-  return fields;
+  // 输出参数不自动扫描，用户需要在 Step3 手动配置
+  return [];
 };
 
 export function actionConfigToFormValues(config: unknown): Record<string, unknown> {
