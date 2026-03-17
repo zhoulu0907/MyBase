@@ -138,8 +138,8 @@ importers:
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@arco-themes/react-cyansu-ob03':
-        specifier: ^0.0.6
-        version: 0.0.6(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        specifier: ^0.0.7
+        version: 0.0.7(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@arco-themes/react-tiangong':
         specifier: ^0.0.1
         version: 0.0.1(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
@@ -1492,11 +1492,6 @@ packages:
     resolution: {integrity: sha512-QO6BZhv0ifyuvk3Qzz7S51UN2+Z0uxivnmHR3k4e+wugwMrTCqc1lQlCv9CLEvRe+AHrT49i+/+NtYJ8yI7l2A==}
     peerDependencies:
       '@arco-design/web-react': ^2.66.3
-
-  '@arco-themes/react-cyansu-ob03@0.0.6':
-    resolution: {integrity: sha512-RIBE8r0lWngWlKnCTKrQTIekWsXGzUYpOMe5C8JEhRm5kWtxyz6amnwkCVoyuKaExKpX+32oYpb5UlwQE+T+GA==}
-    peerDependencies:
-      '@arco-design/web-react': ^2.66.10
 
   '@arco-themes/react-cyansu-ob03@0.0.7':
     resolution: {integrity: sha512-AHj9c8tZbx0IT/76C0GA3OwgPwMh9bh79cV+pu+O6FOI2KzTG3FepWPK0QHDl1I1T53+2CPxlloePfSVkCf+Ag==}
@@ -9799,10 +9794,6 @@ snapshots:
       - '@types/react'
 
   '@arco-themes/react-cyansu-ob03@0.0.3(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
-    dependencies:
-      '@arco-design/web-react': 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-
-  '@arco-themes/react-cyansu-ob03@0.0.6(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
     dependencies:
       '@arco-design/web-react': 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
