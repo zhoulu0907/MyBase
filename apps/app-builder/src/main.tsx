@@ -1,7 +1,7 @@
 import '@arco-design/web-react/dist/css/arco.css';
 
 import { ConfigProvider } from '@arco-design/web-react';
-import { envConfig, ErrorPage, getAiGenURL, TokenManager, generateSignature } from '@onebase/common';
+import { envConfig, ErrorPage, getAiGenURL, TokenManager, generateSignature, loadThemeAtPosition } from '@onebase/common';
 import { loadTheme } from '@onebase/ui-kit/src/utils/theme';
 import { registerMicroApps, start } from 'qiankun';
 import { StrictMode } from 'react';
@@ -12,18 +12,11 @@ import './i18n';
 import './index.css';
 import { initPlugins } from './plugin';
 
+const ARCO_THEME_MAP = {
+  lingji: () => import('@arco-themes/react-cyansu-ob03/index.less'),
+  tiangong: () => import('@arco-themes/react-tiangong/index.less')
+};
 
-async function loadArcoTheme() {
-  const rawTheme = envConfig?.THEME;
-  const theme = rawTheme === 'lingji' ? 'lingji' : 'tiangong';
-  console.log('[ThemeLoader] Loading arco theme:', theme);
-  
-  if (theme === 'lingji') {
-    await import('@arco-themes/react-cyansu-ob03/index.less');
-  } else {
-    await import('@arco-themes/react-tiangong/index.less');
-  }
-}
 const tokenInfo = TokenManager.getTokenInfo();
 const tenantInfo = TokenManager.getTenantInfo();
 registerMicroApps([
@@ -59,7 +52,14 @@ async function init() {
   }
 
   // 加载 Arco 主题（天工或灵畿）
-  await loadArcoTheme();
+  const rawTheme = envConfig?.THEME;
+  const theme = rawTheme === 'lingji' ? 'lingji' : 'tiangong';
+  await loadThemeAtPosition({
+    theme,
+    themeMap: ARCO_THEME_MAP,
+    insertAfterSelector: 'style',
+    defaultTheme: 'tiangong'
+  });
 
   // 加载本地覆盖样式
   await loadTheme({

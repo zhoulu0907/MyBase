@@ -14,8 +14,8 @@ importers:
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@arco-themes/react-cyansu-ob03':
-        specifier: ^0.0.6
-        version: 0.0.6(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        specifier: ^0.0.7
+        version: 0.0.7(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@onebase/app':
         specifier: workspace:*
         version: link:../../packages/app
@@ -798,8 +798,8 @@ importers:
         specifier: ^2.66.1
         version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@arco-themes/react-cyansu-ob03':
-        specifier: ^0.0.6
-        version: 0.0.6(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
+        specifier: ^0.0.7
+        version: 0.0.7(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))
       '@babel/plugin-proposal-class-properties':
         specifier: ^7.18.6
         version: 7.18.6(@babel/core@7.28.5)
@@ -1497,6 +1497,11 @@ packages:
     resolution: {integrity: sha512-RIBE8r0lWngWlKnCTKrQTIekWsXGzUYpOMe5C8JEhRm5kWtxyz6amnwkCVoyuKaExKpX+32oYpb5UlwQE+T+GA==}
     peerDependencies:
       '@arco-design/web-react': ^2.66.10
+
+  '@arco-themes/react-cyansu-ob03@0.0.7':
+    resolution: {integrity: sha512-AHj9c8tZbx0IT/76C0GA3OwgPwMh9bh79cV+pu+O6FOI2KzTG3FepWPK0QHDl1I1T53+2CPxlloePfSVkCf+Ag==}
+    peerDependencies:
+      '@arco-design/web-react': ^2.66.11
 
   '@arco-themes/react-tiangong@0.0.1':
     resolution: {integrity: sha512-XbGM5ZfaOb/3NcNQE+aB73sPgWlYp0KStWMyyggVNuEI09KowMs7Re0Lm0bbiriIkAhP0rLDc4t+GRuo9CDuKg==}
@@ -9801,6 +9806,10 @@ snapshots:
     dependencies:
       '@arco-design/web-react': 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
+  '@arco-themes/react-cyansu-ob03@0.0.7(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
+    dependencies:
+      '@arco-design/web-react': 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+
   '@arco-themes/react-tiangong@0.0.1(@arco-design/web-react@2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))':
     dependencies:
       '@arco-design/web-react': 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -11757,7 +11766,7 @@ snapshots:
       eslint-define-config: 1.12.0
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1)
       eslint-plugin-babel: 5.3.1(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-prettier: 4.2.5(eslint-config-prettier@8.10.2(eslint@8.57.1))(eslint@8.57.1)(prettier@2.8.8)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
@@ -15615,11 +15624,11 @@ snapshots:
       tinyglobby: 0.2.14
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -15635,7 +15644,7 @@ snapshots:
       eslint: 8.57.1
       eslint-rule-composer: 0.3.0
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -15646,7 +15655,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3

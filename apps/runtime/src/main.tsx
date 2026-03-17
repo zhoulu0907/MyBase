@@ -1,8 +1,7 @@
 import '@arco-design/web-react/dist/css/arco.css';
-import '@arco-themes/react-cyansu-ob03/index.less';
 
 import { ConfigProvider } from '@arco-design/web-react';
-import { envConfig, TokenManager } from '@onebase/common';
+import { envConfig, TokenManager, loadThemeAtPosition } from '@onebase/common';
 import { loadTheme } from '@onebase/ui-kit/src/utils/theme';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -11,17 +10,10 @@ import './i18n';
 import './index.css';
 import { initPlugins } from './plugin';
 
-async function loadArcoTheme() {
-  const rawTheme = envConfig?.THEME;
-  const theme = rawTheme === 'lingji' ? 'lingji' : 'tiangong';
-  console.log('[ThemeLoader] Loading arco theme:', theme);
-  
-  if (theme === 'lingji') {
-    await import('@arco-themes/react-cyansu-ob03/index.less');
-  } else {
-    await import('@arco-themes/react-tiangong/index.less');
-  }
-}
+const ARCO_THEME_MAP = {
+  lingji: () => import('@arco-themes/react-cyansu-ob03/index.less'),
+  tiangong: () => import('@arco-themes/react-tiangong/index.less')
+};
 
 async function init() {
   // 提前解析路由获取 tenantId/appId 并初始化插件
@@ -54,7 +46,15 @@ async function init() {
     console.error('[Runtime] Early init failed:', e);
   }
 
-  await loadArcoTheme();
+  // 加载 Arco 主题（天工或灵畿）
+  const rawTheme = envConfig?.THEME;
+  const theme = rawTheme === 'lingji' ? 'lingji' : 'tiangong';
+  await loadThemeAtPosition({
+    theme,
+    themeMap: ARCO_THEME_MAP,
+    insertAfterSelector: 'style',
+    defaultTheme: 'tiangong'
+  });
 
   await loadTheme({
     default: () => import('./themes/theme.less'),
