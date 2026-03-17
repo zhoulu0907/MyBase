@@ -11,7 +11,9 @@ import {
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
-import React, { useEffect } from 'react';
+import { Spin } from '@arco-design/web-react';
+import React, { useEffect, useState } from 'react';
+import DevelopEmpty from '@/assets/images/develop_empty.svg';
 import styles from './index.module.less';
 
 // ==================== Grid 布局工具 ====================
@@ -80,6 +82,7 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
   const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
     useWorkbenchEditorSignal;
   const { setPageLayout, resetPageLayout } = pageLayoutSignal;
+  const [loading, setLoading] = useState(false);
 
   // 组件挂载时清理旧数据和背景样式
   useEffect(() => {
@@ -108,7 +111,18 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
 
     // 加载新页面数据
     if (pageSetId) {
-      startLoadWorkbenchPageSet({ pageSetId });
+      const loadData = async () => {
+        setLoading(true);
+        try {
+          await startLoadWorkbenchPageSet({ pageSetId });
+        } finally {
+          setTimeout(() => {
+            setLoading(false);
+          }, 100);
+        }
+      };
+
+      loadData();
     }
   }, [pageSetId]);
 
@@ -150,56 +164,74 @@ const WorkbenchRuntime: React.FC<WorkbenchRuntimeProps> = ({ pageSetId, runtime 
 
   return (
     <>
-      {/* 普通组件 - grid 布局 */}
-      <div className={styles.wbGrid}>
-        {normalComponents.map((cp: GridItem) => {
-          const schema = wbComponentSchemas.value[cp.id];
-          if (!schema) return null;
-          if (schema.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) return null;
-          const widthStr = getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType);
-          const colSpan = percentageToColSpan(widthStr);
-          const rowSpan = (schema?.config?.gridLayout as { rowSpan?: number } | undefined)?.rowSpan ?? 1;
-          return (
-            <div
-              key={cp.id}
-              className={styles.componentItem}
-              style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
-            >
-              <PreviewRender
-                cpId={cp.id}
-                cpType={cp.type}
-                pageComponentSchema={schema}
-                runtime={runtime}
-                preview={false}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      {/* 浮动组件 */}
-      {floatingComponents.map((cp: GridItem) => {
-        const schema = wbComponentSchemas.value[cp.id];
-        if (!schema) return null;
-        const floatingConfig = schema?.config?.floatingConfig as
-          | { right?: number; bottom?: number; width?: number; height?: number }
-          | undefined;
-        return (
-          <div
-            key={cp.id}
-            style={{
-              position: 'fixed',
-              right: floatingConfig?.right ?? 80,
-              bottom: floatingConfig?.bottom ?? 80,
-              width: floatingConfig?.width ?? 80,
-              height: floatingConfig?.height ?? 80,
-              zIndex: 100
-            }}
-          >
-            <PreviewRender cpId={cp.id} cpType={cp.type} pageComponentSchema={schema} runtime={true} preview={false} />
+      {loading ? (
+        <div className={styles.loading}>
+          <Spin size={40} tip="加载中..." />
+        </div>
+      ) : workbenchComponents.value.length > 0 ? (
+        <>
+          {/* 普通组件 - grid 布局 */}
+          <div className={styles.wbGrid}>
+            {normalComponents.map((cp: GridItem) => {
+              const schema = wbComponentSchemas.value[cp.id];
+              if (!schema) return null;
+              if (schema.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) return null;
+              const widthStr = getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType);
+              const colSpan = percentageToColSpan(widthStr);
+              const rowSpan = (schema?.config?.gridLayout as { rowSpan?: number } | undefined)?.rowSpan ?? 1;
+              return (
+                <div
+                  key={cp.id}
+                  className={styles.componentItem}
+                  style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
+                >
+                  <PreviewRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    pageComponentSchema={schema}
+                    runtime={runtime}
+                    preview={false}
+                  />
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+
+          {/* 浮动组件 */}
+          {floatingComponents.map((cp: GridItem) => {
+            const schema = wbComponentSchemas.value[cp.id];
+            if (!schema) return null;
+            const floatingConfig = schema?.config?.floatingConfig as
+              | { right?: number; bottom?: number; width?: number; height?: number }
+              | undefined;
+            return (
+              <div
+                key={cp.id}
+                style={{
+                  position: 'fixed',
+                  right: floatingConfig?.right ?? 80,
+                  bottom: floatingConfig?.bottom ?? 80,
+                  width: floatingConfig?.width ?? 80,
+                  height: floatingConfig?.height ?? 80,
+                  zIndex: 100
+                }}
+              >
+                <PreviewRender
+                  cpId={cp.id}
+                  cpType={cp.type}
+                  pageComponentSchema={schema}
+                  runtime={true}
+                  preview={false}
+                />
+              </div>
+            );
+          })}
+        </>
+      ) : (
+        <div className={styles.noData}>
+          <img src={DevelopEmpty} alt="暂无数据" />
+        </div>
+      )}
     </>
   );
 };
