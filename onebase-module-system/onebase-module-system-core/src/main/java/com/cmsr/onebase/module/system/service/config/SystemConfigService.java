@@ -71,4 +71,12 @@ public interface SystemConfigService {
      * @return 参数配置
      */
     List<SystemGeneralConfigDO> getTenantConfigListByKeysAndAppId(SystemConfigSearchReqVO  vo);
+
+    /**
+     * 获得参数配置分页
+     *
+     * @param  key
+     * @return 参数配置分页
+     */
+    SystemGeneralConfigDO getAppConfigByKeyAndAppId(String key, Long appId);
 }

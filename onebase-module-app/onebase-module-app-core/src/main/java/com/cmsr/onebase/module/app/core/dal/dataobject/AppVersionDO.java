@@ -34,4 +34,7 @@ public class AppVersionDO extends BaseAppEntity {
     @Column(value = "version_type", comment = "版本类型")
     private Integer versionType;
 
+    @Column(value = "app_third_user_enable", comment = "应用三方用户登录-开关：0-关闭，1-开启")
+    private Integer appThirdUserEnable;
+
 }

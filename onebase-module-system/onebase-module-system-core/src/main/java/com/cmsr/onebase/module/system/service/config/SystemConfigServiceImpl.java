@@ -263,4 +263,9 @@ public class SystemConfigServiceImpl implements SystemConfigService {
 
     }
 
+    @Override
+    public SystemGeneralConfigDO getAppConfigByKeyAndAppId(String key, Long appId) {
+        return systemConfigDataRepository.getAppConfigByKeyAndAppId(key, appId);
+    }
+
 }
