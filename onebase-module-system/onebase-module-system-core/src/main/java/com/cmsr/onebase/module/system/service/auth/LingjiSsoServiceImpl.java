@@ -115,7 +115,21 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 获取灵畿用户信息
      */
     private LingjiSsoUserInfoVO getUserInfo(String code) {
-        // 生成时间戳 (格式: yyyyMMddHHmmssSSS)
+        // 校验必需的配置项
+        if (StringUtils.isBlank(lingjiSsoProperties.getSourceId())) {
+            log.error("灵畿 SSO 配置错误：sourceId 不能为空");
+            throw exception(LINGJI_SSO_CONFIG_DISABLED);
+        }
+        if (StringUtils.isBlank(lingjiSsoProperties.getSourceKey())) {
+            log.error("灵畿 SSO 配置错误：sourceKey 不能为空");
+            throw exception(LINGJI_SSO_CONFIG_DISABLED);
+        }
+        if (StringUtils.isBlank(lingjiSsoProperties.getUserInfoUrl())) {
+            log.error("灵畿 SSO 配置错误：userInfoUrl 不能为空");
+            throw exception(LINGJI_SSO_CONFIG_DISABLED);
+        }
+    
+        // 生成时间戳 (格式：yyyyMMddHHmmssSSS)
         String timestamp = LingjiSsoSignatureUtils.generateTimestamp();
 
         // 生成 requestId

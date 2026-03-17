@@ -11,8 +11,11 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
@@ -20,11 +23,19 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 import java.net.URI;
 import java.time.Duration;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 基于 S3 协议的文件客户端，实现 MinIO、阿里云、腾讯云、七牛云、华为云等云服务
  *
  */
+@Slf4j
 public class S3FileClient extends AbstractFileClient<S3FileClientConfig> {
+
+    /**
+     * 默认桶名称
+     */
+    private static final String DEFAULT_BUCKET = "onebase";
 
     private S3Client client;
     private S3Presigner presigner;
@@ -35,6 +46,10 @@ public class S3FileClient extends AbstractFileClient<S3FileClientConfig> {
 
     @Override
     protected void doInit() {
+        // 补全 bucket，默认使用 onebase
+        if (StrUtil.isEmpty(config.getBucket())) {
+            config.setBucket(DEFAULT_BUCKET);
+        }
         // 补全 domain
         if (StrUtil.isEmpty(config.getDomain())) {
             config.setDomain(buildDomain());
@@ -54,6 +69,8 @@ public class S3FileClient extends AbstractFileClient<S3FileClientConfig> {
                 .endpointOverride(endpoint)
                 .serviceConfiguration(serviceConfiguration)
                 .build();
+        // 检查 Bucket 是否存在，不存在则自动创建
+        ensureBucketExists();
         presigner = S3Presigner.builder()
                 .credentialsProvider(credentialsProvider)
                 .region(region)
@@ -113,6 +130,19 @@ public class S3FileClient extends AbstractFileClient<S3FileClientConfig> {
                 .signatureDuration(expiration)
                 .putObjectRequest(b -> b.bucket(config.getBucket()).key(path))
                 .build()).url().toString();
+    }
+
+    /**
+     * 检查 Bucket 是否存在，不存在则自动创建
+     */
+    private void ensureBucketExists() {
+        String bucket = config.getBucket();
+        try {
+            client.headBucket(HeadBucketRequest.builder().bucket(bucket).build());
+        } catch (NoSuchBucketException e) {
+            log.info("[ensureBucketExists][Bucket({}) 不存在，自动创建]", bucket);
+            client.createBucket(CreateBucketRequest.builder().bucket(bucket).build());
+        }
     }
 
     /**
