@@ -4,7 +4,6 @@ import com.cmsr.onebase.module.etl.common.entity.ColumnData;
 import com.cmsr.onebase.module.etl.common.entity.TableData;
 import com.cmsr.onebase.module.etl.common.graph.Node;
 import com.cmsr.onebase.module.etl.common.graph.NodeConfig;
-import com.cmsr.onebase.module.etl.common.graph.PreviewWorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.WorkflowGraph;
 import com.cmsr.onebase.module.etl.common.graph.conf.*;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlDataSource;
@@ -13,6 +12,7 @@ import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -30,12 +30,11 @@ public class WorkflowProvider {
     private QueryProvider queryProvider;
 
     public WorkflowGraph createSubWorkflowGraph(Long applicationId, String graphJson, String nodeId) throws Exception {
-        PreviewWorkflowGraph previewGraph = JacksonUtil.readValue(graphJson, PreviewWorkflowGraph.class);
-        if(previewGraph == null || previewGraph.getWorkflow() == null) {
+        WorkflowGraph graph = JacksonUtil.readValue(graphJson, WorkflowGraph.class);
+        if(graph == null || CollectionUtils.isEmpty(graph.getNodes())) {
             log.error("createSubWorkflowGraph error. 图信息不完整, applicationId={}, graphJson={}", applicationId, graphJson);
             throw new IllegalArgumentException("图信息不完整");
         }
-        WorkflowGraph graph  = previewGraph.getWorkflow();
         graph.init();
         WorkflowGraph subgraph = graph.subgraph(nodeId);
         complementGraphInformation(applicationId, subgraph);
