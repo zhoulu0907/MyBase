@@ -1,16 +1,15 @@
 package com.cmsr.onebase.module.system.runtime.controller.user;
 
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.dal.dataobject.dict.DictTypeDO;
 import com.cmsr.onebase.module.system.service.user.UserAppRelationService;
 import com.cmsr.onebase.module.system.vo.corpapprelation.CorpAppRelationInertReqVO;
 import com.cmsr.onebase.module.system.vo.dicttype.DictTypeSimpleRespVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppRelationInertReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserAppVO;
-import com.cmsr.onebase.module.system.vo.user.UserApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.user.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -49,5 +48,14 @@ public class UserAppRelationController {
         List<UserAppVO> list = userAppRelationService.getAppByUserId(userId);
         return success(list);
     }
+
+    @GetMapping("/getUserAppCount")
+    @Operation(summary = "根据tenantId与userId查询应用数量")
+    @PermitAll
+    @ApiSignIgnore
+    @TenantIgnore
+    public CommonResult<UserAppCountRespVO> getUserAppCount(@Valid UserAppCountReqVO reqVO){
+        return success(userAppRelationService.getUserAppCount(reqVO));
+    };
 
 }

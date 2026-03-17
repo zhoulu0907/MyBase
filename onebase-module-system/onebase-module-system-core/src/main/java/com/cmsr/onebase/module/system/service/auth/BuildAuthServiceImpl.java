@@ -35,8 +35,8 @@ import com.cmsr.onebase.module.system.service.corp.CorpService;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.member.MemberService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
-import com.cmsr.onebase.module.system.service.oauth2.OAuth2ClientOutConfigService;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientOutConfigDO;
+import com.cmsr.onebase.module.system.service.oauth2.OAuth2ClientExternalConfigService;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientExternalConfigDO;
 import com.cmsr.onebase.module.system.service.permission.PermissionService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
@@ -129,7 +129,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     private PwdEnHelper pwdEnHelper;
 
     @Resource
-    private OAuth2ClientOutConfigService oauth2ClientOutConfigService;
+    private OAuth2ClientExternalConfigService oauth2ClientExternalConfigService;
 
     // 天工租户配置 (从 database 读取)
     private static final String TIAN_GONG_TENANT_CODE = "tenant_tiangong";
@@ -528,7 +528,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     @Override
     public AuthLoginRespVO tianGongLogin(String code, String deviceId) {
         // 1. 从数据库获取天工 OAuth2 配置
-        OAuth2ClientOutConfigDO config = oauth2ClientOutConfigService.getConfigByTenantCode(TIAN_GONG_TENANT_CODE);
+        OAuth2ClientExternalConfigDO config = oauth2ClientExternalConfigService.getConfigByTenantCode(TIAN_GONG_TENANT_CODE);
         if (config == null) {
             throw exception(TIAN_GONG_OAUTH2_CONFIG_NOT_EXISTS);
         }
@@ -570,7 +570,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     /**
      * 获取天工访问令牌
      */
-    private String getTianGongAccessToken(OAuth2ClientOutConfigDO config, String code) {
+    private String getTianGongAccessToken(OAuth2ClientExternalConfigDO config, String code) {
         // 构建 Basic 认证头
         String credentials = config.getClientId() + ":" + config.getClientSecret();
         String encodedCredentials = Base64.getEncoder().encodeToString(credentials.getBytes());
@@ -605,7 +605,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     /**
      * 获取天工用户信息
      */
-    private JSONObject getTianGongUserInfo(OAuth2ClientOutConfigDO config, String accessToken) {
+    private JSONObject getTianGongUserInfo(OAuth2ClientExternalConfigDO config, String accessToken) {
         // 创建请求
         Request request = new Request.Builder()
                 .url(config.getUserInfoUrl())
@@ -635,7 +635,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     /**
      * 处理天工用户登录
      */
-    private AuthLoginRespVO processTianGongUserLogin(JSONObject userInfo, OAuth2ClientOutConfigDO config, String deviceId, TenantDO tenantDo) {
+    private AuthLoginRespVO processTianGongUserLogin(JSONObject userInfo, OAuth2ClientExternalConfigDO config, String deviceId, TenantDO tenantDo) {
         
         // 构建用户对象
         AdminUserDO adminUserDO = JSONUtil.toBean(userInfo, AdminUserDO.class);

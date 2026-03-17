@@ -13,8 +13,8 @@ import lombok.Data;
  */
 @Data
 @TenantIgnore
-@Table(value = "system_oauth2_client_out_config")
-public class OAuth2ClientOutConfigDO extends BaseEntity {
+@Table(value = "system_oauth2_client_external_config")
+public class OAuth2ClientExternalConfigDO extends BaseEntity {
 
     // 字段常量
     public static final String TENANT_CODE = "tenant_code";

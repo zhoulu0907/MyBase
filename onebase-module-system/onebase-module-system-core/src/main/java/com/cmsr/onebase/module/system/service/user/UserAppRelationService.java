@@ -1,10 +1,8 @@
 package com.cmsr.onebase.module.system.service.user;
 
-import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.vo.user.*;
-import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -41,4 +39,6 @@ public interface UserAppRelationService {
          * @return 用户未授权应用列表-分页结果
          */
     List<ApplicationDTO> getUserNoRelationAppList(UserRelationAppReqVO relationAppReqVO);
+
+    UserAppCountRespVO getUserAppCount(UserAppCountReqVO reqVO);
 }
