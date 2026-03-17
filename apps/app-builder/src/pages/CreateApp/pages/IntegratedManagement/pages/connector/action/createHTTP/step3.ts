@@ -1,23 +1,36 @@
 import type { ISchema } from '@formily/react';
 
-/** HTTP 动作创建 - 第三步：出参配置（响应头 / 响应体），每个 Tab 内用表格展示并支持动态增减 */
+/** HTTP 动作创建 - 第三步：动作对外出入参定义（用于调用方只填写少量字段） */
 export const step3Schema: ISchema = {
   type: 'object',
   properties: {
-    tabs: {
+    ioTitle: {
+      type: 'void',
+      title: '动作对外出入参定义',
+      'x-component': 'SectionTitle'
+    },
+    ioDesc: {
+      type: 'void',
+      'x-component': 'div',
+      'x-component-props': {
+        style: { color: '#666', fontSize: 12, marginBottom: 16 }
+      },
+      'x-content': '定义动作对外暴露的入参和出参，调用方只需填写这些字段即可调用动作。'
+    },
+    io: {
       type: 'object',
       'x-component': 'Tabs',
       'x-component-props': { type: 'card-gutter' },
       properties: {
-        responseHeaders: {
+        inputs: {
           type: 'array',
-          title: '响应头',
-          'x-component': 'OutputParamArrayTable'
+          title: '动作入参',
+          'x-component': 'ActionInputArrayTable'
         },
-        responseBody: {
+        outputs: {
           type: 'array',
-          title: '响应体',
-          'x-component': 'OutputParamArrayTable'
+          title: '动作出参',
+          'x-component': 'ActionOutputArrayTable'
         }
       }
     }

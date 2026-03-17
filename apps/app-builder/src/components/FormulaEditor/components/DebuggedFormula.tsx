@@ -39,14 +39,16 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
   };
 
   const transformTableData = (items: fieldListWithNodeData[]) => {
-    const result: { [key: string]: string[] } = {};
+    let result: { [key: string]: string[] } = {};
     Object.entries(items).forEach(([tableKey, rows]) => {
       if (!rows.length) return;
-      if (tableKey.includes('$')) {
+      if (tableKey.startsWith('tableRows')) {
         const newTableKey = tableKey.replace('tableRows', '');
         const fieldNames = Object.keys(rows[0]);
         // 遍历每个字段名，提取所有行的该字段值
         handleTableItem(fieldNames, newTableKey, result, rows);
+      } else {
+        result = items as any;
       }
     });
     return result;
@@ -184,8 +186,9 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       <div className={styles.content}>
         <Form className={styles.variablesDisplay} form={form} ref={formRef}>
           {entityFields.map((item) => {
+            if (item.fieldName.includes('.')) return; // $xx.xx不在此处展示
             return (
-              <Form.Item label={item.fieldName} field={item.fieldName} rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ style: { flex: 1 } }}>
+              <Form.Item label={item.fieldName.replace('$', '')} field={item.fieldName} rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ style: { flex: 1 } }}>
                 {renderFormItem(item.fieldType)}
               </Form.Item>
             );
@@ -195,7 +198,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
             return (
               <>
                 <Typography.Title heading={6} className={styles.title}>
-                  {key}
+                  {key.replace('$', '')}
                 </Typography.Title>
                 <Form.List
                   field="tableRows"

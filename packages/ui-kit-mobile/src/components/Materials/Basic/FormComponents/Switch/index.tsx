@@ -1,6 +1,7 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import { nanoid } from 'nanoid';
-import { Switch, Form, Ellipsis } from '@arco-design/mobile-react';
+import { Switch, Form, Ellipsis, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { FormInternalComponentType } from '@arco-design/mobile-react/esm/form';
 import { getSystem } from '@arco-design/mobile-utils';
 import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
@@ -69,7 +70,16 @@ const XSwitch = memo((props: XSwitchConfig & { runtime?: boolean; detailMode?: b
       layout={layout}
       trigger='checked'
       displayType={FormInternalComponentType.Switch}
-      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : false}
       style={{
         pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',

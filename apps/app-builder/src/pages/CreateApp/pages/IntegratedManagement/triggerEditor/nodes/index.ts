@@ -20,7 +20,7 @@ import { NavigateNodeRegistry } from './interaction/navigate';
 import { RefreshNodeRegistry } from './interaction/refresh';
 import { TooltipNodeRegistry } from './interaction/tooltip';
 import { DataMapperNodeRegistry } from './other/data-mapper';
-import { HTTPNodeRegistry } from './other/http';
+import { HTTPNodeRegistry } from './other/http-legacy';
 import { JavascriptNodeRegistry } from './other/javascript';
 import { JsonNodeRegistry } from './other/json';
 import { LogNodeRegistry } from './other/log';

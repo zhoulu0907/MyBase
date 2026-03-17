@@ -29,6 +29,7 @@ import './index.css';
 import type { XLoadMoreConfig } from './schema';
 import TableSearch from './tableSerach';
 import { getSimpleUserList } from '@onebase/platform-center';
+import EmptySVG from '@/assets/images/empty.svg';
 
 type XTableSelectProps = {
   showSelect: boolean;
@@ -138,10 +139,14 @@ const XLoadMore = memo(
                 if (result.length === 0) return;
                 if (['FILE', 'IMAGE'].includes(dataFieldInfo.fieldType)) {
                   const file = result[0];
+                  const componentSchemasKeys = Object.keys(pageComponentSchemas.value || {});
+                  const enableDownload = componentSchemasKeys.find((ele) => {
+                    return pageComponentSchemas.value[ele]?.config?.showDownload || dataFieldInfo.fieldType === 'IMAGE';
+                  });
                   return (
                     <div className="fileWrapper">
                       <Ellipsis className="filename" text={file.name} />
-                      <IconDownload
+                      {enableDownload && <IconDownload
                         style={{ color: 'rgb(var(--primary-6))', marginLeft: '0.24rem', fontSize: '0.28rem' }}
                         onClick={async () => {
                           const param = {
@@ -153,7 +158,7 @@ const XLoadMore = memo(
                           const fileUrl = await attachmentDownload(tableName, param);
                           downloadFileByUrl(fileUrl, file.name);
                         }}
-                      />
+                      />}
                     </div>
                   );
                 }
@@ -493,7 +498,11 @@ const XLoadMore = memo(
         return null;
       }
       if (!loading && !tableData.length && typeof tableTotal === 'number' && tableTotal === 0) {
-        return <div className="no-data">暂无数据</div>;
+        return (
+          <div className='no-data'>
+            <img src={EmptySVG} alt='暂无数据' />
+          </div>
+        )
       }
       if (loading || tablePageNo * pageSize >= (tableTotal || Number.MAX_SAFE_INTEGER)) {
         return tableTotal ? <div className="total-data">共{tableTotal}条数据</div> : null;

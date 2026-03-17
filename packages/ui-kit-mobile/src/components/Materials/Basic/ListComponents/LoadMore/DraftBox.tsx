@@ -1,5 +1,6 @@
 import ClearIcon from '@/assets/images/clear_icon.svg';
 import draftIcon from '@/assets/images/draft_icon.svg';
+import EmptySVG from '@/assets/images/empty.svg';
 import CustomNav from '@/components/Nav';
 import {
   Badge,
@@ -265,7 +266,11 @@ export default function DraftBox(props: IProps) {
 
   const getBottomBar = () => {
     if (!loading && !draftData.length && draftTotal === 0) {
-      return <div className="no-data">暂无数据</div>;
+      return (
+        <div className='no-data'>
+          <img src={EmptySVG} alt='暂无数据' />
+        </div>
+      )
     }
 
     if (loading || draftPageNo * pageSize >= (draftTotal || Number.MAX_SAFE_INTEGER)) {

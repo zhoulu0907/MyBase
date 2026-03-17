@@ -1,7 +1,7 @@
 import DownloadLink from '@/assets/images/download_link.svg';
-import { Ellipsis, Form, Loading, Toast, Uploader } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Loading, Popover, Toast, Uploader } from '@arco-design/mobile-react';
 import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
-import { IconClose, IconDelete, IconDownload } from '@arco-design/mobile-react/esm/icon';
+import { IconClose, IconDelete, IconDownload, IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES, downloadFileByUrl } from '@onebase/ui-kit';
@@ -148,10 +148,28 @@ const XFileUpload = memo(
       }
     ];
 
+    const formatAccept = (verify: any) => {
+      if (!verify?.fileFormatLimit) return 'undefined';
+      return verify?.fileFormat
+        .split(',')
+        .map((i: any) => i.trim().replace(/^\./, '').toLowerCase())
+        .map((ext: any) => `.${ext}`)
+        .join(',')
+    };
+
     return (
       <Form.Item
         className="inputTextWrapperOBMobile fileUploadWrapperOBMobile"
-        label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+        label={
+          <>
+            {label.display && <Ellipsis text={label.text} maxLine={2} />}
+            {props?.tooltip && (
+              <Popover content={props?.tooltip} direction='bottomCenter' >
+                <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+              </Popover>
+            )}
+          </>
+        }
         layout="vertical"
         field={fieldId}
         rules={rules}
@@ -162,16 +180,16 @@ const XFileUpload = memo(
         }}
       >
         <Uploader
-          accept={verify?.fileFormat}
+          accept={formatAccept(verify)}
           files={filesList}
-          limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
-          onMaxSizeExceed={(file) =>
+          limit={verify?.maxCountLimit ? verify?.maxCount : 0}
+          onMaxSizeExceed={() =>
             Toast.toast({
               content: '文件大小超出限制',
               duration: 2000
             })
           }
-          onLimitExceed={(file) =>
+          onLimitExceed={() =>
             Toast.toast({
               content: '文件数量超出限制',
               duration: 2000
