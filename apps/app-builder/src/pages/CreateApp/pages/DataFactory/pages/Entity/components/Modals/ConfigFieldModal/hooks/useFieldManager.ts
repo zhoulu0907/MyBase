@@ -215,6 +215,7 @@ export const useFieldManager = (
       onSuccess?.();
     } catch (error) {
       console.error('executeSave error', error);
+      Message.error('保存失败');
     } finally {
       setSubmitting(false);
     }

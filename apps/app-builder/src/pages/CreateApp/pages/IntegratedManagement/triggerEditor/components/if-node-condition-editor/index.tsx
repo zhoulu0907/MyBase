@@ -732,9 +732,13 @@ const IfNodeConditionEditor: React.FC<ConditionEditorProps> = ({ nodeId, form, l
                                               {form.getFieldValue(item.field + '.operatorType') ==
                                                 FieldType.FORMULA && (
                                                 <Form.Item field={item.field + '.value'}>
-                                                  <Button onClick={() => openFormulaEditor(item.field + '.value')} long>
+                                                  <Button
+                                                    onClick={() => openFormulaEditor(item.field + '.value')}
+                                                    long
+                                                    className={styles.formulaBtn}
+                                                  >
                                                     {form.getFieldValue(item.field + '.value')
-                                                      ? '已设置公式'
+                                                      ? form.getFieldValue(item.field + '.value.formula')
                                                       : 'ƒx 编辑公式'}
                                                     {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
                                                   </Button>

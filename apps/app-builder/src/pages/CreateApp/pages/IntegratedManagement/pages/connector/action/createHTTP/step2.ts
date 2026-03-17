@@ -1,33 +1,203 @@
 import type { ISchema } from '@formily/react';
 
-/** HTTP 动作创建 - 第二步：4 个 Tab（请求头 / 请求体 / 查询参数 / 路径参数），每个 Tab 内用表格展示并支持动态增减 */
+/** HTTP 动作创建 - 第二步：参考 Postman/Apifox：Params / Headers / Body */
 export const step2Schema: ISchema = {
   type: 'object',
   properties: {
+    requestTitle: {
+      type: 'void',
+      title: '请求定义',
+      'x-component': 'SectionTitle'
+    },
     tabs: {
       type: 'object',
       'x-component': 'Tabs',
       'x-component-props': { type: 'card-gutter' },
       properties: {
-        requestHeaders: {
-          type: 'array',
-          title: 'HTTP 请求头',
-          'x-component': 'ParamArrayTable'
+        headers: {
+          type: 'object',
+          title: 'Headers',
+          properties: {
+            headerTitle: {
+              type: 'void',
+              title: 'Request Headers',
+              'x-component': 'SectionTitle'
+            },
+            requestHeaders: {
+              type: 'array',
+              'x-component': 'ParamArrayTable'
+            }
+          }
         },
-        requestBody: {
-          type: 'array',
-          title: 'HTTP 请求体',
-          'x-component': 'ParamArrayTable'
+        body: {
+          type: 'object',
+          title: 'Body',
+          properties: {
+            bodyMode: {
+              type: 'string',
+              default: 'json',
+              enum: [
+                { label: 'none', value: 'none' },
+                { label: 'form-data', value: 'kv' },
+                { label: 'raw(JSON)', value: 'json' }
+              ],
+              'x-decorator': 'FormItem',
+              'x-decorator-props': { labelCol: { span: 0 }, wrapperCol: { span: 24 } },
+              'x-component': 'Radio.Group',
+              'x-component-props': { type: 'button' }
+            },
+            kvBody: {
+              type: 'object',
+              'x-visible': "{{$form.values.tabs?.body?.bodyMode === 'kv'}}",
+              properties: {
+                bodyKvTitle: {
+                  type: 'void',
+                  title: 'Body (Key-Value)',
+                  'x-component': 'SectionTitle'
+                },
+                requestBody: {
+                  type: 'array',
+                  'x-component': 'ParamArrayTable'
+                }
+              }
+            },
+            jsonBody: {
+              type: 'object',
+              'x-visible': "{{$form.values.tabs?.body?.bodyMode === 'json'}}",
+              properties: {
+                bodyJsonTitle: {
+                  type: 'void',
+                  title: 'Body (JSON)',
+                  'x-component': 'SectionTitle'
+                },
+                requestBodyJson: {
+                  type: 'string',
+                  'x-component': 'JsonEditor'
+                }
+              }
+            }
+          }
         },
-        queryParams: {
-          type: 'array',
-          title: 'URL 查询参数',
-          'x-component': 'ParamArrayTable'
+        params: {
+          type: 'object',
+          title: 'Params',
+          properties: {
+            queryTitle: {
+              type: 'void',
+              title: 'Query Params',
+              'x-component': 'SectionTitle'
+            },
+            queryParams: {
+              type: 'array',
+              'x-component': 'ParamArrayTable'
+            },
+            pathTitle: {
+              type: 'void',
+              title: 'Path Params',
+              'x-component': 'SectionTitle'
+            },
+            pathParams: {
+              type: 'array',
+              'x-component': 'ParamArrayTable'
+            }
+          }
+        }
+      }
+    },
+    responseTitle: {
+      type: 'void',
+      title: '响应定义',
+      'x-component': 'SectionTitle'
+    },
+    successCondition: {
+      type: 'object',
+      properties: {
+        conditionTitle: {
+          type: 'void',
+          title: '调用成功规范',
+          'x-component': 'SectionTitle'
         },
-        pathParams: {
+        successConditions: {
           type: 'array',
-          title: 'URL 路径参数',
-          'x-component': 'ParamArrayTable'
+          'x-component': 'SuccessConditionTable'
+        },
+        errorMessagePathWrapper: {
+          type: 'void',
+          'x-component': 'div',
+          'x-component-props': {
+            style: { marginTop: 20 }
+          },
+          properties: {
+            errorMessagePath: {
+              type: 'string',
+              title: '错误消息路径',
+              'x-decorator': 'FormItem',
+              'x-decorator-props': { labelCol: { span: 6 }, wrapperCol: { span: 18 } },
+              'x-component': 'Input',
+              'x-component-props': { placeholder: 'e.g. $.message' },
+              description: '失败时提取错误消息的 JSON Path'
+            }
+          }
+        }
+      }
+    },
+    responseTabs: {
+      type: 'object',
+      'x-component': 'Tabs',
+      'x-component-props': { type: 'card-gutter' },
+      properties: {
+        responseBodyTab: {
+          type: 'object',
+          title: 'Body',
+          properties: {
+            responseBodyMode: {
+              type: 'string',
+              default: 'json',
+              enum: [
+                { label: 'Text', value: 'text' },
+                { label: 'JSON', value: 'json' }
+              ],
+              'x-decorator': 'FormItem',
+              'x-decorator-props': { labelCol: { span: 0 }, wrapperCol: { span: 24 } },
+              'x-component': 'Radio.Group',
+              'x-component-props': { type: 'button' }
+            },
+            responseBodyTextWrapper: {
+              type: 'object',
+              'x-visible': "{{$form.values.responseTabs?.responseBodyTab?.responseBodyMode === 'text'}}",
+              properties: {
+                responseBodyTextTitle: {
+                  type: 'void',
+                  title: 'Body (Text)',
+                  'x-component': 'SectionTitle'
+                },
+                responseBodyText: {
+                  type: 'string',
+                  'x-component': 'TextAreaEditor'
+                }
+              }
+            },
+            responseBodyJsonWrapper: {
+              type: 'object',
+              'x-visible': "{{$form.values.responseTabs?.responseBodyTab?.responseBodyMode === 'json'}}",
+              properties: {
+                responseBodyJsonTitle: {
+                  type: 'void',
+                  title: 'Body (JSON)',
+                  'x-component': 'SectionTitle'
+                },
+                responseBodyJson: {
+                  type: 'string',
+                  'x-component': 'JsonEditor'
+                }
+              }
+            }
+          }
+        },
+        responseHeaders: {
+          type: 'array',
+          title: 'Headers',
+          'x-component': 'OutputParamArrayTable'
         }
       }
     }

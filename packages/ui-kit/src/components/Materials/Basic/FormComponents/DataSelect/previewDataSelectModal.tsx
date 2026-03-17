@@ -8,7 +8,7 @@ import './index.css';
 interface PreviewDataSelectModalProps {
   visible: boolean;
   onCancel: any;
-  tableConfig: XTableConfig;
+  tableConfig: XTableConfig | null;
   onSelect: (data: any) => void;
   defaultSelectedId?: string | number | null;
 }
@@ -59,7 +59,7 @@ const PreviewDataSelectModal: React.FC<PreviewDataSelectModalProps> = ({
     >
       <div className="popupContainer">
         <div className="rightFlexTable">
-          {visible && (
+          {visible && !!tableConfig && (
             <XTable
               {...tableConfig}
               showAddBtn={false}

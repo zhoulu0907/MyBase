@@ -3,10 +3,12 @@ import React, { useEffect, useRef } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppHeader } from './components/header';
 import { loadMicroApp } from 'qiankun';
-import { getAiCopilotURL } from '@onebase/common';
+import { TokenManager, generateSignature, getAiCopilotURL } from '@onebase/common';
 import styles from './index.module.less';
 
 const Content = Layout.Content;
+const tokenInfo = TokenManager.getTokenInfo();
+const tenantInfo = TokenManager.getTenantInfo();
 
 const Home: React.FC = () => {
   const containerRef = useRef(null);
@@ -18,7 +20,10 @@ const Home: React.FC = () => {
       entry: getAiCopilotURL(),
       container: containerRef.current || '',
       props: {
-        from: 'main app'
+        from: 'main app',
+        generateSignature: generateSignature,
+        tokenInfo: tokenInfo,
+        tenantInfo: tenantInfo
       }
     });
 

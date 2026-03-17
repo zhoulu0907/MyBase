@@ -25,6 +25,21 @@ export const createTriggerEditorSignal = () => {
     nodeData.value = {};
   };
 
+  const flowInputs = signal<any[]>([]);
+  const setFlowInputs = (inputs: any[]) => {
+    flowInputs.value = Array.isArray(inputs) ? inputs : [];
+  };
+
+  const flowOutputs = signal<any[]>([]);
+  const setFlowOutputs = (outputs: any[]) => {
+    flowOutputs.value = Array.isArray(outputs) ? outputs : [];
+  };
+
+  const clearFlowIO = () => {
+    flowInputs.value = [];
+    flowOutputs.value = [];
+  };
+
   const nodeId = signal<string | undefined>(undefined);
   const setNodeId = (id: string | undefined) => {
     nodeId.value = id;
@@ -62,6 +77,14 @@ export const createTriggerEditorSignal = () => {
     setAllNodeData,
     deleteNodeData,
     clearNodeData,
+
+    flowInputs,
+    setFlowInputs,
+
+    flowOutputs,
+    setFlowOutputs,
+
+    clearFlowIO,
 
     nodeId,
     setNodeId,

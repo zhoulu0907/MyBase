@@ -1,9 +1,9 @@
-import { Ellipsis, Form, ImagePicker, ImagePreview, Toast } from '@arco-design/mobile-react';
-import type { ImagePickItem } from '@arco-design/mobile-react/cjs/image-picker/type';
+import { Ellipsis, Form, ImagePicker, ImagePreview, Popover, Toast } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
-import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES } from '@onebase/ui-kit';
+import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from '@onebase/ui-kit';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useRef } from 'react';
 import './index.css';
@@ -11,7 +11,7 @@ import './index.css';
 type XImgUploadConfig = typeof FormSchema.XImgUploadSchema.config;
 
 const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
-  const { label, dataField, status, verify, runtime = true, form, detailMode } = props;
+  const { label, dataField, status, verify, runtime = true, form, uploadType, detailMode } = props;
   const { curMenu } = menuSignal;
   const { rowDataId } = pagesRuntimeSignal;
 
@@ -79,7 +79,20 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     };
   }, []);
 
-  const handleUpload = async (files: ImagePickItem): Promise<ImagePickItem | null> => {
+  const handleUpload = async (files: any): Promise<any | null> => {
+    if (verify?.fileFormatLimit && verify?.fileFormat) {
+      const lastIndexOf = files.file.name.lastIndexOf('.');
+      const type = files.file.name.slice(lastIndexOf + 1);
+      if (!verify.fileFormat.toLocaleLowerCase().split(',').includes(type.toLocaleLowerCase())) {
+        Toast.toast({
+            type: 'warn',
+            content: `不支持该格式，仅支持 ${verify.fileFormat}`,
+            duration: 2000
+          });
+        return null;
+      }
+    }
+
     if (!files.file) {
       return null;
     }
@@ -94,12 +107,13 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
           id: res,
           url: files.url || '',
           name: files.file.name || ''
-        } as ImagePickItem;
+        } as any;
       }
 
       return null;
     } catch (error) {
       Toast.toast({
+        type: 'error',
         content: '上传失败，请重试',
         duration: 2000
       });
@@ -126,35 +140,73 @@ const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMo
     }
   ];
 
+  const formatAccept = (verify: any) => {
+    if (!verify?.fileFormatLimit) return 'image/*';
+    return verify?.fileFormat
+      .split(',')
+      .map((i: any) => i.trim().replace(/^\./, '').toLowerCase())
+      .map((ext: any) => `.${ext}`)
+      .join(',')
+  };
+
   return (
     <Form.Item
       className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
-      label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       layout="vertical"
       field={fieldId}
       rules={rules}
       trigger="fileList"
       style={{
-        pointerEvents: runtime ? 'unset' : 'none',
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.DEFAULT] && runtime ? 'unset' : 'none',
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}
+      extra={
+        <div className="imgUploadBottomTips">
+          {!detailMode && (uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] || uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) ? <>
+            {verify?.fileFormatLimit && (
+              <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
+            )}
+            <span>
+              {verify?.maxCountLimit && (
+                <span>
+                  最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                  {verify?.maxSizeLimit ? '，' : ''}
+                </span>
+              )}
+              {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
+            </span>
+          </> : undefined}
+        </div>
+      }
     >
       <ImagePicker
-        accept="image/*"
-        limit={verify?.maxCount === -1 ? undefined : verify?.maxCount}
-        maxSize={verify.maxSize * 1024}
+        accept={formatAccept(verify)}
+        limit={verify?.maxCountLimit ? verify?.maxCount : 0}
+        maxSize={verify?.maxSizeLimit ? verify?.maxSize * 1024 : undefined}
         onClick={onClick}
         upload={handleUpload}
         images={(form?.getFieldValue(fieldId) || []).map((item: any) => ({ url: item.url }))}
         disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
-        onMaxSizeExceed={(file) => {
+        onMaxSizeExceed={() => {
           Toast.toast({
+            type: 'warn',
             content: '文件大小超出限制',
             duration: 2000
           });
         }}
-        onLimitExceed={(file) =>
+        onLimitExceed={() =>
           Toast.toast({
+            type: 'warn',
             content: '文件数量超出限制',
             duration: 2000
           })

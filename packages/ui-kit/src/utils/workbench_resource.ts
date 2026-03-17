@@ -165,10 +165,19 @@ export async function startLoadWorkbenchPageSet(params: LoadWorkbenchPageSetPara
           displayName: WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP[component.componentType as keyof typeof WORKBENCH_COMPONENT_TYPE_DISPLAY_NAME_MAP] || ''
         });
 
+        const parsedConfig = JSON.parse(component.config);
+        // 加载时清除旧的 gridLayout.colSpan/row/column（这些由 applyGridLayout 动态计算），
+        // 只保留 rowSpan（由 ResizeObserver 测量后上报，作为初始估算值）
+        const savedRowSpan = parsedConfig?.gridLayout?.rowSpan ?? parsedConfig?.rowSpan;
+        const initialRowSpan = (typeof savedRowSpan === 'number' && savedRowSpan > 0) ? savedRowSpan : 1;
+        const cleanConfig = {
+          ...parsedConfig,
+          gridLayout: { rowSpan: initialRowSpan }
+        };
         newPageComponentSchemas[component.componentCode] = {
           id: component.componentCode,
           type: component.componentType,
-          config: JSON.parse(component.config),
+          config: cleanConfig,
           editData: JSON.parse(component.editData)
         };
       }

@@ -6,17 +6,19 @@ import {
   Ellipsis,
   Form,
   Loading,
+  Popover,
   PopupSwiper,
   Radio,
   SearchBar
 } from '@arco-design/mobile-react';
-import { IconArrowBack } from '@arco-design/mobile-react/esm/icon';
+import { IconArrowBack, IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
 import { getDeptUser, type GetDeptUserReq } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import { memo, useCallback, useEffect, useState } from 'react';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 
 import deptIcon from '@/assets/images/dept_icon.svg';
 import { formatDeptAndUsers, getDeptData, parseDeptName } from './const';
@@ -153,11 +155,29 @@ const XDeptSelect = memo(
       await getDeptUsers({ deptId: renderData?.parentId });
     };
 
+    const rules: ITypeRules<ValidatorType.Custom>[] = [
+      {
+        required: verify?.required,
+        type: ValidatorType.Custom,
+        message: `${label.text}是必填项`
+      }
+    ];
+
     return (
       <Form.Item
         className="inputTextWrapperOBMobile inputDeptSelectOBMobile"
-        label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+        label={
+          <>
+            {label.display && <Ellipsis text={label.text} maxLine={2} />}
+            {props?.tooltip && (
+              <Popover content={props?.tooltip} direction='bottomCenter' >
+                <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+              </Popover>
+            )}
+          </>
+        }
         field={fieldId}
+        rules={rules}
         layout={layout}
         style={{
           textAlign: layout === 'vertical' ? 'left' : 'right',

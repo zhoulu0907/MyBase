@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ReactSortable } from 'react-sortablejs';
 import { useSignals } from '@preact/signals-react/runtime';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
-import { IconAdd, IconDelete } from '@arco-design/mobile-react/esm/icon';
-import { Collapse, Ellipsis, Form } from '@arco-design/mobile-react';
+import { IconAdd, IconDelete, IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
+import { Collapse, Ellipsis, Form, Popover } from '@arco-design/mobile-react';
 import { pagesRuntimeSignal } from '@onebase/common';
 import { getDictDataListByType, getDictDetail } from '@onebase/platform-center';
 import {
@@ -304,7 +304,16 @@ const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: bo
       field=""
       rules={rules}
       layout="vertical"
-      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
       }}

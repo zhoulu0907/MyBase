@@ -2,11 +2,14 @@ import {
   Button,
   Input,
   Message,
+  Modal,
   Pagination,
   Popconfirm,
+  Select,
   Space,
   Spin,
   Table,
+  Upload,
   type TableColumnProps
 } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
@@ -16,6 +19,7 @@ import {
   listConnectorActionInfos,
   deleteScriptAction,
   listScriptAction,
+  saveConnectorAction,
   type ConnectorActionStatus,
   type ListConnectorActionReq,
   type ListScriptActionReq,
@@ -28,6 +32,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import CreateHTTPActionPage from '../createHTTP';
 import CreateScriptActionPage from '../createJS';
+import {
+  buildActionNameFromOpenApi,
+  buildHttpActionConfigFromOpenApi,
+  getOperationKey,
+  isRecord,
+  parseOpenApiOperations,
+  type OpenApiOperation
+} from '../openapi';
 import styles from './index.module.less';
 
 /**
@@ -47,13 +59,27 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
   const [actionList, setActionList] = useState<ScriptActionItem[]>();
   const [isCreate, setIsCreate] = useState(false);
   const [editingScriptId, setEditingScriptId] = useState<string | null>(null);
+  const [openApiCreateModalOpen, setOpenApiCreateModalOpen] = useState(false);
+  const [openApiBatchCreateModalOpen, setOpenApiBatchCreateModalOpen] = useState(false);
+  const [openApiRaw, setOpenApiRaw] = useState('');
+  const [openApiOps, setOpenApiOps] = useState<OpenApiOperation[]>([]);
+  const [openApiOpKey, setOpenApiOpKey] = useState<string>('');
+  const [openApiSelectedKeys, setOpenApiSelectedKeys] = useState<string[]>([]);
+  const [openApiSingleKey, setOpenApiSingleKey] = useState<string>('');
+  const [openApiParseError, setOpenApiParseError] = useState<string>('');
+  const [openApiCreating, setOpenApiCreating] = useState(false);
+  const [openApiBatchCreating, setOpenApiBatchCreating] = useState(false);
+  const [openApiBatchStatus, setOpenApiBatchStatus] = useState('');
+  const [openApiImport, setOpenApiImport] = useState<{ token: number; raw: string; opKey?: string }>();
 
   useEffect(() => {
     handleGetScriptActionList();
   }, [isCreate, editingScriptId]);
 
   useEffect(() => {
-    pageSize && handleGetScriptActionList(searchActionName);
+    if (pageSize) {
+      handleGetScriptActionList(searchActionName);
+    }
   }, [pageNo, pageSize, searchActionName]);
 
   const debouncedSearch = useCallback(
@@ -81,12 +107,12 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
           scriptName: actionName || undefined
         };
         const res = await getCommonPaginationList(
-          (param: any) => listScriptAction(param as ListScriptActionReq),
+          (param: unknown) => listScriptAction(param as ListScriptActionReq),
           req,
           setPageNo
         );
         if (res) {
-          const list = (res.list || []).map((item: any, index: number) => ({
+          const list = (res.list || []).map((item: ScriptActionItem, index: number) => ({
             ...item,
             _rowKey: item.id ?? item.scriptName ?? `row-${index}`
           }));
@@ -101,13 +127,13 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
           pageSize: pageSize
         };
         const res = await getCommonPaginationList(
-          (param: any) => listConnectorActionInfos(param as ListConnectorActionReq),
+          (param: unknown) => listConnectorActionInfos(param as ListConnectorActionReq),
           req,
           setPageNo
         );
         if (res) {
           type RowItem = ScriptActionItem & { actionName?: string };
-          const list = (res || []).map((item: RowItem, index: number) => ({
+          const list = ((res as unknown as RowItem[]) || []).map((item: RowItem, index: number) => ({
             ...item,
             _rowKey: item.id ?? item.actionName ?? item.scriptName ?? `row-${index}`
           }));
@@ -165,7 +191,7 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
       title: '序号',
       dataIndex: 'index',
       width: 80,
-      render: (_: any, __: any, index: number) => (pageNo - 1) * pageSize + index + 1
+      render: (_: unknown, __: unknown, index: number) => (pageNo - 1) * pageSize + index + 1
     },
     {
       title: '动作名称',
@@ -196,7 +222,7 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
       dataIndex: 'operation',
       width: 150,
       fixed: 'right',
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: ScriptActionItem & { actionName?: string }) => (
         <Space>
           <Button
             type="text"
@@ -211,11 +237,19 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
           <Popconfirm
             title="确定删除吗？"
             content="删除后不可恢复"
-            onOk={() =>
-              isScript
-                ? handleDeleteScript(record.id)
-                : handleDeleteHttp(getHashQueryParam('id') || '', record.actionName)
-            }
+            onOk={() => {
+              if (isScript) {
+                handleDeleteScript(record.id);
+                return;
+              }
+              const connectorId = getHashQueryParam('id') || '';
+              const actionName = record.actionName ?? record.id;
+              if (!connectorId || !actionName) {
+                Message.warning('无法获取动作标识，请稍后重试');
+                return;
+              }
+              handleDeleteHttp(connectorId, actionName);
+            }}
           >
             <Button type="text" size="mini" status="danger">
               删除
@@ -226,13 +260,161 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
     }
   ];
 
+  const parseOpenApiText = (raw: string) => {
+    const parsed = parseOpenApiOperations(raw);
+    setOpenApiOps(parsed.operations);
+    const firstKey = parsed.operations.length > 0 ? getOperationKey(parsed.operations[0]) : '';
+    setOpenApiOpKey(firstKey);
+    setOpenApiSingleKey(firstKey);
+    setOpenApiSelectedKeys(parsed.operations.map((o) => getOperationKey(o)));
+    setOpenApiParseError(parsed.error ?? '');
+  };
+
+  const handleOpenApiFileChange = (files: unknown) => {
+    const list = Array.isArray(files) ? files : [];
+    const first = list[0];
+    if (!isRecord(first)) return;
+    const originFile = first.originFile;
+    if (!(originFile instanceof File)) return;
+    originFile
+      .text()
+      .then((text) => {
+        setOpenApiRaw(text);
+        parseOpenApiText(text);
+      })
+      .catch(() => {
+        setOpenApiParseError('读取文件失败');
+      });
+  };
+
+  const handleOpenApiCreate = async () => {
+    const connectorId = getHashQueryParam('id');
+    if (!connectorId) {
+      Message.error('缺少连接器 ID');
+      return;
+    }
+    let doc: unknown;
+    try {
+      doc = JSON.parse(openApiRaw || '{}') as unknown;
+    } catch {
+      setOpenApiParseError('OpenAPI 内容不是合法 JSON');
+      return;
+    }
+    const selected = openApiOps.find((o) => getOperationKey(o) === openApiOpKey);
+    if (!selected) {
+      Message.error('请选择要创建的接口');
+      return;
+    }
+
+    setOpenApiCreating(true);
+    try {
+      const built = buildHttpActionConfigFromOpenApi(doc, selected);
+      const actionName = built.actionName;
+      const actionConfig = built.actionConfig;
+      const res = await saveConnectorAction(connectorId, { actionConfig });
+      const createdName =
+        typeof res === 'string'
+          ? res
+          : isRecord(res) && typeof res.data === 'string'
+            ? (res.data as string)
+            : actionName;
+      Message.success('创建成功');
+      setOpenApiCreateModalOpen(false);
+      setEditingScriptId(createdName);
+      setIsCreate(true);
+    } catch (e) {
+      Message.error((e as Error)?.message ?? '创建失败');
+    } finally {
+      setOpenApiCreating(false);
+    }
+  };
+
+  const handleOpenApiBatchCreate = async () => {
+    const connectorId = getHashQueryParam('id');
+    if (!connectorId) {
+      Message.error('缺少连接器 ID');
+      return;
+    }
+    if (!openApiSelectedKeys.length) {
+      Message.error('请先选择要创建的接口');
+      return;
+    }
+    let doc: unknown;
+    try {
+      doc = JSON.parse(openApiRaw || '{}') as unknown;
+    } catch {
+      setOpenApiParseError('OpenAPI 内容不是合法 JSON');
+      return;
+    }
+
+    const opByKey = new Map<string, OpenApiOperation>();
+    openApiOps.forEach((o) => {
+      opByKey.set(getOperationKey(o), o);
+    });
+    const selectedOps = openApiSelectedKeys.map((k) => opByKey.get(k)).filter(Boolean) as OpenApiOperation[];
+    if (selectedOps.length === 0) {
+      Message.error('请先选择要创建的接口');
+      return;
+    }
+
+    const usedNames = new Set<string>();
+    const genUniqueName = (base: string) => {
+      let name = base;
+      let i = 1;
+      while (usedNames.has(name)) {
+        const suffix = `_${i}`;
+        name = `${base.slice(0, Math.max(0, 128 - suffix.length))}${suffix}`;
+        i += 1;
+      }
+      usedNames.add(name);
+      return name;
+    };
+
+    setOpenApiBatchCreating(true);
+    setOpenApiBatchStatus('');
+    try {
+      let ok = 0;
+      const failed: Array<{ key: string; reason: string }> = [];
+      for (let i = 0; i < selectedOps.length; i += 1) {
+        const op = selectedOps[i];
+        const key = `${op.method.toUpperCase()} ${op.path}`;
+        setOpenApiBatchStatus(`正在创建 ${i + 1}/${selectedOps.length}: ${key}`);
+        try {
+          const actionName = genUniqueName(buildActionNameFromOpenApi(op));
+          const actionConfig = buildHttpActionConfigFromOpenApi(doc, op, actionName).actionConfig;
+          await saveConnectorAction(connectorId, { actionConfig });
+          ok += 1;
+        } catch (e) {
+          failed.push({ key, reason: (e as Error)?.message ?? '创建失败' });
+        }
+      }
+
+      if (failed.length === 0) {
+        Message.success(`已创建 ${ok} 个动作`);
+        setOpenApiBatchCreateModalOpen(false);
+        handleGetScriptActionList(searchActionName);
+      } else {
+        Message.warning(`已创建 ${ok} 个动作，失败 ${failed.length} 个`);
+        setOpenApiParseError(
+          failed
+            .slice(0, 3)
+            .map((f) => `${f.key}: ${f.reason}`)
+            .join('\n')
+        );
+      }
+    } finally {
+      setOpenApiBatchCreating(false);
+      setOpenApiBatchStatus('');
+    }
+  };
+
   return (
     <div className={styles.scriptActionListPage}>
       <div className={styles.title}>动作配置</div>
       {isCreate || editingScriptId ? (
         isScript ? (
           <CreateScriptActionPage
-            editData={editingScriptId ? ({ id: editingScriptId } as any) : undefined}
+            editData={editingScriptId ? ({ id: editingScriptId } as unknown as ScriptActionItem) : undefined}
             onSuccess={() => {
               setIsCreate(false);
               setEditingScriptId(null);
@@ -244,23 +426,39 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
             onSuccess={() => {
               setIsCreate(false);
               setEditingScriptId(null);
+              setOpenApiImport(undefined);
             }}
+            openApiImport={openApiImport}
           />
         )
       ) : (
         <>
           <div className={styles.header}>
-            <Button type="primary" icon={<IconPlus />} onClick={() => setIsCreate(true)}>
-              创建动作
-            </Button>
-            <Input.Search
-              allowClear
-              placeholder="请输入动作名称"
-              style={{ width: 240 }}
-              onChange={(value) => {
-                setSearchActionName(value);
-              }}
-            />
+            <div className={styles.headerLeft}>
+              <Button type="primary" icon={<IconPlus />} onClick={() => setIsCreate(true)}>
+                创建动作
+              </Button>
+              {!isScript ? (
+                <Button
+                  type="outline"
+                  onClick={() => {
+                    setOpenApiBatchCreateModalOpen(true);
+                  }}
+                >
+                  OpenAPI 批量创建
+                </Button>
+              ) : null}
+            </div>
+            <div className={styles.headerRight}>
+              <Input.Search
+                allowClear
+                placeholder="请输入动作名称"
+                style={{ width: 240 }}
+                onChange={(value) => {
+                  setSearchActionName(value);
+                }}
+              />
+            </div>
           </div>
 
           <div className={styles.content}>
@@ -290,6 +488,174 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
           </div>
         </>
       )}
+
+      <Modal
+        title="OpenAPI 批量创建"
+        visible={openApiBatchCreateModalOpen}
+        onCancel={() => setOpenApiBatchCreateModalOpen(false)}
+        footer={null}
+        style={{ width: 860 }}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size={12}>
+          <Space>
+            <Upload
+              accept=".json,application/json"
+              autoUpload={false}
+              showUploadList={false}
+              onChange={handleOpenApiFileChange}
+            >
+              <Button>上传 JSON 文件</Button>
+            </Upload>
+            <Button onClick={() => parseOpenApiText(openApiRaw)}>解析</Button>
+          </Space>
+          <Input.TextArea
+            value={openApiRaw}
+            onChange={(v) => setOpenApiRaw(v)}
+            placeholder="粘贴 OpenAPI JSON（v3）"
+            autoSize={{ minRows: 10, maxRows: 16 }}
+          />
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Select
+              mode="multiple"
+              style={{ flex: 1 }}
+              placeholder="选择多个接口"
+              value={openApiSelectedKeys}
+              onChange={(v) => setOpenApiSelectedKeys(v)}
+              options={openApiOps.map((o) => {
+                const k = `${o.method.toUpperCase()} ${o.path}`;
+                return { label: `${k}${o.summary ? ` - ${o.summary}` : ''}`, value: k };
+              })}
+            />
+            <Button
+              type="primary"
+              loading={openApiBatchCreating}
+              disabled={openApiSelectedKeys.length === 0}
+              onClick={handleOpenApiBatchCreate}
+            >
+              一键创建
+            </Button>
+          </div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Select
+              style={{ flex: 1 }}
+              placeholder="请选择一个接口"
+              value={openApiSingleKey || undefined}
+              onChange={(v) => setOpenApiSingleKey(v)}
+              options={openApiOps.map((o) => {
+                const k = `${o.method.toUpperCase()} ${o.path}`;
+                return { label: `${k}${o.summary ? ` - ${o.summary}` : ''}`, value: k };
+              })}
+            />
+            <Button
+              type="primary"
+              onClick={async () => {
+                const connectorId = getHashQueryParam('id');
+                if (!connectorId) {
+                  Message.error('缺少连接器 ID');
+                  return;
+                }
+                if (!openApiSingleKey) {
+                  Message.warning('请先选择一个接口');
+                  return;
+                }
+                let doc: unknown;
+                try {
+                  doc = JSON.parse(openApiRaw || '{}') as unknown;
+                } catch {
+                  setOpenApiParseError('OpenAPI 内容不是合法 JSON');
+                  return;
+                }
+                const op = openApiOps.find((o) => `${o.method.toUpperCase()} ${o.path}` === openApiSingleKey);
+                if (!op) {
+                  Message.warning('未找到选中的接口');
+                  return;
+                }
+                try {
+                  const actionName = buildActionNameFromOpenApi(op);
+                  const actionConfig = buildHttpActionConfigFromOpenApi(doc, op, actionName).actionConfig;
+                  const res = await saveConnectorAction(connectorId, { actionConfig });
+                  const createdName =
+                    typeof res === 'string'
+                      ? res
+                      : isRecord(res) && typeof res.data === 'string'
+                        ? (res.data as string)
+                        : actionName;
+                  Message.success('创建成功');
+                  setOpenApiBatchCreateModalOpen(false);
+                  setEditingScriptId(createdName);
+                  setIsCreate(true);
+                } catch (e) {
+                  Message.error((e as Error)?.message ?? '创建失败');
+                }
+              }}
+            >
+              创建并进入详情
+            </Button>
+          </div>
+          {openApiBatchStatus ? <div style={{ color: 'var(--color-text-2)' }}>{openApiBatchStatus}</div> : null}
+          {openApiParseError ? <div style={{ color: 'var(--color-danger-6)' }}>{openApiParseError}</div> : null}
+        </Space>
+      </Modal>
+
+      <Modal
+        title="OpenAPI 导入创建"
+        visible={openApiCreateModalOpen}
+        onCancel={() => setOpenApiCreateModalOpen(false)}
+        footer={null}
+        style={{ width: 860 }}
+      >
+        <Space direction="vertical" style={{ width: '100%' }} size={12}>
+          <Space>
+            <Upload
+              accept=".json,application/json"
+              autoUpload={false}
+              showUploadList={false}
+              onChange={handleOpenApiFileChange}
+            >
+              <Button>上传 JSON 文件</Button>
+            </Upload>
+            <Button onClick={() => parseOpenApiText(openApiRaw)}>解析</Button>
+          </Space>
+          <Input.TextArea
+            value={openApiRaw}
+            onChange={(v) => setOpenApiRaw(v)}
+            placeholder="粘贴 OpenAPI JSON（v3）"
+            autoSize={{ minRows: 10, maxRows: 16 }}
+          />
+          <Space>
+            <Select
+              style={{ width: 520 }}
+              placeholder="请选择要创建的接口"
+              value={openApiOpKey || undefined}
+              onChange={(v) => {
+                setOpenApiOpKey(v);
+              }}
+              options={openApiOps.map((o) => {
+                const k = `${o.method.toUpperCase()} ${o.path}`;
+                return {
+                  label: `${k}${o.summary ? ` - ${o.summary}` : ''}`,
+                  value: k
+                };
+              })}
+            />
+            <Button type="primary" loading={openApiCreating} disabled={!openApiOpKey} onClick={handleOpenApiCreate}>
+              立即创建
+            </Button>
+            <Button
+              type="outline"
+              onClick={() => {
+                setOpenApiCreateModalOpen(false);
+                setOpenApiImport({ token: Date.now(), raw: openApiRaw, opKey: openApiOpKey });
+                setEditingScriptId(null);
+                setIsCreate(true);
+              }}
+            >
+              导入到表单
+            </Button>
+          </Space>
+          {openApiParseError ? <div style={{ color: 'var(--color-danger-6)' }}>{openApiParseError}</div> : null}
+        </Space>
+      </Modal>
     </div>
   );
 };

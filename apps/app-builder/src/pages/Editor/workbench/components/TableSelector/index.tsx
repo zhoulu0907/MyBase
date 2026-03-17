@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Input, Tree } from '@arco-design/web-react';
+import { Input, Tree, Spin } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 import { getTablesByAppId, type ApplicationMenu } from '@onebase/app';
 import { treeFilter } from '@onebase/common';
@@ -33,6 +33,7 @@ const TableSelector = ({
   const [searchValue, setSearchValue] = useState('');
   const [tableList, setTableList] = useState([]);
   const [checkedKeys, setCheckedKeys] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // 过滤后的菜单列表
   const filteredMenuList = useMemo(() => {
@@ -59,22 +60,28 @@ const TableSelector = ({
   };
 
   useEffect(() => {
-    getTablesByAppId({ applicationId: curAppId }).then((res) => {
-      if (res?.list?.length > 0) {
-        const list = res.list.map((item) => {
-          const config = JSON.parse(item?.config);
-          return {
-            key: config.id,
-            title: config?.label?.text || config?.cpName,
-            componentId: config.id,
-            tableName: config?.tableName,
-            metaData: config?.metaData,
-            columns: config?.columns
-          };
-        });
-        setTableList(list);
-      }
-    });
+    setLoading(true);
+    getTablesByAppId({ applicationId: curAppId })
+      .then((res) => {
+        if (res?.list?.length > 0) {
+          const list = res.list.map((item) => {
+            const config = JSON.parse(item?.config);
+            return {
+              key: config.id,
+              title: config?.label?.text || config?.cpName,
+              componentId: config.id,
+              tableName: config?.tableName,
+              metaData: config?.metaData,
+              columns: config?.columns
+            };
+          });
+          setTableList(list);
+        }
+      })
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setLoading(false);
+      });
   }, [curAppId]);
 
   return (
@@ -84,19 +91,21 @@ const TableSelector = ({
           <Input.Search placeholder={searchPlaceholder} onChange={setSearchValue} />
         </div>
       )}
-      <div className={styles.treeWrapper} style={{ height }}>
-        <Tree
-          treeData={filteredMenuList}
-          checkable={true}
-          selectable={true}
-          multiple={false}
-          checkedKeys={checkedKeys}
-          onCheck={handleCheck}
-          icons={{
-            switcherIcon: <IconDown />
-          }}
-        />
-      </div>
+      <Spin loading={loading} style={{ width: '100%' }}>
+        <div className={styles.treeWrapper} style={{ height }}>
+          <Tree
+            treeData={filteredMenuList}
+            checkable={true}
+            selectable={true}
+            multiple={false}
+            checkedKeys={checkedKeys}
+            onCheck={handleCheck}
+            icons={{
+              switcherIcon: <IconDown />
+            }}
+          />
+        </div>
+      </Spin>
     </div>
   );
 };

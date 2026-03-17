@@ -1,10 +1,12 @@
 import type { CSSProperties } from 'react';
 import { memo, useEffect, useState } from 'react';
 import { Empty, Tabs } from '@arco-design/web-react';
+import { IconRight } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
 import { TokenManager } from '@onebase/common';
 import { getTodoPageList, getDonePageList, getMyCreatePageList, getMyCCPageList } from '@onebase/app/src/services/app_runtime';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP } from '../../core/constants';
+import { useJump } from '../../hooks/useJump';
 import type { XTodoListConfig, ITodoItem } from './schema';
 import { pendingListDefault } from './schema';
 import styles from './index.module.css';
@@ -18,13 +20,16 @@ const statusMap: Record<string, string> = {
 }
 
 const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
-  const { label, dataConfig, theme, status, runtime, dataCount, userAvatar, userName } = props;
+  const { label, dataConfig, theme, status, runtime, dataCount, userAvatar, userName, showMore, showMoreLink } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
 
   const [pendingList, setPendingList] = useState<ITodoItem[]>(runtime ? [] : pendingListDefault);
   const [createdList, setCreatedList] = useState<ITodoItem[]>([]);
   const [handledList, setHandledList] = useState<ITodoItem[]>([]);
   const [ccList, setCcList] = useState<ITodoItem[]>([]);
+  const [contentHeight, setContentHeight] = useState<number | undefined>(undefined);
+
+  const { handleJump } = useJump();
 
   const getListMap = {
     showPending: pendingList,
@@ -103,17 +108,77 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
     }
   }, [runtime, dataCount]);
 
+  // 编辑态中，根据dataCount调整pendingList数据条数
+  useEffect(() => {
+    if (!runtime) {
+      const currentLength = pendingList.length;
+      const targetCount = dataCount;
+
+      if (targetCount > currentLength) {
+        // 新增数据
+        const newItems: ITodoItem[] = [];
+        for (let i = currentLength; i < targetCount; i++) {
+          const templateIndex = i % pendingListDefault.length;
+          const template = pendingListDefault[templateIndex];
+          newItems.push({
+            ...template,
+            id: `${i + 1}`,
+            processTitle: `${template.initiator.name}发起的流程表单测试_表单`,
+            arrivalTime: Date.now() - i * 60000,
+            submitTime: Date.now() - i * 60000 + 200,
+            taskId: `${1446542543792771072 + i}`,
+            instanceId: `${1446542538365341696 + i}`
+          });
+        }
+        setPendingList([...pendingList, ...newItems]);
+      } else if (targetCount < currentLength) {
+        // 减少数据
+        setPendingList(pendingList.slice(0, targetCount));
+      }
+    }
+  }, [dataCount, runtime]);
+
+  // 根据dataCount计算固定高度
+  useEffect(() => {
+    const itemHeight = 60;
+    const itemsPadding = 24;
+    const baseHeight = 128;
+    const calculatedHeight = baseHeight + itemsPadding + itemHeight * dataCount;
+    setContentHeight(calculatedHeight);
+  }, [dataCount]);
+
+  const handleShowMoreClick = () => {
+    if (!runtime) {
+      return;
+    }
+    handleJump({
+      menuUuid: undefined,
+      linkAddress: showMoreLink,
+      runtime
+    });
+  };
+  const containerStyle: CSSProperties = runtime && contentHeight 
+    ? { height: contentHeight, overflow: 'hidden', display: 'flex', flexDirection: 'column' }
+    : {};
+
+  const contentStyle: CSSProperties = runtime && contentHeight
+    ? { flex: 1, overflow: 'auto' }
+    : {};
+
   return (
-    <div className={styles.containerStyle}>
+    <div className={styles.containerStyle} style={containerStyle}>
 
       <div className={styles.todoListHeader}>
         {label?.display && (
           <span className={styles.todoListHeaderTitle}>{label?.text}</span>
         )}
+        {showMore && (
+          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconRight /></a>
+        )}
       </div>
 
-      <div className={styles.todoListContent}>
-        <Tabs style={{ width: '100%' }} onChange={runtime ? fetchListData : undefined}>
+      <div className={styles.todoListContent} style={contentStyle}>
+        <Tabs style={{ width: '100%', height: '100%' }} onChange={runtime ? fetchListData : undefined}>
           {Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
             value &&
             (<Tabs.TabPane key={key} title={DATA_CONFIG_NAME_MAP[key] || key}>

@@ -1,4 +1,5 @@
-import { Checkbox, Ellipsis, Form, Tag } from '@arco-design/mobile-react';
+import { Checkbox, Ellipsis, Form, Popover, Tag } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import IconSquareChecked from '@arco-design/mobile-react/esm/icon/IconSquareChecked';
 import IconSquareDisabled from '@arco-design/mobile-react/esm/icon/IconSquareDisabled';
 import IconSquareUnchecked from '@arco-design/mobile-react/esm/icon/IconSquareUnchecked';
@@ -106,7 +107,16 @@ const XCheckbox = memo(
       <Form.Item
         className="inputTextWrapperOBMobile"
         field={fieldId}
-        label={label.display && <Ellipsis text={label.text} maxLine={2} />}
+        label={
+          <>
+            {label.display && <Ellipsis text={label.text} maxLine={2} />}
+            {props?.tooltip && (
+              <Popover content={props?.tooltip} direction='bottomCenter' >
+                <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+              </Popover>
+            )}
+          </>
+        }
         rules={rules}
         layout={layout}
         style={{

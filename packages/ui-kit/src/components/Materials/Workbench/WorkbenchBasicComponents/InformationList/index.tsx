@@ -22,7 +22,9 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
     dateField,
     linkField,
     showMore,
-    showMoreLink
+    jumpType,
+    jumpPageId,
+    jumpExternalUrl,
   } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
   const { handleJump } = useJump();
@@ -95,9 +97,9 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
       return;
     }
     handleJump({
-      menuUuid: undefined,
-      linkAddress: showMoreLink,
-      runtime
+      menuUuid: jumpType === 'internal' ? jumpPageId : undefined,
+      linkAddress: jumpType === 'external' ? jumpExternalUrl : undefined,
+      runtime,
     });
   };
   return (
@@ -107,7 +109,7 @@ const XInformationList = memo((props: XInformationListConfig & { runtime?: boole
           <span className={styles.informationListHeaderTitle}>{label?.text}</span>
         )}
         {showMore && (
-          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconRight /></a>
+          <a className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconRight /></a>
         )}
       </div>
 

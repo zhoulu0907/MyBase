@@ -18,9 +18,8 @@ import {
   WORKBENCH_WIDTH_OPTIONS,
   WORKBENCH_WIDTH_VALUES
 } from '../../core/constants';
-import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IWbCheckInputConfigType, ITableConfigType } from '../../core/types';
-import { IDataConfigConfigType } from '../../core/types';
-import { labelNameConfig, tableInfoConfig } from '../../config/commonConfig';
+import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IWbCheckInputConfigType, ITableConfigType, INumberConfigType } from '../../core/types';
+import { labelNameConfig, tableInfoConfig, dataCountConfig } from '../../config/commonConfig';
 
 export interface XDataListSchema {
   editData: TXDataListEditData;
@@ -33,9 +32,9 @@ export type TXDataListEditData = Array<
   | IStatusConfigType<TWorkbenchStatusSelectKeyType>
   | IWidthConfigType<TWorkbenchWidthSelectKeyType>
   | IBooleanConfigType
-  | IDataConfigConfigType
   | IWbCheckInputConfigType
   | ITableConfigType
+  | INumberConfigType
 >;
 
 export interface XDataListConfig extends ICommonBaseWorkbenchType {
@@ -50,6 +49,7 @@ export interface XDataListConfig extends ICommonBaseWorkbenchType {
     metaData: string; // 绑定的资产uuid
     columns: object[]; // 表头内容
   };
+  dataCount: number;
   status?: TRadioDefaultType<TWorkbenchStatusSelectKeyType>;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
 }
@@ -57,7 +57,8 @@ export interface XDataListConfig extends ICommonBaseWorkbenchType {
 const XDataList: XDataListSchema = {
   editData: [...workbenchBaseConfig, workbenchStatusConfig, workbenchWidthConfig,
     labelNameConfig,
-    tableInfoConfig
+    tableInfoConfig,
+    dataCountConfig
   ],
   
   config: {
@@ -73,6 +74,7 @@ const XDataList: XDataListSchema = {
       metaData: '',
       columns: [],
     },
+    dataCount: 2,
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
     status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT],
   }

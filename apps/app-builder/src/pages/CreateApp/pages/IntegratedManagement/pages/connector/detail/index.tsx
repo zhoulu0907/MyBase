@@ -32,6 +32,18 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
   const [createName, setCreateName] = useState(''); // 创建模式下的名称
   const [connectorType, setConnectorType] = useState<string>(''); // 连接器类型
   const nameInputRef = useRef<any>(null);
+  type TabKey = 'base' | 'env' | 'action' | 'logic' | 'logs';
+  const DEFAULT_TABS: TabKey[] = ['base', 'env', 'action', 'logic', 'logs'];
+  const isTabKey = (t: any): t is TabKey => t === 'base' || t === 'env' || t === 'action' || t === 'logic' || t === 'logs';
+  const getTabsByType = (typeCode?: any, typeInfo?: any): TabKey[] => {
+    if (typeInfo && Array.isArray(typeInfo.tabs)) {
+      const arr = typeInfo.tabs.filter(isTabKey);
+      if (arr.length) return arr;
+    }
+    if (typeCode === TypeCode.SCRIPT || typeCode === 'SCRIPT') return ['base', 'action', 'logic', 'logs'];
+    return DEFAULT_TABS;
+  };
+  const [tabs, setTabs] = useState<TabKey[]>(DEFAULT_TABS);
 
   useEffect(() => {
     const id = getHashQueryParam('id');
@@ -66,6 +78,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
             typeInfo?.version
           );
           setBaseInfo(tempBaseInfo);
+          setTabs(getTabsByType(TypeCode.SCRIPT, typeInfo));
           // 默认名称规则：{连接器类型}实例-{实例数量 + 1}
           const count = parseInt(instanceCountParam || '0', 10);
           const typeName = connectorNameParam || typeInfo?.nodeName || '连接器';
@@ -78,6 +91,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
           console.error('Failed to get connector type info:', error);
           const tempBaseInfo = createTempBaseInfo();
           setBaseInfo(tempBaseInfo);
+          setTabs(getTabsByType(TypeCode.SCRIPT));
 
           const count = parseInt(instanceCountParam || '0', 10);
           const initialName = `${connectorNameParam || '连接器'}实例-${count + 1}`;
@@ -102,12 +116,19 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
     }
   }, [baseInfo]);
 
+  useEffect(() => {
+    if (!tabs.includes(activeKey)) {
+      setActiveKey(tabs[0]);
+    }
+  }, [tabs, activeKey]);
+
   const handleGetIntanceDetail = async (id: string) => {
     // 统一使用 ID 获取详情
     const res = await getConnectInstance(id);
 
     if (res) {
       setBaseInfo(res);
+      setTabs(getTabsByType(res?.typeCode));
       // 后端接口已经返回完整的连接器信息，不需要再次调用 type-info 接口
     }
   };
@@ -179,9 +200,10 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
         const instanceId = typeof res === 'string' ? res : res.id || res;
         await handleGetIntanceDetail(instanceId);
         setIsCreateMode(false);
-        // 切换到环境配置页面
-        setActiveKey('env');
-        navigate(`/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${appId}&id=${res.id}`);
+        setActiveKey(tabs.includes('env') ? 'env' : (tabs.includes('action') ? 'action' : tabs[0]));
+        navigate(
+          `/onebase/${tenantId}/home/create-app/integrated-management/connector-detail?appId=${appId}&id=${instanceId}`
+        );
       }
     } catch (error) {
       console.error('Failed to create connector:', error);
@@ -231,11 +253,11 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
             selectedKeys={[activeKey]}
             onClickMenuItem={(key) => setActiveKey(key as 'base' | 'env' | 'action' | 'logic' | 'logs')}
           >
-            <Menu.Item key="base">基本信息</Menu.Item>
-            <Menu.Item key="env" disabled={isCreateMode}>环境配置</Menu.Item>
-            <Menu.Item key="action" disabled={isCreateMode}>动作配置</Menu.Item>
-            <Menu.Item key="logic" disabled={isCreateMode}>关联逻辑流</Menu.Item>
-            <Menu.Item key="logs" disabled={isCreateMode}>请求日志</Menu.Item>
+            {tabs.map((k) => (
+              <Menu.Item key={k} disabled={isCreateMode && k !== 'base'}>
+                {k === 'base' ? '基本信息' : k === 'env' ? '环境配置' : k === 'action' ? '动作配置' : k === 'logic' ? '关联逻辑流' : '请求日志'}
+              </Menu.Item>
+            ))}
           </Menu>
         </div>
       </div>
@@ -256,7 +278,7 @@ const ConnectorDetailPage: React.FC<ConnectorInstanceDetailProps> = ({ }) => {
             )}
           </div>
         )}
-        {activeKey === 'env' && (
+        {tabs.includes('env') && activeKey === 'env' && (
           <div className={styles.envContainer}>
             {baseInfo && (
               <ConnectorEnvConfig

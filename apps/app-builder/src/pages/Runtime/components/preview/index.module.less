@@ -42,6 +42,21 @@
   flex-direction: row;
   flex-wrap: wrap;
   align-content: flex-start;
+
+  // 工作台模式grid布局
+  &.workbenchContent {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: auto;
+    grid-auto-flow: row dense;
+    gap: 16px;
+    align-content: start;
+
+    .loading,
+    .noData {
+      grid-column: 1 / -1;
+    }
+  }
 }
 
 // 组件样式

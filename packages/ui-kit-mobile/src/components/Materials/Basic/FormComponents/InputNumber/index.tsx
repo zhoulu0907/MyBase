@@ -1,4 +1,5 @@
-import { Ellipsis, Form, Input } from '@arco-design/mobile-react';
+import { Ellipsis, Form, Input, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { nanoid } from 'nanoid';
 import { memo } from 'react';
@@ -109,7 +110,16 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
       field={fieldId}
       rules={rules}
       layout={layout}
-      label={label.display ? <Ellipsis text={label.text} maxLine={2} /> : undefined}
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
       initialValue={defaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? defaultValueConfig?.customValue : ''}
       style={{
         pointerEvents: !runtime || detailMode ? 'none' : 'unset',

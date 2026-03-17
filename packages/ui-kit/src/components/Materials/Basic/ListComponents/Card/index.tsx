@@ -116,7 +116,7 @@ const XCard = memo(
 
     useEffect(() => {
       if (refresh) {
-        handlePage(true);
+        setCardPageNo(1);
       }
     }, [refresh]);
 
@@ -253,8 +253,7 @@ const XCard = memo(
           [coverField]: coverFieldValue
         });
       }
-
-      if (paginationConfig?.display || reset) {
+      if (paginationConfig?.display || reset || cardPageNo === 1) {
         cardForm.setFieldsValue({ [mainMetaData.tableName]: newCardData });
         setCardData(newCardData);
       } else {
@@ -280,6 +279,85 @@ const XCard = memo(
         return 24;
       }
       return 6;
+    };
+
+    const renderListItem = (item: any, index: number) => {
+      return (
+        <List.Item key={index} className="listItem" style={{ padding: 0 }}>
+          <Card
+            className="card"
+            bordered={false}
+            onClick={() => handleRowClick(item)}
+            cover={
+              coverField ? (
+                <img
+                  style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
+                  src={item[coverField]}
+                  alt=""
+                />
+              ) : undefined
+            }
+          >
+            <Card.Meta
+              title={titleField ? renderItem(item, titleField, index, true) : undefined}
+              description={
+                showFields ? (
+                  <>
+                    {columns?.map((ele, i) => (
+                      <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
+                    ))}
+                  </>
+                ) : undefined
+              }
+            />
+          </Card>
+          <div className="cardExtra">
+            {operationButton?.map((opearate, index) => (
+              <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
+                {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
+                  <Button
+                    type="text"
+                    size="small"
+                    style={{ padding: '0 8px' }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleEdit(item.id, true, item);
+                    }}
+                    icon={<IconEdit />}
+                  ></Button>
+                )}
+
+                {opearate.type === TableOperationButton.DELETE && opearate.display && canDelete.value && (
+                  <div onClick={(event) => event.stopPropagation()}>
+                    <Popconfirm
+                      focusLock
+                      title="确认删除"
+                      content={opearate.confirmText}
+                      disabled={preview}
+                      onOk={(event) => {
+                        event.stopPropagation();
+                        handleDelete(item.id);
+                      }}
+                    >
+                      <Button
+                        type="text"
+                        size="small"
+                        disabled={preview}
+                        style={{ padding: '0 4px' }}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                        }}
+                        status={'danger'}
+                        icon={<IconDelete />}
+                      ></Button>
+                    </Popconfirm>
+                  </div>
+                )}
+              </Tooltip>
+            ))}
+          </div>
+        </List.Item>
+      );
     };
 
     const renderItem = (_record: any, fieldName: string, index: number, isTitle: boolean, column?: any) => {
@@ -466,18 +544,22 @@ const XCard = memo(
       handlePage(true);
     };
 
-    const getListClass = () => {
-      if (
-        paginationConfig.display &&
-        (paginationConfig.pagePosition === 'tl' || paginationConfig.pagePosition === 'bl')
-      ) {
-        return 'list-left';
+    const getPaginationPositionClass = () => {
+      if (!paginationConfig?.display) {
+        return '';
       }
-      if (
-        paginationConfig.display &&
-        (paginationConfig.pagePosition === 'topCenter' || paginationConfig.pagePosition === 'bottomCenter')
-      ) {
+      if (paginationConfig.pagePosition === 'tl') {
+        return 'reverse list-left';
+      } else if (paginationConfig.pagePosition === 'topCenter') {
+        return 'reverse list-center';
+      } else if (paginationConfig.pagePosition === 'tr') {
+        return 'reverse list-right';
+      } else if (paginationConfig.pagePosition === 'bl') {
+        return 'list-left';
+      } else if (paginationConfig.pagePosition === 'bottomCenter') {
         return 'list-center';
+      } else if (paginationConfig.pagePosition === 'br') {
+        return 'list-right';
       }
       return 'list-right';
     };
@@ -514,142 +596,68 @@ const XCard = memo(
 
               {/* todo 草稿 */}
             </div>
-            <Button type="text" onClick={() => handlePage(true)} icon={<IconRefresh />}></Button>
+            <Button type="text" onClick={() => setCardPageNo(1)} icon={<IconRefresh />}></Button>
           </div>
         </div>
         <div className="cardContent">
-          {label?.display && <>{label.text}</>}
-          {/* 滚动加载 */}
+          {label?.display && <div>{label.text}</div>}
           <Form
             form={cardForm}
-            className={
-              paginationConfig.display &&
-              (paginationConfig.pagePosition === 'tl' ||
-                paginationConfig.pagePosition === 'topCenter' ||
-                paginationConfig.pagePosition === 'tr')
-                ? `cardListForm reverse ${getListClass()}`
-                : `cardListForm ${getListClass()}`
-            }
             labelCol={layout === 'horizontal' ? { span: 10 } : {}}
             wrapperCol={layout === 'horizontal' ? { span: 14 } : {}}
+            className={`cardListForm ${getPaginationPositionClass()}`}
           >
-            <List
-              bordered={false}
-              className={paginationConfig?.display || !runtime ? 'pageList' : undefined}
-              dataSource={cardData}
-              scrollLoading={
-                !paginationConfig.display && cardData.length < Number(cardTotal) ? <Spin loading={true} /> : undefined
-              }
-              grid={{ span: getSpan(), gutter: [20, 20] }}
-              noDataElement={
-                <div style={{ padding: '10px 0 20px' }}>
-                  <Empty />
-                </div>
-              }
-              render={(item, index) => {
-                return (
-                  <div className="cardItem">
-                    <Card
-                      className="card"
-                      bordered={false}
-                      onClick={() => handleRowClick(item)}
-                      cover={
-                        coverField ? (
-                          <img
-                            style={{ width: '100%', height: '128px', objectFit: imageFill || 'fill' }}
-                            src={item[coverField]}
-                            alt=""
-                          />
-                        ) : undefined
-                      }
-                    >
-                      <Card.Meta
-                        title={titleField ? renderItem(item, titleField, index, true) : undefined}
-                        description={
-                          showFields ? (
-                            <>
-                              {columns?.map((ele, i) => (
-                                <div key={`${index}-${i}`}>{renderItem(item, ele.dataIndex, index, false, ele)}</div>
-                              ))}
-                            </>
-                          ) : undefined
-                        }
-                      />
-                    </Card>
-                    <div className="cardExtra">
-                      {operationButton?.map((opearate, index) => (
-                        <Tooltip content={!hasOperationPermission && '无操作权限'} key={index}>
-                          {opearate.type === TableOperationButton.EDIT && opearate.display && canEdit.value && (
-                            <Button
-                              type="text"
-                              size="small"
-                              style={{ padding: '0 8px' }}
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                handleEdit(item.id, true, item);
-                              }}
-                              icon={<IconEdit />}
-                            ></Button>
-                          )}
-
-                          {opearate.type === TableOperationButton.DELETE && opearate.display && canDelete.value && (
-                            <div onClick={(event) => event.stopPropagation()}>
-                              <Popconfirm
-                                focusLock
-                                title="确认删除"
-                                content={opearate.confirmText}
-                                disabled={preview}
-                                onOk={(event) => {
-                                  event.stopPropagation();
-                                  handleDelete(item.id);
-                                }}
-                              >
-                                <Button
-                                  type="text"
-                                  size="small"
-                                  disabled={preview}
-                                  style={{ padding: '0 4px' }}
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                  }}
-                                  status={'danger'}
-                                  icon={<IconDelete />}
-                                ></Button>
-                              </Popconfirm>
-                            </div>
-                          )}
-                        </Tooltip>
-                      ))}
-                    </div>
+            {paginationConfig?.display ? (
+              // 分页
+              <List
+                bordered={false}
+                className="pageList"
+                dataSource={cardData}
+                grid={{ span: getSpan(), gutter: [20, 20] }}
+                noDataElement={
+                  <div style={{ padding: '10px 0 20px' }}>
+                    <Empty />
                   </div>
-                );
-              }}
-              style={paginationConfig?.display ? undefined : { maxHeight: 'calc(100vh - 180px)', minHeight: '100px' }}
-              onListScroll={(element) => {
-                if (paginationConfig?.display || cardData.length >= Number(cardTotal)) {
-                  return;
                 }
-                if (element.scrollTop) {
-                  // 小于12+scrollLoading的height(64)
-                  if (element.scrollHeight - element.scrollTop - element.clientHeight <= 76) {
-                    setCardPageNo((prev) => prev + 1);
+                render={renderListItem}
+                pagination={{
+                  pageSize: paginationConfig.pageSize,
+                  showTotal: true,
+                  current: cardPageNo,
+                  total: cardTotal,
+                  onChange: (pageNo: number) => {
+                    setCardPageNo(pageNo);
                   }
+                }}
+              ></List>
+            ) : (
+              // 滚动加载
+              <List
+                bordered={false}
+                dataSource={cardData}
+                className={!runtime ? 'pageList' : undefined}
+                scrollLoading={cardData.length < Number(cardTotal) ? <Spin loading={true} /> : undefined}
+                grid={{ span: getSpan(), gutter: [20, 20] }}
+                noDataElement={
+                  <div style={{ padding: '10px 0 20px' }}>
+                    <Empty />
+                  </div>
                 }
-              }}
-              pagination={
-                paginationConfig?.display
-                  ? {
-                      pageSize: paginationConfig.pageSize,
-                      showTotal: true,
-                      current: cardPageNo,
-                      total: cardTotal,
-                      onChange: (pageNo: number) => {
-                        setCardPageNo(pageNo);
-                      }
+                render={renderListItem}
+                style={{ maxHeight: 'calc(100vh - 180px)' }}
+                onListScroll={(element) => {
+                  if (paginationConfig?.display || cardData.length >= Number(cardTotal)) {
+                    return;
+                  }
+                  if (element.scrollTop) {
+                    // 小于12+scrollLoading的height(64)
+                    if (element.scrollHeight - element.scrollTop - element.clientHeight <= 76) {
+                      setCardPageNo((prev) => prev + 1);
                     }
-                  : false
-              }
-            ></List>
+                  }
+                }}
+              ></List>
+            )}
           </Form>
         </div>
       </div>

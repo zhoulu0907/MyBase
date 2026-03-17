@@ -6,6 +6,7 @@ import { TokenManager } from '@onebase/common';
 import { getTodoPageList, getDonePageList, getMyCreatePageList, getMyCCPageList } from '@onebase/app/src/services/app_runtime';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP, workbenchSchema } from '@onebase/ui-kit';
 import {type ITodoItem, pendingListDefault } from '@onebase/ui-kit/src/components/Materials/Workbench/WorkbenchBasicComponents/TodoList/schema';
+import { useJump } from '../../hooks/useJump';
 import styles from './index.module.css';
 
 type XTodoListConfig = typeof workbenchSchema.XTodoList.config;
@@ -32,10 +33,10 @@ interface TabData {
 }
 
 const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
-  const { label, dataConfig, theme, status, runtime, dataCount, userAvatar, userName } = props;
+  const { label, dataConfig, theme, status, runtime, dataCount, userAvatar, userName, showMore, showMoreLink } = props;
   const hiddenStatusValue = WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.HIDDEN];
 
-const [pendingList, setPendingList] = useState<ITodoItem[]>(runtime ? [] : pendingListDefault);
+  const [pendingList, setPendingList] = useState<ITodoItem[]>(runtime ? [] : pendingListDefault);
   const [createdList, setCreatedList] = useState<ITodoItem[]>([]);
   const [handledList, setHandledList] = useState<ITodoItem[]>([]);
   const [ccList, setCcList] = useState<ITodoItem[]>([]);
@@ -46,6 +47,8 @@ const [pendingList, setPendingList] = useState<ITodoItem[]>(runtime ? [] : pendi
     showHandled: handledList,
     showCc: ccList
   }
+
+  const { handleJump } = useJump();
 
   const tabData = Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
     value &&
@@ -108,6 +111,17 @@ const [pendingList, setPendingList] = useState<ITodoItem[]>(runtime ? [] : pendi
       console.log(error);
     }
   };
+  
+  const handleShowMoreClick = () => {
+    if (!runtime) {
+      return;
+    }
+    handleJump({
+      menuUuid: undefined,
+      linkAddress: showMoreLink,
+      runtime
+    });
+  };
 
   // 获取第一个展示的 tab key
   const getFirstVisibleTabKey = (): string | null => {
@@ -131,6 +145,9 @@ const [pendingList, setPendingList] = useState<ITodoItem[]>(runtime ? [] : pendi
       <div className={styles.todoListHeader}>
         {label?.display && (
           <span className={styles.todoListHeaderTitle}>{label?.text}</span>
+        )}
+        {showMore && (
+          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconArrowIn /></a>
         )}
       </div>
 

@@ -1,2 +1,16 @@
 @import './CreateApp/components/variables.less';
 @content-header-height: 52px;
+
+// 公式展示样式
+.formula-show-btn() {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+
+    & span {
+        max-width: calc(100% - 30px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+}
