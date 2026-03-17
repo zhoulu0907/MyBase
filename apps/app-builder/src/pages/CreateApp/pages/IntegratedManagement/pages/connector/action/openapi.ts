@@ -50,7 +50,7 @@ export const resolveRef = (schema: unknown, doc: unknown): unknown => {
   return resolveRef(current, doc);
 };
 
-/** 递归解析 schema 中的所有 $ref 引用 */
+/** 递归解析 schema 中的所有 $ref 引用，保留 examples 字段 */
 export const resolveAllRefs = (schema: unknown, doc: unknown): unknown => {
   if (!isRecord(schema)) return schema;
 
@@ -58,21 +58,24 @@ export const resolveAllRefs = (schema: unknown, doc: unknown): unknown => {
   const resolved = resolveRef(schema, doc);
   if (!isRecord(resolved)) return resolved;
 
+  // 结果对象，保留所有原始字段
+  const result: Record<string, unknown> = { ...resolved };
+
   // 递归解析 properties 中的 $ref
   if (isRecord(resolved.properties)) {
     const newProperties: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(resolved.properties)) {
       newProperties[key] = resolveAllRefs(value, doc);
     }
-    return { ...resolved, properties: newProperties };
+    result.properties = newProperties;
   }
 
   // 递归解析 items 中的 $ref（用于数组类型）
-  if (resolved.items) {
-    return { ...resolved, items: resolveAllRefs(resolved.items, doc) };
+  if (isRecord(resolved) && 'items' in resolved) {
+    result.items = resolveAllRefs(resolved.items, doc);
   }
 
-  return resolved;
+  return result;
 };
 
 export const getOperationKey = (op: OpenApiOperation) => `${op.method.toUpperCase()} ${op.path}`;
@@ -385,9 +388,9 @@ const extractResponse = (op: Record<string, unknown>, doc: unknown) => {
     console.log('[extractResponse] content-level example:', example);
     // 其次检查 schema 级别的 examples 数组
     const respSchemaRaw = respJson.schema;
-    console.log('[extractResponse] respSchemaRaw:', respSchemaRaw);
     const respSchema = resolveAllRefs(respSchemaRaw, doc);
-    console.log('[extractResponse] respSchema after resolveAllRefs:', respSchema);
+    console.log('[extractResponse] respSchema:', respSchema);
+    console.log('[extractResponse] respSchema.examples:', isRecord(respSchema) ? (respSchema as Record<string, unknown>).examples : 'not a record');
     const schemaExamples = isRecord(respSchema) && Array.isArray(respSchema.examples) ? respSchema.examples : [];
     console.log('[extractResponse] schemaExamples:', schemaExamples);
     firstSchemaExample = schemaExamples.length > 0 ? schemaExamples[0] : null;
