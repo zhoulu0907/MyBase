@@ -5,18 +5,20 @@ export interface LoadThemeOptions {
   theme: string;
   /** 主题映射，key 是主题名，value 是动态导入函数 */
   themeMap: ThemeLoaders;
-  /** 插入到 head 最前面，默认 true */
-  insertAtStart?: boolean;
   /** 默认主题名称，当 theme 不在 themeMap 中时使用 */
   defaultTheme?: string;
 }
 
+// 跟踪上一次插入的样式元素，用于保持加载顺序
+let lastInsertedElement: Element | null = null;
+
 /**
- * 加载主题样式并插入到 head 最前面
- * 动态导入的 CSS 默认会追加到 head 末尾，此方法会将其移到最前面
+ * 加载主题样式并插入到正确位置
+ * 第一次调用会插入到 head 最前面，后续调用会插入到上一次加载的样式后面
+ * 这样保证加载顺序：arco.css → 主题样式 → 本地覆盖样式
  */
 export async function loadThemeAtPosition(options: LoadThemeOptions): Promise<void> {
-  const { theme, themeMap, insertAtStart = true, defaultTheme } = options;
+  const { theme, themeMap, defaultTheme } = options;
 
   // 确定要加载的主题
   const actualTheme = themeMap[theme] ? theme : defaultTheme;
@@ -34,11 +36,6 @@ export async function loadThemeAtPosition(options: LoadThemeOptions): Promise<vo
   // 加载主题
   await themeMap[actualTheme]();
 
-  // 如果不需要插入到最前面，直接返回
-  if (!insertAtStart) {
-    return;
-  }
-
   // 收集新加载的样式元素（style 和 link）
   const allStyles = document.head.querySelectorAll('style');
   const allLinks = document.head.querySelectorAll('link[rel="stylesheet"]');
@@ -50,11 +47,27 @@ export async function loadThemeAtPosition(options: LoadThemeOptions): Promise<vo
     return;
   }
 
-  // 将新加载的样式插入到 head 最前面（倒序插入保持原有顺序）
-  const firstChild = document.head.firstChild;
-  for (let i = newElements.length - 1; i >= 0; i--) {
-    document.head.insertBefore(newElements[i], firstChild);
+  if (lastInsertedElement) {
+    // 后续调用：插入到上一次插入的元素后面
+    newElements.forEach(el => {
+      lastInsertedElement!.after(el);
+      lastInsertedElement = el;
+    });
+  } else {
+    // 第一次调用：插入到 head 最前面
+    const firstChild = document.head.firstChild;
+    for (let i = newElements.length - 1; i >= 0; i--) {
+      document.head.insertBefore(newElements[i], firstChild);
+    }
+    lastInsertedElement = newElements[newElements.length - 1];
   }
+}
+
+/**
+ * 重置样式插入位置跟踪（用于切换主题时重新开始）
+ */
+export function resetThemeInsertPosition(): void {
+  lastInsertedElement = null;
 }
 
 /**

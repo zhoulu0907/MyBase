@@ -1,5 +1,3 @@
-import '@arco-design/web-react/dist/css/arco.css';
-
 import { ConfigProvider } from '@arco-design/web-react';
 import { envConfig, TokenManager, loadThemeAtPosition, loadTheme } from '@onebase/common';
 import { StrictMode } from 'react';
@@ -48,6 +46,16 @@ async function init() {
   // 加载 Arco 主题（天工或灵畿）
   const rawTheme = envConfig?.THEME;
   const theme = rawTheme === 'lingji' ? 'lingji' : 'tiangong';
+
+  // 先加载 Arco 基础样式
+  await loadThemeAtPosition({
+    theme: 'default',
+    themeMap: {
+      default: () => import('@arco-design/web-react/dist/css/arco.css')
+    }
+  });
+
+  // 再加载主题样式
   await loadThemeAtPosition({
     theme,
     themeMap: ARCO_THEME_MAP,
