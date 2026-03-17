@@ -99,9 +99,10 @@
     box-sizing: border-box;
     border-radius: 4px;
     display: grid;
+    align-content: start;
     grid-template-columns: repeat(12, 1fr);
     // 行高固定 32px，组件通过 rowSpan 反推填满内容高度
-    grid-auto-rows: 32px;
+    grid-auto-rows: auto;
     grid-auto-flow: row dense;
     gap: 16px;
 
@@ -161,6 +162,8 @@
   .resizableWorkbenchItemWrapper {
     position: relative;
     display: block;
+    align-self: start;
+    height: fit-content;
   }
 
   .resizableWorkbenchItem {
