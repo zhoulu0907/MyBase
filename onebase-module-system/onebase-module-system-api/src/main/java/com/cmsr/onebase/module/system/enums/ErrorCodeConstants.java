@@ -237,5 +237,6 @@ public interface ErrorCodeConstants {
     ErrorCode LINGJI_SSO_CREATE_TOKEN_FAILED = new ErrorCode(1_002_032_006, "灵畿SSO登录失败：创建本地登录令牌失败");
     ErrorCode LINGJI_SSO_SIGNATURE_ERROR = new ErrorCode(1_002_032_007, "灵畿SSO签名失败");
     ErrorCode LINGJI_SSO_TENANT_MAPPING_NOT_FOUND = new ErrorCode(1_002_032_008, "灵畿SSO登录失败：企业ID未映射到租户");
+    ErrorCode LINGJI_SSO_CODE_INVALID = new ErrorCode(1_002_032_009, "灵畿SSO登录失败：授权码无效或已过期");
 
 }

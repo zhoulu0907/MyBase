@@ -188,15 +188,49 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         // 解析响应
         JSONObject responseObj = JSONUtil.parseObj(responseBody);
 
-        // 检查响应状态
-        String status = responseObj.getStr("status");
-        if (!"0".equals(status)) {
-            log.error("灵畿SSO获取用户信息失败: status={}, message={}", status, responseObj.getStr("message"));
-            throw exception(LINGJI_SSO_GET_TOKEN_FAILED);
+        // 检查响应状态（响应格式：{"head": {"respStatus": "00", "respCode": "00", "respDesc": "..."}, "data": {...}}）
+        JSONObject respHead = responseObj.getJSONObject("head");
+        if (respHead != null) {
+            String respStatus = respHead.getStr("respStatus");
+            String respCode = respHead.getStr("respCode");
+            String respDesc = respHead.getStr("respDesc");
+
+            // 成功状态为 "00"，或者 respStatus/respCode 都为 null 也算成功
+            boolean isSuccess = (respStatus == null && respCode == null)
+                    || ("00".equals(respStatus) && "00".equals(respCode));
+
+            if (!isSuccess) {
+                log.error("灵畿SSO获取用户信息失败: respStatus={}, respCode={}, respDesc={}", respStatus, respCode, respDesc);
+                // 授权码无效或已过期
+                if (respDesc != null && respDesc.contains("授权码无效")) {
+                    throw exception(LINGJI_SSO_CODE_INVALID);
+                }
+                throw exception(LINGJI_SSO_GET_TOKEN_FAILED);
+            }
+        } else {
+            // 兼容旧格式：直接在根级别有 status 字段
+            String status = responseObj.getStr("status");
+            if (!"0".equals(status)) {
+                log.error("灵畿SSO获取用户信息失败: status={}, message={}", status, responseObj.getStr("message"));
+                throw exception(LINGJI_SSO_GET_TOKEN_FAILED);
+            }
         }
 
-        // 获取 id_token
-        String idToken = responseObj.getStr("id_token");
+        // 获取 idToken（可能在 data 对象中，也可能在根级别；可能是 idToken 或 id_token）
+        String idToken = null;
+        JSONObject respData = responseObj.getJSONObject("data");
+        if (respData != null) {
+            idToken = respData.getStr("idToken");
+            if (StringUtils.isBlank(idToken)) {
+                idToken = respData.getStr("id_token");
+            }
+        }
+        if (StringUtils.isBlank(idToken)) {
+            idToken = responseObj.getStr("idToken");
+        }
+        if (StringUtils.isBlank(idToken)) {
+            idToken = responseObj.getStr("id_token");
+        }
         if (StringUtils.isBlank(idToken)) {
             throw exception(LINGJI_SSO_USER_INFO_EMPTY);
         }
