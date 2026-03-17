@@ -1,43 +1,19 @@
-import { Button, Dropdown, Input, Menu, Popconfirm } from '@arco-design/web-react';
-import { IconDelete, IconEdit, IconMenu, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
+import { Button, Input, Popconfirm } from '@arco-design/web-react';
+import { IconDelete, IconEdit, IconPlus, IconDragDotVertical } from '@arco-design/web-react/icon';
 import { ReactSortable } from 'react-sortablejs';
 import type { EntryItem } from '../types';
 import styles from '../index.module.less';
 
 interface EntryListProps {
   entries: EntryItem[];
-  showAddMenu: boolean;
   onSortChange: (newList: EntryItem[]) => void;
   onEdit: (entry: EntryItem) => void;
   onDelete: (entryId: string) => void;
-  onAddEntry: (type: 'menu' | 'link') => void;
+  onAddEntry: () => void;
   onEditEntry: (entryId: string, field: string, value: string) => void;
-  onShowAddMenuChange: (visible: boolean) => void;
 }
 
-export const EntryList = ({
-  entries,
-  showAddMenu,
-  onSortChange,
-  onEdit,
-  onDelete,
-  onAddEntry,
-  onEditEntry,
-  onShowAddMenuChange
-}: EntryListProps) => {
-  const addEntryMenu = (
-    <Menu>
-      <Menu.Item key="menu" onClick={() => onAddEntry('menu')}>
-        <IconMenu style={{ marginRight: 8 }} />
-        应用菜单
-      </Menu.Item>
-      <Menu.Item key="link" onClick={() => onAddEntry('link')}>
-        <IconMenu style={{ marginRight: 8 }} />
-        外部链接
-      </Menu.Item>
-    </Menu>
-  );
-
+export const EntryList = ({ entries, onSortChange, onEdit, onDelete, onAddEntry, onEditEntry }: EntryListProps) => {
   return (
     <>
       <ReactSortable
@@ -67,18 +43,10 @@ export const EntryList = ({
           </div>
         ))}
       </ReactSortable>
-      <Dropdown
-        droplist={addEntryMenu}
-        trigger="click"
-        position="bl"
-        popupVisible={showAddMenu}
-        onVisibleChange={onShowAddMenuChange}
-      >
-        <Button type="outline" className={styles.addEntryBtn} icon={<IconPlus />}>
-          添加入口
-        </Button>
-      </Dropdown>
+
+      <Button type="outline" className={styles.addEntryBtn} icon={<IconPlus />} onClick={onAddEntry}>
+        添加入口
+      </Button>
     </>
   );
 };
-
