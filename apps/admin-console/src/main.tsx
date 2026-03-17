@@ -1,7 +1,6 @@
 import '@arco-design/web-react/dist/css/arco.css';
 
-import { loadTheme } from '@onebase/ui-kit/src/utils/theme';
-import { envConfig, loadThemeAtPosition } from '@onebase/common';
+import { envConfig, loadThemeAtPosition, loadTheme } from '@onebase/common';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
@@ -20,7 +19,6 @@ async function init() {
   await loadThemeAtPosition({
     theme,
     themeMap: ARCO_THEME_MAP,
-    insertAfterSelector: 'style',
     defaultTheme: 'tiangong'
   });
 
@@ -28,7 +26,7 @@ async function init() {
     default: () => import('./themes/theme.less'),
     tiangong: () => import('./themes/theme_tiangong.less'),
     lingji: () => import('./themes/theme_lingji.less')
-  });
+  }, theme);
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
