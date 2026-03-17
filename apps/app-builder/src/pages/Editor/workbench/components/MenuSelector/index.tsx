@@ -17,8 +17,10 @@ export interface MenuSelectorProps {
   searchPlaceholder?: string;
   /** 是否可搜索，默认 true */
   searchable?: boolean;
-  /** 自定义样式 */
+  /** 自定义样式类 */
   className?: string;
+  /** 自定义样式 */
+  style?: object;
   /** 树的高度 */
   height?: string | number;
 }
@@ -30,6 +32,7 @@ const MenuSelector = ({
   searchPlaceholder = '搜索菜单',
   searchable = true,
   className,
+  style,
   height = '400px'
 }: MenuSelectorProps) => {
   const { curAppId } = useAppStore();
@@ -117,7 +120,7 @@ const MenuSelector = ({
   }, [curAppId]);
 
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       {mode === 'multiple' && (
         <>
           {searchable && (

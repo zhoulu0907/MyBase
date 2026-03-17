@@ -36,6 +36,9 @@ export type {
   IAlignConfigType
 } from '../../types';
 
+import type { IBooleanConfigType, TRadioDefaultType, TTextDefaultType } from '../../types';
+
+
 // ========== Workbench 特有类型 ==========
 
 import { WORKBENCH_CONFIG_TYPES } from './constants';
@@ -74,6 +77,9 @@ export interface QuickEntryTitleConfig {
   showTitle: boolean;
   titleName: string;
   showMore: boolean;
+  jumpType: TRadioDefaultType<string>;
+  jumpPageId?: TTextDefaultType;
+  jumpExternalUrl?: TTextDefaultType;
   enableGroup?: boolean;
 }
 
@@ -151,7 +157,6 @@ export interface ICarouselContentConfigType {
 }
 
 // 待办中心-数据内容配置
-import type { IBooleanConfigType } from '../../types';
 export interface IDataConfigConfigType {
   key: string;
   name: string;

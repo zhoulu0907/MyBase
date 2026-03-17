@@ -187,6 +187,18 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
     }
   };
 
+  const handleClickMore = () => {
+    // 20260317更新：查看更多由弹出弹窗改为跳转至用户配置的链接
+    if (!runtime) {
+      return;
+    }
+    handleJump({
+      menuUuid: finalTitleConfig?.jumpType === 'internal' ? finalTitleConfig?.jumpPageId : undefined,
+      linkAddress: finalTitleConfig?.jumpType === 'external' ? finalTitleConfig?.jumpExternalUrl : undefined,
+      runtime,
+    });
+  };
+
   const normalizeThemeClass = (theme?: string) => {
     if (!theme) return '';
     const slug = theme
@@ -231,7 +243,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
             <span className={styles.quickEntryHeaderTitle}>{finalTitleConfig?.titleName || '快捷入口'}</span>
           )}
           {finalTitleConfig?.showMore && (
-            <span className={styles.quickEntryMore}>
+            <span className={styles.quickEntryMore} onClick={() => handleClickMore()} >
               更多 <IconArrowIn />
             </span>
           )}
