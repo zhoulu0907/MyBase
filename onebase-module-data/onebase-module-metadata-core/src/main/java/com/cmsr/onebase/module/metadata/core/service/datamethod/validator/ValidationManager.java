@@ -3,6 +3,11 @@ package com.cmsr.onebase.module.metadata.core.service.datamethod.validator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRangeRepository;
 import com.cmsr.onebase.module.metadata.core.service.number.AutoNumberService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
@@ -11,6 +16,9 @@ import java.util.logging.Logger;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 校验管理器
@@ -29,6 +37,16 @@ public class ValidationManager {
     
     @Resource
     private AutoNumberService autoNumberService;
+    @Resource
+    private MetadataValidationRequiredRepository requiredRepository;
+    @Resource
+    private MetadataValidationUniqueRepository uniqueRepository;
+    @Resource
+    private MetadataValidationLengthRepository lengthRepository;
+    @Resource
+    private MetadataValidationFormatRepository formatRepository;
+    @Resource
+    private MetadataValidationRangeRepository rangeRepository;
 
     public ValidationManager(List<ValidationService> validationServices) {
         this.validationServices = validationServices;
@@ -115,6 +133,61 @@ public class ValidationManager {
     public void validateEntity(String entityUuid, List<MetadataEntityFieldDO> fields, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities, MetadataDataMethodOpEnum operationType) {
         log.info("开始校验实体：entityUuid=" + entityUuid + ", 字段数量=" + fields.size());
 
+        Set<String> fieldUuids = fields.stream()
+                .filter(f -> f.getIsSystemField() == null || f.getIsSystemField() != 1)
+                .filter(f -> f.getIsPrimaryKey() == null || f.getIsPrimaryKey() != 1)
+                .filter(f -> operationType != MetadataDataMethodOpEnum.UPDATE || data.get(f.getFieldName()) != null)
+                .map(MetadataEntityFieldDO::getFieldUuid)
+                .filter(u -> u != null && !u.isBlank())
+                .collect(Collectors.toSet());
+        Map<String, Map<String, ? extends java.util.List<?>>> rulesByType = new HashMap<>();
+        if (!fieldUuids.isEmpty()) {
+            try {
+                var requiredList = requiredRepository.findByFieldUuids(fieldUuids);
+                Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO>> requiredMap = requiredList.stream().filter(r -> r.getFieldUuid() != null)
+                        .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO::getFieldUuid,
+                                Collectors.mapping(r -> r, Collectors.toList())));
+                rulesByType.put("REQUIRED", requiredMap);
+            } catch (Exception ignore) {}
+            try {
+                var uniqueList = uniqueRepository.findByFieldUuids(fieldUuids);
+                Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO>> uniqueMap = uniqueList.stream().filter(r -> r.getFieldUuid() != null)
+                        .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO::getFieldUuid,
+                                Collectors.mapping(r -> r, Collectors.toList())));
+                rulesByType.put("UNIQUE", uniqueMap);
+            } catch (Exception ignore) {}
+            try {
+                var lengthList = lengthRepository.findByFieldUuids(fieldUuids);
+                Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO>> lengthMap = lengthList.stream().filter(r -> r.getFieldUuid() != null)
+                        .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO::getFieldUuid,
+                                Collectors.mapping(r -> r, Collectors.toList())));
+                rulesByType.put("LENGTH", lengthMap);
+            } catch (Exception ignore) {}
+            try {
+                var formatList = formatRepository.findByFieldUuids(fieldUuids);
+                Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO>> formatMap = formatList.stream().filter(r -> r.getFieldUuid() != null)
+                        .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO::getFieldUuid,
+                                Collectors.mapping(r -> r, Collectors.toList())));
+                rulesByType.put("FORMAT", formatMap);
+            } catch (Exception ignore) {}
+            try {
+                var rangeList = rangeRepository.findByFieldUuids(fieldUuids);
+                Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO>> rangeMap = rangeList.stream().filter(r -> r.getFieldUuid() != null)
+                        .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO::getFieldUuid,
+                                Collectors.mapping(r -> r, Collectors.toList())));
+                rulesByType.put("RANGE", rangeMap);
+            } catch (Exception ignore) {}
+        }
+        for (ValidationService service : validationServices) {
+            if (service instanceof PrefetchableValidationService pvs) {
+                try {
+                    pvs.preloadBatchRules(rulesByType);
+                } catch (Exception e) {
+                    log.fine("预加载规则到服务失败，type=" + service.getValidationType() + ", err=" + e.getMessage());
+                }
+            }
+        }
+
         for (ValidationService service : validationServices){
             try{
                 if("CHILD_NOT_EMPTY".equals(service.getValidationType())){
@@ -151,6 +224,14 @@ public class ValidationManager {
             }
 
             validateField(entityUuid, field, value, data, subEntities);
+        }
+
+        for (ValidationService service : validationServices) {
+            if (service instanceof PrefetchableValidationService pvs) {
+                try {
+                    pvs.clearPrefetchedRules();
+                } catch (Exception ignore) {}
+            }
         }
 
         log.info("实体" + entityUuid + "校验完成");

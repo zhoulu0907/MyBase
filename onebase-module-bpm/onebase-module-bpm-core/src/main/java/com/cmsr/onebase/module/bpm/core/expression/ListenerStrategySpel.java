@@ -16,7 +16,7 @@
 package com.cmsr.onebase.module.bpm.core.expression;
 
 import com.cmsr.onebase.module.bpm.core.helper.SpelHelper;
-import org.dromara.warm.flow.core.listener.ListenerStrategy;
+import org.dromara.warm.flow.core.strategy.ListenerStrategy;
 
 import java.util.Map;
 

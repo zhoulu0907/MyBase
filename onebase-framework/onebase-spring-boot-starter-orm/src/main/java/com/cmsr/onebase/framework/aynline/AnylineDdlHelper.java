@@ -6,7 +6,9 @@ import org.anyline.metadata.Table;
 import org.anyline.proxy.CacheProxy;
 import org.anyline.service.AnylineService;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  * Anyline DDL 操作辅助工具类
@@ -124,13 +126,10 @@ public class AnylineDdlHelper {
         log.info("开始创建表: {}", tableName);
         
         try {
-            // 检查表是否已存在
-            boolean tableAlreadyExists = tableExists(service, tableName);
-            
-            if (tableAlreadyExists) {
+            Table<?> existing = service.metadata().table(tableName);
+            if (existing != null) {
                 log.info("表 {} 已存在，检查并添加缺失的列", tableName);
-                // 表已存在，检查并添加缺失的列
-                addMissingColumns(service, table);
+                addMissingColumns(service, table, existing);
                 log.info("表 {} 的列同步完成", tableName);
             } else {
                 // 表不存在，正常创建
@@ -155,12 +154,33 @@ public class AnylineDdlHelper {
      * @param table   Table 对象（包含列定义）
      */
     private static void addMissingColumns(AnylineService<?> service, Table<?> table) {
+        clearMetadataCache();
+        Table<?> existing = service.metadata().table(table.getName());
+        if (existing == null) {
+            return;
+        }
+        addMissingColumns(service, table, existing);
+    }
+
+    private static void addMissingColumns(AnylineService<?> service, Table<?> table, Table<?> existingTable) {
         String tableName = table.getName();
         LinkedHashMap<String, Column> columns = table.getColumns();
         
         if (columns == null || columns.isEmpty()) {
             log.debug("表 {} 没有定义列，跳过列同步", tableName);
             return;
+        }
+
+        Set<String> existingColumnKeys = new HashSet<>();
+        LinkedHashMap<String, Column> existingColumns = existingTable.getColumns();
+        if (existingColumns != null && !existingColumns.isEmpty()) {
+            for (Column col : existingColumns.values()) {
+                String name = col != null ? col.getName() : null;
+                String key = normalizeColumnKey(name);
+                if (key != null) {
+                    existingColumnKeys.add(key);
+                }
+            }
         }
         
         int addedCount = 0;
@@ -170,21 +190,22 @@ public class AnylineDdlHelper {
                 continue;
             }
             
-            // 检查列是否已存在
-            if (!columnExists(service, tableName, columnName)) {
-                log.info("表 {} 缺少列 {}，开始添加", tableName, columnName);
-                try {
-                    // 确保列关联到正确的表
-                    column.setTable(table);
-                    service.ddl().add(column);
-                    addedCount++;
-                    log.info("成功为表 {} 添加缺失的列: {}", tableName, columnName);
-                } catch (Exception e) {
-                    log.error("为表 {} 添加列 {} 失败: {}", tableName, columnName, e.getMessage(), e);
-                    throw new RuntimeException("添加缺失列失败: " + e.getMessage(), e);
-                }
-            } else {
+            String key = normalizeColumnKey(columnName);
+            if (key == null || existingColumnKeys.contains(key)) {
                 log.debug("列 {} 已存在于表 {} 中", columnName, tableName);
+                continue;
+            }
+
+            log.info("表 {} 缺少列 {}，开始添加", tableName, columnName);
+            try {
+                column.setTable(table);
+                service.ddl().add(column);
+                addedCount++;
+                existingColumnKeys.add(key);
+                log.info("成功为表 {} 添加缺失的列: {}", tableName, columnName);
+            } catch (Exception e) {
+                log.error("为表 {} 添加列 {} 失败: {}", tableName, columnName, e.getMessage(), e);
+                throw new RuntimeException("添加缺失列失败: " + e.getMessage(), e);
             }
         }
         
@@ -192,6 +213,17 @@ public class AnylineDdlHelper {
             log.info("为表 {} 添加了 {} 个缺失的列", tableName, addedCount);
             clearMetadataCache();
         }
+    }
+
+    private static String normalizeColumnKey(String name) {
+        if (name == null) {
+            return null;
+        }
+        String s = name.replace("\"", "").replace("'", "").trim();
+        if (s.isEmpty()) {
+            return null;
+        }
+        return s.toLowerCase();
     }
 
     /**

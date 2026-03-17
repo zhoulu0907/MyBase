@@ -22,7 +22,6 @@ import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.entity.User;
 import org.dromara.warm.flow.core.orm.service.IWarmService;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -32,6 +31,8 @@ import java.util.List;
  * @since 2023-03-29
  */
 public interface HisTaskService extends IWarmService<HisTask> {
+
+    List<HisTask> listByTaskId(Long taskId);
 
     /**
      * 根据任务id和协作类型查询
@@ -107,7 +108,7 @@ public interface HisTaskService extends IWarmService<HisTask> {
      * @param isPass     是否通过
      * @return HisTask 历史任务
      */
-    HisTask setSignHisTask(Task task, FlowParams flowParams, BigDecimal nodeRatio, boolean isPass);
+    HisTask setSignHisTask(Task task, FlowParams flowParams, String nodeRatio, boolean isPass);
 
     /**
      * 设置流程历史任务信息

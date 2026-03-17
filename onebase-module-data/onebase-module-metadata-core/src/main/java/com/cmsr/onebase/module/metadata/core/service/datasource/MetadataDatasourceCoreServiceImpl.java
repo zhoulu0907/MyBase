@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.core.service.datasource;
 
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
+import com.cmsr.onebase.module.metadata.core.config.MetadataConfig;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
 import jakarta.annotation.Resource;
@@ -29,11 +30,16 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
     private MetadataDatasourceRepository metadataDatasourceRepository;
 
     @Resource
+    private MetadataConfig metadataConfig;
+
+    @Resource
     private MetadataAppAndDatasourceCoreService appAndDatasourceService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDatasource(@Valid MetadataDatasourceDO datasource) {
+        datasource.setDatasourceType(resolveDatasourceType(datasource.getDatasourceType()));
+
         // 生成 UUID
         if (datasource.getDatasourceUuid() == null || datasource.getDatasourceUuid().isEmpty()) {
             datasource.setDatasourceUuid(UuidUtils.getUuid());
@@ -58,11 +64,13 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createDefaultDatasource(Long appId, String appUid, String datasourceType, String configJson) {
+        String resolvedDatasourceType = resolveDatasourceType(datasourceType);
+
         // 构建默认数据源DO
         MetadataDatasourceDO datasource = new MetadataDatasourceDO();
         datasource.setDatasourceName("默认数据源");
         datasource.setCode("default_" + System.currentTimeMillis());
-        datasource.setDatasourceType(datasourceType);
+        datasource.setDatasourceType(resolvedDatasourceType);
         datasource.setConfig(configJson);
         datasource.setDescription("系统默认数据源");
         datasource.setDatasourceOrigin(0);
@@ -72,7 +80,7 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
         Long datasourceId = createDatasource(datasource);
 
         // 创建关联关系（使用数据源UUID）
-        createAppDatasourceRelation(appId, datasource.getDatasourceUuid(), datasourceType, appUid);
+        createAppDatasourceRelation(appId, datasource.getDatasourceUuid(), resolvedDatasourceType, appUid);
 
         log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}", datasourceId, appId);
         return datasourceId;
@@ -148,9 +156,21 @@ public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCore
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createAppDatasourceRelation(Long appId, String datasourceUuid, String datasourceType, String appUid) {
+        String resolvedDatasourceType = resolveDatasourceType(datasourceType);
+
         // 创建应用与数据源的关联关系
-        appAndDatasourceService.createRelation(appId, datasourceUuid, datasourceType, appUid);
+        appAndDatasourceService.createRelation(appId, datasourceUuid, resolvedDatasourceType, appUid);
         log.info("创建应用数据源关联成功，应用ID: {}，数据源UUID: {}", appId, datasourceUuid);
+    }
+
+    private String resolveDatasourceType(String datasourceType) {
+        if (MetadataConfig.isValidDatabaseType(datasourceType)) {
+            return MetadataConfig.toDatabaseType(datasourceType).name();
+        }
+
+        String fallbackType = metadataConfig.getDefaultDatasourceType();
+        log.warn("数据源类型为空或非法，使用默认类型: {}，原始值: {}", fallbackType, datasourceType);
+        return fallbackType;
     }
 
     /**

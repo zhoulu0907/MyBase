@@ -51,6 +51,8 @@ public class AuthDefaultFactory {
     private static final String DEFAULT_OPERATION_TAGS = JsonUtils.toJsonString(List.of(CREATE, EDIT, DELETE, IMPORT, EXPORT, SHARE));
 
     private static final String EMPTY_DATA_FILTER = JsonUtils.toJsonString(List.of());
+    public static final String DEFAULE_PERMISSION = "默认权限";
+    public static final String SYSTEM_DEFAULE_PERMISSION = "系统提供的默认权限";
 
     //应用 AppAuthPermissionDO
     public static AppAuthPermissionDO createDefaultAuthPermissionDO(AuthPermissionReq req) {
@@ -78,7 +80,8 @@ public class AuthDefaultFactory {
     public static AppAuthDataGroupDO createDefaultAuthDataGroupDO(AuthPermissionReq req) {
 
         AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
-        adg.setGroupName("默认权限");
+        adg.setGroupName(DEFAULE_PERMISSION);
+        adg.setDescription(SYSTEM_DEFAULE_PERMISSION);
         adg.setApplicationId(req.getApplicationId());
         adg.setRoleUuid(req.getRoleUuid());
         adg.setMenuUuid(req.getMenuUuid());
@@ -90,7 +93,8 @@ public class AuthDefaultFactory {
 
     public static AppAuthDataGroupDO createDefaultAuthDataGroupDO() {
         AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
-        adg.setGroupName("默认权限");
+        adg.setGroupName(DEFAULE_PERMISSION);
+        adg.setDescription(SYSTEM_DEFAULE_PERMISSION);
         adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
         adg.setDataFilter(EMPTY_DATA_FILTER);
         adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));

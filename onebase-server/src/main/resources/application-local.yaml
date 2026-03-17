@@ -48,6 +48,7 @@ onebase:
   security:
     mock-enable: true
     mock-secret: inner-
+    login-user-header-enable: true
   ai:
     bridge:
       enabled: true
