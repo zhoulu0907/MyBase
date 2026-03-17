@@ -22,7 +22,7 @@ import {
 } from '../../core/constants';
 import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType, INumberConfigType, IWbMenuSelectorConfigType } from '../../core/types';
 import { IInformationListContentConfigType } from '../../core/types';
-import { dataCountConfig, labelNameConfig, showMoreConfig, showMoreLinkConfig, themeConfig, jumpTypeConfig, jumpExternalUrlConfig, jumpPageIdConfig } from '../../config/commonConfig';
+import { dataCountConfig, labelNameConfig, showMoreConfig, showMoreLinkConfig, themeConfig, jumpExternalUrlConfig, jumpPageIdConfig, checkMoreJumpTypeConfig } from '../../config/commonConfig';
 
 export interface XInformationListSchema {
   editData: TXInformationListEditData;
@@ -138,8 +138,7 @@ const XInformationList: XInformationListSchema = {
     themeConfig,
     dataCountConfig,
     showMoreConfig,
-    // showMoreLinkConfig,
-    jumpTypeConfig,
+    checkMoreJumpTypeConfig,
     jumpPageIdConfig,
     jumpExternalUrlConfig
   ],
