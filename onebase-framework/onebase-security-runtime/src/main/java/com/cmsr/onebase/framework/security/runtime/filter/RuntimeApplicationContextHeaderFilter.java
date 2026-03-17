@@ -44,6 +44,8 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
 
     private static final String X_APPLICATION_ID = "X-Application-Id";
 
+    private static final String X_VERSION_TAG = "X-Version-Tag";
+
     private RequestMatcher systemRequestMatcher   = new AntPathRequestMatcher("/runtime/system/**");
     private RequestMatcher corpRequestMatcher     = new AntPathRequestMatcher("/runtime/corp/**");
     private RequestMatcher fileRequestMatcher     = new AntPathRequestMatcher("/runtime/infra/file/**");
@@ -86,7 +88,14 @@ public class RuntimeApplicationContextHeaderFilter extends OncePerRequestFilter 
             throws ServletException, IOException {
         try {
             if (dataIsolation) {
-                ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+                // 优先从请求头获取 X-Version-Tag
+                String versionTagHeader = request.getHeader(X_VERSION_TAG);
+
+                if (versionTagHeader != null && versionTagHeader.equals(String.valueOf(VersionTagEnum.BUILD.getValue()))) {
+                    ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+                } else {
+                    ApplicationManager.setVersionTag(VersionTagEnum.RUNTIME.getValue());
+                }
             } else {
                 ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
             }

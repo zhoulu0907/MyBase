@@ -57,6 +57,12 @@ onebase:
     tenant: root
   flink:
     address: http://10.0.104.41:30692
+  lingji-sso:
+    sourceId: x
+    sourceKey: x
+    userInfoUrl: x
+
+
 
 justauth:
   enabled: true

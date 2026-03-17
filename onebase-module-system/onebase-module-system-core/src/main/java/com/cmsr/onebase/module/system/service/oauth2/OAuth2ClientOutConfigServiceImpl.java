@@ -25,4 +25,14 @@ public class OAuth2ClientOutConfigServiceImpl implements OAuth2ClientOutConfigSe
         return oauth2ClientOutConfigDataRepository.findOneByTenantCode(tenantCode);
     }
 
+    @Override
+    public void updateEnterpriseMapping(Long id, String enterpriseMapping) {
+        OAuth2ClientOutConfigDO config = oauth2ClientOutConfigDataRepository.getById(id);
+        if (config != null) {
+            config.setEnterpriseMapping(enterpriseMapping);
+            oauth2ClientOutConfigDataRepository.update(config);
+            log.info("更新企业租户映射配置: id={}, mapping={}", id, enterpriseMapping);
+        }
+    }
+
 }

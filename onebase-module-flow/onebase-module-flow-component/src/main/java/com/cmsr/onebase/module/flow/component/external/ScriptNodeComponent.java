@@ -58,7 +58,7 @@ public class ScriptNodeComponent extends SkippableNodeComponent {
         settingToJdbcType(conditionItems);
         List<ExpressionItem> expressionItems = flowConditionsProvider.formatConditionItemsForValue(conditionItems, expressionContext);
 
-        Map<String, Object> inputData = expressionItems.stream().collect(Collectors.toMap(ExpressionItem::getFieldKey, ExpressionItem::getFieldValue));
+        Map<String, Object> inputData = expressionItems.stream().filter(item -> item.getFieldValue() != null).collect(Collectors.toMap(ExpressionItem::getFieldKey, ExpressionItem::getFieldValue));
         // 3. 执行Http调用
         JsRequest jsRequest = new JsRequest();
         jsRequest.setScript(nodeData.getScript());

@@ -202,9 +202,10 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         }
 
         // 根据实体类型决定是否需要创建物理表
+        FieldTypeMappingContext fieldTypeMappingContext = null;
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
             // 同步创建物理表，确保事务原子性
-            createPhysicalTableForEntitySync(businessEntity, createReqVO, systemFields);
+            fieldTypeMappingContext = createPhysicalTableForEntitySync(businessEntity, createReqVO, systemFields);
         }
 
         // 生成实体UUID（如果为空）
@@ -217,7 +218,8 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
         // 如果需要创建物理表，保存系统字段信息到 metadata_entity_field 表
         if (BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType()) && systemFields != null && appId != null) {
-            saveEntityFields(businessEntity.getEntityUuid(), systemFields, appId);
+            saveEntityFields(businessEntity.getEntityUuid(), systemFields, appId,
+                    fieldTypeMappingContext != null ? fieldTypeMappingContext.defaultMappings : null);
         }
 
         if (!BusinessEntityTypeEnum.needCreatePhysicalTable(createReqVO.getEntityType())) {
@@ -307,7 +309,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      * @param createReqVO 创建请求VO
      * @param systemFields 系统字段列表
      */
-    private void createPhysicalTableForEntitySync(MetadataBusinessEntityDO businessEntity,
+    private FieldTypeMappingContext createPhysicalTableForEntitySync(MetadataBusinessEntityDO businessEntity,
                                                  BusinessEntitySaveReqVO createReqVO,
                                                  List<MetadataSystemFieldsDO> systemFields) {
         try {
@@ -322,13 +324,16 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             }
 
             // 2. 生成 DDL 并在数据源内建物理表
-            createPhysicalTable(datasource, businessEntity.getTableName(), systemFields);
+            java.util.Map<String, FieldTypeMappingDO> defaultMappings =
+                    fieldTypeMappingRepository.getDefaultMappingsByDatabaseType(datasource.getDatasourceType());
+            createPhysicalTable(datasource, businessEntity.getTableName(), systemFields, defaultMappings);
 
             // 3. 预先保存实体字段信息到 metadata_entity_field 表（待实体创建成功后会一起提交）
             // 注意：这里不能直接调用saveEntityFields，因为它需要实体ID，而此时实体还未保存
             // 我们将在主方法中处理字段保存
 
             log.info("成功为业务实体 {} 创建物理表: {}", businessEntity.getDisplayName(), businessEntity.getTableName());
+            return new FieldTypeMappingContext(datasource.getDatasourceType(), defaultMappings);
         } catch (Exception e) {
             log.error("创建业务实体物理表失败: {}", e.getMessage(), e);
             throw new RuntimeException("创建物理表失败: " + e.getMessage(), e);
@@ -397,9 +402,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      * @param systemFields 系统字段列表
      * @param appId 应用ID
      */
-    private void saveEntityFields(String entityUuid, List<MetadataSystemFieldsDO> systemFields, Long appId) {
+    private void saveEntityFields(String entityUuid, List<MetadataSystemFieldsDO> systemFields, Long appId,
+                                  java.util.Map<String, FieldTypeMappingDO> defaultMappings) {
         int sortOrder = 1;
-        java.util.Map<String, FieldTypeMappingDO> mappingCache = new java.util.HashMap<>();
+        java.util.Map<String, FieldTypeMappingDO> mappings = defaultMappings != null
+                ? defaultMappings
+                : fieldTypeMappingRepository.getDefaultMappingsByDatabaseType("PostgreSQL");
         for (MetadataSystemFieldsDO systemField : systemFields) {
             // 特殊处理 parent_id：不是主键、不是必填、不是唯一
             boolean isParentId = "parent_id".equalsIgnoreCase(systemField.getFieldName());
@@ -407,7 +415,10 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             int isRequired = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsRequired());
             int isUnique = isParentId ? StatusEnumUtil.NO : BooleanStatusEnum.toStatusValue(systemField.getIsSnowflakeId());
 
-            FieldTypeMappingDO mapping = getDefaultMappingCached(systemField.getFieldType(), mappingCache);
+            FieldTypeMappingDO mapping = null;
+            if (systemField.getFieldType() != null && !systemField.getFieldType().isBlank()) {
+                mapping = mappings.get(systemField.getFieldType().trim().toUpperCase());
+            }
             
             MetadataEntityFieldDO entityField = new MetadataEntityFieldDO();
             entityField.setEntityUuid(entityUuid);
@@ -439,24 +450,6 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         }
 
         log.info("成功保存 {} 个系统字段到实体字段表", systemFields.size());
-    }
-
-    private FieldTypeMappingDO getDefaultMappingCached(String fieldType, java.util.Map<String, FieldTypeMappingDO> cache) {
-        if (fieldType == null || fieldType.trim().isEmpty()) {
-            return null;
-        }
-        String key = fieldType.trim().toUpperCase();
-        if (cache != null) {
-            FieldTypeMappingDO cached = cache.get(key);
-            if (cached != null) {
-                return cached;
-            }
-        }
-        FieldTypeMappingDO mapping = fieldTypeMappingRepository.getDefaultMappingByBusinessType(key);
-        if (cache != null && mapping != null) {
-            cache.put(key, mapping);
-        }
-        return mapping;
     }
 
     /**
@@ -512,9 +505,13 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      * <p>
      * 使用 Anyline 原生 API 创建表，自动适配不同数据库（PostgreSQL、达梦、人大金仓等）。
      */
-    private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields) {
+    private void createPhysicalTable(MetadataDatasourceDO datasource, String tableName, List<MetadataSystemFieldsDO> systemFields,
+                                     java.util.Map<String, FieldTypeMappingDO> defaultMappings) {
         int maxRetries = 3;
         Exception lastException = null;
+        java.util.Map<String, FieldTypeMappingDO> mappings = defaultMappings != null
+                ? defaultMappings
+                : fieldTypeMappingRepository.getDefaultMappingsByDatabaseType(datasource.getDatasourceType());
         
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
@@ -532,7 +529,7 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
                 AnylineService<?> service = temporaryDatasourceService.createTemporaryService(datasource);
 
                 // 使用 Anyline 原生 API 构建 Table 对象
-                Table<?> table = buildTableFromSystemFields(tableName, systemFields);
+                Table<?> table = buildTableFromSystemFields(tableName, systemFields, mappings);
 
                 // 记录连接的数据库信息
                 try {
@@ -594,12 +591,18 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
      * 4. 主键优先级: id > 第一个 isSnowflakeId=1 的非 parent_id 字段 > 兜底 id
      */
     private Table<?> buildTableFromSystemFields(String tableName, List<MetadataSystemFieldsDO> systemFields) {
+        return buildTableFromSystemFields(tableName, systemFields,
+                fieldTypeMappingRepository.getDefaultMappingsByDatabaseType("PostgreSQL"));
+    }
+
+    private Table<?> buildTableFromSystemFields(String tableName, List<MetadataSystemFieldsDO> systemFields,
+                                                java.util.Map<String, FieldTypeMappingDO> defaultMappings) {
         Table<?> table = new Table<>(tableName);
         table.setComment("业务实体表");
 
         String detectedIdField = null;
         String candidatePk = null;
-        java.util.Map<String, FieldTypeMappingDO> mappingCache = new java.util.HashMap<>();
+        java.util.Map<String, FieldTypeMappingDO> mappings = defaultMappings != null ? defaultMappings : java.util.Map.of();
 
         // 预扫描是否已有 id 列
         for (MetadataSystemFieldsDO f : systemFields) {
@@ -621,7 +624,10 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
 
             Column column = new Column(fieldName);
             column.setTable(table);
-            FieldTypeMappingDO mapping = getDefaultMappingCached(field.getFieldType(), mappingCache);
+            FieldTypeMappingDO mapping = null;
+            if (field.getFieldType() != null && !field.getFieldType().isBlank()) {
+                mapping = mappings.get(field.getFieldType().trim().toUpperCase());
+            }
             column.setTypeName(mapFieldType(mapping, field.getFieldType()));
 
             // id 强制 NOT NULL；parent_id 永不加 NOT NULL；其它按 isRequired
@@ -676,6 +682,16 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
         }
 
         return table;
+    }
+
+    private static final class FieldTypeMappingContext {
+        private final String databaseType;
+        private final java.util.Map<String, FieldTypeMappingDO> defaultMappings;
+
+        private FieldTypeMappingContext(String databaseType, java.util.Map<String, FieldTypeMappingDO> defaultMappings) {
+            this.databaseType = databaseType;
+            this.defaultMappings = defaultMappings != null ? defaultMappings : java.util.Map.of();
+        }
     }
 
     /**
@@ -1407,10 +1423,12 @@ public class MetadataBusinessEntityBuildServiceImpl implements MetadataBusinessE
             List<MetadataSystemFieldsDO> systemFields = getSystemFieldsWithCache();
 
             // 5. 创建物理表
-            createPhysicalTable(datasource, entity.getTableName(), systemFields);
+            java.util.Map<String, FieldTypeMappingDO> defaultMappings =
+                    fieldTypeMappingRepository.getDefaultMappingsByDatabaseType(datasource.getDatasourceType());
+            createPhysicalTable(datasource, entity.getTableName(), systemFields, defaultMappings);
 
             // 6. 保存实体字段信息到 metadata_entity_field 表（如果还没有保存的话）
-            saveEntityFields(entity.getEntityUuid(), systemFields, entity.getApplicationId());
+            saveEntityFields(entity.getEntityUuid(), systemFields, entity.getApplicationId(), defaultMappings);
 
             log.info("成功重新创建业务实体 {} 的物理表: {}", entity.getDisplayName(), entity.getTableName());
         } catch (Exception e) {
