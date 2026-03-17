@@ -1,6 +1,6 @@
 import { Layout } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import AppBreadcrumb from '../../components/Breadcrumb';
 import AppHeader from './components/header';
 import AppSider from './components/sider';
@@ -35,6 +35,7 @@ const SettingPage: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string>('');
   const [isIframe, setIsIframe] = useState(false);
   const { tenantId } = useParams();
+  const location = useLocation();
 
   const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(() => getTenantInfoFromSession());
 
@@ -50,6 +51,23 @@ const SettingPage: React.FC = () => {
   useEffect(() => {
     setIsIframe(window.self !== window.top);
   }, []);
+
+  useEffect(() => {
+    if (isIframe) {
+      const message = { timestamp: new Date().getTime(), type: 'loaded' };
+      console.log('[Iframe] postMessage:', message);
+      window.parent.postMessage(message, '*');
+    }
+  }, [isIframe]);
+
+  useEffect(() => {
+    if (isIframe) {
+      const currentUrl = window.location.href;
+      const message = { timestamp: new Date().getTime(), type: 'redirect', url: currentUrl };
+      console.log('[Iframe] postMessage:', message);
+      window.parent.postMessage(message, '*');
+    }
+  }, [location.pathname, isIframe]);
 
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
