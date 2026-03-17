@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.etl.common.excute.ExecuteRequest;
 import com.cmsr.onebase.module.etl.executor.WorkFlowExecutor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import java.util.Map;
 @Setter
 @RequestMapping("/flink")
 @RestController
+@Slf4j
 public class FlinkExecutorController {
 
     @Autowired
@@ -75,6 +77,7 @@ public class FlinkExecutorController {
      * @return 友好的错误提示信息
      */
     private String buildFriendlyErrorMessage(Exception e) {
+        log.error("buildFriendlyErrorMessage ",e);
         String rootMessage = ExceptionUtils.getRootCauseMessage(e);
         if (rootMessage == null) {
             return "执行失败，请检查节点配置";
