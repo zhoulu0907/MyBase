@@ -80,6 +80,12 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
         return this.count(queryWrapper);
     }
 
+    public Long countByTenantIdAndUserId(Long tenantId, Long userId) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.TENANT_ID.eq(tenantId).and(APP_APPLICATION.CREATOR.eq(userId)));
+        return this.count(queryWrapper);
+    }
+
     public AppApplicationDO findByTenantIdAndAppId(Long tenantId, Long appId) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_APPLICATION.TENANT_ID.eq(tenantId))

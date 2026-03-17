@@ -1,15 +1,17 @@
 package com.cmsr.onebase.module.system.build.controller.user;
 
+import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
-import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.system.service.user.UserAppRelationService;
-import com.cmsr.onebase.module.system.vo.user.UserAppPageReqVO;
-import com.cmsr.onebase.module.system.vo.user.UserApplicationRespVO;
+import com.cmsr.onebase.module.system.vo.user.UserAppCountReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserAppCountRespVO;
 import com.cmsr.onebase.module.system.vo.user.UserRelationAppReqVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -39,5 +41,14 @@ public class TenantUserAppRelationController {
         List<ApplicationDTO>  applicationsList=  userAppRelationService.getUserNoRelationAppList(relationAppReqVO);
         return success( applicationsList);
     }
+
+    @GetMapping("/getUserAppCount")
+    @Operation(summary = "根据tenantId与userId查询应用数量")
+    @ApiSignIgnore
+    @TenantIgnore
+    @PermitAll
+    public CommonResult<UserAppCountRespVO> getUserAppCount(@Valid UserAppCountReqVO reqVO){
+        return success(userAppRelationService.getUserAppCount(reqVO));
+    };
 
 }
