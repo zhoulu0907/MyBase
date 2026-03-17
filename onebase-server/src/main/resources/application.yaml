@@ -125,6 +125,7 @@ onebase:
       - /admin-api/app/application/get
       - /admin-api/system/auth/tiangong-login
       - /admin-api/system/oauth2/authorize/token
+      - /admin-api/system/lingji-sso/** # 灵畿SSO登录，无需租户编号
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**

@@ -58,9 +58,11 @@ onebase:
   flink:
     address: http://10.0.104.41:30692
   lingji-sso:
-    sourceId: x
-    sourceKey: x
-    userInfoUrl: x
+    enabled: true
+    source-id: "5570132830"
+    source-key: "JhxsQ3whI26YTMvt"
+    user-info-url: "http://rdcloud.4c-uat.hq.cmcc/moss/web/auth/v1/user/oauth/userInfo"
+    http-debug-log-enabled: true
 
 
 
