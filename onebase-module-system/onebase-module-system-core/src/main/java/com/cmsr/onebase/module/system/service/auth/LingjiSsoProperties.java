@@ -1,15 +1,13 @@
 package com.cmsr.onebase.module.system.service.auth;
 
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * 灵畿平台 SSO 配置属性
  *
- * 配置项前缀: onebase.lingji-sso
+ * 配置项前缀：onebase.lingji-sso
  *
  * YAML 配置示例：
  * <pre>
@@ -30,7 +28,6 @@ import org.springframework.validation.annotation.Validated;
  */
 @ConfigurationProperties(prefix = "onebase.lingji-sso")
 @RefreshScope
-@Validated
 @Data
 public class LingjiSsoProperties {
 
@@ -42,13 +39,11 @@ public class LingjiSsoProperties {
     /**
      * 系统代码（灵畿平台分配）
      */
-    @NotEmpty(message = "sourceId 不能为空")
     private String sourceId;
 
     /**
      * 系统密钥（灵畿平台分配，用于签名）
      */
-    @NotEmpty(message = "sourceKey 不能为空")
     private String sourceKey;
 
     /**
@@ -60,7 +55,6 @@ public class LingjiSsoProperties {
      * UAT3 承载网：http://4c-uat3.hq.cmcc/moss/web/auth/v1/user/oauth/userInfo
      * UAT3 内网：  http://10.102.166.153:31160/moss/web/auth/v1/user/oauth/userInfo
      */
-    @NotEmpty(message = "userInfoUrl 不能为空")
     private String userInfoUrl;
 
     /**

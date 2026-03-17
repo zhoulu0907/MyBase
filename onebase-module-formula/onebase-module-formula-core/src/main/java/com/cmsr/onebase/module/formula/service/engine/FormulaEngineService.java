@@ -44,4 +44,5 @@ public interface FormulaEngineService {
      */
     String[] getSupportedFunctions();
 
+    Object executeJS(String script);
 }
