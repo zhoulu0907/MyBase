@@ -394,7 +394,7 @@ public class EtlWorkflowServiceImpl implements EtlWorkflowService {
         executeRequest.setApplicationId(ApplicationManager.getRequiredApplicationId());
         executeRequest.setPreviewWorkflow(workflow.toString());
         executeRequest.setPreviewNodeId(previewReqVO.getNodeId());
-        String token = JoseGenerator.generateToken(30);
+        String token = JoseGenerator.generateToken(300);
         HttpResponse<String> response = Unirest.post(flinkServerUrl + "/flink/columns")
                 .contentType(ContentType.APPLICATION_JSON)
                 .header("X-Exec-Token", token)
