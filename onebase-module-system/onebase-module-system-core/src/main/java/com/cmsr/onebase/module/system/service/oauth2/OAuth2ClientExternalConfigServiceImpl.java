@@ -25,4 +25,14 @@ public class OAuth2ClientExternalConfigServiceImpl implements OAuth2ClientExtern
         return oauth2ClientExternalConfigDataRepository.findOneByTenantCode(tenantCode);
     }
 
+    @Override
+    public void updateEnterpriseMapping(Long id, String enterpriseMapping) {
+        OAuth2ClientExternalConfigDO config = oauth2ClientExternalConfigDataRepository.getById(id);
+        if (config != null) {
+            config.setEnterpriseMapping(enterpriseMapping);
+            oauth2ClientExternalConfigDataRepository.update(config);
+            log.info("更新企业租户映射配置: id={}, mapping={}", id, enterpriseMapping);
+        }
+    }
+
 }
