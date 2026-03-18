@@ -24,6 +24,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.app.PlatformTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
@@ -46,6 +47,7 @@ import com.cmsr.onebase.module.system.util.oauth2.OkHttpClientUtils;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
+import com.cmsr.onebase.module.system.vo.user.ExternalUserInfoReqVO;
 import com.google.common.annotations.VisibleForTesting;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
@@ -638,21 +640,20 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     private AuthLoginRespVO processTianGongUserLogin(JSONObject userInfo, OAuth2ClientExternalConfigDO config, String deviceId, TenantDO tenantDo) {
         
         // 构建用户对象
-        AdminUserDO adminUserDO = JSONUtil.toBean(userInfo, AdminUserDO.class);
-        String phone = userInfo.getStr("phone");
+        ExternalUserInfoReqVO userInfoReqVO = JSONUtil.toBean(userInfo, ExternalUserInfoReqVO.class);
 
         // 解密敏感字段（username 和 phone 为加密字段）
-        decryptSensitiveFields(adminUserDO, phone);
+        decryptSensitiveFields(userInfoReqVO);
 
-        if (StringUtils.isBlank(adminUserDO.getNickname())) {
-            adminUserDO.setNickname(adminUserDO.getUsername());
+        if (StringUtils.isBlank(userInfoReqVO.getNickname())) {
+            userInfoReqVO.setNickname(userInfoReqVO.getUsername());
         }
-
+        userInfoReqVO.setPlatformType(PlatformTypeEnum.TIANGONG.getType());
         // 保存用户信息并创建 Token
         AtomicReference<AuthLoginRespVO> loginRespRef = new AtomicReference<>();
         TenantUtils.execute(tenantDo.getId(), () -> {
             // 保存用户信息
-            AdminUserDO adminUser = userService.updateOrAddUser(adminUserDO);
+            AdminUserDO adminUser = userService.updateOrAddUser(userInfoReqVO);
             // 创建 Token
             AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(
                 adminUser.getUserType(), 
@@ -675,12 +676,12 @@ public class BuildAuthServiceImpl implements BuildAuthService {
     /**
      * 解密敏感字段
      */
-    private void decryptSensitiveFields(AdminUserDO adminUserDO, String phone) {
-        if (StrUtil.isNotEmpty(adminUserDO.getUsername())) {
-            adminUserDO.setUsername(AesCfbCryptoUtil.decrypt(adminUserDO.getUsername()));
+    private void decryptSensitiveFields(ExternalUserInfoReqVO userInfoReqVO) {
+        if (StrUtil.isNotEmpty(userInfoReqVO.getUsername())) {
+            userInfoReqVO.setUsername(AesCfbCryptoUtil.decrypt(userInfoReqVO.getUsername()));
         }
-        if (StrUtil.isNotEmpty(phone)) {
-            adminUserDO.setMobile(AesCfbCryptoUtil.decrypt(phone));
+        if (StrUtil.isNotEmpty(userInfoReqVO.getPhone())) {
+            userInfoReqVO.setPhone(AesCfbCryptoUtil.decrypt(userInfoReqVO.getPhone()));
         }
     }
 }
