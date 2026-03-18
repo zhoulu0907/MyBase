@@ -2,7 +2,9 @@ package com.cmsr.onebase.module.app.core.impl.version;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.module.app.api.version.AppVersionApi;
+import com.cmsr.onebase.module.app.api.version.dto.AppVersionDTO;
 import com.cmsr.onebase.module.app.core.dal.database.version.AppVersionRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import jakarta.annotation.Resource;
@@ -22,11 +24,11 @@ public class AppVersionApiImpl implements AppVersionApi {
 
 
     @Override
-    public Integer getAppThirdEnableStatus(Long applicationId) {
+    public AppVersionDTO getAppThirdEnableStatus(Long applicationId) {
         AppVersionDO appVersionDO = ApplicationManager.withoutApplicationCondition(() -> appVersionRepository.findRuntimeByApplicationId(applicationId));
-        if (appVersionDO == null) {
-            return CommonStatusEnum.DISABLE.getStatus();
+        if (appVersionDO != null) {
+            return BeanUtils.toBean(appVersionDO, AppVersionDTO.class);
         }
-        return appVersionDO.getAppThirdUserEnable();
+        return null;
     }
 }
