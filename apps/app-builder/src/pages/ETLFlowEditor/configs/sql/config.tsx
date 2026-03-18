@@ -109,6 +109,13 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave, newPayload, setNe
       fields: []
     };
 
+    if (!payload.id) {
+      payload.id = curNode.value.id;
+    }
+    if (!payload.type) {
+      payload.type = curNode.value.flowNodeType;
+    }
+
     console.log('payload: ', payload);
     setNewPayload(payload);
   }, [showSQLValue, sqlVariables]);
@@ -295,10 +302,11 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave, newPayload, setNe
 
               console.log('variable: ', variable);
 
+              // 点击字段插入时在字段前后各加一个空格
               let insertPos = typeof currentCursorPos === 'number' ? currentCursorPos : showSQLValue.length;
-              const newSQLValue = showSQLValue.slice(0, insertPos) + variable + showSQLValue.slice(insertPos);
+              const newSQLValue = showSQLValue.slice(0, insertPos) + ` ${variable} ` + showSQLValue.slice(insertPos);
               setShowSQLValue(newSQLValue);
-              setCurrentCursorPos(insertPos + variable.length);
+              setCurrentCursorPos(insertPos + variable.length + 2);
             }}
             onExpand={(keys, info) => {
               console.log('展开节点:', keys, info);
