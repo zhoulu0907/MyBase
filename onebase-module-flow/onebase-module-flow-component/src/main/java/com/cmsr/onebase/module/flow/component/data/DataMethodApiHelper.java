@@ -16,7 +16,6 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditio
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticSortDirectionEnum;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -272,14 +271,15 @@ public class DataMethodApiHelper {
 
     public static Map<String, String> extractSystemFields(ExecuteContext executeContext) {
         Map<String, String> systemFields = executeContext.getSystemFields();
-        if (MapUtils.isNotEmpty(systemFields)) {
-            return systemFields;
+        if(systemFields == null){
+            systemFields = new HashMap<>();
+            executeContext.setSystemFields(systemFields);
         }
-        systemFields = new HashMap<>();
         systemFields.put(SystemFieldConstants.REQUIRE.CREATOR, String.valueOf(executeContext.getTriggerUserId()));
         systemFields.put(SystemFieldConstants.REQUIRE.UPDATER, String.valueOf(executeContext.getTriggerUserId()));
         systemFields.put(SystemFieldConstants.REQUIRE.OWNER_ID, String.valueOf(executeContext.getTriggerUserId()));
-        systemFields.put(SystemFieldConstants.REQUIRE.OWNER_DEPT, String.valueOf(executeContext.getTriggerUserDeptId()));
+        Long deptId = executeContext.getTriggerUserDeptId() != null ? executeContext.getTriggerUserDeptId() : 0L;
+        systemFields.put(SystemFieldConstants.REQUIRE.OWNER_DEPT, String.valueOf(deptId));
         return systemFields;
     }
 

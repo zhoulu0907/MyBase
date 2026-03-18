@@ -79,7 +79,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
     @Cacheable(cacheNames = SECURITY_TENANT_CONFIGS, key = "#tenantId")
     public List<SecurityConfigItemRespVO> getSecurityConfigsByTenant(Long tenantId) {
         // 获取租户所有安全配置项，用于安全逻辑判断（使用Redis分布式缓存，TTL=30分钟）
-        log.info("从数据库加载租户安全配置，tenantId: {}", tenantId);
+        // log.info("从数据库加载租户安全配置，tenantId: {}", tenantId);
         List<SecurityConfigTemplateDO> templates = templateDataRepository.findByTenantId(tenantId);
         if (templates.isEmpty()) {
             return new ArrayList<>();
@@ -92,7 +92,7 @@ public class SecurityConfigServiceImpl implements SecurityConfigService {
             configItems.add(itemVO);
         }
 
-        log.info("租户安全配置加载完成，tenantId: {}, 配置项数量: {}", tenantId, configItems.size());
+        // log.info("租户安全配置加载完成，tenantId: {}, 配置项数量: {}", tenantId, configItems.size());
         return configItems;
     }
 

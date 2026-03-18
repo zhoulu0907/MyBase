@@ -1,35 +1,21 @@
 
 package com.cmsr.onebase.module.metadata.core.semantic.dto;
 
-import java.math.BigDecimal;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Objects;
-import java.util.regex.Pattern;
-import java.util.Date;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-
-import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
-import com.cmsr.onebase.module.metadata.core.semantic.type.RefType;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
+import java.math.BigDecimal;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Pattern;
 
 @Schema(description = "字段值 DTO")
 @Data
@@ -278,7 +264,7 @@ public class SemanticFieldValueDTO<T> {
         } else if (value instanceof Object[] arr) {
             for (Object o : Arrays.asList(arr)) items.add(normalizeScalar(o, type));
         } else if (value instanceof String s) {
-            log.info("normalizeList: {}", s);
+            // log.info("normalizeList: {}", s);
             String str = s.trim();
             if (str.isEmpty()) {
                 return items;
