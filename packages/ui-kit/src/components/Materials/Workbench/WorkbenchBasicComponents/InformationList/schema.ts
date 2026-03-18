@@ -20,9 +20,9 @@ import {
   WORKBENCH_CONFIG_TYPES,
   WORKBENCH_THEME_OPTIONS
 } from '../../core/constants';
-import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType, INumberConfigType } from '../../core/types';
+import { ILabelConfigType, IBooleanConfigType, TBooleanDefaultType, TTextDefaultType, IThemeConfigType, INumberConfigType, IWbMenuSelectorConfigType } from '../../core/types';
 import { IInformationListContentConfigType } from '../../core/types';
-import { dataCountConfig, labelNameConfig, showMoreConfig, showMoreLinkConfig, themeConfig } from '../../config/commonConfig';
+import { dataCountConfig, labelNameConfig, showMoreConfig, showMoreLinkConfig, themeConfig, jumpExternalUrlConfig, jumpPageIdConfig, checkMoreJumpTypeConfig } from '../../config/commonConfig';
 
 export interface XInformationListSchema {
   editData: TXInformationListEditData;
@@ -38,6 +38,9 @@ export type TXInformationListEditData = Array<
   | IThemeConfigType
   | IInformationListContentConfigType
   | INumberConfigType
+  | IStatusConfigType<any>
+  | ITextConfigType
+  | IWbMenuSelectorConfigType
 >;
 
 export interface InformationListItem {
@@ -61,7 +64,9 @@ export interface XInformationListConfig extends ICommonBaseWorkbenchType {
   };
   theme: string;
   showMore: boolean,
-  showMoreLink: string;
+  jumpType: TRadioDefaultType<string>;
+  jumpPageId?: TTextDefaultType;
+  jumpExternalUrl?: TTextDefaultType;
   /**
    * 静态资讯列表数据
    */
@@ -133,7 +138,9 @@ const XInformationList: XInformationListSchema = {
     themeConfig,
     dataCountConfig,
     showMoreConfig,
-    showMoreLinkConfig
+    checkMoreJumpTypeConfig,
+    jumpPageIdConfig,
+    jumpExternalUrlConfig
   ],
   config: {
     ...workbenchBaseDefault,
@@ -144,7 +151,9 @@ const XInformationList: XInformationListSchema = {
       display: true
     },
     showMore: false,
-    showMoreLink: '',
+    jumpType: 'internal',
+    jumpPageId: '',
+    jumpExternalUrl: '',
     dataCount: 10,
     informationListConfig: [],
     dataSourceMode: 'static',

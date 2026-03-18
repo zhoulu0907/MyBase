@@ -841,6 +841,31 @@ export const FormilyJsonEditor = connect(
   })
 );
 
+const TextAreaEditorInner: React.FC<any> = (props) => {
+  const { value, onChange, ...rest } = props;
+  return (
+    <ReactCodeMirror
+      value={typeof value === 'string' ? value : value ? String(value) : ''}
+      height="300px"
+      onChange={(val) => {
+        onChange(val);
+      }}
+      theme="light"
+      style={{ border: '1px solid var(--color-border-2)', borderRadius: 2 }}
+      {...rest}
+    />
+  );
+};
+
+export const FormilyTextAreaEditor = connect(
+  TextAreaEditorInner,
+  mapProps((props) => {
+    return {
+      ...props
+    };
+  })
+);
+
 // FormItem 装饰器
 const FormItemInner: React.FC<any> = (props: any) => {
   const schema = useFieldSchema();
@@ -896,6 +921,7 @@ export const componentMap: Record<string, React.ComponentType<any>> = {
   Tabs: FormilyTabs,
   HorizontalLayout: FormilyHorizontalLayout,
   JsonEditor: FormilyJsonEditor,
+  TextAreaEditor: FormilyTextAreaEditor,
   AuthSettingsCard: AuthSettingsCard,
   KeyValueList: KeyValueList,
   TokenAuthPanel: TokenAuthPanel

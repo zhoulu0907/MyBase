@@ -13,13 +13,8 @@ const QuickEntryConfig = () => {
   return (
     <WorkbenchAttributes
       renderPanels={({ editData, renderEditItem, handlePropsChange, configs }) => {
-        // 找到入口配置项（key 为 'groupConfig'）
         const entryConfigItem = findItem(editData, 'groupConfig');
-
-        // 找到样式配置项（key 为 'styleConfig'）
         const styleConfigItem = findItem(editData, 'styleConfig');
-
-        // 找到标题配置项（key 为 'titleConfig'）
         const titleConfigItem = findItem(editData, 'titleConfig');
 
         return (

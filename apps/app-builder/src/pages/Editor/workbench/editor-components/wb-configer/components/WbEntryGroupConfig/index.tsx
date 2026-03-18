@@ -83,15 +83,11 @@ const WbEntryGroupConfig = ({ handlePropsChange, item, configs }: Props) => {
       <div className={styles.entryConfig}>
         <EntryList
           entries={state.entries}
-          showAddMenu={state.showAddMenu}
           onSortChange={handleSortListChange}
           onEdit={handleOpenEditDrawer}
           onDelete={handleDeleteEntry}
           onAddEntry={handleAddEntry}
           onEditEntry={handleEditEntry}
-          onShowAddMenuChange={(visible) =>
-            setState((prev: EntryManagementState) => ({ ...prev, showAddMenu: visible }))
-          }
         />
 
         <EntryFormDrawer

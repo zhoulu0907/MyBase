@@ -67,6 +67,9 @@ const XQuickEntry: XQuickEntrySchema = {
       showTitle: true,
       titleName: '快捷入口',
       showMore: true,
+      jumpType: 'internal',
+      jumpPageId: '',
+      jumpExternalUrl: '',
       enableGroup: false
     },
     styleConfig: {

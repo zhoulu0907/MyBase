@@ -1,4 +1,4 @@
-import { Button, Divider, Form, Input, Select } from '@arco-design/web-react';
+import { Button, Divider, Form, Input, Radio, Select } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { useCallback } from 'react';
 import ConfigDrawer from '@/pages/Editor/workbench/components/configDrawer';
@@ -56,7 +56,7 @@ export const EntryFormDrawer = ({
           form={form}
           onValuesChange={onValuesChange}
         >
-          <FormItem
+          {/* <FormItem
             label="入口类型"
             field="entryType"
             layout="horizontal"
@@ -64,7 +64,7 @@ export const EntryFormDrawer = ({
             wrapperCol={{ span: 6, offset: 10 }}
           >
             <div>{entryType === 'menu' ? '应用菜单' : '外部链接'}</div>
-          </FormItem>
+          </FormItem> */}
           <FormItem label="入口图标" field="entryIcon">
             <div className={styles.iconUploader}>
               <div className={styles.iconUploaderAvatar} onClick={onChooseIcon}>
@@ -115,6 +115,12 @@ export const EntryFormDrawer = ({
               </Select>
             </FormItem>
           )}
+          <FormItem label="链接类型" field="entryType">
+            <Radio.Group type="button" defaultValue="menu">
+              <Radio value="menu">内部页面</Radio>
+              <Radio value="link">外部链接</Radio>
+            </Radio.Group>
+          </FormItem>
           <FormItem shouldUpdate>
             {(values) => {
               return values.entryType === 'menu' ? (

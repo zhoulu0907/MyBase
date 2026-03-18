@@ -19,6 +19,9 @@ const defaultTitleConfig: QuickEntryTitleConfig = {
   showTitle: true,
   titleName: '快捷入口',
   showMore: true,
+  jumpType: 'internal',
+  jumpPageId: '',
+  jumpExternalUrl: '',
   enableGroup: false
 };
 
@@ -165,6 +168,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
   const renderContent = (showAll: boolean = false) => {
     // 收集所有入口项，用于计算全局索引
     // 若配置查看更多，则只展示前4个入口项（弹窗中展示全部）
+    // 20260317更新：入口全部展示
     const showMoreCount = showAll ? undefined : (finalTitleConfig?.showMore ? 4 : undefined);
     const allItems = showMoreCount
       ? groups.flatMap((group) => group.entries ?? []).slice(0, showMoreCount)
@@ -231,9 +235,15 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
   };
 
   const handleClickMore = () => {
-    if (preview || runtime) {
-      setMoreModalVisible(true);
+    // 20260317更新：查看更多由弹出弹窗改为跳转至用户配置的链接
+    if (!runtime) {
+      return;
     }
+    handleJump({
+      menuUuid: finalTitleConfig?.jumpType === 'internal' ? finalTitleConfig?.jumpPageId : undefined,
+      linkAddress: finalTitleConfig?.jumpType === 'external' ? finalTitleConfig?.jumpExternalUrl : undefined,
+      runtime,
+    });
   };
   const handleCloseMoreModal = () => {
     setMoreModalVisible(false);
@@ -256,9 +266,9 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
           )}
         </div>
       )}
-      {renderContent()}
+      {renderContent(true)}
 
-      <CheckMoreModal
+      {/* <CheckMoreModal
         visible={moreModalVisible}
         onClose={handleCloseMoreModal}
         runtime={runtime}
@@ -267,7 +277,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
         contentClassName={`${styles.quickEntryModalContent} ${styles.quickEntry} ${themeClass ? themeClassMap[themeClass] || '' : ''}`}
       >
         {renderContent(true)}
-      </CheckMoreModal>
+      </CheckMoreModal> */}
     </div>
   );
 });

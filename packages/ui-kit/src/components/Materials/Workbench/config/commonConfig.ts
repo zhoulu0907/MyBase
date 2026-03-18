@@ -68,6 +68,27 @@ export const jumpTypeConfig: IStatusConfigType<string> = {
 };
 
 /**
+ * 查看更多跳转目标配置（关联已有页面 | 跳转外部链接）
+ */
+export const checkMoreJumpTypeConfig: IStatusConfigType<string> = {
+  key: 'jumpType',
+  name: '链接类型',
+  type: WORKBENCH_CONFIG_TYPES.STATUS_RADIO,
+  range: [
+    {
+      key: 'internal',
+      text: '页面',
+      value: 'internal'
+    },
+    {
+      key: 'external',
+      text: '链接',
+      value: 'external'
+    }
+  ]
+};
+
+/**
  * 选择页面配置（当跳转类型为关联已有页面时使用）
  */
 export const jumpPageIdConfig: IWbMenuSelectorConfigType = {

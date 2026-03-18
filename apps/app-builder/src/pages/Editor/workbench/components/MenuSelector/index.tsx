@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Input, Tree, TreeSelect } from '@arco-design/web-react';
+import { Input, Tree, TreeSelect, Spin } from '@arco-design/web-react';
 import { IconDown } from '@arco-design/web-react/icon';
 import { listApplicationMenu, type ApplicationMenu } from '@onebase/app';
 import { listToTree, treeFilter } from '@onebase/common';
@@ -17,8 +17,10 @@ export interface MenuSelectorProps {
   searchPlaceholder?: string;
   /** 是否可搜索，默认 true */
   searchable?: boolean;
-  /** 自定义样式 */
+  /** 自定义样式类 */
   className?: string;
+  /** 自定义样式 */
+  style?: object;
   /** 树的高度 */
   height?: string | number;
 }
@@ -30,10 +32,12 @@ const MenuSelector = ({
   searchPlaceholder = '搜索菜单',
   searchable = true,
   className,
+  style,
   height = '400px'
 }: MenuSelectorProps) => {
   const { curAppId } = useAppStore();
   const [searchValue, setSearchValue] = useState('');
+  const [loading, setLoading] = useState(false);
   const [menuList, setMenuList] = useState<ApplicationMenu[]>([]);
 
   // 过滤后的菜单列表
@@ -101,18 +105,22 @@ const MenuSelector = ({
   };
 
   useEffect(() => {
-    listApplicationMenu({ applicationId: curAppId }).then((res) => {
-      const treeData = listToTree(res, {
-        key: 'menuUuid',
-        children: 'children',
-        label: 'menuName'
-      });
-      setMenuList(treeData as ApplicationMenu[]);
-    });
+    setLoading(true);
+    listApplicationMenu({ applicationId: curAppId })
+      .then((res) => {
+        const treeData = listToTree(res, {
+          key: 'menuUuid',
+          children: 'children',
+          label: 'menuName'
+        });
+        setMenuList(treeData as ApplicationMenu[]);
+      })
+      .catch((err: any) => console.log(err))
+      .finally(setLoading(false));
   }, [curAppId]);
 
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       {mode === 'multiple' && (
         <>
           {searchable && (
@@ -120,22 +128,24 @@ const MenuSelector = ({
               <Input.Search placeholder={searchPlaceholder} onChange={setSearchValue} />
             </div>
           )}
-          <div className={styles.treeWrapper} style={{ height }}>
-            <Tree
-              treeData={filteredMenuList}
-              checkable={mode === 'multiple'}
-              checkedKeys={selectedKeys}
-              onCheck={handleCheck}
-              fieldNames={{
-                key: 'menuUuid',
-                title: 'menuName',
-                children: 'children'
-              }}
-              icons={{
-                switcherIcon: <IconDown />
-              }}
-            />
-          </div>
+          <Spin loading={loading}>
+            <div className={styles.treeWrapper} style={{ height }}>
+              <Tree
+                treeData={filteredMenuList}
+                checkable={mode === 'multiple'}
+                checkedKeys={selectedKeys}
+                onCheck={handleCheck}
+                fieldNames={{
+                  key: 'menuUuid',
+                  title: 'menuName',
+                  children: 'children'
+                }}
+                icons={{
+                  switcherIcon: <IconDown />
+                }}
+              />
+            </div>
+          </Spin>
         </>
       )}
 
@@ -156,6 +166,7 @@ const MenuSelector = ({
             children: 'children'
           }}
           className={styles.treeSelect}
+          loading={loading}
         />
       )}
     </div>

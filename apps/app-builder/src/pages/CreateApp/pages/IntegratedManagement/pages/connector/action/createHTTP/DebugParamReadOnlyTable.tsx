@@ -1,8 +1,7 @@
-import { Input, Table } from '@arco-design/web-react';
+import { Input, Radio, Table } from '@arco-design/web-react';
 import { connect, useField } from '@formily/react';
 import React from 'react';
 
-/** 与第二步入参一致的行结构，仅多一个可编辑的 字段值（第二步数据只读） */
 export interface DebugParamReadOnlyRow {
   id?: string;
   key: string;
@@ -12,14 +11,40 @@ export interface DebugParamReadOnlyRow {
   defaultValue: string;
   description: string;
   fieldValue?: string;
+  inputMode?: 'table' | 'json';
 }
 
 const FIELD_TYPE_NAMES: Record<string, string> = {
-  string: '字符串',
-  number: '数字',
-  boolean: '布尔',
-  object: '对象',
-  array: '数组'
+  string: 'String',
+  number: 'Number',
+  boolean: 'Boolean',
+  object: 'Object',
+  array: 'Array'
+};
+
+const tryParseJson = (value: string): { isJson: boolean; parsed: unknown } => {
+  if (!value || typeof value !== 'string') {
+    return { isJson: false, parsed: null };
+  }
+  const trimmed = value.trim();
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || 
+      (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return { isJson: true, parsed };
+    } catch {
+      return { isJson: false, parsed: null };
+    }
+  }
+  return { isJson: false, parsed: null };
+};
+
+const formatJsonIfPossible = (value: string): string => {
+  const { isJson, parsed } = tryParseJson(value);
+  if (isJson && parsed !== null) {
+    return JSON.stringify(parsed, null, 2);
+  }
+  return value;
 };
 
 const DebugParamReadOnlyTableInner: React.FC = () => {
@@ -33,78 +58,164 @@ const DebugParamReadOnlyTableInner: React.FC = () => {
     rawField.setValue(next);
   };
 
-  const updateFieldValue = (index: number, fieldValue: string) => {
-    const next = [...value];
-    next[index] = { ...next[index], fieldValue };
+  const globalMode = value.length > 0 ? (value[0].inputMode || 'table') : 'table';
+
+  const updateAllInputMode = (mode: 'table' | 'json') => {
+    const next = value.map(row => ({ ...row, inputMode: mode }));
     setValue(next);
   };
 
+  const updateRow = (index: number, patch: Partial<DebugParamReadOnlyRow>) => {
+    const next = [...value];
+    next[index] = { ...next[index], ...patch };
+    setValue(next);
+  };
+
+  const updateFieldValue = (index: number, fieldValue: string) => {
+    updateRow(index, { fieldValue });
+  };
+
+  const buildJsonFromTable = (): string => {
+    const obj: Record<string, unknown> = {};
+    value.forEach(row => {
+      const k = row.key || row.fieldName;
+      if (!k) return;
+      let v: unknown = row.fieldValue ?? row.defaultValue ?? '';
+      if (row.fieldType === 'object' || row.fieldType === 'array') {
+        const { isJson, parsed } = tryParseJson(String(v));
+        if (isJson) v = parsed;
+      } else if (row.fieldType === 'number') {
+        const n = Number(v);
+        if (!isNaN(n)) v = n;
+      } else if (row.fieldType === 'boolean') {
+        v = v === 'true' || v === true;
+      }
+      obj[k] = v;
+    });
+    return JSON.stringify(obj, null, 2);
+  };
+
+  const parseJsonToTable = (jsonStr: string) => {
+    try {
+      const parsed = JSON.parse(jsonStr);
+      if (typeof parsed !== 'object' || parsed === null) return;
+      const next = value.map(row => {
+        const k = row.key || row.fieldName;
+        if (k && k in parsed) {
+          let v = parsed[k];
+          if (typeof v === 'object') {
+            v = JSON.stringify(v);
+          }
+          return { ...row, fieldValue: String(v) };
+        }
+        return row;
+      });
+      setValue(next);
+    } catch {
+      // ignore parse error
+    }
+  };
+
+  const [jsonValue, setJsonValue] = React.useState(() => buildJsonFromTable());
+
+  React.useEffect(() => {
+    if (globalMode === 'json') {
+      setJsonValue(buildJsonFromTable());
+    }
+  }, [globalMode]);
+
   const columns = [
     {
-      title: '字段 Key',
+      title: 'Key',
       dataIndex: 'key',
       width: 120,
-      render: (_: unknown, row: DebugParamReadOnlyRow) => row.key || '-'
+      render: (_: unknown, row: DebugParamReadOnlyRow) => row.key || row.fieldName || '-'
     },
     {
-      title: '字段名称',
-      dataIndex: 'fieldName',
-      width: 120,
-      render: (_: unknown, row: DebugParamReadOnlyRow) => row.fieldName || '-'
-    },
-    {
-      title: '字段类型',
+      title: 'Type',
       dataIndex: 'fieldType',
-      width: 100,
+      width: 80,
       render: (_: unknown, row: DebugParamReadOnlyRow) =>
         FIELD_TYPE_NAMES[row.fieldType] ?? row.fieldType ?? '-'
     },
     {
-      title: '必填',
+      title: 'Required',
       dataIndex: 'required',
-      width: 70,
-      render: (_: unknown, row: DebugParamReadOnlyRow) => (row.required ? '是' : '否')
+      width: 80,
+      render: (_: unknown, row: DebugParamReadOnlyRow) => (row.required ? 'Yes' : 'No')
     },
     {
-      title: '默认值',
-      dataIndex: 'defaultValue',
-      width: 120,
-      render: (_: unknown, row: DebugParamReadOnlyRow) => row.defaultValue ?? '-'
-    },
-    {
-      title: '字段描述',
-      dataIndex: 'description',
-      width: 120,
-      ellipsis: true,
-      render: (_: unknown, row: DebugParamReadOnlyRow) => row.description ?? '-'
-    },
-    {
-      title: '字段值',
+      title: 'Value',
       dataIndex: 'fieldValue',
-      width: 160,
-      render: (_: unknown, row: DebugParamReadOnlyRow, index: number) => (
-        <Input
-          value={row.fieldValue ?? ''}
-          placeholder="调试时填写的值"
-          onChange={(v) => updateFieldValue(index, v)}
-          allowClear
-        />
-      )
+      render: (_: unknown, row: DebugParamReadOnlyRow, index: number) => {
+        if (row.fieldType === 'object' || row.fieldType === 'array') {
+          return (
+            <Input.TextArea
+              value={row.fieldValue ?? row.defaultValue ?? ''}
+              placeholder='{"key": "value"}'
+              onChange={(v) => updateFieldValue(index, v)}
+              autoSize={{ minRows: 1, maxRows: 6 }}
+              style={{ fontFamily: 'monospace', fontSize: 12 }}
+            />
+          );
+        }
+        return (
+          <Input
+            value={row.fieldValue ?? row.defaultValue ?? ''}
+            placeholder="Input value"
+            onChange={(v) => updateFieldValue(index, v)}
+            allowClear
+          />
+        );
+      }
     }
   ];
 
+  if (value.length === 0) {
+    return <div style={{ color: '#999', padding: '8px 0' }}>No input parameters</div>;
+  }
+
   return (
     <div style={{ width: '100%', maxWidth: '100%' }}>
-      <Table
-        data={value}
-        columns={columns}
-        rowKey={(record: DebugParamReadOnlyRow) =>
-          record.id ?? `row-${record.key}-${record.fieldName}`
-        }
-        scroll={{ x: 800 }}
-        pagination={false}
-        size="small"
-      />
+      <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Radio.Group
+          size="small"
+          value={globalMode}
+          onChange={(v) => {
+            const mode = v as 'table' | 'json';
+            if (mode === 'json') {
+              setJsonValue(buildJsonFromTable());
+            } else {
+              parseJsonToTable(jsonValue);
+            }
+            updateAllInputMode(mode);
+          }}
+        >
+          <Radio value="table">Table</Radio>
+          <Radio value="json">JSON</Radio>
+        </Radio.Group>
+      </div>
+      
+      {globalMode === 'table' ? (
+        <Table
+          data={value}
+          columns={columns}
+          rowKey={(record: DebugParamReadOnlyRow) =>
+            record.id ?? `row-${record.key}-${record.fieldName}`
+          }
+          scroll={{ x: 600 }}
+          pagination={false}
+          size="small"
+        />
+      ) : (
+        <Input.TextArea
+          value={jsonValue}
+          onChange={setJsonValue}
+          placeholder='{"param1": "value1", "param2": "value2"}'
+          autoSize={{ minRows: 6, maxRows: 16 }}
+          style={{ fontFamily: 'monospace', fontSize: 12 }}
+        />
+      )}
     </div>
   );
 };
