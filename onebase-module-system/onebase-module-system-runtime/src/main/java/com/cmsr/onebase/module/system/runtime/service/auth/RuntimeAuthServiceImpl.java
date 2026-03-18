@@ -399,7 +399,7 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         }
 
         AppVersionDTO appVersionDTO = appVersionApi.getAppThirdEnableStatus(appId);
-        if (appVersionDTO != null && CommonStatusEnum.DISABLE.getStatus().equals(appVersionDTO.getAppThirdUserEnable())) {
+        if (appVersionDTO == null || CommonStatusEnum.DISABLE.getStatus().equals(appVersionDTO.getAppThirdUserEnable())) {
             throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
         }
     }
