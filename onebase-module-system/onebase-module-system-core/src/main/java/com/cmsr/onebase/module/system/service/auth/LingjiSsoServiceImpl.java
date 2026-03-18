@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -82,12 +81,6 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
 
     @Resource
     private RoleService roleService;
-
-    /**
-     * 企业ID到租户ID的映射（内存缓存）
-     * TODO: 如果需要持久化，可以存到数据库或 Redis
-     */
-    private final Map<String, Long> enterpriseTenantMapping = new ConcurrentHashMap<>();
 
     /**
      * 默认租户套餐编码
@@ -272,15 +265,10 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
     }
 
     /**
-     * 查找租户
+     * 查找租户（通过 enterpriseId 从数据库查询）
      */
     private TenantDO findTenant(String enterpriseId) {
-        // 从内存映射中查找租户ID
-        Long tenantId = enterpriseTenantMapping.get(enterpriseId);
-        if (tenantId == null) {
-            return null;
-        }
-        return tenantService.getTenant(tenantId);
+        return tenantService.getTenantByCode(enterpriseId);
     }
 
     /**
@@ -324,10 +312,6 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         Long tenantId = createTenantWithFallbackOperator(tenantReqVO);
         log.info("创建租户成功: tenantId={}, enterpriseId={}, tenantCode={}", tenantId, enterpriseId, tenantReqVO.getTenantCode());
 
-        // 更新内存映射
-        enterpriseTenantMapping.put(enterpriseId, tenantId);
-        log.info("更新企业租户映射: enterpriseId={} -> tenantId={}", enterpriseId, tenantId);
-
         return tenantService.getTenant(tenantId);
     }
 
@@ -369,7 +353,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 构建租户编码
      */
     private String buildTenantCode(String enterpriseId) {
-        return "lingji_" + enterpriseId + "_" + System.currentTimeMillis();
+        return enterpriseId;
     }
 
     /**

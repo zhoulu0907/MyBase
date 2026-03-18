@@ -54,7 +54,7 @@ public class UserInsertReqVO {
 
     @Schema(description = "手机号码", example = "15601691300")
     @Mobile
-    @NotBlank(message = "手机号码不能为空")
+    // @NotBlank(message = "手机号码不能为空")
     @DiffLogField(name = "手机号码")
     private String mobile;
 
