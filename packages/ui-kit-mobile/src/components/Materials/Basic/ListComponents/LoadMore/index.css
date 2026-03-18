@@ -153,7 +153,7 @@
     .list-body-item-element {
       display: flex;
       line-height: 0.6rem;
-      height: 0.6rem;
+      min-height: 0.6rem;
       border-radius: 0.16rem 0.16rem 0 0;
 
       &:first-child {
@@ -343,6 +343,6 @@
 .arco-masking-mask {
   @media screen and (min-width: 900px) {
     max-width: 450px !important;
-    left: calc(50vw - 225px);
+    left: calc(50vw - 225px) !important;
   }
 }
