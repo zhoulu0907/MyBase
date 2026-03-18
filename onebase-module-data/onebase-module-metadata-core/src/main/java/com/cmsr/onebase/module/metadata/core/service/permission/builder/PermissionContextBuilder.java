@@ -74,7 +74,7 @@ public class PermissionContextBuilder {
         FieldPermission fieldPermission = loadFieldPermission(userId, applicationId, menuId);
         permissionContext.setFieldPermission(fieldPermission);
 
-        log.info("权限上下文构建完成：userId={}, menuId={}", userId, menuId);
+        // log.info("权限上下文构建完成：userId={}, menuId={}", userId, menuId);
 
         return permissionContext;
     }
