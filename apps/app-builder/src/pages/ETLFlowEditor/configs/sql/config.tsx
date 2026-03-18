@@ -118,6 +118,8 @@ const SQLConfig: React.FC<SQLConfigProps> = ({ onRegisterSave, newPayload, setNe
     const nodes = graphData.value.nodes?.map((node: any) => {
       if (node.id === curNode.value.id) {
         return {
+          id: node.id,
+          type: node.type,
           description: nodeData.value[node.id].description || '',
           meta: node.meta || {},
           ...newPayload
