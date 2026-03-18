@@ -5,6 +5,8 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
@@ -36,6 +38,9 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -88,6 +93,11 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 默认租户套餐编码
      */
     private static final String DEFAULT_PACKAGE_CODE = "default";
+
+    /**
+     * SSO 首次登录自动建租户时，兜底的操作人 ID。
+     */
+    private static final Long SSO_FALLBACK_OPERATOR_USER_ID = 1L;
 
     @Override
     public AuthLoginRespVO login(String code, String deviceId) {
@@ -311,7 +321,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         tenantReqVO.setTenantAdminUserReqVOList(Collections.singletonList(adminReqVO));
 
         // 创建租户
-        Long tenantId = tenantService.createTenant(tenantReqVO);
+        Long tenantId = createTenantWithFallbackOperator(tenantReqVO);
         log.info("创建租户成功: tenantId={}, enterpriseId={}, tenantCode={}", tenantId, enterpriseId, tenantReqVO.getTenantCode());
 
         // 更新内存映射
@@ -319,6 +329,30 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         log.info("更新企业租户映射: enterpriseId={} -> tenantId={}", enterpriseId, tenantId);
 
         return tenantService.getTenant(tenantId);
+    }
+
+    /**
+     * 在无登录态时，使用兜底操作人补充安全上下文，避免审计字段（creator/updater）为空导致插入失败。
+     */
+    private Long createTenantWithFallbackOperator(TenantInsertReqVO tenantReqVO) {
+        if (SecurityFrameworkUtils.getLoginUserId() != null) {
+            return tenantService.createTenant(tenantReqVO);
+        }
+
+        Authentication previousAuthentication = SecurityFrameworkUtils.getAuthentication();
+        try {
+            LoginUser fallbackLoginUser = new LoginUser();
+            fallbackLoginUser.setId(SSO_FALLBACK_OPERATOR_USER_ID);
+            fallbackLoginUser.setUserType(UserTypeEnum.PLATFORM.getValue());
+
+            UsernamePasswordAuthenticationToken fallbackAuthentication =
+                    new UsernamePasswordAuthenticationToken(fallbackLoginUser, null, Collections.emptyList());
+            SecurityContextHolder.getContext().setAuthentication(fallbackAuthentication);
+
+            return tenantService.createTenant(tenantReqVO);
+        } finally {
+            SecurityContextHolder.getContext().setAuthentication(previousAuthentication);
+        }
     }
 
     /**
