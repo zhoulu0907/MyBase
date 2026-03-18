@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@arco-design/web-react": "^2.66.1",
-    "@arco-themes/react-cyansu-ob03": "^0.0.6",
+    "@arco-themes/react-cyansu-ob03": "^0.0.7",
+    "@arco-themes/react-tiangong": "^0.0.1",
     "@onebase/app": "workspace:*",
     "@onebase/common": "workspace:*",
     "@onebase/platform-center": "workspace:*",

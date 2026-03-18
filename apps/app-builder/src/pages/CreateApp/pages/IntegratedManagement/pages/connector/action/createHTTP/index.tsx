@@ -33,8 +33,7 @@ import {
 import {
   actionConfigToFormValues,
   buildActionConfig,
-  scanExposedFields,
-  scanExposedOutputFields
+  scanExposedFields
 } from './transform';
 import {
   buildJsonBodyRows,
@@ -182,29 +181,25 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
   useEffect(() => {
     if (currentStep !== 2) return;
     const values = form.values as Record<string, unknown>;
-    
+
+    // 扫描 Step2 中包含 ${xxx} 变量的字段
     const exposedInputs = scanExposedFields(values);
-    const exposedOutputs = scanExposedOutputFields(values);
-    
+    // 输出参数不再自动扫描，用户需要在 Step3 手动配置
+
     const io = isRecord(values.io) ? (values.io as Record<string, unknown>) : {};
     const existingInputs = Array.isArray(io.inputs) ? (io.inputs as unknown[]) : [];
     const existingOutputs = Array.isArray(io.outputs) ? (io.outputs as unknown[]) : [];
-    
+
     const existingInputKeys = new Set(
       existingInputs
         .map((row) => (isRecord(row) && typeof row.key === 'string' ? row.key : ''))
         .filter((k) => k)
     );
-    const existingOutputKeys = new Set(
-      existingOutputs
-        .map((row) => (isRecord(row) && typeof row.key === 'string' ? row.key : ''))
-        .filter((k) => k)
-    );
-    
+
+    // 只添加新的入参（不覆盖已有的）
     const newInputs = exposedInputs.filter((f) => !existingInputKeys.has(f.key));
-    const newOutputs = exposedOutputs.filter((f) => !existingOutputKeys.has(f.key));
-    
-    if (newInputs.length > 0 || newOutputs.length > 0) {
+
+    if (newInputs.length > 0) {
       const mergedInputs = [
         ...existingInputs,
         ...newInputs.map((f) => ({
@@ -219,26 +214,12 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
           defaultValue: f.defaultValue
         }))
       ];
-      
-      const mergedOutputs = [
-        ...existingOutputs,
-        ...newOutputs.map((f) => ({
-          id: `output-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          key: f.key,
-          fieldName: f.fieldName,
-          fieldType: f.fieldType,
-          description: f.description,
-          fromKind: f.mapKind,
-          fromKey: f.mapKey,
-          jsonPath: f.mapKey
-        }))
-      ];
-      
+
       form.setValues({
         ...values,
         io: {
           inputs: mergedInputs,
-          outputs: mergedOutputs
+          outputs: existingOutputs  // 保持现有输出不变
         }
       });
     }

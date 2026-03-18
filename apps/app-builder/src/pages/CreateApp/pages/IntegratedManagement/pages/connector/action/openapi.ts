@@ -30,6 +30,54 @@ export const OPENAPI_METHODS: OpenApiMethod[] = ['get', 'post', 'put', 'delete',
 
 export const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 
+/** 解析 $ref 引用，返回实际的 schema 对象 */
+export const resolveRef = (schema: unknown, doc: unknown): unknown => {
+  if (!isRecord(schema)) return schema;
+
+  const ref = schema.$ref;
+  if (typeof ref !== 'string' || !ref.startsWith('#/')) return schema;
+
+  // 解析路径，如 "#/components/schemas/DataCardRequest"
+  const pathParts = ref.slice(2).split('/');
+  let current: unknown = doc;
+
+  for (const part of pathParts) {
+    if (!isRecord(current)) return schema;
+    current = current[part];
+  }
+
+  // 递归解析（处理嵌套的 $ref）
+  return resolveRef(current, doc);
+};
+
+/** 递归解析 schema 中的所有 $ref 引用，保留 examples 字段 */
+export const resolveAllRefs = (schema: unknown, doc: unknown): unknown => {
+  if (!isRecord(schema)) return schema;
+
+  // 先解析当前层级的 $ref
+  const resolved = resolveRef(schema, doc);
+  if (!isRecord(resolved)) return resolved;
+
+  // 结果对象，保留所有原始字段
+  const result: Record<string, unknown> = { ...resolved };
+
+  // 递归解析 properties 中的 $ref
+  if (isRecord(resolved.properties)) {
+    const newProperties: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(resolved.properties)) {
+      newProperties[key] = resolveAllRefs(value, doc);
+    }
+    result.properties = newProperties;
+  }
+
+  // 递归解析 items 中的 $ref（用于数组类型）
+  if (isRecord(resolved) && 'items' in resolved) {
+    result.items = resolveAllRefs(resolved.items, doc);
+  }
+
+  return result;
+};
+
 export const getOperationKey = (op: OpenApiOperation) => `${op.method.toUpperCase()} ${op.path}`;
 
 export const pickFirstServerUrl = (doc: unknown) => {
@@ -48,6 +96,15 @@ export const mapOpenApiSchemaTypeToFieldType = (schema: unknown) => {
   if (t === 'boolean') return 'boolean';
   if (t === 'array') return 'array';
   if (t === 'object') return 'object';
+  return 'string';
+};
+
+/** 从 JavaScript 值推断字段类型 */
+const inferFieldTypeFromValue = (value: unknown): string => {
+  if (Array.isArray(value)) return 'array';
+  if (typeof value === 'object' && value !== null) return 'object';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'boolean') return 'boolean';
   return 'string';
 };
 
@@ -143,12 +200,21 @@ const extractParameters = (op: Record<string, unknown>) => {
     const pr = isRecord(p) ? p : {};
     const key = typeof pr.name === 'string' ? pr.name : '';
     const schema = isRecord(pr.schema) ? pr.schema : undefined;
+
+    // 优先使用 parameter 级别的 example，其次 schema.default
+    let defaultValue = '';
+    if (pr.example !== undefined && pr.example !== null && pr.example !== '') {
+      defaultValue = String(pr.example);
+    } else if (schema && isRecord(schema) && schema.default != null) {
+      defaultValue = String(schema.default);
+    }
+
     return {
       key,
       fieldName: key,
       fieldType: mapOpenApiSchemaTypeToFieldType(schema),
       required: Boolean(pr.required),
-      defaultValue: schema && isRecord(schema) && schema.default != null ? String(schema.default) : '',
+      defaultValue,
       description: typeof pr.description === 'string' ? pr.description : ''
     } satisfies ParamRow;
   };
@@ -169,7 +235,7 @@ const extractParameters = (op: Record<string, unknown>) => {
   return { headers, query, path };
 };
 
-const extractRequestBodyRows = (op: Record<string, unknown>) => {
+const extractRequestBodyRows = (op: Record<string, unknown>, doc: unknown) => {
   const requestBody = isRecord(op.requestBody) ? (op.requestBody as Record<string, unknown>) : undefined;
   const requestBodyContent =
     requestBody && isRecord(requestBody.content) ? (requestBody.content as Record<string, unknown>) : undefined;
@@ -177,33 +243,131 @@ const extractRequestBodyRows = (op: Record<string, unknown>) => {
     requestBodyContent && isRecord(requestBodyContent['application/json'])
       ? (requestBodyContent['application/json'] as Record<string, unknown>)
       : undefined;
-  const reqSchema = jsonContent ? jsonContent.schema : undefined;
 
-  const rows =
-    isRecord(reqSchema) && reqSchema.type === 'object'
-      ? buildParamRowsFromSchemaObject(reqSchema, (reqSchema as Record<string, unknown>).required)
-      : reqSchema
-        ? ([
-            {
-              key: 'body',
-              fieldName: 'body',
-              fieldType: mapOpenApiSchemaTypeToFieldType(reqSchema),
-              required: true,
-              defaultValue: '',
-              description: jsonContent && typeof jsonContent.description === 'string' ? jsonContent.description : ''
-            }
-          ] satisfies ParamRow[])
-        : ([] as ParamRow[]);
+  let rows: ParamRow[] = [];
+  let requestBodyJson = '';
+  let isJsonBody = Boolean(jsonContent);
 
-  const requestBodyJson = reqSchema ? JSON.stringify(reqSchema, null, 2) : '';
+  if (jsonContent) {
+    // 优先使用 content 级别的 example
+    const example = jsonContent.example;
 
-  return { rows, isJsonBody: Boolean(jsonContent), requestBodyJson };
+    // 其次检查 schema 级别的 examples 数组
+    const reqSchemaRaw = jsonContent.schema;
+    const reqSchema = resolveAllRefs(reqSchemaRaw, doc);
+    const schemaExamples = isRecord(reqSchema) && Array.isArray(reqSchema.examples) ? reqSchema.examples : [];
+    const firstSchemaExample = schemaExamples.length > 0 ? schemaExamples[0] : null;
+
+    if (example !== undefined && example !== null) {
+      requestBodyJson = JSON.stringify(example, null, 2);
+
+      // 从示例数据推断字段结构
+      if (Array.isArray(example)) {
+        // 数组类型：取第一个元素作为模板
+        const firstItem = example[0];
+        if (isRecord(firstItem)) {
+          rows = Object.entries(firstItem).map(([key, value]) => ({
+            key,
+            fieldName: key,
+            fieldType: inferFieldTypeFromValue(value),
+            required: false,
+            defaultValue: `\${${key}}`,
+            description: ''
+          }));
+        } else {
+          // 数组元素是基本类型
+          rows = [{
+            key: 'body',
+            fieldName: 'body',
+            fieldType: 'array',
+            required: true,
+            defaultValue: requestBodyJson,
+            description: '请求体 (JSON 数组)'
+          }];
+        }
+      } else if (isRecord(example)) {
+        // 对象类型
+        rows = Object.entries(example).map(([key, value]) => ({
+          key,
+          fieldName: key,
+          fieldType: inferFieldTypeFromValue(value),
+          required: false,
+          defaultValue: `\${${key}}`,
+          description: ''
+        }));
+      }
+    } else if (firstSchemaExample !== null) {
+      // 使用 schema 级别的 examples
+      requestBodyJson = JSON.stringify(firstSchemaExample, null, 2);
+
+      if (Array.isArray(firstSchemaExample)) {
+        const firstItem = firstSchemaExample[0];
+        if (isRecord(firstItem)) {
+          rows = Object.entries(firstItem).map(([key, value]) => ({
+            key,
+            fieldName: key,
+            fieldType: inferFieldTypeFromValue(value),
+            required: false,
+            defaultValue: `\${${key}}`,
+            description: ''
+          }));
+        } else {
+          rows = [{
+            key: 'body',
+            fieldName: 'body',
+            fieldType: 'array',
+            required: true,
+            defaultValue: requestBodyJson,
+            description: '请求体 (JSON 数组)'
+          }];
+        }
+      } else if (isRecord(firstSchemaExample)) {
+        rows = Object.entries(firstSchemaExample).map(([key, value]) => ({
+          key,
+          fieldName: key,
+          fieldType: inferFieldTypeFromValue(value),
+          required: false,
+          defaultValue: `\${${key}}`,
+          description: ''
+        }));
+      }
+    } else if (isRecord(reqSchema)) {
+      // 没有 example，使用已解析的 schema
+      requestBodyJson = JSON.stringify(reqSchema, null, 2);
+
+      if (reqSchema.type === 'object' && isRecord(reqSchema.properties)) {
+        rows = buildParamRowsFromSchemaObject(reqSchema, (reqSchema as Record<string, unknown>).required);
+      } else if (reqSchema.type === 'array') {
+        rows = [{
+          key: 'body',
+          fieldName: 'body',
+          fieldType: 'array',
+          required: true,
+          defaultValue: requestBodyJson,
+          description: '请求体 (JSON 数组)'
+        }];
+      } else {
+        rows = [{
+          key: 'body',
+          fieldName: 'body',
+          fieldType: mapOpenApiSchemaTypeToFieldType(reqSchema),
+          required: true,
+          defaultValue: '',
+          description: ''
+        }];
+      }
+    }
+  }
+
+  return { rows, isJsonBody, requestBodyJson };
 };
 
-const extractResponse = (op: Record<string, unknown>) => {
+const extractResponse = (op: Record<string, unknown>, doc: unknown) => {
   const responseObj = isRecord(op.responses) ? (op.responses as Record<string, unknown>) : {};
+  console.log('[extractResponse] responseObj:', responseObj);
   const status =
     ['200', '201', 'default'].find((k) => isRecord(responseObj) && k in responseObj) || Object.keys(responseObj)[0];
+  console.log('[extractResponse] status:', status);
   const resp = status && isRecord(responseObj) ? responseObj[status] : undefined;
   const respRec = isRecord(resp) ? (resp as Record<string, unknown>) : undefined;
   const respContent = respRec && isRecord(respRec.content) ? (respRec.content as Record<string, unknown>) : undefined;
@@ -211,27 +375,154 @@ const extractResponse = (op: Record<string, unknown>) => {
     respContent && isRecord(respContent['application/json'])
       ? (respContent['application/json'] as Record<string, unknown>)
       : undefined;
-  const respSchema = respJson ? respJson.schema : undefined;
 
-  const responseBody =
-    isRecord(respSchema) && respSchema.type === 'object'
-      ? buildParamRowsFromSchemaObject(respSchema, (respSchema as Record<string, unknown>).required, true)
-      : respSchema
-        ? ([
-            {
-              key: 'body',
-              fieldName: 'body',
-              fieldType: mapOpenApiSchemaTypeToFieldType(respSchema),
-              required: false,
-              defaultValue: '',
-              description: respJson && typeof respJson.description === 'string' ? respJson.description : '',
-              expose: false,
-              jsonPath: '$'
-            }
-          ] satisfies ParamRow[])
-        : ([] as ParamRow[]);
+  console.log('[extractResponse] respJson:', respJson);
 
-  const responseBodyJson = respSchema ? JSON.stringify(respSchema, null, 2) : '';
+  let responseBody: ParamRow[] = [];
+  let responseBodyJson = '';
+  let firstSchemaExample: unknown = null;
+
+  if (respJson) {
+    // 优先使用 content 级别的 example
+    const example = respJson.example;
+    console.log('[extractResponse] content-level example:', example);
+    // 其次检查 schema 级别的 examples 数组
+    const respSchemaRaw = respJson.schema;
+    const respSchema = resolveAllRefs(respSchemaRaw, doc);
+    console.log('[extractResponse] respSchema:', respSchema);
+    console.log('[extractResponse] respSchema.examples:', isRecord(respSchema) ? (respSchema as Record<string, unknown>).examples : 'not a record');
+    const schemaExamples = isRecord(respSchema) && Array.isArray(respSchema.examples) ? respSchema.examples : [];
+    console.log('[extractResponse] schemaExamples:', schemaExamples);
+    firstSchemaExample = schemaExamples.length > 0 ? schemaExamples[0] : null;
+    console.log('[extractResponse] firstSchemaExample:', firstSchemaExample);
+
+    if (example !== undefined && example !== null) {
+      responseBodyJson = JSON.stringify(example, null, 2);
+
+      // 从示例数据推断字段结构
+      if (Array.isArray(example)) {
+        // 数组类型：取第一个元素作为模板
+        const firstItem = example[0];
+        if (isRecord(firstItem)) {
+          responseBody = Object.entries(firstItem).map(([key, value]) => ({
+            key,
+            fieldName: key,
+            fieldType: inferFieldTypeFromValue(value),
+            required: false,
+            defaultValue: '',
+            description: '',
+            expose: false,
+            jsonPath: `$.${key}`
+          }));
+        } else {
+          responseBody = [{
+            key: 'body',
+            fieldName: 'body',
+            fieldType: 'array',
+            required: false,
+            defaultValue: '',
+            description: '响应体 (JSON 数组)',
+            expose: false,
+            jsonPath: '$'
+          }];
+        }
+      } else if (isRecord(example)) {
+        responseBody = Object.entries(example).map(([key, value]) => ({
+          key,
+          fieldName: key,
+          fieldType: inferFieldTypeFromValue(value),
+          required: false,
+          defaultValue: '',
+          description: '',
+          expose: false,
+          jsonPath: `$.${key}`
+        }));
+      }
+    } else if (firstSchemaExample !== null) {
+      // 使用 schema 级别的 examples
+      responseBodyJson = JSON.stringify(firstSchemaExample, null, 2);
+
+      if (Array.isArray(firstSchemaExample)) {
+        const firstItem = firstSchemaExample[0];
+        if (isRecord(firstItem)) {
+          responseBody = Object.entries(firstItem).map(([key, value]) => ({
+            key,
+            fieldName: key,
+            fieldType: inferFieldTypeFromValue(value),
+            required: false,
+            defaultValue: '',
+            description: '',
+            expose: false,
+            jsonPath: `$.${key}`
+          }));
+        } else {
+          responseBody = [{
+            key: 'body',
+            fieldName: 'body',
+            fieldType: 'array',
+            required: false,
+            defaultValue: '',
+            description: '响应体 (JSON 数组)',
+            expose: false,
+            jsonPath: '$'
+          }];
+        }
+      } else if (isRecord(firstSchemaExample)) {
+        responseBody = Object.entries(firstSchemaExample).map(([key, value]) => ({
+          key,
+          fieldName: key,
+          fieldType: inferFieldTypeFromValue(value),
+          required: false,
+          defaultValue: '',
+          description: '',
+          expose: false,
+          jsonPath: `$.${key}`
+        }));
+      }
+    } else if (isRecord(respSchema)) {
+      // 没有 example，使用已解析的 schema
+      responseBodyJson = JSON.stringify(respSchema, null, 2);
+
+      if (respSchema.type === 'object' && isRecord(respSchema.properties)) {
+        responseBody = buildParamRowsFromSchemaObject(respSchema, (respSchema as Record<string, unknown>).required, true);
+      } else if (respSchema.type === 'array' && isRecord(respSchema.items)) {
+        const itemsSchema = respSchema.items;
+        // items 已经被 resolveAllRefs 解析过了
+        if (isRecord(itemsSchema) && itemsSchema.type === 'object' && isRecord(itemsSchema.properties)) {
+          const itemRows = buildParamRowsFromSchemaObject(itemsSchema, (itemsSchema as Record<string, unknown>).required, true);
+          responseBody = itemRows.map(row => ({
+            ...row,
+            jsonPath: row.jsonPath || `$.${row.key}`
+          }));
+        } else {
+          responseBody = [{
+            key: 'body',
+            fieldName: 'body',
+            fieldType: 'array',
+            required: false,
+            defaultValue: '',
+            description: '响应体 (JSON 数组)',
+            expose: false,
+            jsonPath: '$'
+          }];
+        }
+      } else {
+        responseBody = [{
+          key: 'body',
+          fieldName: 'body',
+          fieldType: mapOpenApiSchemaTypeToFieldType(respSchema),
+          required: false,
+          defaultValue: '',
+          description: '',
+          expose: false,
+          jsonPath: '$'
+        }];
+      }
+    }
+  }
+
+  console.log('[extractResponse] final responseBody:', responseBody);
+  console.log('[extractResponse] final responseBodyJson:', responseBodyJson);
 
   const responseHeadersRaw =
     respRec && isRecord(respRec.headers) ? (respRec.headers as Record<string, unknown>) : undefined;
@@ -239,12 +530,21 @@ const extractResponse = (op: Record<string, unknown>) => {
     ? Object.entries(responseHeadersRaw).map(([k, v]) => {
         const vr = isRecord(v) ? (v as Record<string, unknown>) : {};
         const schema = isRecord(vr.schema) ? vr.schema : undefined;
+
+        // 优先使用 example，其次 schema.default
+        let defaultValue = '';
+        if (vr.example !== undefined && vr.example !== null && vr.example !== '') {
+          defaultValue = String(vr.example);
+        } else if (schema && isRecord(schema) && schema.default != null) {
+          defaultValue = String(schema.default);
+        }
+
         return {
           key: k,
           fieldName: k,
           fieldType: mapOpenApiSchemaTypeToFieldType(schema),
           required: false,
-          defaultValue: schema && isRecord(schema) && schema.default != null ? String(schema.default) : '',
+          defaultValue,
           description: typeof vr.description === 'string' ? vr.description : '',
           expose: false,
           jsonPath: `$.${k}`
@@ -256,25 +556,27 @@ const extractResponse = (op: Record<string, unknown>) => {
   let successConditionValue = '';
   let errorMessagePath = '';
 
-  if (isRecord(respSchema) && respSchema.type === 'object') {
-    const properties = isRecord(respSchema.properties) ? respSchema.properties as Record<string, unknown> : {};
-    
-    if ('code' in properties) {
-      successConditionPath = '$.code';
-      successConditionValue = '0';
-    } else if ('status' in properties) {
-      successConditionPath = '$.status';
-      successConditionValue = 'success';
-    } else if ('success' in properties) {
+  // 从示例数据中检查成功条件
+  const exampleToCheck = respJson?.example ?? firstSchemaExample;
+  const dataToCheck = Array.isArray(exampleToCheck) ? exampleToCheck[0] : exampleToCheck;
+
+  if (isRecord(dataToCheck)) {
+    if ('success' in dataToCheck) {
       successConditionPath = '$.success';
       successConditionValue = 'true';
+    } else if ('code' in dataToCheck) {
+      successConditionPath = '$.code';
+      successConditionValue = '0';
+    } else if ('status' in dataToCheck) {
+      successConditionPath = '$.status';
+      successConditionValue = 'success';
     }
-    
-    if ('message' in properties) {
+
+    if ('message' in dataToCheck) {
       errorMessagePath = '$.message';
-    } else if ('msg' in properties) {
+    } else if ('msg' in dataToCheck) {
       errorMessagePath = '$.msg';
-    } else if ('error' in properties) {
+    } else if ('error' in dataToCheck) {
       errorMessagePath = '$.error';
     }
   }
@@ -288,8 +590,8 @@ export const buildHttpFormValuesFromOpenApi = (doc: unknown, operation: OpenApiO
 
   const op = isRecord(operation.raw) ? (operation.raw as Record<string, unknown>) : {};
   const { headers, query, path } = extractParameters(op);
-  const { rows: requestBody, isJsonBody, requestBodyJson } = extractRequestBodyRows(op);
-  const { responseHeaders, responseBody, responseBodyJson: respBodyJson, successConditionPath, successConditionValue, errorMessagePath } = extractResponse(op);
+  const { rows: requestBody, isJsonBody, requestBodyJson } = extractRequestBodyRows(op, doc);
+  const { responseHeaders, responseBody, responseBodyJson: respBodyJson, successConditionPath, successConditionValue, errorMessagePath } = extractResponse(op, doc);
 
   const method = operation.method.toUpperCase() === 'POST' && isJsonBody ? 'POST_JSON' : operation.method.toUpperCase();
 
@@ -364,8 +666,8 @@ export const buildHttpActionConfigFromOpenApi = (doc: unknown, operation: OpenAp
 
   const op = isRecord(operation.raw) ? (operation.raw as Record<string, unknown>) : {};
   const { headers, query, path } = extractParameters(op);
-  const { rows: requestBody, isJsonBody, requestBodyJson } = extractRequestBodyRows(op);
-  const { responseHeaders, responseBody } = extractResponse(op);
+  const { rows: requestBody, isJsonBody } = extractRequestBodyRows(op, doc);
+  const { responseHeaders, responseBody } = extractResponse(op, doc);
 
   const name = (actionName || '').trim() || buildActionNameFromOpenApi(operation);
   const method = operation.method.toUpperCase();

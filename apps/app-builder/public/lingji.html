@@ -41,9 +41,19 @@
       // 从配置文件读取配置
       var CONFIG = window.SSO_CONFIG || {
         lingjiHome: 'https://rdcloud.4c-uat.hq.cmcc/cmdevops-platform-desktop-web/home',
+        sourceid: 'onebase',
         ssoLoginApi: 'http://onebase.4c-uat.hq.cmcc:20011/observerbuilder/admin-api/system/lingji-sso/login',
         successRedirectBase: 'http://onebase.4c-uat.hq.cmcc:20011/appbuilder'
       };
+
+      // 从 lingjiHome 提取域名
+      function getOrigin(url) {
+        try {
+          return new URL(url).origin;
+        } catch (e) {
+          return '';
+        }
+      }
       
       var urlParams = new URLSearchParams(window.location.search);
       var code = urlParams.get('code');
@@ -79,8 +89,15 @@
             setTimeout(function() { window.location.href = CONFIG.lingjiHome; }, 3000);
           });
       } else {
-        statusEl.textContent = '正在跳转到灵畿平台...';
-        window.location.href = CONFIG.lingjiHome;
+        // 没有 code，跳转到灵畿 SSO 授权页面
+        statusEl.textContent = '正在跳转到灵畿平台登录...';
+        var lingjiOrigin = getOrigin(CONFIG.lingjiHome);
+        var currentUrl = window.location.href.split('?')[0]; // 当前页面地址（不含参数）
+        var ssoUrl = lingjiOrigin + '/moss/micrologin/#/sso/getauthorizecode' +
+          '?redirectUri=' + encodeURIComponent(currentUrl) +
+          '&sourceid=' + encodeURIComponent(CONFIG.sourceid) +
+          '&moss_sso_account=1';
+        window.location.href = ssoUrl;
       }
     })();
   </script>

@@ -1,4 +1,4 @@
-import { Button, Input, Select, Space, Switch, Table } from '@arco-design/web-react';
+import { Button, Input, Select, Space, Table } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, useField, useForm } from '@formily/react';
 import React from 'react';
@@ -11,7 +11,7 @@ export interface OutputParamRow {
   fieldType: string;
   description: string;
   jsonPath?: string;
-  expose?: boolean;
+  expose?: boolean; // 已废弃，保留用于兼容旧数据
 }
 
 export interface ActionOutputRow extends OutputParamRow {
@@ -32,8 +32,7 @@ const defaultRow: OutputParamRow = {
   fieldName: '',
   fieldType: 'string',
   description: '',
-  jsonPath: '',
-  expose: false
+  jsonPath: ''
 };
 
 const defaultActionOutputRow: ActionOutputRow = {
@@ -46,13 +45,6 @@ const FROM_KIND_OPTIONS = [
   { label: '响应头', value: 'header' },
   { label: '响应体', value: 'body' }
 ];
-
-const buildJsonPath = (key: string, fromKind?: string): string => {
-  if (fromKind === 'header') {
-    return `$.${key}`;
-  }
-  return `$.${key}`;
-};
 
 const OutputParamArrayTableInner: React.FC = () => {
   const rawField = useField() as { value?: OutputParamRow[]; setValue: (v: OutputParamRow[]) => void };
@@ -80,27 +72,8 @@ const OutputParamArrayTableInner: React.FC = () => {
     setValue(next);
   };
 
-  const handleExposeChange = (index: number, expose: boolean) => {
-    const row = value[index];
-    const key = row.key || row.fieldName;
-    let newJsonPath = row.jsonPath;
-    
-    if (expose && key && !row.jsonPath) {
-      newJsonPath = buildJsonPath(key);
-    }
-    
-    updateRow(index, { expose, jsonPath: newJsonPath });
-  };
-
   const handleKeyChange = (index: number, newKey: string) => {
-    const row = value[index];
-    let newJsonPath = row.jsonPath;
-    
-    if (row.expose && newKey && !row.jsonPath) {
-      newJsonPath = buildJsonPath(newKey);
-    }
-    
-    updateRow(index, { key: newKey, jsonPath: newJsonPath });
+    updateRow(index, { key: newKey });
   };
 
   const columns = [
@@ -146,7 +119,7 @@ const OutputParamArrayTableInner: React.FC = () => {
     {
       title: 'JSON路径',
       dataIndex: 'jsonPath',
-      width: 140,
+      width: 180,
       render: (_: unknown, row: OutputParamRow, index: number) => (
         <Input
           value={row.jsonPath}
@@ -157,20 +130,9 @@ const OutputParamArrayTableInner: React.FC = () => {
       )
     },
     {
-      title: '暴露',
-      dataIndex: 'expose',
-      width: 80,
-      render: (_: unknown, row: OutputParamRow, index: number) => (
-        <Switch
-          checked={row.expose || false}
-          onChange={(v) => handleExposeChange(index, v)}
-        />
-      )
-    },
-    {
       title: '描述',
       dataIndex: 'description',
-      ellipsis: true,
+      width: 150,
       render: (_: unknown, row: OutputParamRow, index: number) => (
         <Input
           value={row.description}
@@ -305,43 +267,50 @@ const ActionOutputArrayTableInner: React.FC = () => {
 
   const generateOutputsFromResponse = () => {
     const newRows: ActionOutputRow[] = [];
-    
+    const addedKeys = new Set<string>();
+
     const addRows = (rows: any[], fromKind: string) => {
       (Array.isArray(rows) ? rows : []).forEach((r) => {
         const key = r?.key || r?.fieldName;
         const path = r?.path || r?.jsonPath;
         if (!key && !path) return;
-        if (!r?.expose) return;
+
+        const rowKey = key || path?.split('.').pop() || '';
+        if (addedKeys.has(rowKey)) return;
+        addedKeys.add(rowKey);
+
         newRows.push({
           id: `row-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          key: key || path?.split('.').pop() || '',
+          key: rowKey,
           fieldName: r?.fieldName || key || path?.split('.').pop() || '',
           fieldType: r?.fieldType || r?.type || 'string',
           description: r?.description || '',
           jsonPath: path,
-          expose: true,
           fromKind,
           fromKey: key || path
         });
       });
     };
-    
+
     addRows(responseHeaders, 'header');
-    
+
     if (responseBodyMode === 'json' || responseBodyMode === 'text') {
       const jsonBody = responseBodyMode === 'json' ? responseBodyJson : responseBodyText;
       if (jsonBody) {
         try {
           const parsed = JSON.parse(jsonBody);
           const flattened = flattenObject(parsed);
-          addRows(flattened.map(f => ({ ...f, expose: true })), 'body');
+          addRows(flattened, 'body');
         } catch {
           // ignore
         }
       }
     }
-    
-    setValue(newRows);
+
+    // 合并已有行（避免覆盖用户已配置的）
+    const existingKeys = new Set(value.map((r) => r.key));
+    const filteredNewRows = newRows.filter((r) => !existingKeys.has(r.key));
+    setValue([...value, ...filteredNewRows]);
   };
 
   const columns = [
@@ -433,7 +402,7 @@ const ActionOutputArrayTableInner: React.FC = () => {
       <div style={{ marginBottom: 8 }}>
         <Space>
           <Button type="outline" size="small" onClick={generateOutputsFromResponse}>
-            从暴露字段生成
+            从响应字段生成
           </Button>
         </Space>
       </div>

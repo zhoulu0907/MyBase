@@ -2,6 +2,7 @@ import { Button, Input, Select, Space, Switch, Table } from '@arco-design/web-re
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, useField, useForm } from '@formily/react';
 import React from 'react';
+import { extractVariables } from './utils';
 
 /** 单行数据形状 */
 export interface ParamRow {
@@ -12,7 +13,7 @@ export interface ParamRow {
   required: boolean;
   defaultValue: string;
   description: string;
-  expose?: boolean;
+  expose?: boolean; // 已废弃，保留用于兼容旧数据
 }
 
 export interface ActionInputRow extends ParamRow {
@@ -34,8 +35,7 @@ const defaultRow: ParamRow = {
   fieldType: 'string',
   required: false,
   defaultValue: '',
-  description: '',
-  expose: false
+  description: ''
 };
 
 const defaultActionInputRow: ActionInputRow = {
@@ -74,36 +74,15 @@ const ParamArrayTableInner: React.FC = () => {
     setValue(next);
   };
 
-  const handleExposeChange = (index: number, expose: boolean) => {
-    const row = value[index];
-    const key = row.key || row.fieldName;
-    let newDefaultValue = row.defaultValue;
-    
-    if (expose && key) {
-      if (!row.defaultValue || !row.defaultValue.includes('${')) {
-        newDefaultValue = `\${${key}}`;
-      }
-    }
-    
-    updateRow(index, { expose, defaultValue: newDefaultValue });
-  };
-
   const handleKeyChange = (index: number, newKey: string) => {
-    const row = value[index];
-    let newDefaultValue = row.defaultValue;
-    
-    if (row.expose && newKey) {
-      newDefaultValue = `\${${newKey}}`;
-    }
-    
-    updateRow(index, { key: newKey, defaultValue: newDefaultValue });
+    updateRow(index, { key: newKey });
   };
 
   const columns = [
     {
       title: '键名',
       dataIndex: 'key',
-      width: 120,
+      width: 140,
       render: (_: unknown, row: ParamRow, index: number) => (
         <Input
           value={row.key}
@@ -116,7 +95,7 @@ const ParamArrayTableInner: React.FC = () => {
     {
       title: '名称',
       dataIndex: 'fieldName',
-      width: 120,
+      width: 140,
       render: (_: unknown, row: ParamRow, index: number) => (
         <Input
           value={row.fieldName}
@@ -142,7 +121,7 @@ const ParamArrayTableInner: React.FC = () => {
     {
       title: '必填',
       dataIndex: 'required',
-      width: 80,
+      width: 70,
       render: (_: unknown, row: ParamRow, index: number) => (
         <Switch
           checked={row.required}
@@ -153,32 +132,20 @@ const ParamArrayTableInner: React.FC = () => {
     {
       title: '默认值',
       dataIndex: 'defaultValue',
-      width: 140,
+      width: 180,
       render: (_: unknown, row: ParamRow, index: number) => (
         <Input
           value={row.defaultValue}
-          placeholder="可选"
+          placeholder="可使用 ${变量名}"
           onChange={(v) => updateRow(index, { defaultValue: v })}
           allowClear
-          disabled={row.expose}
-        />
-      )
-    },
-    {
-      title: '暴露',
-      dataIndex: 'expose',
-      width: 80,
-      render: (_: unknown, row: ParamRow, index: number) => (
-        <Switch
-          checked={row.expose || false}
-          onChange={(v) => handleExposeChange(index, v)}
         />
       )
     },
     {
       title: '描述',
       dataIndex: 'description',
-      ellipsis: true,
+      width: 150,
       render: (_: unknown, row: ParamRow, index: number) => (
         <Input
           value={row.description}
@@ -191,7 +158,7 @@ const ParamArrayTableInner: React.FC = () => {
     {
       title: '',
       dataIndex: '_op',
-      width: 60,
+      width: 50,
       fixed: 'right' as const,
       render: (_: unknown, __: ParamRow, index: number) => (
         <Button
@@ -210,7 +177,7 @@ const ParamArrayTableInner: React.FC = () => {
         data={value}
         columns={columns}
         rowKey={(record: ParamRow) => record.id ?? `row-${record.key}-${record.fieldName}`}
-        scroll={{ x: 900 }}
+        scroll={{ x: 830 }}
         pagination={false}
         size="small"
       />
@@ -286,32 +253,46 @@ const ActionInputArrayTableInner: React.FC = () => {
 
   const generateInputsFromRequest = () => {
     const newRows: ActionInputRow[] = [];
-    const addRows = (rows: any[], mapKind: string) => {
+    const addedKeys = new Set<string>();
+
+    const addRowsFromVariables = (rows: any[], mapKind: string) => {
       (Array.isArray(rows) ? rows : []).forEach((r) => {
         const key = r?.key || r?.fieldName;
+        const defaultValue = r?.defaultValue || '';
         if (!key) return;
-        if (!r?.expose) return;
-        newRows.push({
-          id: `row-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          key,
-          fieldName: r?.fieldName || key,
-          fieldType: r?.fieldType || 'string',
-          required: typeof r?.required === 'boolean' ? r.required : false,
-          defaultValue: r?.defaultValue || '',
-          description: r?.description || '',
-          expose: true,
-          mapKind,
-          mapKey: key
+
+        // 从 defaultValue 中提取 ${xxx} 变量
+        const vars = extractVariables(defaultValue);
+        vars.forEach((v) => {
+          if (addedKeys.has(v)) return;
+          addedKeys.add(v);
+
+          newRows.push({
+            id: `row-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            key: v,  // 变量名作为入参 key
+            fieldName: r?.fieldName || v,
+            fieldType: r?.fieldType || 'string',
+            required: typeof r?.required === 'boolean' ? r.required : false,
+            defaultValue: defaultValue,
+            description: r?.description || '',
+            mapKind,
+            mapKey: key  // 映射到底层的 key
+          });
         });
       });
     };
-    addRows(requestHeaders, 'header');
-    addRows(queryParams, 'query');
-    addRows(pathParams, 'path');
+
+    addRowsFromVariables(requestHeaders, 'header');
+    addRowsFromVariables(queryParams, 'query');
+    addRowsFromVariables(pathParams, 'path');
     if (bodyMode === 'kv') {
-      addRows(requestBody, 'body');
+      addRowsFromVariables(requestBody, 'body');
     }
-    setValue(newRows);
+
+    // 合并已有行（避免覆盖用户已配置的）
+    const existingKeys = new Set(value.map((r) => r.key));
+    const filteredNewRows = newRows.filter((r) => !existingKeys.has(r.key));
+    setValue([...value, ...filteredNewRows]);
   };
 
   const columns = [
@@ -419,7 +400,7 @@ const ActionInputArrayTableInner: React.FC = () => {
       <div style={{ marginBottom: 8 }}>
         <Space>
           <Button type="outline" size="small" onClick={generateInputsFromRequest}>
-            从暴露字段生成
+            从变量生成
           </Button>
         </Space>
       </div>

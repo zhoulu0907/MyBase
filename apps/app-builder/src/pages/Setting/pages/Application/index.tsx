@@ -80,10 +80,16 @@ const AppManagement: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(1); // 创建数据源步骤
   const [dbTypeSelect, setDbTypeSelect] = useState<string>(''); // 数据源类型
 
+  const [isIframe, setIsIframe] = useState(false);
+
   const { setCurAppId } = useAppStore();
 
   const createDatasourceRef = useRef<DataSourceHandle>(null);
   const appContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsIframe(window.self !== window.top);
+  }, []);
 
   // option dropdown
   const [optionVisibleId, setOptionVisibleId] = useState('');
@@ -235,6 +241,11 @@ const AppManagement: React.FC = () => {
     }
   };
 
+  const nagivateToDataFactoryInternal = (appId: string) => {
+    setCurAppId(appId);
+    navigate(`/onebase/${tenantId}/home/create-app/data-factory?appId=${appId}`);
+  };
+
   const nagivateToRuntimeApp = (appId: string) => {
     const appUrl = `${getRuntimeURL()}/#/onebase/${tenantId}/${appId}/runtime/`;
 
@@ -254,7 +265,11 @@ const AppManagement: React.FC = () => {
   };
 
   const handleEdit = (appId: string) => {
-    nagivateToDataFactory(appId);
+    if (isIframe) {
+      nagivateToDataFactoryInternal(appId);
+    } else {
+      nagivateToDataFactory(appId);
+    }
   };
 
   const handleLaunch = (appId: string) => {

@@ -10,6 +10,7 @@ export * from './menuPermission';
 export * from './resources';
 export * from './router';
 export * from './signature';
+export * from './themeLoader';
 export * from './token';
 export * from './tree';
 export * from './userPermission';

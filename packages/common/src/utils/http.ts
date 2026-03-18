@@ -127,6 +127,13 @@ export class HttpClient {
           if (data.code !== 0) {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
+              // 如果在iframe中，发送logout消息给父窗口
+              if (window.self !== window.top) {
+                const message = { timestamp: new Date().getTime(), type: 'logout' };
+                console.log('[Iframe] postMessage:', message);
+                window.parent.postMessage(message, '*');
+              }
+
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
               const tenantId = TokenManager.getTokenInfo()?.tenantId;
 
@@ -168,6 +175,9 @@ export class HttpClient {
         if (error.response?.status === 401) {
           // 清除过期的 token
           TokenManager.clearToken();
+
+          // 触发自定义事件，通知其他组件 token 已失效
+          window.dispatchEvent(new CustomEvent('token-expired'));
 
           // 可以在这里触发重新登录逻辑
           // 例如：window.location.href = '/login';
