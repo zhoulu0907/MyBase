@@ -302,7 +302,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
 
         // 设置管理员信息（当前登录用户）
         TenantAdminUserReqVO adminReqVO = new TenantAdminUserReqVO();
-        adminReqVO.setAdminUserName(StringUtils.isNotBlank(userInfo.getStaffCode()) ? userInfo.getStaffCode() : userInfo.getSub());
+        adminReqVO.setAdminUserName(userInfo.getStaffCode());
         adminReqVO.setAdminNickName(StringUtils.isNotBlank(userInfo.getUserName()) ? userInfo.getUserName() : adminReqVO.getAdminUserName());
         adminReqVO.setAdminMobile(userInfo.getSub());
         adminReqVO.setAdminEmail(userInfo.getEmail());
@@ -364,7 +364,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         AdminUserDO adminUserDO = new AdminUserDO();
         adminUserDO.setMobile(userInfo.getSub()); // 手机号在 sub 字段
         adminUserDO.setNickname(userInfo.getUserName());
-        adminUserDO.setUsername(StringUtils.isNotBlank(userInfo.getStaffCode()) ? userInfo.getStaffCode() : userInfo.getSub());
+        adminUserDO.setUsername(userInfo.getStaffCode());
         adminUserDO.setEmail(userInfo.getEmail());
         adminUserDO.setUserType(UserTypeEnum.CORP.getValue());
 
@@ -400,8 +400,9 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 查找或创建用户（只有关键信息变化时才更新）
      */
     private AdminUserDO findOrCreateUser(AdminUserDO userInfo, LingjiSsoUserInfoVO ssoUserInfo) {
-        // 通过用户名查找用户
-        AdminUserDO existingUser = userService.getUserByUsername(userInfo.getUsername());
+        // 通过用户名查找用户（使用 staffCode）
+        String username = ssoUserInfo.getStaffCode();
+        AdminUserDO existingUser = userService.getUserByUsername(username);
 
         if (existingUser == null) {
             // 用户不存在，创建新用户
