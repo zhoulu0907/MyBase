@@ -300,6 +300,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         tenantReqVO.setPackageId(tenantPackage.getId());
         tenantReqVO.setExpireTime(LocalDateTime.now().plusYears(10)); // 默认10年
         tenantReqVO.setAccountCount(10000); // 默认10000个账号
+        tenantReqVO.setWebsite(lingjiSsoProperties.getTenantWebsite());
 
         // 设置管理员信息（当前登录用户）
         TenantAdminUserReqVO adminReqVO = new TenantAdminUserReqVO();
