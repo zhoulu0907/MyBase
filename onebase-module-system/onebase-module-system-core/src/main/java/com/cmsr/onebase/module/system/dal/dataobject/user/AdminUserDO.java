@@ -42,7 +42,6 @@ public class AdminUserDO extends BaseTenantEntity implements BaseDOInterface {
     public static final String CORP_ID    = "corp_id";
     public static final String PLATFORM_USER_ID    = "platform_user_id";
     public static final String CREATE_SOURCE    = "create_source";
-    public static final String TIAN_GONG_id    = "tiangong_id";
 
 
     public AdminUserDO setId(Long id) {
@@ -164,9 +163,4 @@ public class AdminUserDO extends BaseTenantEntity implements BaseDOInterface {
     @Column(PLATFORM_USER_ID)
     private Long platformUserId;
 
-    /**
-     * 来自平台的克隆的用户id
-     */
-    @Column(TIAN_GONG_id)
-    private Long tianGongID;
 }

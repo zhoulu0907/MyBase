@@ -1,11 +1,6 @@
 package com.cmsr.onebase.module.app.api.version;
 
-import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
-import com.cmsr.onebase.module.app.api.app.dto.TagVO;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import com.cmsr.onebase.module.app.api.version.dto.AppVersionDTO;
 
 /**
  * @Author：huangjie
@@ -13,7 +8,7 @@ import java.util.Map;
  */
 public interface AppVersionApi {
 
-    Integer getAppThirdEnableStatus(Long appId);
+    AppVersionDTO getAppThirdEnableStatus(Long appId);
 
 
 }

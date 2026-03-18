@@ -23,6 +23,7 @@ import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.version.AppVersionApi;
+import com.cmsr.onebase.module.app.api.version.dto.AppVersionDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
@@ -397,8 +398,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             throw exception(AUTH_VERIFY_THIRD_USER_ERROR);
         }
 
-        Integer appThirdEnableStatus = appVersionApi.getAppThirdEnableStatus(appId);
-        if (CommonStatusEnum.DISABLE.getStatus().equals(appThirdEnableStatus)) {
+        AppVersionDTO appVersionDTO = appVersionApi.getAppThirdEnableStatus(appId);
+        if (appVersionDTO == null || CommonStatusEnum.DISABLE.getStatus().equals(appVersionDTO.getAppThirdUserEnable())) {
             throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
         }
     }

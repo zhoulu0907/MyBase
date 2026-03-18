@@ -11,6 +11,7 @@ import java.util.zip.ZipOutputStream;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.system.api.config.SystemConfigApi;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -189,7 +190,7 @@ public class AppVersionServiceImpl implements AppVersionService {
 
             //查询应用三方用户登录-开关状态
             CommonResult<Boolean> appConfig = systemConfigApi.getAppConfig(APP_THIRD_USER_ENABLE, applicationId);
-            if (appConfig.getData()) {
+            if (BooleanUtils.isTrue(appConfig.getData())) {
                 newRunVersionDO.setAppThirdUserEnable(CommonStatusEnum.ENABLE.getStatus());
             } else {
                 newRunVersionDO.setAppThirdUserEnable(CommonStatusEnum.DISABLE.getStatus());
