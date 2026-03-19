@@ -601,7 +601,7 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 从 action_config.properties 按 actionCode（作为动作名称key）查找
+        // 2. 从 action_config.properties 按 actionName 查找
         String actionConfig = connector.getActionConfig();
         if (actionConfig == null || actionConfig.trim().isEmpty()) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
@@ -616,25 +616,21 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
             JsonNode actionNode = properties.get(actionName);
 
-            // 3. 从 basic 对象获取描述信息
-            JsonNode basicNode = actionNode.get("basic");
-            String description = basicNode != null ? getString(basicNode, "description") : null;
+            // 3. 提取描述信息（兼容 OpenAPI 格式和旧格式）
+            String description = getDescriptionFromActionConfig(actionNode);
 
             // 获取时间字段
             String createTime = getString(actionNode, "createTime");
             String updateTime = getString(actionNode, "updateTime");
 
-            // 4. 构建返回 VO - 字段映射：basic→basicInfo, request→inputConfig, response→outputConfig, debug→debugConfig
+            // 4. 构建返回 VO - 直接返回完整的 OpenAPI 格式配置
             ConnectorActionVO vo = ConnectorActionVO.builder()
                     .actionName(actionName)
                     .description(description)
                     .status(getString(actionNode, "status"))
                     .createTime(createTime)
                     .updateTime(updateTime)
-                    .basicInfo(actionNode.get("basic"))
-                    .inputConfig(actionNode.get("request"))
-                    .outputConfig(actionNode.get("response"))
-                    .debugConfig(actionNode.get("debug"))
+                    .actionConfig(actionNode)  // 直接返回完整配置（OpenAPI 格式）
                     .build();
 
             log.info("getActionDetail success, connectorId: {}, actionName: {}", connectorId, actionName);
@@ -643,6 +639,46 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             log.error("Parse action_config failed", e);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ACTION_NOT_EXISTS);
         }
+    }
+
+    /**
+     * 从动作配置中提取描述信息
+     * <p>
+     * 支持 OpenAPI 格式和旧格式：
+     * - OpenAPI 格式: 优先从 x-onebase.actionDescription 获取，其次从 description 获取
+     * - 旧格式: 从 basic.description 获取
+     *
+     * @param actionNode 动作配置节点
+     * @return 描述信息
+     */
+    private String getDescriptionFromActionConfig(JsonNode actionNode) {
+        // 1. 优先从 x-onebase.actionDescription 获取（OpenAPI 格式）
+        JsonNode xOnebase = actionNode.get("x-onebase");
+        if (xOnebase != null && xOnebase.has("actionDescription")) {
+            String desc = xOnebase.get("actionDescription").asText();
+            if (StringUtils.isNotBlank(desc)) {
+                return desc;
+            }
+        }
+
+        // 2. 从 description 获取（OpenAPI 格式）
+        if (actionNode.has("description")) {
+            String desc = actionNode.get("description").asText();
+            if (StringUtils.isNotBlank(desc)) {
+                return desc;
+            }
+        }
+
+        // 3. 从 basic.description 获取（旧格式，兼容）
+        JsonNode basicNode = actionNode.get("basic");
+        if (basicNode != null && basicNode.has("description")) {
+            String desc = basicNode.get("description").asText();
+            if (StringUtils.isNotBlank(desc)) {
+                return desc;
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -1308,7 +1344,11 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
     /**
      * 从动作配置中提取动作编码
      * <p>
-     * 配置格式: {"basic": {"actionName": "hahaha1"}, ...}
+     * 支持 OpenAPI 格式和旧格式：
+     * - OpenAPI 格式: {"summary": "动作名称", "x-onebase": {"actionName": "xxx"}, ...}
+     * - 旧格式: {"basic": {"actionName": "xxx"}, ...}
+     * <p>
+     * 优先级：x-onebase.actionName > summary > basic.actionName
      *
      * @param configNode 动作配置节点
      * @return 动作编码（actionName）
@@ -1318,17 +1358,33 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ACTION_CONFIG);
         }
 
+        // 1. 优先从 x-onebase.actionName 提取（OpenAPI 格式）
+        JsonNode xOnebase = configNode.get("x-onebase");
+        if (xOnebase != null && xOnebase.has("actionName")) {
+            String actionName = xOnebase.get("actionName").asText();
+            if (StringUtils.isNotBlank(actionName)) {
+                return actionName;
+            }
+        }
+
+        // 2. 从 summary 提取（OpenAPI 格式）
+        if (configNode.has("summary")) {
+            String summary = configNode.get("summary").asText();
+            if (StringUtils.isNotBlank(summary)) {
+                return summary;
+            }
+        }
+
+        // 3. 从 basic.actionName 提取（旧格式，兼容）
         JsonNode basicNode = configNode.get("basic");
-        if (basicNode == null || !basicNode.isObject()) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ACTION_CONFIG);
+        if (basicNode != null && basicNode.has("actionName")) {
+            String actionName = basicNode.get("actionName").asText();
+            if (StringUtils.isNotBlank(actionName)) {
+                return actionName;
+            }
         }
 
-        JsonNode actionNameNode = basicNode.get("actionName");
-        if (actionNameNode == null || actionNameNode.isNull()) {
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ACTION_CONFIG);
-        }
-
-        return actionNameNode.asText();
+        throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ACTION_CONFIG);
     }
 
     /**
