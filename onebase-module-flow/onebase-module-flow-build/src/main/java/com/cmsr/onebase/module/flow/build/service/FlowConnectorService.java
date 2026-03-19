@@ -106,7 +106,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器实例ID
      * @return 动作配置模板 VO
+     * @deprecated 已废弃，动作配置模板已迁移到统一动作表
      */
+    @Deprecated
     ActionConfigTemplateVO getActionConfigTemplate(Long connectorId);
 
     /**
@@ -164,7 +166,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器实例ID
      * @param reqVO      动作配置请求
      * @return 保存是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#createAction(com.cmsr.onebase.module.flow.build.vo.CreateActionReqVO)}
      */
+    @Deprecated
     Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO);
 
     /**
@@ -176,17 +180,21 @@ public interface FlowConnectorService {
      * @param actionName  动作名称（作为properties的key）
      * @param reqVO       动作配置请求
      * @return 更新是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#updateAction(com.cmsr.onebase.module.flow.build.vo.UpdateActionReqVO)}
      */
+    @Deprecated
     Boolean updateActionConfig(Long connectorId, String actionName, SaveActionConfigReqVO reqVO);
 
-    // ==================== 动作管理接口 ====================
+    // ==================== 动作管理接口（已废弃，请使用 FlowConnectorActionService） ====================
 
     /**
      * 获取连接器的动作列表
      *
      * @param connectorId 连接器ID
      * @return 动作列表
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#getActionsByConnectorUuid(String)}
      */
+    @Deprecated
     List<ConnectorActionVO> getActionList(Long connectorId);
 
     /**
@@ -196,7 +204,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器ID
      * @return 动作配置列表（精简版）
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#getActionsByConnectorUuid(String)}
      */
+    @Deprecated
     List<ConnectorActionLiteVO> getActionInfos(Long id);
 
     /**
@@ -205,7 +215,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器ID
      * @param actionName  动作名称
      * @return 动作详情
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#getActionByUuid(String)}
      */
+    @Deprecated
     ConnectorActionVO getActionDetail(Long connectorId, String actionName);
 
     /**
@@ -214,7 +226,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器ID
      * @param createVO    创建请求
      * @return 创建的动作名称
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#createAction(com.cmsr.onebase.module.flow.build.vo.CreateActionReqVO)}
      */
+    @Deprecated
     String saveActionDraft(Long connectorId, CreateConnectorActionReqVO createVO);
 
     /**
@@ -223,7 +237,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器ID
      * @param actionName  动作名称
      * @param updateVO    更新请求
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#updateAction(com.cmsr.onebase.module.flow.build.vo.UpdateActionReqVO)}
      */
+    @Deprecated
     void updateActionDraft(Long connectorId, String actionName, UpdateConnectorActionReqVO updateVO);
 
     /**
@@ -235,7 +251,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器ID
      * @param actionName  动作名称
+     * @deprecated 已废弃，请直接更新动作的 activeStatus 字段
      */
+    @Deprecated
     void publishAction(Long connectorId, String actionName);
 
     /**
@@ -243,7 +261,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器ID
      * @param actionName  动作名称
+     * @deprecated 已废弃，请直接更新动作的 activeStatus 字段
      */
+    @Deprecated
     void offlineAction(Long connectorId, String actionName);
 
     /**
@@ -251,7 +271,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器ID
      * @param actionName  动作名称
+     * @deprecated 已废弃，请直接更新动作的 activeStatus 字段
      */
+    @Deprecated
     void republishAction(Long connectorId, String actionName);
 
     /**
@@ -264,7 +286,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器ID
      * @param actionName  动作名称
      * @return 新复制的动作名称
+     * @deprecated 已废弃
      */
+    @Deprecated
     String copyAction(Long connectorId, String actionName);
 
     /**
@@ -276,7 +300,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器ID
      * @param actionName  动作名称
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#deleteAction(Long)}
      */
+    @Deprecated
     void deleteAction(Long connectorId, String actionName);
 
     /**
@@ -285,7 +311,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器ID
      * @param actionName  动作名称
      * @return 校验结果
+     * @deprecated 已废弃
      */
+    @Deprecated
     ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionName);
 
     /**
