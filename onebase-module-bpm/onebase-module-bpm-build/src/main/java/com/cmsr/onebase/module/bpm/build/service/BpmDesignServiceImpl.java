@@ -5,15 +5,24 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
 import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
 import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
 import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignRespVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmDesignSaveReqVO;
 import com.cmsr.onebase.module.bpm.build.vo.design.BpmPublishReqVO;
 import com.cmsr.onebase.module.bpm.convert.BpmDesignConvert;
 import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.FieldPermCfgDTO;
 import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.ApproverNodeVO;
+import com.cmsr.onebase.module.bpm.core.vo.design.node.base.BaseNodeVO;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowDefinition;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowDefinitionRepository;
+import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRelationSchemaDTO;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolation;
@@ -27,6 +36,10 @@ import org.dromara.warm.flow.core.service.DefService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -64,11 +77,14 @@ public class BpmDesignServiceImpl implements BpmDesignService {
     @Resource
     private BpmAppResourceValidator bpmAppResourceValidator;
 
+    @Resource
+    private SemanticDynamicDataApi semanticDynamicDataApi;
+
     private String generateFlowCode() {
         return "fc_" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     }
 
-    public BpmDefJsonVO validateBpmDefJsonVO(String bpmDefJson) {
+    public BpmDefJsonVO validateBpmDefJsonVO(String bpmDefJson, String businessUuid) {
         BpmDefJsonVO bpmDefJsonVO = JsonUtils.parseObject(bpmDefJson, BpmDefJsonVO.class);
         if (bpmDefJsonVO == null) {
             log.error("流程定义JSON解析失败");
@@ -85,8 +101,175 @@ public class BpmDesignServiceImpl implements BpmDesignService {
                 throw exception(ErrorCodeConstants.VALIDATE_BPM_DEF_JSON_FAILED.getCode(), violation.getMessage());
             }
         }
-
+        // 流程校验
+        validateBpmDefStructure(bpmDefJsonVO);
+        // 权限字段校验
+        validateFieldPermConfigFields(bpmDefJsonVO, businessUuid);
         return bpmDefJsonVO;
+    }
+
+    private void validateBpmDefStructure(BpmDefJsonVO bpmDefJsonVO) {
+        List<BaseNodeVO> nodes = bpmDefJsonVO.getNodes();
+        List<BaseEdgeVO> edges = bpmDefJsonVO.getEdges();
+
+        Map<String, BaseNodeVO> nodeMap = new HashMap<>();
+        for (BaseNodeVO node : nodes) {
+            nodeMap.put(node.getId(), node);
+        }
+
+        BaseNodeVO startNode = nodes.stream().filter(node -> BpmNodeTypeEnum.START.getCode().equals(node.getType())).findFirst().orElse(null);
+        BaseNodeVO initiationNode = nodes.stream().filter(node -> BpmNodeTypeEnum.INITIATION.getCode().equals(node.getType())).findFirst().orElse(null);
+
+        if (startNode == null || initiationNode == null) {
+            throw exception(ErrorCodeConstants.START_OR_INITIATION_NOT_EXISTS);
+        }
+
+        long startCount = nodes.stream().filter(node -> BpmNodeTypeEnum.START.getCode().equals(node.getType())).count();
+        long initiationCount = nodes.stream().filter(node -> BpmNodeTypeEnum.INITIATION.getCode().equals(node.getType())).count();
+
+        if (startCount != 1) {
+            throw exception(ErrorCodeConstants.START_ONLY_ONE);
+        }
+        if (initiationCount != 1) {
+            throw exception(ErrorCodeConstants.INITIATION_ONLY_ONE);
+        }
+
+        // 连接开始节点的边，开始节点之后必须是提交节点
+        List<BaseEdgeVO> startOutgoing = edges.stream()
+                .filter(edge -> edge.getSourceNodeId().equals(startNode.getId()))
+                .toList();
+
+        if (startOutgoing.size() != 1 || !startOutgoing.get(0).getTargetNodeId().equals(initiationNode.getId())) {
+            throw exception(ErrorCodeConstants.INITIATION_MUST_AFTER_START);
+        }
+
+        Map<String, Integer> incomingCount = new HashMap<>();
+        Map<String, Integer> outgoingCount = new HashMap<>();
+        for (BaseEdgeVO edge : edges) {
+            outgoingCount.merge(edge.getSourceNodeId(), 1, Integer::sum);
+            incomingCount.merge(edge.getTargetNodeId(), 1, Integer::sum);
+        }
+
+        for (BaseNodeVO node : nodes) {
+            if (BpmNodeTypeEnum.START.getCode().equals(node.getType()) || BpmNodeTypeEnum.END.getCode().equals(node.getType())) {
+                continue;
+            }
+            int incoming = incomingCount.getOrDefault(node.getId(), 0);
+            int outgoing = outgoingCount.getOrDefault(node.getId(), 0);
+
+            if (incoming == 0 || outgoing == 0) {
+                throw exception(ErrorCodeConstants.SINGLE_NODE);
+            }
+        }
+    }
+
+    private void validateFieldPermConfigFields(BpmDefJsonVO bpmDefJsonVO, String businessUuid) {
+        if (StringUtils.isBlank(businessUuid)) {
+            throw exception(ErrorCodeConstants.REQUIRED_BUSINESS_UUID_MISSING);
+        }
+
+        List<BaseNodeVO> nodes = bpmDefJsonVO.getNodes();
+        if (nodes == null || nodes.isEmpty()) {
+            return;
+        }
+
+        SemanticEntitySchemaDTO entitySchema = getEntitySchemaByBusinessUuid(businessUuid);
+        Map<String, Set<String>> entityTableFields = buildEntityTableFields(entitySchema);
+
+        for (BaseNodeVO node : nodes) {
+            if (!(node instanceof ApproverNodeVO approverNode)) {
+                continue;
+            }
+
+            ApproverNodeVO.ApproverNodeDataVO nodeData = approverNode.getData();
+            if (nodeData == null) {
+                continue;
+            }
+
+            FieldPermCfgDTO fieldPermConfig = nodeData.getFieldPermConfig();
+            if (fieldPermConfig == null || !Boolean.TRUE.equals(fieldPermConfig.getUseNodeConfig())) {
+                continue;
+            }
+
+            List<FieldPermCfgDTO.FieldConfigDTO> fieldConfigs = fieldPermConfig.getFieldConfigs();
+            if (fieldConfigs == null || fieldConfigs.isEmpty()) {
+                continue;
+            }
+
+            for (FieldPermCfgDTO.FieldConfigDTO fieldConfig : fieldConfigs) {
+                String tableName = fieldConfig.getTableName();
+                String fieldName = fieldConfig.getFieldName();
+                if (StringUtils.isBlank(tableName) || StringUtils.isBlank(fieldName)) {
+                    continue;
+                }
+
+                Set<String> fieldSet = entityTableFields.get(tableName);
+                if (fieldSet == null) {
+                    String message = String.format("实体表不存在: 表名=%s", tableName);
+                    throw exception(ErrorCodeConstants.ENTITY_TABLE_NOT_EXISTS.getCode(), message);
+                }
+                if (!fieldSet.contains(fieldName)) {
+                    // 如果fieldConfig.getParentDisplayName()拿不到值，说明是主表的字段，直接用主表的displayName
+                    //String displayName = StringUtils.isEmpty(fieldConfig.getParentDisplayName())? entitySchema.getDisplayName() : fieldConfig.getParentDisplayName();
+                    String message = String.format("字段不存在: 表名=%s, 字段名=%s", tableName, fieldName);
+                    throw exception(ErrorCodeConstants.ENTITY_TABLE_FIELD_NOT_EXISTS.getCode(), message);
+                }
+            }
+        }
+    }
+
+    private SemanticEntitySchemaDTO getEntitySchemaByBusinessUuid(String businessUuid) {
+        Long applicationId = ApplicationManager.getApplicationId();
+        AppMenuRespDTO menuDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, applicationId);
+        if (menuDTO == null || StringUtils.isBlank(menuDTO.getEntityUuid())) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
+        }
+
+        return semanticDynamicDataApi.buildEntitySchemaByUuid(menuDTO.getEntityUuid());
+    }
+
+    private Map<String, Set<String>> buildEntityTableFields(SemanticEntitySchemaDTO entitySchema) {
+        Map<String, Set<String>> entityTableFields = new HashMap<>();
+
+        if (entitySchema == null || StringUtils.isBlank(entitySchema.getTableName())) {
+            throw exception(ErrorCodeConstants.FLOW_NOT_BIND_ENTITY);
+        }
+
+        entityTableFields.put(entitySchema.getTableName(), collectFieldNames(entitySchema.getFields()));
+
+        List<SemanticRelationSchemaDTO> connectors = entitySchema.getConnectors();
+        if (connectors == null || connectors.isEmpty()) {
+            return entityTableFields;
+        }
+
+        for (SemanticRelationSchemaDTO connector : connectors) {
+            String targetTableName = connector.getTargetEntityTableName();
+            if (StringUtils.isBlank(targetTableName)) {
+                continue;
+            }
+
+            Set<String> targetFields = collectFieldNames(connector.getRelationAttributes());
+            //这里需要把子表表名加上
+            targetFields.add(targetTableName);
+            entityTableFields.put(targetTableName, targetFields);
+        }
+
+        return entityTableFields;
+    }
+
+    private Set<String> collectFieldNames(List<SemanticFieldSchemaDTO> fields) {
+        if (fields == null || fields.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        Set<String> fieldSet = new HashSet<>();
+        for (SemanticFieldSchemaDTO field : fields) {
+            if (field.getFieldName() != null) {
+                fieldSet.add(field.getFieldName());
+            }
+        }
+
+        return fieldSet;
     }
 
     private void validateApplicationId() {
@@ -196,7 +379,7 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         }
 
         // 校验流程定义JSON
-        BpmDefJsonVO bpmDefJsonVO = validateBpmDefJsonVO(flowDesignVO.getBpmDefJson());
+        BpmDefJsonVO bpmDefJsonVO = validateBpmDefJsonVO(flowDesignVO.getBpmDefJson(), flowDesignVO.getBusinessUuid());
         flowDesignVO.setBpmDefJsonVO(bpmDefJsonVO);
 
         if (flowId == null) {

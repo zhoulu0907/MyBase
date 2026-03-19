@@ -143,6 +143,20 @@ public interface ErrorCodeConstants {
 
     ErrorCode TARGET_HANDLER_USER_NOT_EXISTS = new ErrorCode(1_009_002_044, "目标处理人不存在");
 
+    ErrorCode ENTITY_TABLE_NOT_EXISTS = new ErrorCode(1_009_002_045, "实体表不存在");
+
+    ErrorCode ENTITY_TABLE_FIELD_NOT_EXISTS = new ErrorCode(1_009_002_046, "实体表字段不存在");
+
+    ErrorCode START_OR_INITIATION_NOT_EXISTS = new ErrorCode(1_009_002_047, "开始节点或提交节点不存在");
+
+    ErrorCode START_ONLY_ONE = new ErrorCode(1_009_002_048, "开始节点有且只能有一个");
+
+    ErrorCode INITIATION_ONLY_ONE = new ErrorCode(1_009_002_049, "提交节点有且只能有一个");
+
+    ErrorCode INITIATION_MUST_AFTER_START = new ErrorCode(1_009_002_050, "开始节点之后必须是提交节点");
+
+    ErrorCode SINGLE_NODE = new ErrorCode(1_009_002_051, "存在孤立节点，非开始结束节点必须同时有前后连线");
+
     // ============= 系统相关错误 =============
 
     ErrorCode DEPT_API_CALL_FAILED = new ErrorCode(1_009_003_001, "部门接口调用失败");
