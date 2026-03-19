@@ -105,9 +105,6 @@ public class BpmDesignServiceImpl implements BpmDesignService {
         validateBpmDefStructure(bpmDefJsonVO);
         // 权限字段校验
         validateFieldPermConfigFields(bpmDefJsonVO, businessUuid);
-        if (true){
-            throw exception(ErrorCodeConstants.VALIDATE_BPM_DEF_JSON_FAILED.getCode(), "自动结束");
-        }
         return bpmDefJsonVO;
     }
 
@@ -208,13 +205,13 @@ public class BpmDesignServiceImpl implements BpmDesignService {
 
                 Set<String> fieldSet = entityTableFields.get(tableName);
                 if (fieldSet == null) {
-                    String message = String.format("实体表不存在: 表名=%s", fieldConfig.getParentDisplayName());
+                    String message = String.format("实体表不存在: 表名=%s", tableName);
                     throw exception(ErrorCodeConstants.ENTITY_TABLE_NOT_EXISTS.getCode(), message);
                 }
                 if (!fieldSet.contains(fieldName)) {
                     // 如果fieldConfig.getParentDisplayName()拿不到值，说明是主表的字段，直接用主表的displayName
-                    String displayName = StringUtils.isEmpty(fieldConfig.getParentDisplayName())? entitySchema.getDisplayName() : fieldConfig.getParentDisplayName();
-                    String message = String.format("字段不存在: 表名=%s, 字段名=%s", displayName, fieldConfig.getFieldDisplayName());
+                    //String displayName = StringUtils.isEmpty(fieldConfig.getParentDisplayName())? entitySchema.getDisplayName() : fieldConfig.getParentDisplayName();
+                    String message = String.format("字段不存在: 表名=%s, 字段名=%s", tableName, fieldName);
                     throw exception(ErrorCodeConstants.ENTITY_TABLE_FIELD_NOT_EXISTS.getCode(), message);
                 }
             }

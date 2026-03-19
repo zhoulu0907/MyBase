@@ -60,6 +60,6 @@ public class FieldPermCfgDTO {
         /**
          * 子表的字段的表名
          */
-        private String parentDisplayName;
+//        private String parentDisplayName;
     }
 }
