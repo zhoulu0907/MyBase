@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.system.service.auth;
 
+import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
@@ -15,6 +16,7 @@ import com.cmsr.onebase.module.system.vo.auth.LingjiSsoUserInfoVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantAdminUserReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
+import com.cmsr.onebase.module.system.vo.user.UserUpdateReqVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,6 +31,7 @@ import org.mockito.quality.Strictness;
 import java.util.Collections;
 import java.util.Set;
 
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.USER_USERNAME_EXISTS;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -288,10 +291,11 @@ class LingjiSsoServiceTest {
             userInfo.setNickname("现有用户");
             userInfo.setEmail("existing@example.com");
             userInfo.setMobile("13800138000");
+            userInfo.setUserType(UserTypeEnum.CORP.getValue());
 
             when(userService.getUserByUsername("EXISTING001")).thenReturn(existingUser);
 
-            AdminUserDO result = invokeFindOrCreateUser(userInfo);
+            AdminUserDO result = invokeFindOrCreateUser(userInfo, createSsoUserInfo("EXISTING001", "13800138000"));
 
             assertEquals(100L, result.getId());
             verify(userService, never()).updateUser(any());
@@ -318,10 +322,11 @@ class LingjiSsoServiceTest {
             userInfo.setNickname("新昵称");
             userInfo.setEmail("new@example.com");
             userInfo.setMobile("13800138000");
+            userInfo.setUserType(UserTypeEnum.CORP.getValue());
 
             when(userService.getUserByUsername("EXISTING002")).thenReturn(existingUser);
 
-            AdminUserDO result = invokeFindOrCreateUser(userInfo);
+            AdminUserDO result = invokeFindOrCreateUser(userInfo, createSsoUserInfo("EXISTING002", "13800138000"));
 
             assertEquals(100L, result.getId());
             verify(userService, times(1)).updateUser(any());
@@ -351,11 +356,68 @@ class LingjiSsoServiceTest {
             when(roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode())).thenReturn(tenantAdminRole);
             when(userService.createUser(any(UserInsertReqVO.class))).thenReturn(300L);
 
-            AdminUserDO result = invokeFindOrCreateUser(userInfo);
+            AdminUserDO result = invokeFindOrCreateUser(userInfo, createSsoUserInfo("NEWUSER003", "13800138003"));
 
             assertNotNull(result);
             assertEquals(300L, result.getId());
             verify(userService, times(1)).createUser(any(UserInsertReqVO.class));
+        }
+
+        @Test
+        @DisplayName("查找用户 - 用户名未命中但手机号已存在，直接放行")
+        void testFindOrCreateUser_ExistingUserByMobile() throws Exception {
+            AdminUserDO existingUser = new AdminUserDO();
+            existingUser.setId(101L);
+            existingUser.setUsername("OLD001");
+            existingUser.setNickname("旧昵称");
+            existingUser.setEmail("old@example.com");
+            existingUser.setMobile("13800138009");
+            existingUser.setUserType(UserTypeEnum.CORP.getValue());
+
+            AdminUserDO userInfo = new AdminUserDO();
+            userInfo.setUsername("NEW001");
+            userInfo.setNickname("新昵称");
+            userInfo.setEmail("new@example.com");
+            userInfo.setMobile("13800138009");
+            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+
+            when(userService.getUserByUsername("NEW001")).thenReturn(null);
+            when(userService.getUserByMobile("13800138009", UserTypeEnum.CORP.getValue())).thenReturn(existingUser);
+
+            AdminUserDO result = invokeFindOrCreateUser(userInfo, createSsoUserInfo("NEW001", "13800138009"));
+
+            assertEquals(101L, result.getId());
+            assertEquals("OLD001", result.getUsername());
+            verify(userService, times(1)).updateUser(any(UserUpdateReqVO.class));
+            verify(userService, never()).createUser(any());
+        }
+
+        @Test
+        @DisplayName("查找用户 - 创建时用户名冲突，回退复用已有用户")
+        void testFindOrCreateUser_CreateConflictThenReuseExistingUser() throws Exception {
+            AdminUserDO existingUser = new AdminUserDO();
+            existingUser.setId(102L);
+            existingUser.setUsername("EXISTING003");
+            existingUser.setNickname("已存在用户");
+            existingUser.setEmail("existing3@example.com");
+            existingUser.setMobile("13800138010");
+            existingUser.setUserType(UserTypeEnum.CORP.getValue());
+
+            AdminUserDO userInfo = new AdminUserDO();
+            userInfo.setUsername("EXISTING003");
+            userInfo.setNickname("灵积昵称");
+            userInfo.setEmail("lingji@example.com");
+            userInfo.setMobile("13800138010");
+            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+
+            when(userService.getUserByUsername("EXISTING003")).thenReturn(null, existingUser);
+            when(userService.createUser(any(UserInsertReqVO.class))).thenThrow(new ServiceException(USER_USERNAME_EXISTS));
+
+            AdminUserDO result = invokeFindOrCreateUser(userInfo, createSsoUserInfo("EXISTING003", "13800138010"));
+
+            assertEquals(102L, result.getId());
+            verify(userService, times(1)).createUser(any(UserInsertReqVO.class));
+            verify(userService, times(1)).updateUser(any(UserUpdateReqVO.class));
         }
     }
 
@@ -402,11 +464,21 @@ class LingjiSsoServiceTest {
      * 通过反射调用私有方法 findOrCreateUser
      */
     private AdminUserDO invokeFindOrCreateUser(AdminUserDO userInfo) throws Exception {
-        var ssoUserInfo = new LingjiSsoUserInfoVO();
+        return invokeFindOrCreateUser(userInfo, new LingjiSsoUserInfoVO());
+    }
+
+    private AdminUserDO invokeFindOrCreateUser(AdminUserDO userInfo, LingjiSsoUserInfoVO ssoUserInfo) throws Exception {
         var method = LingjiSsoServiceImpl.class.getDeclaredMethod(
                 "findOrCreateUser", AdminUserDO.class, LingjiSsoUserInfoVO.class
         );
         method.setAccessible(true);
         return (AdminUserDO) method.invoke(lingjiSsoService, userInfo, ssoUserInfo);
+    }
+
+    private LingjiSsoUserInfoVO createSsoUserInfo(String staffCode, String mobile) {
+        LingjiSsoUserInfoVO ssoUserInfo = new LingjiSsoUserInfoVO();
+        ssoUserInfo.setStaffCode(staffCode);
+        ssoUserInfo.setSub(mobile);
+        return ssoUserInfo;
     }
 }

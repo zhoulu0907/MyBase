@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
@@ -50,6 +51,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
@@ -319,8 +321,12 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 在无登录态时，使用兜底操作人补充安全上下文，避免审计字段（creator/updater）为空导致插入失败。
      */
     private Long createTenantWithFallbackOperator(TenantInsertReqVO tenantReqVO) {
+        return executeWithFallbackOperator(() -> tenantService.createTenant(tenantReqVO));
+    }
+
+    private <T> T executeWithFallbackOperator(Supplier<T> action) {
         if (SecurityFrameworkUtils.getLoginUserId() != null) {
-            return tenantService.createTenant(tenantReqVO);
+            return action.get();
         }
 
         Authentication previousAuthentication = SecurityFrameworkUtils.getAuthentication();
@@ -333,7 +339,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
                     new UsernamePasswordAuthenticationToken(fallbackLoginUser, null, Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(fallbackAuthentication);
 
-            return tenantService.createTenant(tenantReqVO);
+            return action.get();
         } finally {
             SecurityContextHolder.getContext().setAuthentication(previousAuthentication);
         }
@@ -400,24 +406,49 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 查找或创建用户（只有关键信息变化时才更新）
      */
     private AdminUserDO findOrCreateUser(AdminUserDO userInfo, LingjiSsoUserInfoVO ssoUserInfo) {
-        // 通过用户名查找用户（使用 staffCode）
+        AdminUserDO existingUser = findExistingUser(userInfo, ssoUserInfo);
+        if (existingUser != null) {
+            return syncExistingUser(existingUser, userInfo);
+        }
+
+        try {
+            log.info("用户不存在，创建新用户: username={}", userInfo.getUsername());
+            return createUserWithFallbackOperator(userInfo);
+        } catch (ServiceException ex) {
+            if (!Objects.equals(ex.getCode(), USER_USERNAME_EXISTS.getCode())
+                    && !Objects.equals(ex.getCode(), USER_MOBILE_EXISTS.getCode())) {
+                throw ex;
+            }
+
+            log.warn("灵畿SSO创建用户命中唯一键，复用已有用户继续登录: username={}, mobile={}, code={}",
+                    userInfo.getUsername(), userInfo.getMobile(), ex.getCode());
+            AdminUserDO retryExistingUser = findExistingUser(userInfo, ssoUserInfo);
+            if (retryExistingUser != null) {
+                return syncExistingUser(retryExistingUser, userInfo);
+            }
+            throw ex;
+        }
+    }
+
+    private AdminUserDO findExistingUser(AdminUserDO userInfo, LingjiSsoUserInfoVO ssoUserInfo) {
         String username = ssoUserInfo.getStaffCode();
         AdminUserDO existingUser = userService.getUserByUsername(username);
-
-        if (existingUser == null) {
-            // 用户不存在，创建新用户
-            log.info("用户不存在，创建新用户: username={}", userInfo.getUsername());
-            return createUser(userInfo);
+        if (existingUser != null) {
+            log.info("命中已有用户，直接放行: username={}, userId={}", existingUser.getUsername(), existingUser.getId());
+            return existingUser;
         }
+        if (StringUtils.isNotBlank(userInfo.getMobile())) {
+            AdminUserDO mobileMatchedUser = userService.getUserByMobile(userInfo.getMobile(), userInfo.getUserType());
+            if (mobileMatchedUser != null) {
+                log.info("按手机号命中已有用户，直接放行: mobile={}, userId={}", userInfo.getMobile(), mobileMatchedUser.getId());
+                return mobileMatchedUser;
+            }
+        }
+        return null;
+    }
 
-        // 用户存在，检查关键信息是否变化
+    private AdminUserDO syncExistingUser(AdminUserDO existingUser, AdminUserDO userInfo) {
         boolean needUpdate = false;
-
-        if (!Objects.equals(existingUser.getUsername(), userInfo.getUsername())) {
-            log.info("用户名变化: {} -> {}", existingUser.getUsername(), userInfo.getUsername());
-            existingUser.setUsername(userInfo.getUsername());
-            needUpdate = true;
-        }
 
         if (!Objects.equals(existingUser.getNickname(), userInfo.getNickname())) {
             log.info("昵称变化: {} -> {}", existingUser.getNickname(), userInfo.getNickname());
@@ -431,6 +462,12 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
             needUpdate = true;
         }
 
+        if (!Objects.equals(existingUser.getMobile(), userInfo.getMobile())) {
+            log.info("手机号变化: {} -> {}", existingUser.getMobile(), userInfo.getMobile());
+            existingUser.setMobile(userInfo.getMobile());
+            needUpdate = true;
+        }
+
         // 只有变化时才更新
         if (needUpdate) {
             log.info("用户信息有变化，更新用户: userId={}", existingUser.getId());
@@ -440,10 +477,14 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
             updateReqVO.setNickname(userInfo.getNickname());
             updateReqVO.setEmail(userInfo.getEmail());
             updateReqVO.setMobile(userInfo.getMobile());
-            userService.updateUser(updateReqVO);
+            executeWithFallbackOperator(() -> {
+                userService.updateUser(updateReqVO);
+                return null;
+            });
             // 更新返回对象
             existingUser.setNickname(userInfo.getNickname());
             existingUser.setEmail(userInfo.getEmail());
+            existingUser.setMobile(userInfo.getMobile());
         } else {
             log.debug("用户信息无变化，跳过更新: userId={}", existingUser.getId());
         }
@@ -476,6 +517,10 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         Long userId = userService.createUser(insertReqVO);
         userInfo.setId(userId);
         return userInfo;
+    }
+
+    private AdminUserDO createUserWithFallbackOperator(AdminUserDO userInfo) {
+        return executeWithFallbackOperator(() -> createUser(userInfo));
     }
 
     /**
