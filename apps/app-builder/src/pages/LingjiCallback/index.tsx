@@ -75,8 +75,8 @@ const LingjiCallback: React.FC = () => {
             console.error('获取权限信息失败:', error);
           }
 
-          // 4. 跳转到首页
-          navigate(`/onebase/${loginData.tenantId}/home/enterprise-app`);
+          // 4. 跳转到应用管理页面
+          navigate(`/onebase/${loginData.tenantId}/setting/application`);
         } catch (error) {
           console.error('灵畿登录处理失败:', error);
           Message.error((error as any)?.message || '登录处理失败');
