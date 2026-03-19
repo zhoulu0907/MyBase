@@ -26,7 +26,7 @@ const Home: React.FC = () => {
 
   return (
     <Layout className={styles.homePage}>
-      {!isIframe && (location.pathname.includes('create-app') || location.pathname.includes('preview-app')) ? null : (
+      {isIframe || location.pathname.includes('create-app') || location.pathname.includes('preview-app') ? null : (
         <AppHeader className={styles.myAppPageHeader} />
       )}
 
