@@ -20,6 +20,7 @@ import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import org.apache.commons.lang3.StringUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -131,15 +132,22 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
     @SuppressWarnings("NullableProblems")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        
+        String requestPath = requestPath(request);
+
         if (StaticResourceUtil.isStaticResource(request)) {
             chain.doFilter(request, response);
             return;
         }
-        
+
         if (isLoginOrLogoutRequest(request)) {
             // 如果是登录、登出、注册，那么从header中获取租户信息
             TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+            log.info("[BuildAuthenticationFilter][登录链路放行] path={}, tenantHeader={}, legacyTenantHeader={}, referer={}, userAgent={}",
+                    requestPath,
+                    getHeaderValue(request, WebFrameworkUtils.HEADER_X_TENANT_ID),
+                    getHeaderValue(request, WebFrameworkUtils.HEADER_TENANT_ID),
+                    getHeaderValue(request, "Referer"),
+                    getHeaderValue(request, "User-Agent"));
             // 无需获取token和登录用户信息
         } else if (isPermitAllRequest(request)) {
             // 如果是其他免登接口，暂保持和登录登出一致的逻辑，从header中获取租户信息
@@ -195,6 +203,9 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             if (loginUser != null) {
                 SecurityFrameworkUtils.setLoginUser(loginUser, request);
                 TenantContextHolder.setTenantId(loginUser.getTenantId());
+                log.info("[BuildAuthenticationFilter][认证成功] path={}, userId={}, tenantId={}, runMode={}, tokenSource={}",
+                        requestPath, loginUser.getId(), loginUser.getTenantId(), loginUser.getRunMode(),
+                        resolveTokenSource(request));
                 if (isTokenMockable(token)) {
                     // mock模式不检查会话空闲
                     log.info("[BuildAuthenticationFilter][TOKEN MOCK开启，用户ID：{}, prefix:{}, token:{}]", loginUser.getId(), securityProperties.getMockSecret(), token);
@@ -209,7 +220,8 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
                     }
                 }
             } else {
-                log.error("[BuildAuthenticationFilter][无效的Token，401 登录已过期]");
+                log.error("[BuildAuthenticationFilter][无效的Token，401 登录已过期] {}",
+                        buildTokenDiagnostics(request, requestPath, token));
                 CommonResult<?> result = CommonResult.error(UNAUTHORIZED);
                 ServletUtils.writeJSON(response, result);
                 return; // 中断
@@ -279,6 +291,63 @@ public class BuildAuthenticationFilter extends OncePerRequestFilter implements A
             return false;
         }
         return securityProperties.getMockEnable() && token.startsWith(securityProperties.getMockSecret());
+    }
+
+    private String buildTokenDiagnostics(HttpServletRequest request, String requestPath, String token) {
+        return String.format("path=%s, runMode=%s, tokenSource=%s, authHeader=%s, tokenParam=%s, tokenCookie=%s, xTenantId=%s, tenantId=%s, referer=%s, userAgent=%s, token=%s",
+                requestPath,
+                getRunModeByUri(request),
+                resolveTokenSource(request),
+                hasText(request.getHeader(securityProperties.getTokenHeader())),
+                hasText(request.getParameter(securityProperties.getTokenParameter())),
+                hasText(getCookieValue(request, securityProperties.getTokenHeader())),
+                getHeaderValue(request, WebFrameworkUtils.HEADER_X_TENANT_ID),
+                getHeaderValue(request, WebFrameworkUtils.HEADER_TENANT_ID),
+                getHeaderValue(request, "Referer"),
+                getHeaderValue(request, "User-Agent"),
+                maskToken(token));
+    }
+
+    private String resolveTokenSource(HttpServletRequest request) {
+        if (hasText(request.getHeader(securityProperties.getTokenHeader()))) {
+            return "header";
+        }
+        if (hasText(request.getParameter(securityProperties.getTokenParameter()))) {
+            return "parameter";
+        }
+        if (hasText(getCookieValue(request, securityProperties.getTokenHeader()))) {
+            return "cookie";
+        }
+        return "none";
+    }
+
+    private String getCookieValue(HttpServletRequest request, String cookieName) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (StringUtils.equals(cookieName, cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private boolean hasText(String value) {
+        return StringUtils.isNotBlank(value);
+    }
+
+    private String getHeaderValue(HttpServletRequest request, String headerName) {
+        return StringUtils.defaultIfBlank(request.getHeader(headerName), "-");
+    }
+
+    private String maskToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            return "-";
+        }
+        int visibleLength = Math.min(8, token.length());
+        return token.substring(0, visibleLength) + "...(len=" + token.length() + ")";
     }
 
     private LoginUser buildLoginUserByInnerToken(String token) {
