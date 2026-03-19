@@ -317,7 +317,7 @@ const ActionOutputArrayTableInner: React.FC = () => {
     {
       title: '键名',
       dataIndex: 'key',
-      width: 120,
+      width: 140,
       render: (_: unknown, row: ActionOutputRow, index: number) => (
         <Input value={row.key} onChange={(v) => updateRow(index, { key: v })} allowClear />
       )
@@ -325,7 +325,7 @@ const ActionOutputArrayTableInner: React.FC = () => {
     {
       title: '名称',
       dataIndex: 'fieldName',
-      width: 120,
+      width: 140,
       render: (_: unknown, row: ActionOutputRow, index: number) => (
         <Input value={row.fieldName} onChange={(v) => updateRow(index, { fieldName: v })} allowClear />
       )
@@ -359,21 +359,12 @@ const ActionOutputArrayTableInner: React.FC = () => {
     {
       title: 'JSON路径',
       dataIndex: 'fromKey',
-      width: 160,
+      width: 200,
       render: (_: unknown, row: ActionOutputRow, index: number) => (
-        <Select
-          value={row.fromKey}
-          options={buildKeyOptions(row.fromKind)}
-          onChange={(v) => {
-            const target = findTargetRow(row.fromKind, v);
-            updateRow(index, {
-              fromKey: v,
-              jsonPath: v,
-              fieldType: (target?.fieldType as string) || (target?.type as string) || row.fieldType,
-              description: (target?.description as string) || row.description
-            });
-          }}
-          style={{ width: '100%' }}
+        <Input
+          value={row.fromKey || row.jsonPath || ''}
+          onChange={(v) => updateRow(index, { fromKey: v, jsonPath: v })}
+          placeholder="e.g. $.data.items[0].name"
           allowClear
         />
       )
@@ -381,7 +372,7 @@ const ActionOutputArrayTableInner: React.FC = () => {
     {
       title: '描述',
       dataIndex: 'description',
-      ellipsis: true,
+      width: 180,
       render: (_: unknown, row: ActionOutputRow, index: number) => (
         <Input value={row.description} onChange={(v) => updateRow(index, { description: v })} allowClear />
       )
@@ -410,7 +401,7 @@ const ActionOutputArrayTableInner: React.FC = () => {
         data={value}
         columns={columns}
         rowKey={(record: ActionOutputRow) => record.id ?? `row-${record.key}-${record.fieldName}`}
-        scroll={{ x: 900 }}
+        scroll={{ x: 1000 }}
         pagination={false}
         size="small"
       />

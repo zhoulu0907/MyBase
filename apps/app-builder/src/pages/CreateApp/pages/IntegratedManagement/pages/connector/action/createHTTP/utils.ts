@@ -19,7 +19,7 @@ export const getTabValue = (values: Record<string, unknown>, key: string) => {
   if (key === 'queryParams') return getByPath(tabs, ['params', 'queryParams']);
   if (key === 'pathParams') return getByPath(tabs, ['params', 'pathParams']);
   if (key === 'requestBody') return getByPath(tabs, ['body', 'requestBody']);
-  if (key === 'requestBodyJson') return getByPath(tabs, ['body', 'requestBodyJson']);
+  if (key === 'requestBodyJson') return getByPath(tabs, ['body', 'jsonBody', 'requestBodyJson']);
   if (key === 'bodyMode') return getByPath(tabs, ['body', 'bodyMode']);
   return undefined;
 };
@@ -61,9 +61,8 @@ export const buildResponseBodyFromJson = (jsonText: string) => {
 };
 
 export const normalizeMethodForRequest = (method: unknown) => {
-  if (method === 'POST_JSON') return { actualMethod: 'POST', methodMode: 'POST_JSON' as const };
-  if (typeof method === 'string' && method.length > 0) return { actualMethod: method, methodMode: undefined };
-  return { actualMethod: 'GET', methodMode: undefined };
+  if (typeof method === 'string' && method.length > 0) return { actualMethod: method };
+  return { actualMethod: 'GET' };
 };
 
 export const extractVariables = (str: string): string[] => {

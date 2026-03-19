@@ -67,14 +67,10 @@
           .then(function(response) { return response.json(); })
           .then(function(data) {
             if (data.code === 0 && data.data && data.data.accessToken) {
-              localStorage.setItem('accessToken', data.data.accessToken);
-              if (data.data.refreshToken) {
-                localStorage.setItem('refreshToken', data.data.refreshToken);
-              }
-              // 从后端返回获取 tenantId，构建完整跳转地址
-              var tenantId = data.data.tenantId || '';
-              var successRedirect = CONFIG.successRedirectBase + '/#/onebase/' + tenantId + '/setting/application';
-              window.location.href = successRedirect + '?token=' + encodeURIComponent(data.data.accessToken);
+              // 临时存储登录数据，供回调页面使用
+              sessionStorage.setItem('lingji_login_data', JSON.stringify(data.data));
+              // 跳转到 React 回调页面进行完整初始化
+              window.location.href = CONFIG.successRedirectBase + '/#/lingji-callback';
             } else {
               statusEl.textContent = '登录失败';
               errorEl.textContent = data.msg || '未知错误';

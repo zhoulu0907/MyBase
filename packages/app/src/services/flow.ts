@@ -1,6 +1,7 @@
 import { type PageParam } from '../types/common';
 import {
   CreateConnectInstanceReq,
+  CreateConnectorActionReq,
   CreateFlowMgmtReq,
   CreateScriptActionReq,
   DebugActionReq,
@@ -13,6 +14,7 @@ import {
   RenameFlowMgmtReq,
   SaveConnectorActionReq,
   UpdateConnectInstanceReq,
+  UpdateConnectorActionReq,
   UpdateFlowMgmtDefinitionReq,
   UpdateScriptActionReq
 } from '../types/flow';
@@ -178,6 +180,42 @@ export const getConnectorActionInfo = (id: string, actionName: string) => {
   return flowService.get(`/connector/${id}/actions/${actionName}`);
 };
 
+/** 获取连接器动作详情（通过 connectorUuid + actionCode） */
+export const getConnectorActionByCode = (connectorUuid: string, actionCode: string) => {
+  return flowService.get('/connector-action/detail-by-code', { connectorUuid, actionCode });
+};
+
+/** 获取连接器动作详情（通过ID） */
+export const getConnectorActionById = (id: number) => {
+  return flowService.get('/connector-action/detail', { id });
+};
+
+/** 创建连接器动作 */
+export const createConnectorAction = (params: CreateConnectorActionReq) => {
+  return flowService.post('/connector-action/create', params);
+};
+
+/** 更新连接器动作 */
+export const updateConnectorAction = (params: UpdateConnectorActionReq) => {
+  return flowService.post('/connector-action/update', params);
+};
+
+/** 删除连接器动作 */
+export const deleteConnectorAction = (id: number) => {
+  return flowService.post('/connector-action/delete', { id });
+};
+
+/** 获取连接器动作列表 */
+export const listConnectorActionsByUuid = (connectorUuid: string) => {
+  return flowService.get('/connector-action/list', { connectorUuid });
+};
+
+/** 更新连接器动作状态 */
+export const updateConnectorActionStatus = (id: number, activeStatus: number) => {
+  return flowService.post('/connector-action/update-status', { id, activeStatus });
+};
+
+/** @deprecated 使用 createConnectorAction 代替 */
 export const saveConnectorAction = (id: string, params: SaveConnectorActionReq) => {
   return flowService.post(`/connector/${id}/save-action`, params);
 };
@@ -186,10 +224,12 @@ export const getActionValue = (id: string, params: GetActionValueReq) => {
   return flowService.get(`/connector/${id}/action-value`, params);
 };
 
+/** @deprecated 使用 deleteConnectorAction 代替 */
 export const deleteHTTPAction = (id: string, actionName: string) => {
   return flowService.post(`/connector/${id}/actions/${actionName}/delete`);
 };
 
+/** @deprecated 使用 updateConnectorAction 代替 */
 export const updateHTTPAction = (id: string, actionName: string, params: SaveConnectorActionReq) => {
   return flowService.post(`/connector/${id}/actions/${actionName}/update-config`, params);
 };

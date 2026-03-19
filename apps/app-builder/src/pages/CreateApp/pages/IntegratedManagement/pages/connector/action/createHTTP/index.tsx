@@ -1,18 +1,23 @@
 import { Button, Input, Message, Modal, Select, Space, Spin, Steps, Upload } from '@arco-design/web-react';
 import { createForm } from '@formily/core';
-import { createSchemaField, FormProvider } from '@formily/react';
+import { createSchemaField, FormProvider, useForm, observer } from '@formily/react';
 import {
+  createConnectorAction,
   debugAction,
-  getConnectorActionInfo,
-  saveConnectorAction,
-  updateHTTPAction,
-  type SaveConnectorActionReq
+  getConnectgorEnvironmentConfig,
+  getConnectorActionByCode,
+  getEnableConnectorEnvironment,
+  updateConnectorAction,
+  type ConnectorActionDO,
+  type CreateConnectorActionReq,
+  type UpdateConnectorActionReq
 } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { componentMap, FormilyFormItem } from '../../../../../../../../components/DynamicForm/componentMapper';
 
 import { DebugParamReadOnlyTable } from './DebugParamReadOnlyTable';
+import { DebugHeadersTable } from './DebugHeadersTable';
 import styles from './index.module.less';
 import { ActionOutputArrayTable, OutputParamArrayTable } from './OutputParamArrayTable';
 import { ActionInputArrayTable, ParamArrayTable } from './ParamArrayTable';
@@ -21,7 +26,7 @@ import { step1Schema } from './step1';
 import { step2Schema } from './step2';
 import { step3Schema } from './step3';
 import { step4Schema } from './step4';
-import type { CreateHTTPActionPageProps } from './types';
+import type { CreateHTTPActionPageProps, HttpActionConfig } from './types';
 import {
   buildActionNameFromOpenApi,
   buildHttpFormValuesFromOpenApi,
@@ -33,14 +38,200 @@ import {
 import {
   actionConfigToFormValues,
   buildActionConfig,
+  formValuesToOpenApiConfig,
+  generateOutputsFromValues,
+  openApiConfigToFormValues,
   scanExposedFields
 } from './transform';
 import {
-  buildJsonBodyRows,
   getTabArray,
-  getTabString,
-  getTabValue
+  getTabString
 } from './utils';
+
+/** 认证方式映射 */
+const AUTH_TYPE_NAMES: Record<string, string> = {
+  none: '无认证',
+  basic: 'Basic Auth',
+  bearer: 'Bearer Token',
+  apikey: 'API Key',
+  oauth2: 'OAuth 2.0',
+  custom: '自定义签名'
+};
+
+/** 调试 URL 显示组件 */
+const DebugUrlText = observer(() => {
+  const form = useForm();
+  const values = form.values as Record<string, unknown>;
+  // url 现在是相对路径（来自 HTTP 定义）
+  const urlPath = typeof values.url === 'string' ? values.url : '';
+  const baseUrl = typeof values.baseUrl === 'string' ? values.baseUrl : '';
+
+  // 如果都没有配置
+  if (!baseUrl && !urlPath) {
+    return <span style={{ color: '#c9cdd4', fontSize: 14 }}>未设置</span>;
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center' }}>
+      <span style={{
+        padding: '4px 12px',
+        background: '#f7f8fa',
+        border: '1px solid #e5e6eb',
+        borderRadius: '4px 0 0 4px',
+        color: baseUrl ? '#86909c' : '#c9cdd4',
+        fontSize: 14,
+        maxWidth: 300,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      }}>
+        {baseUrl || '未配置域名'}
+      </span>
+      <span style={{
+        padding: '4px 12px',
+        background: '#fff',
+        border: '1px solid #e5e6eb',
+        borderLeft: 'none',
+        borderRadius: '0 4px 4px 0',
+        color: urlPath ? '#1d2129' : '#c9cdd4',
+        fontSize: 14,
+        flex: 1
+      }}>
+        {urlPath || '未设置路径'}
+      </span>
+    </div>
+  );
+});
+
+/** 认证方式显示组件 */
+const DebugAuthTypeText = observer(() => {
+  const form = useForm();
+  const values = form.values as Record<string, unknown>;
+  const authType = typeof values.authType === 'string' ? values.authType : '';
+  const authDisplay = authType ? (AUTH_TYPE_NAMES[authType] || authType) : '';
+
+  // 如果没有配置认证方式
+  if (!authType) {
+    return <span style={{ color: '#c9cdd4', fontSize: 14 }}>未设置</span>;
+  }
+
+  return (
+    <span style={{
+      padding: '4px 12px',
+      background: '#f7f8fa',
+      borderRadius: '4px',
+      color: authType === 'none' ? '#86909c' : '#1d2129',
+      fontSize: 14,
+      display: 'inline-block'
+    }}>
+      {authDisplay}
+    </span>
+  );
+});
+
+/** 请求方法显示组件 */
+const DebugMethodText = observer(() => {
+  const form = useForm();
+  const values = form.values as Record<string, unknown>;
+  const method = typeof values.method === 'string' ? values.method : '';
+
+  if (!method) {
+    return <span style={{ color: '#c9cdd4', fontSize: 14 }}>未设置</span>;
+  }
+
+  return (
+    <span style={{
+      padding: '4px 12px',
+      background: '#f7f8fa',
+      borderRadius: '4px',
+      color: '#1d2129',
+      fontSize: 14,
+      display: 'inline-block'
+    }}>
+      {method}
+    </span>
+  );
+});
+
+/** 一键生成入参出参按钮 */
+const IOGenerateButton: React.FC = () => {
+  const form = useForm();
+
+  const handleGenerate = () => {
+    const values = form.values as Record<string, unknown>;
+
+    // 1. 生成入参（从 ${xxx} 变量）
+    const exposedInputs = scanExposedFields(values);
+
+    // 2. 生成出参（从响应 JSON）
+    const exposedOutputs = generateOutputsFromValues(values);
+
+    // 3. 获取现有的入参出参
+    const existingInputs = Array.isArray(values.inputs) ? (values.inputs as unknown[]) : [];
+    const existingOutputs = Array.isArray(values.outputs) ? (values.outputs as unknown[]) : [];
+
+    // 4. 合并入参（避免覆盖已有的）
+    const existingInputKeys = new Set(
+      existingInputs
+        .map((row) => (isRecord(row) && typeof row.key === 'string' ? row.key : ''))
+        .filter((k) => k)
+    );
+    const newInputs = exposedInputs.filter((f) => !existingInputKeys.has(f.key));
+
+    // 5. 合并出参（避免覆盖已有的）
+    const existingOutputKeys = new Set(
+      existingOutputs
+        .map((row) => (isRecord(row) && typeof row.key === 'string' ? row.key : ''))
+        .filter((k) => k)
+    );
+    const newOutputs = exposedOutputs.filter((f) => !existingOutputKeys.has(f.key));
+
+    // 6. 更新表单
+    if (newInputs.length > 0 || newOutputs.length > 0) {
+      form.setValues({
+        ...values,
+        inputs: [
+          ...existingInputs,
+          ...newInputs.map((f) => ({
+            id: `input-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            key: f.key,
+            fieldName: f.fieldName,
+            fieldType: f.fieldType,
+            description: f.description,
+            mapKind: f.mapKind,
+            mapKey: f.mapKey,
+            required: f.required,
+            defaultValue: f.defaultValue
+          }))
+        ],
+        outputs: [
+          ...existingOutputs,
+          ...newOutputs.map((f) => ({
+            id: `output-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            key: f.key,
+            fieldName: f.fieldName,
+            fieldType: f.fieldType,
+            description: f.description,
+            fromKind: f.mapKind === 'header' ? 'header' : 'body',
+            fromKey: f.mapKey,
+            jsonPath: f.mapKey
+          }))
+        ]
+      });
+      Message.success(`已生成 ${newInputs.length} 个入参，${newOutputs.length} 个出参`);
+    } else {
+      Message.info('没有新的入参或出参需要生成');
+    }
+  };
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <Button type="primary" onClick={handleGenerate}>
+        一键生成入参出参
+      </Button>
+    </div>
+  );
+};
 
 const SchemaField = createSchemaField({
   components: {
@@ -51,7 +242,12 @@ const SchemaField = createSchemaField({
     OutputParamArrayTable,
     ActionOutputArrayTable,
     DebugParamReadOnlyTable,
-    SuccessConditionTable
+    DebugHeadersTable,
+    SuccessConditionTable,
+    IOGenerateButton,
+    DebugUrlText,
+    DebugAuthTypeText,
+    DebugMethodText
   }
 });
 
@@ -75,10 +271,16 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
   const [openApiOps, setOpenApiOps] = useState<OpenApiOperation[]>([]);
   const [openApiOpKey, setOpenApiOpKey] = useState<string>('');
   const [openApiParseError, setOpenApiParseError] = useState<string>('');
+  // 编辑模式下的动作 ID（用于更新）
+  const [editActionId, setEditActionId] = useState<number | null>(null);
+
   const form = useMemo(
     () =>
       createForm({
-        initialValues: {}
+        initialValues: {
+          baseUrl: '',
+          authType: ''
+        }
       }),
     []
   );
@@ -88,8 +290,15 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
   const isLastStep = currentStep === STEP_LIST.length - 1;
   const isEditMode = Boolean(editActionName);
 
+  // 每次步骤变化时打印 baseUrl 状态
+  useEffect(() => {
+    console.log(`[Step${currentStep}] form.values has baseUrl?`, 'baseUrl' in form.values, 'value:', form.values.baseUrl);
+    console.log(`[Step${currentStep}] Object.keys:`, Object.keys(form.values));
+  }, [currentStep, form.values]);
+
   const importOpenApiToForm = useCallback(
     (raw: string, opKey?: string) => {
+      debugger
       const parsed = parseOpenApiOperations(raw);
       if (parsed.operations.length === 0) {
         Message.error(parsed.error || '未解析到任何接口操作');
@@ -152,13 +361,95 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
 
   useEffect(() => {
     if (!editActionName) return;
-    const connectorId = getHashQueryParam('id');
-    if (!connectorId) return;
+    const connectorUuid = getHashQueryParam('id');
+    if (!connectorUuid) return;
     setEditLoading(true);
-    getConnectorActionInfo(connectorId, editActionName)
+
+    // 使用新的 API：getConnectorActionByCode
+    getConnectorActionByCode(connectorUuid, editActionName)
       .then((res: unknown) => {
-        console.log(res);
-        const values = actionConfigToFormValues(res);
+        console.log('[editMode] raw response:', res);
+
+        // API 返回的是 ConnectorActionDO 对象
+        // 通过 unknown 进行类型转换
+        const actionDO = isRecord(res) ? (res as unknown as ConnectorActionDO) : null;
+
+        if (!actionDO) {
+          Message.error('获取动作详情失败：响应格式错误');
+          return;
+        }
+
+        // 保存动作 ID 用于更新
+        if (actionDO.id) {
+          setEditActionId(actionDO.id);
+        }
+
+        // 解析 actionConfig（JSON 字符串）
+        let actionConfig: HttpActionConfig | null = null;
+        if (typeof actionDO.actionConfig === 'string' && actionDO.actionConfig) {
+          try {
+            actionConfig = JSON.parse(actionDO.actionConfig);
+          } catch (e) {
+            console.error('[editMode] Failed to parse actionConfig:', e);
+          }
+        }
+
+        let values: Record<string, unknown>;
+
+        if (actionConfig && 'path' in actionConfig && 'method' in actionConfig) {
+          // 新格式：OpenAPI 格式
+          console.log('[editMode] detected new OpenAPI format');
+          values = openApiConfigToFormValues(actionConfig as HttpActionConfig);
+        } else if (actionConfig) {
+          // 旧格式
+          console.log('[editMode] detected old format');
+          values = actionConfigToFormValues(actionConfig);
+        } else {
+          // 从其他字段构建
+          console.log('[editMode] building from actionDO fields');
+          values = {
+            basic: {
+              actionName: actionDO.actionName || '',
+              actionDescription: actionDO.description || ''
+            },
+            url: '',
+            method: 'GET',
+            tabs: {
+              params: { queryParams: [], pathParams: [] },
+              headers: { requestHeaders: [] },
+              body: { bodyMode: 'none', requestBody: [], jsonBody: { requestBodyJson: '' } }
+            },
+            responseTabs: {
+              responseBodyTab: {
+                responseBodyMode: 'json',
+                responseBodyJsonWrapper: { responseBodyJson: '' }
+              }
+            },
+            successCondition: { successConditions: [], errorMessagePath: '' },
+            inputs: [],
+            outputs: [],
+            baseUrl: '',
+            authType: ''
+          };
+
+          // 解析 inputSchema 和 outputSchema
+          if (actionDO.inputSchema) {
+            try {
+              values.inputs = JSON.parse(actionDO.inputSchema);
+            } catch (e) {
+              console.warn('[editMode] Failed to parse inputSchema:', e);
+            }
+          }
+          if (actionDO.outputSchema) {
+            try {
+              values.outputs = JSON.parse(actionDO.outputSchema);
+            } catch (e) {
+              console.warn('[editMode] Failed to parse outputSchema:', e);
+            }
+          }
+        }
+
+        console.log('[editMode] converted values:', values);
         form.setValues(values);
       })
       .catch((e: unknown) => {
@@ -174,10 +465,6 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
     });
   }, [editActionName, form]);
 
-  const getTabsData = (values: Record<string, unknown>) => {
-    return (key: string) => getTabValue(values, key) ?? [];
-  };
-
   useEffect(() => {
     if (currentStep !== 2) return;
     const values = form.values as Record<string, unknown>;
@@ -186,9 +473,8 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
     const exposedInputs = scanExposedFields(values);
     // 输出参数不再自动扫描，用户需要在 Step3 手动配置
 
-    const io = isRecord(values.io) ? (values.io as Record<string, unknown>) : {};
-    const existingInputs = Array.isArray(io.inputs) ? (io.inputs as unknown[]) : [];
-    const existingOutputs = Array.isArray(io.outputs) ? (io.outputs as unknown[]) : [];
+    const existingInputs = Array.isArray(values.inputs) ? (values.inputs as unknown[]) : [];
+    const existingOutputs = Array.isArray(values.outputs) ? (values.outputs as unknown[]) : [];
 
     const existingInputKeys = new Set(
       existingInputs
@@ -200,27 +486,25 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
     const newInputs = exposedInputs.filter((f) => !existingInputKeys.has(f.key));
 
     if (newInputs.length > 0) {
-      const mergedInputs = [
-        ...existingInputs,
-        ...newInputs.map((f) => ({
-          id: `input-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-          key: f.key,
-          fieldName: f.fieldName,
-          fieldType: f.fieldType,
-          description: f.description,
-          mapKind: f.mapKind,
-          mapKey: f.mapKey,
-          required: f.required,
-          defaultValue: f.defaultValue
-        }))
-      ];
-
       form.setValues({
         ...values,
-        io: {
-          inputs: mergedInputs,
-          outputs: existingOutputs  // 保持现有输出不变
-        }
+        inputs: [
+          ...existingInputs,
+          ...newInputs.map((f) => ({
+            id: `input-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            key: f.key,
+            fieldName: f.fieldName,
+            fieldType: f.fieldType,
+            description: f.description,
+            mapKind: f.mapKind,
+            mapKey: f.mapKey,
+            required: f.required,
+            defaultValue: f.defaultValue
+          }))
+        ],
+        outputs: existingOutputs,  // 保持现有输出不变
+        baseUrl: values.baseUrl ?? '',
+        authType: values.authType ?? ''
       });
     }
   }, [currentStep, form]);
@@ -228,41 +512,106 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
   useEffect(() => {
     if (currentStep !== 3) return;
     const values = form.values as Record<string, unknown>;
-    const io = isRecord(values.io) ? (values.io as Record<string, unknown>) : {};
-    const inputs = Array.isArray(io.inputs) ? (io.inputs as unknown[]) : [];
-    const copyWithFieldValue = (arr: unknown[]) =>
-      Array.isArray(arr)
-        ? arr.map((row) => {
-            const r = row as Record<string, unknown>;
-            return {
-              ...r,
-              fieldValue: r.fieldValue ?? r.defaultValue ?? '',
-              inputMode: 'table'
-            };
-          })
-        : [];
 
-    const fallbackFromRequest = () => {
-      const headers = getTabArray(values, 'requestHeaders').map((r) => ({ ...r, mapKind: 'header', mapKey: (r as any)?.key || (r as any)?.fieldName }));
-      const query = getTabArray(values, 'queryParams').map((r) => ({ ...r, mapKind: 'query', mapKey: (r as any)?.key || (r as any)?.fieldName }));
-      const path = getTabArray(values, 'pathParams').map((r) => ({ ...r, mapKind: 'path', mapKey: (r as any)?.key || (r as any)?.fieldName }));
-      const bodyMode =
-        getTabString(values, 'bodyMode') || (getTabArray(values, 'requestBody').length > 0 ? 'kv' : 'none');
-      const bodySource =
-        bodyMode === 'json'
-          ? buildJsonBodyRows(getTabString(values, 'requestBodyJson'))
-          : bodyMode === 'none'
-            ? []
-            : getTabArray(values, 'requestBody');
-      const body = (bodySource as any[]).map((r) => ({ ...r, mapKind: 'body', mapKey: (r as any)?.key || (r as any)?.fieldName }));
-      return [...headers, ...query, ...path, ...body];
+    // 检查是否已有保存的调试值
+    const savedDebugHeaders = Array.isArray(values.debugHeaders) ? values.debugHeaders : [];
+    const savedDebugBody = typeof values.debugBody === 'string' ? values.debugBody : '';
+    const hasSavedDebugData = savedDebugHeaders.length > 0 || savedDebugBody;
+
+    // 构建调试请求数据（如果没有保存的值）
+    const buildDebugData = () => {
+      const requestHeaders = getTabArray(values, 'requestHeaders');
+      const bodyMode = getTabString(values, 'bodyMode') || 'none';
+
+      // 收集所有 headers
+      const headers: { key: string; value: string }[] = [];
+      requestHeaders.forEach((row) => {
+        if (!isRecord(row)) return;
+        const key = typeof row.key === 'string' ? row.key : '';
+        const value = typeof row.defaultValue === 'string' ? row.defaultValue : '';
+        if (key) headers.push({ key, value });
+      });
+
+      // 构建 body JSON
+      let bodyJson = '';
+      if (bodyMode === 'json') {
+        bodyJson = getTabString(values, 'requestBodyJson');
+      } else if (bodyMode === 'kv') {
+        const requestBody = getTabArray(values, 'requestBody');
+        const bodyObj: Record<string, unknown> = {};
+        requestBody.forEach((row) => {
+          if (!isRecord(row)) return;
+          const key = typeof row.key === 'string' ? row.key : '';
+          const value = typeof row.defaultValue === 'string' ? row.defaultValue : '';
+          if (key) bodyObj[key] = value;
+        });
+        if (Object.keys(bodyObj).length > 0) {
+          bodyJson = JSON.stringify(bodyObj, null, 2);
+        }
+      }
+
+      return { headers, bodyJson };
     };
 
-    const debugInputSource = inputs.length > 0 ? inputs : fallbackFromRequest();
-    form.setValues({
-      ...values,
-      debugInputs: copyWithFieldValue(debugInputSource)
-    });
+    // 使用已保存的值或重新构建
+    const debugHeaders = hasSavedDebugData ? savedDebugHeaders : buildDebugData().headers;
+    const debugBody = hasSavedDebugData ? savedDebugBody : buildDebugData().bodyJson;
+
+    // 加载环境配置获取 baseUrl 和 authType
+    const loadEnvConfig = async () => {
+      const connectorId = getHashQueryParam('id');
+
+      if (!connectorId) {
+        form.setValues({
+          ...values,
+          debugHeaders,
+          debugBody,
+          baseUrl: '',
+          authType: ''
+        });
+        return;
+      }
+
+      try {
+        const envName = await getEnableConnectorEnvironment(connectorId);
+        console.log('[loadEnvConfig] envName:', envName);
+
+        if (envName) {
+          const res = await getConnectgorEnvironmentConfig(connectorId, envName);
+          console.log('[loadEnvConfig] res:', res);
+
+          const data = res?.data ?? res;
+          const envConfig = data?.schema?.envConfig ?? {};
+
+          const basicInfo = envConfig?.basicInfo ?? {};
+          const baseUrl = basicInfo?.baseUrl ?? '';
+
+          const authInfo = envConfig?.authInfo ?? {};
+          const authType = authInfo?.authType ?? '';
+
+          form.setValues({
+            ...values,
+            debugHeaders,
+            debugBody,
+            baseUrl,
+            authType
+          });
+          return;
+        }
+      } catch (e) {
+        console.warn('加载环境配置失败:', e);
+      }
+
+      form.setValues({
+        ...values,
+        debugHeaders,
+        debugBody,
+        baseUrl: '',
+        authType: ''
+      });
+    };
+
+    loadEnvConfig();
   }, [currentStep, form]);
 
   const [saveLoading, setSaveLoading] = useState(false);
@@ -271,16 +620,57 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
 
   const handleDebug = async () => {
     const values = form.values as Record<string, unknown>;
-    const combined = buildActionConfig(values);
     const connectorId = getHashQueryParam('id');
     if (!connectorId) {
       Message.error('缺少连接器 ID');
       return;
     }
+
+    // 从用户编辑的 debugHeaders 和 debugBody 获取数据
+    const debugHeaders = Array.isArray(values.debugHeaders) ? values.debugHeaders : [];
+    const debugBody = typeof values.debugBody === 'string' ? values.debugBody : '';
+    const baseUrl = typeof values.baseUrl === 'string' ? values.baseUrl : '';
+    const urlPath = typeof values.url === 'string' ? values.url : '';
+    const method = typeof values.method === 'string' ? values.method : 'GET';
+
+    // 构建完整 URL
+    const fullUrl = baseUrl + urlPath;
+
+    // 构建请求头数组
+    const requestHeaders = debugHeaders.map((h: { key: string; value: string }) => ({
+      key: h.key,
+      fieldName: h.key,
+      fieldValue: h.value,
+      fieldType: 'string'
+    }));
+
+    // 构建请求体
+    let requestBody: unknown[] = [];
+    if (debugBody) {
+      try {
+        JSON.parse(debugBody); // 验证 JSON 是否有效
+        requestBody = [{ key: 'body', fieldName: 'body', fieldType: 'object', fieldValue: debugBody }];
+      } catch {
+        requestBody = [{ key: 'body', fieldName: 'body', fieldType: 'string', fieldValue: debugBody }];
+      }
+    }
+
+    // 构建调试配置
+    const debugConfig = {
+      debug: {
+        url: fullUrl,
+        method,
+        requestHeaders,
+        requestBody,
+        queryParams: [],
+        pathParams: []
+      }
+    };
+
     setDebugLoading(true);
     setDebugResult(null);
     try {
-      const res = await debugAction(connectorId, { actionConfig: combined });
+      const res = await debugAction(debugConfig);
       setDebugResult(res);
       Message.success('调试成功');
     } catch (e) {
@@ -344,7 +734,9 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
       responseTabs: nextResponseTabs,
       successCondition: nextSuccessCondition,
       url: imported.url,
-      method: imported.method
+      method: imported.method,
+      baseUrl: current.baseUrl ?? '',
+      authType: current.authType ?? ''
     });
     setOpenApiModalOpen(false);
   };
@@ -368,9 +760,15 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
 
   const handleFinish = async () => {
     const values = form.values as Record<string, unknown>;
-    const combined = buildActionConfig(values);
-    const connectorId = getHashQueryParam('id');
-    if (!connectorId) {
+    console.log('[handleFinish] form.values inputs:', values.inputs);
+    console.log('[handleFinish] form.values outputs:', values.outputs);
+
+    // 使用 OpenAPI 兼容格式保存
+    const openApiConfig = formValuesToOpenApiConfig(values);
+    console.log('[handleFinish] openApiConfig:', JSON.stringify(openApiConfig, null, 2));
+
+    const connectorUuid = getHashQueryParam('id');
+    if (!connectorUuid) {
       Message.error('缺少连接器 ID');
       return;
     }
@@ -382,13 +780,42 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
     }
     setSaveLoading(true);
     try {
-      const params: SaveConnectorActionReq = { actionConfig: combined };
-      if (isEditMode && editActionName) {
-        await updateHTTPAction(connectorId, editActionName, params);
+      // 获取基本信息
+      const basic = isRecord(values.basic) ? (values.basic as Record<string, unknown>) : {};
+      const actionName = typeof basic.actionName === 'string' ? basic.actionName : '';
+      const actionDescription = typeof basic.actionDescription === 'string' ? basic.actionDescription : '';
+
+      // 构建 inputSchema 和 outputSchema
+      const inputs = Array.isArray(values.inputs) ? values.inputs : [];
+      const outputs = Array.isArray(values.outputs) ? values.outputs : [];
+
+      if (isEditMode && editActionId) {
+        // 更新模式
+        const params: UpdateConnectorActionReq = {
+          id: editActionId,
+          actionName,
+          description: actionDescription,
+          inputSchema: JSON.stringify(inputs),
+          outputSchema: JSON.stringify(outputs),
+          actionConfig: JSON.stringify(openApiConfig)
+        };
+        await updateConnectorAction(params);
       } else {
-        await saveConnectorAction(connectorId, params);
+        // 创建模式
+        const params: CreateConnectorActionReq = {
+          connectorUuid,
+          connectorType: 'HTTP',
+          actionName,
+          description: actionDescription,
+          inputSchema: JSON.stringify(inputs),
+          outputSchema: JSON.stringify(outputs),
+          actionConfig: JSON.stringify(openApiConfig),
+          activeStatus: 1
+        };
+        await createConnectorAction(params);
       }
       Message.success('保存成功');
+      onSuccess?.();
     } catch (e) {
       Message.error((e as Error)?.message ?? '保存失败');
     } finally {
@@ -404,9 +831,9 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
             OpenAPI 导入
           </Button>
         </div>
-        <Steps current={currentStep + 1} style={{ marginBottom: 24 }}>
+        <Steps current={currentStep} onChange={(current) => setCurrentStep(current)} style={{ marginBottom: 24 }}>
           {STEP_LIST.map((item) => (
-            <Steps.Step key={item.key} title={item.title} />
+            <Steps.Step key={item.key} title={item.title} style={{ cursor: 'pointer' }} />
           ))}
         </Steps>
         <FormProvider form={form}>
@@ -474,9 +901,6 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
                 const debug = combined.debug || {};
                 const lines: string[] = [];
                 lines.push(`${debug.method || 'GET'} ${debug.url || ''}`);
-                if (debug.methodMode) {
-                  lines.push(`Method Mode: ${debug.methodMode}`);
-                }
                 lines.push('');
                 lines.push('=== Request Headers ===');
                 if (Array.isArray(debug.requestHeaders) && debug.requestHeaders.length > 0) {

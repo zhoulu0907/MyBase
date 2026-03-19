@@ -259,6 +259,52 @@ export interface ListConnectorActionReq {
   id: string;
 }
 
+/** 连接器动作 - 创建请求 */
+export interface CreateConnectorActionReq {
+  connectorUuid: string;
+  connectorType: 'HTTP' | 'SCRIPT' | 'DATABASE' | 'EMAIL';
+  actionCode?: string;
+  actionName: string;
+  description?: string;
+  inputSchema?: string;
+  outputSchema?: string;
+  actionConfig: string;
+  activeStatus?: number;
+  sortOrder?: number;
+}
+
+/** 连接器动作 - 更新请求 */
+export interface UpdateConnectorActionReq {
+  id: number;
+  actionCode?: string;
+  actionName?: string;
+  description?: string;
+  inputSchema?: string;
+  outputSchema?: string;
+  actionConfig?: string;
+  activeStatus?: number;
+  sortOrder?: number;
+}
+
+/** 连接器动作 - 数据对象 */
+export interface ConnectorActionDO {
+  id: number;
+  connectorUuid: string;
+  connectorType: string;
+  actionUuid: string;
+  actionCode: string;
+  actionName: string;
+  description: string;
+  inputSchema: string;
+  outputSchema: string;
+  actionConfig: string;
+  activeStatus: number;
+  sortOrder: number;
+  createTime: string;
+  updateTime: string;
+}
+
+/** @deprecated 使用 CreateConnectorActionReq 代替 */
 export interface SaveConnectorActionReq {
   actionConfig: any;
 }
