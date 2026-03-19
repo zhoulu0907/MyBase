@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.bpm.core.dal.mapper;
 
 
 import com.cmsr.onebase.module.bpm.core.dto.BpmInstanceDTO;
-import com.cmsr.onebase.module.bpm.core.vo.BpmFormDataPageReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.instance.BpmFormDataPageReqVO;
 
 import java.util.List;
 
