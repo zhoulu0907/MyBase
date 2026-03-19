@@ -99,7 +99,7 @@ class LingjiSsoServiceTest {
                 assertNotNull(reqVO.getTenantAdminUserReqVOList());
                 assertEquals(1, reqVO.getTenantAdminUserReqVOList().size());
                 TenantAdminUserReqVO adminUser = reqVO.getTenantAdminUserReqVOList().get(0);
-                assertEquals("TEST001", adminUser.getAdminUserName());
+                assertEquals("13800138000", adminUser.getAdminUserName());
                 assertEquals("测试用户", adminUser.getAdminNickName());
                 return 2L;
             });
@@ -166,7 +166,7 @@ class LingjiSsoServiceTest {
             userInfo.setNickname("新用户");
             userInfo.setMobile("13800138001");
             userInfo.setEmail("newuser@example.com");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             // 准备租户管理员角色
             RoleDO tenantAdminRole = new RoleDO();
@@ -183,7 +183,7 @@ class LingjiSsoServiceTest {
                 assertEquals("新用户", reqVO.getNickname());
                 assertEquals("13800138001", reqVO.getMobile());
                 assertEquals("newuser@example.com", reqVO.getEmail());
-                assertEquals(UserTypeEnum.CORP.getValue(), reqVO.getUserType());
+                assertEquals(UserTypeEnum.TENANT.getValue(), reqVO.getUserType());
                 assertEquals(CommonStatusEnum.ENABLE.getStatus(), reqVO.getStatus());
                 // 验证角色已设置
                 assertNotNull(reqVO.getRoleIds());
@@ -213,7 +213,7 @@ class LingjiSsoServiceTest {
             userInfo.setNickname("新用户2");
             userInfo.setMobile("13800138002");
             userInfo.setEmail("newuser2@example.com");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             // 配置 mock - 角色不存在
             when(roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode())).thenReturn(null);
@@ -237,14 +237,13 @@ class LingjiSsoServiceTest {
          * 测试创建用户 - 使用工号作为用户名
          */
         @Test
-        @DisplayName("创建用户 - 优先使用工号作为用户名")
-        void testCreateUser_UseStaffCodeAsUsername() throws Exception {
-            // 准备用户信息（有工号）
+        @DisplayName("创建用户 - 使用传入用户名")
+        void testCreateUser_UseGivenUsername() throws Exception {
             AdminUserDO userInfo = new AdminUserDO();
             userInfo.setUsername("STAFF123"); // 工号
             userInfo.setNickname("员工用户");
             userInfo.setMobile("13800138003");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             // 准备角色
             RoleDO tenantAdminRole = new RoleDO();
@@ -291,7 +290,7 @@ class LingjiSsoServiceTest {
             userInfo.setNickname("现有用户");
             userInfo.setEmail("existing@example.com");
             userInfo.setMobile("13800138000");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             when(userService.getUserByUsername("EXISTING001")).thenReturn(existingUser);
 
@@ -322,7 +321,7 @@ class LingjiSsoServiceTest {
             userInfo.setNickname("新昵称");
             userInfo.setEmail("new@example.com");
             userInfo.setMobile("13800138000");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             when(userService.getUserByUsername("EXISTING002")).thenReturn(existingUser);
 
@@ -345,7 +344,7 @@ class LingjiSsoServiceTest {
             userInfo.setNickname("新用户3");
             userInfo.setEmail("newuser3@example.com");
             userInfo.setMobile("13800138003");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             // 准备租户管理员角色
             RoleDO tenantAdminRole = new RoleDO();
@@ -372,17 +371,17 @@ class LingjiSsoServiceTest {
             existingUser.setNickname("旧昵称");
             existingUser.setEmail("old@example.com");
             existingUser.setMobile("13800138009");
-            existingUser.setUserType(UserTypeEnum.CORP.getValue());
+            existingUser.setUserType(UserTypeEnum.TENANT.getValue());
 
             AdminUserDO userInfo = new AdminUserDO();
             userInfo.setUsername("NEW001");
             userInfo.setNickname("新昵称");
             userInfo.setEmail("new@example.com");
             userInfo.setMobile("13800138009");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             when(userService.getUserByUsername("NEW001")).thenReturn(null);
-            when(userService.getUserByMobile("13800138009", UserTypeEnum.CORP.getValue())).thenReturn(existingUser);
+            when(userService.getUserByMobile("13800138009", UserTypeEnum.TENANT.getValue())).thenReturn(existingUser);
 
             AdminUserDO result = invokeFindOrCreateUser(userInfo, createSsoUserInfo("NEW001", "13800138009"));
 
@@ -401,14 +400,14 @@ class LingjiSsoServiceTest {
             existingUser.setNickname("已存在用户");
             existingUser.setEmail("existing3@example.com");
             existingUser.setMobile("13800138010");
-            existingUser.setUserType(UserTypeEnum.CORP.getValue());
+            existingUser.setUserType(UserTypeEnum.TENANT.getValue());
 
             AdminUserDO userInfo = new AdminUserDO();
             userInfo.setUsername("EXISTING003");
             userInfo.setNickname("灵积昵称");
             userInfo.setEmail("lingji@example.com");
             userInfo.setMobile("13800138010");
-            userInfo.setUserType(UserTypeEnum.CORP.getValue());
+            userInfo.setUserType(UserTypeEnum.TENANT.getValue());
 
             when(userService.getUserByUsername("EXISTING003")).thenReturn(null, existingUser);
             when(userService.createUser(any(UserInsertReqVO.class))).thenThrow(new ServiceException(USER_USERNAME_EXISTS));

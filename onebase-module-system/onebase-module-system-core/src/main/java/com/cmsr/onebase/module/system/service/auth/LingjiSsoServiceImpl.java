@@ -3,16 +3,21 @@ package com.cmsr.onebase.module.system.service.auth;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
+import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
-import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
@@ -49,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -82,6 +88,9 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
     @Resource
     private RoleService roleService;
 
+    @Resource
+    private SecurityConfigApi securityConfigApi;
+
     /**
      * 默认租户套餐编码
      */
@@ -109,6 +118,8 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         if (tenantDo == null) {
             tenantDo = createTenant(userInfo);
         }
+
+        tenantService.validTenant(tenantDo.getId());
 
         // 5. 处理用户信息并登录
         return processUserLogin(userInfo, deviceId, tenantDo);
@@ -360,13 +371,15 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 处理用户登录
      */
     private AuthLoginRespVO processUserLogin(LingjiSsoUserInfoVO userInfo, String deviceId, TenantDO tenantDo) {
+        String loginDeviceId = normalizeDeviceId(deviceId);
+
         // 构建用户对象
         AdminUserDO adminUserDO = new AdminUserDO();
         adminUserDO.setMobile(userInfo.getSub()); // 手机号在 sub 字段
         adminUserDO.setNickname(userInfo.getUserName());
         adminUserDO.setUsername(userInfo.getSub());  // 使用手机号作为账号
         adminUserDO.setEmail(userInfo.getEmail());
-        adminUserDO.setUserType(UserTypeEnum.CORP.getValue());
+        adminUserDO.setUserType(UserTypeEnum.TENANT.getValue());
 
         if (StringUtils.isBlank(adminUserDO.getNickname())) {
             adminUserDO.setNickname(adminUserDO.getUsername());
@@ -378,12 +391,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
             // 查找或创建用户
             AdminUserDO adminUser = findOrCreateUser(adminUserDO, userInfo);
             // 创建 Token
-            AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(
-                adminUser.getUserType(),
-                adminUser.getId(),
-                adminUser.getUsername(),
-                deviceId
-            );
+            AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(adminUser, loginDeviceId, tenantDo);
             loginRespRef.set(authLoginRespVO);
         });
 
@@ -391,8 +399,6 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         if (authLoginRespVO == null) {
             throw exception(LINGJI_SSO_CREATE_TOKEN_FAILED);
         }
-        // 设置租户ID
-        authLoginRespVO.setTenantId(tenantDo.getId());
         return authLoginRespVO;
     }
 
@@ -400,14 +406,27 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      * 查找或创建用户（只有关键信息变化时才更新）
      */
     private AdminUserDO findOrCreateUser(AdminUserDO userInfo, LingjiSsoUserInfoVO ssoUserInfo) {
-        // 通过手机号查找用户
-        String mobile = ssoUserInfo.getSub();
-        AdminUserDO existingUser = userService.getUserByMobile(mobile, UserTypeEnum.CORP.getValue());
-
+        AdminUserDO existingUser = findExistingUser(userInfo);
         if (existingUser == null) {
             // 用户不存在，创建新用户
             log.info("用户不存在，创建新用户: username={}", userInfo.getUsername());
-            return createUser(userInfo);
+            try {
+                return createUser(userInfo);
+            } catch (ServiceException ex) {
+                if (!isUserConflictException(ex)) {
+                    throw ex;
+                }
+                log.warn("灵畿SSO创建用户发生并发冲突，改为复用已有用户: username={}, mobile={}, code={}",
+                        userInfo.getUsername(), userInfo.getMobile(), ex.getCode());
+                existingUser = findExistingUser(userInfo);
+                if (existingUser == null) {
+                    throw ex;
+                }
+            }
+        }
+
+        if (CommonStatusEnum.isDisable(existingUser.getStatus())) {
+            throw exception(AUTH_LOGIN_USER_DISABLED);
         }
 
         // 用户存在，检查关键信息是否变化
@@ -431,6 +450,12 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
             needUpdate = true;
         }
 
+        if (!Objects.equals(existingUser.getMobile(), userInfo.getMobile())) {
+            log.info("手机号变化: {} -> {}", existingUser.getMobile(), userInfo.getMobile());
+            existingUser.setMobile(userInfo.getMobile());
+            needUpdate = true;
+        }
+
         // 只有变化时才更新
         if (needUpdate) {
             log.info("用户信息有变化，更新用户: userId={}", existingUser.getId());
@@ -440,15 +465,41 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
             updateReqVO.setNickname(userInfo.getNickname());
             updateReqVO.setEmail(userInfo.getEmail());
             updateReqVO.setMobile(userInfo.getMobile());
+            updateReqVO.setUserType(existingUser.getUserType());
             userService.updateUser(updateReqVO);
             // 更新返回对象
             existingUser.setNickname(userInfo.getNickname());
             existingUser.setEmail(userInfo.getEmail());
+            existingUser.setMobile(userInfo.getMobile());
         } else {
             log.debug("用户信息无变化，跳过更新: userId={}", existingUser.getId());
         }
 
         return existingUser;
+    }
+
+    private AdminUserDO findExistingUser(AdminUserDO userInfo) {
+        AdminUserDO existingUser = userService.getUserByUsername(userInfo.getUsername());
+        if (existingUser != null) {
+            return existingUser;
+        }
+        if (StringUtils.isBlank(userInfo.getMobile())) {
+            return null;
+        }
+        existingUser = userService.getUserByMobile(userInfo.getMobile(), UserTypeEnum.TENANT.getValue());
+        if (existingUser != null) {
+            return existingUser;
+        }
+        return userService.getUserByMobile(userInfo.getMobile(), UserTypeEnum.CORP.getValue());
+    }
+
+    private boolean isUserConflictException(ServiceException ex) {
+        if (ex == null || ex.getCode() == null) {
+            return false;
+        }
+        return Objects.equals(ex.getCode(), USER_USERNAME_EXISTS.getCode())
+                || Objects.equals(ex.getCode(), USER_MOBILE_EXISTS.getCode())
+                || Objects.equals(ex.getCode(), USER_EMAIL_EXISTS.getCode());
     }
 
     /**
@@ -460,7 +511,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         insertReqVO.setNickname(userInfo.getNickname());
         insertReqVO.setMobile(userInfo.getMobile());
         insertReqVO.setEmail(userInfo.getEmail());
-        insertReqVO.setUserType(UserTypeEnum.CORP.getValue());
+        insertReqVO.setUserType(UserTypeEnum.TENANT.getValue());
         insertReqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
         insertReqVO.setPassword("AdminChina2025!");
 
@@ -473,34 +524,70 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
             log.warn("未找到租户管理员角色，用户将没有角色: username={}", userInfo.getUsername());
         }
 
-        Long userId = userService.createUser(insertReqVO);
+        Long userId = createUserWithFallbackOperator(insertReqVO);
         userInfo.setId(userId);
         return userInfo;
+    }
+
+    private Long createUserWithFallbackOperator(UserInsertReqVO insertReqVO) {
+        if (SecurityFrameworkUtils.getLoginUserId() != null) {
+            return userService.createUser(insertReqVO);
+        }
+
+        Authentication previousAuthentication = SecurityFrameworkUtils.getAuthentication();
+        try {
+            LoginUser fallbackLoginUser = new LoginUser();
+            fallbackLoginUser.setId(SSO_FALLBACK_OPERATOR_USER_ID);
+            fallbackLoginUser.setUserType(UserTypeEnum.PLATFORM.getValue());
+
+            UsernamePasswordAuthenticationToken fallbackAuthentication =
+                    new UsernamePasswordAuthenticationToken(fallbackLoginUser, null, Collections.emptyList());
+            SecurityContextHolder.getContext().setAuthentication(fallbackAuthentication);
+
+            return userService.createUser(insertReqVO);
+        } finally {
+            SecurityContextHolder.getContext().setAuthentication(previousAuthentication);
+        }
     }
 
     /**
      * 登录成功后创建 Token
      */
-    private AuthLoginRespVO createTokenAfterLoginSuccess(Integer userType, Long userId, String username, String deviceId) {
+    private AuthLoginRespVO createTokenAfterLoginSuccess(AdminUserDO adminUser, String deviceId, TenantDO tenantDo) {
         // 插入登陆日志
-        createLoginLog(userId, username, LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.SUCCESS);
+        createLoginLog(adminUser.getId(), adminUser.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.SUCCESS);
 
         // 创建访问令牌
-        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessToken(
-            userId, userType,
-            OAuth2ClientConstants.CLIENT_ID_DEFAULT, null
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+            RunModeEnum.BUILD.getValue(), adminUser.getCorpId(), null,
+            adminUser.getId(), adminUser.getUserType(),
+            OAuth2ClientConstants.CLIENT_ID_DEFAULT, null, null
         );
 
-        // 更新最后登录时间
-        userService.updateUserLogin(userId, ServletUtils.getClientIP());
+        // 检查并限制设备数，踢出超限的设备
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(adminUser.getId(), deviceId, accessTokenDO.getAccessToken()).getData();
+        if (removedTokens != null && !removedTokens.isEmpty()) {
+            for (String removedToken : removedTokens) {
+                oauth2TokenService.removeAccessToken(removedToken);
+                log.info("灵畿SSO登录设备数超限，已踢出Token: userId={}, token={}", adminUser.getId(), removedToken);
+            }
+        }
 
         // 构建返回结果
-        AuthLoginRespVO respVO = new AuthLoginRespVO();
-        respVO.setAccessToken(accessTokenDO.getAccessToken());
-        respVO.setRefreshToken(accessTokenDO.getRefreshToken());
-        respVO.setExpiresTime(accessTokenDO.getExpiresTime());
-
+        AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO, tenantDo);
+        respVO.setAdminFlag(findTenantAdminFlag(adminUser.getId(), tenantDo.getId()));
+        PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(adminUser.getId()).getData();
+        respVO.setPasswordExpiryInfo(expiryCheckResult);
+        securityConfigApi.createSessionIdleKey(adminUser.getId(), deviceId);
         return respVO;
+    }
+
+    private Boolean findTenantAdminFlag(Long userId, Long tenantId) {
+        RoleDO roleDO = roleService.getRoleIdsByCodeAndTenantId(RoleCodeEnum.TENANT_ADMIN.getCode(), tenantId);
+        if (roleDO == null) {
+            return false;
+        }
+        return userService.findAdminByRoleIdAndUserId(roleDO.getId(), userId);
     }
 
     /**
@@ -516,5 +603,15 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         reqDTO.setUserIp(ServletUtils.getClientIP());
         reqDTO.setResult(loginResult.getResult());
         loginLogService.createLoginLog(reqDTO);
+        if (userId != null && Objects.equals(LoginResultEnum.SUCCESS.getResult(), loginResult.getResult())) {
+            userService.updateUserLogin(userId, ServletUtils.getClientIP());
+        }
+    }
+
+    private String normalizeDeviceId(String deviceId) {
+        if (StringUtils.isNotBlank(deviceId)) {
+            return deviceId;
+        }
+        return UUID.randomUUID().toString().replace("-", "");
     }
 }
