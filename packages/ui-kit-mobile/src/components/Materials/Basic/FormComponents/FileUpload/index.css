@@ -1,4 +1,5 @@
 .fileUploadWrapperOBMobile {
+  margin-bottom: 0.24rem;
   .arco-form-label-item {
     margin-top: 0.24rem;
   }
@@ -11,7 +12,28 @@
     display: block;
   }
   .arco-uploader-add {
-    width: 1.6rem;
+    width: 2rem;
+  }
+  .uploadTextWrapper {
+    display: flex;
+    align-items: center;
+  }
+  .uploadText {
+    font-size: 0.24rem;
+    white-space: nowrap;
+    margin-left: 0.08rem;
+  }
+  .arco-button.arco-button-type-default {
+    background-color: #f2f3f5;
+    color: #4e5969;
+    border: 1px solid transparent;
+  }
+  .arco-button.arco-button-type-ghost {
+    color: rgb(var(--primary-6));
+    border-color: currentColor;
+  }
+  .arco-button.arco-button-size-large {
+    padding: 0;
   }
   .uplaodList-text-item {
     display: flex;
@@ -40,5 +62,8 @@
       align-items: center;
       flex: unset;
     }
+  }
+  .fileUploadBottomTips {
+    font-size: 0.28rem;
   }
 }

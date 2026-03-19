@@ -1,5 +1,5 @@
 import { Layout } from '@arco-design/web-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import CreateAppPage from '../CreateApp';
 import AppSettingPage from '../CreateApp/pages/AppSetting';
@@ -18,10 +18,15 @@ const Content = Layout.Content;
 
 const Home: React.FC = () => {
   const location = useLocation();
+  const [isIframe, setIsIframe] = useState(false);
+
+  useEffect(() => {
+    setIsIframe(window.self !== window.top);
+  }, []);
 
   return (
     <Layout className={styles.homePage}>
-      {location.pathname.includes('create-app') || location.pathname.includes('preview-app') ? null : (
+      {isIframe || location.pathname.includes('create-app') || location.pathname.includes('preview-app') ? null : (
         <AppHeader className={styles.myAppPageHeader} />
       )}
 

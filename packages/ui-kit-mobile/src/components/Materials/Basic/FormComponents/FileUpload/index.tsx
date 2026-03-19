@@ -1,13 +1,14 @@
 import DownloadLink from '@/assets/images/download_link.svg';
-import { Ellipsis, Form, Loading, Popover, Toast, Uploader } from '@arco-design/mobile-react';
+import { Button, Ellipsis, Form, Loading, Popover, Toast, Uploader } from '@arco-design/mobile-react';
 import { FileListMethods } from '@arco-design/mobile-react/cjs/uploader';
-import { IconClose, IconDelete, IconDownload, IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
+import { IconClose, IconDelete, IconDownload, IconQuestionCircle, IconUpload } from '@arco-design/mobile-react/esm/icon';
 import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES, downloadFileByUrl } from '@onebase/ui-kit';
 import { nanoid } from 'nanoid';
 import { memo, useEffect, useState } from 'react';
 import { CommonFileItem } from '@arco-design/mobile-react/cjs/uploader/upload/type';
+import { UPLOAD_OPTIONS, UPLOAD_VALUES } from '@onebase/ui-kit/src/components/Materials/constants';
 import '../index.css';
 import './index.css';
 
@@ -23,9 +24,15 @@ interface FileItem {
   type: string;
 }
 
+const UploadButtonType = {
+  primary: 'primary',
+  secondary: 'default',
+  outline: 'ghost'
+} as any;
+
 const XFileUpload = memo(
   (props: XFileUploadConfig & { runtime?: boolean; detailMode?: boolean; recordId?: string; form?: any }) => {
-    const { label, dataField, status, verify, layout, runtime = true, detailMode, form, showDownload } = props;
+    const { label, dataField, status, verify, layout, buttonName, buttonType, uploadType, runtime = true, detailMode, form, showDownload } = props;
 
     const [tableName, fieldName] = dataField;
     const { curMenu } = menuSignal;
@@ -178,6 +185,24 @@ const XFileUpload = memo(
           pointerEvents: runtime ? 'unset' : 'none',
           opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
         }}
+        extra={
+          <div className="fileUploadBottomTips">
+            {!detailMode && uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] ? <>
+              {verify?.fileFormatLimit && (
+                <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
+              )}
+              <span>
+                {verify?.maxCountLimit && (
+                  <span>
+                    最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                    {verify?.maxSizeLimit ? '，' : ''}
+                  </span>
+                )}
+                {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
+              </span>
+            </> : undefined}
+          </div>
+        }
       >
         <Uploader
           accept={formatAccept(verify)}
@@ -194,6 +219,20 @@ const XFileUpload = memo(
               content: '文件数量超出限制',
               duration: 2000
             })
+          }
+          renderUploadArea={() =>
+            <div>
+              {detailMode ? null : (
+                <div className="uplaodTrigger">
+                  <Button type={UploadButtonType[buttonType || 'primary']}>
+                    <div className="uploadTextWrapper">
+                      <IconUpload />
+                      <span className="uploadText">{buttonName || '点击上传'}</span>
+                    </div>
+                  </Button>
+                </div>
+              )}
+            </div>
           }
           disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
           style={{
