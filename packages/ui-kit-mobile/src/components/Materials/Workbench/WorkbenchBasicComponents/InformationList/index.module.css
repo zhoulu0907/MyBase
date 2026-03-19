@@ -61,7 +61,8 @@
   gap: 12px;
   align-items: center;
   width: 100%;
-  padding: 10px 0;
+  box-sizing: border-box;
+  padding: 10px;
   cursor: default;
 }
 

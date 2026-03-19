@@ -105,40 +105,17 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
     [normalizedValue, onChange]
   );
 
-  const handleAddEntry = useCallback(
-    (type: 'menu' | 'link') => {
-      if (type === 'link') {
-        const nextIndex = getNextIndex(state.entries, 'entryName', '新增链接');
-        const newEntry: EntryItem = {
-          entryId: generateEntryId(),
-          entryName: `新增链接${nextIndex}`,
-          entryType: type,
-          group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME
-        };
-
-        const newEntries = [...state.entries, { ...newEntry, id: newEntry.entryId }];
-        setState((prev) => ({ ...prev, showAddMenu: false }));
-        onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
-      } else {
-        const nextIndex = getNextIndex(state.entries, 'entryName', '新增菜单');
-        const pendingEntry: EntryItem = {
-          entryId: generateEntryId(),
-          entryName: `新增菜单${nextIndex}`,
-          entryType: type,
-          group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME,
-          id: ''
-        };
-
-        setState({
-          ...state,
-          showAddMenu: false,
-          selectMenuModalVisible: true,
-          pendingEntry: { ...pendingEntry, id: pendingEntry.entryId }
-        });
-      }
-    },
-    [state, normalizedValue, onChange]
-  );
+  const handleAddEntry = useCallback(() => {
+    const nextIndex = getNextIndex(state.entries, 'entryName', '新增入口');
+    const newEntry: EntryItem = {
+      entryId: generateEntryId(),
+      entryName: `新增入口${nextIndex}`,
+      entryType: 'menu',
+      group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME
+    };
+    const newEntries = [...state.entries, { ...newEntry, id: newEntry.entryId }];
+    onChange?.({ ...normalizedValue, groups: entriesToGroups(newEntries) });
+  }, [state.entries, state.enableGroup, normalizedValue, onChange]);
 
   const handleDeleteEntry = useCallback(
     (entryId: string) => {
