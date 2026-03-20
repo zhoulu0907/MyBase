@@ -62,8 +62,8 @@ const SettingPage: React.FC = () => {
 
   useEffect(() => {
     if (isIframe) {
-      const currentUrl = window.location.href;
-      const message = { timestamp: new Date().getTime(), type: 'redirect', url: currentUrl };
+      const currentPath = location.pathname;
+      const message = { timestamp: new Date().getTime(), type: 'redirect', url: currentPath };
       console.log('[Iframe] postMessage:', message);
       window.parent.postMessage(message, '*');
     }
