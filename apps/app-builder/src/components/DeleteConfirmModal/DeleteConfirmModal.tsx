@@ -34,6 +34,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
       footer={null}
       autoFocus={false}
       focusLock={true}
+      style={{ width: 320 }}
       className={styles.deleteModal}
     >
       <div className={styles.modalContent}>
