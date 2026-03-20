@@ -65,7 +65,7 @@ export default function DictionaryTable({
         </Button>
       </div>
       <div className={s.tableContainer}>
-        <ResizableTable rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} />
+        <ResizableTable rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} stripe />
         <div className={s.paginationContainer}>
           <TablePagination
             total={total}
