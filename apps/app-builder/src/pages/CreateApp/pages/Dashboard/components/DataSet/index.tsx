@@ -28,7 +28,6 @@ const DataSet: FC = () => {
       title: '操作',
       width: 80,
       key: 'operate',
-      align: 'center',
       render: (_: DataTable, record: DataTable) => (
         <ActionButtons>
           <Button type="text" onClick={() => handleEdit(record)}>

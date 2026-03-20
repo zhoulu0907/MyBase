@@ -2,6 +2,7 @@ import TablePagination from '@/components/TablePagination';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 import ResizableTable from '@/components/ResizableTable';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import ActionButtons from '@/components/ActionButtons';
 import { isSystemUser } from '@/utils';
 import { Button, Input, Message, Pagination, Space, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
@@ -156,9 +157,11 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
         dataIndex: 'op',
         width: 180,
         render: (_: any, record: any) => (
-          <Button type="text" onClick={() => handleRemove(record)} disabled={isSystemUser(record)}>
-            移除
-          </Button>
+          <ActionButtons>
+            <Button type="text" onClick={() => handleRemove(record)} disabled={isSystemUser(record)}>
+              移除
+            </Button>
+          </ActionButtons>
         )
       }
     ],

@@ -57,7 +57,6 @@ const ICopied:FC = () => {
         {
             title: '操作',
             dataIndex: 'op',
-            align: 'center',
             render: (_, record) => (
                 <Button type='text' status='success' onClick={() => {handleDetailPage(record)}}>详情</Button>
             ),

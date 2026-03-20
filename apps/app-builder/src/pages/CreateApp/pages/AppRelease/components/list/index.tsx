@@ -166,7 +166,6 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
     {
       title: '操作',
       key: 'actions',
-      align: 'center',
       width: 80,
       render: (_: unknown, record: VersionRecord) => (
         <ActionButtons>

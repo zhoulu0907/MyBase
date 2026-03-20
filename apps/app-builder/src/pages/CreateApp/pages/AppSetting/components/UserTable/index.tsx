@@ -356,7 +356,6 @@ const UserMembers = (props: IProps) => {
     {
       title: '操作',
       dataIndex: 'op',
-      align: 'center',
       show: true,
       render: (_, record) => (
         <Popconfirm

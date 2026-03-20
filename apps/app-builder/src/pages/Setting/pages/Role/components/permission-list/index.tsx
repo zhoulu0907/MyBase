@@ -1,5 +1,6 @@
 import ResizableTable from '@/components/ResizableTable';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import ActionButtons from '@/components/ActionButtons';
 import { listToTree } from '@/utils/tree';
 import { Button, Message } from '@arco-design/web-react';
 import { PERMISSION_TYPES } from '@onebase/common';
@@ -120,9 +121,11 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
         dataIndex: 'op',
         width: 120,
         render: (_: any, record: Permission) => (
-          <Button type="text" size="small" disabled ={type === UserType.SYSTEM} onClick={() => handleRemove(record.id)}>
-            移除
-          </Button>
+          <ActionButtons>
+            <Button type="text" size="small" disabled ={type === UserType.SYSTEM} onClick={() => handleRemove(record.id)}>
+              移除
+            </Button>
+          </ActionButtons>
         )
       }
     ],

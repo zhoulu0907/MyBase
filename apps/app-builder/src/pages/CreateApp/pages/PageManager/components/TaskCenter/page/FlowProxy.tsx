@@ -87,7 +87,6 @@ const FlowProxy: FC = () => {
       title: '操作',
       dataIndex: 'op',
       width: 80,
-      align: 'center',
       render: (_, record) => (
         <ActionButtons>
           <Button type="text" status="success" onClick={() => {}}>
