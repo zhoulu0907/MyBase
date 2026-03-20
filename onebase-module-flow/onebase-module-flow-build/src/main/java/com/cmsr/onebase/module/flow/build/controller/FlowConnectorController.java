@@ -104,12 +104,13 @@ public class FlowConnectorController {
         return CommonResult.success(result);
     }
 
-    // ==================== 环境配置接口 ====================
+    // ==================== 环境配置接口（已废弃，请使用 FlowConnectorEnvController） ====================
 
     @Operation(summary = "查询连接器的环境配置列表",
               description = "从flow_connector.config字段解析环境配置信息")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @GetMapping("/{id}/environments")
+    @Deprecated
     public CommonResult<List<FlowConnectorEnvLiteVO>> getEnvironments(
             @Parameter(description = "连接器实例ID", required = true, example = "1")
             @PathVariable Long id) {
@@ -122,6 +123,7 @@ public class FlowConnectorController {
     @Parameter(name = "id", description = "连接器实例ID（主键）", required = true, example = "1")
     @Parameter(name = "envName", description = "环境名称（如DEV环境配置）", required = true, example = "DEV环境配置")
     @GetMapping("/{id}/environment-config")
+    @Deprecated
     public CommonResult<EnvironmentConfigVO> getEnvironmentConfig(
             @PathVariable("id") Long id,
             @RequestParam("envName") @NotBlank(message = "环境名称不能为空") String envName) {
@@ -134,6 +136,7 @@ public class FlowConnectorController {
               description = "获取连接器类型对应的环境配置 Formily Schema 模板，用于创建环境信息")
     @Parameter(name = "id", description = "连接器实例ID", required = true)
     @GetMapping("/{id}/env-config-template")
+    @Deprecated
     public CommonResult<EnvConfigTemplateVO> getEnvConfigTemplate(@PathVariable Long id) {
         EnvConfigTemplateVO template = connectorService.getEnvConfigTemplate(id);
         return CommonResult.success(template);
@@ -143,6 +146,7 @@ public class FlowConnectorController {
               description = "保存新的环境配置到 connector.config，如果环境已存在则拒绝")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @PostMapping("/{id}/save-env")
+    @Deprecated
     public CommonResult<Boolean> saveEnvironmentConfig(
             @PathVariable("id") Long id,
             @RequestBody @Valid SaveEnvironmentConfigReqVO reqVO) {
@@ -154,6 +158,7 @@ public class FlowConnectorController {
               description = "更新已存在的环境配置，环境必须存在，否则拒绝")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @PostMapping("/{id}/update-env")
+    @Deprecated
     public CommonResult<Boolean> updateEnvironmentConfig(
             @PathVariable("id") Long id,
             @RequestBody @Valid SaveEnvironmentConfigReqVO reqVO) {
@@ -166,6 +171,7 @@ public class FlowConnectorController {
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @Parameter(name = "envName", description = "环境名称（传空表示取消启用）", required = false)
     @PostMapping("/{id}/enable-env")
+    @Deprecated
     public CommonResult<Boolean> enableEnvironment(
             @PathVariable("id") Long id,
             @RequestParam(value = "envName", required = false) String envName) {
@@ -177,6 +183,7 @@ public class FlowConnectorController {
               description = "获取连接器当前启用的环境名称，用于编辑回显。未设置则返回null")
     @Parameter(name = "id", description = "连接器实例ID", required = true, example = "1")
     @GetMapping("/{id}/get-enabled-envname")
+    @Deprecated
     public CommonResult<String> getEnabledEnvName(@PathVariable("id") Long id) {
         String enabledEnvName = connectorService.getEnabledEnvName(id);
         return CommonResult.success(enabledEnvName);

@@ -75,7 +75,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器ID
      * @return 环境配置列表
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnvironments(Long)}
      */
+    @Deprecated
     List<FlowConnectorEnvLiteVO> getEnvironments(Long connectorId);
 
     /**
@@ -86,7 +88,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器实例ID（主键）
      * @param envName     环境名称（如 DEV环境配置）
      * @return 环境配置 VO
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnvironmentConfig(Long, String)}
      */
+    @Deprecated
     EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName);
 
     /**
@@ -96,7 +100,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器实例ID
      * @return 环境配置模板 VO
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnvConfigTemplate(Long)}
      */
+    @Deprecated
     EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId);
 
     /**
@@ -120,7 +126,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器实例ID
      * @param reqVO 环境配置请求
      * @return 保存是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#saveEnvironmentConfig(Long, SaveEnvironmentConfigReqVO)}
      */
+    @Deprecated
     Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
 
     /**
@@ -132,7 +140,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器实例ID
      * @param reqVO 环境配置请求
      * @return 更新是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#updateEnvironmentConfig(Long, SaveEnvironmentConfigReqVO)}
      */
+    @Deprecated
     Boolean updateEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
 
     /**
@@ -144,7 +154,9 @@ public interface FlowConnectorService {
      * @param connectorId 连接器实例ID
      * @param envName     环境名称（传空或null表示取消启用）
      * @return 设置是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#enableEnvironment(Long, String)}
      */
+    @Deprecated
     Boolean enableEnvironment(Long connectorId, String envName);
 
     /**
@@ -154,7 +166,9 @@ public interface FlowConnectorService {
      *
      * @param connectorId 连接器实例ID
      * @return 启用的环境名称，未设置则返回null
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnabledEnvName(Long)}
      */
+    @Deprecated
     String getEnabledEnvName(Long connectorId);
 
     /**

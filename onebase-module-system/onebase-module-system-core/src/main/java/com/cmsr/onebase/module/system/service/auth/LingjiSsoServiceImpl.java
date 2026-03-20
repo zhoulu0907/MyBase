@@ -36,6 +36,7 @@ import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.LingjiSsoUserInfoVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantAdminUserReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
+import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserInsertReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserUpdateReqVO;
 import jakarta.annotation.Resource;
@@ -303,12 +304,13 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
 
         // 构建租户创建请求
         TenantInsertReqVO tenantReqVO = new TenantInsertReqVO();
-        tenantReqVO.setName(buildTenantName(userInfo, enterpriseId));
+        tenantReqVO.setName(buildTenantName(enterpriseId));
         tenantReqVO.setTenantCode(buildTenantCode(enterpriseId));
         tenantReqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
         tenantReqVO.setPackageId(tenantPackage.getId());
         tenantReqVO.setExpireTime(LocalDateTime.now().plusYears(10)); // 默认10年
         tenantReqVO.setAccountCount(10000); // 默认10000个账号
+        // website 先设置基础地址，创建租户后更新
         tenantReqVO.setWebsite(lingjiSsoProperties.getTenantWebsite());
 
         // 设置管理员信息（当前登录用户）
@@ -322,6 +324,11 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         // 创建租户
         Long tenantId = createTenantWithFallbackOperator(tenantReqVO);
         log.info("创建租户成功: tenantId={}, enterpriseId={}, tenantCode={}", tenantId, enterpriseId, tenantReqVO.getTenantCode());
+
+        // 更新租户 website，格式：/tenant/{tenantId}/{tenantCode}/
+        String tenantWebsite = lingjiSsoProperties.getTenantWebsite() + "/tenant/" + tenantId + "/";
+        updateTenantWebsite(tenantId, tenantWebsite);
+        log.info("更新租户website: tenantId={}, website={}", tenantId, tenantWebsite);
 
         return tenantService.getTenant(tenantId);
     }
@@ -353,10 +360,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
     /**
      * 构建租户名称
      */
-    private String buildTenantName(LingjiSsoUserInfoVO userInfo, String enterpriseId) {
-        if (StringUtils.isNotBlank(userInfo.getUserName())) {
-            return userInfo.getUserName() + "的空间";
-        }
+    private String buildTenantName(String enterpriseId) {
         return "企业" + enterpriseId + "的空间";
     }
 
@@ -365,6 +369,16 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
      */
     private String buildTenantCode(String enterpriseId) {
         return enterpriseId;
+    }
+
+    /**
+     * 更新租户 website
+     */
+    private void updateTenantWebsite(Long tenantId, String website) {
+        TenantUpdateReqVO updateReqVO = new TenantUpdateReqVO();
+        updateReqVO.setId(tenantId);
+        updateReqVO.setWebsite(website);
+        tenantService.updateTenant(updateReqVO);
     }
 
     /**

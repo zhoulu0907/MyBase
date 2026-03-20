@@ -14,6 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +34,7 @@ import static com.cmsr.onebase.module.flow.core.dal.dataobject.table.FlowConnect
 @Validated
 public class FlowConnectorActionServiceImpl implements FlowConnectorActionService {
 
-    @Setter
+    @Autowired
     private FlowConnectorActionRepository actionRepository;
 
     @Override
