@@ -221,7 +221,8 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
   const isHidden = status === statusValueHidden;
   const containerStyle: CSSProperties = {
     // width: width || '100%',
-    opacity: isHidden ? 0.4 : 1
+    opacity: isHidden ? 0.4 : 1,
+    height: '100%'
   };
 
   if (runtime && isHidden) {
