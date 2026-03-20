@@ -1,0 +1,62 @@
+.resizableTable {
+  :global {
+    .react-resizable {
+      position: relative;
+      background-clip: padding-box;
+    }
+
+    .react-resizable-handle {
+      position: absolute;
+      right: -5px;
+      bottom: 0;
+      z-index: 1;
+      width: 10px;
+      height: 100%;
+      cursor: col-resize;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+      // 隐藏 react-resizable 默认的 handle 样式
+      background: none !important;
+      border: none !important;
+
+      // 隐藏默认的伪元素 handle
+      &::before,
+      &::after {
+        display: none !important;
+        content: none !important;
+      }
+
+      // 覆盖所有方向的默认 handle 样式
+      &-e,
+      &-w,
+      &-n,
+      &-s,
+      &-ne,
+      &-nw,
+      &-se,
+      &-sw {
+        &::before,
+        &::after {
+          display: none !important;
+          content: none !important;
+        }
+      }
+
+      &:hover {
+        .resizeHandleLine {
+          background: rgb(var(--primary-6));
+        }
+      }
+    }
+  }
+}
+
+.resizeHandleLine {
+  width: 1px;
+  height: 20px;
+  background: var(--G07, #EAEEEF);
+  transition: background 0.2s ease;
+}

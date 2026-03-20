@@ -1,7 +1,8 @@
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
+import ResizableTable from '@/components/ResizableTable';
 import { listToTree } from '@/utils/tree';
-import { Input, Message, Modal, Space, Table } from '@arco-design/web-react';
+import { Input, Message, Modal, Space } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretRight, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { TENANT_DEPT_PERMISSION as ACTIONS, hasAnyPermission, hasPermission } from '@onebase/common';
 import { createDept, deleteDept, getDeptList, updateDept, type DeptForm, type DeptVO } from '@onebase/platform-center';
@@ -186,7 +187,7 @@ const OrganizationPage: React.FC = () => {
         </Button>
       </div>
       <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
-        <Table
+        <ResizableTable
           loading={loading}
           columns={filteredColumns}
           data={data}

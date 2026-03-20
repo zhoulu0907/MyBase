@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import { useState, type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Link } from '@arco-design/web-react';
+import { type TableColumnProps, Button, Tag, Link } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
 import BatchApproveModal from '../modal/batchApprove';
@@ -100,7 +101,7 @@ const WillDo:FC = () => {
                 <Button type='primary' onClick={() => handleBatch2Click()}>批量同意</Button>
             </div>
         </div>}
-        <Table className='task-tb-box' rowKey='name' rowSelection={tbRowSelection} columns={columns} data={data} />
+        <ResizableTable className='task-tb-box' rowKey='name' rowSelection={tbRowSelection} columns={columns} data={data} />
         {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible}/>}
         {approveVisible && <BatchApproveModal approveVisible={approveVisible} setApproveVisible={setApproveVisible}/>}
     </section>

@@ -1,3 +1,4 @@
+import ResizableTable from '@/components/ResizableTable';
 import {
   Button,
   Cascader,
@@ -330,7 +331,7 @@ const ParamsTableInner: React.FC<any> = observer(() => {
 
   return (
     <div>
-      <Table
+      <ResizableTable
         size="small"
         pagination={false}
         columns={columns}
@@ -592,7 +593,7 @@ const ConnectorParamsInner: React.FC<any> = observer(() => {
   ];
 
   return (
-    <Table
+    <ResizableTable
       size="small"
       pagination={false}
       columns={columns}

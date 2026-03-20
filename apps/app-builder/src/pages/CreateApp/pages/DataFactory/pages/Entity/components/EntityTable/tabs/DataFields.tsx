@@ -1,10 +1,11 @@
+import ResizableTable from '@/components/ResizableTable';
 import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/DataFactory/utils/dataConverter';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
 import { useAppStore } from '@/store/store_app';
 import { useFieldStore } from '@/store/store_field';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Message, Modal, Space, Table, Tag } from '@arco-design/web-react';
+import { Button, Message, Modal, Space, Tag } from '@arco-design/web-react';
 import { deleteField, getEntityFieldsPage } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import EditFieldDrawer from '../../Drawers/EditFieldDrawer';
@@ -196,7 +197,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
           字段配置
         </Button>
       </div>
-      <Table
+      <ResizableTable
         columns={columns}
         data={fields}
         rowKey="id"

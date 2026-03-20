@@ -1,6 +1,7 @@
 import DynamicIcon from '@/components/DynamicIcon';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag from '@/components/StatusTag';
+import ResizableTable from '@/components/ResizableTable';
 import {
   Avatar,
   Button,
@@ -351,7 +352,7 @@ const ProfilePage: React.FC = () => {
       >
         <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ maxWidth: tabPanelWidth }}>
           <TabPane key={CREATED_TYPE.ENTERPRISE} title="我创建的企业">
-            <Table
+            <ResizableTable
               rowKey="id"
               hover
               columns={getColumns()}

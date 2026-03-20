@@ -1,4 +1,5 @@
-import { Input, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Input } from '@arco-design/web-react';
 import { connect, useField } from '@formily/react';
 import React from 'react';
 
@@ -49,7 +50,7 @@ const DebugHeadersTableInner: React.FC = () => {
   ];
 
   return (
-    <Table
+    <ResizableTable
       data={value}
       columns={columns}
       rowKey={(record: DebugHeaderRow, index: number) => `header-${record.key}-${index}`}

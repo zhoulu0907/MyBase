@@ -1,9 +1,10 @@
-import { Card, Pagination, Space, Table, Typography, Button } from '@arco-design/web-react';
+import { Card, Pagination, Space, Typography, Button } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import React, { useState } from 'react';
 import EditVersionModal from '../modals/EditVersionModal';
 import SaveVersionModal from '../modals/SaveVersionModal';
 import AppExportModal from '@/components/AppExportModal';
+import ResizableTable from '@/components/ResizableTable';
 import { useAppStore } from '@/store';
 import dayjs from 'dayjs';
 import type { VersionRecord } from '../..';
@@ -206,7 +207,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
         </Space>
       </div>
 
-      <Table
+      <ResizableTable
         scroll={{
           y: 330
         }}

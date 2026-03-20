@@ -1,5 +1,5 @@
 import externalUserSVG from '@/assets/images/external_user.svg';
-import { Input, Message, Modal, Space, Spin, Switch, Tabs, Pagination, Drawer, Dropdown, Menu, Button, Form, Upload, Table, Popconfirm, Divider } from '@arco-design/web-react';
+import { Input, Message, Modal, Space, Spin, Switch, Tabs, Pagination, Drawer, Dropdown, Menu, Button, Form, Upload, Popconfirm, Divider } from '@arco-design/web-react';
 import { IconSettings, IconEdit, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
 import { getPluginListApi, type pluginParams, updatePluginStatusApi, getPluginPageListApi, type pluginPageParams, createPluginApi, getPluginDetailApi, updatePluginInfoApi, uploadPluginVersionApi, getPluginVersionListApi, deletePluginVersionApi, activePluginVersionApi, enablePluginApi, disablePluginApi, getPluginConfigTemplateApi, savePluginConfigApi, getPluginConfigDetailApi, type PluginDetailRespVO, type PluginVersionVO } from '@onebase/platform-center';
 import dayjs from 'dayjs';
@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { TENANT_CONFIG_UPDATE, hasPermission } from '@onebase/common';
 import MenuComp from '@/components/MenuIcon';
 import DynamicForm from '@/components/DynamicForm';
+import ResizableTable from '@/components/ResizableTable';
 import { createForm } from '@formily/core';
 import { webMenuIcons } from '@onebase/ui-kit';
 import { statusMapping, StatusValue } from './constants';
@@ -907,7 +908,7 @@ const PluginPage = () => {
               <div style={{ fontSize: 16, fontWeight: 500, borderLeft: '4px solid rgb(var(--primary-6))', paddingLeft: 8 }}>版本管理</div>
               <Button type="primary" icon={<IconPlus />} onClick={() => setVersionCreateVisible(true)}>新增版本</Button>
             </div>
-            <Table
+            <ResizableTable
               columns={[
                 {
                   title: '插件版本',

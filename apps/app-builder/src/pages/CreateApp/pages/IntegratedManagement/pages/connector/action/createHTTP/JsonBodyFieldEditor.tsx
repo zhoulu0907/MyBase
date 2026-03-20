@@ -1,4 +1,5 @@
-import { Button, Input, Select, Space, Switch, Table, Typography } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, Input, Select, Space, Switch, Typography } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, useField } from '@formily/react';
 import React, { useMemo } from 'react';
@@ -275,7 +276,7 @@ const JsonBodyFieldEditorInner: React.FC = () => {
           </Text>
         </div>
       )}
-      <Table
+      <ResizableTable
         data={value}
         columns={columns}
         rowKey={(record: JsonBodyField) => record.id ?? `row-${record.key}-${record.path}`}

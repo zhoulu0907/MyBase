@@ -1,4 +1,5 @@
-import { Button, Input, Select, Switch, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, Input, Select, Switch } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, useField } from '@formily/react';
 import React from 'react';
@@ -144,7 +145,7 @@ const DebugParamArrayTableInner: React.FC = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '100%' }}>
-      <Table
+      <ResizableTable
         data={value}
         columns={columns}
         rowKey={(record: DebugParamRow) => record.id ?? `row-${record.key}-${record.fieldName}`}

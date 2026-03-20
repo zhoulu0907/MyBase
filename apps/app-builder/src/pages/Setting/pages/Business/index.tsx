@@ -1,4 +1,5 @@
 import StatusTag from '@/components/StatusTag';
+import ResizableTable from '@/components/ResizableTable';
 import {
   Avatar,
   Button,
@@ -351,7 +352,7 @@ const BusinessPage: React.FC = () => {
           onAdd={handleCreateBusiness}
           setSearchInputValue={handleSearchChange}
         />
-        <Table
+        <ResizableTable
           loading={loading}
           columns={businessManageColumns as ColumnProps<cropItem>[]}
           data={displayData}

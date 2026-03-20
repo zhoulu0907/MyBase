@@ -1,4 +1,5 @@
-import { DatePicker, Form, Input, InputNumber, Switch, Table, TimePicker, Typography } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { DatePicker, Form, Input, InputNumber, Switch, TimePicker, Typography } from '@arco-design/web-react';
 import { IconArrowRight, IconLoading, IconPlusCircle } from '@arco-design/web-react/icon';
 import styles from './DebuggedFormula.module.less';
 import { debugFormula, type fieldListWithNodeData } from '@onebase/app';
@@ -207,7 +208,7 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
                   {(fields, { add }) => {
                     return (
                       <>
-                        <Table
+                        <ResizableTable
                           className={styles.variableTable}
                           border
                           borderCell

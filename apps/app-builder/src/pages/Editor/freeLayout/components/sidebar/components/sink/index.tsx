@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import { useState } from 'react';
-import { Table, type TableColumnProps } from '@arco-design/web-react';
+import { type TableColumnProps } from '@arco-design/web-react';
 import Header from '../../../header';
 import BottomBtn from '../../../bottomBtn';
 import styles from './index.module.less';
@@ -53,7 +54,7 @@ export default function ApproveDreawer() {
           上游分支<span className={styles.titleTips}>等待所有应到达的上游分支完成，合并为一条路径后继续流程</span>
         </div>
         <div className={styles.configContent}>
-          <Table columns={columns} data={data} pagination={false} />
+          <ResizableTable columns={columns} data={data} pagination={false} />
         </div>
       </div>
       <BottomBtn handleSubmit={handleSubmit} />

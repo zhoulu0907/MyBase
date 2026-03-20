@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import React, { useEffect, useState } from 'react';
-import { Modal, Table, Select, Input, Message } from '@arco-design/web-react';
+import { Modal, Select, Input, Message } from '@arco-design/web-react';
 import { getVersionMgmt } from '@onebase/app';
 import { getVersionColumns } from './tableColumn';
 import { VersionStatus, SortType } from './indexType';
@@ -107,7 +108,7 @@ export default function VersionModal({
           />
         </div>
       </div>
-      <Table columns={columns} data={versionList} rowKey="id" />
+      <ResizableTable columns={columns} data={versionList} rowKey="id" />
       <EditRemarkModal
         visible={editRemarkVisible}
         setVisible={setEditRemarkVisible}

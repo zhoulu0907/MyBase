@@ -1,6 +1,7 @@
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
+import ResizableTable from '@/components/ResizableTable';
 import {
   Avatar,
   Dropdown,
@@ -339,7 +340,7 @@ export default function UserTable({
       </div>
       {/* 表格 */}
       <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
-        <Table
+        <ResizableTable
           rowKey="id"
           hover
           columns={getColumns(handleEdit)}

@@ -1,4 +1,5 @@
-import { Button, Link, Radio, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, Link, Radio } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconEdit, IconPlusCircle } from '@arco-design/web-react/icon';
 import { useState } from 'react';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
@@ -189,7 +190,7 @@ export default function ConditionMode() {
           <Radio value="b">并行生效</Radio>
         </RadioGroup>
       </div>
-      <Table
+      <ResizableTable
         className="arco-drag-table-container-2"
         pagination={false}
         components={components}

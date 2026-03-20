@@ -1,4 +1,5 @@
-import { Checkbox, Input, Modal, Pagination, Spin, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Checkbox, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
 import type { PageParam, UserVO } from '@onebase/platform-center';
 import { getUserPage } from '@onebase/platform-center';
@@ -184,7 +185,7 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
       </div>
 
       <Spin loading={modalLoading}>
-        <Table
+        <ResizableTable
           rowKey="id"
           columns={columns}
           data={userList}

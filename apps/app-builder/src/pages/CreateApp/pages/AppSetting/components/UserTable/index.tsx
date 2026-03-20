@@ -1,4 +1,5 @@
 import UserProfileAvatar from '@/components/UserProfileAvatar';
+import ResizableTable from '@/components/ResizableTable';
 import {
   Button,
   Dropdown,
@@ -471,7 +472,7 @@ const UserMembers = (props: IProps) => {
           </>
         )}
       </div>
-      <Table
+      <ResizableTable
         className={styles.table}
         columns={columns.filter((c) => c.show)}
         data={userList}
