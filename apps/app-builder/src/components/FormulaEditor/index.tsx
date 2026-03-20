@@ -309,13 +309,22 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         content = match.slice(2, -2);
         content = content.replace(/^[^.]+\./, '');
       } else {
-        content = match.slice(2, -2);
-        content = content.replace(/^[^.]+\./, '');
-        const temp = content.split('$');
-        if (temp.length > 1) {
-          content = `$${temp[1]}`;
+        const raw = match.slice(2, -2);
+        const rawParts = raw.split('.');
+        const dollarIdx = rawParts.findIndex((p) => p.startsWith('$'));
+        if (dollarIdx !== -1 && dollarIdx < rawParts.length - 1) {
+          const nodeLabel = rawParts[dollarIdx].slice(1);
+          const displayName = rawParts[dollarIdx + 1] || '';
+          content = `$${nodeLabel}.${displayName},`;
+        } else if (rawParts.length === 3) {
+          // 2) 子表：[[id.子表.字段]] => $子表.字段
+          const subTableName = rawParts[1] || '';
+          const fieldName = rawParts[2] || '';
+          content = `$${subTableName}.${fieldName},`;
         } else {
-          content = `$${content}`;
+          // 3) 主表：[[id.字段]] => 字段
+          const fieldName = rawParts[1] || '';
+          content = `${fieldName},`;
         }
       }
       return content;
@@ -344,26 +353,30 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     const variablesMapping: { [key: string]: string } = {};
     matches.forEach((match) => {
       const temp = match[1].split('.');
-      let fieldName = '';
-      let fieldId = '';
-      if (temp.length > 3) {
-        const variableId = temp[1];
-        const nodeName = temp[2];
-        const variableName = temp[3];
-
-        fieldId = variableId;
-
-        const node = nodeName.startsWith('$') ? nodeName : `$${nodeName}`;
-        fieldName = `${node}.${variableName}`;
-      } else {
-        fieldId = temp[0] || '';
-        let name = temp.slice(1).join('.');
-        if (!name.startsWith('$')) {
-          name = `$${name}`;
+      const dollarIdx = temp.findIndex((p) => p.startsWith('$'));
+      if (dollarIdx !== -1 && dollarIdx < temp.length - 1) {
+        const nodeLabel = temp[dollarIdx].slice(1);
+        const displayName = temp[dollarIdx + 1] || '';
+        const fieldId = temp[1] || '';
+        if (nodeLabel && displayName) {
+          variablesMapping[`$${nodeLabel}.${displayName}`] = fieldId;
         }
-        fieldName = name;
+        return;
       }
-      variablesMapping[fieldName] = fieldId;
+
+      if (temp.length === 2) {
+        const fieldId = temp[0] || '';
+        const fieldName = temp[1] || '';
+        if (fieldName) variablesMapping[fieldName] = fieldId;
+        return;
+      }
+
+      if (temp.length === 3) {
+        const fieldId = temp[0] || '';
+        const fieldName = `${temp[1] || ''}.${temp[2] || ''}`;
+        if (fieldName !== '.' && fieldName) variablesMapping[`$${fieldName}`] = fieldId;
+        return;
+      }
     });
     return variablesMapping;
   };
@@ -397,7 +410,22 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   const getFieldType = (keyName: string, value: any) => {
     let fieldType: string = '';
     variables.forEach((variable) => {
-      const fieldIndex = variable?.fields?.findIndex((item) => keyName.includes(item.displayName) && item.id === value);
+      const directIndex = variable?.fields?.findIndex(
+        (item: any) => item.id === value || item.value === value || item.fieldId === value || item.fieldUuid === value
+      );
+      if (directIndex !== -1) {
+        fieldType = variable?.fields?.[directIndex as number].fieldType || 'TEXT';
+        return;
+      }
+
+      const fieldIndex = variable?.fields?.findIndex((item: any) => {
+        const display = item.displayName || item.label || item.fieldName || '';
+        return (
+          !!display &&
+          keyName.includes(display) &&
+          (item.id === value || item.value === value || item.fieldId === value || item.fieldUuid === value)
+        );
+      });
       if (fieldIndex !== -1) {
         fieldType = variable?.fields?.[fieldIndex as number].fieldType || 'TEXT';
       }
@@ -414,7 +442,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     let newVariablesData: variableItem[] = [];
     if (variables.length > 0) {
       Object.keys(currentVariablesObj).forEach((key) => {
-        if (key.includes('$')) {
+        if (!key.includes('$') && !key.includes('.')) {
           newVariablesData.push({
             fieldName: key,
             fieldId: currentVariablesObj[key],
@@ -426,25 +454,71 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     return newVariablesData;
   };
 
-  /**调试模式下获取只包含节点的数据 */
-  const displaywithNodeField = () => {
-    const currentVariablesObj = getParameters(formula);
-    const newObj: fieldListWithNodeData = {};
-    // 遍历原对象中以 $ 开头的键
-    for (const key in currentVariablesObj) {
-      if (key.startsWith('$')) {
-        const [baseKey, name] = key.split('.'); // 分割为 [基础key, 字段名name]
-        const id = currentVariablesObj[key]; // id 为原键对应的值
-        if (name) {
-          // 初始化 newObj 中的基础 key 结构，fieldList 为对象数组
-          if (!newObj[baseKey]) {
-            newObj[baseKey] = { fieldList: [] };
-          }
-          // 构建 { id, name } 对象并添加到 fieldList
-          newObj[baseKey].fieldList.push({ fieldId: id, fieldName: name, fieldType: 'NUMBER' });
+  /**
+   * 调试模式下获取只包含交互/节点的数据（单值输入）
+   * token 形如：[[nodeId.fieldId.xxx.$节点名.字段名]] 或 [[nodeId.fieldId.$节点名.字段名]]
+   * 输出字段名：$节点名.字段名
+   */
+  const displayNodeField = () => {
+    const regex = /\[\[(.*?)\]\]/g;
+    const matches = [...formula.matchAll(regex)];
+    const dedupe = new Set<string>();
+    const result: variableItem[] = [];
+
+    matches.forEach((m) => {
+      const parts = m[1].split('.');
+      const dollarIdx = parts.findIndex((p: string) => p.startsWith('$'));
+      if (dollarIdx !== -1 && dollarIdx < parts.length - 1) {
+        const nodeLabel = parts[dollarIdx].slice(1);
+        const displayName = parts[dollarIdx + 1] || '';
+        const fieldId = parts[1] || '';
+        const fieldName = `$${nodeLabel}.${displayName}`;
+        if (nodeLabel && displayName && fieldId && !dedupe.has(fieldName)) {
+          dedupe.add(fieldName);
+          result.push({
+            fieldName,
+            fieldId,
+            fieldType:
+              getFieldType(
+                displayName,
+                dollarIdx >= 3 ? `${parts[1] || ''}.${parts[dollarIdx - 1] || ''}` : fieldId
+              ) || 'TEXT'
+          });
         }
       }
-    }
+    });
+    return result;
+  };
+
+  /**调试模式下获取只包含节点的数据 */
+  const displaywithNodeField = () => {
+    const newObj: fieldListWithNodeData = {};
+    const regex = /\[\[(.*?)\]\]/g;
+    const matches = [...formula.matchAll(regex)];
+    matches.forEach((match) => {
+      const parts = match[1].split('.');
+      if (parts.length === 3) {
+        const fieldId = parts[0] || '';
+        const subTableName = parts[1] || '';
+        const fieldName = parts[2] || '';
+        if (!subTableName || !fieldName) return;
+
+        const baseKey = `$${subTableName}`;
+        if (!newObj[baseKey]) {
+          newObj[baseKey] = { fieldList: [] };
+        }
+
+        const exists = newObj[baseKey].fieldList.some((f: any) => f.fieldName === fieldName);
+        if (!exists) {
+          const keyNameForType = `${subTableName}.${fieldName}`;
+          newObj[baseKey].fieldList.push({
+            fieldId,
+            fieldName,
+            fieldType: getFieldType(keyNameForType, fieldId)
+          });
+        }
+      }
+    });
     return newObj;
   };
 
@@ -478,6 +552,8 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   const entityFields = displayEntityField();
 
   const tableData = displaywithNodeField();
+
+  const nodeFields = displayNodeField();
 
   return (
     <Modal
@@ -518,7 +594,12 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         </Spin>
         {/* 底部面板（变量名称/函数公式/函数概要） */}
         {isDebugMode ? (
-          <DebuggedFormula entityFields={entityFields} tableData={tableData} formula={formattedFormula()} />
+          <DebuggedFormula
+            entityFields={entityFields}
+            nodeFields={nodeFields}
+            tableData={tableData}
+            formula={formattedFormula()}
+          />
         ) : (
           <Row>
             <Col xs={2} sm={4} md={8} lg={8} xl={8} xxl={8}>

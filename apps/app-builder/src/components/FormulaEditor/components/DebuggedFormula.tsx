@@ -15,16 +15,31 @@ interface VariableItem {
 
 interface DebuggedFormulaProps {
   entityFields: VariableItem[];
+  nodeFields?: VariableItem[];
   formula: string;
   tableData: fieldListWithNodeData;
 }
 
 export function DebuggedFormula(props: DebuggedFormulaProps) {
-  const { entityFields, formula, tableData = {} } = props;
+  const { entityFields, nodeFields = [], formula, tableData = {} } = props;
   const [displayValue, setDisplayValue] = useState<any>();
   const [loading, setLoading] = useState<boolean>(false); //当调用接口的时候显示加载中
   const [form] = Form.useForm();
   const formRef = useRef<any>(null); // Form实例引用
+
+  const flattenValues = (obj: any, prefix = '', out: Record<string, any> = {}) => {
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return out;
+    Object.keys(obj).forEach((k) => {
+      const v = obj[k];
+      const nextKey = prefix ? `${prefix}.${k}` : k;
+      if (v && typeof v === 'object' && !Array.isArray(v)) {
+        flattenValues(v, nextKey, out);
+      } else {
+        out[nextKey] = v;
+      }
+    });
+    return out;
+  };
 
   const handleTableItem = (
     fieldNames: string[],
@@ -40,16 +55,16 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
   };
 
   const transformTableData = (items: fieldListWithNodeData[]) => {
-    let result: { [key: string]: string[] } = {};
+    const result: { [key: string]: string[] } = {};
     Object.entries(items).forEach(([tableKey, rows]) => {
       if (!rows.length) return;
-      if (tableKey.startsWith('tableRows')) {
+      if (tableKey.includes('$')) {
+        // if (tableKey.startsWith('tableRows')) {
         const newTableKey = tableKey.replace('tableRows', '');
         const fieldNames = Object.keys(rows[0]);
         // 遍历每个字段名，提取所有行的该字段值
         handleTableItem(fieldNames, newTableKey, result, rows);
       } else {
-        result = items as any;
       }
     });
     return result;
@@ -70,13 +85,11 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       const allData = formRef.current?.getFieldsValue() || [];
       const formattedTableData = transformTableData(allData);
       let newValidFieldResult: { [key: string]: any } = {};
-      Object.keys(values)?.map((key) => {
-        const fieldObj = values[key];
-        if (!key.includes('$')) {
-          newValidFieldResult = {
-            ...newValidFieldResult,
-            [key]: fieldObj
-          };
+      const flat = flattenValues(values);
+      Object.keys(flat)?.forEach((key) => {
+        const fieldObj = flat[key];
+        if (!key.startsWith('tableRows')) {
+          newValidFieldResult[key] = fieldObj;
         }
       });
       const data = await debugFormula({
@@ -186,14 +199,20 @@ export function DebuggedFormula(props: DebuggedFormulaProps) {
       </div>
       <div className={styles.content}>
         <Form className={styles.variablesDisplay} form={form} ref={formRef}>
-          {entityFields.map((item) => {
-            if (item.fieldName.includes('.')) return; // $xx.xx不在此处展示
-            return (
-              <Form.Item label={item.fieldName.replace('$', '')} field={item.fieldName} rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ style: { flex: 1 } }}>
-                {renderFormItem(item.fieldType)}
-              </Form.Item>
-            );
-          })}
+          {(entityFields.length > 0 || nodeFields.length > 0) &&
+            [...entityFields, ...nodeFields].map((item) => {
+              return (
+                <Form.Item
+                  label={item.fieldName}
+                  field={item.fieldName}
+                  rules={[{ required: true }]}
+                  labelCol={{ span: 6 }}
+                  wrapperCol={{ style: { flex: 1 } }}
+                >
+                  {renderFormItem(item.fieldType)}
+                </Form.Item>
+              );
+            })}
           {/* 表格 */}
           {Object.keys(tableData)?.map((key) => {
             return (
