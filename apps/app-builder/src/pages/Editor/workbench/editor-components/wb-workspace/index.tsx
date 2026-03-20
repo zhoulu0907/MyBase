@@ -19,7 +19,7 @@ import { useWorkbenchContainer } from '../../hooks/use-workbench-container';
 import { useWorkbenchHandlers } from '../../hooks/use-workbench-handlers';
 import { WorkbenchItem } from './components/workbench-item';
 import { EmptyState } from './components/empty-state';
-import { SORTABLE_CONFIG, WB_GRID_CONFIG } from '../../utils/constants';
+import { SORTABLE_CONFIG } from '../../utils/constants';
 import { applyGridLayout } from '../../utils/grid-layout';
 import 'react-grid-layout/css/styles.css';
 import styles from './index.module.less';
@@ -150,7 +150,7 @@ export default function WorkbenchWorkspace() {
   // 获取页面配置
   const pageConfig = getOrCreatePageConfig(wbComponentSchemas)[1].config;
 
-  // 处理空白区域点击 
+  // 处理空白区域点击
   const handleBodyMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).id === 'workspace-content') {
       clearCurComponentID?.();
@@ -179,6 +179,9 @@ export default function WorkbenchWorkspace() {
   }, [wbComponentSchemas, curComponentID]);
 
   const isMobileMode = editMode.value === EditMode.MOBILE;
+
+  const runtimeBodyWidth = 1920 - (pageConfig?.showSidebar ? 200 : 0);
+  const wbFontSize = `${Math.min(20, Math.max(10, (containerWidth / runtimeBodyWidth) * 16))}px`;
 
   return (
     <div className={styles.editorSwitchContainer}>
@@ -227,8 +230,7 @@ export default function WorkbenchWorkspace() {
                   backgroundImage: pageConfig.pageBgImg ? `url(${pageConfig.pageBgImg})` : undefined,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  '--wb-row-height': `${WB_GRID_CONFIG.rowHeight}px`
+                  backgroundRepeat: 'no-repeat'
                 } as React.CSSProperties
               }
               onAdd={handlers.handleComponentAdd}
@@ -252,6 +254,7 @@ export default function WorkbenchWorkspace() {
                       currentWidth={currentWidth}
                       containerWidth={containerWidth}
                       pageComponentSchema={wbComponentSchemas[cp.id]}
+                      wbFontSize={wbFontSize}
                       onOperation={{
                         show: handlers.handleShowComponent,
                         copy: handlers.handleCopyComponent,

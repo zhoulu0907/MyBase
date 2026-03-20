@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { memo, useEffect, useState } from 'react';
 import { getTaskCenterOverview } from '@onebase/app/src/services/app_runtime';
 import { TokenManager } from '@onebase/common';

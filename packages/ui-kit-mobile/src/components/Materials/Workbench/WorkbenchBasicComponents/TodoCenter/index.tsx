@@ -97,7 +97,7 @@ const XTodoCenter = memo((props: XTodoCenterConfig & { runtime?: boolean }) => {
             </div>
 
             <div className={styles.todoCenterContentItemRight} style={{ backgroundColor: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'rgba(var(--primary-6))' : colorList[index % colorList.length] }}>
-              <img src={ICON_MAP[key]} alt={key} height={28} />
+              <img src={ICON_MAP[key]} alt={key} />
             </div>
           </div>)
         ))}
