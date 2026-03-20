@@ -1,6 +1,7 @@
 import ResizableTable from '@/components/ResizableTable';
 import { useState, useEffect } from 'react';
-import { Spin, Empty, Button, Input, Select, DatePicker, Space } from '@arco-design/web-react';
+import { Spin, Button, Input, Select, DatePicker, Space } from '@arco-design/web-react';
+import EmptyState from '@/components/EmptyState';
 import { useConnectorWizardStore } from '../store';
 import styles from '../index.module.less';
 
@@ -63,7 +64,7 @@ const RequestLogsStep: React.FC<Step5RequestLogsProps> = ({ onSubmit }) => {
         {logs.length > 0 ? (
           <ResizableTable data={logs} columns={columns} pagination={{ total }} />
         ) : (
-          <Empty description="暂无请求日志" />
+          <EmptyState type="table" description="暂无请求日志" />
         )}
       </Spin>
 

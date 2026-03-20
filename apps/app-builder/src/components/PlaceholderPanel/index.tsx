@@ -1,5 +1,6 @@
 import React from 'react';
-import { Spin, Empty } from '@arco-design/web-react';
+import { Spin } from '@arco-design/web-react';
+import EmptyState from '@/components/EmptyState';
 
 /**
  * 用于查询的占位
@@ -27,11 +28,11 @@ const PlaceholderPanel: React.FC<PlaceholderPanelProps> = ({
   return (
     <div className={`${className ? className : ''} placeholder-panel`} style={style}>
       {!hasPermission ? (
-        <Empty description="无权限" />
+        <EmptyState type="table" description="无权限" />
       ) : isLoading ? (
         <Spin size={40} style={spinStyle}>{children}</Spin>
       ) : isEmpty ? (
-        <Empty description="暂无数据" />
+        <EmptyState type="table" description="暂无数据" />
       ) : children}
     </div>
   );

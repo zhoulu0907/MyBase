@@ -1,7 +1,8 @@
 import TablePagination from '@/components/TablePagination';
 import ActionButtons from '@/components/ActionButtons';
 import ResizableTable from '@/components/ResizableTable';
-import { Button, Modal, type TableColumnProps } from '@arco-design/web-react';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import { Button, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
@@ -116,25 +117,12 @@ const DataSet: FC = () => {
         <TablePagination current={currentPage} pageSize={pageSize} total={total} onChange={handlePageChange} />
       </div>
       {/* 删除卡片弹框 */}
-      <Modal
+      <DeleteConfirmModal
         visible={deleteVisible}
-        onOk={handleDeleteOk}
-        onCancel={() => setDeleteVisible(false)}
-        autoFocus={false}
-        focusLock={true}
-        footer={
-          <>
-            <Button type="secondary" size="default" style={{ marginRight: 10 }} onClick={() => setDeleteVisible(false)}>
-              取消
-            </Button>
-            <Button type="primary" status="danger" size="default" onClick={handleDeleteOk}>
-              确认删除
-            </Button>
-          </>
-        }
-      >
-        <p style={{ fontSize: 16, fontWeight: 500, color: '#1D2129' }}>您确定要删除该数据集吗？</p>
-      </Modal>
+        onVisibleChange={setDeleteVisible}
+        onConfirm={handleDeleteOk}
+        content="您确定要删除该数据集吗？"
+      />
     </div>
   );
 };

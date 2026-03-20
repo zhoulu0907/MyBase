@@ -1,7 +1,7 @@
 import InfoPanel from '@/components/InfoPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
+import { Divider, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
 import { TENANT_ROLE_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import { RoleType } from '@onebase/platform-center';
 import { createRole, deleteRole, updateRole } from '@onebase/platform-center/src/services/role';
@@ -12,6 +12,7 @@ import RoleList from './components/role-list';
 import RoleModal from './components/role-modal';
 import UserList from './components/user-list';
 import styles from './index.module.less';
+import EmptyState from '@/components/EmptyState';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -165,7 +166,7 @@ export default function RolePage() {
         <Layout className={styles.rightPanel}>
           {!activeRoleId || showEmpty ? (
             <>
-              <Empty />
+              <EmptyState type="card" description="请选择角色" />
             </>
           ) : (
             <>

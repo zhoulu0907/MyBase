@@ -10,7 +10,7 @@ import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-da
 import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
 import DictModal from '@/pages/Setting/pages/SystemDict/components/dict-modal';
 import { useAppStore } from '@/store/store_app';
-import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
+import { Divider, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
 import { TENANT_DICT_PERMISSION as ACTIONS, TokenManager } from '@onebase/common';
 import {
   batchConfigDictData,
@@ -33,6 +33,7 @@ import {
 import { debounce } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
+import EmptyState from '@/components/EmptyState';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -568,7 +569,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         </Sider>
         <Content className={styles.rightPanel}>
           {!activeDictId || showEmpty ? (
-            <Empty description={finalConfig.ui.emptyText} />
+            <EmptyState type="table" description={finalConfig.ui.emptyText} />
           ) : (
             <>
               <Header>

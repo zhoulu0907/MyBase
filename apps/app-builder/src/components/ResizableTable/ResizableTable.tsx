@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, forwardRef } from 'react';
 import { Table } from '@arco-design/web-react';
 import { Resizable } from 'react-resizable';
 import ResizeHandle from './ResizeHandle';
+import EmptyState from '@/components/EmptyState';
 import type { ResizableTableProps, ResizableTitleProps } from './types';
 import styles from './index.module.less';
 
@@ -40,6 +41,7 @@ const ResizableTable = forwardRef<HTMLDivElement, ResizableTableProps>((props, r
     maxWidth = DEFAULT_MAX_WIDTH,
     columns = [],
     className,
+    emptyContent,
     ...restProps
   } = props;
 
@@ -119,6 +121,7 @@ const ResizableTable = forwardRef<HTMLDivElement, ResizableTableProps>((props, r
       className={tableClassName || undefined}
       columns={resizableColumns}
       components={components}
+      emptyContent={emptyContent ?? <EmptyState type="table" />}
       {...restProps}
     />
   );
