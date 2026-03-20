@@ -1,4 +1,3 @@
-import TablePagination from '@/components/TablePagination';
 import { useI18n } from '@/hooks/useI18n';
 import { useAppStore } from '@/store/store_app';
 import {
@@ -8,6 +7,7 @@ import {
   Link,
   Menu,
   Modal,
+  Pagination,
   Select,
   Spin,
   Tag,
@@ -255,7 +255,6 @@ const EnterpriseAppPage: React.FC = () => {
               <Button
                 type="text"
                 icon={<IconSettings />}
-                style={{ color: '#21252e' }}
                 onClick={() => {
                   setTagModalVisible(true);
                 }}
@@ -374,15 +373,13 @@ const EnterpriseAppPage: React.FC = () => {
             </div>
           </Spin>
 
-          <TablePagination
+          <Pagination
             className={styles.myAppPagination}
             total={total}
             current={pageNo}
             pageSize={pageSize}
-            onChange={(pNo) => {
+            onChange={(pNo, pSize) => {
               setPageNo(pNo);
-            }}
-            onPageSizeChange={(pSize) => {
               setPageSize(pSize);
             }}
           />
