@@ -82,7 +82,7 @@ const ResizableTable = forwardRef<HTMLDivElement, ResizableTableProps>((props, r
         width: currentWidth,
         onHeaderCell: (col: any) => {
           const originalOnHeaderCell = column.onHeaderCell;
-          const originalResult = originalOnHeaderCell ? originalOnHeaderCell(col) : {};
+          const originalResult = originalOnHeaderCell ? originalOnHeaderCell(col, {}) : {};
 
           return {
             ...originalResult,
@@ -121,7 +121,7 @@ const ResizableTable = forwardRef<HTMLDivElement, ResizableTableProps>((props, r
       className={tableClassName || undefined}
       columns={resizableColumns}
       components={components}
-      emptyContent={emptyContent ?? <EmptyState type="table" />}
+      noDataElement={emptyContent ?? <EmptyState type="table" />}
       {...restProps}
     />
   );

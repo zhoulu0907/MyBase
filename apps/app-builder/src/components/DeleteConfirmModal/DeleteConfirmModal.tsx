@@ -20,7 +20,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
   confirmLoading = false,
   title = '确认删除',
   content = '确定要删除吗？删除后无法恢复。',
-  okText = '确认删除',
+  okText = '删除',
   cancelText = '取消'
 }) => {
   const handleCancel = () => {

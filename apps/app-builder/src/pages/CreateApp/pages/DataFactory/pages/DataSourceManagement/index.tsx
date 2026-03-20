@@ -1,7 +1,8 @@
 import TablePagination from '@/components/TablePagination';
 import CreateExternalModal from '@/components/CreateExternalModal';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { useAppStore } from '@/store';
-import { Button, Input, Message, Modal, Spin } from '@arco-design/web-react';
+import { Button, Input, Message, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   collectETLDatasource,
@@ -24,6 +25,8 @@ const DataSourceManagementPage: React.FC = () => {
   const [editInitialData, setEditInitialData] = useState<any>(null);
 
   const [datasourceList, setDatasourceList] = useState<PageDatasourceItem[]>([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string>('');
 
   const [pageSize, setPageSize] = useState<number>(9);
   const [pageNo, setPageNo] = useState(1);
@@ -100,18 +103,18 @@ const DataSourceManagementPage: React.FC = () => {
     setCreateExternalModalVisible(true);
   };
 
-  const handleDeleteDatasource = async (datasourceId: string) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除吗？删除后无法恢复。',
-      onOk: async () => {
-        const res = await deleteETLDatasource(datasourceId);
-        if (res) {
-          Message.success('删除成功');
-          handleGetDatasourceList();
-        }
-      }
-    });
+  const handleDeleteDatasource = (datasourceId: string) => {
+    setDeleteTargetId(datasourceId);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    const res = await deleteETLDatasource(deleteTargetId);
+    if (res) {
+      Message.success('删除成功');
+      setDeleteModalVisible(false);
+      handleGetDatasourceList();
+    }
   };
 
   const handleCreateExternalModalCreate = (datasourceUuid: string) => {
@@ -183,6 +186,11 @@ const DataSourceManagementPage: React.FC = () => {
         onClose={handleCreateExternalModalClose}
         onCreate={handleCreateExternalModalCreate}
         initialData={editInitialData}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
       />
     </div>
   );

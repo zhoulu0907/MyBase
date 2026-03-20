@@ -25,7 +25,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <div className={`${styles.emptyState} ${className || ''}`} style={style}>
       <img src={iconSrc} alt={description} className={styles.icon} />
-      <span className={styles.description}>{description}</span>
     </div>
   );
 };

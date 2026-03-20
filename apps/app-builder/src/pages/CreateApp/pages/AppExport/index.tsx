@@ -1,6 +1,7 @@
-import { Button, Alert, Select, Tag, Modal, Message } from '@arco-design/web-react';
+import { Button, Alert, Select, Tag, Message } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { IconInfoCircleFill } from '@arco-design/web-react/icon';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import {
   ExportStatus,
   pageExportAppVersion,
@@ -16,6 +17,7 @@ import React, { useEffect, useState } from 'react';
 import AppExportModal from '@/components/AppExportModal';
 import ResizableTable from '@/components/ResizableTable';
 import styles from './index.module.less';
+import ActionButtons from '@/components/ActionButtons';
 
 const AppExportPage: React.FC = () => {
   const { curAppInfo } = useAppStore();
@@ -30,6 +32,8 @@ const AppExportPage: React.FC = () => {
     { label: '导出失败', value: ExportStatus.ERROR }
   ];
   const [tableData, setTableData] = useState<AppExportRecord[]>([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<AppExportRecord | null>(null);
   const [pagination, setPagination] = useState({
     sizeCanChange: true,
     showTotal: true,
@@ -113,14 +117,16 @@ const AppExportPage: React.FC = () => {
 
   // 删除
   const handleDelete = (record: AppExportRecord) => {
-    Modal.confirm({
-      title: `确定要删除吗？`,
-      content: `删除后，数据将被永久删除，操作不可逆，请谨慎操作。`,
-      onOk: async () => {
-        await deleteExportAppVersion({ exportId: record.id });
-        Message.success('删除成功');
-      }
-    });
+    setDeleteTarget(record);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await deleteExportAppVersion({ exportId: deleteTarget.id });
+    Message.success('删除成功');
+    setDeleteModalVisible(false);
+    getExportList();
   };
 
   // 状态改变重新获取表格数据
@@ -169,6 +175,13 @@ const AppExportPage: React.FC = () => {
         }}
       />
       <AppExportModal visible={exportVisible} onClose={() => setExportVisible(false)} appInfo={curAppInfo} />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
+        title="确定要删除吗？"
+        content="删除后，数据将被永久删除，操作不可逆，请谨慎操作。"
+      />
     </div>
   );
 };

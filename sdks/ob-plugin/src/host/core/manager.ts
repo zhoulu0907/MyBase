@@ -54,7 +54,7 @@ export class PluginManager {
 
   /** 加载并初始化插件 */
   async loadPlugin(pluginId: string): Promise<LoadedPlugin> {
-    console.error(`ob-plugin-template 插件加载中 ${pluginId}`)
+    // console.error(`ob-plugin-template 插件加载中 ${pluginId}`)
     const key = this.resolveKey(pluginId);
     const item = this.registry.get(key);
     if (!item) throw new Error(`Plugin ${pluginId} not registered`);

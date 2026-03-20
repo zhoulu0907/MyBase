@@ -1,4 +1,5 @@
 import type { TableProps } from '@arco-design/web-react';
+import type { ReactNode } from 'react';
 
 export interface ResizableTableProps extends TableProps {
   /** 是否启用列宽拖拽调整，默认 true */
@@ -7,6 +8,7 @@ export interface ResizableTableProps extends TableProps {
   minWidth?: number;
   /** 最大列宽，默认 500 */
   maxWidth?: number;
+  emptyContent?: ReactNode;
 }
 
 export interface ResizeHandleProps {

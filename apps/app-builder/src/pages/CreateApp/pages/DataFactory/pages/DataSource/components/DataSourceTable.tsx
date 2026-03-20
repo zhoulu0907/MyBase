@@ -1,6 +1,7 @@
 import ResizableTable from '@/components/ResizableTable';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { useAppStore } from '@/store/store_app';
-import { Button, Message, Modal, Space, type TableColumnProps } from '@arco-design/web-react';
+import { Button, Message, Space, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
@@ -202,17 +203,13 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
       </div>
 
       {/* 删除确认对话框 */}
-      <Modal
-        title="确认删除"
+      <DeleteConfirmModal
         visible={deleteModalVisible}
-        onOk={confirmDelete}
-        onCancel={cancelDelete}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
-        okText="确认删除"
-        cancelText="取消"
-      >
-        <p>确定要删除这个数据源吗？删除后无法恢复。</p>
-      </Modal>
+        content="确定要删除这个数据源吗？删除后无法恢复。"
+      />
 
       <EditDsDrawer
         visible={editDrawerVisible}

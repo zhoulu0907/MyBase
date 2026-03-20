@@ -4,11 +4,12 @@ import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import CreateScreenModal from '@/components/CreatePageDashboardModal';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { useI18n } from '@/hooks/useI18n';
 import PreviewContainer from '@/pages/Runtime/components/preview';
 import { useAppStore } from '@/store/store_app';
 import { addParentIdToChildren } from '@/utils/menu';
-import { Button, Dropdown, Form, Input, Layout, Menu, Message, Modal, Tree } from '@arco-design/web-react';
+import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
 import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import {
   copyApplicationMenu,
@@ -128,6 +129,8 @@ const PageManagerPage: FC = () => {
 
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const [searchResult, setSearchResult] = useState<boolean>(false); // 菜单搜索结果
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const dashboardPageType = 4;
 
   const initTreeItemWidth = 110;
@@ -439,13 +442,14 @@ const PageManagerPage: FC = () => {
   };
 
   const triggerDelete = (menuID: string, menuName: string) => {
-    Modal.confirm({
-      title: `你确定要删除${menuName}吗？`,
-      content: `删除页面将同时删除页面设计与权限配置等，且无法还原，请谨慎操作。`,
-      onOk: async () => {
-        handleDelete(menuID);
-      }
-    });
+    setDeleteTarget({ id: menuID, name: menuName });
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await handleDelete(deleteTarget.id);
+    setDeleteModalVisible(false);
   };
 
   //页面设计新建大屏创建
@@ -918,6 +922,13 @@ const PageManagerPage: FC = () => {
         entityListOptions={entityListOptions}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
+        title={deleteTarget ? `你确定要删除${deleteTarget.name}吗？` : '确认删除'}
+        content="删除页面将同时删除页面设计与权限配置等，且无法还原，请谨慎操作。"
       />
     </div>
   );

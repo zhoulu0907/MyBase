@@ -4,13 +4,14 @@
 import InfoPanel from '@/components/InfoPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import StatusTag, { StatusLabelEnum } from '@/components/StatusTag';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-config-modal';
 import DictDataModal from '@/pages/Setting/pages/SystemDict/components/dict-data-modal';
 import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-data-table';
 import DictList from '@/pages/Setting/pages/SystemDict/components/dict-list';
 import DictModal from '@/pages/Setting/pages/SystemDict/components/dict-modal';
 import { useAppStore } from '@/store/store_app';
-import { Divider, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
+import { Divider, Empty, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
 import { TENANT_DICT_PERMISSION as ACTIONS, TokenManager } from '@onebase/common';
 import {
   batchConfigDictData,
@@ -184,6 +185,8 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   const [editItem, setEditItem] = useState<DictData | null>(null);
   const [batchConfigModalVisible, setBatchConfigModalVisible] = useState(false);
   const [batchConfigLoading, setBatchConfigLoading] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string>('');
   const getTenantInfo = TokenManager.getTenantInfo();
 
   // 获取当前tab的配置
@@ -383,16 +386,14 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   };
 
   // 删除字典
-  const handleDeleteDict = async (id: string) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这条数据吗？',
-      okText: '确认',
-      cancelText: '取消',
-      onOk: async () => {
-        handleDeleteDictOk(id);
-      }
-    });
+  const handleDeleteDict = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteDictConfirm = async () => {
+    await handleDeleteDictOk(deleteTargetId);
+    setDeleteModalVisible(false);
   };
 
   const handleDeleteDictOk = async (id: string) => {
@@ -648,6 +649,12 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         onOk={handleBatchConfigOk}
         loading={batchConfigLoading}
         dictTypeId={activeDict?.id || ''}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteDictConfirm}
+        content="确定要删除这条数据吗？"
       />
     </div>
   );

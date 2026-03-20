@@ -1,6 +1,7 @@
 import TablePagination from '@/components/TablePagination';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { useAppStore } from '@/store';
-import { Button, Input, Message, Modal, Spin, Tabs } from '@arco-design/web-react';
+import { Button, Input, Message, Spin, Tabs } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
     deleteETLFlow,
@@ -37,6 +38,8 @@ const EtlDataFactoryPage: React.FC = () => {
 
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [curFlowStrategyInfo, setCurFlowStrategyInfo] = useState<any>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string>('');
 
   useEffect(() => {
     handleGetETLFlowList();
@@ -88,18 +91,18 @@ const EtlDataFactoryPage: React.FC = () => {
     navigate(`/onebase/${tenantId}/etl_editor?appId=${curAppId}`);
   };
 
-  const handleDeleteFlow = async (flowId: string) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除吗？删除后无法恢复。',
-      onOk: async () => {
-        const res = await deleteETLFlow(flowId);
-        if (res) {
-          Message.success('删除成功');
-          handleGetETLFlowList();
-        }
-      }
-    });
+  const handleDeleteFlow = (flowId: string) => {
+    setDeleteTargetId(flowId);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    const res = await deleteETLFlow(deleteTargetId);
+    if (res) {
+      Message.success('删除成功');
+      setDeleteModalVisible(false);
+      handleGetETLFlowList();
+    }
   };
 
   return (
@@ -177,6 +180,11 @@ const EtlDataFactoryPage: React.FC = () => {
         visible={editModalVisible}
         onOk={handleUpdateETLFlow}
         onCancel={handleCancelUpdateETLFlow}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
       />
     </div>
   );
