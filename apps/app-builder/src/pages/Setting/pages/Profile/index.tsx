@@ -347,7 +347,7 @@ const ProfilePage: React.FC = () => {
       <PlaceholderPanel
         hasPermission={hasPermission(ACTIONS.QUERY)}
         isLoading={loading}
-        style={{ display: 'flex', flex: 1, overflow: 'hidden' }}
+        style={{ display: 'flex', flex: 1, overflow: 'hidden', visibility: 'hidden' }}
         spinStyle={{ display: 'flex', flex: 1, overflow: 'hidden' }}
       >
         <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ maxWidth: tabPanelWidth }}>
