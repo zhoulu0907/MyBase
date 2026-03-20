@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Space, Grid, Button, Table, Tag, type TableColumnProps, type PaginationProps } from '@arco-design/web-react';
-import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp, IconMoreVertical } from '@arco-design/web-react/icon';
+import { Space, Grid, Button, Table, Tag, type TableColumnProps } from '@arco-design/web-react';
+import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp } from '@arco-design/web-react/icon';
+import TablePagination from '@/components/TablePagination';
 import styles from './index.module.less';
 import { useAppStore } from '@/store';
 import { getFlowLogDetail, getFlowLogPage, getFlowLogStatistic } from '@onebase/app';
@@ -29,13 +30,10 @@ const FlowExecuteRecordPage: React.FC = () => {
   const [tableData, setTableData] = useState<ExecuteRecord[]>([]);
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   // 分页器
-  const [pagination, setPagination] = useState<PaginationProps>({
+  const [pagination, setPagination] = useState({
     total: 10,
     current: 1,
-    pageSize: 10,
-    showTotal: true,
-    sizeCanChange: true,
-    pageSizeChangeResetCurrent: true
+    pageSize: 10
   });
   // 执行记录 table
   const columns: TableColumnProps[] = [
@@ -105,7 +103,7 @@ const FlowExecuteRecordPage: React.FC = () => {
   }, []);
 
   // 初始化获取数据
-  const getData = async (paginationConfig: PaginationProps) => {
+  const getData = async (paginationConfig: { current: number; pageSize: number; total?: number }) => {
     const appId = curAppId || getHashQueryParam('appId');
     const statisticParam = {
       applicationId: appId
@@ -170,20 +168,10 @@ const FlowExecuteRecordPage: React.FC = () => {
     const paginationConfig = {
       total: 10,
       current: 1,
-      pageSize: 10,
-      showTotal: true,
-      sizeCanChange: true,
-      pageSizeChangeResetCurrent: true
+      pageSize: 10
     };
     setPagination(paginationConfig);
     getData(paginationConfig);
-  };
-
-  // 分页改变时的回调
-  const onChangeTable = (paginationConfig: PaginationProps) => {
-    const { current, pageSize } = paginationConfig;
-    getData(paginationConfig);
-    setPagination((prev) => ({ ...prev, current, pageSize }));
   };
 
   return (
@@ -239,11 +227,25 @@ const FlowExecuteRecordPage: React.FC = () => {
             columns={columns}
             data={tableData}
             loading={tableLoading}
-            pagination={pagination}
-            onChange={onChangeTable}
+            pagination={false}
             border={false}
             rowKey="id"
           ></Table>
+          <TablePagination
+            total={pagination.total}
+            current={pagination.current}
+            pageSize={pagination.pageSize}
+            onChange={(pNo) => {
+              const newPagination = { ...pagination, current: pNo };
+              setPagination(newPagination);
+              getData(newPagination);
+            }}
+            onPageSizeChange={(pSize) => {
+              const newPagination = { ...pagination, current: 1, pageSize: pSize };
+              setPagination(newPagination);
+              getData(newPagination);
+            }}
+          />
         </div>
       </div>
     </div>

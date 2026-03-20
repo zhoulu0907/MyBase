@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import { Button, Message, Space, Tag } from '@arco-design/web-react';
 import { CommonTable } from '../table/commonTable';
 import { TopHeader } from '../topHeader';
@@ -129,16 +130,16 @@ export const AuthorizedApp: React.FC<IAuthorizedAppProps> = ({
     },
     {
       title: '操作',
-      width: 140,
+      width: 100,
       render: (_: any, record: any) => (
-        <Space size="mini">
+        <ActionButtons>
           <Button type="text" onClick={() => handleEditAuthorizedTime(record)}>
             编辑
           </Button>
           <Button type="text" onClick={() => handleRemove(record.id)}>
             移除
           </Button>
-        </Space>
+        </ActionButtons>
       )
     }
   ];

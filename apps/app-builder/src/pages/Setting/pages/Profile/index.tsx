@@ -1,3 +1,4 @@
+import TablePagination from '@/components/TablePagination';
 import DynamicIcon from '@/components/DynamicIcon';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag from '@/components/StatusTag';
@@ -7,7 +8,6 @@ import {
   Card,
   Grid,
   Image,
-  Pagination,
   Space,
   Spin,
   Table,
@@ -369,15 +369,12 @@ const ProfilePage: React.FC = () => {
                 marginTop: 12
               }}
             >
-              <Pagination
-                size="small"
+              <TablePagination
                 current={page}
                 pageSize={pageSize}
                 total={total}
                 onChange={setPage}
                 onPageSizeChange={setPageSize}
-                showTotal
-                showJumper
                 sizeOptions={[5, 10, 20]}
               />
             </div>

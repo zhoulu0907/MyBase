@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
@@ -145,16 +146,17 @@ const DataRules: React.FC<DataRulesProps> = ({ entity, activeTab }) => {
     {
       title: '操作',
       key: 'operation',
+      width: 80,
       render: (col, record) => {
         return (
-          <Space>
+          <ActionButtons>
             <Button type="text" size="mini" onClick={() => handleEdit(record)}>
               编辑
             </Button>
             <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)}>
               删除
             </Button>
-          </Space>
+          </ActionButtons>
         );
       }
     }

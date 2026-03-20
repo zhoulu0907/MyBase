@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import { listToTree } from '@/utils/tree';
@@ -51,9 +52,9 @@ const OrganizationPage: React.FC = () => {
     {
       title: '操作',
       dataIndex: 'operations',
-      width: 242,
+      width: 240,
       render: (_: any, record: any) => (
-        <Space size="mini">
+        <ActionButtons>
           <Button permission={ACTIONS.SUB_DEPT} type="text" onClick={(e) => handleAddSubDepart(e, record)}>
             添加子部门
           </Button>
@@ -63,7 +64,7 @@ const OrganizationPage: React.FC = () => {
           <Button permission={ACTIONS.DELETE} type="text" onClick={(e) => handleDelete(e, record)}>
             删除
           </Button>
-        </Space>
+        </ActionButtons>
       )
     }
   ];

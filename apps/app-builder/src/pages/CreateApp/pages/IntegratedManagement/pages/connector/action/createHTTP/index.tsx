@@ -48,6 +48,19 @@ import {
   getTabString
 } from './utils';
 
+/** 生成动作编码：ACTION_ + 8位，英文大写开头，包含英文大写和数字 */
+const generateActionCode = (): string => {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  // 第一位必须是英文大写
+  let code = letters.charAt(Math.floor(Math.random() * letters.length));
+  // 后面7位是英文大写或数字
+  for (let i = 0; i < 7; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `ACTION_${code}`;
+};
+
 /** 认证方式映射 */
 const AUTH_TYPE_NAMES: Record<string, string> = {
   none: '无认证',
@@ -801,10 +814,12 @@ const CreateHTTPActionPage: React.FC<CreateHTTPActionPageProps> = ({
         };
         await updateConnectorAction(params);
       } else {
-        // 创建模式
+        // 创建模式 - 自动生成动作编码
+        const actionCode = generateActionCode();
         const params: CreateConnectorActionReq = {
           connectorUuid,
           connectorType: 'HTTP',
+          actionCode,
           actionName,
           description: actionDescription,
           inputSchema: JSON.stringify(inputs),

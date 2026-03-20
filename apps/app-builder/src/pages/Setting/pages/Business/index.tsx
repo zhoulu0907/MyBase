@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import StatusTag from '@/components/StatusTag';
 import {
   Avatar,
@@ -91,8 +92,9 @@ const BusinessPage: React.FC = () => {
     },
     {
       title: '操作',
+      width: 200,
       render: (_: any, record: any) => (
-        <Space size={4}>
+        <ActionButtons>
           {hasPermission(ACTIONS.UPDATE) && (
             <Button size="small" type="text" onClick={handleEdit.bind(null, record, 'basic')}>
               编辑
@@ -113,7 +115,7 @@ const BusinessPage: React.FC = () => {
               <Button size="small" type="text" icon={<IconMore />} />
             </Dropdown>
           )}
-        </Space>
+        </ActionButtons>
       )
     }
   ];

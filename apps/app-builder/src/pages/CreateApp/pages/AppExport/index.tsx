@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import { Table, Button, Alert, Select, Tag, Modal, Message } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { IconInfoCircleFill } from '@arco-design/web-react/icon';
@@ -72,9 +73,9 @@ const AppExportPage: React.FC = () => {
       title: '操作',
       key: 'actions',
       align: 'center',
-      width: 200,
+      width: 120,
       render: (_, record: any) => (
-        <>
+        <ActionButtons>
           {record.exportStatus === ExportStatus.SUCCESS && (
             <Button size="mini" type="text" onClick={() => handleDownload(record)}>
               下载
@@ -88,7 +89,7 @@ const AppExportPage: React.FC = () => {
           <Button size="mini" type="text" status="danger" onClick={() => handleDelete(record)}>
             删除
           </Button>
-        </>
+        </ActionButtons>
       )
     }
   ];

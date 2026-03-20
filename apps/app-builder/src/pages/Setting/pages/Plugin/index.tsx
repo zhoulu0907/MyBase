@@ -1,5 +1,7 @@
+import TablePagination from '@/components/TablePagination';
+import ActionButtons from '@/components/ActionButtons';
 import externalUserSVG from '@/assets/images/external_user.svg';
-import { Input, Message, Modal, Space, Spin, Switch, Tabs, Pagination, Drawer, Dropdown, Menu, Button, Form, Upload, Table, Popconfirm, Divider } from '@arco-design/web-react';
+import { Input, Message, Modal, Space, Spin, Switch, Tabs, Drawer, Dropdown, Menu, Button, Form, Upload, Table, Popconfirm, Divider } from '@arco-design/web-react';
 import { IconSettings, IconEdit, IconMoreVertical, IconPlus, IconUpload } from '@arco-design/web-react/icon';
 import { getPluginListApi, type pluginParams, updatePluginStatusApi, getPluginPageListApi, type pluginPageParams, createPluginApi, getPluginDetailApi, updatePluginInfoApi, uploadPluginVersionApi, getPluginVersionListApi, deletePluginVersionApi, activePluginVersionApi, enablePluginApi, disablePluginApi, getPluginConfigTemplateApi, savePluginConfigApi, getPluginConfigDetailApi, type PluginDetailRespVO, type PluginVersionVO } from '@onebase/platform-center';
 import dayjs from 'dayjs';
@@ -822,12 +824,11 @@ const PluginPage = () => {
                 {/* 动态插件分页 */}
                 {total > 0 && (
                   <div className={styles.pagination}>
-                    <Pagination
+                    <TablePagination
                       current={currentPage}
                       pageSize={pageSize}
                       total={total}
                       onChange={handlePageChange}
-                      showTotal={(total) => `共 ${total} 条`}
                     />
                   </div>
                 )}
@@ -936,9 +937,9 @@ const PluginPage = () => {
                 {
                   title: '操作',
                   key: 'action',
-                  width: 250,
+                  width: 120,
                   render: (_: any, record: PluginVersionVO) => (
-                    <Space split={<Divider type="vertical" />}>
+                    <ActionButtons>
                       <Button
                         type="text"
                         size="small"
@@ -961,7 +962,7 @@ const PluginPage = () => {
                           删除
                         </Button>
                       </Popconfirm>
-                    </Space>
+                    </ActionButtons>
                   )
                 }
               ]}

@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import { useState, type FC } from 'react';
 import { Table, type TableColumnProps, Button, Tag, Radio, Space } from '@arco-design/web-react';
 import { IconPlusCircle } from '@arco-design/web-react/icon';
@@ -84,9 +85,10 @@ const FlowProxy: FC = () => {
     {
       title: '操作',
       dataIndex: 'op',
+      width: 80,
       align: 'center',
       render: (_, record) => (
-        <>
+        <ActionButtons>
           <Button type="text" status="success" onClick={() => {}}>
             撤消
           </Button>
@@ -100,7 +102,7 @@ const FlowProxy: FC = () => {
           >
             编辑
           </Button>
-        </>
+        </ActionButtons>
       )
     }
   ];

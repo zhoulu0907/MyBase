@@ -1,3 +1,5 @@
+import TablePagination from '@/components/TablePagination';
+import ActionButtons from '@/components/ActionButtons';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
@@ -297,9 +299,9 @@ export default function UserTable({
       {
         title: '操作',
         dataIndex: 'op',
-        width: 200,
+        width: 150,
         render: (_: any, record: any) => (
-          <Space>
+          <ActionButtons>
             <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
               编辑
             </Button>
@@ -338,7 +340,7 @@ export default function UserTable({
                 </Button>
               </>
             )}
-          </Space>
+          </ActionButtons>
         )
       }
     ];
@@ -517,26 +519,14 @@ export default function UserTable({
           scroll={{ y: 510 }}
         />
         {/* 页码 */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            marginTop: 12
-          }}
-        >
-          <Pagination
-            size="small"
-            current={page}
-            pageSize={pageSize}
-            total={total}
-            onChange={setPage}
-            onPageSizeChange={setPageSize}
-            showTotal
-            showJumper
-            sizeOptions={[10, 20, 50]}
-          />
-        </div>
+        <TablePagination
+          current={page}
+          pageSize={pageSize}
+          total={total}
+          onChange={setPage}
+          onPageSizeChange={setPageSize}
+          sizeOptions={[10, 20, 50]}
+        />
       </PlaceholderPanel>
       <UserFormModal
         visible={userModalVisible}

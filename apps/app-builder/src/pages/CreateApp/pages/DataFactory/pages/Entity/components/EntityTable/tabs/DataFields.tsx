@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import { convertEntityListItemToConfigField } from '@/pages/CreateApp/pages/DataFactory/utils/dataConverter';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { FIELD_TYPE, FIELD_TYPE_LABEL } from '@onebase/ui-kit';
@@ -171,7 +172,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
       key: 'operation',
       width: 80,
       render: (_, record) => (
-        <Space>
+        <ActionButtons>
           {record.isSystemField === FIELD_TYPE.CUSTOM && (
             <Button type="text" size="mini" onClick={() => handleEditField(record.id)}>
               编辑
@@ -183,7 +184,7 @@ const DataFields: React.FC<DataFieldsProps> = ({ entity, activeTab }) => {
               删除
             </Button>
           )}
-        </Space>
+        </ActionButtons>
       )
     }
   ];

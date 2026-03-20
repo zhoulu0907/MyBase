@@ -1,4 +1,6 @@
-import { Button, Modal, Pagination, Space, Table, type TableColumnProps } from '@arco-design/web-react';
+import TablePagination from '@/components/TablePagination';
+import ActionButtons from '@/components/ActionButtons';
+import { Button, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
@@ -22,18 +24,18 @@ const DataSet: FC = () => {
     { title: '修改人/修改时间', dataIndex: 'lastUpdateTime', key: 'lastUpdateTime' },
     {
       title: '操作',
-      width: 100,
+      width: 80,
       key: 'operate',
       align: 'center',
       render: (_: DataTable, record: DataTable) => (
-        <Space size="mini">
+        <ActionButtons>
           <Button type="text" onClick={() => handleEdit(record)}>
             编辑
           </Button>
           <Button type="text" status="danger" onClick={() => handleDelete(record)}>
             删除
           </Button>
-        </Space>
+        </ActionButtons>
       )
     }
   ];
@@ -110,7 +112,7 @@ const DataSet: FC = () => {
           marginTop: 12
         }}
       >
-        <Pagination current={currentPage} pageSize={pageSize} total={total} onChange={handlePageChange} showTotal />
+        <TablePagination current={currentPage} pageSize={pageSize} total={total} onChange={handlePageChange} />
       </div>
       {/* 删除卡片弹框 */}
       <Modal

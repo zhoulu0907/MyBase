@@ -1,4 +1,6 @@
-import { Card, Pagination, Space, Table, Typography, Button } from '@arco-design/web-react';
+import TablePagination from '@/components/TablePagination';
+import ActionButtons from '@/components/ActionButtons';
+import { Card, Space, Table, Typography, Button } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import React, { useState } from 'react';
 import EditVersionModal from '../modals/EditVersionModal';
@@ -164,9 +166,9 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       title: '操作',
       key: 'actions',
       align: 'center',
-      width: 200,
+      width: 80,
       render: (_: unknown, record: VersionRecord) => (
-        <Space>
+        <ActionButtons>
           <Button type="text" size="small" onClick={() => handleExport(record)}>
             版本导出
           </Button>
@@ -182,7 +184,7 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
           <Button type="text" size="small" onClick={() => handleCompareVersion(record)}>
             版本比对
           </Button> */}
-        </Space>
+        </ActionButtons>
       )
     }
   ];
@@ -218,14 +220,12 @@ const VersionManagement: React.FC<VersionManagementProps> = ({
       />
 
       <div className={styles.pagination}>
-        <Pagination
+        <TablePagination
           total={total}
           current={currentPage}
           pageSize={pageSize}
           onChange={setCurrentPage}
           onPageSizeChange={setPageSize}
-          showTotal
-          sizeCanChange
           sizeOptions={[10, 20, 50]}
         />
       </div>

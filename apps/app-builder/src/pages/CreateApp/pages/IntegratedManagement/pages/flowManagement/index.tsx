@@ -1,3 +1,4 @@
+import TablePagination from '@/components/TablePagination';
 import { useAppStore } from '@/store';
 import {
   Button,
@@ -6,7 +7,6 @@ import {
   Input,
   Menu,
   Modal,
-  Pagination,
   Radio,
   Select,
   Spin,
@@ -337,13 +337,15 @@ const FlowManagementPage: React.FC = () => {
           </Spin>
         </div>
         <div className={styles.footer}>
-          <Pagination
+          <TablePagination
             className={styles.myAppPagination}
             total={total}
             current={pageNo}
             pageSize={pageSize}
-            onChange={(pNo, pSize) => {
+            onChange={(pNo) => {
               setPageNo(pNo);
+            }}
+            onPageSizeChange={(pSize) => {
               setPageSize(pSize);
             }}
           />

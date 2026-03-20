@@ -1,6 +1,7 @@
+import TablePagination from '@/components/TablePagination';
 import CreateExternalModal from '@/components/CreateExternalModal';
 import { useAppStore } from '@/store';
-import { Button, Input, Message, Modal, Pagination, Spin } from '@arco-design/web-react';
+import { Button, Input, Message, Modal, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   collectETLDatasource,
@@ -162,12 +163,14 @@ const DataSourceManagementPage: React.FC = () => {
           </div>
 
           <div className={styles.contentFooter}>
-            <Pagination
+            <TablePagination
               total={total}
               current={pageNo}
               pageSize={pageSize}
-              onChange={(pNo, pSize) => {
+              onChange={(pNo) => {
                 setPageNo(pNo);
+              }}
+              onPageSizeChange={(pSize) => {
                 setPageSize(pSize);
               }}
             />

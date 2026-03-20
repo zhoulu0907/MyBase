@@ -1,5 +1,6 @@
+import TablePagination from '@/components/TablePagination';
 import { useAppStore } from '@/store';
-import { Button, Input, Message, Modal, Pagination, Spin, Tabs } from '@arco-design/web-react';
+import { Button, Input, Message, Modal, Spin, Tabs } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
     deleteETLFlow,
@@ -155,13 +156,15 @@ const EtlDataFactoryPage: React.FC = () => {
             </Spin>
           </div>
           <div className={styles.contentFooter}>
-            <Pagination
+            <TablePagination
               className={styles.myAppPagination}
               total={total}
               current={pageNo}
               pageSize={pageSize}
-              onChange={(pNo, pSize) => {
+              onChange={(pNo) => {
                 setPageNo(pNo);
+              }}
+              onPageSizeChange={(pSize) => {
                 setPageSize(pSize);
               }}
             />

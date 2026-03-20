@@ -1,6 +1,7 @@
+import TablePagination from '@/components/TablePagination';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import StatusTag from '@/components/StatusTag';
-import { Input, Pagination, Table } from '@arco-design/web-react';
+import { Input, Table } from '@arco-design/web-react';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@onebase/common';
 import { type DictData } from '@onebase/platform-center';
 import s from '../../index.module.less';
@@ -64,14 +65,12 @@ export default function DictionaryTable({
       <div className={s.tableContainer}>
         <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} />
         <div className={s.paginationContainer}>
-          <Pagination
+          <TablePagination
             total={total}
             pageSize={pageSize}
             current={currentPage}
             onChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
-            showTotal
-            sizeCanChange
           />
         </div>
       </div>

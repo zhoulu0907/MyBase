@@ -1,4 +1,5 @@
-import { Button, Input, Message, Pagination, Select, Spin } from '@arco-design/web-react';
+import TablePagination from '@/components/TablePagination';
+import { Button, Input, Message, Select, Spin } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteConnectInstance, listAllConnectInstance, type ConnectInstance } from '@onebase/app';
 import { getHashQueryParam } from '@onebase/common';
@@ -139,13 +140,15 @@ const ConnectorInstancesPage: React.FC = () => {
           </Spin>
         </div>
         <div className={styles.footer}>
-          <Pagination
+          <TablePagination
             className={styles.myAppPagination}
             total={total}
             current={pageNo}
             pageSize={pageSize}
-            onChange={(pNo, pSize) => {
+            onChange={(pNo) => {
               setPageNo(pNo);
+            }}
+            onPageSizeChange={(pSize) => {
               setPageSize(pSize);
             }}
           />

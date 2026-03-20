@@ -1,3 +1,4 @@
+import TablePagination from '@/components/TablePagination';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 import { isSystemUser } from '@/utils';
 import { Button, Input, Message, Modal, Pagination, Space, Spin, Table } from '@arco-design/web-react';
@@ -183,31 +184,19 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
       <Spin loading={loading}>
         <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} stripe />
       </Spin>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          marginTop: 12
+      <TablePagination
+        current={page}
+        pageSize={pageSize}
+        total={total}
+        onChange={(newPage) => {
+          setPage(newPage);
         }}
-      >
-        <Pagination
-          size="small"
-          current={page}
-          pageSize={pageSize}
-          total={total}
-          onChange={(newPage) => {
-            setPage(newPage);
-          }}
-          onPageSizeChange={(newPageSize) => {
-            setPageSize(newPageSize);
-            setPage(1);
-          }}
-          showTotal
-          showJumper
-          sizeOptions={[10, 20, 50]}
-        />
-      </div>
+        onPageSizeChange={(newPageSize) => {
+          setPageSize(newPageSize);
+          setPage(1);
+        }}
+        sizeOptions={[10, 20, 50]}
+      />
 
       {/* 添加用户对话框 */}
       {userModalVisible && (

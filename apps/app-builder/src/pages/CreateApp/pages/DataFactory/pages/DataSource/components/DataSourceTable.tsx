@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import { useAppStore } from '@/store/store_app';
 import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
@@ -137,13 +138,13 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
     {
       title: '操作',
       dataIndex: 'operation',
+      width: 120,
       render: (_, record: DatasourceRecord, index) => (
         // 默认数据源（第一个返回值）不可编辑删除
-        <Space>
+        <ActionButtons>
           <Button
             type="text"
             size="mini"
-            style={{ marginRight: 8 }}
             onClick={() => gotoEdit(record.id)}
             disabled={index === 0}
           >
@@ -158,10 +159,9 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
           >
             删除
           </Button>
-        </Space>
+        </ActionButtons>
       ),
       fixed: 'right',
-      width: 120
     }
   ];
 

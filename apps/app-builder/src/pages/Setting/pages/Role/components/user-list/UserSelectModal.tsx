@@ -1,5 +1,6 @@
-import { Checkbox, Input, Modal, Pagination, Spin, Table } from '@arco-design/web-react';
+import { Checkbox, Input, Modal, Spin, Table } from '@arco-design/web-react';
 import { IconSearch } from '@arco-design/web-react/icon';
+import TablePagination from '@/components/TablePagination';
 import type { PageParam, UserVO } from '@onebase/platform-center';
 import { getUserPage } from '@onebase/platform-center';
 import { debounce, difference, union } from 'lodash-es';
@@ -194,22 +195,17 @@ const UserSelectModal: React.FC<UserSelectModalProps> = ({
         />
       </Spin>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 12 }}>
-        <Pagination
-          size="small"
-          current={page}
-          pageSize={pageSize}
-          total={total}
-          onChange={setPage}
-          onPageSizeChange={(pageSize) => {
-            setPageSize(pageSize);
-            setPage(1);
-          }}
-          showTotal
-          showJumper
-          sizeOptions={[10, 20, 50]}
-        />
-      </div>
+      <TablePagination
+        current={page}
+        pageSize={pageSize}
+        total={total}
+        onChange={(pNo) => setPageNo(pNo)}
+        onPageSizeChange={(pSize) => {
+          setPageSize(pSize);
+          setPageNo(1);
+        }}
+        sizeOptions={[10, 20, 50]}
+      />
     </Modal>
   );
 };

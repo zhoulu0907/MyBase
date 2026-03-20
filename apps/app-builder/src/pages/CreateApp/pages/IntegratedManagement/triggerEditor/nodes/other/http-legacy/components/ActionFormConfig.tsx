@@ -2,11 +2,11 @@ import DynamicForm from '@/components/DynamicForm';
 import { DebugParamReadOnlyTable } from '@/pages/CreateApp/pages/IntegratedManagement/pages/connector/action/createHTTP/DebugParamReadOnlyTable';
 import { createForm, type Form } from '@formily/core';
 import { type ISchema } from '@formily/react';
-import { getConnectorActionInfo, type FlowConnector } from '@onebase/app';
+import { getConnectorActionByCode, type FlowConnector } from '@onebase/app';
 import React, { useEffect, useMemo, useState } from 'react';
 import { getDefaultActionSchema } from './action-form-schema';
 
-/** 将 getConnectorActionInfo 接口返回的 actionConfig 转为表单 values（与 createHTTP 保持一致） */
+/** 将 getConnectorActionByCode 接口返回的 actionConfig 转为表单 values（与 createHTTP 保持一致） */
 function actionConfigToFormValues(config: Record<string, unknown>): Record<string, unknown> {
   const basic = (config.basicInfo ?? {}) as Record<string, unknown>;
   const request = (config.inputConfig ?? {}) as Record<string, unknown>;
@@ -105,7 +105,7 @@ export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
     };
   }, [form, onChange]);
 
-  // 通过接口获取动作 schema，id 为 connector.id，actionName 为当前选中动作名称
+  // 通过接口获取动作 schema，connectorUuid 为 connector.connectorUuid，actionCode 为当前选中动作编码
   const [actionSchema, setActionSchema] = useState<ISchema | null>(null);
   const [schemaLoading, setSchemaLoading] = useState(false);
 
@@ -113,16 +113,26 @@ export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
   const actionFormComponents = useMemo(() => ({ DebugParamReadOnlyTable }), []);
 
   useEffect(() => {
-    if (!connector?.id || !actionName) {
+    if (!connector?.connectorUuid || !actionName) {
       setActionSchema(null);
       return;
     }
     let cancelled = false;
     setSchemaLoading(true);
-    getConnectorActionInfo(connector.id, actionName)
+    getConnectorActionByCode(connector.connectorUuid, actionName)
       .then((res: unknown) => {
         if (cancelled) return;
-        const config = (res ?? {}) as Record<string, unknown>;
+        // 新 API 返回的是 ConnectorActionDO 对象
+        const actionDO = (res ?? {}) as Record<string, unknown>;
+        // 解析 actionConfig JSON 字符串
+        let config: Record<string, unknown> = {};
+        if (typeof actionDO.actionConfig === 'string' && actionDO.actionConfig) {
+          try {
+            config = JSON.parse(actionDO.actionConfig);
+          } catch (e) {
+            console.error('Failed to parse actionConfig:', e);
+          }
+        }
         // 用 actionConfigToFormValues 将接口 config 转为表单值；仅当父组件未传入有效 initialValues 时才用接口数据填充，避免覆盖已保存数据
         const formValues = actionConfigToFormValues(config);
         const hasInitialFromParent = initialValues && Object.keys(initialValues).length > 0;
@@ -145,7 +155,7 @@ export const ActionFormConfig: React.FC<ActionFormConfigProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [connector?.id, actionName, form]);
+  }, [connector?.connectorUuid, actionName, form]);
 
   if (schemaLoading) {
     return <div style={{ color: '#999', padding: '32px 0', textAlign: 'center' }}>加载中...</div>;

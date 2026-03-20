@@ -1,3 +1,4 @@
+import TablePagination from '@/components/TablePagination';
 import { useAppStore } from '@/store/store_app';
 import {
   Divider,
@@ -5,7 +6,6 @@ import {
   Input,
   Message,
   Modal,
-  Pagination,
   Select,
   Space,
   Spin,
@@ -414,13 +414,15 @@ const AppManagement: React.FC = () => {
             </div>
           </Spin>
 
-          <Pagination
+          <TablePagination
             className={styles.appPagination}
             total={total}
             current={pageNo}
             pageSize={pageSize}
-            onChange={(pNo, pSize) => {
+            onChange={(pNo) => {
               setPageNo(pNo);
+            }}
+            onPageSizeChange={(pSize) => {
               setPageSize(pSize);
             }}
           />

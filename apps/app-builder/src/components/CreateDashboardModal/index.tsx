@@ -1,5 +1,6 @@
 import MenuComp from '@/components/MenuIcon';
-import { Button, Form, Input, Modal, Pagination, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import TablePagination from '@/components/TablePagination';
+import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import { getDashboardListApi, getDashboardTemplateListApi, IsHot, RootParentPage } from '@onebase/app';
 import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -495,15 +496,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
             )}
             {dashboardMethod !== DashBoardCreateType.DashboardNew && (
               <div className={styles.dashboardPagination}>
-                <Pagination
+                <TablePagination
                   total={total}
                   current={dashboardPagination.current}
                   pageSize={dashboardPagination.pageSize}
-                  sizeOptions={[8]}
-                  showTotal
-                  sizeCanChange
                   onChange={handleChangePagination}
-                  disabled={dashboardTemplateTabLoading}
+                  sizeOptions={[8]}
                 />
               </div>
             )}

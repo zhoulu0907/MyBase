@@ -9,5 +9,8 @@
     "build:runtime": "pnpm build:packages && pnpm build:plugins && pnpm --filter ./apps/runtime... devops_build",
     "build:mobile-runtime": "pnpm build:packages && pnpm --filter ./packages/ui-kit-mobile... build && pnpm --filter ./apps/mobile-runtime... devops_build",
     "encrypt:config": "npx tsx scripts/encrypt-config.ts"
+  },
+  "dependencies": {
+    "@arco-themes/react-cyansu-ob03": "^0.0.8"
   }
 }
