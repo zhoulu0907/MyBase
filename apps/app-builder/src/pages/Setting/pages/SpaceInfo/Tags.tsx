@@ -1,8 +1,6 @@
-import { Avatar, Popover, Tag, Grid } from '@arco-design/web-react';
+import { Avatar, Popover, Tag } from '@arco-design/web-react';
 import { getFileUrlById } from '@onebase/platform-center';
 import styles from './index.module.less';
-
-const { Row, Col } = Grid;
 
 interface TagItem {
   adminUserId: string;
@@ -47,30 +45,18 @@ const Tags = ({ data }: IProps) => {
             }
             content={
               <div style={{ width: 264 }}>
-                <Row gutter={24} style={{ marginBottom: 16 }}>
-                  <Col span={12}>
-                    <span className={styles.infoKey}>手机号</span>
-                  </Col>
-                  <Col span={12}>
-                    <span>{tag.adminMobile || '-'}</span>
-                  </Col>
-                </Row>
-                <Row gutter={24} style={{ marginBottom: 16 }}>
-                  <Col span={12}>
-                    <span className={styles.infoKey}>邮箱</span>
-                  </Col>
-                  <Col span={12}>
-                    <span>{tag.adminEmail || '-'}</span>
-                  </Col>
-                </Row>
-                <Row gutter={24}>
-                  <Col span={12}>
-                    <span className={styles.infoKey}>所属部门</span>
-                  </Col>
-                  <Col span={12}>
-                    <span>{tag.deptName || '-'}</span>
-                  </Col>
-                </Row>
+                <div style={{ display: 'flex', marginBottom: 16 }}>
+                  <span style={{ width: 70, color: 'var(--color-text-3)' }}>手机号</span>
+                  <span>{tag.adminMobile || '-'}</span>
+                </div>
+                <div style={{ display: 'flex', marginBottom: 16 }}>
+                  <span style={{ width: 70, color: 'var(--color-text-3)' }}>邮箱</span>
+                  <span>{tag.adminEmail || '-'}</span>
+                </div>
+                <div style={{ display: 'flex' }}>
+                  <span style={{ width: 70, color: 'var(--color-text-3)' }}>所属部门</span>
+                  <span>{tag.deptName || '-'}</span>
+                </div>
               </div>
             }
           >

@@ -4,17 +4,16 @@ import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import ResizableTable from '@/components/ResizableTable';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import {
   Avatar,
   Dropdown,
   Input,
   Menu,
   Message,
-  Modal,
-  Pagination,
   Select,
   Space,
-  Table,
+  Modal,
   Tag
 } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
@@ -52,6 +51,8 @@ export default function UserTable({
   const [detailUser, setDetailUser] = useState<externalUserRecord | undefined>();
   const [userModalVisible, setUserModalVisible] = useState(false);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<externalUserRecord | undefined>();
 
   // 查询用户列表
   const getUserList = useCallback(
@@ -152,17 +153,17 @@ export default function UserTable({
 
   // 删除
   const handleDelete = (record: externalUserRecord) => {
-    Modal.confirm({
-      title: `确认要删除账号（${record.nickName}）吗？`,
-      content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
-      okButtonProps: { status: 'danger' },
-      onOk: async () => {
-        await deleteExternalUserApi(record.id);
-        Message.success('删除成功');
-        onRefreshDept();
-        getUserList();
-      }
-    });
+    setDeleteTarget(record);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await deleteExternalUserApi(deleteTarget.id);
+    Message.success('删除成功');
+    setDeleteModalVisible(false);
+    onRefreshDept();
+    getUserList();
   };
 
   // 查看详情
@@ -381,6 +382,13 @@ export default function UserTable({
         tableData={deptTree}
         deptLoading={deptLoading}
         onRefreshDept={onRefreshDept}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
+        title={deleteTarget ? `确认要删除账号（${deleteTarget.nickName}）吗？` : '确认删除'}
+        content="删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。"
       />
     </div>
   );

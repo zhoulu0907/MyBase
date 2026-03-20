@@ -1,8 +1,9 @@
 import TablePagination from '@/components/TablePagination';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
 import ResizableTable from '@/components/ResizableTable';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { isSystemUser } from '@/utils';
-import { Button, Input, Message, Modal, Pagination, Space, Spin } from '@arco-design/web-react';
+import { Button, Input, Message, Pagination, Space, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import type { PageParam, UserVO } from '@onebase/platform-center';
 import { addRoleUsers, getUserPage, removeRoleUsers } from '@onebase/platform-center';
@@ -25,6 +26,8 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
   const [data, setData] = useState<UserRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<UserRecord | null>(null);
 
   // 查询用户列表
   const getUserList = useCallback(
@@ -109,21 +112,20 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
       Message.warning('请先选择一个角色');
       return;
     }
+    setDeleteTarget(record);
+    setDeleteModalVisible(true);
+  };
 
-    Modal.confirm({
-      title: `确认要移除角色用户（${record.nickname}）吗？`,
-      content: '移除该角色用户后，该角色用户将失去该角色赋予的权限，请谨慎操作。',
-      okButtonProps: { status: 'danger' },
-      onOk: async () => {
-        try {
-          await removeRoleUsers(selectedRoleId, [record.id]);
-          Message.success('用户移除成功');
-          getUserList(searchValue);
-        } catch (error) {
-          Message.error('移除用户失败，请重试');
-        }
-      }
-    });
+  const handleRemoveConfirm = async () => {
+    if (!selectedRoleId || !deleteTarget) return;
+    try {
+      await removeRoleUsers(selectedRoleId, [deleteTarget.id]);
+      Message.success('用户移除成功');
+      setDeleteModalVisible(false);
+      getUserList(searchValue);
+    } catch (error) {
+      Message.error('移除用户失败，请重试');
+    }
   };
 
   const columns = useMemo(
@@ -211,6 +213,13 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
           selectedRoleId={selectedRoleId}
         />
       )}
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleRemoveConfirm}
+        title={deleteTarget ? `确认要移除角色用户（${deleteTarget.nickname}）吗？` : '确认移除'}
+        content="移除该角色用户后，该角色用户将失去该角色赋予的权限，请谨慎操作。"
+      />
     </div>
   );
 };

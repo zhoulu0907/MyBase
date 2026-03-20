@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, forwardRef } from 'react';
+import { useState, useMemo, useCallback, forwardRef, useEffect } from 'react';
 import { Table } from '@arco-design/web-react';
 import { Resizable } from 'react-resizable';
 import ResizeHandle from './ResizeHandle';
@@ -6,8 +6,8 @@ import EmptyState from '@/components/EmptyState';
 import type { ResizableTableProps, ResizableTitleProps } from './types';
 import styles from './index.module.less';
 
-const DEFAULT_MIN_WIDTH = 50;
-const DEFAULT_MAX_WIDTH = 500;
+const DEFAULT_MIN_WIDTH = 40;
+const DEFAULT_MAX_WIDTH = 600;
 
 // 可调整宽度的表头单元格组件
 const ResizableTitle = forwardRef<HTMLTableCellElement, ResizableTitleProps>((props, ref) => {
@@ -42,6 +42,7 @@ const ResizableTable = forwardRef<HTMLDivElement, ResizableTableProps>((props, r
     columns = [],
     className,
     emptyContent,
+    components: externalComponents,
     ...restProps
   } = props;
 
@@ -55,6 +56,20 @@ const ResizableTable = forwardRef<HTMLDivElement, ResizableTableProps>((props, r
     });
     return widths;
   });
+
+  // 当 columns 变化时同步更新列宽
+  useEffect(() => {
+    setColumnWidths((prev) => {
+      const newWidths: Record<number, number> = {};
+      columns.forEach((col, index) => {
+        if (col.width && typeof col.width === 'number') {
+          // 保留已调整过的宽度，新列使用初始宽度
+          newWidths[index] = prev[index] ?? col.width;
+        }
+      });
+      return newWidths;
+    });
+  }, [columns]);
 
   // 处理列宽调整
   const handleResize = useCallback((index: number) => {
@@ -94,18 +109,29 @@ const ResizableTable = forwardRef<HTMLDivElement, ResizableTableProps>((props, r
     });
   }, [columns, resizable, columnWidths, handleResize]);
 
-  // 自定义表格组件
+  // 自定义表格组件 - 合并外部传入的 components 和内部的列宽拖拽配置
   const components = useMemo(() => {
-    if (!resizable) {
-      return {};
-    }
+    const internalComponents = resizable
+      ? {
+          header: {
+            th: ResizableTitle,
+          },
+        }
+      : {};
 
+    // 深度合并 components
     return {
+      ...externalComponents,
+      ...internalComponents,
       header: {
-        th: ResizableTitle,
+        ...externalComponents?.header,
+        ...internalComponents?.header,
+      },
+      body: {
+        ...externalComponents?.body,
       },
     };
-  }, [resizable]);
+  }, [resizable, externalComponents]);
 
   // 合并 className
   const tableClassName = useMemo(() => {

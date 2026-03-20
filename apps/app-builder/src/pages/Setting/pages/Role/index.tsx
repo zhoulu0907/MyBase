@@ -1,7 +1,8 @@
 import InfoPanel from '@/components/InfoPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
-import { Divider, Layout, Message, Modal, Space, Tabs } from '@arco-design/web-react';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import { Divider, Empty, Layout, Message, Space, Tabs } from '@arco-design/web-react';
 import { TENANT_ROLE_PERMISSION as ACTIONS, hasPermission } from '@onebase/common';
 import { RoleType } from '@onebase/platform-center';
 import { createRole, deleteRole, updateRole } from '@onebase/platform-center/src/services/role';
@@ -27,6 +28,8 @@ export default function RolePage() {
   const [roleModalVisible, setRoleModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('user');
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Partial<RoleVO> | null>(null);
 
   const roleListRef = useRef<any>(null);
 
@@ -108,21 +111,20 @@ export default function RolePage() {
   // 删除角色
   const handleDelete = (record: Partial<RoleVO> | null) => {
     if (!record?.id) return;
-    Modal.confirm({
-      title: `确认要删除角色（${record?.name}）吗？`,
-      content: '删除角色后，该角色下关联的用户将失去该角色赋予的权限，请谨慎操作。',
-      okButtonProps: { status: 'danger' },
-      onOk: async () => {
-        try {
-          handleDeleteRole(record.id!).then(() => {
-            roleListRef.current?.refresh?.();
-          });
-          Message.success('用户移除成功');
-        } catch (error) {
-          Message.error('移除用户失败，请重试');
-        }
-      }
-    });
+    setDeleteTarget(record);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget?.id) return;
+    try {
+      await handleDeleteRole(deleteTarget.id);
+      setDeleteModalVisible(false);
+      roleListRef.current?.refresh?.();
+      Message.success('删除成功');
+    } catch (error) {
+      Message.error('删除失败，请重试');
+    }
   };
 
   // 编辑/删除角色按钮
@@ -207,6 +209,13 @@ export default function RolePage() {
         }}
         confirmLoading={modalLoading}
         initialValues={(editRole as any) || undefined}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
+        title={deleteTarget ? `确认要删除角色（${deleteTarget.name}）吗？` : '确认删除'}
+        content="删除角色后，该角色下关联的用户将失去该角色赋予的权限，请谨慎操作。"
       />
     </div>
   );
