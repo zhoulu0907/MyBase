@@ -1,4 +1,4 @@
-import { Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
 import React from 'react';
 
 interface DataPreviewProps {
@@ -15,7 +15,7 @@ interface DataPreviewProps {
 const DataPreview: React.FC<DataPreviewProps> = ({ data, columns }) => {
   return (
     <div style={{ height: '100%', overflow: 'auto', backgroundColor: '#fff' }}>
-      <Table
+      <ResizableTable
         data={data}
         virtualized={true}
         columns={columns}

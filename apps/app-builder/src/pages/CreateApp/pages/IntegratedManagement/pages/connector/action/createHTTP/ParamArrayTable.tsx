@@ -1,4 +1,5 @@
-import { Button, Input, Select, Space, Switch, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, Input, Select, Space, Switch } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, useField, useForm } from '@formily/react';
 import React from 'react';
@@ -173,7 +174,7 @@ const ParamArrayTableInner: React.FC = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '100%' }}>
-      <Table
+      <ResizableTable
         data={value}
         columns={columns}
         rowKey={(record: ParamRow) => record.id ?? `row-${record.key}-${record.fieldName}`}
@@ -404,7 +405,7 @@ const ActionInputArrayTableInner: React.FC = () => {
           </Button>
         </Space>
       </div>
-      <Table
+      <ResizableTable
         data={value}
         columns={columns}
         rowKey={(record: ActionInputRow) => record.id ?? `row-${record.key}-${record.fieldName}`}

@@ -1,6 +1,6 @@
-import ActionButtons from '@/components/ActionButtons';
+import ResizableTable from '@/components/ResizableTable';
 import { useAppStore } from '@/store/store_app';
-import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
+import { Button, Message, Modal, Space, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
@@ -182,7 +182,7 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
             创建数据源
           </Button>
         </div>
-        <Table
+        <ResizableTable
           columns={columns}
           data={dataSourceList}
           pagination={{

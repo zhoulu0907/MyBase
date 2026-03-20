@@ -1,5 +1,4 @@
-import ActionButtons from '@/components/ActionButtons';
-import { Table, Button, Alert, Select, Tag, Modal, Message } from '@arco-design/web-react';
+import { Button, Alert, Select, Tag, Modal, Message } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { IconInfoCircleFill } from '@arco-design/web-react/icon';
 import {
@@ -15,6 +14,7 @@ import dayjs from 'dayjs';
 import { useAppStore } from '@/store';
 import React, { useEffect, useState } from 'react';
 import AppExportModal from '@/components/AppExportModal';
+import ResizableTable from '@/components/ResizableTable';
 import styles from './index.module.less';
 
 const AppExportPage: React.FC = () => {
@@ -158,7 +158,7 @@ const AppExportPage: React.FC = () => {
           ></Select>
         </div>
       </div>
-      <Table
+      <ResizableTable
         columns={columns}
         data={tableData}
         rowKey="id"

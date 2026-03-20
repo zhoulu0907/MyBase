@@ -1,5 +1,5 @@
+import ResizableTable from '@/components/ResizableTable';
 import React from 'react';
-import { Table } from '@arco-design/web-react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import type { DictData } from '@onebase/platform-center';
@@ -89,7 +89,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
 
   return (
     <div ref={tableRef}>
-      <Table
+      <ResizableTable
         data={data}
         columns={columns}
         pagination={false}

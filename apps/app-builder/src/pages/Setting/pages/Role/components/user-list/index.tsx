@@ -1,7 +1,8 @@
 import TablePagination from '@/components/TablePagination';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
+import ResizableTable from '@/components/ResizableTable';
 import { isSystemUser } from '@/utils';
-import { Button, Input, Message, Modal, Pagination, Space, Spin, Table } from '@arco-design/web-react';
+import { Button, Input, Message, Modal, Pagination, Space, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import type { PageParam, UserVO } from '@onebase/platform-center';
 import { addRoleUsers, getUserPage, removeRoleUsers } from '@onebase/platform-center';
@@ -182,7 +183,7 @@ const UserList: React.FC<UserListProps> = ({ selectedRoleId = undefined }: UserL
       </div>
 
       <Spin loading={loading}>
-        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} stripe />
+        <ResizableTable rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} stripe />
       </Spin>
       <TablePagination
         current={page}

@@ -1,8 +1,9 @@
 import ActionButtons from '@/components/ActionButtons';
+import ResizableTable from '@/components/ResizableTable';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Message, Space, Tag } from '@arco-design/web-react';
 import { getEntityRelations, deleteRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ALL_RELATIONSHIP_TYPE_MAP } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
@@ -182,7 +183,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
           </Button>
         </Dropdown>
       </div>
-      <Table
+      <ResizableTable
         columns={columns}
         data={relations}
         rowKey="id"

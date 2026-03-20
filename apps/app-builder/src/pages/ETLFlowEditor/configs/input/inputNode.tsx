@@ -1,4 +1,5 @@
-import { Button, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button } from '@arco-design/web-react';
 import { listETLTableColumns, listETLTables, previewETLDatasource, type ELTColumn, type ETLTable } from '@onebase/app';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -156,7 +157,7 @@ export const InputNodeConfig: React.FC<InputNodeConfigProps> = ({ onRegisterSave
               </div>
 
               <div className={styles.columnContent}>
-                <Table
+                <ResizableTable
                   data={curColumns.map((col) => ({ ...col, key: col.fieldName }))}
                   pagination={false}
                   columns={[

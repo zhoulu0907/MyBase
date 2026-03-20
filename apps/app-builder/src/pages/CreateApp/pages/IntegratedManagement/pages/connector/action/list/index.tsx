@@ -1,4 +1,5 @@
 import TablePagination from '@/components/TablePagination';
+import ResizableTable from '@/components/ResizableTable';
 import {
   Button,
   Input,
@@ -487,7 +488,7 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
           <div className={styles.content}>
             <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
               <div className={styles.tableContainer}>
-                <Table
+                <ResizableTable
                   rowKey="_rowKey"
                   columns={columns}
                   data={actionList || []}

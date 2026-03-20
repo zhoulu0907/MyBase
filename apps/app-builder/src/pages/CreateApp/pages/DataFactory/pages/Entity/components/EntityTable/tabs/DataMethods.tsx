@@ -1,6 +1,7 @@
+import ResizableTable from '@/components/ResizableTable';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Link, Table, Tag } from '@arco-design/web-react';
+import { Link, Tag } from '@arco-design/web-react';
 import { getEntityMethods } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import styles from './tabs.module.less';
@@ -103,7 +104,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ entity, activeTab }) => {
           添加方法
         </Button>
       </div> */}
-      <Table
+      <ResizableTable
         columns={columns}
         data={methods}
         rowKey="methodCode"

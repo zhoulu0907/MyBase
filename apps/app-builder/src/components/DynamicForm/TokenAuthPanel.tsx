@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import React from 'react';
-import { Input, Select, Tabs, Button, Space, Grid, Table, Checkbox, Switch } from '@arco-design/web-react';
+import { Input, Select, Tabs, Button, Space, Grid, Checkbox, Switch } from '@arco-design/web-react';
 import { useForm } from '@formily/react';
 import { KeyValueList } from './AuthComponents';
 
@@ -165,7 +166,7 @@ export const TokenAuthPanel: React.FC = () => {
 
                     {/* Tree Table */}
                     <div style={{ background: 'var(--color-fill-1)', padding: 16, borderRadius: 4 }}>
-                        <Table
+                        <ResizableTable
                             columns={columns}
                             data={tableData}
                             pagination={false}

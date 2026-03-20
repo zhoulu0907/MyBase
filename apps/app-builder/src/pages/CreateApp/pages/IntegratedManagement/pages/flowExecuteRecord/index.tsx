@@ -1,6 +1,7 @@
+import ResizableTable from '@/components/ResizableTable';
 import React, { useEffect, useState } from 'react';
-import { Space, Grid, Button, Table, Tag, type TableColumnProps } from '@arco-design/web-react';
-import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp } from '@arco-design/web-react/icon';
+import { Space, Grid, Button, Tag, type TableColumnProps, type PaginationProps } from '@arco-design/web-react';
+import { IconDownload, IconRefresh, IconArrowDown, IconArrowUp, IconMoreVertical } from '@arco-design/web-react/icon';
 import TablePagination from '@/components/TablePagination';
 import styles from './index.module.less';
 import { useAppStore } from '@/store';
@@ -223,14 +224,14 @@ const FlowExecuteRecordPage: React.FC = () => {
           </Grid.Row>
         </div>
         <div className={styles.table}>
-          <Table
+          <ResizableTable
             columns={columns}
             data={tableData}
             loading={tableLoading}
             pagination={false}
             border={false}
             rowKey="id"
-          ></Table>
+></ResizableTable>
           <TablePagination
             total={pagination.total}
             current={pagination.current}

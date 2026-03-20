@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import { listToTree } from '@/utils/tree';
-import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { Button, Message, Modal } from '@arco-design/web-react';
 import { PERMISSION_TYPES } from '@onebase/common';
 import type { Permission } from '@onebase/platform-center';
 import { configureRolePermissions, getConfiguredPermissions, removeRolePermission, UserType } from '@onebase/platform-center';
@@ -151,7 +152,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
         </Button>
       </div>
 
-      <Table {...tableConfig} />
+      <ResizableTable {...tableConfig} />
 
       {configModalVisible && (
         <PermissionConfigModal

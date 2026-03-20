@@ -1,5 +1,5 @@
+import ResizableTable from '@/components/ResizableTable';
 import { useEffect, useState } from 'react';
-import { Table } from '@arco-design/web-react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import { FlowNodeEntity, useClientContext } from '@flowgram.ai/free-layout-editor';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
@@ -172,7 +172,7 @@ export default function Conditional({ node }: { node: FlowNodeEntity }) {
           分支优先级<span className={styles.titleTips}>可通过拖拽调整默认分支以外的分支优先级</span>
         </div>
         <div className={styles.configContent}>
-          <Table
+          <ResizableTable
             className="arco-drag-table-container-2"
             components={components}
             columns={columns}

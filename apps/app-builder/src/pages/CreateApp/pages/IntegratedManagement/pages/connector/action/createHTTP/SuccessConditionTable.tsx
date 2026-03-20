@@ -1,4 +1,5 @@
-import { Button, Input, Select, Space, Table, Typography } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, Input, Select, Space, Typography } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, useField } from '@formily/react';
 import React, { useEffect } from 'react';
@@ -196,7 +197,7 @@ const SuccessConditionTableInner: React.FC = () => {
       <div style={{ marginBottom: 12 }}>
         <Text style={{ fontWeight: 500 }}>调用成功规范</Text>
       </div>
-      <Table
+      <ResizableTable
         data={value}
         columns={columns}
         rowKey={(record: SuccessConditionRow) => record.id ?? `row-${Date.now()}`}

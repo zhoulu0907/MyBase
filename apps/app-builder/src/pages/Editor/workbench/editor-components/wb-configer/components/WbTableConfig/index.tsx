@@ -1,3 +1,4 @@
+import ResizableTable from '@/components/ResizableTable';
 import { Button, Modal } from '@arco-design/web-react';
 import { registerConfigRenderer } from '../../registry';
 import { WORKBENCH_CONFIG_TYPES, type IWbColorConfigType } from '@onebase/ui-kit';

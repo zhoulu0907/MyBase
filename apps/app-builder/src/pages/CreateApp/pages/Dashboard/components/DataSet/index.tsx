@@ -1,6 +1,7 @@
 import TablePagination from '@/components/TablePagination';
 import ActionButtons from '@/components/ActionButtons';
-import { Button, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, Modal, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
 import { DataSetParams, DelDataSetList } from '@onebase/platform-center';
@@ -103,7 +104,7 @@ const DataSet: FC = () => {
           新建数据集
         </Button>
       </div>
-      <Table rowKey="id" hover columns={columns} data={dataSetList} border={false} pagination={false} />
+      <ResizableTable rowKey="id" hover columns={columns} data={dataSetList} border={false} pagination={false} />
       <div
         style={{
           display: 'flex',

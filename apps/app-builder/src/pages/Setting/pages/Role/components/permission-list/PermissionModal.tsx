@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import { listToTree } from '@/utils/tree';
-import { Checkbox, Input, Modal, Table } from '@arco-design/web-react';
+import { Checkbox, Input, Modal } from '@arco-design/web-react';
 import type { ColumnProps } from '@arco-design/web-react/es/Table';
 import { PERMISSION_TYPES } from '@onebase/common';
 import type { Permission } from '@onebase/platform-center';
@@ -274,7 +275,7 @@ const PermissionConfigModal: React.FC<PermissionConfigModalProps> = ({
         onChange={(value) => setSearchValue(value)}
         onSearch={setSearchValue}
       />
-      <Table
+      <ResizableTable
         rowKey="id"
         childrenColumnName="actions"
         columns={columns}

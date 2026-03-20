@@ -4,8 +4,9 @@ import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
+import ResizableTable from '@/components/ResizableTable';
 import { isSystemUser } from '@/utils';
-import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
+import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Tag } from '@arco-design/web-react';
 import { /* IconDownload, IconUpload, */ IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
 import {
@@ -509,7 +510,7 @@ export default function UserTable({
       </div>
       {/* 表格 */}
       <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
-        <Table
+        <ResizableTable
           rowKey="id"
           hover
           stripe

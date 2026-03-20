@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import React, { useState, useRef, useEffect, useContext, useCallback } from 'react';
-import { Table, Input, Form, type FormInstance, Switch, Checkbox } from '@arco-design/web-react';
+import { Input, Form, type FormInstance, Switch, Checkbox } from '@arco-design/web-react';
 import { IconEdit, IconSettings } from '@arco-design/web-react/icon';
 import SettingModal from './SettingModal';
 import styles from '../approverConfig/index.module.less';
@@ -258,7 +259,7 @@ export default function ApproverBtnConfig({ setApprovalConfigData, buttonConfigs
   return (
     <div className={styles.approverConfig}>
       <div className={styles.configTitle}>操作按钮</div>
-      <Table
+      <ResizableTable
         pagination={false}
         data={tbData}
         components={{
