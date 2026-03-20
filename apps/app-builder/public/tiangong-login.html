@@ -51,9 +51,14 @@
     (function() {
       var urlParams = new URLSearchParams(window.location.search);
       var code = urlParams.get('code');
+      var state = urlParams.get('state');
 
       if (code) {
-        window.location.href = '/v0/obappbuilder/#/oauth/obbuilder/app?code=' + encodeURIComponent(code);
+        var redirectUrl = '/v0/obappbuilder/#/oauth/obbuilder/app?code=' + encodeURIComponent(code);
+        if (state) {
+          redirectUrl += '&state=' + encodeURIComponent(state);
+        }
+        window.location.href = redirectUrl;
       } else {
         window.location.href = '/v0/obappbuilder/#/login';
       }
