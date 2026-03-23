@@ -61,10 +61,11 @@ public class AiProxyController {
         }
         String query = request.getQueryString();
         String fullPath = path + (StringUtils.isNotBlank(query) ? "?" + query : "");
-        String url = base.endsWith("/") ? (base + fullPath) : (base + "/" + fullPath);
+        boolean hasSlash = base.endsWith("/") || fullPath.startsWith("/");
+        String url = hasSlash ? (base + fullPath) : (base + "/" + fullPath);
 
-        HttpClient client = HttpClient.newBuilder().build();
-        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url));
+        HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url)).version(HttpClient.Version.HTTP_1_1);
         String method = request.getMethod().toUpperCase(Locale.ROOT);
         boolean hasBody = hasBody(request, method);
         // 附件上传与大 body 场景必须走流式转发，避免整体读入内存
