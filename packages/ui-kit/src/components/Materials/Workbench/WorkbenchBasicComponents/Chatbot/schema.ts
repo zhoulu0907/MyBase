@@ -9,15 +9,18 @@ import {
   type IWidthConfigType
 } from '../../config/workbenchShared';
 import { WORKBENCH_WIDTH_OPTIONS, WORKBENCH_WIDTH_VALUES, WORKBENCH_CONFIG_TYPES } from '../../core/constants';
+import type { IWbAgentSelectorConfigType } from '../../core/types';
 
 export interface XChatbotSchema {
-  editData: Array<ITextConfigType | IWidthConfigType<TWorkbenchWidthSelectKeyType>>;
+  editData: Array<ITextConfigType | IWidthConfigType<TWorkbenchWidthSelectKeyType> | IWbAgentSelectorConfigType>;
   config: XChatbotConfig;
 }
 
 export interface XChatbotConfig extends ICommonBaseWorkbenchType {
   componentName: string;
   iframeUrl: string;
+  agentId?: string;
+  agentName?: string;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
   floatingConfig?: {
     right: number;
@@ -30,6 +33,11 @@ export interface XChatbotConfig extends ICommonBaseWorkbenchType {
 const XChatbot: XChatbotSchema = {
   editData: [
     ...workbenchBaseConfig,
+    {
+      key: 'agentId',
+      name: '智能体',
+      type: WORKBENCH_CONFIG_TYPES.WB_AGENT_SELECTOR
+    },
     {
       key: 'iframeUrl',
       name: 'URL地址',

@@ -1,11 +1,13 @@
 import { Modal } from '@arco-design/web-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
 import './index.css';
 
 export interface XChatbotProps {
   config?: {
     iframeUrl?: string;
+    agentId?: string;
+    agentName?: string;
     [key: string]: any;
   };
   runtime?: boolean;
@@ -15,6 +17,8 @@ export interface XChatbotProps {
 const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl: propIframeUrl }) => {
   const [visible, setVisible] = useState(false);
   const [iframeHeight, setIframeHeight] = useState(200);
+
+  const { agentId, iframeUrl: configIframeUrl } = config || {};
 
   useEffect(() => {
     const calculateHeight = () => {
@@ -34,7 +38,23 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
   };
 
   const DEFAULT_URL = 'http://10.11.112.38:9500/bote/#/driver/bot?tenantId=0&botId=1338078781184737280&modeType=single&token=4f0fc76675484ad8a2ab29941debf7f4&pattern=S';
-  const iframeUrl = propIframeUrl || config?.iframeUrl || DEFAULT_URL;
+
+  const displayUrl = useMemo(() => {
+    if (propIframeUrl) {
+      return propIframeUrl;
+    }
+    if (configIframeUrl) {
+      if (agentId) {
+        const baseUrl = configIframeUrl.includes('?') ? configIframeUrl : `${configIframeUrl}`;
+        return `${baseUrl}&botId=${agentId}`;
+      }
+      return configIframeUrl;
+    }
+    if (agentId) {
+      return `${DEFAULT_URL}&botId=${agentId}`;
+    }
+    return DEFAULT_URL;
+  }, [propIframeUrl, configIframeUrl, agentId]);
 
   return (
     <>
@@ -73,7 +93,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
         className="chatbot-modal"
       >
         <iframe
-          src={iframeUrl}
+          src={displayUrl}
           style={{ width: '100%', height: iframeHeight, border: 'none' }}
           title="Chatbot"
         />
