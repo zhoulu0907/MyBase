@@ -10,7 +10,6 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -1574,6 +1573,12 @@ public class UserServiceImpl implements UserService {
         AdminUserDO user = userDataRepository.getById(token.getUserId());
         OAuth2UserInfoRespVO oAuth2UserInfoRespVO = BeanUtils.toBean(user, OAuth2UserInfoRespVO.class);
         oAuth2UserInfoRespVO.setApplicationId(token.getAppId());
+
+        // 获得部门信息
+        if (user.getDeptId() != null) {
+            DeptDO dept = deptService.getDept(user.getDeptId());
+            oAuth2UserInfoRespVO.setDept(BeanUtils.toBean(dept, OAuth2UserInfoRespVO.Dept.class));
+        }
 
         // 补充租户信息
         TenantDO tenantDO = tenantService.getTenant(token.getTenantId());

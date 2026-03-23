@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
  * 另外，一个公司如果有多个管理后台，它们 client_id 产生的 access token 相互之间是无法互通的，即无法访问它们系统的 API 接口，直到两个 client_id 产生信任授权。
  *
  * 考虑到【本系统】暂时不想做的过于复杂，默认只有获取到 access token 之后，可以访问【本系统】管理后台的 /system-api/* 所有接口，除非手动添加 scope 控制。
- * scope 的使用示例，可见 {@link OAuth2UserController} 类
  *
  */
 @Tag(name = "管理后台 - OAuth2.0 授权")
