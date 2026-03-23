@@ -1,4 +1,4 @@
-import { Card, Button, Menu, Popover, Message, Popconfirm } from '@arco-design/web-react';
+import { Card, Button, Menu, Popover, Message, Popconfirm, Pagination } from '@arco-design/web-react';
 import { IconMoreVertical, IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
 import { RedirectMethod, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
@@ -43,11 +43,13 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
   const { curPage, setRowDataId, setFlows, setBpmInstanceId, setRowDataType, setDrawerVisible,
     setDetailPageViewId } = pagesRuntimeSignal;
   const { curMenu } = menuSignal;
-  const { status, runtime = true, componentName = 'CanvasCardType1', showFromPageData, tableName, metaData, displayFields, refresh, fieldList: propFieldList, preview } = props;
+  const { status, runtime = true, componentName = 'CanvasCardType1', showFromPageData, tableName, metaData, displayFields, refresh, fieldList: propFieldList, preview, paginationConfig } = props;
 
   const [cardData, setCardData] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [fieldList, setFieldList] = useState<Array<{ fieldName: string; displayName: string }>>(propFieldList || []);
+  const [cardTotal, setCardTotal] = useState<number>(1);
+  const [cardPageNo, setCardPageNo] = useState<number>(1);
 
   useEffect(() => {
     if (runtime && isRuntimeEnv() && metaData && tableName) {
@@ -87,8 +89,8 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
     setLoading(true);
     try {
       const req = {
-        pageNo: 1,
-        pageSize: 20,
+        pageNo: cardPageNo,
+        pageSize: paginationConfig?.pageSize || 20,
         filters: {
           nodeType: 'GROUP',
           combinator: 'AND',
@@ -107,7 +109,7 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
         res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
       }
 
-      const { list } = res || {};
+      const { list, total } = res || {};
       const newCardData = (list || []).map((item: any) => {
         const rowId = (item && item.id) || (item?.data && item.data.id);
         return {
@@ -117,6 +119,7 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
       });
 
       setCardData(newCardData);
+      setCardTotal(total);
     } catch (error) {
       console.error('Failed to fetch card data:', error);
     } finally {
@@ -235,6 +238,27 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
     showFromPageData?.(record.id, false);
   };
 
+  const getPaginationStyle = () => {
+    if (!paginationConfig?.display) {
+      return {};
+    }
+
+    if (paginationConfig.pagePosition === 'tl') {
+      return { order: 2, alignSelf: 'flex-start' };
+    } else if (paginationConfig.pagePosition === 'topCenter') {
+      return { order: 2, alignSelf: 'center' };
+    } else if (paginationConfig.pagePosition === 'tr') {
+      return { order: 2, alignSelf: 'flex-end' };
+    } else if (paginationConfig.pagePosition === 'bl') {
+      return { order: 4, alignSelf: 'flex-start' };
+    } else if (paginationConfig.pagePosition === 'bottomCenter') {
+      return { order: 4, alignSelf: 'center' };
+    } else if (paginationConfig.pagePosition === 'br') {
+      return { order: 4, alignSelf: 'flex-end' };
+    }
+    return { order: 4, alignSelf: 'flex-end' };
+  }
+
   const renderComponent = (record?: Record<string, unknown>) => {
     const cardProps = {
       ...props,
@@ -340,7 +364,7 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
   return (
     <div className="canvas-card-container" style={{
         opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1,
-        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'block'
+        display: runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 'none' : 'flex'
       }}>
       <div className="canvas-card-header">
         <div className="headerActions">
@@ -360,10 +384,23 @@ const XCanvasCard = memo((props: XCanvasCardConfig & {
               />
             )}
           </div>
-          <Button type="text" onClick={() => handleFetchData()} icon={<IconRefresh />} loading={loading}></Button>
+          <Button type="text" onClick={() => {setCardPageNo(1); handleFetchData();}} icon={<IconRefresh />} loading={loading}></Button>
         </div>
       </div>
       {renderCardList()}
+
+      {paginationConfig?.display && 
+        <Pagination
+          pageSize={paginationConfig.pageSize}
+          current={cardPageNo}
+          total={cardTotal}
+          showTotal
+          onChange={(pageNo: number) => {
+            setCardPageNo(pageNo);
+          }}
+          style={getPaginationStyle()}
+        ></Pagination>
+      }
     </div>
   );
 });

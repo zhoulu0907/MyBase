@@ -158,7 +158,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
     });
   };
   const containerStyle: CSSProperties = runtime && contentHeight 
-    ? { height: contentHeight, overflow: 'hidden', display: 'flex', flexDirection: 'column' }
+    ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' }
     : {};
 
   const contentStyle: CSSProperties = runtime && contentHeight

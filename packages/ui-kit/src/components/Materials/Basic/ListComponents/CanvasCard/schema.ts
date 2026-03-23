@@ -4,11 +4,13 @@ import {
     statusConfig,
     labelConfig,
     canvasCardConfig,
+    paginationConfig,
     type ICommonBaseType,
     type TStatusSelectKeyType,
-    type TWidthSelectKeyType
+    type TWidthSelectKeyType,
+    TPagePositionSelectKeyType
 } from '../../../common';
-import { STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
+import { PAGINATION_POSITION_OPTIONS, PAGINATION_POSITION_VALUES, STATUS_OPTIONS, STATUS_VALUES, WIDTH_OPTIONS, WIDTH_VALUES } from '../../../constants';
 import type {
     IStatusConfigType,
     ITextConfigType,
@@ -18,7 +20,9 @@ import type {
     TTextDefaultType,
     TBooleanDefaultType,
     TSelectDefaultType,
-    ICanvasCardConfigType
+    ICanvasCardConfigType,
+    TNumberDefaultType,
+    IPaginationConfigType
 } from '../../../types';
 
 export type DisplayFieldsConfig = {
@@ -42,7 +46,7 @@ export interface XCanvasCardSchema {
 }
 
 export type TXCanvasCardEditData = Array<
-  ITextConfigType | IStatusConfigType<TStatusSelectKeyType> | ILabelConfigType | ICanvasCardConfigType | ICommonConfigType
+  ITextConfigType | IStatusConfigType<TStatusSelectKeyType> | ILabelConfigType | ICanvasCardConfigType | ICommonConfigType | IPaginationConfigType
 >;
 
 export interface XCanvasCardConfig extends ICommonBaseType {
@@ -89,10 +93,19 @@ export interface XCanvasCardConfig extends ICommonBaseType {
    * 页面类型
    */
   pageSetType?: number;
+
+  /**
+ * 分页  开启分页 分页数 分页位置
+ */
+  paginationConfig: {
+    display: TBooleanDefaultType;
+    pageSize: TNumberDefaultType;
+    pagePosition: TSelectDefaultType<TPagePositionSelectKeyType>;
+  }
 }
 
 const XCanvasCard: XCanvasCardSchema = {
-  editData: [...baseConfig, labelConfig, canvasCardConfig, statusConfig],
+  editData: [...baseConfig, labelConfig, canvasCardConfig, statusConfig, paginationConfig],
   config: {
     ...baseDefault,
     label: {
@@ -117,7 +130,12 @@ const XCanvasCard: XCanvasCardSchema = {
       avatar: '',
       avatarFill: 'fill',
       cardFields: ['', '', '', '']
-    }
+    },
+    paginationConfig: {
+      display: true,
+      pageSize: 20,
+      pagePosition: PAGINATION_POSITION_VALUES[PAGINATION_POSITION_OPTIONS.BR]
+    },
   }
 };
 
