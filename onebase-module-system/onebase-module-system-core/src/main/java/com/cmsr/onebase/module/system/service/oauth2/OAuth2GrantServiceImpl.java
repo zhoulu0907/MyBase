@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2CodeDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.system.service.auth.BuildAuthService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
@@ -56,7 +57,7 @@ public class OAuth2GrantServiceImpl implements OAuth2GrantService {
             throw exception(ErrorCodeConstants.OAUTH2_GRANT_CLIENT_ID_MISMATCH);
         }
         // 校验 redirectUri 是否匹配
-        if (!StrUtil.equals(redirectUri, codeDO.getRedirectUri())) {
+        if (StringUtils.isNotBlank(redirectUri) && !redirectUri.startsWith(codeDO.getRedirectUri())) {
             throw exception(ErrorCodeConstants.OAUTH2_GRANT_REDIRECT_URI_MISMATCH);
         }
         // 校验 state 是否匹配

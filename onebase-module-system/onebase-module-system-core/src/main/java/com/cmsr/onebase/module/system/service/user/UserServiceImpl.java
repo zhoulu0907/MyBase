@@ -153,6 +153,9 @@ public class UserServiceImpl implements UserService {
     @Resource
     private CorpDataRepository corpDataRepository;
 
+    @Resource
+    private TenantService tenantService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = SYSTEM_USER_TYPE, subType = SYSTEM_USER_CREATE_SUB_TYPE, bizNo = "{{#user.id}}",
@@ -1574,6 +1577,12 @@ public class UserServiceImpl implements UserService {
         AdminUserDO user = userDataRepository.getById(token.getUserId());
         OAuth2UserInfoRespVO oAuth2UserInfoRespVO = BeanUtils.toBean(user, OAuth2UserInfoRespVO.class);
         oAuth2UserInfoRespVO.setApplicationId(token.getAppId());
+
+        // 补充租户信息
+        TenantDO tenantDO = tenantService.getTenant(token.getTenantId());
+        if(tenantDO != null){
+            oAuth2UserInfoRespVO.setTenantName(tenantDO.getName());
+        }
         return oAuth2UserInfoRespVO;
     }
 

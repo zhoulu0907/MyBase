@@ -7,11 +7,9 @@ import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2OpenService;
 import com.cmsr.onebase.module.system.vo.user.OAuth2UserInfoRespVO;
-import com.cmsr.onebase.module.system.vo.user.UserSimpleRespVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -47,6 +45,48 @@ public class OAuth2OpenController {
     @Resource
     private UserService userService;
 
+
+    /**
+     * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 approveOrDeny 方法
+     *
+     * 场景一：【自动授权 autoApprove = true】
+     *      刚进入 sso.vue 界面，调用该接口，用户历史已经给该应用做过对应的授权，或者 OAuth2Client 支持该 scope 的自动授权
+     * 场景二：【手动授权 autoApprove = false】
+     *      在 sso.vue 界面，用户选择好 scope 授权范围，调用该接口，进行授权。此时，approved 为 true 或者 false
+     *
+     * 因为前后端分离，Axios 无法很好的处理 302 重定向，所以和 Spring Security OAuth 略有不同，返回结果是重定向的 URL，剩余交给前端处理
+     */
+    @ApiSignIgnore
+    @PostMapping("/authorize/code")
+    @Operation(summary = "申请授权", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【提交】调用")
+    @Parameters({
+            @Parameter(name = "response_type", required = true, description = "响应类型", example = "code"),
+            @Parameter(name = "client_id", required = true, description = "客户端编号", example = "tudou"),
+            @Parameter(name = "scope", description = "授权范围", example = "userinfo.read"), // 使用 Map<String, Boolean> 格式，Spring MVC 暂时不支持这么接收参数
+            @Parameter(name = "redirect_uri", required = true, description = "重定向 URI", example = "http://cmsr.com"),
+            @Parameter(name = "auto_approve", required = true, description = "用户是否接受", example = "true"),
+            @Parameter(name = "state", example = "1")
+    })
+    public CommonResult<AuthorizeURIRespVO> generateAuthCode(@RequestParam("response_type") String responseType,
+                                                             @RequestParam("client_id") String clientId,
+                                                             @RequestParam(value = "scope", required = false) String scope,
+                                                             @RequestParam("redirect_uri") String redirectUri,
+                                                             @RequestParam(value = "auto_approve") Boolean autoApprove,
+                                                             @RequestParam(value = "state", required = false) String state) {
+        return oauth2OpenService.generateAuthCode(responseType, clientId, scope, redirectUri, autoApprove, state);
+    }
+
+
+    /**
+     * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 authorize 方法
+     */
+    @GetMapping("/authorize/client")
+    @Operation(summary = "获得授权信息", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
+    @Parameter(name = "clientId", required = true, description = "客户端编号", example = "tudou")
+    public CommonResult<AuthorizeURIRespVO> authorizeClient(@RequestParam("clientId") String clientId) {
+        return oauth2OpenService.authorizeClient(clientId);
+    }
+
     /**
      * 对应 Spring Security OAuth 的 TokenEndpoint 类的 postAccessToken 方法
      *
@@ -72,16 +112,16 @@ public class OAuth2OpenController {
             @Parameter(name = "scope", example = "user_info"),
             @Parameter(name = "refresh_token", example = "123424233"),
     })
-    public CommonResult<OAuth2OpenAccessTokenRespVO> postAccessToken(HttpServletRequest request,
-                                                                     @RequestParam("grant_type") String grantType,
-                                                                     @RequestParam(value = "code", required = false) String code, // 授权码模式
-                                                                     @RequestParam(value = "redirect_uri", required = false) String redirectUri, // 授权码模式
-                                                                     @RequestParam(value = "state", required = false) String state, // 授权码模式
-                                                                     @RequestParam(value = "username", required = false) String username, // 密码模式
-                                                                     @RequestParam(value = "password", required = false) String password, // 密码模式
-                                                                     @RequestParam(value = "scope", required = false) String scope, // 密码模式
-                                                                     @RequestParam(value = "refresh_token", required = false) String refreshToken) { // 刷新模式
-        return oauth2OpenService.postAccessToken(request, grantType, code, redirectUri, state, username, password, scope, refreshToken, RunModeEnum.BUILD.getValue());
+    public CommonResult<OAuth2OpenAccessTokenRespVO> generateAuthToken(HttpServletRequest request,
+                                                                       @RequestParam("grant_type") String grantType,
+                                                                       @RequestParam(value = "code", required = false) String code, // 授权码模式
+                                                                       @RequestParam(value = "redirect_uri", required = false) String redirectUri, // 授权码模式
+                                                                       @RequestParam(value = "state", required = false) String state, // 授权码模式
+                                                                       @RequestParam(value = "username", required = false) String username, // 密码模式
+                                                                       @RequestParam(value = "password", required = false) String password, // 密码模式
+                                                                       @RequestParam(value = "scope", required = false) String scope, // 密码模式
+                                                                       @RequestParam(value = "refresh_token", required = false) String refreshToken) { // 刷新模式
+        return oauth2OpenService.generateAuthToken(request, grantType, code, redirectUri, state, username, password, scope, refreshToken, RunModeEnum.BUILD.getValue());
     }
 
     @PostMapping("/authorize/revoke-token")
@@ -105,52 +145,13 @@ public class OAuth2OpenController {
         return oauth2OpenService.checkToken(request, token);
     }
 
-    /**
-     * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 authorize 方法
-     */
-    @GetMapping("/authorize/client")
-    @Operation(summary = "获得授权信息", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【获取】调用")
-    @Parameter(name = "clientId", required = true, description = "客户端编号", example = "tudou")
-    public CommonResult<AuthorizeURIRespVO> authorize(@RequestParam("clientId") String clientId) {
-        return oauth2OpenService.authorize(clientId);
-    }
-
-    /**
-     * 对应 Spring Security OAuth 的 AuthorizationEndpoint 类的 approveOrDeny 方法
-     *
-     * 场景一：【自动授权 autoApprove = true】
-     *      刚进入 sso.vue 界面，调用该接口，用户历史已经给该应用做过对应的授权，或者 OAuth2Client 支持该 scope 的自动授权
-     * 场景二：【手动授权 autoApprove = false】
-     *      在 sso.vue 界面，用户选择好 scope 授权范围，调用该接口，进行授权。此时，approved 为 true 或者 false
-     *
-     * 因为前后端分离，Axios 无法很好的处理 302 重定向，所以和 Spring Security OAuth 略有不同，返回结果是重定向的 URL，剩余交给前端处理
-     */
-    @ApiSignIgnore
-    @PostMapping("/authorize/code")
-    @Operation(summary = "申请授权", description = "适合 code 授权码模式，或者 implicit 简化模式；在 sso.vue 单点登录界面被【提交】调用")
-    @Parameters({
-            @Parameter(name = "response_type", required = true, description = "响应类型", example = "code"),
-            @Parameter(name = "client_id", required = true, description = "客户端编号", example = "tudou"),
-            @Parameter(name = "scope", description = "授权范围", example = "userinfo.read"), // 使用 Map<String, Boolean> 格式，Spring MVC 暂时不支持这么接收参数
-            @Parameter(name = "redirect_uri", required = true, description = "重定向 URI", example = "http://cmsr.com"),
-            @Parameter(name = "auto_approve", required = true, description = "用户是否接受", example = "true"),
-            @Parameter(name = "state", example = "1")
-    })
-    public CommonResult<AuthorizeURIRespVO> approveOrDeny(@RequestParam("response_type") String responseType,
-                                                          @RequestParam("client_id") String clientId,
-                                                          @RequestParam(value = "scope", required = false) String scope,
-                                                          @RequestParam("redirect_uri") String redirectUri,
-                                                          @RequestParam(value = "auto_approve") Boolean autoApprove,
-                                                          @RequestParam(value = "state", required = false) String state) {
-        return oauth2OpenService.approveOrDeny(responseType, clientId, scope, redirectUri, autoApprove, state);
-    }
 
     @PostMapping("/user/get")
     @Operation(summary = "获取用户信息")
     @PermitAll
     @ApiSignIgnore
     @TenantIgnore
-    CommonResult<OAuth2UserInfoRespVO> getUser(@RequestParam("access_token") String accessToken) {
+    CommonResult<OAuth2UserInfoRespVO> getUserInfo(@RequestParam("access_token") String accessToken) {
 
         return CommonResult.success(userService.getUserInfoByToken(accessToken));
     }

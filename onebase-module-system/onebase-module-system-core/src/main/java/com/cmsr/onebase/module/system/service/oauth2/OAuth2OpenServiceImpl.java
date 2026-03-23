@@ -9,21 +9,19 @@ import com.cmsr.onebase.framework.common.util.http.HttpUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.system.convert.oauth2.OAuth2OpenConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
-import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ApproveDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2ClientDO;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2GrantTypeEnum;
 import com.cmsr.onebase.module.system.util.oauth2.OAuth2Utils;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -55,16 +53,16 @@ public class OAuth2OpenServiceImpl implements OAuth2OpenService {
     private OAuth2TokenService oauth2TokenService;
 
     @Override
-    public CommonResult<OAuth2OpenAccessTokenRespVO> postAccessToken(HttpServletRequest request,
-                                                                     String grantType,
-                                                                     String code,
-                                                                     String redirectUri,
-                                                                     String state,
-                                                                     String username,
-                                                                     String password,
-                                                                     String scope,
-                                                                     String refreshToken,
-                                                                     String runMode) {
+    public CommonResult<OAuth2OpenAccessTokenRespVO> generateAuthToken(HttpServletRequest request,
+                                                                       String grantType,
+                                                                       String code,
+                                                                       String redirectUri,
+                                                                       String state,
+                                                                       String username,
+                                                                       String password,
+                                                                       String scope,
+                                                                       String refreshToken,
+                                                                       String runMode) {
         List<String> scopes = OAuth2Utils.buildScopes(scope);
         // 1.1 校验授权类型
         OAuth2GrantTypeEnum grantTypeEnum = OAuth2GrantTypeEnum.getByGrantType(grantType);
@@ -127,7 +125,7 @@ public class OAuth2OpenServiceImpl implements OAuth2OpenService {
     }
 
     @Override
-    public CommonResult<AuthorizeURIRespVO> authorize(String clientId) {
+    public CommonResult<AuthorizeURIRespVO> authorizeClient(String clientId) {
         // 0. 校验用户已经登录。通过 Spring Security 实现
 
         // 1. 获得 Client 客户端的信息
@@ -135,16 +133,16 @@ public class OAuth2OpenServiceImpl implements OAuth2OpenService {
         if (client == null){
             throw exception(BAD_REQUEST.getCode(), "客户端不存在");
         }
-        return approveOrDeny("code", clientId, null, client.getRedirectUris().get(0), null, null);
+        return generateAuthCode("code", clientId, null, client.getRedirectUris().get(0), null, null);
     }
 
     @Override
-    public CommonResult<AuthorizeURIRespVO> approveOrDeny(String responseType,
-                                                          String clientId,
-                                                          String scope,
-                                                          String redirectUri,
-                                                          Boolean autoApprove,
-                                                          String state) {
+    public CommonResult<AuthorizeURIRespVO> generateAuthCode(String responseType,
+                                                             String clientId,
+                                                             String scope,
+                                                             String redirectUri,
+                                                             Boolean autoApprove,
+                                                             String state) {
         @SuppressWarnings("unchecked")
         Map<String, Boolean> scopes = JsonUtils.parseObject(scope, Map.class);
         scopes = ObjectUtils.defaultIfNull(scopes, Collections.emptyMap());
