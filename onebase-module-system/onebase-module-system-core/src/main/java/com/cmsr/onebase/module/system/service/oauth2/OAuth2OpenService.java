@@ -3,7 +3,6 @@ package com.cmsr.onebase.module.system.service.oauth2;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.module.system.vo.oauth.AuthorizeURIRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAccessTokenRespVO;
-import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenAuthorizeInfoRespVO;
 import com.cmsr.onebase.module.system.vo.oauth.OAuth2OpenCheckTokenRespVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,16 +29,16 @@ public interface OAuth2OpenService {
      * @param refreshToken 刷新令牌（刷新模式）
      * @return 访问令牌信息
      */
-    CommonResult<OAuth2OpenAccessTokenRespVO> postAccessToken(HttpServletRequest request,
-                                                              String grantType,
-                                                              String code,
-                                                              String redirectUri,
-                                                              String state,
-                                                              String username,
-                                                              String password,
-                                                              String scope,
-                                                              String refreshToken,
-                                                              String runMode);
+    CommonResult<OAuth2OpenAccessTokenRespVO> generateAuthToken(HttpServletRequest request,
+                                                                String grantType,
+                                                                String code,
+                                                                String redirectUri,
+                                                                String state,
+                                                                String username,
+                                                                String password,
+                                                                String scope,
+                                                                String refreshToken,
+                                                                String runMode);
 
     /**
      * 删除访问令牌
@@ -65,7 +64,7 @@ public interface OAuth2OpenService {
      * @param clientId 客户端编号
      * @return 授权信息
      */
-    CommonResult<AuthorizeURIRespVO> authorize(String clientId);
+    CommonResult<AuthorizeURIRespVO> authorizeClient(String clientId);
 
     /**
      * 申请授权
@@ -78,11 +77,11 @@ public interface OAuth2OpenService {
      * @param state 状态
      * @return 授权结果
      */
-    CommonResult<AuthorizeURIRespVO> approveOrDeny(String responseType,
-                                                   String clientId,
-                                                   String scope,
-                                                   String redirectUri,
-                                                   Boolean autoApprove,
-                                                   String state);
+    CommonResult<AuthorizeURIRespVO> generateAuthCode(String responseType,
+                                                      String clientId,
+                                                      String scope,
+                                                      String redirectUri,
+                                                      Boolean autoApprove,
+                                                      String state);
 
 }
