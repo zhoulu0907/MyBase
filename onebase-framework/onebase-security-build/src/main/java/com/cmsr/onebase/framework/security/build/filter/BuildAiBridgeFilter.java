@@ -10,9 +10,9 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +70,11 @@ public class BuildAiBridgeFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        // 对于 multipart 请求，包装 request 让 Spring 不解析，确保流可转发
+        if (request.getContentType() != null && request.getContentType().startsWith("multipart/")) {
+            request = new MultipartPassthroughRequest(request);
+        }
+
         try {
             if (!hasAiHeaders(request)) {
                 chain.doFilter(request, response);
@@ -137,5 +142,48 @@ public class BuildAiBridgeFilter extends OncePerRequestFilter {
                 StringUtils.isNotBlank(request.getHeader(HDR_SIG)) ||
                 StringUtils.isNotBlank(request.getHeader(HDR_REQ_ID)) ||
                 StringUtils.isNotBlank(request.getHeader(HDR_TENANT_ID));
+    }
+
+    /**
+     * 包装请求，伪装 Content-Type，让 Spring 不解析 multipart。
+     * 确保原始输入流可被下游代理转发。
+     */
+    private static class MultipartPassthroughRequest extends HttpServletRequestWrapper {
+        private static final String MULTIPART = "multipart/";
+        private final String realContentType;
+
+        MultipartPassthroughRequest(HttpServletRequest request) {
+            super(request);
+            this.realContentType = request.getContentType();
+        }
+
+        @Override
+        public String getContentType() {
+            // 返回 null，Spring 不会识别为 multipart
+            if (realContentType != null && realContentType.startsWith(MULTIPART)) {
+                return null;
+            }
+            return realContentType;
+        }
+
+        @Override
+        public String getHeader(String name) {
+            if ("content-type".equalsIgnoreCase(name)) {
+                return getContentType();
+            }
+            return super.getHeader(name);
+        }
+
+        @Override
+        public jakarta.servlet.http.Part getPart(String name) throws IOException, ServletException {
+            // 不解析，直接返回 null
+            return null;
+        }
+
+        @Override
+        public java.util.Collection<jakarta.servlet.http.Part> getParts() throws IOException, ServletException {
+            // 不解析，返回空集合
+            return java.util.Collections.emptyList();
+        }
     }
 }
