@@ -1,16 +1,17 @@
 package com.cmsr.onebase.framework.security.build.config;
 
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
+import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
+import com.cmsr.onebase.framework.security.build.filter.DisableMultipartFilter;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
-import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
 import com.cmsr.onebase.framework.security.core.handler.AuthenticationEntryPointImpl;
 import com.cmsr.onebase.framework.security.service.SystemPermissionService;
 import com.cmsr.onebase.framework.security.service.SystemPermissionServiceImpl;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
-import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -72,6 +73,11 @@ public class BuildSecurityAutoConfiguration {
     public BuildAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
                                                                OAuth2TokenCommonApi oauth2TokenApi, SecurityConfigApi securityConfigApi) {
         return new BuildAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi,securityConfigApi);
+    }
+
+    @Bean
+    public DisableMultipartFilter disableMultipartFilter() {
+        return new DisableMultipartFilter();
     }
 
     @Bean("ss") // 使用 Spring Security 的缩写，方便使用
