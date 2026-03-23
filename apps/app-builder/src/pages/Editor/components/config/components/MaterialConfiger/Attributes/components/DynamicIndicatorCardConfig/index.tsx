@@ -32,7 +32,7 @@ import {
   INDICATOR_COMPARE_CALCULATE_TYPE,
   getPopupContainer,
   useAppEntityStore,
-  webMenuIcons
+  mobileMenuIcons
 } from '@onebase/ui-kit';
 import {
   FieldType,
@@ -93,7 +93,7 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
     i: null
   });
   // 图标下拉内容
-  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
+  const allMobileMenuIcons = mobileMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
   const opCodeOptions = [
     {
       label: '公式',
@@ -555,7 +555,9 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                       const label = { ...currentIndicator.label, display: value };
                       setCurrentIndicator((prev: any) => ({ ...prev, label }));
                     }}
-                  ></Checkbox>
+                  >
+                    <span style={{ color: 'var(--color-text-2)' }}>显示标题</span>
+                  </Checkbox>
                 </>
               }
             >
@@ -957,7 +959,9 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                       const icon = { ...currentIndicator.icon, display: value };
                       setCurrentIndicator((prev: any) => ({ ...prev, icon }));
                     }}
-                  ></Checkbox>
+                  >
+                    <span style={{ color: 'var(--color-text-2)' }}></span>
+                  </Checkbox>
                 </>
               }
             >
@@ -966,7 +970,7 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                   <Dropdown
                     droplist={
                       <Menu>
-                        {allWebMenuIcons?.map((iconItem) => (
+                        {allMobileMenuIcons?.map((iconItem) => (
                           <Menu.Item
                             key={iconItem.code}
                             onClick={() => {
@@ -993,7 +997,7 @@ const DynamicIndicatorCardConfig = ({ handlePropsChange, item, configs, id }: Pr
                     >
                       <ReactSVG
                         style={{ height: '20px' }}
-                        src={allWebMenuIcons.find((ele) => ele.code === currentIndicator.icon?.name)?.icon || ''}
+                        src={allMobileMenuIcons.find((ele) => ele.code === currentIndicator.icon?.name)?.icon || ''}
                         beforeInjection={(svg) => {
                           const fillColor = currentIndicator.icon?.color || 'rgb(var(--primary-6))';
                           svg.querySelectorAll('*').forEach((el) => {
