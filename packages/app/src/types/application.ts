@@ -149,6 +149,11 @@ export interface CreateApplicationReq {
   datasourceSaveReq?: DatasourceSaveReqDTO;
 
   publishModel?: PUBLISH_MODULE;
+
+  /**
+   * 项目编码（可选）
+   */
+  projectCode?: string;
 }
 
 /**

@@ -57,6 +57,7 @@
       
       var urlParams = new URLSearchParams(window.location.search);
       var code = urlParams.get('code');
+      var projectCode = urlParams.get('projectCode');
       var statusEl = document.getElementById('status');
       var errorEl = document.getElementById('error');
 
@@ -67,6 +68,10 @@
           .then(function(response) { return response.json(); })
           .then(function(data) {
             if (data.code === 0 && data.data && data.data.accessToken) {
+              // 存储 projectCode 到 sessionStorage
+              if (projectCode) {
+                sessionStorage.setItem('projectCode', projectCode);
+              }
               // 临时存储登录数据，供回调页面使用
               sessionStorage.setItem('lingji_login_data', JSON.stringify(data.data));
               // 跳转到 React 回调页面进行完整初始化

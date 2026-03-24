@@ -5,6 +5,7 @@ import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
 import { getHashQueryParam } from './router';
 import { generateSignature } from './signature';
 import TokenManager from './token';
+import { ProjectStorage } from './project';
 
 /**
  * 拼接域名和服务路径
@@ -83,6 +84,15 @@ export class HttpClient {
         // 如果获取到 appId 且 header 中未设置，则自动添加
         if (appId && !config.headers['X-Application-Id']) {
           config.headers['X-Application-Id'] = appId;
+        }
+
+        // 自动添加 projectCode 到请求参数
+        const projectCode = ProjectStorage.get();
+        if (projectCode) {
+          config.params = {
+            ...config.params,
+            projectCode
+          };
         }
 
         // 执行自定义请求拦截器
