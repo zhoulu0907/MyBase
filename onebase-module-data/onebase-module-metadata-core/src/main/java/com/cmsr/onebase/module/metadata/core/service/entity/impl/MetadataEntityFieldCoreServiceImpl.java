@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataComponentField
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataComponentFieldTypeDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusinessEntityDO;
+import com.cmsr.onebase.module.metadata.core.dal.redis.RedisKeyConstants;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataEntityFieldCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.mybatisflex.core.paginate.Page;
@@ -14,6 +15,11 @@ import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -27,6 +33,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@CacheConfig(cacheNames = RedisKeyConstants.ENTITY_FIELD_LIST)
 public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCoreService {
 
     @Resource
@@ -38,6 +45,9 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     @Resource
     private MetadataBusinessEntityCoreService metadataBusinessEntityCoreService;
 
+    @Resource
+    private CacheManager cacheManager;
+
     @Override
     public Long createEntityField(@Valid MetadataEntityFieldDO entityField) {
         // 生成 UUID
@@ -46,17 +56,26 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
         }
         metadataEntityFieldRepository.save(entityField);
         log.info("创建实体字段成功，ID: {}，UUID: {}", entityField.getId(), entityField.getFieldUuid());
+        // 清除该实体的字段缓存（如果存在）
+        evictEntityFieldCache(entityField.getEntityUuid());
         return entityField.getId();
     }
 
     @Override
+    @CacheEvict(key = "#entityField.entityUuid", condition = "#entityField != null && #entityField.entityUuid != null")
     public void updateEntityField(@Valid MetadataEntityFieldDO entityField) {
         metadataEntityFieldRepository.updateById(entityField);
     }
 
     @Override
     public void deleteEntityField(Long id) {
+        // 先查询获取 entityUuid 用于清除缓存
+        MetadataEntityFieldDO entityField = metadataEntityFieldRepository.getById(id);
         metadataEntityFieldRepository.removeById(id);
+        // 清除该实体的字段缓存
+        if (entityField != null) {
+            evictEntityFieldCache(entityField.getEntityUuid());
+        }
     }
 
     @Override
@@ -94,6 +113,7 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     }
 
     @Override
+    @Cacheable(key = "#entityUuid", unless = "#result == null || #result.isEmpty()")
     public List<MetadataEntityFieldDO> getEntityFieldListByEntityUuid(String entityUuid) {
         if (entityUuid == null || entityUuid.isEmpty()) {
             return Collections.emptyList();
@@ -103,6 +123,19 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
                 .orderBy(MetadataEntityFieldDO::getSortOrder, true)
                 .orderBy(MetadataEntityFieldDO::getCreateTime, false);
         return metadataEntityFieldRepository.list(queryWrapper);
+    }
+
+    @Override
+    public Map<String, List<MetadataEntityFieldDO>> batchGetEntityFieldsByEntityUuids(List<String> entityUuids) {
+        if (entityUuids == null || entityUuids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        // 批量查询所有字段
+        List<MetadataEntityFieldDO> allFields = metadataEntityFieldRepository.getEntityFieldListByEntityUuids(entityUuids);
+        // 按 entityUuid 分组
+        return allFields.stream()
+                .filter(field -> field.getEntityUuid() != null)
+                .collect(Collectors.groupingBy(MetadataEntityFieldDO::getEntityUuid));
     }
 
     @Override
@@ -297,5 +330,23 @@ public class MetadataEntityFieldCoreServiceImpl implements MetadataEntityFieldCo
     @Override
     public long countByDictTypeId(Long dictTypeId) {
         return metadataEntityFieldRepository.countByDictTypeId(dictTypeId);
+    }
+
+    // ==================== 缓存辅助方法 ====================
+
+    /**
+     * 清除指定实体的字段缓存
+     *
+     * @param entityUuid 实体UUID
+     */
+    private void evictEntityFieldCache(String entityUuid) {
+        if (entityUuid == null) {
+            return;
+        }
+        Cache cache = cacheManager.getCache(RedisKeyConstants.ENTITY_FIELD_LIST);
+        if (cache != null) {
+            cache.evict(entityUuid);
+            log.debug("已清除实体字段缓存, entityUuid: {}", entityUuid);
+        }
     }
 }

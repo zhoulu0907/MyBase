@@ -160,16 +160,16 @@ public interface FlowConnectorService {
     Boolean enableEnvironment(Long connectorId, String envName);
 
     /**
-     * 获取启用环境名称
+     * 获取启用环境
      * <p>
-     * 从连接器配置中读取当前启用的环境名称
+     * 获取连接器当前启用的环境完整信息
      *
      * @param connectorId 连接器实例ID
-     * @return 启用的环境名称，未设置则返回null
-     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnabledEnvName(Long)}
+     * @return 启用的环境信息，未设置则返回null
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnabledEnv(Long)}
      */
     @Deprecated
-    String getEnabledEnvName(Long connectorId);
+    FlowConnectorEnvLiteVO getEnabledEnv(Long connectorId);
 
     /**
      * 保存连接器动作配置

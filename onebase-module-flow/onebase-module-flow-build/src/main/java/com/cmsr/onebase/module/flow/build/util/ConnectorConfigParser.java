@@ -157,10 +157,12 @@ public class ConnectorConfigParser {
             // 从 basicInfo 提取环境信息
             JsonNode basicInfoNode = envConfigNode.get("basicInfo");
             if (basicInfoNode != null && basicInfoNode.isObject()) {
-                // 环境名称
+                // 环境名称：如果 basicInfo.envName 为空，使用 properties 的 key（envCode）作为备用
                 JsonNode envNameNode = basicInfoNode.get("envName");
-                if (envNameNode != null && !envNameNode.isNull()) {
+                if (envNameNode != null && !envNameNode.isNull() && !envNameNode.asText().isEmpty()) {
                     vo.setEnvName(envNameNode.asText());
+                } else {
+                    vo.setEnvName(envCode);  // 使用 properties 的 key 作为环境名称
                 }
 
                 // 环境编码

@@ -48,9 +48,9 @@ public class FlowConnectorEnvController {
     public CommonResult<EnvironmentConfigVO> getEnvironmentConfig(
             @Parameter(description = "连接器实例ID", required = true, example = "1")
             @RequestParam("connectorId") Long connectorId,
-            @Parameter(description = "环境名称", required = true, example = "DEV环境配置")
-            @RequestParam("envName") @NotBlank(message = "环境名称不能为空") String envName) {
-        EnvironmentConfigVO config = envService.getEnvironmentConfig(connectorId, envName);
+            @Parameter(description = "环境编码", required = true, example = "DEV")
+            @RequestParam("envCode") @NotBlank(message = "环境编码不能为空") String envCode) {
+        EnvironmentConfigVO config = envService.getEnvironmentConfig(connectorId, envCode);
         return CommonResult.success(config);
     }
 
@@ -88,18 +88,18 @@ public class FlowConnectorEnvController {
     public CommonResult<Boolean> enableEnvironment(
             @Parameter(description = "连接器实例ID", required = true, example = "1")
             @RequestParam("connectorId") Long connectorId,
-            @Parameter(description = "环境名称（传空表示取消启用）", required = false)
-            @RequestParam(value = "envName", required = false) String envName) {
-        Boolean result = envService.enableEnvironment(connectorId, envName);
+            @Parameter(description = "环境编码（传空表示取消启用）", required = false)
+            @RequestParam(value = "envCode", required = false) String envCode) {
+        Boolean result = envService.enableEnvironment(connectorId, envCode);
         return CommonResult.success(result);
     }
 
-    @Operation(summary = "获取启用环境名称", description = "获取连接器当前启用的环境名称")
-    @GetMapping("/enabled-envname")
-    public CommonResult<String> getEnabledEnvName(
+    @Operation(summary = "获取启用环境", description = "获取连接器当前启用的环境完整信息")
+    @GetMapping("/enabled-env")
+    public CommonResult<FlowConnectorEnvLiteVO> getEnabledEnv(
             @Parameter(description = "连接器实例ID", required = true, example = "1")
             @RequestParam("connectorId") Long connectorId) {
-        String enabledEnvName = envService.getEnabledEnvName(connectorId);
-        return CommonResult.success(enabledEnvName);
+        FlowConnectorEnvLiteVO enabledEnv = envService.getEnabledEnv(connectorId);
+        return CommonResult.success(enabledEnv);
     }
 }

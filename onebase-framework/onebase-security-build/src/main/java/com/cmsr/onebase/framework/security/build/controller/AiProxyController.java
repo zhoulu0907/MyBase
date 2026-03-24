@@ -1,6 +1,8 @@
 package com.cmsr.onebase.framework.security.build.controller;
 
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.security.build.config.AiBridgeProperties;
 import com.cmsr.onebase.framework.security.build.context.AiBridgeContextHolder;
 import com.cmsr.onebase.framework.security.build.util.AiBridgeCryptoUtils;
@@ -21,6 +23,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+
 
 /**
  * AI 代理入口。
@@ -82,6 +85,20 @@ public class AiProxyController {
         });
 
         // 从上下文注入业务侧 header（供上游鉴权/审计/隔离使用）
+
+
+        String userId = SecurityFrameworkUtils.getLoginUserId() != null ? SecurityFrameworkUtils.getLoginUserId().toString() : null;
+
+//        if (StringUtils.isBlank(userId)) {
+//            userId = StringUtils.trimToEmpty(request.getHeader(HDR_USER_ID));
+//        }
+
+        String tenantId = TenantContextHolder.getTenantId() != null ? String.valueOf(TenantContextHolder.getTenantId()) : null;
+
+//        if (StringUtils.isBlank(tenantId)) {
+//            tenantId =  StringUtils.trimToEmpty(request.getHeader(HDR_TENANT_ID));
+//        }
+
         AiBridgeContextHolder.Context ctx = AiBridgeContextHolder.get();
         String reqId = Objects.toString(ctx != null ? ctx.getRequestId() : null, UUID.randomUUID().toString());
         String ts = String.valueOf(System.currentTimeMillis());
@@ -90,8 +107,8 @@ public class AiProxyController {
             builder.header("X-AI-KeyId", ctx.getKeyId());
         }
         builder.header("X-AI-Request-Id", reqId);
-        String userId = ctx != null ? StringUtils.defaultString(ctx.getUserId()) : "";
-        String tenantId = ctx != null ? StringUtils.defaultString(ctx.getTenantId()) : "";
+//        String userId = ctx != null ? StringUtils.defaultString(ctx.getUserId()) : "";
+//        String tenantId = ctx != null ? StringUtils.defaultString(ctx.getTenantId()) : "";
         String appId = ctx != null ? StringUtils.defaultString(ctx.getAppId()) : "";
         if (StringUtils.isNotBlank(userId)) builder.header("X-AI-User-Id", userId);
         if (StringUtils.isNotBlank(tenantId)) builder.header("X-AI-Tenant-Id", tenantId);

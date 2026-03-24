@@ -17,8 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 运行态 - 实体关系服务实现类
@@ -82,7 +81,7 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
         // 3. 查询以该实体为源实体的所有关系（即该实体作为父表的关系）
         QueryWrapper queryWrapper = entityRelationshipRepository.query()
                 .eq(MetadataEntityRelationshipDO::getSourceEntityUuid, entityUuid);
-        
+
         // 增加关系类型筛选条件
         if (StringUtils.hasText(relationshipType)) {
             queryWrapper.eq(MetadataEntityRelationshipDO::getRelationshipType, relationshipType);
@@ -95,9 +94,19 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
         List<EntityFieldInfoRespVO> parentFields = getEntityFields(entityUuid);
         result.setParentFields(parentFields);
 
-        // 5. 转换为子表信息列表
+        // 5. 批量查询所有子表实体的字段，避免 N+1 问题
+        List<String> targetEntityUuids = relationships.stream()
+                .map(MetadataEntityRelationshipDO::getTargetEntityUuid)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+        Map<String, List<MetadataEntityFieldDO>> fieldMap = targetEntityUuids.isEmpty()
+                ? Collections.emptyMap()
+                : entityFieldService.batchGetEntityFieldsByEntityUuids(new ArrayList<>(targetEntityUuids));
+
+        // 6. 转换为子表信息列表
         List<ChildEntityInfoRespVO> childEntities = relationships.stream()
-                .map(this::convertToChildEntityInfo)
+                .map(r -> convertToChildEntityInfo(r, fieldMap))
                 .filter(Objects::nonNull)
                 .toList();
 
@@ -112,17 +121,19 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
      * 转换关系DO为子表信息
      *
      * @param relationshipDO 关系DO
+     * @param fieldMap       实体字段映射（key为entityUuid）
      * @return 子表信息
      */
-    private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO) {
+    private ChildEntityInfoRespVO convertToChildEntityInfo(MetadataEntityRelationshipDO relationshipDO,
+                                                           Map<String, List<MetadataEntityFieldDO>> fieldMap) {
         // 获取目标实体信息（使用UUID查询）
         MetadataBusinessEntityDO targetEntity = businessEntityService.getBusinessEntityByUuid(relationshipDO.getTargetEntityUuid());
-        
+
         // 关联的目标实体为空（不存在或被删除）直接跳过后续处理
         if (targetEntity == null) {
             return null;
         }
-        
+
         ChildEntityInfoRespVO childInfo = BeanUtils.toBean(relationshipDO, ChildEntityInfoRespVO.class, info -> {
             info.setChildEntityId(targetEntity.getId());
             info.setChildEntityUuid(relationshipDO.getTargetEntityUuid());
@@ -138,8 +149,12 @@ public class MetadataEntityRelationshipRuntimeServiceImpl implements MetadataEnt
         childInfo.setSourceFieldName(getFieldNameByUuid(relationshipDO.getSourceFieldUuid()));
         childInfo.setTargetFieldName(getFieldNameByUuid(relationshipDO.getTargetFieldUuid()));
 
-        // 填充子表字段信息
-        List<EntityFieldInfoRespVO> childFields = getEntityFields(relationshipDO.getTargetEntityUuid());
+        // 填充子表字段信息（从预查询的map中获取）
+        String targetEntityUuid = relationshipDO.getTargetEntityUuid();
+        List<MetadataEntityFieldDO> fields = fieldMap.getOrDefault(targetEntityUuid, Collections.emptyList());
+        List<EntityFieldInfoRespVO> childFields = fields.stream()
+                .map(this::convertToFieldInfo)
+                .toList();
         childInfo.setChildFields(childFields);
 
         return childInfo;

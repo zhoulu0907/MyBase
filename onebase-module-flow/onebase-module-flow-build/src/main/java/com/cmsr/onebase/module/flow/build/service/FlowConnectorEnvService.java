@@ -19,7 +19,7 @@ public interface FlowConnectorEnvService {
     /**
      * 查询连接器的环境配置列表
      * <p>
-     * 从flow_connector.config字段解析环境配置信息
+     * 从 flow_connector_env 表查询该连接器类型下的所有环境配置
      *
      * @param connectorId 连接器ID
      * @return 环境配置列表
@@ -29,13 +29,13 @@ public interface FlowConnectorEnvService {
     /**
      * 查询连接器的指定环境配置信息
      * <p>
-     * 从flow_connector.config的properties中解析指定环境的Formily Schema
+     * 从 flow_connector_env 表查询指定环境编码的配置详情
      *
      * @param connectorId 连接器实例ID（主键）
-     * @param envName     环境名称（如DEV环境配置）
+     * @param envCode     环境编码（如 DEV）
      * @return 环境配置 VO
      */
-    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName);
+    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode);
 
     /**
      * 获取环境配置模板
@@ -50,8 +50,8 @@ public interface FlowConnectorEnvService {
     /**
      * 保存连接器环境配置
      * <p>
-     * 将新的环境配置添加到 flow_connector.config.properties 中
-     * 如果环境已存在则拒绝保存
+     * 将新的环境配置保存到 flow_connector_env 表
+     * 如果环境名称已存在则拒绝保存
      *
      * @param connectorId 连接器实例ID
      * @param reqVO       环境配置请求
@@ -62,7 +62,7 @@ public interface FlowConnectorEnvService {
     /**
      * 更新连接器环境配置
      * <p>
-     * 更新已存在的环境配置，环境必须存在
+     * 更新 flow_connector_env 表中已存在的环境配置
      * 如果环境不存在则拒绝更新
      *
      * @param connectorId 连接器实例ID
@@ -74,22 +74,22 @@ public interface FlowConnectorEnvService {
     /**
      * 设置启用环境
      * <p>
-     * 在连接器配置中设置当前启用的环境名称
+     * 在 flow_connector 表设置当前启用的环境（通过 env_uuid 关联）
      * 环境必须存在才能启用
      *
      * @param connectorId 连接器实例ID
-     * @param envName     环境名称（传空或null表示取消启用）
+     * @param envCode     环境编码（传空或null表示取消启用）
      * @return 设置是否成功
      */
-    Boolean enableEnvironment(Long connectorId, String envName);
+    Boolean enableEnvironment(Long connectorId, String envCode);
 
     /**
-     * 获取启用环境名称
+     * 获取启用环境
      * <p>
-     * 从连接器配置中读取当前启用的环境名称
+     * 从 flow_connector 表读取当前启用的环境完整信息
      *
      * @param connectorId 连接器实例ID
-     * @return 启用的环境名称，未设置则返回null
+     * @return 启用的环境完整信息，未设置则返回null
      */
-    String getEnabledEnvName(Long connectorId);
+    FlowConnectorEnvLiteVO getEnabledEnv(Long connectorId);
 }

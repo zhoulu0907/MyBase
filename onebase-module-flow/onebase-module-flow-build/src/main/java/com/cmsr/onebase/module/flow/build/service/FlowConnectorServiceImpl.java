@@ -954,8 +954,8 @@ public class FlowConnectorServiceImpl implements FlowConnectorService {
 
     @Override
     @Deprecated
-    public String getEnabledEnvName(Long connectorId) {
-        return envService.getEnabledEnvName(connectorId);
+    public FlowConnectorEnvLiteVO getEnabledEnv(Long connectorId) {
+        return envService.getEnabledEnv(connectorId);
     }
 
     @Override

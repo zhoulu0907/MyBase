@@ -207,4 +207,21 @@ public class MetadataEntityFieldRepository extends BaseBizRepository<MetadataEnt
                 .in(MetadataEntityFieldDO::getFieldUuid, fieldUuids);
         return list(queryWrapper);
     }
+
+    /**
+     * 根据实体UUID列表批量查询实体字段
+     *
+     * @param entityUuids 实体UUID列表
+     * @return 实体字段列表（包含排序）
+     */
+    public List<MetadataEntityFieldDO> getEntityFieldListByEntityUuids(Collection<String> entityUuids) {
+        if (entityUuids == null || entityUuids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        QueryWrapper queryWrapper = this.query()
+                .in(MetadataEntityFieldDO::getEntityUuid, entityUuids)
+                .orderBy(MetadataEntityFieldDO::getSortOrder, true)
+                .orderBy(MetadataEntityFieldDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
 }

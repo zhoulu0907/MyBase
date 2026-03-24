@@ -310,10 +310,10 @@ public class SemanticMergeRecordAssembler {
 
         Map<String, List<SemanticFieldSchemaDTO>> relationAttrsByTargetId = new HashMap<>();
         if (!targetUuids.isEmpty()) {
-            // 使用 fieldCoreService 查询目标实体字段，确保正确的 version_tag 和 application_id 过滤
+            // 批量查询目标实体字段，避免 N+1 问题
+            Map<String, List<MetadataEntityFieldDO>> targetFieldMap = fieldCoreService.batchGetEntityFieldsByEntityUuids(new ArrayList<>(targetUuids));
             List<MetadataEntityFieldDO> allTargetFields = new ArrayList<>();
-            for (String targetUuid : targetUuids) {
-                List<MetadataEntityFieldDO> targetFields = fieldCoreService.getEntityFieldListByEntityUuid(targetUuid);
+            for (List<MetadataEntityFieldDO> targetFields : targetFieldMap.values()) {
                 if (targetFields != null) {
                     allTargetFields.addAll(targetFields);
                 }
