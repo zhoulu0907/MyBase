@@ -255,46 +255,78 @@ export const getConnectorTypeInfo = (nodeCode: string) => {
   return flowService.get(`/node-config/type-info?nodeCode=${nodeCode}`);
 };
 
-export const getConnectorEnvList = (id: string) => {
-  return flowService.get(`/connector/${id}/environments`);
-};
+// ============ 连接器环境配置 API（新接口） ============
 
-export const getConnectgorEnvironmentConfig = (id: string, envName: string) => {
-  return flowService.get(`/connector/${id}/environment-config?envName=${envName}`);
-};
-
-export const updateEnvironmentConfig = (id: string, params: any) => {
-  return flowService.post(`/connector/${id}/update-env`, params);
-};
-
-export const enableConnectorEnvironment = (id: string, envName: string) => {
-  return flowService.post(`/connector/${id}/enable-env?envName=${envName}`);
-};
-
-export const getEnableConnectorEnvironment = (id: string) => {
-  return flowService.get(`/connector/${id}/get-enabled-envname`);
+/**
+ * 获取连接器环境配置列表
+ * @param connectorId 连接器实例ID
+ */
+export const getConnectorEnvList = (connectorId: string | number) => {
+  return flowService.get('/connector-env/list', { connectorId });
 };
 
 /**
- * 获取连接器环境详情
- * @param id 环境ID
+ * 获取指定环境配置详情
+ * @param connectorId 连接器实例ID
+ * @param envCode 环境编码
  */
+export const getConnectgorEnvironmentConfig = (connectorId: string | number, envCode: string) => {
+  return flowService.get('/connector-env/detail', { connectorId, envCode });
+};
+
+/**
+ * 获取环境配置模板
+ * @param connectorId 连接器实例ID
+ */
+export const getEnvConfigTemplate = (connectorId: string | number) => {
+  return flowService.get('/connector-env/template', { connectorId });
+};
+
+/**
+ * 创建环境配置
+ * @param connectorId 连接器实例ID
+ * @param params 环境配置请求
+ */
+export const createConnectorEnv = (connectorId: string | number, params: any) => {
+  return flowService.post(`/connector-env/create?connectorId=${connectorId}`, params);
+};
+
+/**
+ * 更新环境配置
+ * @param connectorId 连接器实例ID
+ * @param params 环境配置请求
+ */
+export const updateEnvironmentConfig = (connectorId: string | number, params: any) => {
+  return flowService.post(`/connector-env/update?connectorId=${connectorId}`, params);
+};
+
+/**
+ * 设置启用环境
+ * @param connectorId 连接器实例ID
+ * @param envCode 环境编码（传空表示取消启用）
+ */
+export const enableConnectorEnvironment = (connectorId: string | number, envCode?: string) => {
+  const query = envCode ? `?connectorId=${connectorId}&envCode=${encodeURIComponent(envCode)}` : `?connectorId=${connectorId}`;
+  return flowService.post(`/connector-env/enable${query}`);
+};
+
+/**
+ * 获取启用的环境信息
+ * @param connectorId 连接器实例ID
+ * @returns FlowConnectorEnvLiteVO 或 null
+ */
+export const getEnableConnectorEnvironment = (connectorId: string | number) => {
+  return flowService.get('/connector-env/enabled-env', { connectorId });
+};
+
+// ============ 以下为废弃接口，保留向后兼容 ============
+
+/** @deprecated 使用 getConnectorEnvList 代替 */
 export const getConnectorEnvDetail = (id: string) => {
   return flowService.get(`/connector-env/${id}`);
 };
 
-export const getEnvConfigTemplate = (id: string) => {
-  return flowService.get(`/connector/${id}/env-config-template`);
-};
-
-/**
- * 更新连接器环境配置
- * @param params 更新参数
- */
+/** @deprecated 使用 updateEnvironmentConfig 代替 */
 export const updateConnectorEnv = (params: any) => {
   return flowService.post('/connector-env/update', params);
-};
-
-export const createConnectorEnv = (id: string, params: any) => {
-  return flowService.post(`/connector/${id}/save-env`, params);
 };

@@ -167,7 +167,11 @@ export class HttpClient {
                 }
               }
             }
-            return Promise.reject(new Error(data.msg || '请求失败'));
+            const error = new Error(data.msg || '请求失败');
+            (error as any).code = data.code;
+            (error as any).statusCode = data.code;
+            error.message = data.msg || '请求失败';
+            return Promise.reject(error);
           }
         }
 

@@ -389,3 +389,39 @@ export const ConnectorActionStatusText: Record<ConnectorActionStatus, string> = 
   [ConnectorActionStatus.Published]: '已发布',
   [ConnectorActionStatus.Unpublished]: '未发布'
 };
+
+// ============ 连接器环境配置相关类型定义 ============
+
+/** 连接器环境配置（精简）- 列表项 */
+export interface FlowConnectorEnvLiteVO {
+  id: number;
+  envUuid: string;
+  envName: string;
+  envCode: string;
+  typeCode: string;
+  envUrl: string;
+  authType: string;
+  description: string;
+  activeStatus: number; // 0-禁用，1-启用
+  createTime: string;
+}
+
+/** 环境配置 Schema（Formily） */
+export interface EnvironmentConfigVO {
+  schema: Record<string, any>;
+  envCode: string;
+  typeCode: string;
+}
+
+/** 环境配置模板 */
+export interface EnvConfigTemplateVO {
+  schema: Record<string, any>;
+}
+
+/** 保存环境配置请求 */
+export interface SaveEnvironmentConfigReqVO {
+  config: {
+    envMode?: string;
+    envConfig?: Record<string, any>;
+  };
+}
