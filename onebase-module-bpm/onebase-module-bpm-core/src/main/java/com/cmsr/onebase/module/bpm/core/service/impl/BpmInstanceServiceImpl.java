@@ -15,6 +15,7 @@ import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionReposi
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dal.mapper.BpmInstanceMapper;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.table.BpmFlowInsBizExtTableDef;
 import com.cmsr.onebase.module.bpm.core.dto.BpmDefinitionExtDTO;
 import com.cmsr.onebase.module.bpm.core.dto.BpmGlobalConfigDTO;
 import com.cmsr.onebase.module.bpm.core.dto.PageViewGroupDTO;
@@ -34,7 +35,10 @@ import com.cmsr.onebase.module.bpm.core.vo.design.BpmDefJsonVO;
 import com.cmsr.onebase.module.bpm.core.vo.design.edge.base.BaseEdgeVO;
 import com.cmsr.onebase.module.bpm.core.vo.instance.*;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.FlowInstance;
+import com.cmsr.onebase.module.engine.orm.mybatisflex.entity.table.FlowInstanceTableDef;
 import com.cmsr.onebase.module.engine.orm.mybatisflex.repository.FlowInstanceRepository;
+import com.mybatisflex.core.query.QueryColumn;
+import com.mybatisflex.core.query.QueryCondition;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.*;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionNodeTypeEnum;
@@ -69,6 +73,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -539,7 +544,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         return respVO;
     }
-   /**
+    /**
      * 获取流程表单数据
      *
      * @param reqVO 获取流程表单数据请求
@@ -547,7 +552,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
      */
     @Override
     public PageResult<Map<String, Object>> formDataPage(BpmFormDataPageReqVO reqVO) {
-        Long loginUserId = WebFrameworkUtils.getLoginUserId();
         PageResult<Map<String, Object>> response = PageResult.empty();
         Long applicationId = BpmUtil.getRequiredApplicationId();
 
@@ -557,11 +561,25 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
 
         String menuUuid = appMenuRespDTO.getMenuUuid();
 
-        // todo 增加流程本身的条件筛选，数据量如果太大，可能会导致性能问题，待优化，先限制2000条
-        QueryWrapper instanceQuery = QueryWrapper.create();
-        instanceQuery.eq(FlowInstance::getFormPath, menuUuid);
+        FlowInstanceTableDef fi = FlowInstanceTableDef.FLOW_INSTANCE.as("fi");
+        BpmFlowInsBizExtTableDef ext = BpmFlowInsBizExtTableDef.BPM_FLOW_INSTANCE_BIZ_EXT.as("ext");
+
+        QueryWrapper instanceQuery = QueryWrapper.create()
+                .select(fi.ALL_COLUMNS)
+                .from(fi)
+                .innerJoin(ext).on(fi.ID.eq(ext.INSTANCE_ID))
+                .where(fi.FORM_PATH.eq(menuUuid))
+                .and(fi.DELETED.eq(0))
+                .and(ext.DELETED.eq(0))
+                .and(ext.APPLICATION_ID.eq(applicationId));
+
+        QueryCondition flowFilterCondition = buildFlowFilterCondition(reqVO.getFilters(), fi, ext);
+        if (flowFilterCondition != null) {
+            instanceQuery.and(flowFilterCondition);
+        }
+
         instanceQuery.limit(2000);
-        instanceQuery.orderBy(FlowInstance::getCreateTime, false);
+        instanceQuery.orderBy(fi.CREATE_TIME, false);
 
         List<FlowInstance> instances = flowInstanceRepository.list(instanceQuery);
         Map<Long, Long> entityDataIdInstanceIdMap = new HashMap<>();
@@ -600,9 +618,9 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             if (reqVO.getFilters().getChildren() == null) {
                 reqVO.getFilters().setChildren(new ArrayList<>());
             }
-
-            // reqVO.getFilters().getChildren().add(idCondition);
-            conditionVO.setSemanticConditionDTO(reqVO.getFilters());
+            // 去掉流程系统字段条件，避免元数据模块重复处理
+            SemanticConditionDTO metadataFilters = removeBpmSystemFieldConditions(reqVO.getFilters());
+            conditionVO.setSemanticConditionDTO(metadataFilters);
         } else {
             // conditionVO.setSemanticConditionDTO(idCondition);
         }
@@ -618,12 +636,12 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         }
 
         for (SemanticEntityValueDTO entityValueDTO : entityPageResult.getList()) {
-             Long instanceId = entityDataIdInstanceIdMap.get(entityValueDTO.getId());
+            Long instanceId = entityDataIdInstanceIdMap.get(entityValueDTO.getId());
 
-             if (instanceId == null) {
-                 log.warn("未匹配到对应的实例ID");
-                 continue;
-             }
+            if (instanceId == null) {
+                log.warn("未匹配到对应的实例ID");
+                continue;
+            }
 
             instanceIds.add(instanceId);
         }
@@ -864,50 +882,50 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
      *
      * @return 获取流程表单数据响应
      */
-   private PageResult<SemanticEntityValueDTO> getEntityDataByCondition(List businessDataIdList, String tableName,int pageNo, int pageSize,SemanticPageConditionVO entityFilters) {
-       // 1. 创建 SemanticPageConditionVO 对象
-       SemanticPageConditionVO conditionVO = new SemanticPageConditionVO();
-       conditionVO.setTableName(tableName); // 设置表名
+    private PageResult<SemanticEntityValueDTO> getEntityDataByCondition(List businessDataIdList, String tableName,int pageNo, int pageSize,SemanticPageConditionVO entityFilters) {
+        // 1. 创建 SemanticPageConditionVO 对象
+        SemanticPageConditionVO conditionVO = new SemanticPageConditionVO();
+        conditionVO.setTableName(tableName); // 设置表名
 
-       // 2. 构造查询条件 - 通过 entityId 集合查询
-       SemanticConditionDTO idCondition = new SemanticConditionDTO();
-       idCondition.setFieldName("id"); // 假设主键字段名为"id"
-       idCondition.setOperator(SemanticOperatorEnum.EXISTS_IN); // 使用IN操作符
-       idCondition.setFieldValue(businessDataIdList); // entityIdList
-       idCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
+        // 2. 构造查询条件 - 通过 entityId 集合查询
+        SemanticConditionDTO idCondition = new SemanticConditionDTO();
+        idCondition.setFieldName("id"); // 假设主键字段名为"id"
+        idCondition.setOperator(SemanticOperatorEnum.EXISTS_IN); // 使用IN操作符
+        idCondition.setFieldValue(businessDataIdList); // entityIdList
+        idCondition.setNodeType(SemanticConditionNodeTypeEnum.CONDITION);
 
-       // 3. 处理 entityFilters 中的条件，并与ID条件组合
-       if (entityFilters != null && entityFilters.getSemanticConditionDTO() != null) {
-           entityFilters.setTableName(tableName);
-           entityFilters.getSemanticConditionDTO().getChildren().add(idCondition);
-           SemanticConditionDTO combinedCondition = getSemanticConditionDTO(entityFilters, idCondition);
-           conditionVO.setSemanticConditionDTO(combinedCondition);
+        // 3. 处理 entityFilters 中的条件，并与ID条件组合
+        if (entityFilters != null && entityFilters.getSemanticConditionDTO() != null) {
+            entityFilters.setTableName(tableName);
+            entityFilters.getSemanticConditionDTO().getChildren().add(idCondition);
+            SemanticConditionDTO combinedCondition = getSemanticConditionDTO(entityFilters, idCondition);
+            conditionVO.setSemanticConditionDTO(combinedCondition);
 
-           // 设置 entityFilters 中的排序条件
-           if (entityFilters.getSortBy() != null) {
-               conditionVO.setSortBy(entityFilters.getSortBy());
-           }
-       } else {
-           // 如果没有 entityFilters 条件，只使用ID条件
-           conditionVO.setSemanticConditionDTO(idCondition);
-       }
+            // 设置 entityFilters 中的排序条件
+            if (entityFilters.getSortBy() != null) {
+                conditionVO.setSortBy(entityFilters.getSortBy());
+            }
+        } else {
+            // 如果没有 entityFilters 条件，只使用ID条件
+            conditionVO.setSemanticConditionDTO(idCondition);
+        }
 
-       // 4. 设置分页参数
-       conditionVO.setPageNo(pageNo);    // 页码
-       conditionVO.setPageSize(pageSize); // 每页大小
+        // 4. 设置分页参数
+        conditionVO.setPageNo(pageNo);    // 页码
+        conditionVO.setPageSize(pageSize); // 每页大小
 
-       // 5. 调用 getDataByCondition 方法
-       PageResult<SemanticEntityValueDTO> result = semanticDynamicDataApi.getDataByCondition(conditionVO);
-       return result;
-   }
+        // 5. 调用 getDataByCondition 方法
+        PageResult<SemanticEntityValueDTO> result = semanticDynamicDataApi.getDataByCondition(conditionVO);
+        return result;
+    }
 
-   /**
-   * 处理 entityFilters 中的条件，并与ID条件组合
-   *
-   * @param entityFilters entityFilters
-   * @param idCondition   ID条件
-   * @return 组合后的条件
-   */
+    /**
+     * 处理 entityFilters 中的条件，并与ID条件组合
+     *
+     * @param entityFilters entityFilters
+     * @param idCondition   ID条件
+     * @return 组合后的条件
+     */
     @NotNull
     private static SemanticConditionDTO getSemanticConditionDTO(SemanticPageConditionVO entityFilters, SemanticConditionDTO idCondition) {
         SemanticConditionDTO filterConditions = entityFilters.getSemanticConditionDTO();
@@ -923,6 +941,148 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         combinedCondition.setFieldUuid(entityFilters.getSemanticConditionDTO().getFieldUuid());
         combinedCondition.setChildren(Arrays.asList(idCondition, filterConditions));
         return combinedCondition;
+    }
+
+
+    private QueryCondition buildFlowFilterCondition(SemanticConditionDTO condition,
+                                                    FlowInstanceTableDef fi,
+                                                    BpmFlowInsBizExtTableDef ext) {
+        if (condition == null || condition.getNodeType() == null) {
+            return null;
+        }
+
+        if (condition.getNodeType() == SemanticConditionNodeTypeEnum.GROUP) {
+            List<SemanticConditionDTO> children = condition.getChildren();
+
+            if (CollectionUtils.isEmpty(children)) {
+                // GROUP 节点没有子条件时，不拼接过滤条件
+                return null;
+            }
+            
+
+            QueryCondition groupCond = null;
+            boolean isOr = condition.getCombinator() != null && "OR".equalsIgnoreCase(condition.getCombinator().name());
+
+            for (SemanticConditionDTO child : children) {
+                QueryCondition childCond = buildFlowFilterCondition(child, fi, ext);
+
+                if (childCond == null) {
+                    continue;
+                }
+
+                groupCond = (groupCond == null) ? childCond : (isOr ? groupCond.or(childCond) : groupCond.and(childCond));
+            }
+
+            // children 里如果全是业务字段（非 BPM 字段），这里会是 null，交给元数据模块继续处理
+            return groupCond;
+        }
+
+        BpmSystemFieldEnum bpmField = BpmSystemFieldEnum.getByFieldName(condition.getFieldName());
+
+        // 非流程系统字段不在BPM查询中处理（交给元数据模块）
+        if (bpmField == null) {
+            return null;
+        }
+
+        return switch (bpmField) {
+            case BPM_TITLE -> buildCommonCondition(ext.BPM_TITLE, condition);
+            case BPM_INITIATOR_ID -> buildCommonCondition(ext.INITIATOR_ID, condition);
+            case BPM_SUBMIT_TIME -> buildDateCondition(ext.SUBMIT_TIME, condition);
+            case BPM_STATUS -> buildCommonCondition(fi.FLOW_STATUS, condition);
+            case BPM_CURRENT_NODE -> buildCommonCondition(fi.NODE_CODE, condition);
+            default -> null;
+        };
+    }
+
+    private QueryCondition buildCommonCondition(com.mybatisflex.core.query.QueryColumn column, SemanticConditionDTO condition) {
+        SemanticOperatorEnum operator = condition.getOperator();
+        List<Object> values = condition.getFieldValue();
+
+        if (operator == null) {
+            return null;
+        }
+
+        if (operator == SemanticOperatorEnum.IS_EMPTY) {
+            return column.isNull().or(column.eq(""));
+        }
+
+        if (operator == SemanticOperatorEnum.IS_NOT_EMPTY) {
+            return column.isNotNull().and(column.ne(""));
+        }
+
+        if (CollectionUtils.isEmpty(values)) {
+            return null;
+        }
+
+        Object first = values.get(0);
+
+        return switch (operator) {
+            case EQUALS -> values.size() > 1 ? column.in(values) : column.eq(first);
+            case NOT_EQUALS -> values.size() > 1 ? column.notIn(values) : column.ne(first);
+            case CONTAINS -> column.like("%" + first + "%");
+            case NOT_CONTAINS -> column.notLike("%" + first + "%");
+            case EXISTS_IN -> column.in(values);
+            case NOT_EXISTS_IN -> column.notIn(values);
+            case GREATER_THAN, LATER_THAN -> column.gt(first);
+            case GREATER_EQUALS -> column.ge(first);
+            case LESS_THAN, EARLIER_THAN -> column.lt(first);
+            case LESS_EQUALS -> column.le(first);
+            case RANGE -> values.size() >= 2 ? column.ge(values.get(0)).and(column.le(values.get(1))) : null;
+            default -> null;
+        };
+    }
+
+    private QueryCondition buildDateCondition(com.mybatisflex.core.query.QueryColumn column, SemanticConditionDTO condition) {
+        if (condition.getOperator() == SemanticOperatorEnum.RANGE
+                && CollectionUtils.isNotEmpty(condition.getFieldValue())
+                && condition.getFieldValue().size() >= 2) {
+            LocalDate start = LocalDate.parse(String.valueOf(condition.getFieldValue().get(0))) ;
+            LocalDate end = LocalDate.parse(String.valueOf(condition.getFieldValue().get(1)));
+
+            LocalDateTime dateStart = start.atStartOfDay();
+            LocalDateTime dateEnd = end.atTime(23, 59, 59);
+            return column.ge(dateStart).and(column.le(dateEnd));
+        }
+
+        return buildCommonCondition(column, condition);
+    }
+
+    private SemanticConditionDTO removeBpmSystemFieldConditions(SemanticConditionDTO condition) {
+        if (condition == null || condition.getNodeType() == null) {
+            return null;
+        }
+
+        if (condition.getNodeType() == SemanticConditionNodeTypeEnum.CONDITION) {
+            // BPM系统字段条件在流程查询阶段处理，这里从元数据过滤条件里移除
+            if (BpmSystemFieldEnum.getByFieldName(condition.getFieldName()) != null) {
+                return null;
+            }
+
+            return condition;
+        }
+
+        if (CollectionUtils.isEmpty(condition.getChildren())) {
+            return condition;
+        }
+
+        List<SemanticConditionDTO> filteredChildren = new ArrayList<>();
+
+        for (SemanticConditionDTO child : condition.getChildren()) {
+            SemanticConditionDTO filteredChild = removeBpmSystemFieldConditions(child);
+
+            if (filteredChild != null) {
+                filteredChildren.add(filteredChild);
+            }
+        }
+
+        condition.setChildren(filteredChildren);
+
+        // 子节点全部被过滤后，不再传给元数据模块
+        if (CollectionUtils.isEmpty(filteredChildren)) {
+            return null;
+        }
+
+        return condition;
     }
 
 
