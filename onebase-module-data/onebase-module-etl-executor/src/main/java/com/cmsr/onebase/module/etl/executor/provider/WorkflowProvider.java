@@ -102,7 +102,7 @@ public class WorkflowProvider {
             field.setFieldType(flinkType);
             field.setLength(etlColumn.getLength());
             field.setPrecision(etlColumn.getPrecision());
-            field.setScale(etlColumn.getScale());
+            field.setScale(normalizeTemporalScale(datasourceType, flinkType, etlColumn.getScale()));
         }
     }
 
@@ -147,9 +147,34 @@ public class WorkflowProvider {
             jdbcOutputMapper.setTargetFieldType(flinkType);
             jdbcOutputMapper.setTargetFieldLength(etlColumn.getLength());
             jdbcOutputMapper.setTargetFieldPrecision(etlColumn.getPrecision());
-            jdbcOutputMapper.setTargetFieldScale(etlColumn.getScale());
+            jdbcOutputMapper.setTargetFieldScale(normalizeTemporalScale(datasourceType, flinkType, etlColumn.getScale()));
         }
     }
 
+    private Integer normalizeTemporalScale(String datasourceType, String flinkType, Integer scale) {
+        if (!isTemporalType(flinkType)) {
+            return scale;
+        }
+        int resolvedScale = scale == null ? 6 : scale;
+        if (resolvedScale < 0) {
+            resolvedScale = 0;
+        }
+        if (isMysqlDatasource(datasourceType) && resolvedScale > 6) {
+            return 6;
+        }
+        return Math.min(resolvedScale, 9);
+    }
+
+    private boolean isTemporalType(String flinkType) {
+        if (StringUtils.isBlank(flinkType)) {
+            return false;
+        }
+        String normalizedType = flinkType.trim().toUpperCase();
+        return "TIMESTAMP".equals(normalizedType) || "TIMESTAMP_LTZ".equals(normalizedType);
+    }
+
+    private boolean isMysqlDatasource(String datasourceType) {
+        return StringUtils.containsIgnoreCase(datasourceType, "mysql");
+    }
 
 }

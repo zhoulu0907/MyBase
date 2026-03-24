@@ -62,6 +62,6 @@ public class FlinkUtil {
     }
 
     private static boolean isMysql(String databaseType) {
-        return "mysql".equalsIgnoreCase(databaseType);
+        return databaseType != null && databaseType.toLowerCase().contains("mysql");
     }
 }
