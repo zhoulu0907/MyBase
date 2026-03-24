@@ -7,8 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Schema(description = "管理后台 - OAuth2 获得用户基本信息 Response VO")
 @Data
 @NoArgsConstructor
@@ -40,6 +38,9 @@ public class OAuth2UserInfoRespVO {
     @Schema(description = "租户id")
     private Long tenantId;
 
+    @Schema(description = "租户名称")
+    private String tenantName;
+
     @Schema(description = "应用id")
     private Long applicationId;
 
@@ -51,11 +52,6 @@ public class OAuth2UserInfoRespVO {
      */
     private Dept dept;
 
-    /**
-     * 所属岗位数组
-     */
-    private List<Post> posts;
-
     @Schema(description = "部门")
     @Data
     public static class Dept {
@@ -64,18 +60,6 @@ public class OAuth2UserInfoRespVO {
         private Long id;
 
         @Schema(description = "部门名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "研发部")
-        private String name;
-
-    }
-
-    @Schema(description = "岗位")
-    @Data
-    public static class Post {
-
-        @Schema(description = "岗位编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-        private Long id;
-
-        @Schema(description = "岗位名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "开发")
         private String name;
 
     }

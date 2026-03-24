@@ -9,10 +9,11 @@ import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticCombinatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionNodeTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticConditionTypeEnum;
+import com.cmsr.onebase.module.metadata.core.dialect.SqlDialects;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticOperatorEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticMergeRecordAssembler;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.SemanticQueryConditionBuilder;
-import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.CPI;
 import com.mybatisflex.core.query.QueryMethods;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -35,7 +36,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Component("buildDashMetaDataCardExecutor")
 public class DashMetaDataCardExecutor {
@@ -347,7 +347,7 @@ public class DashMetaDataCardExecutor {
             throw new IllegalArgumentException("unsafe tableName");
         }
         String calcField = safeToString(card.get("calculateField"));
-        QueryColumn calcColumn = resolveCalcColumn(calcField, schema);
+        SemanticFieldSchemaDTO calcFieldSchema = resolveCalcFieldSchema(calcField, schema);
         QueryWrapper whereQw = buildWhereQuery(schema, card.get("filterCondition"));
         if (!isSafeIdentifier(timeField)) {
             throw new IllegalArgumentException("unsafe timeField");
@@ -355,7 +355,7 @@ public class DashMetaDataCardExecutor {
         whereQw.and(" " + timeField + " >= ? ", start);
         whereQw.and(" " + timeField + " < ? ", end);
         QueryWrapper aggQw = QueryWrapper.create();
-        applyAggregateSelect(aggQw, calculateType, calcColumn, calcField);
+        applyAggregateSelect(aggQw, calculateType, calcFieldSchema, calcField);
         aggQw.where(CPI.getWhereQueryCondition(whereQw));
         Long appId = ApplicationManager.getApplicationId();
         if (appId == null) {
@@ -390,10 +390,10 @@ public class DashMetaDataCardExecutor {
         }
 
         String calcField = safeToString(card.get("calculateField"));
-        QueryColumn calcColumn = resolveCalcColumn(calcField, schema);
+        SemanticFieldSchemaDTO calcFieldSchema = resolveCalcFieldSchema(calcField, schema);
         QueryWrapper whereQw = buildWhereQuery(schema, card.get("filterCondition"));
         QueryWrapper aggQw = QueryWrapper.create();
-        applyAggregateSelect(aggQw, calculateType, calcColumn, calcField);
+        applyAggregateSelect(aggQw, calculateType, calcFieldSchema, calcField);
         aggQw.where(CPI.getWhereQueryCondition(whereQw));
 
         Long appId = ApplicationManager.getApplicationId();
@@ -536,7 +536,7 @@ public class DashMetaDataCardExecutor {
                 || ciEquals(CALC_COUNT_DISTINCT, calculateType);
     }
 
-    private QueryColumn resolveCalcColumn(String calcField, SemanticEntitySchemaDTO schema) {
+    private SemanticFieldSchemaDTO resolveCalcFieldSchema(String calcField, SemanticEntitySchemaDTO schema) {
         if (StringUtils.isBlank(calcField)) {
             return null;
         }
@@ -546,25 +546,30 @@ public class DashMetaDataCardExecutor {
         if (schema == null || schema.getFields() == null || schema.getFields().isEmpty()) {
             throw new IllegalArgumentException("missing schema fields");
         }
-        boolean exists = schema.getFields().stream()
-                .map(SemanticFieldSchemaDTO::getFieldName)
-                .filter(Objects::nonNull)
-                .anyMatch(calcField::equals);
-        if (!exists) {
-            throw new IllegalArgumentException("calculateField not exists in entity");
-        }
-        return new QueryColumn(calcField);
+        return schema.getFields().stream()
+                .filter(f -> calcField.equals(f.getFieldName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("calculateField not exists in entity"));
     }
 
-    private void applyAggregateSelect(QueryWrapper qw, String calculateType, QueryColumn column, String calcField) {
+    private void assertNumericField(SemanticFieldSchemaDTO fieldSchema, String calculateType) {
+        if (fieldSchema == null) {
+            throw new IllegalArgumentException("missing calculateField for " + calculateType);
+        }
+        SemanticFieldTypeEnum fieldType = fieldSchema.getFieldTypeEnum();
+        if (fieldType == null || !fieldType.isNumberType()) {
+            throw new IllegalArgumentException(
+                    calculateType + " 仅支持数值类型字段，当前字段 " + fieldSchema.getFieldName() + " 类型为 " + fieldSchema.getFieldType());
+        }
+    }
+
+    private void applyAggregateSelect(QueryWrapper qw, String calculateType, SemanticFieldSchemaDTO fieldSchema, String calcField) {
+        // count 不需要字段
         if (ciEquals(CALC_COUNT, calculateType)) {
-            if (column != null) {
-                qw.select(QueryMethods.count(column).as("value"));
-            } else {
-                qw.select(QueryMethods.count().as("value"));
-            }
+            qw.select(QueryMethods.count().as("value"));
             return;
         }
+        // count_distinct 需要字段但不限类型
         if (ciEquals(CALC_COUNT_DISTINCT, calculateType)) {
             if (StringUtils.isBlank(calcField)) {
                 throw new IllegalArgumentException("missing calculateField");
@@ -572,23 +577,31 @@ public class DashMetaDataCardExecutor {
             if (!isSafeIdentifier(calcField)) {
                 throw new IllegalArgumentException("unsafe calculateField");
             }
-            qw.select("COUNT(DISTINCT " + calcField + ") AS value");
+            qw.select(SqlDialects.countDistinct(calcField) + " AS value");
             return;
         }
-        if (column == null) {
-            throw new IllegalArgumentException("missing calculateField");
+        // sum/avg/max/min 需要数值类型字段
+        if (ciEquals(CALC_SUM, calculateType) || ciEquals(CALC_AVG, calculateType)
+                || ciEquals(CALC_MAX, calculateType) || ciEquals(CALC_MIN, calculateType)) {
+            assertNumericField(fieldSchema, calculateType);
+            if (StringUtils.isBlank(calcField) || !isSafeIdentifier(calcField)) {
+                throw new IllegalArgumentException("missing or unsafe calculateField");
+            }
+            // 使用工具类生成 SQL
+            String sql;
+            if (ciEquals(CALC_SUM, calculateType)) {
+                sql = SqlDialects.sum(calcField);
+            } else if (ciEquals(CALC_AVG, calculateType)) {
+                sql = SqlDialects.avg(calcField);
+            } else if (ciEquals(CALC_MAX, calculateType)) {
+                sql = SqlDialects.max(calcField);
+            } else {
+                sql = SqlDialects.min(calcField);
+            }
+            qw.select(sql + " AS value");
+            return;
         }
-        if (ciEquals(CALC_SUM, calculateType)) {
-            qw.select(QueryMethods.sum(column).as("value"));
-        } else if (ciEquals(CALC_AVG, calculateType)) {
-            qw.select(QueryMethods.avg(column).as("value"));
-        } else if (ciEquals(CALC_MAX, calculateType)) {
-            qw.select(QueryMethods.max(column).as("value"));
-        } else if (ciEquals(CALC_MIN, calculateType)) {
-            qw.select(QueryMethods.min(column).as("value"));
-        } else {
-            throw new IllegalArgumentException("unsupported calculateType: " + calculateType);
-        }
+        throw new IllegalArgumentException("unsupported calculateType: " + calculateType);
     }
 
     private Object applyAbsolute(Object value) {

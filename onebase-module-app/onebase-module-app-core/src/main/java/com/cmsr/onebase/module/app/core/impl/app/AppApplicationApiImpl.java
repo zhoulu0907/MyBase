@@ -66,6 +66,11 @@ public class AppApplicationApiImpl implements AppApplicationApi {
     }
 
     @Override
+    public Long countApplicationByTenantIdAndUserId(Long tenantId, Long userId) {
+        return TenantManager.withoutTenantCondition(() -> appApplicationRepository.countByTenantIdAndUserId(tenantId, userId));
+    }
+
+    @Override
     public List<ApplicationDTO> findAppApplicationByAppName(String appName) {
         List<AppApplicationDO> applicationList = appApplicationRepository.findAppApplicationByAppName(appName, AppStatusEnum.ONLINE.getValue());
         List<ApplicationDTO> applicationDTOList = applicationList.stream()

@@ -22,6 +22,8 @@ import com.cmsr.onebase.module.app.api.app.AppApplicationApi;
 import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
+import com.cmsr.onebase.module.app.api.version.AppVersionApi;
+import com.cmsr.onebase.module.app.api.version.dto.AppVersionDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
@@ -123,6 +125,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
     private CaptchaService captchaService;
     @Resource
     private SmsCodeApi smsCodeApi;
+    @Resource
+    private AppVersionApi appVersionApi;
     /**
      * 验证码的开关，默认为 true
      */
@@ -393,19 +397,10 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
         if (null == thirdUserConfigDO || MenuConstants.DefaultSaasThirdUser.equals(thirdUserConfigDO.getConfigValue())) {
             throw exception(AUTH_VERIFY_THIRD_USER_ERROR);
         }
-        SystemConfigSearchReqVO configSearchReqVO = new SystemConfigSearchReqVO();
-        configSearchReqVO.setAppId(appId);
-        configSearchReqVO.setConfigType(ConfigTypeEnum.APP.getCode());
-        Set<String> set = new HashSet<>();
-        set.add(SystemConfigKeyEnum.appThirdUserEnable.getKey());
-        configSearchReqVO.setConfigKeys(set);
-        List<SystemGeneralConfigDO> configListByKeysAndAppId = systemConfigService.getTenantConfigListByKeysAndAppId(configSearchReqVO);
-        if (CollectionUtils.isEmpty(configListByKeysAndAppId)) {
+
+        AppVersionDTO appVersionDTO = appVersionApi.getAppThirdEnableStatus(appId);
+        if (appVersionDTO == null || CommonStatusEnum.DISABLE.getStatus().equals(appVersionDTO.getAppThirdUserEnable())) {
             throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
-        } else {
-            if (!configListByKeysAndAppId.get(0).getConfigValue().equals(String.valueOf(SystemConfigKeyEnum.appThirdUserEnable_DefaultValue))) {
-                throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
-            }
         }
     }
 

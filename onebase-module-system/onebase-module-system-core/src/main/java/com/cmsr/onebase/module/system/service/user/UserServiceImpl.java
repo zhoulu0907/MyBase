@@ -10,7 +10,6 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
@@ -22,13 +21,11 @@ import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.infra.api.config.ConfigApi;
 import com.cmsr.onebase.module.system.api.dept.dto.UserPageApiReqVO;
 import com.cmsr.onebase.module.system.convert.user.UserConvert;
-import com.cmsr.onebase.module.system.dal.database.CorpDataRepository;
-import com.cmsr.onebase.module.system.dal.database.RoleDataRepository;
-import com.cmsr.onebase.module.system.dal.database.UserPostDataRepository;
-import com.cmsr.onebase.module.system.dal.database.UserRoleDataRepository;
+import com.cmsr.onebase.module.system.dal.database.*;
 import com.cmsr.onebase.module.system.dal.dataobject.corp.CorpDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.DeptDO;
 import com.cmsr.onebase.module.system.dal.dataobject.dept.UserPostDO;
+import com.cmsr.onebase.module.system.dal.dataobject.external.SystemExternalUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
@@ -37,6 +34,7 @@ import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.UserAppRelationDO;
 import com.cmsr.onebase.module.system.dal.flex.repo.UserDataRepository;
 import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.enums.app.PlatformTypeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptCodeEnum;
 import com.cmsr.onebase.module.system.enums.dept.DeptTypeEnum;
 import com.cmsr.onebase.module.system.enums.permission.AdminTypeEnum;
@@ -152,6 +150,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private CorpDataRepository corpDataRepository;
+
+    @Resource
+    private SystemExternalUserDataRepository systemExternalUserDataRepository;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -274,37 +275,47 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AdminUserDO updateOrAddUser(AdminUserDO userDO) {
-        AdminUserDO adminUserDO = userDataRepository.getUserByTianGongId(userDO.getId());
-        if (adminUserDO == null) {
-            if (userDO.getUserType() == null) {
-                userDO.setUserType(UserTypeEnum.TENANT.getValue());
-            }
-            userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
-            if (userDO.getAdminType() == null) {
-                userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
-            }
-            // 1.1 校验账户配合
-            validateTenantUserCountMaxLimit();
-            // 1.2 校验正确性
-            validateUserForCreateOrUpdate(null, userDO.getUsername(),
-                    userDO.getMobile(), userDO.getEmail(), userDO.getDeptId(), userDO.getPostIds(), userDO.getUserType());
+    public AdminUserDO updateOrAddUser(ExternalUserInfoReqVO userInfoReqVO) {
+        SystemExternalUserDO externalUserDO = systemExternalUserDataRepository.findByExternalUserId(userInfoReqVO.getId(), userInfoReqVO.getPlatformType(), userInfoReqVO.getCurrentTenantId());
 
-            userDO.setTianGongID(userDO.getId());
-            userDO.setPassword(encodePassword("AdminChina2025!")); // 加密密码
-            userDO.setId(null);
-            userDataRepository.save(userDO);
-            RoleDO roleIdsByCodeAndTenantId = roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
-            // 保存初始密码历史记录
-            securityConfigApi.savePasswordHistory(userDO.getId(), userDO.getPassword());
-
-            // 2 插入用户角色关联
-            Set<Long> roleIds = new HashSet<>();
-            roleIds.add(roleIdsByCodeAndTenantId.getId());
-            permissionService.assignUserRoles(userDO.getId(), roleIds);
-            return userDO;
+        if (externalUserDO != null) {
+            AdminUserDO adminUserDO = userDataRepository.findById(externalUserDO.getObUserId());
+            if (adminUserDO != null) {
+                return adminUserDO;
+            }
         }
-        return adminUserDO;
+        AdminUserDO userDO = BeanUtils.toBean(userInfoReqVO, AdminUserDO.class);
+        userDO.setMobile(userInfoReqVO.getPhone());
+        userDO.setUserType(UserTypeEnum.TENANT.getValue());
+        userDO.setStatus(CommonStatusEnum.ENABLE.getStatus()); // 默认开启
+        userDO.setAdminType(AdminTypeEnum.CUSTOM.getType());
+        // 1.1 校验账户配合
+        validateTenantUserCountMaxLimit();
+        // 1.2 校验正确性
+        validateUserForCreateOrUpdate(null, userDO.getUsername(),
+                userDO.getMobile(), userDO.getEmail(), userDO.getDeptId(), userDO.getPostIds(), userDO.getUserType());
+
+        userDO.setPassword(encodePassword("AdminChina2025!")); // 加密密码
+        userDO.setId(null);
+        userDataRepository.save(userDO);
+        RoleDO roleIdsByCodeAndTenantId = roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
+        // 保存初始密码历史记录
+        securityConfigApi.savePasswordHistory(userDO.getId(), userDO.getPassword());
+
+        // 2 插入用户角色关联
+        Set<Long> roleIds = new HashSet<>();
+        roleIds.add(roleIdsByCodeAndTenantId.getId());
+        permissionService.assignUserRoles(userDO.getId(), roleIds);
+        // 3 插入外部用户关联表
+        SystemExternalUserDO systemExternalUserDO = new SystemExternalUserDO();
+        systemExternalUserDO.setObUserId(userDO.getId())
+                .setObTenantId(userDO.getTenantId())
+                .setExternalUserId(userInfoReqVO.getId())
+                .setPlatformType(PlatformTypeEnum.TIANGONG.getType())
+                .setExternalTenantId(userInfoReqVO.getCurrentTenantId());
+        systemExternalUserDataRepository.save(systemExternalUserDO);
+
+        return userDO;
     }
 
     private Long createCoreAdminRole() {
@@ -1574,6 +1585,18 @@ public class UserServiceImpl implements UserService {
         AdminUserDO user = userDataRepository.getById(token.getUserId());
         OAuth2UserInfoRespVO oAuth2UserInfoRespVO = BeanUtils.toBean(user, OAuth2UserInfoRespVO.class);
         oAuth2UserInfoRespVO.setApplicationId(token.getAppId());
+
+        // 获得部门信息
+        if (user.getDeptId() != null) {
+            DeptDO dept = deptService.getDept(user.getDeptId());
+            oAuth2UserInfoRespVO.setDept(BeanUtils.toBean(dept, OAuth2UserInfoRespVO.Dept.class));
+        }
+
+        // 补充租户信息
+        TenantDO tenantDO = tenantService.getTenant(token.getTenantId());
+        if(tenantDO != null){
+            oAuth2UserInfoRespVO.setTenantName(tenantDO.getName());
+        }
         return oAuth2UserInfoRespVO;
     }
 

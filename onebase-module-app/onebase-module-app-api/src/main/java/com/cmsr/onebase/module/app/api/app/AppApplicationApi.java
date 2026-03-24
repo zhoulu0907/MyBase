@@ -33,5 +33,7 @@ public interface AppApplicationApi {
 
     List<ApplicationDTO> getSimpleAllAppList(Long tenantId);
 
+    Long countApplicationByTenantIdAndUserId(Long tenantId, Long userId);
+
 
 }

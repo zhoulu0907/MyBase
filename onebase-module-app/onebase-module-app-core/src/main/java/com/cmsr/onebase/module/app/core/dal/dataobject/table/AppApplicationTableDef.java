@@ -88,6 +88,11 @@ public class AppApplicationTableDef extends TableDef {
      */
     public final QueryColumn PUBLISH_STATUS = new QueryColumn(this, "publish_status");
 
+    /**
+     * 项目编码
+     */
+    public final QueryColumn PROJECT_CODE = new QueryColumn(this, "project_code");
+
 
     /**
      * 所有字段。
@@ -97,7 +102,7 @@ public class AppApplicationTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APP_UID, APP_NAME, APP_CODE, APP_MODE, APP_STATUS, VERSION_URL, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, PUBLISH_MODEL, PUBLISH_STATUS};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, APP_UID, APP_NAME, APP_CODE, APP_MODE, APP_STATUS, VERSION_URL, DESCRIPTION, LOCK_VERSION, CREATOR, CREATE_TIME, UPDATER, UPDATE_TIME, DELETED, TENANT_ID, PUBLISH_MODEL, PUBLISH_STATUS, PROJECT_CODE};
 
     public AppApplicationTableDef() {
         super("", "app_application");

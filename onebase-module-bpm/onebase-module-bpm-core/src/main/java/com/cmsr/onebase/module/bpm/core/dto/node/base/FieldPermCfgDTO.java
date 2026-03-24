@@ -56,5 +56,10 @@ public class FieldPermCfgDTO {
          */
         @NotBlank(message = "字段权限类型不能为空")
         private String fieldPermType;
+
+        /**
+         * 子表的字段的表名
+         */
+//        private String parentDisplayName;
     }
 }

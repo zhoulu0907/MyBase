@@ -147,5 +147,16 @@ public class SystemConfigDataRepository extends BaseDataRepository<SystemConfigM
                 .where(SYSTEM_CONFIG.ID.eq(id))
                 .update();
     }
+
+    /**
+     * 根据KEY获取租户配置
+     *
+     * @param key 配置key
+     * @return 配置
+     */
+    public SystemGeneralConfigDO getAppConfigByKeyAndAppId(String key, Long appId) {
+        return getOne(query().eq(CONFIG_KEY, key)
+                .eq(CONFIG_TYPE, ConfigTypeEnum.APP.getCode()).eq(APP_ID, appId));
+    }
 }
 

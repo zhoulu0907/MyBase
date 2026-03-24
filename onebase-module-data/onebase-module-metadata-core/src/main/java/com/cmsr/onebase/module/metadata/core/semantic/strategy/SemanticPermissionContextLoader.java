@@ -2,7 +2,7 @@ package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.dto.RuntimeLoginUser;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticLoginUserCtx;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticPermissionContext;
 import com.cmsr.onebase.module.metadata.core.service.permission.builder.PermissionContextBuilder;
@@ -18,7 +18,7 @@ public class SemanticPermissionContextLoader {
 
     public void loadPermissionContext(SemanticRecordDTO record) {
         Long ctxMenuId = record.getRecordContext().getMenuId();
-        RuntimeLoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
         SemanticLoginUserCtx loginUserCtx = new SemanticLoginUserCtx();
         loginUserCtx.setUserId(loginUser.getId());
         loginUserCtx.setApplicationId(ApplicationManager.getApplicationId());

@@ -12,6 +12,7 @@ import com.cmsr.onebase.framework.tenant.core.service.TenantFrameworkService;
 import com.cmsr.onebase.framework.web.config.WebProperties;
 import com.cmsr.onebase.framework.web.core.filter.ApiRequestFilter;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,7 +77,12 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
         if (!isIgnoreUrl(request)) {
             // 2. 如果请求未带租户的编号，不允许访问。
             if (tenantId == null) {
-                log.error("[doFilterInternal][URL({}/{}) 未传递空间编号]", request.getRequestURI(), request.getMethod());
+                log.error("[doFilterInternal][URL({}/{}) 未传递空间编号, xTenantId={}, tenantId={}, loginUserTenantId={}, referer={}]",
+                        request.getRequestURI(), request.getMethod(),
+                        defaultHeader(request.getHeader(WebFrameworkUtils.HEADER_X_TENANT_ID)),
+                        defaultHeader(request.getHeader(WebFrameworkUtils.HEADER_TENANT_ID)),
+                        user != null ? user.getTenantId() : null,
+                        defaultHeader(request.getHeader("Referer")));
                 ServletUtils.writeJSON(response, CommonResult.error(GlobalErrorCodeConstants.BAD_REQUEST.getCode(),
                         "请求的空间标识未传递，请进行排查"));
                 return;
@@ -114,6 +120,10 @@ public class TenantSecurityWebFilter extends ApiRequestFilter {
             }
         }
         return false;
+    }
+
+    private String defaultHeader(String value) {
+        return value == null || value.isBlank() ? "-" : value;
     }
 
 }

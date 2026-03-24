@@ -11,6 +11,8 @@ import com.cmsr.onebase.module.etl.executor.provider.dao.EtlFlinkMappings;
 import com.cmsr.onebase.module.etl.executor.provider.dao.EtlTable;
 import com.cmsr.onebase.module.etl.executor.util.JacksonUtil;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -22,12 +24,17 @@ import java.util.stream.Collectors;
  * @Date：2025/11/6 10:54
  */
 @Setter
+@Slf4j
 public class WorkflowProvider {
 
     private QueryProvider queryProvider;
 
     public WorkflowGraph createSubWorkflowGraph(Long applicationId, String graphJson, String nodeId) throws Exception {
         WorkflowGraph graph = JacksonUtil.readValue(graphJson, WorkflowGraph.class);
+        if(graph == null || CollectionUtils.isEmpty(graph.getNodes())) {
+            log.error("createSubWorkflowGraph error. 图信息不完整, applicationId={}, graphJson={}", applicationId, graphJson);
+            throw new IllegalArgumentException("图信息不完整");
+        }
         graph.init();
         WorkflowGraph subgraph = graph.subgraph(nodeId);
         complementGraphInformation(applicationId, subgraph);

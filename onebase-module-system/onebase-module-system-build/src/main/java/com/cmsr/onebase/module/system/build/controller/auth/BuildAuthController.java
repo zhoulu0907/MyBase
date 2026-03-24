@@ -63,9 +63,7 @@ public class BuildAuthController {
     @Operation(summary = "空间登录（账密）")
     public CommonResult<AuthLoginRespVO> tenantLogin(@RequestBody @Valid AuthLoginReqVO reqVO, HttpServletResponse response) {
         AuthLoginRespVO respVO = authService.login(reqVO);
-        // 设置Cookie
-        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
-                securityProperties.getTokenHeader(), respVO.getAccessToken()));
+        addTokenCookie(response, respVO.getAccessToken());
         return success(respVO);
     }
 
@@ -135,9 +133,12 @@ public class BuildAuthController {
     public CommonResult<AuthLoginRespVO> tianGongLogin(@RequestParam @NotBlank(message = "{code}不能为空") String code, @RequestParam @NotBlank(message = "{deviceId}不能为空") String deviceId, HttpServletResponse response) {
 
         AuthLoginRespVO authLoginRespVO = authService.tianGongLogin(code, deviceId);
-        // 设置Cookie
-        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
-                securityProperties.getTokenHeader(), authLoginRespVO.getAccessToken()));
+        addTokenCookie(response, authLoginRespVO.getAccessToken());
         return success(authLoginRespVO);
+    }
+
+    private void addTokenCookie(HttpServletResponse response, String accessToken) {
+        response.addHeader("Set-Cookie", String.format("%s=%s; Path=/; HttpOnly",
+                securityProperties.getTokenHeader(), accessToken));
     }
 }

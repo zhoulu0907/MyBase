@@ -31,4 +31,7 @@ public class ApplicationPageReqVO extends PageParam {
     @Schema(description = "发布模式")
     private String publishModel;
 
+    @Schema(description = "项目编码")
+    private String projectCode;
+
 }

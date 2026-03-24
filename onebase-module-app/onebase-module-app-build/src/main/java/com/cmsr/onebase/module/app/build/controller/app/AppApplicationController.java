@@ -104,8 +104,9 @@ public class AppApplicationController {
     @GetMapping(value = { "/simple-list" })
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     @Operation(summary = "获取应用精简信息列表-不分页", description = "只包含被开启的应用，主要用于前端的下拉选项")
-    public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList() {
-        List<AppApplicationDO> list = appApplicationService.getSimpleAppList(AppStatusEnum.ONLINE.getValue());
+    public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppList(
+            @RequestParam(value = "projectCode", required = false) String projectCode) {
+        List<AppApplicationDO> list = appApplicationService.getSimpleAppList(AppStatusEnum.ONLINE.getValue(), projectCode);
         return success(BeanUtils.toBean(list, ApplicationSimpleRespVO.class));
     }
 

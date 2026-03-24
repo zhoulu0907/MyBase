@@ -20,7 +20,7 @@ public class FlowSystemProviderImpl implements FlowSystemProvider {
     @Override
     public Long findUserDeptId(Long userId) {
         AdminUserRespDTO userRespDTO = adminUserApi.getUser(userId).getCheckedData();
-        return userRespDTO.getDeptId();
+        return userRespDTO == null ? null : userRespDTO.getDeptId();
     }
 
 }

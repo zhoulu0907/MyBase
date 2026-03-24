@@ -133,10 +133,6 @@ public class UserDataRepository extends BaseDataRepository<SystemUsersMapper, Ad
         return list(query().eq(AdminUserDO.CORP_ID, corpId).eq(AdminUserDO.USER_TYPE, UserTypeEnum.CORP.getValue()));
     }
 
-    public AdminUserDO getUserByTianGongId(Long tiangGongId){
-        return getOne(query().eq(AdminUserDO.TIAN_GONG_id, tiangGongId).eq(AdminUserDO.USER_TYPE, UserTypeEnum.TENANT.getValue()));
-    }
-
     /**
      * 查询没有部门的用户
      *

@@ -286,7 +286,7 @@ public class SemanticDynamicDataApiImpl implements SemanticDynamicDataApi {
         if (updates.isEmpty()) { return List.of(); }
 
         // 2) 构建 RecordDTO（目标请求体 + 过滤条件）
-        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, new SemanticTargetBodyVO(), null, null,
+        SemanticRecordDTO record = semanticMergeRecordAssembler.assembleTargetBody(tableName, new SemanticTargetBodyVO(), null, body.getTraceId(),
                 SemanticMethodCodeEnum.UPDATE,
                 SemanticDataMethodOpEnum.UPDATE);
         record.getRecordContext().setFilters(cond);

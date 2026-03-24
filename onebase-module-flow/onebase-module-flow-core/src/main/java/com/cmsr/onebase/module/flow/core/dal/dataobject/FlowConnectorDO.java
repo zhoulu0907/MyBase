@@ -53,7 +53,9 @@ public class FlowConnectorDO extends BaseAppEntity {
      *
      * @author kanten
      * @since 2026-01-29
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionDO} 统一动作表
      */
+    @Deprecated
     @Column(value = "action_config")
     private String actionConfig;
 

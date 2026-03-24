@@ -416,8 +416,8 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
     }
 
     @Override
-    public List<AppApplicationDO> getSimpleAppList(Integer status) {
-        return applicationRepository.getSimpleAppList(status);
+    public List<AppApplicationDO> getSimpleAppList(Integer status, String projectCode) {
+        return applicationRepository.getSimpleAppList(status, projectCode);
     }
 
     @Override

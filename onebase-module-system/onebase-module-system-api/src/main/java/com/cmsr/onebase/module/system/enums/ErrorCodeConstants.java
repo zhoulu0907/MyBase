@@ -227,4 +227,21 @@ public interface ErrorCodeConstants {
     ErrorCode TIAN_GONG_OAUTH2_TENANT_NOT_FOUND = new ErrorCode(1_002_031_006, "天工登录失败：找不到租户");
     ErrorCode TIAN_GONG_OAUTH2_CREATE_TOKEN_FAILED = new ErrorCode(1_002_031_007, "天工登录失败：创建本地登录令牌失败");
 
+    // ========== 灵畿平台 SSO 登录 1-002-032-000 ==========
+    ErrorCode LINGJI_SSO_CONFIG_NOT_EXISTS = new ErrorCode(1_002_032_000, "灵畿SSO登录失败：找不到配置");
+    ErrorCode LINGJI_SSO_CONFIG_DISABLED = new ErrorCode(1_002_032_001, "灵畿SSO登录失败：配置已禁用");
+    ErrorCode LINGJI_SSO_CONFIG_INCOMPLETE = new ErrorCode(1_002_032_002, "灵畿SSO登录失败：配置不完整");
+    ErrorCode LINGJI_SSO_GET_TOKEN_FAILED = new ErrorCode(1_002_032_003, "灵畿SSO登录失败：获取用户信息失败");
+    ErrorCode LINGJI_SSO_USER_INFO_EMPTY = new ErrorCode(1_002_032_004, "灵畿SSO登录失败：用户信息为空");
+    ErrorCode LINGJI_SSO_TENANT_NOT_FOUND = new ErrorCode(1_002_032_005, "灵畿SSO登录失败：找不到租户");
+    ErrorCode LINGJI_SSO_CREATE_TOKEN_FAILED = new ErrorCode(1_002_032_006, "灵畿SSO登录失败：创建本地登录令牌失败");
+    ErrorCode LINGJI_SSO_SIGNATURE_ERROR = new ErrorCode(1_002_032_007, "灵畿SSO签名失败");
+    ErrorCode LINGJI_SSO_TENANT_MAPPING_NOT_FOUND = new ErrorCode(1_002_032_008, "灵畿SSO登录失败：企业ID未映射到租户");
+    ErrorCode LINGJI_SSO_CODE_INVALID = new ErrorCode(1_002_032_009, "灵畿SSO登录失败：授权码无效或已过期");
+
+    // ========== 项目信息 1-002-033-000 ==========
+    ErrorCode PROJECT_NOT_EXISTS = new ErrorCode(1_002_033_000, "项目不存在");
+    ErrorCode PROJECT_CODE_EXISTS = new ErrorCode(1_002_033_001, "项目编码已存在");
+    ErrorCode PROJECT_DISABLED = new ErrorCode(1_002_033_002, "项目已禁用");
+
 }

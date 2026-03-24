@@ -81,7 +81,13 @@ onebase:
       redirect-uri: http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/system/auth/tiangong-login
       scope: server
       device-id: tianGong
-
+  lingji-sso:
+    enabled: true
+    source-id: "5570132830"
+    source-key: "JhxsQ3whI26YTMvt"
+    tenant-website: "http://onebase.4c-uat.hq.cmcc:20011/appbuilder/"
+    user-info-url: "http://rdcloud.4c-uat.hq.cmcc/moss/web/auth/v1/user/oauth/userInfo"
+    http-debug-log-enabled: true
 justauth:
   enabled: true
   cache:

@@ -28,7 +28,10 @@ import java.util.List;
  *
  * @author kanten
  * @since 2026-01-29
+ * @deprecated 已废弃，请使用 {@link com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorActionDO} 统一动作表
+ *             所有动作配置已迁移到 flow_connector_action 数据库表，使用 {@link com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorActionRepository} 进行操作
  */
+@Deprecated
 @Slf4j
 @Component
 public class ActionConfigHelper {
@@ -58,7 +61,9 @@ public class ActionConfigHelper {
      *
      * @param configJson 配置 JSON 字符串
      * @return 解析后的 JsonNode，解析失败返回空节点
+     * @deprecated 已废弃
      */
+    @Deprecated
     public JsonNode parseActionConfig(String configJson) {
         if (configJson == null || configJson.trim().isEmpty()) {
             return objectMapper.createObjectNode();
@@ -77,7 +82,9 @@ public class ActionConfigHelper {
      *
      * @param configJson 配置 JSON 字符串
      * @return 动作列表
+     * @deprecated 已废弃，请使用 {@link com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorActionRepository#findByConnectorUuid(String)}
      */
+    @Deprecated
     public List<JsonNode> getActions(String configJson) {
         List<JsonNode> actions = new ArrayList<>();
         if (configJson == null || configJson.trim().isEmpty()) {
@@ -107,7 +114,9 @@ public class ActionConfigHelper {
      * @param configJson 配置 JSON 字符串
      * @param actionCode 动作编码
      * @return 动作配置，不存在返回 null
+     * @deprecated 已废弃，请使用 {@link com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorActionRepository#findByConnectorUuidAndCode(String, String)}
      */
+    @Deprecated
     public JsonNode findAction(String configJson, String actionCode) {
         try {
             JsonNode root = objectMapper.readTree(configJson);
@@ -134,7 +143,9 @@ public class ActionConfigHelper {
      * @param configJson 配置 JSON 字符串
      * @param newAction  新动作配置
      * @return 更新后的配置 JSON 字符串
+     * @deprecated 已废弃，请使用 {@link com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorActionRepository#save(Object)}
      */
+    @Deprecated
     public String addAction(String configJson, JsonNode newAction) {
         try {
             JsonNode root = parseActionConfig(configJson);
@@ -168,7 +179,9 @@ public class ActionConfigHelper {
      * @param actionCode    动作编码
      * @param updatedAction 更新后的动作配置
      * @return 更新后的配置 JSON 字符串
+     * @deprecated 已废弃，请使用 {@link com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorActionRepository#updateById(Object)}
      */
+    @Deprecated
     public String updateAction(String configJson, String actionCode, JsonNode updatedAction) {
         try {
             JsonNode root = objectMapper.readTree(configJson);
@@ -206,7 +219,9 @@ public class ActionConfigHelper {
      * @param configJson 配置 JSON 字符串
      * @param actionName 动作名称（properties的key）
      * @return 更新后的配置 JSON 字符串
+     * @deprecated 已废弃，请使用 {@link com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorActionRepository} 进行软删除
      */
+    @Deprecated
     public String removeAction(String configJson, String actionName) {
         try {
             JsonNode root = objectMapper.readTree(configJson);
@@ -238,7 +253,9 @@ public class ActionConfigHelper {
      * @param configJson 配置 JSON 字符串
      * @param actionCode 动作编码
      * @return Formily Schema，不存在返回 null
+     * @deprecated 已废弃，请直接查询 {@link com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorActionDO} 表
      */
+    @Deprecated
     public JsonNode getActionSchema(String configJson, String actionCode) {
         JsonNode root = parseActionConfig(configJson);
         JsonNode properties = root.get(PROPERTIES_KEY);
@@ -254,7 +271,9 @@ public class ActionConfigHelper {
      * 格式: action-{8位随机字符}
      *
      * @return 动作ID
+     * @deprecated 已废弃
      */
+    @Deprecated
     public String generateActionId() {
         return "action-" + java.util.UUID.randomUUID().toString().substring(0, 8);
     }
@@ -267,7 +286,9 @@ public class ActionConfigHelper {
      * @param configJson 配置 JSON 字符串
      * @param actionCode 动作编码
      * @return true=唯一，false=已存在
+     * @deprecated 已废弃，请使用 {@link com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorActionRepository#findByConnectorUuidAndCode(String, String)} 检查唯一性
      */
+    @Deprecated
     public boolean isActionCodeUnique(String configJson, String actionCode) {
         JsonNode root = parseActionConfig(configJson);
         JsonNode actionsNode = root.get(ACTIONS_KEY);
@@ -294,7 +315,9 @@ public class ActionConfigHelper {
      *
      * @param action 动作配置
      * @return 验证结果
+     * @deprecated 已废弃
      */
+    @Deprecated
     public ValidationResult validateActionCompleteness(JsonNode action) {
         List<String> errors = new ArrayList<>();
 
@@ -349,7 +372,10 @@ public class ActionConfigHelper {
 
     /**
      * 验证结果
+     *
+     * @deprecated 已废弃
      */
+    @Deprecated
     public static class ValidationResult {
         private final boolean valid;
         private final List<String> errors;
@@ -359,10 +385,12 @@ public class ActionConfigHelper {
             this.errors = errors;
         }
 
+        @Deprecated
         public boolean isValid() {
             return valid;
         }
 
+        @Deprecated
         public List<String> getErrors() {
             return errors;
         }

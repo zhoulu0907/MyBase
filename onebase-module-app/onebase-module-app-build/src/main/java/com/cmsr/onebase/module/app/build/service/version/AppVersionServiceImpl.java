@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipOutputStream;
 
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.module.system.api.config.SystemConfigApi;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -96,6 +99,8 @@ public class AppVersionServiceImpl implements AppVersionService {
     private static final String CONFIG_METADATA = "config/metadata.json";
     private static final String CONFIG_BPM = "config/bpm.json";
 
+    private static final String APP_THIRD_USER_ENABLE = "appThirdUserEnable";
+
     /**
      * 自注入代理对象，用于调用异步方法（解决同一类中 @Async 不生效的问题）
      * 使用 @Lazy 避免循环依赖
@@ -133,6 +138,9 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Autowired
     private FileApi fileApi;
+
+    @Autowired
+    private SystemConfigApi systemConfigApi;
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
@@ -179,6 +187,14 @@ public class AppVersionServiceImpl implements AppVersionService {
             AppVersionDO newRunVersionDO = createNewVersion(createReqVO, applicationId);
             applicationRepository.updateStatusByApplicationId(applicationId, AppStatusEnum.ONLINE,
                     AppPublishEnum.ONCE_PUBLISHED);
+
+            //查询应用三方用户登录-开关状态
+            CommonResult<Boolean> appConfig = systemConfigApi.getAppConfig(APP_THIRD_USER_ENABLE, applicationId);
+            if (BooleanUtils.isTrue(appConfig.getData())) {
+                newRunVersionDO.setAppThirdUserEnable(CommonStatusEnum.ENABLE.getStatus());
+            } else {
+                newRunVersionDO.setAppThirdUserEnable(CommonStatusEnum.DISABLE.getStatus());
+            }
             versionRepository.save(newRunVersionDO);
         });
         // online services that required

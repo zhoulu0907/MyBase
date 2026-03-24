@@ -572,22 +572,22 @@ public class MetadataDataMethodCoreServiceImpl extends AbstractMetadataDataMetho
             throw exception(METADATA_DATA_METHOD_RUNTIME_MENU_ID_REQUIRED);
         }
 
-        RuntimeLoginUser loginUser = RTSecurityContext.getLoginUser();
-        if (loginUser == null) {
-            throw exception(UNAUTHORIZED);
-        }
+        // RuntimeLoginUser loginUser = RTSecurityContext.getLoginUser();
+        // if (loginUser == null) {
+        //     throw exception(UNAUTHORIZED);
+        // }
 
-        DataPermission menuDataPermission = RTSecurityContext.getMenuDataPermission(menuId);
-        FieldPermission menuFieldPermission = RTSecurityContext.getMenuFieldPermission(menuId);
-        OperationPermission menuOperation = RTSecurityContext.getMenuOperation(menuId);
+        // DataPermission menuDataPermission = RTSecurityContext.getMenuDataPermission(menuId);
+        // FieldPermission menuFieldPermission = RTSecurityContext.getMenuFieldPermission(menuId);
+        // OperationPermission menuOperation = RTSecurityContext.getMenuOperation(menuId);
 
-        MetadataPermissionContext metadataPermissionContext = new MetadataPermissionContext();
-        metadataPermissionContext.setDataPermission(menuDataPermission);
-        metadataPermissionContext.setFieldPermission(menuFieldPermission);
-        metadataPermissionContext.setOperationPermission(menuOperation);
-        metadataDataMethodRequestContext.setPermissionContext(metadataPermissionContext);
-        LoginUserCtx loginUserCtx = convertLoginUserCtx(loginUser);
-        metadataDataMethodRequestContext.setLoginUserCtx(loginUserCtx);
+        // MetadataPermissionContext metadataPermissionContext = new MetadataPermissionContext();
+        // metadataPermissionContext.setDataPermission(menuDataPermission);
+        // metadataPermissionContext.setFieldPermission(menuFieldPermission);
+        // metadataPermissionContext.setOperationPermission(menuOperation);
+        // metadataDataMethodRequestContext.setPermissionContext(metadataPermissionContext);
+        // LoginUserCtx loginUserCtx = convertLoginUserCtx(loginUser);
+        // metadataDataMethodRequestContext.setLoginUserCtx(loginUserCtx);
 
     }
 
