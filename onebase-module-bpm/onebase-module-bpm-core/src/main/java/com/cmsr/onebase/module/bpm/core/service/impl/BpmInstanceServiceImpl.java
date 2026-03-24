@@ -573,7 +573,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
                 .and(ext.DELETED.eq(0))
                 .and(ext.APPLICATION_ID.eq(applicationId));
 
-        QueryCondition flowFilterCondition = buildFlowFilterCondition(reqVO.getFilters(), fi, ext);
+        QueryCondition flowFilterCondition = bpmBuildFlowFilterCondition(reqVO.getFilters(), fi, ext);
         if (flowFilterCondition != null) {
             instanceQuery.and(flowFilterCondition);
         }
@@ -944,7 +944,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
     }
 
 
-    private QueryCondition buildFlowFilterCondition(SemanticConditionDTO condition,
+    private QueryCondition bpmBuildFlowFilterCondition(SemanticConditionDTO condition,
                                                     FlowInstanceTableDef fi,
                                                     BpmFlowInsBizExtTableDef ext) {
         if (condition == null || condition.getNodeType() == null) {
@@ -964,7 +964,7 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             boolean isOr = condition.getCombinator() != null && "OR".equalsIgnoreCase(condition.getCombinator().name());
 
             for (SemanticConditionDTO child : children) {
-                QueryCondition childCond = buildFlowFilterCondition(child, fi, ext);
+                QueryCondition childCond = bpmBuildFlowFilterCondition(child, fi, ext);
 
                 if (childCond == null) {
                     continue;
@@ -1002,14 +1002,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
             return null;
         }
 
-        if (operator == SemanticOperatorEnum.IS_EMPTY) {
-            return column.isNull().or(column.eq(""));
-        }
-
-        if (operator == SemanticOperatorEnum.IS_NOT_EMPTY) {
-            return column.isNotNull().and(column.ne(""));
-        }
-
         if (CollectionUtils.isEmpty(values)) {
             return null;
         }
@@ -1017,17 +1009,8 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
         Object first = values.get(0);
 
         return switch (operator) {
-            case EQUALS -> values.size() > 1 ? column.in(values) : column.eq(first);
-            case NOT_EQUALS -> values.size() > 1 ? column.notIn(values) : column.ne(first);
+            case EQUALS -> column.eq(first);
             case CONTAINS -> column.like("%" + first + "%");
-            case NOT_CONTAINS -> column.notLike("%" + first + "%");
-            case EXISTS_IN -> column.in(values);
-            case NOT_EXISTS_IN -> column.notIn(values);
-            case GREATER_THAN, LATER_THAN -> column.gt(first);
-            case GREATER_EQUALS -> column.ge(first);
-            case LESS_THAN, EARLIER_THAN -> column.lt(first);
-            case LESS_EQUALS -> column.le(first);
-            case RANGE -> values.size() >= 2 ? column.ge(values.get(0)).and(column.le(values.get(1))) : null;
             default -> null;
         };
     }
