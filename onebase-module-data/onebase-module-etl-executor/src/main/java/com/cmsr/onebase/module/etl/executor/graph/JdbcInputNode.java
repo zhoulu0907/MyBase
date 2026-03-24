@@ -26,13 +26,14 @@ public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableA
     @Override
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
+        String databaseTypeHint = resolveDatabaseTypeHint();
         for (Field field : config.getFields()) {
             DataType dataType = FlinkUtil.toFlinkTableType(
                     field.getFieldType(),
                     field.getLength(),
                     field.getPrecision(),
                     field.getScale(),
-                    config.getJdbcConfig().getDatabaseType()
+                    databaseTypeHint
             );
             schemaBuilder.column(field.getFieldName(), dataType);
         }
@@ -46,5 +47,15 @@ public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableA
                 .build();
         log.info("create table: {}, {}", getId(), tableDescriptor);
         tableEnv.createTable(getId(), tableDescriptor);
+    }
+
+    private String resolveDatabaseTypeHint() {
+        String databaseType = config.getJdbcConfig().getDatabaseType();
+        String driver = config.getJdbcConfig().getDriver();
+        String jdbcUrl = config.getJdbcConfig().getJdbcUrl();
+        return String.join("|",
+                databaseType == null ? "" : databaseType,
+                driver == null ? "" : driver,
+                jdbcUrl == null ? "" : jdbcUrl);
     }
 }

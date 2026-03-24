@@ -36,13 +36,14 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
     @Override
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
+        String databaseTypeHint = resolveDatabaseTypeHint();
         for (JdbcOutputMapper field : config.getFields()) {
             DataType dataType = FlinkUtil.toFlinkTableType(
                     field.getTargetFieldType(),
                     field.getTargetFieldLength(),
                     field.getTargetFieldPrecision(),
                     field.getTargetFieldScale(),
-                    config.getJdbcConfig().getDatabaseType()
+                    databaseTypeHint
             );
             schemaBuilder.column(field.getTargetFieldName(), dataType);
         }
@@ -88,4 +89,13 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
         }).toList().toArray(new org.jooq.Field[0]);
     }
 
+    private String resolveDatabaseTypeHint() {
+        String databaseType = config.getJdbcConfig().getDatabaseType();
+        String driver = config.getJdbcConfig().getDriver();
+        String jdbcUrl = config.getJdbcConfig().getJdbcUrl();
+        return String.join("|",
+                databaseType == null ? "" : databaseType,
+                driver == null ? "" : driver,
+                jdbcUrl == null ? "" : jdbcUrl);
+    }
 }
