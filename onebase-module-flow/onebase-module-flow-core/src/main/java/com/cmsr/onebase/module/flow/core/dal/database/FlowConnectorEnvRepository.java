@@ -185,4 +185,54 @@ public class FlowConnectorEnvRepository extends ServiceImpl<FlowConnectorEnvMapp
         entity.setDeleted(1L);
         return updateById(entity);
     }
+
+    /**
+     * 根据环境编码查询
+     *
+     * @param envCode 环境编码
+     * @return 环境配置DO
+     */
+    public FlowConnectorEnvDO selectByEnvCode(String envCode) {
+        QueryWrapper query = QueryWrapper.create()
+                .where(FLOW_CONNECTOR_ENV.ENV_CODE.eq(envCode))
+                .and(FLOW_CONNECTOR_ENV.DELETED.eq(0));
+        query = injectTenantFilter(query);
+        return getOne(query);
+    }
+
+    /**
+     * 根据连接器类型和环境编码查询
+     *
+     * @param typeCode 连接器类型编号
+     * @param envCode  环境编码
+     * @return 环境配置DO
+     */
+    public FlowConnectorEnvDO selectByTypeCodeAndEnvCode(String typeCode, String envCode) {
+        QueryWrapper query = QueryWrapper.create()
+                .where(FLOW_CONNECTOR_ENV.TYPE_CODE.eq(typeCode))
+                .and(FLOW_CONNECTOR_ENV.ENV_CODE.eq(envCode))
+                .and(FLOW_CONNECTOR_ENV.DELETED.eq(0));
+        query = injectTenantFilter(query);
+        return getOne(query);
+    }
+
+    /**
+     * 检查环境编码是否已存在（同一连接器类型下唯一）
+     *
+     * @param typeCode 连接器类型编号
+     * @param envCode  环境编码
+     * @param excludeId 排除的ID（用于更新时排除自身）
+     * @return 是否存在
+     */
+    public boolean existsByTypeAndEnvCode(String typeCode, String envCode, Long excludeId) {
+        QueryWrapper query = QueryWrapper.create()
+                .where(FLOW_CONNECTOR_ENV.TYPE_CODE.eq(typeCode))
+                .and(FLOW_CONNECTOR_ENV.ENV_CODE.eq(envCode))
+                .and(FLOW_CONNECTOR_ENV.DELETED.eq(0));
+        query = injectTenantFilter(query);
+        if (excludeId != null) {
+            query.and(FLOW_CONNECTOR_ENV.ID.ne(excludeId));
+        }
+        return this.count(query) > 0;
+    }
 }
