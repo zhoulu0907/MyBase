@@ -43,4 +43,10 @@ public class AppApplicationDO extends BaseTenantEntity {
     @Column(value = "publish_status", comment = "发布状态")
     private Integer publishStatus;
 
+    /**
+     * 项目编码
+     */
+    @Column(value = "project_code", comment = "项目编码")
+    private String projectCode;
+
 }

@@ -37,6 +37,9 @@ debug: false
 
 # OneBase配置项，设置当前项目所有自定义的配置
 onebase:
+  project: # 项目功能配置
+    enabled: true # 是否启用项目功能，接入灵畿/天工时开启
+    auto-create: true # 项目不存在时自动创建
   plugin:
     plugins-dir: /opt/plugins # 插件目录路径
   sign:

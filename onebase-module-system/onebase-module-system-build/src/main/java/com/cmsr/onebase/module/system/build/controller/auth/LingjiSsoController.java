@@ -47,12 +47,13 @@ public class LingjiSsoController {
     public CommonResult<AuthLoginRespVO> login(
             @RequestParam @NotBlank(message = "授权码不能为空") String code,
             @RequestParam(required = false) String deviceId,
+            @RequestParam(required = false) String projectCode,
             HttpServletRequest request,
             HttpServletResponse response) {
-        AuthLoginRespVO result = lingjiSsoService.login(code, deviceId);
+        AuthLoginRespVO result = lingjiSsoService.login(code, deviceId, projectCode);
         addTokenCookie(response, result.getAccessToken());
-        log.info("[LingjiSsoController][SSO登录成功] userId={}, tenantId={}, deviceId={}, cookieName={}, token={}, referer={}, userAgent={}",
-                result.getUserId(), result.getTenantId(), deviceId, securityProperties.getTokenHeader(),
+        log.info("[LingjiSsoController][SSO登录成功] userId={}, tenantId={}, deviceId={}, projectCode={}, cookieName={}, token={}, referer={}, userAgent={}",
+                result.getUserId(), result.getTenantId(), deviceId, projectCode, securityProperties.getTokenHeader(),
                 maskToken(result.getAccessToken()), defaultValue(request.getHeader("Referer")),
                 defaultValue(request.getHeader("User-Agent")));
         return success(result);

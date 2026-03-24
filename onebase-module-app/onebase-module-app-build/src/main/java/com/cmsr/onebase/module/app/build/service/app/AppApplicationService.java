@@ -31,7 +31,7 @@ public interface AppApplicationService {
 
     Long generateId();
 
-    List<AppApplicationDO> getSimpleAppList(Integer status);
+    List<AppApplicationDO> getSimpleAppList(Integer status, String projectCode);
 
     List<AppApplicationDO> getSimpleAllAppList(Long tenantId);
 

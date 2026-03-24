@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
 import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
 import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
+import com.cmsr.onebase.module.system.dal.dataobject.project.ProjectInfoDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantPackageDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
@@ -24,9 +25,12 @@ import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
 import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
 import com.cmsr.onebase.module.system.enums.permission.RoleCodeEnum;
+import com.cmsr.onebase.module.system.enums.project.ProjectSourceEnum;
 import com.cmsr.onebase.module.system.service.logger.LoginLogService;
 import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
 import com.cmsr.onebase.module.system.service.permission.RoleService;
+import com.cmsr.onebase.module.system.service.project.ProjectInfoService;
+import com.cmsr.onebase.module.system.service.project.ProjectProperties;
 import com.cmsr.onebase.module.system.service.tenant.TenantPackageService;
 import com.cmsr.onebase.module.system.service.tenant.TenantService;
 import com.cmsr.onebase.module.system.service.user.UserService;
@@ -34,6 +38,7 @@ import com.cmsr.onebase.module.system.util.oauth2.LingjiSsoSignatureUtils;
 import com.cmsr.onebase.module.system.util.oauth2.OkHttpClientUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.LingjiSsoUserInfoVO;
+import com.cmsr.onebase.module.system.vo.project.ProjectInfoCreateReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantAdminUserReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantUpdateReqVO;
@@ -92,6 +97,12 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
     @Resource
     private SecurityConfigApi securityConfigApi;
 
+    @Resource
+    private ProjectInfoService projectInfoService;
+
+    @Resource
+    private ProjectProperties projectProperties;
+
     /**
      * 默认租户套餐编码
      */
@@ -103,7 +114,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
     private static final Long SSO_FALLBACK_OPERATOR_USER_ID = 1L;
 
     @Override
-    public AuthLoginRespVO login(String code, String deviceId) {
+    public AuthLoginRespVO login(String code, String deviceId, String projectCode) {
         // 1. 校验配置是否启用
         if (!lingjiSsoProperties.isEnabled()) {
             throw exception(LINGJI_SSO_CONFIG_DISABLED);
@@ -122,8 +133,29 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
 
         tenantService.validTenant(tenantDo.getId());
 
-        // 5. 处理用户信息并登录
+        // 5. 处理项目信息（如果启用了项目功能且有传projectCode）
+        if (projectProperties.isEnabled() && StringUtils.isNotBlank(projectCode)) {
+            handleProjectCode(projectCode, tenantDo.getId());
+        }
+
+        // 6. 处理用户信息并登录
         return processUserLogin(userInfo, deviceId, tenantDo);
+    }
+
+    /**
+     * 处理项目编码
+     */
+    private void handleProjectCode(String projectCode, Long tenantId) {
+        ProjectInfoDO project = projectInfoService.getProjectByCode(projectCode);
+        if (project == null && projectProperties.isAutoCreate()) {
+            // 自动创建项目
+            log.info("项目不存在，自动创建: projectCode={}, tenantId={}", projectCode, tenantId);
+            ProjectInfoCreateReqVO createReqVO = new ProjectInfoCreateReqVO();
+            createReqVO.setProjectCode(projectCode);
+            createReqVO.setProjectName("项目-" + projectCode);
+            createReqVO.setSourcePlatform(ProjectSourceEnum.LINGJI.getSource());
+            projectInfoService.createProject(createReqVO);
+        }
     }
 
     /**

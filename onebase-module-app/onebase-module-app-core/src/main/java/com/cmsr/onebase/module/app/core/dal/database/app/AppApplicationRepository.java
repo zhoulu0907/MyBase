@@ -44,6 +44,8 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
                 .where(APP_APPLICATION.APP_STATUS.eq(pageReqVO.getStatus()).when(pageReqVO.getStatus() != null))
                 .where(APP_APPLICATION.PUBLISH_MODEL.eq(pageReqVO.getPublishModel())
                         .when(StringUtils.isNotBlank(pageReqVO.getPublishModel())))
+                .where(APP_APPLICATION.PROJECT_CODE.eq(pageReqVO.getProjectCode())
+                        .when(StringUtils.isNotBlank(pageReqVO.getProjectCode())))
                 .where(APP_APPLICATION.CREATOR.eq(userId).when(filterByUser));
         if (Strings.CI.equals(pageReqVO.getOrderByTime(), "create")) {
             queryWrapper = queryWrapper.orderBy(APP_APPLICATION.CREATE_TIME, false);
@@ -96,6 +98,15 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
     public List<AppApplicationDO> getSimpleAppList(Integer status) {
         QueryWrapper queryWrapper = this.query()
                 .where(APP_APPLICATION.APP_STATUS.eq(status))
+                .orderBy(APP_APPLICATION.UPDATE_TIME, false)
+                .orderBy(APP_APPLICATION.CREATE_TIME, false);
+        return list(queryWrapper);
+    }
+
+    public List<AppApplicationDO> getSimpleAppList(Integer status, String projectCode) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.APP_STATUS.eq(status))
+                .where(APP_APPLICATION.PROJECT_CODE.eq(projectCode).when(StringUtils.isNotBlank(projectCode)))
                 .orderBy(APP_APPLICATION.UPDATE_TIME, false)
                 .orderBy(APP_APPLICATION.CREATE_TIME, false);
         return list(queryWrapper);
