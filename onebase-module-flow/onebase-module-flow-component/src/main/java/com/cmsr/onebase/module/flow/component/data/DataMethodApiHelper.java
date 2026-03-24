@@ -275,6 +275,7 @@ public class DataMethodApiHelper {
             systemFields = new HashMap<>();
             executeContext.setSystemFields(systemFields);
         }
+        // 这里需要使用流程触发者/创建者的信息来填充系统字段，确保流程内部调用数据方法时能正确获取到这些字段值
         systemFields.put(SystemFieldConstants.REQUIRE.CREATOR, String.valueOf(executeContext.getTriggerUserId()));
         systemFields.put(SystemFieldConstants.REQUIRE.UPDATER, String.valueOf(executeContext.getTriggerUserId()));
         systemFields.put(SystemFieldConstants.REQUIRE.OWNER_ID, String.valueOf(executeContext.getTriggerUserId()));

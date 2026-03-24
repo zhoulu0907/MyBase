@@ -1,18 +1,18 @@
 package com.cmsr.onebase.framework.security.build.filter;
 
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
 import com.cmsr.onebase.framework.security.build.config.AiBridgeProperties;
 import com.cmsr.onebase.framework.security.build.context.AiBridgeContextHolder;
 import com.cmsr.onebase.framework.security.build.util.AiBridgeCryptoUtils;
-import com.cmsr.onebase.framework.common.security.TenantContextHolder;
-import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
-import com.cmsr.onebase.framework.common.security.dto.LoginUser;
-import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
 import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +69,7 @@ public class BuildAiBridgeFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
         try {
             if (!hasAiHeaders(request)) {
                 chain.doFilter(request, response);
