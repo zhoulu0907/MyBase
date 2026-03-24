@@ -15,7 +15,7 @@ public class FlinkUtil {
      *
      * @return Flink DataType对象
      */
-    public static DataType toFlinkTableType(String type, Integer length, Integer precision, Integer scale) {
+    public static DataType toFlinkTableType(String type, Integer length, Integer precision, Integer scale, String databaseType) {
         if (type == null) {
             throw new IllegalArgumentException("Type cannot be null");
         }
@@ -39,8 +39,8 @@ public class FlinkUtil {
             case "DOUBLE" -> DataTypes.DOUBLE();
             case "DATE" -> DataTypes.DATE();
             case "TIME" -> DataTypes.TIME(0);
-            case "TIMESTAMP" -> DataTypes.TIMESTAMP(scale == null ? 9 : scale);
-            case "TIMESTAMP_LTZ" -> DataTypes.TIMESTAMP_LTZ(scale == null ? 9 : scale);
+            case "TIMESTAMP" -> DataTypes.TIMESTAMP(normalizeTimestampPrecision(scale, databaseType));
+            case "TIMESTAMP_LTZ" -> DataTypes.TIMESTAMP_LTZ(normalizeTimestampPrecision(scale, databaseType));
             case "INTERVAL" -> DataTypes.INTERVAL(DataTypes.SECOND(3));
             case "ARRAY" -> DataTypes.ARRAY(DataTypes.STRING());
             case "MULTISET" -> DataTypes.MULTISET(DataTypes.STRING());
@@ -48,5 +48,20 @@ public class FlinkUtil {
             case "ROW" -> DataTypes.ROW();
             default -> throw new IllegalArgumentException("Unsupported Flink data type: " + type);
         };
+    }
+
+    private static int normalizeTimestampPrecision(Integer scale, String databaseType) {
+        int resolvedScale = scale == null ? 6 : scale;
+        if (resolvedScale < 0) {
+            return 0;
+        }
+        if (isMysql(databaseType) && resolvedScale > 6) {
+            return 6;
+        }
+        return Math.min(resolvedScale, 9);
+    }
+
+    private static boolean isMysql(String databaseType) {
+        return databaseType != null && databaseType.toLowerCase().contains("mysql");
     }
 }

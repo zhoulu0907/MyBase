@@ -1,8 +1,8 @@
 openapi: 3.0.1
 info:
   title: 连接器环境配置 API
-  description: 连接器环境配置管理接口，提供环境配置的 CRUD 操作
-  version: 1.0.0
+  description: 连接器环境配置管理接口，环境配置存储在独立的 flow_connector_env 表中
+  version: 2.0.0
 servers:
   - url: http://localhost:8080/admin-api
     description: 本地开发环境
@@ -15,7 +15,7 @@ paths:
       tags:
         - 连接器环境配置
       summary: 查询环境配置列表
-      description: 获取指定连接器的环境配置列表，从 flow_connector.config 字段解析环境配置信息
+      description: 从 flow_connector_env 表查询该连接器类型下的所有环境配置
       operationId: getEnvironments
       parameters:
         - name: connectorId
@@ -25,7 +25,7 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1
+            example: 328979291082227712
       responses:
         '200':
           description: 成功
@@ -38,7 +38,7 @@ paths:
       tags:
         - 连接器环境配置
       summary: 查询指定环境配置
-      description: 获取连接器指定环境的配置信息，从 flow_connector.config 的 properties 中解析指定环境的 Formily Schema
+      description: 从 flow_connector_env 表查询指定环境编码的配置详情
       operationId: getEnvironmentConfig
       parameters:
         - name: connectorId
@@ -48,14 +48,14 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1
-        - name: envName
+            example: 328979291082227712
+        - name: envCode
           in: query
-          description: 环境名称
+          description: 环境编码
           required: true
           schema:
             type: string
-            example: DEV环境配置
+            example: DEV
       responses:
         '200':
           description: 成功
@@ -78,7 +78,7 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1
+            example: 328979291082227712
       responses:
         '200':
           description: 成功
@@ -91,7 +91,7 @@ paths:
       tags:
         - 连接器环境配置
       summary: 创建环境配置
-      description: 保存新的环境配置，如果环境已存在则拒绝
+      description: 将新的环境配置保存到 flow_connector_env 表，如果环境编码已存在则拒绝
       operationId: createEnvironmentConfig
       parameters:
         - name: connectorId
@@ -101,7 +101,7 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1
+            example: 328979291082227712
       requestBody:
         description: 环境配置请求
         required: true
@@ -121,7 +121,7 @@ paths:
       tags:
         - 连接器环境配置
       summary: 更新环境配置
-      description: 更新已存在的环境配置，环境必须存在
+      description: 更新 flow_connector_env 表中已存在的环境配置，环境必须存在
       operationId: updateEnvironmentConfig
       parameters:
         - name: connectorId
@@ -131,7 +131,7 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1
+            example: 328979291082227712
       requestBody:
         description: 环境配置请求
         required: true
@@ -151,7 +151,7 @@ paths:
       tags:
         - 连接器环境配置
       summary: 设置启用环境
-      description: 设置连接器当前启用的环境，传空取消启用
+      description: 在 flow_connector 表设置当前启用的环境（通过 env_uuid 关联），传空取消启用
       operationId: enableEnvironment
       parameters:
         - name: connectorId
@@ -161,14 +161,14 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1
-        - name: envName
+            example: 328979291082227712
+        - name: envCode
           in: query
-          description: 环境名称（传空表示取消启用）
+          description: 环境编码（传空表示取消启用）
           required: false
           schema:
             type: string
-            example: DEV环境配置
+            example: DEV
       responses:
         '200':
           description: 成功
@@ -176,13 +176,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommonResultBoolean'
-  /flow/connector-env/enabled-envname:
+  /flow/connector-env/enabled-env:
     get:
       tags:
         - 连接器环境配置
-      summary: 获取启用环境名称
-      description: 获取连接器当前启用的环境名称
-      operationId: getEnabledEnvName
+      summary: 获取启用环境
+      description: 获取连接器当前启用的环境完整信息
+      operationId: getEnabledEnv
       parameters:
         - name: connectorId
           in: query
@@ -191,14 +191,14 @@ paths:
           schema:
             type: integer
             format: int64
-            example: 1
+            example: 328979291082227712
       responses:
         '200':
           description: 成功
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommonResultString'
+                $ref: '#/components/schemas/CommonResultFlowConnectorEnvLiteVO'
 components:
   schemas:
     CommonResultListFlowConnectorEnvLiteVO:
@@ -258,7 +258,7 @@ components:
           type: boolean
           description: 操作结果
           example: true
-    CommonResultString:
+    CommonResultFlowConnectorEnvLiteVO:
       type: object
       properties:
         code:
@@ -270,10 +270,7 @@ components:
           description: 响应消息
           example: ""
         data:
-          type: string
-          description: 启用环境名称
-          example: DEV环境配置
-          nullable: true
+          $ref: '#/components/schemas/FlowConnectorEnvLiteVO'
     FlowConnectorEnvLiteVO:
       type: object
       description: 连接器环境配置（精简）
@@ -281,16 +278,16 @@ components:
         id:
           type: integer
           format: int64
-          description: 环境配置编号
+          description: 环境配置ID
         envUuid:
           type: string
           description: 环境配置UUID
         envName:
           type: string
-          description: 环境名称
+          description: 环境名称（显示用，如 DEV环境配置）
         envCode:
           type: string
-          description: 环境编码
+          description: 环境编码（唯一标识，如 DEV）
         typeCode:
           type: string
           description: 连接器类型编号
@@ -312,11 +309,11 @@ components:
           description: 创建时间
     EnvironmentConfigVO:
       type: object
-      description: 环境配置 Schema（Formily）
+      description: 环境配置详情（包含 Formily Schema）
       properties:
         schema:
           type: object
-          description: 动作的 Formily Schema（包含 type、title、properties 等完整配置）
+          description: 环境配置的 Formily Schema
           additionalProperties: {}
         envCode:
           type: string
@@ -347,6 +344,7 @@ components:
           envMode: custom
           envConfig:
             basicInfo:
+              envCode: DEV
               envName: DEV环境配置
               description: 开发环境
             url: https://dev.example.com

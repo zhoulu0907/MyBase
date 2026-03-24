@@ -1,33 +1,34 @@
 package com.cmsr.onebase.module.flow.build.service;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
-import com.cmsr.onebase.framework.common.util.json.JsonUtils;
-import com.cmsr.onebase.module.flow.build.util.ConnectorConfigParser;
 import com.cmsr.onebase.module.flow.build.vo.EnvConfigTemplateVO;
 import com.cmsr.onebase.module.flow.build.vo.EnvironmentConfigVO;
 import com.cmsr.onebase.module.flow.build.vo.FlowConnectorEnvLiteVO;
 import com.cmsr.onebase.module.flow.build.vo.SaveEnvironmentConfigReqVO;
+import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorEnvRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowConnectorRepository;
 import com.cmsr.onebase.module.flow.core.dal.database.FlowNodeConfigRepository;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorDO;
+import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowConnectorEnvDO;
 import com.cmsr.onebase.module.flow.core.dal.dataobject.FlowNodeConfigDO;
 import com.cmsr.onebase.module.flow.core.enums.FlowErrorCodeConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 连接器环境配置Service实现
+ * <p>
+ * 环境配置存储在独立的 flow_connector_env 表中，不再使用 flow_connector.config JSON
  *
  * @author onebase
  * @since 2026-03-20
@@ -40,13 +41,13 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
     private FlowConnectorRepository connectorRepository;
 
     @Autowired
+    private FlowConnectorEnvRepository envRepository;
+
+    @Autowired
     private FlowNodeConfigRepository flowNodeConfigRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private ConnectorConfigParser connectorConfigParser;
 
     @Override
     public List<FlowConnectorEnvLiteVO> getEnvironments(Long connectorId) {
@@ -56,31 +57,26 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
         if (connector == null) {
             log.warn("Connector not found, id: {}, returning empty list", connectorId);
-            return new ArrayList<>();
+            return List.of();
         }
 
-        // 2. 获取 config 字段
-        String configJson = connector.getConfig();
-        log.info("Connector config content, connectorId: {}, config: {}, configLength: {}",
-                connectorId, configJson, configJson != null ? configJson.length() : 0);
+        // 2. 通过 typeCode 查询环境配置列表
+        String typeCode = connector.getTypeCode();
+        List<FlowConnectorEnvDO> envList = envRepository.selectByTypeCode(typeCode);
 
-        if (StringUtils.isBlank(configJson)) {
-            log.info("Connector config is empty, connectorId: {}", connectorId);
-            return new ArrayList<>();
-        }
-
-        // 3. 解析环境配置
-        List<FlowConnectorEnvLiteVO> environments = connectorConfigParser.parseEnvironments(
-                configJson, connector.getTypeCode());
+        // 3. 转换为 VO
+        List<FlowConnectorEnvLiteVO> result = envList.stream()
+                .map(this::convertToLiteVO)
+                .collect(Collectors.toList());
 
         log.info("getEnvironments success, connectorId: {}, count: {}, typeCode: {}",
-                connectorId, environments.size(), connector.getTypeCode());
-        return environments;
+                connectorId, result.size(), typeCode);
+        return result;
     }
 
     @Override
-    public EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName) {
-        log.info("getEnvironmentConfig start, connectorId: {}, envName: {}", connectorId, envName);
+    public EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envCode) {
+        log.info("getEnvironmentConfig start, connectorId: {}, envCode: {}", connectorId, envCode);
 
         // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
@@ -89,23 +85,31 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 获取 config 字段
-        String config = connector.getConfig();
-        if (StringUtils.isBlank(config)) {
-            log.warn("Connector config is empty, connectorId: {}", connectorId);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_CONFIG_NOT_EXISTS, envName);
+        // 2. 通过 typeCode 和 envCode 查询环境配置
+        String typeCode = connector.getTypeCode();
+        FlowConnectorEnvDO envDO = envRepository.selectByTypeCodeAndEnvCode(typeCode, envCode);
+        if (envDO == null) {
+            log.warn("Environment not found, connectorId: {}, envCode: {}", connectorId, envCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_CONFIG_NOT_EXISTS, envCode);
         }
 
-        // 3. 使用 Parser 提取环境 Schema
-        JsonNode envSchema = connectorConfigParser.parseEnvironmentSchema(config, envName);
-
-        // 4. 封装 VO
+        // 3. 封装 VO
         EnvironmentConfigVO vo = new EnvironmentConfigVO();
-        vo.setSchema(envSchema);
-        vo.setEnvCode(envName);
-        vo.setTypeCode(connector.getTypeCode());
+        vo.setEnvCode(envDO.getEnvCode());
+        vo.setTypeCode(typeCode);
 
-        log.info("getEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
+        // 解析 config 字段作为 schema
+        if (StringUtils.isNotBlank(envDO.getConfig())) {
+            try {
+                JsonNode schema = objectMapper.readTree(envDO.getConfig());
+                vo.setSchema(schema);
+            } catch (JsonProcessingException e) {
+                log.error("Failed to parse config JSON, envId: {}", envDO.getId(), e);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
+            }
+        }
+
+        log.info("getEnvironmentConfig success, connectorId: {}, envCode: {}", connectorId, envCode);
         return vo;
     }
 
@@ -124,7 +128,7 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
         String typeCode = connector.getTypeCode();
         log.info("Connector typeCode: {}", typeCode);
 
-        // 3. 查询节点配置模板（使用 findByNodeCode）
+        // 3. 查询节点配置模板
         FlowNodeConfigDO nodeConfig = flowNodeConfigRepository.findByNodeCode(typeCode);
         if (nodeConfig == null) {
             log.warn("Node config not found for typeCode: {}", typeCode);
@@ -158,37 +162,38 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
     public Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO) {
         log.info("saveEnvironmentConfig start, connectorId: {}", connectorId);
 
-        // 1. 查询并验证连接器实例
+        // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
         if (connector == null) {
             log.warn("Connector not found, id: {}", connectorId);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 解析或创建根配置
-        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
-        ObjectNode properties = rootConfig.withObject("properties");
+        String typeCode = connector.getTypeCode();
 
-        // 3. 从请求中提取环境名称
-        String envName = extractEnvNameFromConfig(reqVO.getConfig());
+        // 2. 从请求中提取环境编码，如果没有则自动生成
+        String envCode = extractOrGenerateEnvCode(reqVO.getConfig(), connector.getConnectorName());
 
-        // 4. 检查环境是否已存在
-        if (properties.has(envName)) {
-            log.warn("Environment already exists, connectorId: {}, envName: {}", connectorId, envName);
+        // 3. 检查环境编码是否已存在
+        if (envRepository.existsByTypeAndEnvCode(typeCode, envCode, null)) {
+            log.warn("Environment already exists, connectorId: {}, envCode: {}", connectorId, envCode);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_ALREADY_EXISTS);
         }
 
-        // 5. 添加新环境配置
-        properties.set(envName, reqVO.getConfig());
+        // 4. 创建环境配置实体
+        FlowConnectorEnvDO envDO = new FlowConnectorEnvDO();
+        envDO.setEnvUuid(UUID.randomUUID().toString().replace("-", ""));
+        envDO.setEnvCode(envCode);
+        envDO.setEnvName(envCode + "环境配置");
+        envDO.setTypeCode(typeCode);
+        envDO.setConfig(toJsonString(reqVO.getConfig()));
+        envDO.setActiveStatus(1);
+        envDO.setSortOrder(0);
 
-        // 6. 更新元数据版本
-        updateMetadataVersion(rootConfig);
+        // 5. 保存到数据库
+        envRepository.save(envDO);
 
-        // 7. 保存到数据库
-        connector.setConfig(toJsonString(rootConfig));
-        connectorRepository.updateById(connector);
-
-        log.info("saveEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
+        log.info("saveEnvironmentConfig success, connectorId: {}, envId: {}, envCode: {}", connectorId, envDO.getId(), envCode);
         return Boolean.TRUE;
     }
 
@@ -197,146 +202,166 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
     public Boolean updateEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO) {
         log.info("updateEnvironmentConfig start, connectorId: {}", connectorId);
 
-        // 1. 查询并验证连接器实例
+        // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
         if (connector == null) {
             log.warn("Connector not found, id: {}", connectorId);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 解析根配置
-        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
-        ObjectNode properties = rootConfig.withObject("properties");
+        String typeCode = connector.getTypeCode();
 
-        // 3. 从请求中提取环境名称
-        String envName = extractEnvNameFromConfig(reqVO.getConfig());
+        // 2. 从请求中提取环境编码
+        String envCode = extractEnvCodeFromConfig(reqVO.getConfig());
 
-        // 4. 检查环境是否存在（编辑保存必须存在）
-        if (!properties.has(envName)) {
-            log.warn("Environment not exists, connectorId: {}, envName: {}", connectorId, envName);
-            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envName);
+        // 3. 查询现有环境配置
+        FlowConnectorEnvDO envDO = envRepository.selectByTypeCodeAndEnvCode(typeCode, envCode);
+        if (envDO == null) {
+            log.warn("Environment not exists, connectorId: {}, envCode: {}", connectorId, envCode);
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envCode);
         }
 
-        // 5. 替换已有环境配置
-        properties.set(envName, reqVO.getConfig());
+        // 4. 更新配置
+        envDO.setConfig(toJsonString(reqVO.getConfig()));
+        envRepository.updateById(envDO);
 
-        // 6. 更新元数据版本
-        updateMetadataVersion(rootConfig);
-
-        // 7. 保存到数据库
-        connector.setConfig(toJsonString(rootConfig));
-        connectorRepository.updateById(connector);
-
-        log.info("updateEnvironmentConfig success, connectorId: {}, envName: {}", connectorId, envName);
+        log.info("updateEnvironmentConfig success, connectorId: {}, envId: {}, envCode: {}", connectorId, envDO.getId(), envCode);
         return Boolean.TRUE;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean enableEnvironment(Long connectorId, String envName) {
-        log.info("enableEnvironment start, connectorId: {}, envName: {}", connectorId, envName);
+    public Boolean enableEnvironment(Long connectorId, String envCode) {
+        log.info("enableEnvironment start, connectorId: {}, envCode: {}", connectorId, envCode);
 
-        // 1. 查询并验证连接器实例
+        // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
         if (connector == null) {
             log.warn("Connector not found, id: {}", connectorId);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 解析根配置
-        ObjectNode rootConfig = parseOrCreateRootConfig(connector.getConfig());
-        ObjectNode properties = rootConfig.withObject("properties");
+        String typeCode = connector.getTypeCode();
 
-        // 3. 如果envName不为空，校验环境是否存在
-        if (StringUtils.isNotBlank(envName)) {
-            if (!properties.has(envName)) {
-                log.warn("Environment not exists, connectorId: {}, envName: {}", connectorId, envName);
-                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envName);
+        // 2. 如果envCode不为空，校验环境是否存在
+        if (StringUtils.isNotBlank(envCode)) {
+            FlowConnectorEnvDO envDO = envRepository.selectByTypeCodeAndEnvCode(typeCode, envCode);
+            if (envDO == null) {
+                log.warn("Environment not exists, connectorId: {}, envCode: {}", connectorId, envCode);
+                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.ENV_NOT_EXISTS, envCode);
             }
-            // 设置启用环境
-            rootConfig.put("enableEnvName", envName);
+            // 更新 connector 的 envUuid
+            connector.setEnvUuid(envDO.getEnvUuid());
         } else {
-            // 取消启用（设置为null）
-            rootConfig.putNull("enableEnvName");
+            // 取消启用
+            connector.setEnvUuid(null);
         }
 
-        // 4. 更新元数据版本
-        updateMetadataVersion(rootConfig);
-
-        // 5. 保存到数据库
-        connector.setConfig(toJsonString(rootConfig));
+        // 3. 保存到数据库
         connectorRepository.updateById(connector);
 
-        log.info("enableEnvironment success, connectorId: {}, envName: {}", connectorId, envName);
+        log.info("enableEnvironment success, connectorId: {}, envCode: {}", connectorId, envCode);
         return Boolean.TRUE;
     }
 
     @Override
-    public String getEnabledEnvName(Long connectorId) {
-        log.info("getEnabledEnvName start, connectorId: {}", connectorId);
+    public FlowConnectorEnvLiteVO getEnabledEnv(Long connectorId) {
+        log.info("getEnabledEnv start, connectorId: {}", connectorId);
 
-        // 1. 查询并验证连接器实例
+        // 1. 查询连接器实例
         FlowConnectorDO connector = connectorRepository.getById(connectorId);
         if (connector == null) {
             log.warn("Connector not found, id: {}", connectorId);
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.CONNECTOR_NOT_EXISTS);
         }
 
-        // 2. 获取 config 字段
-        String config = connector.getConfig();
-        if (StringUtils.isBlank(config)) {
-            log.info("Connector config is empty, return null, connectorId: {}", connectorId);
+        // 2. 获取 envUuid
+        String envUuid = connector.getEnvUuid();
+        if (StringUtils.isBlank(envUuid)) {
+            log.info("No enabled environment, connectorId: {}", connectorId);
             return null;
         }
 
-        // 3. 解析 JSON 并获取 enableEnvName
-        JsonNode root = JsonUtils.parseTree(config);
-        JsonNode enableEnvNameNode = root.get("enableEnvName");
-
-        if (enableEnvNameNode == null || enableEnvNameNode.isNull()) {
-            log.info("enableEnvName not found or is null, connectorId: {}", connectorId);
+        // 3. 查询环境配置
+        FlowConnectorEnvDO envDO = envRepository.selectByEnvUuid(envUuid);
+        if (envDO == null) {
+            log.info("Enabled environment not found, envUuid: {}", envUuid);
             return null;
         }
 
-        String enableEnvName = enableEnvNameNode.asText();
-        log.info("getEnabledEnvName success, connectorId: {}, enableEnvName: {}", connectorId, enableEnvName);
-        return enableEnvName;
+        // 4. 转换为 VO 返回
+        FlowConnectorEnvLiteVO vo = convertToLiteVO(envDO);
+        log.info("getEnabledEnv success, connectorId: {}, envCode: {}", connectorId, vo.getEnvCode());
+        return vo;
     }
 
     // ==================== 私有辅助方法 ====================
 
     /**
-     * 解析或创建根配置对象
-     *
-     * @param configJson 现有配置JSON，可能为空
-     * @return 根配置对象，包含 properties 和 _metadata 节点
+     * 转换为精简 VO
      */
-    private ObjectNode parseOrCreateRootConfig(String configJson) {
-        ObjectNode rootConfig;
-        if (StringUtils.isBlank(configJson)) {
-            rootConfig = objectMapper.createObjectNode();
-            rootConfig.putObject("properties");
-            rootConfig.putObject("_metadata");
-        } else {
-            try {
-                rootConfig = (ObjectNode) objectMapper.readTree(configJson);
-            } catch (JsonProcessingException e) {
-                log.error("Failed to parse config JSON", e);
-                throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_CONNECTOR_CONFIG);
-            }
-        }
-        return rootConfig;
+    private FlowConnectorEnvLiteVO convertToLiteVO(FlowConnectorEnvDO envDO) {
+        FlowConnectorEnvLiteVO vo = new FlowConnectorEnvLiteVO();
+        vo.setId(envDO.getId());
+        vo.setEnvUuid(envDO.getEnvUuid());
+        vo.setEnvName(envDO.getEnvName());
+        vo.setEnvCode(envDO.getEnvCode());
+        vo.setTypeCode(envDO.getTypeCode());
+        vo.setEnvUrl(envDO.getEnvUrl());
+        vo.setAuthType(envDO.getAuthType());
+        vo.setDescription(envDO.getDescription());
+        vo.setActiveStatus(envDO.getActiveStatus());
+        vo.setCreateTime(envDO.getCreateTime());
+        return vo;
     }
 
     /**
-     * 从配置节点中提取环境名称
-     * <p>
-     * 配置格式: {"envMode": "...", "envConfig": {"basicInfo": {"envName": "..."}}}
+     * 从配置节点中提取环境编码，如果不存在则使用默认值
      *
      * @param configNode 配置节点
-     * @return 环境名称
+     * @param defaultName 默认环境编码（实例名称）
+     * @return 环境编码
      */
-    private String extractEnvNameFromConfig(JsonNode configNode) {
+    private String extractOrGenerateEnvCode(JsonNode configNode, String defaultName) {
+        if (configNode == null || !configNode.isObject()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        JsonNode envConfigNode = configNode.get("envConfig");
+        if (envConfigNode == null || !envConfigNode.isObject()) {
+            throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
+        }
+
+        JsonNode basicInfoNode = envConfigNode.get("basicInfo");
+        if (basicInfoNode == null || !basicInfoNode.isObject()) {
+            // basicInfo 不存在时，自动创建并设置默认环境编码
+            com.fasterxml.jackson.databind.node.ObjectNode envConfigObj = (com.fasterxml.jackson.databind.node.ObjectNode) envConfigNode;
+            com.fasterxml.jackson.databind.node.ObjectNode newBasicInfo = envConfigObj.putObject("basicInfo");
+            String generatedCode = StringUtils.isNotBlank(defaultName) ? defaultName : "DEFAULT";
+            newBasicInfo.put("envCode", generatedCode);
+            log.info("Auto generated envCode: {}", generatedCode);
+            return generatedCode;
+        }
+
+        JsonNode envCodeNode = basicInfoNode.get("envCode");
+        if (envCodeNode == null || envCodeNode.isNull() || StringUtils.isBlank(envCodeNode.asText())) {
+            // envCode 为空时，自动设置默认值
+            String generatedCode = StringUtils.isNotBlank(defaultName) ? defaultName : "DEFAULT";
+            ((com.fasterxml.jackson.databind.node.ObjectNode) basicInfoNode).put("envCode", generatedCode);
+            log.info("Auto generated envCode: {}", generatedCode);
+            return generatedCode;
+        }
+
+        return envCodeNode.asText();
+    }
+
+    /**
+     * 从配置节点中提取环境编码
+     *
+     * @param configNode 配置节点
+     * @return 环境编码
+     */
+    private String extractEnvCodeFromConfig(JsonNode configNode) {
         if (configNode == null || !configNode.isObject()) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
         }
@@ -351,24 +376,12 @@ public class FlowConnectorEnvServiceImpl implements FlowConnectorEnvService {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
         }
 
-        JsonNode envNameNode = basicInfoNode.get("envName");
-        if (envNameNode == null || envNameNode.isNull()) {
+        JsonNode envCodeNode = basicInfoNode.get("envCode");
+        if (envCodeNode == null || envCodeNode.isNull()) {
             throw ServiceExceptionUtil.exception(FlowErrorCodeConstants.INVALID_ENV_CONFIG);
         }
 
-        return envNameNode.asText();
-    }
-
-    /**
-     * 更新配置元数据版本号
-     *
-     * @param rootConfig 根配置对象
-     */
-    private void updateMetadataVersion(ObjectNode rootConfig) {
-        ObjectNode metadata = rootConfig.withObject("_metadata");
-        int currentVersion = metadata.has("version") ? metadata.get("version").asInt() : 0;
-        metadata.put("version", currentVersion + 1);
-        metadata.put("updatedAt", Instant.now().toString());
+        return envCodeNode.asText();
     }
 
     /**

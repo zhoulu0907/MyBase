@@ -71,6 +71,16 @@ public interface MetadataEntityFieldCoreService {
     List<MetadataEntityFieldDO> getEntityFieldListByEntityUuid(String entityUuid);
 
     /**
+     * 根据实体UUID列表批量获取实体字段
+     * <p>
+     * 返回 Map，key 为 entityUuid，value 为该实体的字段列表
+     *
+     * @param entityUuids 实体UUID列表
+     * @return 实体UUID到字段列表的映射
+     */
+    Map<String, List<MetadataEntityFieldDO>> batchGetEntityFieldsByEntityUuids(List<String> entityUuids);
+
+    /**
      * 根据字段ID列表批量获取实体字段
      *
      * @param fieldIds 字段ID列表
