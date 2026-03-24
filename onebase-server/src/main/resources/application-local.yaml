@@ -71,6 +71,7 @@ onebase:
     tenant: root
   flink:
     address: http://10.0.104.41:30692
+#    address: http://localhost:48082
   auth:
     tiangong:
       tenant-code: tenant_tiangong
