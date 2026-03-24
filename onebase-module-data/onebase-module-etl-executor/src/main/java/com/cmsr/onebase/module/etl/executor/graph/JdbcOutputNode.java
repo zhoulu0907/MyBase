@@ -37,7 +37,13 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         for (JdbcOutputMapper field : config.getFields()) {
-            DataType dataType = FlinkUtil.toFlinkTableType(field.getTargetFieldType(), field.getTargetFieldLength(), field.getTargetFieldPrecision(), field.getTargetFieldScale());
+            DataType dataType = FlinkUtil.toFlinkTableType(
+                    field.getTargetFieldType(),
+                    field.getTargetFieldLength(),
+                    field.getTargetFieldPrecision(),
+                    field.getTargetFieldScale(),
+                    config.getJdbcConfig().getDatabaseType()
+            );
             schemaBuilder.column(field.getTargetFieldName(), dataType);
         }
         TableDescriptor tableDescriptor = TableDescriptor.forConnector("jdbc")

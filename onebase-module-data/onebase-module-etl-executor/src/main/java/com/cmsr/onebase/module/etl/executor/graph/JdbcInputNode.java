@@ -27,7 +27,13 @@ public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableA
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         for (Field field : config.getFields()) {
-            DataType dataType = FlinkUtil.toFlinkTableType(field.getFieldType(), field.getLength(), field.getPrecision(), field.getScale());
+            DataType dataType = FlinkUtil.toFlinkTableType(
+                    field.getFieldType(),
+                    field.getLength(),
+                    field.getPrecision(),
+                    field.getScale(),
+                    config.getJdbcConfig().getDatabaseType()
+            );
             schemaBuilder.column(field.getFieldName(), dataType);
         }
         TableDescriptor tableDescriptor = TableDescriptor.forConnector("jdbc")
