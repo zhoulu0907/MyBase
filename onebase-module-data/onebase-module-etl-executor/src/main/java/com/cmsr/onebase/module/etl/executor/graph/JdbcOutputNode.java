@@ -37,12 +37,14 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         String databaseTypeHint = resolveDatabaseTypeHint();
+        boolean mysqlJdbc = isMysqlJdbc(databaseTypeHint);
         for (JdbcOutputMapper field : config.getFields()) {
+            Integer normalizedScale = normalizeScaleForMysqlJdbc(field.getTargetFieldType(), field.getTargetFieldScale(), mysqlJdbc);
             DataType dataType = FlinkUtil.toFlinkTableType(
                     field.getTargetFieldType(),
                     field.getTargetFieldLength(),
                     field.getTargetFieldPrecision(),
-                    field.getTargetFieldScale(),
+                    normalizedScale,
                     databaseTypeHint
             );
             schemaBuilder.column(field.getTargetFieldName(), dataType);
@@ -97,5 +99,28 @@ public class JdbcOutputNode extends Node<JdbcOutputConfig> implements CreateTabl
                 databaseType == null ? "" : databaseType,
                 driver == null ? "" : driver,
                 jdbcUrl == null ? "" : jdbcUrl);
+    }
+
+    private Integer normalizeScaleForMysqlJdbc(String fieldType, Integer scale, boolean mysqlJdbc) {
+        if (!mysqlJdbc || !isTimestampType(fieldType)) {
+            return scale;
+        }
+        int resolvedScale = scale == null ? 6 : scale;
+        if (resolvedScale < 0) {
+            return 0;
+        }
+        return Math.min(resolvedScale, 6);
+    }
+
+    private boolean isTimestampType(String fieldType) {
+        if (fieldType == null) {
+            return false;
+        }
+        String normalizedType = fieldType.trim().toUpperCase();
+        return normalizedType.startsWith("TIMESTAMP");
+    }
+
+    private boolean isMysqlJdbc(String databaseTypeHint) {
+        return databaseTypeHint != null && databaseTypeHint.toLowerCase().contains("mysql");
     }
 }

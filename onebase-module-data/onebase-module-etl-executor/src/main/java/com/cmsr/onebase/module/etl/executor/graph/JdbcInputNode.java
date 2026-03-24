@@ -27,12 +27,14 @@ public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableA
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
         String databaseTypeHint = resolveDatabaseTypeHint();
+        boolean mysqlJdbc = isMysqlJdbc(databaseTypeHint);
         for (Field field : config.getFields()) {
+            Integer normalizedScale = normalizeScaleForMysqlJdbc(field.getFieldType(), field.getScale(), mysqlJdbc);
             DataType dataType = FlinkUtil.toFlinkTableType(
                     field.getFieldType(),
                     field.getLength(),
                     field.getPrecision(),
-                    field.getScale(),
+                    normalizedScale,
                     databaseTypeHint
             );
             schemaBuilder.column(field.getFieldName(), dataType);
@@ -57,5 +59,28 @@ public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableA
                 databaseType == null ? "" : databaseType,
                 driver == null ? "" : driver,
                 jdbcUrl == null ? "" : jdbcUrl);
+    }
+
+    private Integer normalizeScaleForMysqlJdbc(String fieldType, Integer scale, boolean mysqlJdbc) {
+        if (!mysqlJdbc || !isTimestampType(fieldType)) {
+            return scale;
+        }
+        int resolvedScale = scale == null ? 6 : scale;
+        if (resolvedScale < 0) {
+            return 0;
+        }
+        return Math.min(resolvedScale, 6);
+    }
+
+    private boolean isTimestampType(String fieldType) {
+        if (fieldType == null) {
+            return false;
+        }
+        String normalizedType = fieldType.trim().toUpperCase();
+        return normalizedType.startsWith("TIMESTAMP");
+    }
+
+    private boolean isMysqlJdbc(String databaseTypeHint) {
+        return databaseTypeHint != null && databaseTypeHint.toLowerCase().contains("mysql");
     }
 }

@@ -170,7 +170,7 @@ public class WorkflowProvider {
             return false;
         }
         String normalizedType = flinkType.trim().toUpperCase();
-        return "TIMESTAMP".equals(normalizedType) || "TIMESTAMP_LTZ".equals(normalizedType);
+        return normalizedType.startsWith("TIMESTAMP");
     }
 
     private boolean isMysqlDatasource(String datasourceType) {
