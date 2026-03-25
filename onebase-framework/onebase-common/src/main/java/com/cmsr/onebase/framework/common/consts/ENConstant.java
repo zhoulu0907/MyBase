@@ -13,4 +13,13 @@ public class ENConstant {
     public static final String SIGN_HEADER_KEY_NONCE    = "nonce";
     public static final String SIGN_HEADER_KEY_SIGN    = "sign";
     public static final Integer SIGN_REQ_TIMEOUT    = 180;
+
+    public static final String AI_HDR_KEY_ID = "X-AI-KeyId";
+    public static final String AI_HDR_SIG = "X-AI-Signature";
+    public static final String AI_HDR_TS = "X-AI-Timestamp";
+    public static final String AI_HDR_NONCE = "X-AI-Nonce";
+    public static final String AI_HDR_REQ_ID = "X-AI-Request-Id";
+    public static final String AI_HDR_USER_ID = "X-AI-User-Id";
+    public static final String AI_HDR_TENANT_ID = "X-AI-Tenant-Id";
+    public static final String AI_HDR_APP_ID = "X-AI-App-Id";
 }
