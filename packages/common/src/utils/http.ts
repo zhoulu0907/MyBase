@@ -141,7 +141,7 @@ export class HttpClient {
                 const message = { timestamp: new Date().getTime(), type: 'logout' };
                 console.log('[Iframe] postMessage:', message);
                 window.parent.postMessage(message, '*');
-                return Promise.resolve();
+                return response;
               }
 
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
