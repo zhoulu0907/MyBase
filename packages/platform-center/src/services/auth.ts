@@ -3,6 +3,8 @@ import {
   CodeType,
   Headers,
   LoginRequest,
+  OAuthAuthorizeRequest,
+  OAuthAuthorizeResponse,
   RuntimeAccountLoginRequest,
   RuntimeCorpLoginRequest,
   RuntimeMobileLoginRequest,
@@ -75,6 +77,18 @@ export const tiangongLogin = (req: TiangongLoginRequest): Promise<TiangongLoginR
     code,
     deviceId
   });
+};
+
+export const oauthAuthorize = (req: OAuthAuthorizeRequest): Promise<OAuthAuthorizeResponse> => {
+  const params = new URLSearchParams();
+  params.append('client_id', req.client_id);
+  params.append('scope', req.scope);
+  params.append('redirect_uri', req.redirect_uri);
+  params.append('response_type', req.response_type);
+  if (req.auto_approve !== undefined) {
+    params.append('auto_approve', String(req.auto_approve));
+  }
+  return systemService.post(`/oauth2/authorize/code?${params.toString()}`);
 };
 
 // 校验验证码 /system/captcha/check

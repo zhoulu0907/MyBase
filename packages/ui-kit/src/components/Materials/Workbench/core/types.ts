@@ -245,3 +245,13 @@ export interface ITableConfigType {
   name: string;
   type: typeof WORKBENCH_CONFIG_TYPES.WB_TABLE_CONFIG;
 }
+
+/**
+ * 智能体选择器配置类型
+ */
+export interface IWbAgentSelectorConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_AGENT_SELECTOR;
+  disabled?: boolean;
+}
