@@ -61,6 +61,9 @@ public class ApiSignHelper {
             return true;
         }
 
+        if (hasAiHeaders(request)) {
+            return true;
+        }
 
         // 1.1 校验 Header
         verifyHeaders(request);
@@ -237,5 +240,12 @@ public class ApiSignHelper {
             return null;
         }
         return URLDecoder.decode(str, StandardCharsets.UTF_8);
+    }
+
+    private boolean hasAiHeaders(HttpServletRequest request) {
+        return StringUtils.isNotBlank(request.getHeader(AI_HDR_KEY_ID)) ||
+                StringUtils.isNotBlank(request.getHeader(AI_HDR_SIG)) ||
+                StringUtils.isNotBlank(request.getHeader(AI_HDR_REQ_ID)) ||
+                StringUtils.isNotBlank(request.getHeader(AI_HDR_TENANT_ID));
     }
 }
