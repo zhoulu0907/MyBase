@@ -1,6 +1,6 @@
 import MenuComp from '@/components/MenuIcon';
 import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
-import { PageType, RootParentPage } from '@onebase/app';
+import { RootParentPage, CREATE_MENU_CATEGORIES, type CreateMenuCategory } from '@onebase/app';
 import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
@@ -10,8 +10,7 @@ interface CreateModalProps {
   handleCreate: () => void;
   onCancel: () => void;
   form: FormInstance;
-  pageSetTypeOptions: { label: string; value: any }[];
-  visibleCreateForm: string;
+  visibleCreateForm: CreateMenuCategory | '';
   initValue: { pageType: number; menuName: string; parentId: string };
   treeData: any[];
   entityListOptions: { label: string; value: any }[];
@@ -22,7 +21,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
   handleCreate,
   onCancel,
   form,
-  pageSetTypeOptions,
   visibleCreateForm,
   initValue,
   treeData,
@@ -41,31 +39,13 @@ const CreateModal: React.FC<CreateModalProps> = ({
     }
   }, [menuIcon, visibleCreateForm]);
 
-  const nameMap = {
-    page: '页面',
-    group: '分组',
-    workbench: '页面'
-  };
-
-  const iconMap = {
-    page: 'page',
-    group: 'seo-folder',
-    workbench: 'page'
-  };
+  const menuNameLabel = visibleCreateForm === CREATE_MENU_CATEGORIES.GROUP ? '分组' : '页面';
+  const shouldShowEntity =
+    visibleCreateForm === CREATE_MENU_CATEGORIES.NORMAL_FORM || visibleCreateForm === CREATE_MENU_CATEGORIES.BPM_FORM;
 
   const handleCloseModal = () => {
     setMenuIcon('');
     onCancel();
-  };
-
-  const getPageSetTypeOptions = () => {
-    const wb = PageType.WORKBENCH;
-    if (visibleCreateForm !== 'workbench') {
-      return pageSetTypeOptions.filter((opt) => opt.value !== wb);
-    } else {
-      form.setFieldValue('pageSetType', wb);
-      return pageSetTypeOptions.filter((opt) => opt.value === wb);
-    }
   };
 
   return (
@@ -104,28 +84,17 @@ const CreateModal: React.FC<CreateModalProps> = ({
             transform: visibleMenuIcon ? 'translateX(-100%)' : ''
           }}
         >
-          {visibleCreateForm !== 'group' && (
-            <Form.Item
-              label="页面类型"
-              field="pageSetType"
-              rules={[{ required: true, message: '请选择页面类型' }]}
-              disabled={visibleCreateForm === 'workbench'}
-            >
-              <Select options={getPageSetTypeOptions()} placeholder="请选择页面类型" allowClear />
-            </Form.Item>
-          )}
-
           <Form.Item
-            label={nameMap[visibleCreateForm as keyof typeof nameMap]}
+            label={menuNameLabel}
             field="menuName"
             rules={[
-              { required: true, message: `请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}名称` },
+              { required: true, message: `请输入${menuNameLabel}名称` },
               { maxLength: 20, message: '页面名称不能超过20个字符' }
             ]}
           >
             <Input
               maxLength={20}
-              placeholder={`请输入${nameMap[visibleCreateForm as keyof typeof nameMap]}名称，不超过20个字符`}
+              placeholder={`请输入${menuNameLabel}名称，不超过20个字符`}
               allowClear
               onChange={(value) => {
                 form.setFieldValue('menuName', value);
@@ -168,7 +137,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           <Form.Item label="父级页面" field="parentId">
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
-          {visibleCreateForm === 'page' && (
+          {shouldShowEntity && (
             <Form.Item label="数据资产" field="entityUuid" rules={[{ required: true, message: '请选择数据资产' }]}>
               <Select options={entityListOptions} placeholder="请选择数据资产" allowClear />
             </Form.Item>
