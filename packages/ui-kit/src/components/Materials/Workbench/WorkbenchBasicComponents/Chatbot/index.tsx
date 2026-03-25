@@ -7,13 +7,16 @@ export interface XChatbotProps {
   agentId?: string;
   agentName?: string;
   agentTenantId?: string;
+  iframeUrl?: string;
   runtime?: boolean;
 }
 
-const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, runtime = false }) => {
+const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, iframeUrl, runtime = false }) => {
   const [visible, setVisible] = useState(false);
   const [iframeHeight, setIframeHeight] = useState(200);
   const [code, setCode] = useState<string>('');
+
+  const hasCustomUrl = iframeUrl && iframeUrl.trim() !== '';
 
   useEffect(() => {
     const calculateHeight = () => {
@@ -27,10 +30,10 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
   }, []);
 
   useEffect(() => {
-    if (runtime) {
+    if (runtime && !hasCustomUrl) {
       fetchCode();
     }
-  }, [runtime]);
+  }, [runtime, hasCustomUrl]);
 
   const fetchCode = async () => {
     try {
@@ -38,7 +41,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
       const authorizeRes = await oauthAuthorize({
         client_id: 'aitool',
         scope: '',
-        redirect_uri: 'http://10.0.13.16:29500/bote/manager/',
+        redirect_uri: 'http://bote.sit.artifex-cmcc.com.cn/bote/manager/',
         response_type: 'code',
         auto_approve: true
       });
@@ -59,6 +62,10 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
   const DEFAULT_URL_TEMPLATE = 'http://bote.sit.artifex-cmcc.com.cn/bote/#/driver/bot?tenantId={{tenantId}}&botId={{botId}}&modeType=single&systemCode=ONEBASE-Runtime&code={{code}}';
 
   const displayUrl = useMemo(() => {
+    if (hasCustomUrl) {
+      return iframeUrl;
+    }
+
     if (!agentId) {
       return '';
     }
@@ -68,7 +75,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
       .replace('{{botId}}', agentId)
       .replace('{{code}}', code || '');
     return url;
-  }, [agentId, agentTenantId, code]);
+  }, [iframeUrl, hasCustomUrl, agentId, agentTenantId, code]);
 
   return (
     <>

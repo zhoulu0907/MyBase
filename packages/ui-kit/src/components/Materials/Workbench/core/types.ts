@@ -253,4 +253,5 @@ export interface IWbAgentSelectorConfigType {
   key: string;
   name: string;
   type: typeof WORKBENCH_CONFIG_TYPES.WB_AGENT_SELECTOR;
+  disabled?: boolean;
 }

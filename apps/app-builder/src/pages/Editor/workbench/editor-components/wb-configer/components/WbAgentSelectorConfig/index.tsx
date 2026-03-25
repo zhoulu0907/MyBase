@@ -23,10 +23,14 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
   const [agentList, setAgentList] = useState<AgentItem[]>([]);
 
   const currentAgentId = (configs[item.key] as string) || '';
+  const iframeUrl = configs.iframeUrl as string | undefined;
+  const isDisabled = !!iframeUrl && iframeUrl.trim() !== '';
 
   useEffect(() => {
-    fetchAgentList();
-  }, []);
+    if (!isDisabled) {
+      fetchAgentList();
+    }
+  }, [isDisabled]);
 
   const fetchAgentList = async () => {
     setLoading(true);
@@ -74,14 +78,25 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
     }
   };
 
+  const handleClear = () => {
+    handlePropsChange(item.key, '');
+    handleMultiPropsChange([
+      { key: 'agentId', value: '' },
+      { key: 'agentName', value: '' },
+      { key: 'agentTenantId', value: '' }
+    ]);
+  };
+
   return (
     <Form.Item className={styles.formItem} label={item.name}>
       <Spin loading={loading} style={{ width: '100%' }}>
         <Select
           value={currentAgentId}
           onChange={handleChange}
-          placeholder="请选择智能体"
-          allowClear
+          onClear={handleClear}
+          placeholder={isDisabled ? '已配置URL地址' : '请选择智能体'}
+          allowClear={!isDisabled}
+          disabled={isDisabled}
         >
           {agentList.map((agent) => (
             <Select.Option key={agent.botId} value={agent.botId}>

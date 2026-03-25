@@ -21,6 +21,7 @@ export interface XChatbotConfig extends ICommonBaseWorkbenchType {
   agentId?: string;
   agentName?: string;
   agentTenantId?: string;
+  iframeUrl?: string;
   width: TSelectDefaultType<TWorkbenchWidthSelectKeyType>;
   floatingConfig?: {
     right: number;
@@ -37,6 +38,11 @@ const XChatbot: XChatbotSchema = {
       key: 'agentId',
       name: '智能体',
       type: WORKBENCH_CONFIG_TYPES.WB_AGENT_SELECTOR
+    },
+    {
+      key: 'iframeUrl',
+      name: 'URL地址',
+      type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT
     }
   ],
   config: {
