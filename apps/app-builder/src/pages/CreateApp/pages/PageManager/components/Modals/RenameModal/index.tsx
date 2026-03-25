@@ -67,8 +67,15 @@ const RenameModal: React.FC<RenameModalProps> = ({ title, visible, handleRename,
             menuIcon: form.getFieldValue('menuIcon')
           }}
         >
-          <Form.Item label="页面名称" field="menuName" rules={[{ required: true, message: '请输入页面名称' }]}>
-            <Input placeholder="请输入页面名称" allowClear />
+          <Form.Item
+            label="页面名称"
+            field="menuName"
+            rules={[
+              { required: true, message: '请输入页面名称' },
+              { maxLength: 20, message: '页面名称不能超过20个字符' }
+            ]}
+          >
+            <Input placeholder="请输入页面名称" maxLength={20} allowClear />
           </Form.Item>
 
           <Form.Item label={'菜单图标'} field="menuIcon" rules={[{ required: true, message: '请选择菜单图标' }]}>

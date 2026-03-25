@@ -134,7 +134,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
               </div>
             </div>
           </Form.Item>
-          <Form.Item label="父级页面" field="parentId">
+          <Form.Item label="父级页面" field="parentId" rules={[{ required: true, message: '请选择父级页面' }]}>
             <TreeSelect treeData={treeData} placeholder="请选择父级页面" allowClear />
           </Form.Item>
           {shouldShowEntity && (
