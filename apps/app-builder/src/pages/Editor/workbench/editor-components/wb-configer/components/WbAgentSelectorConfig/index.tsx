@@ -32,7 +32,7 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
     setLoading(true);
     try {
       const response = await axios.post(
-        'http://10.0.13.16:29500/bote/api/bote/manager/bot/queryPublishedAppPage',
+        'http://bote.sit.artifex-cmcc.com.cn/bote/api/bote/manager/bot/queryPublishedAppPage',
         {
           extTenantId: '153935442021842944',
           spaceId: '1348207178626895872',

@@ -38,7 +38,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
       const authorizeRes = await oauthAuthorize({
         client_id: 'aitool',
         scope: '',
-        redirect_uri: 'http://10.0.13.16:29500/bote/manager/',
+        redirect_uri: 'http://bote.sit.artifex-cmcc.com.cn/bote/manager/',
         response_type: 'code',
         auto_approve: true
       });
@@ -56,7 +56,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
     }
   };
 
-  const DEFAULT_URL_TEMPLATE = 'http://10.0.13.16:29500/bote/#/driver/bot?tenantId={{tenantId}}&botId={{botId}}&modeType=single&systemCode=ONEBASE-Runtime&code={{code}}';
+  const DEFAULT_URL_TEMPLATE = 'http://bote.sit.artifex-cmcc.com.cn/bote/#/driver/bot?tenantId={{tenantId}}&botId={{botId}}&modeType=single&systemCode=ONEBASE-Runtime&code={{code}}';
 
   const displayUrl = useMemo(() => {
     if (!agentId) {
