@@ -137,11 +137,11 @@ export class HttpClient {
           if (data.code !== 0) {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
-              // 如果在iframe中，发送logout消息给父窗口
               if (window.self !== window.top) {
                 const message = { timestamp: new Date().getTime(), type: 'logout' };
                 console.log('[Iframe] postMessage:', message);
                 window.parent.postMessage(message, '*');
+                return Promise.resolve();
               }
 
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
