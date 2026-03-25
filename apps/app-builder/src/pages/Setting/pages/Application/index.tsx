@@ -288,13 +288,12 @@ const AppManagement: React.FC = () => {
       const authorizeRes = await oauthAuthorize({
         client_id: 'aitool',
         scope: '',
-        redirect_uri: 'http://bote.sit.artifex-cmcc.com.cn/bote/manager/',
+        redirect_uri: 'http://10.0.13.16:29500/bote/manager/',
         response_type: 'code',
         auto_approve: true
       });
 
       if (authorizeRes.code) {
-        debugger
         const callbackUrl = `http://bote.sit.artifex-cmcc.com.cn/bote/api/bote/oauth2/callback?systemCode=onebase&redirect=http://bote.sit.artifex-cmcc.com.cn/bote/manager/%23/&code=${authorizeRes.code}`;
         window.open(callbackUrl, '_blank');
       } else {
