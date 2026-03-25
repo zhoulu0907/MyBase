@@ -1,5 +1,6 @@
+import TablePagination from '@/components/TablePagination';
 import { useCallback, useRef, useEffect, useState, type FC } from 'react';
-import { Button, Input, Tabs, Typography, Modal, Form, Space, Pagination } from '@arco-design/web-react';
+import { Button, Input, Tabs, Typography, Modal, Form, Space } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import TemplateCard from '../TemplateCard';
 import styles from './index.module.less';
@@ -199,15 +200,11 @@ const ScreenTemplate: FC = () => {
           ))}
         </Tabs>
       </div>
-      <Pagination
+      <TablePagination
         current={currentPage}
         pageSize={pageSize}
         total={total}
         onChange={handlePageChange}
-        showTotal
-        style={{
-          justifyContent: 'flex-end'
-        }}
       />
       {/* 编辑弹框 */}
       <Modal

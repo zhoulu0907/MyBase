@@ -1,4 +1,4 @@
-import { Checkbox, Divider, Empty, Form, Grid, Radio } from '@arco-design/web-react';
+import { Checkbox, Divider, Form, Grid, Radio } from '@arco-design/web-react';
 import {
   FieldDownloadable,
   FieldEdit,
@@ -14,6 +14,7 @@ import { useEffect, useState, type FC } from 'react';
 
 import { IconAttachment } from '@arco-design/web-react/icon';
 import styles from './index.module.less';
+import EmptyState from '@/components/EmptyState';
 
 const Row = Grid.Row;
 const Col = Grid.Col;
@@ -349,7 +350,7 @@ const FieldPermission: FC<IProps> = ({ appId, menuId, roleId }: IProps) => {
             </Form.Item>
             {!isAllFieldsAllowed && (
               <div>
-                {showEmpty && <Empty description="暂无数据" />}
+                {showEmpty && <EmptyState type="table" description="暂无数据" />}
                 {fieldPermission && fieldPermission.length > 0 && (
                   <Form.Item
                     field="authFields"

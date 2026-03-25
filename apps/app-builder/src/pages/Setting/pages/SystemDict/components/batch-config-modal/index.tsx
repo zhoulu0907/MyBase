@@ -243,7 +243,7 @@ const BatchConfigModal: React.FC<BatchConfigModalProps> = ({ visible, onCancel, 
       columns.push({
         title: '',
         dataIndex: 'colorType',
-        width: 32,
+        width: 60,
         render: (_: unknown, record: DictData, index: number) => (
           <Form.Item field={`dictValues.${index}.colorType`} style={{ margin: 0 }}>
             <ColorPicker

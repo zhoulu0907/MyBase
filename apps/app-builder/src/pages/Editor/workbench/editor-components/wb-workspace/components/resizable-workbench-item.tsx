@@ -55,16 +55,15 @@ export function ResizableWorkbenchItem({
   layout
 }: ResizableWorkbenchItemProps) {
   const contentRef = useRef<HTMLDivElement>(null);
-  const measureRef = useRef<HTMLDivElement>(null);
   const [draggingWidth, setDraggingWidth] = useState<number | null>(null);
   // 拖动中实时吸附的列数，用于同步扩展 wrapper gridColumn，防止视觉溢出
   const [draggingColSpan, setDraggingColSpan] = useState<number | null>(null);
   const pendingCommitRef = useRef(false);
   const lastRowSpanRef = useRef<number>(0);
 
-  // 通过独立测量层观察内容自然高度，避免 height:100% 子组件将 grid cell 高度反馈回来形成循环
+  // 直接观测 contentRef（可见层）的高度变化，上报 rowSpan
   useEffect(() => {
-    if (!measureRef.current) return;
+    if (!contentRef.current) return;
     const observer = new ResizeObserver((entries) => {
       const rowSpan = calcRowSpan(entries[0].contentRect.height);
       if (rowSpan !== lastRowSpanRef.current) {
@@ -72,7 +71,7 @@ export function ResizableWorkbenchItem({
         onHeightChange(componentId, rowSpan);
       }
     });
-    observer.observe(measureRef.current);
+    observer.observe(contentRef.current);
     return () => observer.disconnect();
   }, [componentId, onHeightChange]);
 
@@ -177,29 +176,13 @@ export function ResizableWorkbenchItem({
           style={{
             ...contentWidthStyle,
             borderColor: isSelected ? 'rgb(var(--primary-6))' : '',
-            borderStyle: isSelected ? 'solid' : 'dashed'
+            borderStyle: isSelected ? 'solid' : 'dashed',
+            // 切断 fontSize 继承，防止子组件 em 尺寸变化影响此元素高度
+            fontSize: 0
           }}
           onMouseDown={handleClick}
           onClick={handleClick}
         >
-          {/* 独立测量层：position:absolute + height:fit-content，测量内容自然高度，不受 grid 撑高影响 */}
-          <div
-            ref={measureRef}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: 'fit-content',
-              visibility: 'hidden',
-              pointerEvents: 'none',
-              zIndex: -1,
-              overflow: 'hidden'
-            }}
-            aria-hidden="true"
-          >
-            {children}
-          </div>
           {children}
         </div>
       </Resizable>

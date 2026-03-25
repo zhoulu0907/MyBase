@@ -446,7 +446,7 @@ const AppManagement: React.FC = () => {
             total={total}
             current={pageNo}
             pageSize={pageSize}
-            onChange={(pNo, pSize) => {
+            onChange={(pNo: number, pSize: number) => {
               setPageNo(pNo);
               setPageSize(pSize);
             }}

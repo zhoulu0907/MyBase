@@ -1,9 +1,10 @@
 import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Collapse, Empty, Spin, Tag } from '@arco-design/web-react';
+import { Collapse, Spin, Tag } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { getEntityRules } from '@onebase/app';
 import { validationTypeMap } from '../../../Modals/CreateEditRuleModal/rule';
 import styles from './DataRules.module.less';
+import EmptyState from '@/components/EmptyState';
 
 // 数据规则接口定义
 interface DataRule {
@@ -91,7 +92,7 @@ const DataRules: React.FC<DataRulesProps> = ({ node }) => {
             <span>加载中...</span>
           </div>
         ) : rules.length === 0 ? (
-          <Empty description="暂无数据规则" />
+          <EmptyState type="table" description="暂无数据规则" />
         ) : (
           <Collapse expandIconPosition="right" bordered={false} defaultActiveKey={rules[0]?.id || ''}>
             {rules.length > 0 &&

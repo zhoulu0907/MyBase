@@ -13,7 +13,7 @@ import {
 } from '@onebase/common';
 import { FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
-import { DeleteConfirmModal } from '../../../Modals';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import styles from './NodeEditForm.module.less';
 
 // 节点编辑表单组件

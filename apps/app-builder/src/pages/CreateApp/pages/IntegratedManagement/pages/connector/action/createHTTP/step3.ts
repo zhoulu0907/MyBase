@@ -9,6 +9,10 @@ export const step3Schema: ISchema = {
       title: '动作对外出入参定义',
       'x-component': 'SectionTitle'
     },
+    ioGenerateButton: {
+      type: 'void',
+      'x-component': 'IOGenerateButton'
+    },
     ioDesc: {
       type: 'void',
       'x-component': 'div',
@@ -17,22 +21,23 @@ export const step3Schema: ISchema = {
       },
       'x-content': '定义动作对外暴露的入参和出参，调用方只需填写这些字段即可调用动作。'
     },
-    io: {
-      type: 'object',
-      'x-component': 'Tabs',
-      'x-component-props': { type: 'card-gutter' },
-      properties: {
-        inputs: {
-          type: 'array',
-          title: '动作入参',
-          'x-component': 'ActionInputArrayTable'
-        },
-        outputs: {
-          type: 'array',
-          title: '动作出参',
-          'x-component': 'ActionOutputArrayTable'
-        }
-      }
+    inputsTitle: {
+      type: 'void',
+      title: '动作入参',
+      'x-component': 'SectionTitle'
+    },
+    inputs: {
+      type: 'array',
+      'x-component': 'ActionInputArrayTable'
+    },
+    outputsTitle: {
+      type: 'void',
+      title: '动作出参',
+      'x-component': 'SectionTitle'
+    },
+    outputs: {
+      type: 'array',
+      'x-component': 'ActionOutputArrayTable'
     }
   }
 };

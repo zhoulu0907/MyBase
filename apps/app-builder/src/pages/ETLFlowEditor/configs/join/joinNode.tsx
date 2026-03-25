@@ -1,4 +1,5 @@
-import { Form, Input, Layout, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Form, Input, Layout } from '@arco-design/web-react';
 import useForm from '@arco-design/web-react/es/Form/useForm';
 import { ETLDrawerTab, etlEditorSignal } from '@onebase/common';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -230,7 +231,7 @@ export const JoinNodeConfig: React.FC<JoinNodeConfigProps> = ({ onRegisterSave }
 
                 return (
                   <>
-                    <Table
+                    <ResizableTable
                       columns={columns}
                       data={rows}
                       rowKey={(r: Row) => r.fieldFqn}

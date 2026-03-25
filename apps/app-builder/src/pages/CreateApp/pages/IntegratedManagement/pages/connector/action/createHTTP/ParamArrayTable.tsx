@@ -1,4 +1,5 @@
-import { Button, Input, Select, Space, Switch, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, Input, Select, Space, Switch } from '@arco-design/web-react';
 import { IconDelete, IconPlus } from '@arco-design/web-react/icon';
 import { connect, useField, useForm } from '@formily/react';
 import React from 'react';
@@ -173,7 +174,7 @@ const ParamArrayTableInner: React.FC = () => {
 
   return (
     <div style={{ width: '100%', maxWidth: '100%' }}>
-      <Table
+      <ResizableTable
         data={value}
         columns={columns}
         rowKey={(record: ParamRow) => record.id ?? `row-${record.key}-${record.fieldName}`}
@@ -299,7 +300,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '键名',
       dataIndex: 'key',
-      width: 120,
+      width: 140,
       render: (_: unknown, row: ActionInputRow, index: number) => (
         <Input value={row.key} onChange={(v) => updateRow(index, { key: v })} allowClear />
       )
@@ -307,7 +308,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '名称',
       dataIndex: 'fieldName',
-      width: 120,
+      width: 140,
       render: (_: unknown, row: ActionInputRow, index: number) => (
         <Input value={row.fieldName} onChange={(v) => updateRow(index, { fieldName: v })} allowClear />
       )
@@ -328,7 +329,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '必填',
       dataIndex: 'required',
-      width: 80,
+      width: 70,
       render: (_: unknown, row: ActionInputRow, index: number) => (
         <Switch checked={row.required} onChange={(v) => updateRow(index, { required: v })} />
       )
@@ -336,7 +337,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '默认值',
       dataIndex: 'defaultValue',
-      width: 120,
+      width: 160,
       render: (_: unknown, row: ActionInputRow, index: number) => (
         <Input value={row.defaultValue} onChange={(v) => updateRow(index, { defaultValue: v })} allowClear />
       )
@@ -344,7 +345,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '映射到',
       dataIndex: 'mapKind',
-      width: 110,
+      width: 100,
       render: (_: unknown, row: ActionInputRow, index: number) => (
         <Select
           value={row.mapKind}
@@ -357,7 +358,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '映射键',
       dataIndex: 'mapKey',
-      width: 140,
+      width: 160,
       render: (_: unknown, row: ActionInputRow, index: number) => (
         <Select
           value={row.mapKey}
@@ -379,7 +380,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '描述',
       dataIndex: 'description',
-      ellipsis: true,
+      width: 180,
       render: (_: unknown, row: ActionInputRow, index: number) => (
         <Input value={row.description} onChange={(v) => updateRow(index, { description: v })} allowClear />
       )
@@ -387,7 +388,7 @@ const ActionInputArrayTableInner: React.FC = () => {
     {
       title: '',
       dataIndex: '_op',
-      width: 60,
+      width: 50,
       fixed: 'right' as const,
       render: (_: unknown, __: ActionInputRow, index: number) => (
         <Button type="text" status="danger" icon={<IconDelete />} onClick={() => removeRow(index)} />
@@ -404,11 +405,11 @@ const ActionInputArrayTableInner: React.FC = () => {
           </Button>
         </Space>
       </div>
-      <Table
+      <ResizableTable
         data={value}
         columns={columns}
         rowKey={(record: ActionInputRow) => record.id ?? `row-${record.key}-${record.fieldName}`}
-        scroll={{ x: 1000 }}
+        scroll={{ x: 1200 }}
         pagination={false}
         size="small"
       />

@@ -1,6 +1,6 @@
 // 应用服务
 
-import { isRuntimeEnv } from '@onebase/common';
+import { isRuntimeEnv, ProjectStorage } from '@onebase/common';
 import {
   GetAppNavigationConfigReq,
   UpdateAppNavigationConfigReq,
@@ -26,7 +26,11 @@ export const getApplicationLeast = (params: GetApplicationReq) => {
 };
 
 export const createApplication = (params: CreateApplicationReq) => {
-  return appService.post('/application/create', params);
+  const projectCode = ProjectStorage.get();
+  return appService.post('/application/create', {
+    ...params,
+    projectCode: projectCode || undefined
+  });
 };
 
 export const updateApplication = (params: UpdateApplicationReq) => {

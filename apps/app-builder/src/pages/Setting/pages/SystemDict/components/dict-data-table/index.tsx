@@ -1,6 +1,8 @@
+import TablePagination from '@/components/TablePagination';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import StatusTag from '@/components/StatusTag';
-import { Input, Pagination, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Input } from '@arco-design/web-react';
 import { TENANT_DICT_PERMISSION as ACTIONS } from '@onebase/common';
 import { type DictData } from '@onebase/platform-center';
 import s from '../../index.module.less';
@@ -34,15 +36,16 @@ export default function DictionaryTable({
     {
       title: '颜色标识',
       dataIndex: 'colorType',
-      width: 120,
+      width: 80,
       render: (val: string) => <div style={{ width: 16, height: 16, borderRadius: 50, backgroundColor: val }} />
     },
-    { title: '字典值', dataIndex: 'label' },
-    { title: '字典值编码', dataIndex: 'value' },
-    { title: '显示顺序', dataIndex: 'sort' },
+    { title: '字典值', dataIndex: 'label', width: 160 },
+    { title: '字典值编码', dataIndex: 'value', width: 200 },
+    { title: '显示顺序', dataIndex: 'sort', width: 120 },
     {
       title: '状态',
       dataIndex: 'status',
+      width: 100,
       render: (val: number) => <StatusTag status={val} />
     }
   ];
@@ -62,16 +65,14 @@ export default function DictionaryTable({
         </Button>
       </div>
       <div className={s.tableContainer}>
-        <Table rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} />
+        <ResizableTable rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} stripe />
         <div className={s.paginationContainer}>
-          <Pagination
+          <TablePagination
             total={total}
             pageSize={pageSize}
             current={currentPage}
             onChange={onPageChange}
             onPageSizeChange={onPageSizeChange}
-            showTotal
-            sizeCanChange
           />
         </div>
       </div>

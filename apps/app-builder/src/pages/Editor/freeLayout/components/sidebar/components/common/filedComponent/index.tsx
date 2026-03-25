@@ -1,4 +1,5 @@
-import { Button, Table, type TableColumnProps } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Button, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { getEntityFieldsWithChildren, getPageSetMetaData } from '@onebase/app';
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
@@ -145,7 +146,7 @@ const FieldTable = forwardRef(({ onTableChange, title, tbData, setTableData, col
           </Button>
         )}
       </div>
-      <Table
+      <ResizableTable
         className="field-table-wrapper"
         rowKey={(record: any) =>
           record.parentDisplayName ? record.parentDisplayName + record.fieldName : record.fieldName

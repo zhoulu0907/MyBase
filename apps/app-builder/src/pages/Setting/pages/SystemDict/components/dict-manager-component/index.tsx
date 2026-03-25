@@ -4,6 +4,7 @@
 import InfoPanel from '@/components/InfoPanel';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import StatusTag, { StatusLabelEnum } from '@/components/StatusTag';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import BatchConfigModal from '@/pages/Setting/pages/SystemDict/components/batch-config-modal';
 import DictDataModal from '@/pages/Setting/pages/SystemDict/components/dict-data-modal';
 import DictionaryTable from '@/pages/Setting/pages/SystemDict/components/dict-data-table';
@@ -33,6 +34,7 @@ import {
 import { debounce } from 'lodash-es';
 import { useEffect, useState } from 'react';
 import styles from '../../index.module.less';
+import EmptyState from '@/components/EmptyState';
 
 const Sider = Layout.Sider;
 const Header = Layout.Header;
@@ -183,6 +185,8 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   const [editItem, setEditItem] = useState<DictData | null>(null);
   const [batchConfigModalVisible, setBatchConfigModalVisible] = useState(false);
   const [batchConfigLoading, setBatchConfigLoading] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string>('');
   const getTenantInfo = TokenManager.getTenantInfo();
 
   // 获取当前tab的配置
@@ -382,16 +386,14 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
   };
 
   // 删除字典
-  const handleDeleteDict = async (id: string) => {
-    Modal.confirm({
-      title: '确认删除',
-      content: '确定要删除这条数据吗？',
-      okText: '确认',
-      cancelText: '取消',
-      onOk: async () => {
-        handleDeleteDictOk(id);
-      }
-    });
+  const handleDeleteDict = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteDictConfirm = async () => {
+    await handleDeleteDictOk(deleteTargetId);
+    setDeleteModalVisible(false);
   };
 
   const handleDeleteDictOk = async (id: string) => {
@@ -568,7 +570,7 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         </Sider>
         <Content className={styles.rightPanel}>
           {!activeDictId || showEmpty ? (
-            <Empty description={finalConfig.ui.emptyText} />
+            <EmptyState type="table" description={finalConfig.ui.emptyText} />
           ) : (
             <>
               <Header>
@@ -647,6 +649,12 @@ export default function DictManager({ config = {}, onDictChange, onDictDataChang
         onOk={handleBatchConfigOk}
         loading={batchConfigLoading}
         dictTypeId={activeDict?.id || ''}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteDictConfirm}
+        content="确定要删除这条数据吗？"
       />
     </div>
   );

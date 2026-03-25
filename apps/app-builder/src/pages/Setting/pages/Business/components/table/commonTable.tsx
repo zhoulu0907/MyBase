@@ -1,4 +1,4 @@
-import { Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
 
 interface ICommonTableProps {
   data: any[];
@@ -18,7 +18,7 @@ export const CommonTable: React.FC<ICommonTableProps> = ({
   ...rest
 }) => {
   return (
-    <Table
+    <ResizableTable
       rowKey="id"
       stripe
       loading={loading}

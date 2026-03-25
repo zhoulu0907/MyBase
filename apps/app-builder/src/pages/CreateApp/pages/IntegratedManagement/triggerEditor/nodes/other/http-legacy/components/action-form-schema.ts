@@ -22,7 +22,6 @@ export function getDefaultActionSchema(): ISchema {
         enum: [
           { label: 'GET', value: 'GET' },
           { label: 'POST', value: 'POST' },
-          { label: 'POST(JSON)', value: 'POST_JSON' },
           { label: 'PUT', value: 'PUT' },
           { label: 'DELETE', value: 'DELETE' }
         ],

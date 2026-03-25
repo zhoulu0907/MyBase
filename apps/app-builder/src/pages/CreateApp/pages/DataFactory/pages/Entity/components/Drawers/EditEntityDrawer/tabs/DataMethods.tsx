@@ -1,8 +1,9 @@
 import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Collapse, Empty, Spin, Tag } from '@arco-design/web-react';
+import { Collapse, Spin, Tag } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import styles from './DataMethods.module.less';
 import { getEntityMethods } from '@onebase/app';
+import EmptyState from '@/components/EmptyState';
 
 // 数据方法接口定义
 interface DataMethod {
@@ -63,7 +64,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
             <span>加载中...</span>
           </div>
         ) : methods.length === 0 ? (
-          <Empty description="暂无数据方法" />
+          <EmptyState type="table" description="暂无数据方法" />
         ) : (
           <Collapse expandIconPosition="right" bordered={false} defaultActiveKey={methods[0].id}>
             {methods.map((method) => (

@@ -1,9 +1,13 @@
+import TablePagination from '@/components/TablePagination';
+import ActionButtons from '@/components/ActionButtons';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag, { getStatusLabel } from '@/components/StatusTag';
 import UserProfileAvatar from '@/components/UserProfileAvatar';
+import ResizableTable from '@/components/ResizableTable';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { isSystemUser } from '@/utils';
-import { Dropdown, Input, Menu, Message, Modal, Pagination, Select, Space, Table, Tag } from '@arco-design/web-react';
+import { Dropdown, Input, Menu, Message, Pagination, Select, Space, Tag } from '@arco-design/web-react';
 import { /* IconDownload, IconUpload, */ IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
 import { type AuthRoleUsersPageRespVO } from '@onebase/app';
 import {
@@ -105,6 +109,8 @@ export default function UserTable({
   const [importModalVisible, setImportModalVisible] = useState(false); // 导入
   const [managerTypeModalVisible, setManagerTypeModalVisible] = useState<UserRole | null>(null); // 设置主管 or 管理员
   const [isMultiple, setIsMultiple] = useState<boolean>(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<UserRecord | undefined>();
   // 查询用户列表
   const getUserList = useCallback(
     async (searchValue?: string) => {
@@ -215,17 +221,17 @@ export default function UserTable({
 
   // 删除
   const handleDelete = (record: UserRecord) => {
-    Modal.confirm({
-      title: `确认要删除账号（${record.nickname}）吗？`,
-      content: '删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。',
-      okButtonProps: { status: 'danger' },
-      onOk: async () => {
-        await deleteUser(record.id);
-        Message.success('删除成功');
-        onRefreshDept();
-        getUserList();
-      }
-    });
+    setDeleteTarget(record);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await deleteUser(deleteTarget.id);
+    Message.success('删除成功');
+    setDeleteModalVisible(false);
+    onRefreshDept();
+    getUserList();
   };
 
   // 查看详情
@@ -297,9 +303,9 @@ export default function UserTable({
       {
         title: '操作',
         dataIndex: 'op',
-        width: 200,
+        width: 150,
         render: (_: any, record: any) => (
-          <Space>
+          <ActionButtons>
             <Button permission={ACTIONS.UPDATE} type="text" onClick={() => handleEdit(record)}>
               编辑
             </Button>
@@ -338,7 +344,7 @@ export default function UserTable({
                 </Button>
               </>
             )}
-          </Space>
+          </ActionButtons>
         )
       }
     ];
@@ -507,7 +513,7 @@ export default function UserTable({
       </div>
       {/* 表格 */}
       <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
-        <Table
+        <ResizableTable
           rowKey="id"
           hover
           stripe
@@ -517,26 +523,14 @@ export default function UserTable({
           scroll={{ y: 510 }}
         />
         {/* 页码 */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            marginTop: 12
-          }}
-        >
-          <Pagination
-            size="small"
-            current={page}
-            pageSize={pageSize}
-            total={total}
-            onChange={setPage}
-            onPageSizeChange={setPageSize}
-            showTotal
-            showJumper
-            sizeOptions={[10, 20, 50]}
-          />
-        </div>
+        <TablePagination
+          current={page}
+          pageSize={pageSize}
+          total={total}
+          onChange={setPage}
+          onPageSizeChange={setPageSize}
+          sizeOptions={[10, 20, 50]}
+        />
       </PlaceholderPanel>
       <UserFormModal
         visible={userModalVisible}
@@ -581,6 +575,13 @@ export default function UserTable({
           setManagerTypeModalVisible(null);
           setSelectedMembers([]);
         }}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
+        title={deleteTarget ? `确认要删除账号（${deleteTarget.nickname}）吗？` : '确认删除'}
+        content="删除用户后，用户将无法登录，用户数据将被永久删除，请谨慎操作。"
       />
     </div>
   );

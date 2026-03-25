@@ -5,6 +5,7 @@ import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
 import { getHashQueryParam } from './router';
 import { generateSignature } from './signature';
 import TokenManager from './token';
+import { ProjectStorage } from './project';
 
 /**
  * 拼接域名和服务路径
@@ -85,6 +86,15 @@ export class HttpClient {
           config.headers['X-Application-Id'] = appId;
         }
 
+        // 自动添加 projectCode 到请求参数
+        const projectCode = ProjectStorage.get();
+        if (projectCode) {
+          config.params = {
+            ...config.params,
+            projectCode
+          };
+        }
+
         // 执行自定义请求拦截器
         this.requestInterceptors.forEach((interceptor) => {
           if (interceptor.onFulfilled) {
@@ -157,7 +167,11 @@ export class HttpClient {
                 }
               }
             }
-            return Promise.reject(new Error(data.msg || '请求失败'));
+            const error = new Error(data.msg || '请求失败');
+            (error as any).code = data.code;
+            (error as any).statusCode = data.code;
+            error.message = data.msg || '请求失败';
+            return Promise.reject(error);
           }
         }
 

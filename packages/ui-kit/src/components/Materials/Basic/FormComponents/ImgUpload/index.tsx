@@ -4,7 +4,7 @@ import { type UploadListProps } from '@arco-design/web-react/lib/Upload';
 import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
 import { isRuntimeEnv, pagesRuntimeSignal } from '@onebase/common';
 import { nanoid } from 'nanoid';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState, useMemo } from 'react';
 import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from '../../../constants';
 import { downloadFileByUrl } from 'src/utils/downloadFile';
@@ -67,6 +67,7 @@ const XImgUpload = memo(
     useEffect(() => {
       handleGetUrlList();
     }, [fieldValue, currentRowDataId]);
+
 
     // 组件卸载时清理所有 blob URL
     useEffect(() => {
@@ -175,6 +176,11 @@ const XImgUpload = memo(
         });
       }
     };
+
+    useMemo(() => {
+      handleGetUrlList();
+    }, [fieldValue]);
+
 
     // 处理文件删除，清理本地 URL
     const handleRemoveFile = (file: any, index: number, fileProps: UploadListProps) => {

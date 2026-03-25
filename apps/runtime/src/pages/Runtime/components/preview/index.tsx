@@ -367,7 +367,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         setTimeout(() => setRefresh(Date.now()), 150);
         setSubmitLoading(false);
       } catch (error) {
-        Message.error('创建失败');
+        debugger
+        Message.error((error as any).message || '创建失败');
         console.error('创建失败', error);
         setPredictVisible(false);
         setSubmitLoading(false);

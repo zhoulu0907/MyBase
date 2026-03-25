@@ -1,4 +1,4 @@
-import { Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 
@@ -40,7 +40,7 @@ function SortableTable({ data, columns, onSortEnd }) {
   return (
     <div style={{ width: '100%', padding: 5 }}>
       {data.length > 0 && (
-        <Table
+        <ResizableTable
           className="sort-table"
           pagination={false}
           border={false}

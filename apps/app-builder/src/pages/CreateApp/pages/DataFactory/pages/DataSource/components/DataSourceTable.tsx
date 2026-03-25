@@ -1,10 +1,13 @@
+import ResizableTable from '@/components/ResizableTable';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { useAppStore } from '@/store/store_app';
-import { Button, Message, Modal, Space, Table, type TableColumnProps } from '@arco-design/web-react';
+import { Button, Message, Space, type TableColumnProps } from '@arco-design/web-react';
 import { IconPlus } from '@arco-design/web-react/icon';
 import { deleteDatasource, getDatasource, getDatasourcePage, type DatasourceSaveReqVO } from '@onebase/app';
 import { useEffect, useState } from 'react';
 import styles from '../index.module.less';
 import EditDsDrawer from './EditDsDrawer';
+import ActionButtons from '@/components/ActionButtons';
 
 // 数据源记录类型
 interface DatasourceRecord {
@@ -137,13 +140,13 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
     {
       title: '操作',
       dataIndex: 'operation',
+      width: 120,
       render: (_, record: DatasourceRecord, index) => (
         // 默认数据源（第一个返回值）不可编辑删除
-        <Space>
+        <ActionButtons>
           <Button
             type="text"
             size="mini"
-            style={{ marginRight: 8 }}
             onClick={() => gotoEdit(record.id)}
             disabled={index === 0}
           >
@@ -158,10 +161,9 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
           >
             删除
           </Button>
-        </Space>
+        </ActionButtons>
       ),
       fixed: 'right',
-      width: 120
     }
   ];
 
@@ -182,7 +184,7 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
             创建数据源
           </Button>
         </div>
-        <Table
+        <ResizableTable
           columns={columns}
           data={dataSourceList}
           pagination={{
@@ -201,17 +203,13 @@ const DataSourceTable = ({ handlePageType }: { handlePageType: (tab: string) => 
       </div>
 
       {/* 删除确认对话框 */}
-      <Modal
-        title="确认删除"
+      <DeleteConfirmModal
         visible={deleteModalVisible}
-        onOk={confirmDelete}
-        onCancel={cancelDelete}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
-        okText="确认删除"
-        cancelText="取消"
-      >
-        <p>确定要删除这个数据源吗？删除后无法恢复。</p>
-      </Modal>
+        content="确定要删除这个数据源吗？删除后无法恢复。"
+      />
 
       <EditDsDrawer
         visible={editDrawerVisible}

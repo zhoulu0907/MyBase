@@ -1,5 +1,6 @@
+import TablePagination from '@/components/TablePagination';
 import CreateDashboardModal from '@/components/CreateDashboardModal';
-import { Button, Form, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
+import { Button, Form, Input, Modal, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { useCallback, useEffect, useState, type FC } from 'react';
 import ScreenCard from '../DashboardCard';
@@ -208,15 +209,17 @@ const Dashboard: FC = () => {
           ))}
         </div>
       </Spin>
-      <Pagination
+      <TablePagination
         className={styles.appPagination}
         total={total}
         current={pageNo}
         pageSize={pageSize}
-        onChange={(pNo, pSize) => {
+        onChange={(pNo) => {
           setPageNo(pNo);
-          setPageSize(pSize);
           getDashboardList(searchText, pNo);
+        }}
+        onPageSizeChange={(pSize) => {
+          setPageSize(pSize);
         }}
       />
       {/* 编辑弹框 */}

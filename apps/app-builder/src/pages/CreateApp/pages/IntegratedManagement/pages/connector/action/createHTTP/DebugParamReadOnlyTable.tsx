@@ -1,4 +1,5 @@
-import { Input, Radio, Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import { Input, Radio } from '@arco-design/web-react';
 import { connect, useField } from '@formily/react';
 import React from 'react';
 
@@ -197,7 +198,7 @@ const DebugParamReadOnlyTableInner: React.FC = () => {
       </div>
       
       {globalMode === 'table' ? (
-        <Table
+        <ResizableTable
           data={value}
           columns={columns}
           rowKey={(record: DebugParamReadOnlyRow) =>

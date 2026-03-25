@@ -138,6 +138,19 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     isDropdownMode: () => props.selectMethod === 'dropdown'
   };
 
+  const normalizeLabel = (value: any): string => {
+    if (value == null) return '';
+    if (typeof value === 'string') return value;
+    if (Array.isArray(value)) {
+      if (value.length === 0) return '';
+      return value.map((item: any) => item?.name ?? '').filter(Boolean).join(', ') || '';
+    }
+    if (typeof value === 'object') {
+      return value?.name ?? value?.label ?? JSON.stringify(value);
+    }
+    return String(value);
+  };
+
   const fetchOptions = async () => {
     if (!runtime || !isRuntimeEnv()) {
       return;
@@ -151,12 +164,11 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     };
 
     const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
-    console.log('res11111',res,displayFields)
     const lastKey = (displayFields || []).length ? displayFields[displayFields.length - 1]?.value : undefined;
     const list = Array.isArray(res?.list) ? res.list : [];
     const opts = list.map((item: any) => ({
-      label: lastKey ? (item?.[lastKey] ?? '') : '',
-      value: item?.id ?? item?.id
+      label: normalizeLabel(lastKey ? item?.[lastKey] : ''),
+      value: item?.id ?? ''
     }));
     setOptions(opts);
     setDataList(list);

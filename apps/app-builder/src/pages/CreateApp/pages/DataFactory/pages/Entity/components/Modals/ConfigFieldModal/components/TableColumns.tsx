@@ -445,7 +445,6 @@ const TableColumns = ({
       title: '操作',
       dataIndex: 'operation',
       width: 60,
-      align: 'center',
       render: (_: unknown, record: FieldFormValues) => {
         return (
           record.isSystemField === FIELD_TYPE.CUSTOM && (

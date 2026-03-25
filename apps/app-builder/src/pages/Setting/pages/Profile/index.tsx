@@ -1,13 +1,14 @@
+import TablePagination from '@/components/TablePagination';
 import DynamicIcon from '@/components/DynamicIcon';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
 import StatusTag from '@/components/StatusTag';
+import ResizableTable from '@/components/ResizableTable';
 import {
   Avatar,
   Button,
   Card,
   Grid,
   Image,
-  Pagination,
   Space,
   Spin,
   Table,
@@ -346,12 +347,12 @@ const ProfilePage: React.FC = () => {
       <PlaceholderPanel
         hasPermission={hasPermission(ACTIONS.QUERY)}
         isLoading={loading}
-        style={{ display: 'flex', flex: 1, overflow: 'hidden' }}
+        style={{ display: 'flex', flex: 1, overflow: 'hidden', visibility: 'hidden' }}
         spinStyle={{ display: 'flex', flex: 1, overflow: 'hidden' }}
       >
         <Tabs className={styles.createTabs} activeTab={curTab} onChange={setCurTab} style={{ maxWidth: tabPanelWidth }}>
           <TabPane key={CREATED_TYPE.ENTERPRISE} title="我创建的企业">
-            <Table
+            <ResizableTable
               rowKey="id"
               hover
               columns={getColumns()}
@@ -369,15 +370,12 @@ const ProfilePage: React.FC = () => {
                 marginTop: 12
               }}
             >
-              <Pagination
-                size="small"
+              <TablePagination
                 current={page}
                 pageSize={pageSize}
                 total={total}
                 onChange={setPage}
                 onPageSizeChange={setPageSize}
-                showTotal
-                showJumper
                 sizeOptions={[5, 10, 20]}
               />
             </div>
