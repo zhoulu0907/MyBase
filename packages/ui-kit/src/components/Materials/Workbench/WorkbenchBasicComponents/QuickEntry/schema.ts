@@ -1,4 +1,4 @@
-import { entryGroupConfig, entryStyleConfig, entryTitleConfig } from '../../config/commonConfig';
+import { entryGroupConfig, entryStyleConfig, labelNameConfig, entryTitleConfig } from '../../config/commonConfig';
 import {
   workbenchBaseConfig,
   workbenchBaseDefault,
@@ -11,7 +11,9 @@ import {
   type ICommonBaseWorkbenchType,
   type TWorkbenchStatusSelectKeyType,
   type TWorkbenchWidthSelectKeyType,
-  ITextConfigType
+  ITextConfigType,
+  ILabelConfigType,
+  IBooleanConfigType
 } from '../../config/workbenchShared';
 import {
   WORKBENCH_STATUS_OPTIONS,
@@ -23,11 +25,15 @@ import {
 import type {
   IEntryGroupConfigType,
   IThemeConfigType,
-  IEntryTitleConfigType,
+  IWbMenuSelectorConfigType,
   QuickEntryTitleConfig,
   QuickEntryStyleConfig,
-  QuickEntryGroupConfig
+  QuickEntryGroupConfig,
+  TBooleanDefaultType,
+  TTextDefaultType,
+  IEntryTitleConfigType
 } from '../../core/types';
+
 export interface XQuickEntrySchema {
   editData: TXQuickEntryEditData;
   config: XQuickEntryConfig;
@@ -35,6 +41,8 @@ export interface XQuickEntrySchema {
 
 export type TXQuickEntryEditData = Array<
   | ITextConfigType
+  | ILabelConfigType
+  | IBooleanConfigType
   | IEntryGroupConfigType
   | IThemeConfigType
   | IEntryTitleConfigType
@@ -44,6 +52,10 @@ export type TXQuickEntryEditData = Array<
 
 export interface XQuickEntryConfig extends ICommonBaseWorkbenchType {
   componentName: string;
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
   titleConfig: QuickEntryTitleConfig;
   styleConfig: QuickEntryStyleConfig;
   groupConfig: QuickEntryGroupConfig;
@@ -54,6 +66,7 @@ export interface XQuickEntryConfig extends ICommonBaseWorkbenchType {
 const XQuickEntry: XQuickEntrySchema = {
   editData: [
     ...workbenchBaseConfig,
+    labelNameConfig,
     entryTitleConfig,
     entryStyleConfig,
     entryGroupConfig,
@@ -63,9 +76,11 @@ const XQuickEntry: XQuickEntrySchema = {
   config: {
     ...workbenchBaseDefault,
     componentName: 'QuickEntry',
+    label: {
+      text: '快捷入口',
+      display: true
+    },
     titleConfig: {
-      showTitle: true,
-      titleName: '快捷入口',
       showMore: true,
       jumpType: 'internal',
       jumpPageId: '',

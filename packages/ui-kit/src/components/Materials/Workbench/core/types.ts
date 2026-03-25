@@ -74,8 +74,6 @@ export interface IWbRichTextContentConfigType {
  * 快捷入口标题配置
  */
 export interface QuickEntryTitleConfig {
-  showTitle: boolean;
-  titleName: string;
   showMore: boolean;
   jumpType: TRadioDefaultType<string>;
   jumpPageId?: TTextDefaultType;
