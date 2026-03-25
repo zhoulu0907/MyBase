@@ -5,20 +5,20 @@ import './index.css';
 
 export interface XChatbotProps {
   config?: {
-    iframeUrl?: string;
     agentId?: string;
     agentName?: string;
+    agentTenantId?: string;
     [key: string]: any;
   };
   runtime?: boolean;
-  iframeUrl?: string;
 }
 
-const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl: propIframeUrl }) => {
+const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false }) => {
   const [visible, setVisible] = useState(false);
   const [iframeHeight, setIframeHeight] = useState(200);
+  const [code, setCode] = useState<string>('');
 
-  const { agentId, iframeUrl: configIframeUrl } = config || {};
+  const { agentId, agentName, agentTenantId } = config || {};
 
   useEffect(() => {
     const calculateHeight = () => {
@@ -31,30 +31,49 @@ const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false, iframeUrl:
     return () => window.removeEventListener('resize', calculateHeight);
   }, []);
 
+  useEffect(() => {
+    if (runtime) {
+      fetchCode();
+    }
+  }, [runtime]);
+
+  const fetchCode = async () => {
+    try {
+      const { oauthAuthorize } = await import('@onebase/platform-center');
+      const authorizeRes = await oauthAuthorize({
+        client_id: 'aitool',
+        scope: '',
+        redirect_uri: 'http://10.0.13.16:29500/bote/manager/',
+        response_type: 'code',
+        auto_approve: true
+      });
+      if (authorizeRes?.code) {
+        setCode(authorizeRes.code);
+      }
+    } catch (error) {
+      console.error('获取授权码失败:', error);
+    }
+  };
+
   const handleClick = () => {
     if (runtime) {
       setVisible(true);
     }
   };
 
-  const DEFAULT_URL = 'http://10.11.112.38:9500/bote/#/driver/bot?tenantId=0&botId=1338078781184737280&modeType=single&token=4f0fc76675484ad8a2ab29941debf7f4&pattern=S';
+  const DEFAULT_URL_TEMPLATE = 'http://10.0.13.16:29500/bote/#/driver/bot?tenantId={{tenantId}}&botId={{botId}}&modeType=single&systemCode=ONEBASE-Runtime&code={{code}}';
 
   const displayUrl = useMemo(() => {
-    if (propIframeUrl) {
-      return propIframeUrl;
+    if (!agentId) {
+      return '';
     }
-    if (configIframeUrl) {
-      if (agentId) {
-        const baseUrl = configIframeUrl.includes('?') ? configIframeUrl : `${configIframeUrl}`;
-        return `${baseUrl}&botId=${agentId}`;
-      }
-      return configIframeUrl;
-    }
-    if (agentId) {
-      return `${DEFAULT_URL}&botId=${agentId}`;
-    }
-    return DEFAULT_URL;
-  }, [propIframeUrl, configIframeUrl, agentId]);
+    const tenantId = agentTenantId || '';
+    const url = DEFAULT_URL_TEMPLATE
+      .replace('{{tenantId}}', tenantId)
+      .replace('{{botId}}', agentId)
+      .replace('{{code}}', code || '');
+    return url;
+  }, [agentId, agentTenantId, code]);
 
   return (
     <>

@@ -15,6 +15,7 @@ interface Props {
 interface AgentItem {
   botId: string;
   appName: string;
+  tenantId: string;
 }
 
 const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, configs }: Props) => {
@@ -49,7 +50,8 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
       if (response.data?.resultCode === '0' && response.data?.resultObject?.list) {
         const list = response.data.resultObject.list.map((item: any) => ({
           botId: item.botId,
-          appName: item.appName
+          appName: item.appName,
+          tenantId: item.tenantId
         }));
         setAgentList(list);
       }
@@ -66,7 +68,8 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
     if (selectedAgent) {
       handleMultiPropsChange([
         { key: 'agentId', value },
-        { key: 'agentName', value: selectedAgent.appName }
+        { key: 'agentName', value: selectedAgent.appName },
+        { key: 'agentTenantId', value: selectedAgent.tenantId }
       ]);
     }
   };
