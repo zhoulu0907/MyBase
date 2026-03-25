@@ -4,21 +4,16 @@ import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
 import './index.css';
 
 export interface XChatbotProps {
-  config?: {
-    agentId?: string;
-    agentName?: string;
-    agentTenantId?: string;
-    [key: string]: any;
-  };
+  agentId?: string;
+  agentName?: string;
+  agentTenantId?: string;
   runtime?: boolean;
 }
 
-const XChatbot: React.FC<XChatbotProps> = ({ config, runtime = false }) => {
+const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, runtime = false }) => {
   const [visible, setVisible] = useState(false);
   const [iframeHeight, setIframeHeight] = useState(200);
   const [code, setCode] = useState<string>('');
-
-  const { agentId, agentName, agentTenantId } = config || {};
 
   useEffect(() => {
     const calculateHeight = () => {
