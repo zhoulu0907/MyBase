@@ -21,6 +21,11 @@ export function WorkbenchItem({
     return null;
   }
 
+  // 快捷入口和欢迎卡片组件仅能有一个，不可复制
+  const canNotCopy =
+    component.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY ||
+    component.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD;
+
   const handleSelect = () => {
     onOperation.select(component.id, component);
   };
@@ -63,7 +68,12 @@ export function WorkbenchItem({
         )}
 
         {isSelected && pageComponentSchema && (
-          <OperationButtons component={component} pageComponentSchema={pageComponentSchema} onOperation={onOperation} />
+          <OperationButtons
+            component={component}
+            pageComponentSchema={pageComponentSchema}
+            onOperation={onOperation}
+            canNotCopy={canNotCopy}
+          />
         )}
       </div>
     </ResizableWorkbenchItem>
