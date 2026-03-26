@@ -93,11 +93,28 @@
         // 没有 code，跳转到灵畿 SSO 授权页面
         statusEl.textContent = '正在跳转到灵畿平台登录...';
         var lingjiOrigin = getOrigin(CONFIG.lingjiHome);
+
+        // 验证来源域名是否合法
+        if (!lingjiOrigin) {
+          statusEl.textContent = '配置错误';
+          errorEl.textContent = '灵畿平台地址配置无效';
+          errorEl.style.display = 'block';
+          return;
+        }
+
         var currentUrl = window.location.href.split('?')[0]; // 当前页面地址（不含参数）
         var ssoUrl = lingjiOrigin + '/moss/micrologin/#/sso/getauthorizecode' +
           '?redirectUri=' + encodeURIComponent(currentUrl) +
           '&sourceid=' + encodeURIComponent(CONFIG.sourceid) +
           '&moss_sso_account=1';
+        // 验证跳转 URL 的域名是否来自配置的灵畿平台
+        var ssoUrlOrigin = getOrigin(ssoUrl);
+        if (ssoUrlOrigin !== lingjiOrigin) {
+          statusEl.textContent = '跳转地址错误';
+          errorEl.textContent = 'SSO地址验证失败';
+          errorEl.style.display = 'block';
+          return;
+        }
         window.location.href = ssoUrl;
       }
     })();

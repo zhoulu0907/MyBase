@@ -1,4 +1,12 @@
-export const genId = (prefix: string = 'id'): string => `${prefix}_${Math.random().toString(36).slice(2, 8)}`
+// 生成安全的随机字符串
+const secureRandomString = (length: number): string => {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const array = new Uint32Array(length);
+  crypto.getRandomValues(array);
+  return Array.from(array, (num) => chars[num % chars.length]).join('');
+};
+
+export const genId = (prefix: string = 'id'): string => `${prefix}_${secureRandomString(6)}`
 
 import { STATUS_OPTIONS, STATUS_VALUES } from './constants'
 
