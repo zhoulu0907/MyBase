@@ -88,7 +88,7 @@ export const oauthAuthorize = (req: OAuthAuthorizeRequest): Promise<OAuthAuthori
   if (req.auto_approve !== undefined) {
     params.append('auto_approve', String(req.auto_approve));
   }
-  return systemService.post(`/oauth2/authorize/code?${params.toString()}`);
+  return (isRuntimeEnv() ? runtimeService : systemService).post(`/oauth2/authorize/code?${params.toString()}`);
 };
 
 // 校验验证码 /system/captcha/check
