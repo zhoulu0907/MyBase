@@ -7,7 +7,7 @@ import declineSvg03 from '@/assets/images/indicatorCard/decline03.svg';
 import { Grid, Typography, Divider } from '@arco-design/web-react';
 import { IconPlus, IconRefresh } from '@arco-design/web-react/icon';
 import { memo, useEffect, useState } from 'react';
-import { webMenuIcons } from '@/utils/menuIcons';
+import { mobileMenuIcons } from '@/utils/menuIcons';
 import { ReactSVG } from 'react-svg';
 import {
   STATUS_OPTIONS,
@@ -24,9 +24,11 @@ import { queryRuntimeDataCards } from '@onebase/app/src/services/app_runtime';
 import type { XIndicatorCardConfig } from './schema';
 import './index.css';
 
+const colorList = ['#24B28F', '#FF7D00', '#1979FF', '#7E5AEA']
+
 const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }) => {
   const { label, runtime = true, styleType, indicatorList, status, width } = props;
-  const allWebMenuIcons = webMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
+  const allMobileMenuIcons = mobileMenuIcons.map((ele) => ele.children).reduce((acc, current) => acc.concat(current), []);
 
   const [data, setData] = useState<any[]>([]);
 
@@ -148,7 +150,7 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
                       >
                         <ReactSVG
                           style={{ height: '18px' }}
-                          src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                          src={allMobileMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
                           beforeInjection={(svg) => {
                             const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
                             svg.querySelectorAll('*').forEach((el) => {
@@ -180,7 +182,7 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
                     <div className="cardIcon2" style={{ backgroundColor: ele.icon?.color || 'rgb(var(--primary-6))' }}>
                       <ReactSVG
                         style={{ height: '24px' }}
-                        src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                        src={allMobileMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
                         beforeInjection={(svg) => {
                           const fillColor = '#ffffff';
                           svg.querySelectorAll('*').forEach((el) => {
@@ -271,7 +273,7 @@ const XIndicatorCard = memo((props: XIndicatorCardConfig & { runtime?: boolean }
                     <div className="cardIcon3">
                       <ReactSVG
                         style={{ height: '42px' }}
-                        src={allWebMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
+                        src={allMobileMenuIcons.find((e) => e.code === ele.icon?.name)?.icon || ''}
                         beforeInjection={(svg) => {
                           const fillColor = ele.icon?.color || 'rgb(var(--primary-6))';
                           svg.querySelectorAll('*').forEach((el) => {

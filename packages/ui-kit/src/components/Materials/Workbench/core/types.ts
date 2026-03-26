@@ -74,8 +74,6 @@ export interface IWbRichTextContentConfigType {
  * 快捷入口标题配置
  */
 export interface QuickEntryTitleConfig {
-  showTitle: boolean;
-  titleName: string;
   showMore: boolean;
   jumpType: TRadioDefaultType<string>;
   jumpPageId?: TTextDefaultType;
@@ -244,4 +242,14 @@ export interface ITableConfigType {
   key: string;
   name: string;
   type: typeof WORKBENCH_CONFIG_TYPES.WB_TABLE_CONFIG;
+}
+
+/**
+ * 智能体选择器配置类型
+ */
+export interface IWbAgentSelectorConfigType {
+  key: string;
+  name: string;
+  type: typeof WORKBENCH_CONFIG_TYPES.WB_AGENT_SELECTOR;
+  disabled?: boolean;
 }

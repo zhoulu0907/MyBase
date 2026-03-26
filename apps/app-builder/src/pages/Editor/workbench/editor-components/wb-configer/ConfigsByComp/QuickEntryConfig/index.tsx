@@ -7,6 +7,11 @@ import styles from '../../index.module.less';
 
 const CollapseItem = Collapse.Item;
 
+const defaultLabel = {
+  text: '快捷入口',
+  display: true
+};
+
 const QuickEntryConfig = () => {
   const [activeKeys, setActiveKeys] = useState<string[]>(['style', 'title', 'entry']);
 
@@ -16,6 +21,12 @@ const QuickEntryConfig = () => {
         const entryConfigItem = findItem(editData, 'groupConfig');
         const styleConfigItem = findItem(editData, 'styleConfig');
         const titleConfigItem = findItem(editData, 'titleConfig');
+        const labelItem = findItem(editData, 'label');
+
+        // 兼容缺少label配置的旧数据
+        if (!configs?.label) {
+          handlePropsChange('label', defaultLabel);
+        }
 
         return (
           <div className={styles.workbenchConfigs}>
@@ -38,6 +49,7 @@ const QuickEntryConfig = () => {
                   )}
                 </CollapseItem>
                 <CollapseItem header="标题配置" name="title" contentStyle={PanelContentStyle}>
+                  {labelItem && renderEditItem(labelItem)}
                   {titleConfigItem && renderEditItem(titleConfigItem)}
                 </CollapseItem>
                 <CollapseItem header="入口配置" name="entry" contentStyle={PanelContentStyle}>

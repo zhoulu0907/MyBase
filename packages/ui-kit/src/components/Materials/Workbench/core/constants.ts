@@ -70,6 +70,8 @@ export const WORKBENCH_CONFIG_TYPES = {
   WB_INFORMATION_LIST_CONTENT: 'Wb_InformationListContent' as const,
   // 数据列表
   WB_TABLE_CONFIG: 'Wb_TableConfig' as const,
+  // 智能体选择器
+  WB_AGENT_SELECTOR: 'Wb_AgentSelector' as const,
 } as const;
 
 /**
