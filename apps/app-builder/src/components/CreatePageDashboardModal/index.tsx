@@ -249,7 +249,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   };
 
   const handlePreview = (dashboardProjectId: string) => {
-    window.open(`${resourceUrl}chart/preview/${dashboardProjectId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${dashboardProjectId}/${dashboardType}`, '_blank');
   };
 
   const handleDashboardTemplateCard = (id: string) => {

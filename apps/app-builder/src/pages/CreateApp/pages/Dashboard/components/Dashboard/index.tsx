@@ -129,7 +129,7 @@ const Dashboard: FC = () => {
   };
   const handlePreview = (item: dataList) => {
     console.log('预览 item:', item);
-    window.open(`${resourceUrl}chart/preview/${item.id}/${dashboardType}?tenantId=${tenantId}`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${item.id}/${dashboardType}`, '_blank');
   };
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);

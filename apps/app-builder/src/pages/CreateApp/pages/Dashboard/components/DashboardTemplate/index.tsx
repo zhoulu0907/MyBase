@@ -112,7 +112,7 @@ const ScreenTemplate: FC = () => {
     setEditVisible(false);
   };
   const handlePreview = (item: screenTemplate) => {
-    window.open(`${resourceUrl}chart/preview/${item.id}/template?tenantId=${tenantId}`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${item.id}/template`, '_blank');
   };
   //导入模板
   const [selectedButton, setSelectedButton] = useState('');
