@@ -4,7 +4,6 @@ import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
-import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.formula.dal.dataflexdo.FunctionDO;
 import com.cmsr.onebase.module.formula.service.function.FormulaFunctionService;
 import com.cmsr.onebase.module.formula.vo.function.*;
@@ -26,7 +25,7 @@ import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
  * @author matianyu
  * @date 2025-08-28
  */
-@Tag(name = "公式函数")
+@Tag(name = "公式函数Build")
 @RestController
 @RequestMapping("/formula/function")
 @Validated
