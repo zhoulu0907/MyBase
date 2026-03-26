@@ -10,7 +10,7 @@ import dashboardTemplate from '@/assets/images/dashboard_template.svg';
 import dashboardLink from '@/assets/images/dashboard_link.svg';
 import dashboardChange from '@/assets/images/dashboard_change.svg';
 import { getFileUrlById } from '@onebase/platform-center';
-import { getDashBoardURL } from '@onebase/common';
+import { getDashBoardURL, TokenManager } from '@onebase/common';
 import { DashBoardCreateType } from '@onebase/app';
 
 interface CreateModalProps {
@@ -55,6 +55,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const [dashboardTemplateData, setDashboardTemplateData] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const dashboardType = 'dashboard';
+  const tenantId = TokenManager.getCurIdentifyId();
 
   useEffect(() => {
     if (menuIcon) {
@@ -274,7 +275,6 @@ const CreateModal: React.FC<CreateModalProps> = ({
   };
 
   const handlePreview = (dashboardProjectId: string) => {
-    // 在新窗口打开预览页面，使用 hash 路由
     window.open(`${resourceUrl}chart/preview/${dashboardProjectId}/${dashboardType}`, '_blank');
   };
 

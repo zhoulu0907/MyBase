@@ -14,7 +14,7 @@ import {
   createDashboardTemplate
 } from '@onebase/platform-center';
 import { useLocation } from 'react-router-dom';
-import { getDashBoardURL } from '@onebase/common';
+import { getDashBoardURL, TokenManager } from '@onebase/common';
 
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
@@ -32,10 +32,10 @@ const ScreenTemplate: FC = () => {
   const searchParams = new URLSearchParams(location.search);
   const appId = searchParams.get('appId');
   const resourceUrl = getDashBoardURL();
-  //创建模板
+  const tenantId = TokenManager.getCurIdentifyId();
   const handleAdd = async () => {
     const res = await createDashboardTemplate({ templateType: 'app', appId: appId });
-    window.open(`${resourceUrl}chart/home/${res}/${appId}/template`, '_blank');
+    window.open(`${resourceUrl}chart/home/${res}/${appId}/template?tenantId=${tenantId}`, '_blank');
   };
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
   const [currentPage, setCurrentPage] = useState(1);
@@ -106,13 +106,11 @@ const ScreenTemplate: FC = () => {
     await getTemplateList(currentType);
   };
   const handleEditTemplate = (item: screenTemplate) => {
-    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/template`, '_blank');
+    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/template?tenantId=${tenantId}`, '_blank');
   };
-  //取消弹框
   const handleEditCancel = () => {
     setEditVisible(false);
   };
-  //预览
   const handlePreview = (item: screenTemplate) => {
     window.open(`${resourceUrl}chart/preview/${item.id}/template`, '_blank');
   };
