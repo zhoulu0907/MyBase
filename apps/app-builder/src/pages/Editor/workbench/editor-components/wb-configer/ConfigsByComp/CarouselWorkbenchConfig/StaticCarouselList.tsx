@@ -281,8 +281,8 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
           className={attributeStyles.attributes}
           onValuesChange={handleFormValuesChange}
         >
-          <FormItem label="图片标题" field="title">
-            <Input placeholder="请输入图片标题" />
+          <FormItem label="图片标题" field="title" rules={[{ maxLength: 20, message: '标题名称不能超过20个字符' }]}>
+            <Input placeholder="请输入图片标题" maxLength={20} />
           </FormItem>
           <FormItem label="轮播图片" field="image">
             <Form.Item noStyle shouldUpdate={(prev, next) => prev.image !== next.image}>
