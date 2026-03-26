@@ -152,7 +152,9 @@ export const autoplayConfig: IBooleanConfigType = {
 export const intervalConfig: INumberConfigType = {
   key: 'interval',
   name: '轮播间隔',
-  type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT
+  type: WORKBENCH_CONFIG_TYPES.NUMBER_INPUT,
+  min: 0,
+  step: 1
 };
 
 /**

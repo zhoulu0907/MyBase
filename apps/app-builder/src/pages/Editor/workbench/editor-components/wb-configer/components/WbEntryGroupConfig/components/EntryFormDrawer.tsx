@@ -72,8 +72,8 @@ export const EntryFormDrawer = ({
               </div>
             </div>
           </FormItem>
-          <FormItem label="入口名称" field="entryName">
-            <Input placeholder="请输入" />
+          <FormItem label="入口名称" field="entryName" rules={[{ maxLength: 20, message: '标题名称不能超过20个字符' }]}>
+            <Input placeholder="请输入" maxLength={20} />
           </FormItem>
           <FormItem label="辅助描述" field="entryDesc">
             <Input.TextArea placeholder="请输入" autoSize={{ minRows: 2, maxRows: 3 }} />
