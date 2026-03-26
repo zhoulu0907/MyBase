@@ -128,7 +128,7 @@ const XTable = memo(
       title: '操作',
       dataIndex: 'op',
       fixed: null,
-      width: '80px',
+      width: operationButton.length * 80,
       headerCellStyle: { textAlign: 'center' },
       //TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
       bodyCellStyle: { padding: '0 8px', textAlign: 'center' },
@@ -683,6 +683,20 @@ const XTable = memo(
 
     const [form] = Form.useForm();
 
+    const tableScrollX = Array.isArray(finalColumns)
+      ? finalColumns.reduce((total, col) => {
+          const widthValue = col?.width;
+          if (typeof widthValue === 'number') {
+            return total + widthValue;
+          }
+          if (typeof widthValue === 'string') {
+            const parsedWidth = Number.parseInt(widthValue, 10);
+            return Number.isNaN(parsedWidth) ? total : total + parsedWidth;
+          }
+          return total;
+        }, 0)
+      : 0;
+
     return (
       <div
         style={{
@@ -731,7 +745,7 @@ const XTable = memo(
           <Form form={tableForm}>
             <Table
               scroll={{
-                x: 'max-content'
+                x: tableScrollX || undefined
               }}
               onRow={(record) => {
                 return {
