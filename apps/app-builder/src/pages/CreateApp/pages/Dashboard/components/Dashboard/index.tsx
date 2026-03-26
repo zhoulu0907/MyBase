@@ -41,9 +41,7 @@ const Dashboard: FC = () => {
   const [searchParams] = useSearchParams();
   const appId = searchParams.get('appId');
   const dashboardType = 'dashboard';
-  const tokenInfo = TokenManager.getTokenInfo();
-  const tenantId = tokenInfo?.tenantId;
-  const accessToken = tokenInfo?.accessToken;
+  const tenantId = TokenManager.getCurIdentifyId();
   useEffect(() => {
     setLoading(false);
     console.log('tokenInfo:', tokenInfo);
@@ -84,7 +82,7 @@ const Dashboard: FC = () => {
     if (id) {
       const dashboardId = await getDashboardIdFromTemplateApi(id);
       console.log('dashboardId:', dashboardId);
-      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
     }
     if (!id && appId && tenantId) {
       const params = {
@@ -93,9 +91,8 @@ const Dashboard: FC = () => {
         appId: appId
       };
       const dashboardId = await getDashboardIdApi(params);
-      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
     }
-    // window.open(`${resourceUrl}chart/home/${id}/${appId}/${dashboardType}`, '_blank');
     setVisibleCreateScreenForm('');
     getDashboardList();
   };
@@ -127,14 +124,12 @@ const Dashboard: FC = () => {
   const handleEditCancel = () => {
     setEditVisible(false);
   };
-  //编辑大屏
   const handleEdit = (item: dataList) => {
-    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/${dashboardType}`, '_blank');
+    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
   };
-  //预览
   const handlePreview = (item: dataList) => {
     console.log('预览 item:', item);
-    window.open(`${resourceUrl}chart/preview/${item.id}/${dashboardType}`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${item.id}/${dashboardType}?tenantId=${tenantId}`, '_blank');
   };
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
