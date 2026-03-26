@@ -49,10 +49,14 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
+  :global(.arco-cell-inner) {
+    width: 100%;
+  }
   :global(.cell-content) {
     display: flex;
     align-items: center;
     gap: 12px;
+    width: 100%;
   }
 }
 
