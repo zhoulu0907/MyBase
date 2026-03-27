@@ -69,6 +69,7 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
     @Override
     public Object executeFormulaWithParams(String formula, Map<String, Object> parameters) {
+        log.info("executeFormulaWithParams --->，start，formula= {}, parameters= {}", formula, JsonUtils.toJsonString(parameters));
 
         if (!StringUtils.hasText(formula)) {
             throw new IllegalArgumentException("公式不能为空");
@@ -187,9 +188,11 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     }
 
     @Override
-    public Object executeFormulaWithParamsForFlow(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
+    public Object executeFormulaWithParamsData(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
+        log.info("executeFormulaWithParamsData --->，start，formula= {}, parameters= {}, contextData= {}", formula, JsonUtils.toJsonString(parameters), JsonUtils.toJsonString(contextData));
         formula = handleFormulaParameters(formula, parameters);
         formula = handleFormulaContextData(formula, contextData);
+        log.info("executeFormulaWithParamsData --->，handle formula data，formula= {}", formula);
         return executeFormulaWithParams(formula, parameters);
     }
 
