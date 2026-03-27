@@ -99,7 +99,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const dashboardType = 'dashboard';
   const resourceUrl = getDashBoardURL();
   const isDev = useIsRuntimeDev();
-  const tenantId = TokenManager.getCurIdentifyId();
+  const tenantId = TokenManager.getTokenInfo()?.tenantId || '';
 
   useEffect(() => {
     if (drawerVisible.value) {
