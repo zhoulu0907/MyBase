@@ -61,9 +61,9 @@
         if (state) {
           redirectUrl += '&state=' + encodeURIComponent(state);
         }
-        window.location.href = redirectUrl;
+        window.location.replace(redirectUrl);
       } else {
-        window.location.href = baseUrl + '/obappbuilder/#/login';
+        window.location.replace(baseUrl + '/obappbuilder/#/login');
       }
     })();
   </script>
