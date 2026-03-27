@@ -125,7 +125,7 @@ Content-Type: application/json
 }
 
 
-### 请求 /execute 接口 => 执行函数函数 计数
+### 请求 /execute 接口 => 测试工作流-对象数组节点
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
@@ -155,7 +155,7 @@ Content-Type: application/json
     }
 }
 
-### 请求 /create 接口 => 创建函数
+### 请求 /execute 接口 => 测试工作流-实体变更触发/读取节点
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
