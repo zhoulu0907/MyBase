@@ -305,6 +305,10 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
         if (v == null) {
             return "null";
         }
+        // 容器类型保持为 JSON 字面量，避免被包成字符串影响数组函数计算
+        if (v instanceof Collection || v instanceof Map || v.getClass().isArray()) {
+            return JsonUtils.toJsonString(v);
+        }
         if (v instanceof Number || v instanceof Boolean) {
             return String.valueOf(v);
         }
