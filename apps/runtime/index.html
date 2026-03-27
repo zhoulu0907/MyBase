@@ -5,11 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="./logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OneBase 3.0</title>
-  </head>
-  <body>
-    <div id="root"></div>
     <script>
-      // 根据域名动态加载配置文件
       const currentDomain = window.location.hostname;
       const configScript = document.createElement('script');
       
@@ -19,8 +15,11 @@
         configScript.src = './config.js';
       }
       
-      document.body.appendChild(configScript);
+      document.head.prepend(configScript);
     </script>
+  </head>
+  <body>
+    <div id="root"></div>
     <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
