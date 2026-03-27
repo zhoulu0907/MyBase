@@ -103,28 +103,55 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             
             // upsert 长度
             MetadataValidationLengthDO exist = lengthService.getByFieldId(req.getFieldUuid());
-            MetadataValidationLengthDO d = new MetadataValidationLengthDO();
-            if (exist != null) { d.setId(exist.getId()); }
-            d.setFieldUuid(req.getFieldUuid());
-            d.setEntityUuid(field.getEntityUuid());
-            d.setIsEnabled(req.getIsEnabled());
-            d.setMinLength(req.getMinLength());
-            d.setMaxLength(req.getMaxLength());
-            d.setTrimBefore(1);
-            d.setPromptMessage(prompt);
-            d.setVersionTag(req.getVersionTag());
-            if (d.getId() == null) {
-                // 将DO转换为VO
-                ValidationLengthSaveReqVO lengthVO = BeanUtils.toBean(d, ValidationLengthSaveReqVO.class);
-                lengthVO.setRgName(buildLengthGroupName(field.getId())); // 设置规则组名称
-                lengthVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
+            if (exist == null) {
+                // 新建长度校验
+                ValidationLengthSaveReqVO lengthVO = new ValidationLengthSaveReqVO();
+                lengthVO.setFieldUuid(req.getFieldUuid());
+                lengthVO.setEntityUuid(field.getEntityUuid());
+                lengthVO.setIsEnabled(req.getIsEnabled());
+                lengthVO.setMinLength(req.getMinLength());
+                lengthVO.setMaxLength(req.getMaxLength());
+                lengthVO.setPromptMessage(prompt);
+                lengthVO.setVersionTag(req.getVersionTag());
+                lengthVO.setRgName(buildLengthGroupName(field.getId()));
+                lengthVO.setPopPrompt(prompt);
                 lengthService.create(lengthVO);
             } else {
-                // 将DO转换为UpdateReqVO
-                ValidationLengthUpdateReqVO lengthUpdateVO = BeanUtils.toBean(d, ValidationLengthUpdateReqVO.class);
-                lengthUpdateVO.setRgName(buildLengthGroupName(field.getId())); // 设置规则组名称
-                lengthUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
-                lengthService.update(lengthUpdateVO);
+                // 更新长度校验，需要通过groupUuid获取规则组ID
+                Long ruleGroupId = null;
+                if (exist.getGroupUuid() != null) {
+                    var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(exist.getGroupUuid());
+                    if (ruleGroup != null) {
+                        ruleGroupId = ruleGroup.getId();
+                    }
+                }
+                if (ruleGroupId == null) {
+                    // 规则组不存在，降级为新建
+                    log.warn("长度校验规则组不存在，降级为新建，fieldUuid={}", req.getFieldUuid());
+                    ValidationLengthSaveReqVO lengthVO = new ValidationLengthSaveReqVO();
+                    lengthVO.setFieldUuid(req.getFieldUuid());
+                    lengthVO.setEntityUuid(field.getEntityUuid());
+                    lengthVO.setIsEnabled(req.getIsEnabled());
+                    lengthVO.setMinLength(req.getMinLength());
+                    lengthVO.setMaxLength(req.getMaxLength());
+                    lengthVO.setPromptMessage(prompt);
+                    lengthVO.setVersionTag(req.getVersionTag());
+                    lengthVO.setRgName(buildLengthGroupName(field.getId()));
+                    lengthVO.setPopPrompt(prompt);
+                    lengthService.create(lengthVO);
+                } else {
+                    // 正常更新，传递规则组ID
+                    ValidationLengthUpdateReqVO lengthUpdateVO = new ValidationLengthUpdateReqVO();
+                    lengthUpdateVO.setId(ruleGroupId); // 传递规则组ID而非长度校验记录ID
+                    lengthUpdateVO.setIsEnabled(req.getIsEnabled());
+                    lengthUpdateVO.setMinLength(req.getMinLength());
+                    lengthUpdateVO.setMaxLength(req.getMaxLength());
+                    lengthUpdateVO.setPromptMessage(prompt);
+                    lengthUpdateVO.setVersionTag(req.getVersionTag());
+                    lengthUpdateVO.setRgName(buildLengthGroupName(field.getId()));
+                    lengthUpdateVO.setPopPrompt(prompt);
+                    lengthService.update(lengthUpdateVO);
+                }
             }
         } else if ("REGEX".equalsIgnoreCase(type)) {
             // 获取字段信息用于生成默认提示语
