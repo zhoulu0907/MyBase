@@ -19,15 +19,8 @@
         configScript.src = './config.js';
       }
       
-      configScript.onload = function() {
-        // 配置文件加载完成后，加载主应用
-        const mainScript = document.createElement('script');
-        mainScript.type = 'module';
-        mainScript.src = './src/main.tsx';
-        document.body.appendChild(mainScript);
-      };
-      
       document.body.appendChild(configScript);
     </script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
