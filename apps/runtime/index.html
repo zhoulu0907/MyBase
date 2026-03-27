@@ -8,7 +8,19 @@
   </head>
   <body>
     <div id="root"></div>
-    <script src="./config.js"></script>
+    <script>
+      // 根据域名动态加载配置文件
+      const currentDomain = window.location.hostname;
+      const configScript = document.createElement('script');
+      
+      if (currentDomain === 'onebase.sit.artifex-cmcc.com.cn') {
+        configScript.src = './artifex.js';
+      } else {
+        configScript.src = './config.js';
+      }
+      
+      document.body.appendChild(configScript);
+    </script>
     <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
