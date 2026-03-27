@@ -17,7 +17,9 @@ import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.Ordered;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -76,8 +78,13 @@ public class BuildSecurityAutoConfiguration {
     }
 
     @Bean
-    public DisableMultipartFilter disableMultipartFilter() {
-        return new DisableMultipartFilter();
+    public FilterRegistrationBean<DisableMultipartFilter> disableMultipartFilter() {
+        FilterRegistrationBean<DisableMultipartFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new DisableMultipartFilter());
+        registration.addUrlPatterns("/admin-api/build/ai/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registration.setName("disableMultipartFilter");
+        return registration;
     }
 
     @Bean("ss") // 使用 Spring Security 的缩写，方便使用
