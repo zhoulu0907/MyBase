@@ -3429,6 +3429,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                 || (constraints.getMaxLength() != null && constraints.getMaxLength() > 0);
         boolean hasLengthPrompt = StringUtils.hasText(constraints.getLengthPrompt());
         boolean hasExplicitEnableFlag = constraints.getLengthEnabled() != null;
+        
+        // 当明确启用，或者没有明确启停标志但有配置数据时，保存约束配置
         if (lengthEnabled || (!hasExplicitEnableFlag && (hasLengthRange || hasLengthPrompt))) {
             FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
             req.setFieldUuid(fieldUuid);
@@ -3445,7 +3447,17 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
         } else if (lengthExplicitDisabled && (hasLengthRange || hasLengthPrompt)) {
-            fieldConstraintService.delete(fieldUuid, "LENGTH_RANGE");
+            // 当明确禁用但有配置数据时，保存约束配置并设置isEnabled=0（而不是删除）
+            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+            req.setFieldUuid(fieldUuid);
+            req.setConstraintType("LENGTH_RANGE");
+            req.setMinLength(constraints.getMinLength());
+            req.setMaxLength(constraints.getMaxLength());
+            req.setPromptMessage(constraints.getLengthPrompt());
+            req.setIsEnabled(CommonStatusEnum.DISABLED.getStatus()); // 设置为禁用
+            req.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
+            req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
+            fieldConstraintService.saveFieldConstraintConfig(req);
         }
 
         // 正则 - 只有当正则表达式不为空且启用时才创建REGEX约束
@@ -3464,7 +3476,16 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
             req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
             fieldConstraintService.saveFieldConstraintConfig(req);
         } else if (regexExplicitDisabled && (hasRegexPattern || hasRegexPrompt)) {
-            fieldConstraintService.delete(fieldUuid, "REGEX");
+            // 当明确禁用但有配置数据时，保存约束配置并设置isEnabled=0（而不是删除）
+            FieldConstraintSaveReqVO req = new FieldConstraintSaveReqVO();
+            req.setFieldUuid(fieldUuid);
+            req.setConstraintType("REGEX");
+            req.setRegexPattern(constraints.getRegexPattern());
+            req.setPromptMessage(constraints.getRegexPrompt());
+            req.setIsEnabled(CommonStatusEnum.DISABLED.getStatus()); // 设置为禁用
+            req.setVersionTag(entityField != null && entityField.getVersionTag() != null ? entityField.getVersionTag() : 0L);
+            req.setApplicationId(entityField != null ? entityField.getApplicationId() : null);
+            fieldConstraintService.saveFieldConstraintConfig(req);
         }
     }
 
