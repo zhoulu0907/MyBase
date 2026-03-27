@@ -266,14 +266,25 @@ const XTable = memo(
       if (Object.keys(columns as any).length) {
         const mainMetaData = await getEntityFieldsWithChildren(metaData);
         newColumns = (columns || []).map((column) => {
+          // 解析列宽：有明确数值则保留，无则不设 width 让内容自适应
+          const rawWidth = column?.width;
+          const parsedColWidth =
+            typeof rawWidth === 'number'
+              ? rawWidth
+              : typeof rawWidth === 'string' && rawWidth
+              ? Number.parseInt(rawWidth, 10) || 0
+              : 0;
+          const colWidthProp = parsedColWidth > 0 ? rawWidth : undefined;
+          const hasWidth = parsedColWidth > 0;
           // 数据标题
           if (column.dataIndex?.indexOf('-') !== -1) {
             return {
               ...column,
               dataIndex: 'dataTitle',
-              ellipsis: true,
-              width: column.width + 'px',
-              bodyCellStyle: { padding: '0 12px' },
+              bodyCellStyle: {
+                padding: '0 12px',
+                ...(hasWidth ? { maxWidth: colWidthProp, overflow: 'hidden' } : {})
+              },
               render: (_text: any, _record: any, index: number) => {
                 const _index = column.dataIndex.indexOf('-');
                 const dataTitleType = column.dataIndex.slice(0, _index);
@@ -304,10 +315,13 @@ const XTable = memo(
           }
           return {
             ...column,
-            ellipsis: true,
+            // ellipsis: true, // 有render时不生效
             width: column.width + 'px',
             // TODO: zhoumingji ,基础组件上不要写这种样式，最好能放到样式文件里
-            bodyCellStyle: { padding: '0 12px' },
+            bodyCellStyle: {
+              padding: '0 12px',
+              ...(hasWidth ? { maxWidth: colWidthProp, overflow: 'hidden' } : {})
+            },
             render: (_text: any, _record: any, index: number) => {
               const componentSchemasKeys = Object.keys(fromPageComponentSchemas.value || {});
               const columnId = column.dataIndex;
@@ -691,9 +705,11 @@ const XTable = memo(
           }
           if (typeof widthValue === 'string') {
             const parsedWidth = Number.parseInt(widthValue, 10);
-            return Number.isNaN(parsedWidth) ? total : total + parsedWidth;
+            // 没有设置列宽的列，按默认 150px 参与滚动宽度计算
+            return Number.isNaN(parsedWidth) ? total + 150 : total + parsedWidth;
           }
-          return total;
+          // 未设置列宽，按默认 150px 占位
+          return total + 150;
         }, 0)
       : 0;
 
