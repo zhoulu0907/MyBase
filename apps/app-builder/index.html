@@ -8,7 +8,26 @@
   </head>
   <body>
     <div id="root"></div>
-    <script src="./config.js"></script>
-    <script type="module" src="./src/main.tsx"></script>
+    <script>
+      // 根据域名动态加载配置文件
+      const currentDomain = window.location.hostname;
+      const configScript = document.createElement('script');
+      
+      if (currentDomain === 'onebase.sit.artifex-cmcc.com.cn') {
+        configScript.src = './artifex_config.js';
+      } else {
+        configScript.src = './config.js';
+      }
+      
+      configScript.onload = function() {
+        // 配置文件加载完成后，加载主应用
+        const mainScript = document.createElement('script');
+        mainScript.type = 'module';
+        mainScript.src = './src/main.tsx';
+        document.body.appendChild(mainScript);
+      };
+      
+      document.body.appendChild(configScript);
+    </script>
   </body>
 </html>
