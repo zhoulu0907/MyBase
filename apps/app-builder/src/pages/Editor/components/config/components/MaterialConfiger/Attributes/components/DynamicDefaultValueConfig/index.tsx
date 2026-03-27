@@ -98,12 +98,18 @@ const DynamicDefaultValueConfig: React.FC<DynamicDefaultValueConfigProps> = ({
   };
 
   // 公式编辑器弹窗确定
-  const handleFormulaConfirm = (formulaData: string, formattedFormula: string) => {
+  const handleFormulaConfirm = (
+    formulaData: string, 
+    formattedFormula: string, 
+    params: Record<string, string>,
+    relatedFields: any[]
+  ) => {
     setFormulaVisible(false);
     const newConfig = {
       ...configs[defaultValueConfigKey],
       formulaValue: formulaData,
-      formattedFormula: formattedFormula
+      formattedFormula: formattedFormula,
+      relatedFields
     };
     handlePropsChange(defaultValueConfigKey, newConfig);
   };

@@ -351,6 +351,14 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     const copyFormulaData = formulaData;
     const matches = [...copyFormulaData.matchAll(regex)];
     const variablesMapping: { [key: string]: string } = {};
+    
+    // 新增：构建 relatedFields
+    const relatedFields: Array<{
+      fieldId: string;
+      fieldName: string;
+      formFieldName: string;
+    }> = [];
+    
     matches.forEach((match) => {
       const temp = match[1].split('.');
       const dollarIdx = temp.findIndex((p) => p.startsWith('$'));
@@ -372,7 +380,22 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       if (temp.length === 2) {
         const fieldId = temp[0] || '';
         const fieldName = temp[1] || '';
-        if (fieldName) variablesMapping[fieldName] = fieldId;
+        if (fieldName) {
+          variablesMapping[fieldName] = fieldId;
+          
+          // 新增：从 variables 中查找 formFieldName
+          let fieldInfo: any = null;
+          for (const entity of variables) {
+            fieldInfo = entity.fields?.find((f: any) => f.id === fieldId);
+            if (fieldInfo) break;
+          }
+          
+          relatedFields.push({
+            fieldId,
+            fieldName,
+            formFieldName: fieldInfo?.fieldName || fieldName
+          });
+        }
         return;
       }
 
@@ -383,7 +406,12 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         return;
       }
     });
-    return variablesMapping;
+    
+    // 返回 params 和 relatedFields
+    return {
+      params: variablesMapping,
+      relatedFields
+    };
   };
 
   /**
@@ -391,10 +419,10 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
    */
   const handleConfirm = useCallback(async () => {
     const newFormula = formattedFormula();
-    const params = getParameters(formula);
-    onConfirm(formula, newFormula, params);
+    const { params, relatedFields } = getParameters(formula);
+    onConfirm(formula, newFormula, params, relatedFields);
     setIsDebugMode(false);
-  }, [formula, onConfirm, onCancel]);
+  }, [formula, onConfirm, onCancel, variables]);
 
   /**
    * 公式编辑器准备就绪
