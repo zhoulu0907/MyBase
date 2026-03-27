@@ -191,8 +191,19 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
     public Object executeFormulaWithParamsData(String formula, Map<String, Object> parameters, Map<String, Object> contextData) {
         log.info("executeFormulaWithParamsData --->，start，formula= {}, parameters= {}, contextData= {}", formula, JsonUtils.toJsonString(parameters), JsonUtils.toJsonString(contextData));
         formula = handleFormulaParameters(formula, parameters);
+        log.info("handleFormulaParameters --->，handle formula params，formula= {}", formula);
+        // PRODUCT($start_entity_0.t9jn_sum_test.price,$start_entity_0.t9jn_sum_test.num)
+
+        // formula= SUMPRODUCT($销售订单明细表_子表.销售数量,$销售订单明细表_子表.单价)
+        // parameters= {"$销售订单明细表_子表.销售数量":"330111341003997186","$销售订单明细表_子表.单价":"330115137755086848"}
+        // contextData= {"start_entity_0":{"t9jn_wsq_sales_order.id":"333141887108251648","t9jn_wsq_sales_order.customer_name":{"id":"333140169121333248"},"t9jn_wsq_sales_order.deleted":0,"t9jn_wsq_sales_order.owner_id":{"id":"227669481864036359"},"t9jn_wsq_sales_order.created_time":1774578610715,"t9jn_wsq_sales_order.order_code":"dd0007","t9jn_wsq_sales_order.updated_time":1774590373862,"t9jn_wsq_sales_order.lock_version":0,"t9jn_wsq_sales_order.draft_status":0,"t9jn_wsq_sales_order.updater":{"id":"227669481864036359"},"t9jn_wsq_sales_order.owner_dept":{"id":"233621103945547776"},"t9jn_wsq_sales_order.creator":{"id":"227669481864036359"},"t9jn_wsq_sales_order.contact_person":"003"}}
+        //
+        // formula= PRODUCT($表单(实体)触发节点.单价,$表单(实体)触发节点.数量),
+        // parameters= {"$表单(实体)触发节点.单价":"t9jn_sum_test","$表单(实体)触发节点.数量":"t9jn_sum_test"},
+        // contextData= {"start_entity_0":{"t9jn_sum_test.owner_dept":{"id":"233621103945547776"},"t9jn_sum_test.draft_status":0,"t9jn_sum_test.owner_id":{"id":"227669481864036359"},"t9jn_sum_test.created_time":1774579833832,"t9jn_sum_test.updater":{"id":"227669481864036359"},"t9jn_sum_test.creator":{"id":"227669481864036359"},"t9jn_sum_test.price":2,"t9jn_sum_test.deleted":0,"t9jn_sum_test.name":"测试1","t9jn_sum_test.id":"333162898088263680","t9jn_sum_test.lock_version":0,"t9jn_sum_test.num":6,"t9jn_sum_test.updated_time":1774591068525}}
+
         formula = handleFormulaContextData(formula, contextData);
-        log.info("executeFormulaWithParamsData --->，handle formula data，formula= {}", formula);
+        log.info("handleFormulaContextData --->，handle formula data，formula= {}", formula);
         return executeFormulaWithParams(formula, parameters);
     }
 
@@ -513,9 +524,11 @@ public class FormulaEngineServiceImpl implements FormulaEngineService {
 
         String result = formula;
 
-        // 匹配占位符: $recordKey.fieldKey （recordKey和fieldKey均为字母/数字/下划线，recordKey以字母或下划线开头）
-        Pattern p = Pattern.compile("\\$([A-Za-z_][\\w]*)\\.([A-Za-z_][\\w]*)");
+        // 匹配占位符: $recordKey.fieldPath
+        // 其中 recordKey 用于在 contextData 中取值，fieldPath 支持多段（如 t9jn_sum_test.price）
+        Pattern p = Pattern.compile("\\$([A-Za-z_][\\w]*)\\.([A-Za-z_][\\w]*(?:\\.[A-Za-z_][\\w]*)*)");
         Matcher m = p.matcher(result);
+
 
         // 收集唯一占位符，避免重复处理
         Set<String> placeholders = new LinkedHashSet<>();

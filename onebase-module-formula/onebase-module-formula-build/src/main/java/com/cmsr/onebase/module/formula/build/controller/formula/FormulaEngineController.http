@@ -92,6 +92,39 @@ Content-Type: application/json
     }
 }
 
+
+### 请求 /execute 接口 => 执行函数函数 计数
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula": "LEN(text,length)",
+  "parameters": {"text": "HELLO", "length": 2},
+  "parameters": {"text": "HELLO", "length": 2}
+}
+
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula": "SUMPRODUCT($销售订单明细表_子表.销售数量,$销售订单明细表_子表.单价)",
+  "parameters": {
+    "$销售订单明细表_子表.销售数量": [
+      2,3
+    ],
+    "$销售订单明细表_子表.单价": [
+      3,4
+    ]
+  }
+}
+
+
 ### 请求 /execute 接口 => 执行函数函数 计数
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
@@ -122,33 +155,42 @@ Content-Type: application/json
     }
 }
 
-### 请求 /execute 接口 => 执行函数函数 计数
+### 请求 /create 接口 => 创建函数
 POST {{baseUrl}}/formula/engine/execute-formula
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
 Content-Type: application/json
 
 {
-  "formula": "LEN(text,length)",
-  "parameters": {"text": "HELLO", "length": 2},
-  "parameters": {"text": "HELLO", "length": 2}
-}
-
-
-### 请求 /create 接口 => 创建函数
-POST {{baseUrl}}/formula/engine/debug-formula
-Authorization: Bearer {{token}}
-tenant-id: {{adminTenantId}}
-Content-Type: application/json
-
-{
-  "formula": "SUMPRODUCT($销售订单明细表_子表.销售数量,$销售订单明细表_子表.单价)",
+  "formula": "PRODUCT($表单(实体)触发节点.单价,$表单(实体)触发节点.数量)",
   "parameters": {
-    "$销售订单明细表_子表.销售数量": [
-      2,3
-    ],
-    "$销售订单明细表_子表.单价": [
-      3,4
-    ]
+      "$表单(实体)触发节点": "start_entity_0",
+      "$表单(实体)触发节点.单价": "t9jn_sum_test.price",
+      "$表单(实体)触发节点.数量": "t9jn_sum_test.num"
+    },
+  "contextData": {
+      "start_entity_0": {
+        "t9jn_sum_test.owner_dept": {
+          "id": "233621103945547776"
+        },
+        "t9jn_sum_test.draft_status": 0,
+        "t9jn_sum_test.owner_id": {
+          "id": "227669481864036359"
+        },
+        "t9jn_sum_test.created_time": "1774579833832",
+        "t9jn_sum_test.updater": {
+          "id": "227669481864036359"
+        },
+        "t9jn_sum_test.creator": {
+          "id": "227669481864036359"
+        },
+        "t9jn_sum_test.price": 2,
+        "t9jn_sum_test.deleted": 0,
+        "t9jn_sum_test.name": "测试1",
+        "t9jn_sum_test.id": "333162898088263680",
+        "t9jn_sum_test.lock_version": 0,
+        "t9jn_sum_test.num": 6,
+        "t9jn_sum_test.updated_time": "1774591068525"
+      }
   }
 }
