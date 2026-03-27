@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { throttle } from 'lodash-es';
+import { debugFormula } from '@onebase/app';
 
 interface RelatedField {
   fieldId: string;
@@ -30,40 +30,57 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
   
   const formulaComponentsRef = useRef<Map<string, FormulaComponentInfo>>(new Map());
   const fieldDependencyRef = useRef<Map<string, Set<string>>>(new Map());
+  const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   
   const setForm = useCallback((form: any) => {
     formRef.current = form;
   }, []);
   
-  const computeFormulaForComponent = useCallback((cpId: string) => {
+  const computeFormulaForComponent = useCallback(async (cpId: string) => {
     const info = formulaComponentsRef.current.get(cpId);
     const form = formRef.current;
     if (!info || !form) return;
     
     const { targetFieldName, defaultValueConfig, formattedFormula } = info;
     
-    let computedValue = '';
-    const relatedValues: Record<string, any> = {};
+    const parameters: Record<string, any> = {};
     
     if (defaultValueConfig?.relatedFields) {
       defaultValueConfig.relatedFields.forEach((field: RelatedField) => {
         const value = form.getFieldValue(field.formFieldName);
-        relatedValues[field.fieldName] = value;
-        if (!computedValue) {
-          computedValue = value ?? '';
-        }
+        parameters[field.fieldName] = value ?? '';
       });
     }
     
     console.log(`[公式计算] ${formattedFormula}`);
-    console.log(`  关联字段值:`, relatedValues);
-    console.log(`  计算结果:`, computedValue);
+    console.log(`  关联字段值:`, parameters);
     
-    const currentValue = form.getFieldValue(targetFieldName);
-    if (currentValue !== computedValue) {
-      form.setFieldValue(targetFieldName, computedValue);
+    try {
+      const response = await debugFormula({
+        formula: formattedFormula,
+        parameters
+      });
+      
+      const computedValue = response?.result ?? '';
+      console.log(`  计算结果:`, computedValue);
+      
+      const currentValue = form.getFieldValue(targetFieldName);
+      if (currentValue !== computedValue) {
+        form.setFieldValue(targetFieldName, computedValue);
+      }
+    } catch (error) {
+      console.error(`[公式计算失败]`, error);
     }
   }, []);
+  
+  const computeForField = useCallback((changedFieldName: string) => {
+    const dependentCpIds = fieldDependencyRef.current.get(changedFieldName);
+    if (dependentCpIds) {
+      dependentCpIds.forEach((cpId) => {
+        computeFormulaForComponent(cpId);
+      });
+    }
+  }, [computeFormulaForComponent]);
   
   const registerFormulaComponent = useCallback((info: FormulaComponentInfo) => {
     formulaComponentsRef.current.set(info.cpId, info);
@@ -98,28 +115,29 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
     formulaComponentsRef.current.delete(cpId);
   }, []);
   
-  const throttledCompute = useRef(
-    throttle((changedFieldName: string) => {
-      const dependentCpIds = fieldDependencyRef.current.get(changedFieldName);
-      if (dependentCpIds) {
-        dependentCpIds.forEach((cpId) => {
-          computeFormulaForComponent(cpId);
-        });
-      }
-    }, 300)
-  ).current;
-  
   const handleValuesChange = useCallback((changedValues: any, allValues: any) => {
     Object.keys(changedValues).forEach((fieldName) => {
-      throttledCompute(fieldName);
+      if (timersRef.current.has(fieldName)) {
+        clearTimeout(timersRef.current.get(fieldName)!);
+      }
+      
+      const timer = setTimeout(() => {
+        computeForField(fieldName);
+        timersRef.current.delete(fieldName);
+      }, 300);
+      
+      timersRef.current.set(fieldName, timer);
     });
-  }, [throttledCompute]);
+  }, [computeForField]);
   
   useEffect(() => {
     return () => {
-      throttledCompute.cancel();
+      timersRef.current.forEach((timer) => {
+        clearTimeout(timer);
+      });
+      timersRef.current.clear();
     };
-  }, [throttledCompute]);
+  }, []);
   
   return {
     registerFormulaComponent,
