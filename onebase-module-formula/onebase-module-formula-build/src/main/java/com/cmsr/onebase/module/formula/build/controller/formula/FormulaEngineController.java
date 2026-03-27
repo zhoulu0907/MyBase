@@ -56,7 +56,7 @@ public class FormulaEngineController {
         log.info("executeFormula -->开始 formula: {} , params: {} " ,reqDTO.getFormula(), reqDTO.getParameters());
 
         long startTime = System.currentTimeMillis();
-        Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(), reqDTO.getParameters(), reqDTO.getContextData());
+        Object result = formulaEngineService.executeFormulaWithParamsData(reqDTO.getFormula(), reqDTO.getParameters(), reqDTO.getContextData());
         long executionTime = System.currentTimeMillis() - startTime;
         FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
 
