@@ -355,11 +355,16 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
       const temp = match[1].split('.');
       const dollarIdx = temp.findIndex((p) => p.startsWith('$'));
       if (dollarIdx !== -1 && dollarIdx < temp.length - 1) {
+        const nodeId = temp[0] || '';
+        const tableName = temp[1] || '';
+        const fieldName = temp[2] || '';
         const nodeLabel = temp[dollarIdx].slice(1);
         const displayName = temp[dollarIdx + 1] || '';
-        const fieldId = temp[1] || '';
+        
         if (nodeLabel && displayName) {
-          variablesMapping[`$${nodeLabel}.${displayName}`] = fieldId;
+          const fullFieldPath = `${tableName}.${fieldName}`;
+          variablesMapping[`$${nodeLabel}.${displayName}`] = fullFieldPath;
+          variablesMapping[`$${nodeLabel}`] = nodeId;
         }
         return;
       }
