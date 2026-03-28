@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 import { debugFormula } from '@onebase/app';
 
 interface RelatedField {
@@ -27,6 +27,7 @@ interface FormulaWatchManagerReturn {
 
 export function useFormulaWatchManager(): FormulaWatchManagerReturn {
   const formRef = useRef<any>(null);
+  const isComputingRef = useRef(false);
   
   const formulaComponentsRef = useRef<Map<string, FormulaComponentInfo>>(new Map());
   const fieldDependencyRef = useRef<Map<string, Set<string>>>(new Map());
@@ -36,7 +37,8 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
     formRef.current = form;
   }, []);
   
-  const computeFormulaForComponent = useCallback(async (cpId: string) => {
+  const computeFormulaForComponent = useCallback(async (cpId: string, triggerSource?: string) => {
+    console.log(`[computeFormulaForComponent] 触发来源: ${triggerSource || '未知'}, cpId: ${cpId}`);
     const info = formulaComponentsRef.current.get(cpId);
     const form = formRef.current;
     if (!info || !form) return;
@@ -66,7 +68,11 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
       
       const currentValue = form.getFieldValue(targetFieldName);
       if (currentValue !== computedValue) {
+        isComputingRef.current = true;
         form.setFieldValue(targetFieldName, computedValue);
+        setTimeout(() => {
+          isComputingRef.current = false;
+        }, 0);
       }
     } catch (error) {
       console.error(`[公式计算失败]`, error);
@@ -77,7 +83,7 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
     const dependentCpIds = fieldDependencyRef.current.get(changedFieldName);
     if (dependentCpIds) {
       dependentCpIds.forEach((cpId) => {
-        computeFormulaForComponent(cpId);
+        computeFormulaForComponent(cpId, `字段变化: ${changedFieldName}`);
       });
     }
   }, [computeFormulaForComponent]);
@@ -95,7 +101,7 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
       });
     }
     
-    computeFormulaForComponent(info.cpId);
+    computeFormulaForComponent(info.cpId, '组件注册');
   }, [computeFormulaForComponent]);
   
   const unregisterFormulaComponent = useCallback((cpId: string) => {
@@ -116,7 +122,21 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
   }, []);
   
   const handleValuesChange = useCallback((changedValues: any, allValues: any) => {
+    if (isComputingRef.current) {
+      console.log('[handleValuesChange] 正在计算中，跳过');
+      return;
+    }
+    
+    console.log('[handleValuesChange] changedValues:', changedValues);
+    console.log('[handleValuesChange] fieldDependencyRef keys:', Array.from(fieldDependencyRef.current.keys()));
+    
     Object.keys(changedValues).forEach((fieldName) => {
+      console.log(`[handleValuesChange] 检查字段: ${fieldName}, 是否在依赖中: ${fieldDependencyRef.current.has(fieldName)}`);
+      
+      if (!fieldDependencyRef.current.has(fieldName)) {
+        return;
+      }
+      
       if (timersRef.current.has(fieldName)) {
         clearTimeout(timersRef.current.get(fieldName)!);
       }
@@ -139,10 +159,10 @@ export function useFormulaWatchManager(): FormulaWatchManagerReturn {
     };
   }, []);
   
-  return {
+  return useMemo(() => ({
     registerFormulaComponent,
     unregisterFormulaComponent,
     handleValuesChange,
     setForm
-  };
+  }), [registerFormulaComponent, unregisterFormulaComponent, handleValuesChange, setForm]);
 }

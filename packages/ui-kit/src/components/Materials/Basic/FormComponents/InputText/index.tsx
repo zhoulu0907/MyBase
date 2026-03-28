@@ -46,6 +46,8 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
   // ===== 公式监听 begin =====
   const formulaWatchContext = useFormulaWatchContext();
   const isFormulaType = defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA;
+  const formattedFormula = defaultValueConfig?.formattedFormula || '';
+  const relatedFieldsStr = JSON.stringify(defaultValueConfig?.relatedFields || []);
 
   useEffect(() => {
     if (!isFormulaType || !formulaWatchContext || !targetFieldName || !cpId) {
@@ -56,13 +58,13 @@ const XInputText = memo((props: XInputTextConfig & { runtime?: boolean; detailMo
       cpId,
       targetFieldName,
       defaultValueConfig,
-      formattedFormula: defaultValueConfig.formattedFormula || ''
+      formattedFormula
     });
 
     return () => {
       formulaWatchContext.unregisterFormulaComponent(cpId);
     };
-  }, [isFormulaType, formulaWatchContext, cpId, targetFieldName, defaultValueConfig]);
+  }, [isFormulaType, formulaWatchContext, cpId, targetFieldName, formattedFormula, relatedFieldsStr]);
   // ===== 公式监听 end =====
 
   // ===== 外部事件：选择数据 begin =====
