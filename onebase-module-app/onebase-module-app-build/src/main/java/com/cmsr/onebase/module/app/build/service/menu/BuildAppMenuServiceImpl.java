@@ -283,7 +283,11 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
         menuDO.setMenuType(createReqVO.getMenuType());
         menuDO.setMenuName(createReqVO.getMenuName());
         menuDO.setMenuIcon(createReqVO.getMenuIcon());
-        menuDO.setMenuSort(generateMenuSort(applicationDO.getId()));
+        Integer menuSort = createReqVO.getMenuSort();
+        if (menuSort == null || menuSort <= 0) {
+            menuSort = generateMenuSort(applicationDO.getId());
+        }
+        menuDO.setMenuSort(menuSort);
         menuDO.setIsVisiblePc(NumberUtils.INTEGER_ONE);
         menuDO.setIsVisibleMobile(NumberUtils.INTEGER_ONE);
         menuDO.setEntityUuid(createReqVO.getEntityUuid());
