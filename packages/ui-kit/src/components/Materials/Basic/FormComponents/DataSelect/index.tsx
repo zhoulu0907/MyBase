@@ -14,6 +14,125 @@ import { useFormField } from '../useFormField';
 import { useFormEditorSignal } from '@/index';
 import { isRuntimeEnv } from '@onebase/common';
 import './index.css';
+
+// ===== 过滤条件转换函数 begin =====
+/**
+ * 将前端 filterCondition 转换为后端 API 需要的 filters 格式
+ */
+function transformFilterConditionToFilters(filterCondition: any[], form?: any): any {
+  if (!filterCondition || filterCondition.length === 0) {
+    return undefined;
+  }
+
+  // 如果只有一个顶级组
+  if (filterCondition.length === 1) {
+    const children = transformConditions(filterCondition[0].conditions, form);
+    if (!children || children.length === 0) return undefined;
+
+    return {
+      nodeType: 'GROUP',
+      combinator: 'AND',
+      children
+    };
+  }
+
+  // 多个顶级组，用 OR 连接
+  const children = filterCondition.map(group => {
+    const groupChildren = transformConditions(group.conditions, form);
+    return {
+      nodeType: 'GROUP',
+      combinator: 'AND',
+      children: groupChildren || []
+    };
+  }).filter((g: any) => g.children && g.children.length > 0);
+
+  if (children.length === 0) return undefined;
+
+  return {
+    nodeType: 'GROUP',
+    combinator: 'OR',
+    children
+  };
+}
+
+/**
+ * 转换条件列表
+ */
+function transformConditions(conditions: any[], form?: any): any[] {
+  if (!conditions) return [];
+
+  return conditions
+    .filter(cond => cond && cond.fieldKey && cond.op)
+    .map(cond => {
+      const fieldName = cond.fieldKey?.split('.')[1] || cond.fieldKey;
+      const fieldValue = resolveFieldValue(cond, form);
+
+      return {
+        nodeType: 'CONDITION',
+        fieldName,
+        operator: cond.op,
+        fieldValue
+      };
+    });
+}
+
+/**
+ * 解析字段值（处理静态值、变量、公式）
+ */
+function resolveFieldValue(cond: any, form?: any): any[] {
+  const { operatorType, value } = cond;
+
+  if (!value) return [];
+
+  switch (operatorType) {
+    case 'VALUE':
+      // 静态值：转为数组
+      return Array.isArray(value) ? value : [value];
+
+    case 'VARIABLES':
+      // 变量：从当前表单上下文获取值
+      return resolveVariableValue(value, form);
+
+    case 'FORMULA':
+      // 公式：计算公式结果（需要公式引擎）
+      console.warn('Formula evaluation not implemented for DataSelect filter');
+      return [];
+
+    default:
+      return [value];
+  }
+}
+
+/**
+ * 解析变量值
+ * @param variablePath 变量路径，格式：currentForm.fieldName 或 tableName.fieldName
+ * @param form 当前表单实例
+ */
+function resolveVariableValue(variablePath: string, form?: any): any[] {
+  if (!variablePath || !form) return [];
+
+  // 解析变量路径
+  const parts = variablePath.split('.');
+  const fieldKey = parts[parts.length - 1];  // 取最后一段作为字段名
+
+  // 从表单获取字段值
+  const formValue = form.getFieldValue(fieldKey);
+
+  if (formValue == null) return [];
+
+  // 处理对象格式的值（如数据选择组件 { id, name }）
+  if (typeof formValue === 'object' && formValue.id !== undefined) {
+    return [formValue.id];
+  }
+
+  // 数组值
+  if (Array.isArray(formValue)) {
+    return formValue;
+  }
+
+  return [formValue];
+}
+// ===== 过滤条件转换函数 end =====
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
@@ -62,11 +181,13 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     const normalize = (data: any) => {
       if (!data) return '';
       if (typeof data === 'object') {
+        // 新格式：{ id, name, value } - 保留 value 用于显示和访问
         if (typeof data.id !== 'undefined' || typeof data.name !== 'undefined') {
-          return { id: data.id ?? '', name: data.name ?? '' };
+          return { id: data.id ?? '', name: data.name ?? '', value: data.value ?? null };
         }
+        // 旧格式兼容：{ selectID, displayValue }
         if (typeof data.selectID !== 'undefined' || typeof data.displayValue !== 'undefined') {
-          return { id: data.selectID ?? '', name: data.displayValue ?? '' };
+          return { id: data.selectID ?? '', name: data.displayValue ?? '', value: null };
         }
       } else if (typeof data === 'string') {
         return data;
@@ -158,9 +279,15 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     const tableName = props?.selectedDataSource?.tableName;
     if (!tableName) return;
     const { curMenu } = menuSignal;
+
+    // 处理过滤条件
+    const filterCondition = props?.filterCondition;
+    const filters = transformFilterConditionToFilters(filterCondition, form);
+
     const req: PageMethodV2Params = {
       pageNo: 1,
-      pageSize: 100
+      pageSize: 100,
+      filters
     };
 
     const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
@@ -185,7 +312,8 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     props.selectMethod,
     props?.dynamicTableConfig?.metaData,
     props?.selectedDataSource?.entityUuid,
-    displayFields
+    displayFields,
+    props.filterCondition
   ]);
 
   const renderInteractiveContent = () => (

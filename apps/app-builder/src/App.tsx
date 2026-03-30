@@ -42,6 +42,12 @@ function AppContent() {
   useEffect(() => {
     if (tenantId) {
       TokenManager.setCurIdentifyId(tenantId);
+
+      // 如果 session 中没有 tenant_id，从 URL 获取并存储
+      const existingTenantId = TokenManager.getTenantInfo()?.tenantId;
+      if (!existingTenantId) {
+        TokenManager.setTenantId(tenantId);
+      }
       // initPlugins(); // 已在 main.tsx 中提前初始化
     }
   }, [tenantId, location.pathname]);
