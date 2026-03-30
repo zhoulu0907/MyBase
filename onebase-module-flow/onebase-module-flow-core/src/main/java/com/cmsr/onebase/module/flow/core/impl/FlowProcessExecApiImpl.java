@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Author：huangjie
@@ -138,6 +137,15 @@ public class FlowProcessExecApiImpl implements FlowProcessExecApi {
                     return respDTO;
                 }
             }
+
+            // 防止同一流程在同一线程内递归触发（例如流程中的数据更新再次触发本流程）
+            if (flowProcessExecutor.isProcessExecutingInCurrentThread(nodeData.getProcessId())) {
+                respDTO.setSuccess(true);
+                respDTO.setTriggered(false);
+                respDTO.setMessage(String.format("检测到流程递归触发，已跳过执行: processId=%s", nodeData.getProcessId()));
+                return respDTO;
+            }
+
             respDTO.setTriggered(true);
             ExecutorInput executorInput = new ExecutorInput();
             executorInput.setTraceId(reqDTO.getTraceId());
