@@ -28,7 +28,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -42,6 +44,11 @@ import java.util.UUID;
 @Component
 @Conditional(FlowEnableCondition.class)
 public class FlowProcessExecutor {
+
+    /**
+     * 当前线程内正在执行的流程栈（支持嵌套不同流程），用于防止同一流程递归重入。
+     */
+    private static final ThreadLocal<Deque<Long>> EXECUTING_PROCESS_STACK_HOLDER = new ThreadLocal<>();
 
     @Autowired
     private FlowExecutor flowExecutor;
@@ -208,6 +215,20 @@ public class FlowProcessExecutor {
     }
 
     /**
+     * 判断当前线程是否正在执行指定流程。
+     *
+     * @param processId 流程ID
+     * @return true-当前线程正在执行该流程；false-未执行
+     */
+    public boolean isProcessExecutingInCurrentThread(Long processId) {
+        if (processId == null) {
+            return false;
+        }
+        Deque<Long> processStack = EXECUTING_PROCESS_STACK_HOLDER.get();
+        return processStack != null && processStack.contains(processId);
+    }
+
+    /**
      * 执行流程的公共逻辑
      */
     private ExecutorResult executeFlow(Long processId, VariableContext variableContext, ExecuteContext executeContext) {
@@ -215,19 +236,48 @@ public class FlowProcessExecutor {
         String traceId = executeContext.getTraceId();
         String executionUuid = executeContext.getExecutionUuid();
 
-        log.info("[FLOW-TRACE] executeFlow开始: processId={}, traceId={}, executionUuid={}, chainId={}",
-                processId, traceId, executionUuid, chainId);
+        pushExecutingProcess(processId);
+        try {
+            log.info("[FLOW-TRACE] executeFlow开始: processId={}, traceId={}, executionUuid={}, chainId={}",
+                    processId, traceId, executionUuid, chainId);
 
-        executeContext.addLog("调用流程执行方法");
-        LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
-        executeContext.addLog("调用流程执行方法返回");
+            executeContext.addLog("调用流程执行方法");
+            LiteflowResponse response = flowExecutor.execute2Resp(chainId, processId, variableContext, executeContext);
+            executeContext.addLog("调用流程执行方法返回");
 
-        log.info("[FLOW-TRACE] LiteFlow执行完成: processId={}, traceId={}, executionUuid={}, success={}",
-                processId, traceId, executionUuid, response.isSuccess());
+            log.info("[FLOW-TRACE] LiteFlow执行完成: processId={}, traceId={}, executionUuid={}, success={}",
+                    processId, traceId, executionUuid, response.isSuccess());
 
-        VariableContext updatedVariableContext = response.getContextBean(VariableContext.class);
-        ExecuteContext updatedExecuteContext = response.getContextBean(ExecuteContext.class);
-        return buildExecutorResult(response, updatedExecuteContext, updatedVariableContext);
+            VariableContext updatedVariableContext = response.getContextBean(VariableContext.class);
+            ExecuteContext updatedExecuteContext = response.getContextBean(ExecuteContext.class);
+            return buildExecutorResult(response, updatedExecuteContext, updatedVariableContext);
+        } finally {
+            popExecutingProcess(processId);
+        }
+    }
+
+    private void pushExecutingProcess(Long processId) {
+        Deque<Long> processStack = EXECUTING_PROCESS_STACK_HOLDER.get();
+        if (processStack == null) {
+            processStack = new ArrayDeque<>();
+            EXECUTING_PROCESS_STACK_HOLDER.set(processStack);
+        }
+        processStack.push(processId);
+    }
+
+    private void popExecutingProcess(Long processId) {
+        Deque<Long> processStack = EXECUTING_PROCESS_STACK_HOLDER.get();
+        if (processStack == null || processStack.isEmpty()) {
+            return;
+        }
+        if (processId.equals(processStack.peek())) {
+            processStack.pop();
+        } else {
+            processStack.removeFirstOccurrence(processId);
+        }
+        if (processStack.isEmpty()) {
+            EXECUTING_PROCESS_STACK_HOLDER.remove();
+        }
     }
 
     /**

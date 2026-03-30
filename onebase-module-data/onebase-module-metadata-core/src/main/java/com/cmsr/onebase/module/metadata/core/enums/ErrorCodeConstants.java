@@ -56,7 +56,7 @@ public interface ErrorCodeConstants {
 
     // ========== 前置后置流程触发相关 1-003-008-000 ==========
     ErrorCode PROCESS_ERROR_BEFORE_CREATE = new ErrorCode(1_003_008_000, "数据插入前置工作流触发失败，接口返回：{}");
-    ErrorCode PROCESS_ERROR_AFTER_CREATE = new ErrorCode(1_003_008_001, "数据插入前置工作流触发失败，接口返回：{}");
+    ErrorCode PROCESS_ERROR_AFTER_CREATE = new ErrorCode(1_003_008_001, "数据插入后置工作流触发失败，接口返回：{}");
     ErrorCode PROCESS_ERROR_BEFORE_UPDATE = new ErrorCode(1_003_008_002, "数据更新前置工作流触发失败，接口返回：{}");
     ErrorCode PROCESS_ERROR_AFTER_UPDATE = new ErrorCode(1_003_008_003, "数据更新后置工作流触发失败，接口返回：{}");
     ErrorCode PROCESS_ERROR_BEFORE_DELETE = new ErrorCode(1_003_008_004, "数据删除前置工作流触发失败，接口返回：{}");
