@@ -24,10 +24,13 @@ import copilotdocSVG from '@/assets/images/aidoc_line2.svg';
 import copilotdocActiveSVG from '@/assets/images/aidoc_line_active2.svg';
 import wxminiSVG from '@/assets/images/wxmini_line2.svg';
 import wxminiActiveSVG from '@/assets/images/wxmini_line_active2.svg';
+import agentSVG from '@/assets/images/agent.svg';
+import agentActiveSVG from '@/assets/images/agent_active.svg';
 import { userPermissionSignal } from '@/store/singals/user_permission';
-import { Button, Layout, Menu } from '@arco-design/web-react';
+import { Button, Layout, Menu, Message } from '@arco-design/web-react';
 import { IconMenuFold, IconMenuUnfold } from '@arco-design/web-react/icon';
 import { hasMenu, TENANT_MENUS } from '@onebase/common';
+import { oauthAuthorize } from '@onebase/platform-center';
 import { useSignals } from '@preact/signals-react/runtime';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -146,6 +149,13 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       permissionKey: TENANT_MENUS.CORP
     },
     {
+      key: 'agent',
+      title: '智能体管理',
+      icon: <img src={agentSVG} />,
+      iconActive: <img src={agentActiveSVG} />,
+      path: `/onebase/${tenantId}/setting/agent`
+    },
+    {
       key: 'copilotdoc',
       title: 'AI生成文档',
       icon: <img src={copilotdocSVG} />,
@@ -206,7 +216,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   }, [location.pathname, findSelectedKeys]);
 
   // 处理菜单点击
-  const handleMenuClick = (key: string) => {
+  const handleMenuClick = async (key: string) => {
     const findPathByKey = (items: MenuItemType[], targetKey: string): string | null => {
       for (const item of items) {
         if (item.key === targetKey) {
@@ -221,7 +231,28 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     };
 
     const path = findPathByKey(finalMenuItems, key.replace('.$', ''));
-    if (path) {
+    
+    if (key === 'agent') {
+      try {
+        const authorizeRes = await oauthAuthorize({
+          client_id: 'aitool',
+          scope: '',
+          redirect_uri: 'http://10.0.13.16:29500/bote/manager/',
+          response_type: 'code',
+          auto_approve: true
+        });
+
+        if (authorizeRes.code) {
+          const callbackUrl = `http://bote.sit.artifex-cmcc.com.cn/bote/api/bote/oauth2/callback?systemCode=onebase&redirect=http://bote.sit.artifex-cmcc.com.cn/bote/manager/%23/&code=${authorizeRes.code}`;
+          window.open(callbackUrl, '_blank');
+        } else {
+          Message.error('获取授权码失败');
+        }
+      } catch (error) {
+        console.error('智能体管理调用失败:', error);
+        Message.error('智能体管理调用失败');
+      }
+    } else if (path) {
       navigate(path);
     }
   };
