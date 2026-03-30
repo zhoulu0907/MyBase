@@ -17,3 +17,4 @@ export const runtimeBpmService = createClient('/bpm', getRuntimeBackendURL());
 export const runtimeMetadataService = createClient('/metadata', getRuntimeBackendURL());
 export const runtimeListdataService = createClient('/bpm', getRuntimeBackendURL());
 export const runtimeFlowService = createClient('/flow', getRuntimeBackendURL());
+export const runtimeFormulaService = createClient('/formula', getRuntimeBackendURL());

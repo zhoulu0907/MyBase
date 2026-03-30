@@ -351,6 +351,7 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
     const copyFormulaData = formulaData;
     const matches = [...copyFormulaData.matchAll(regex)];
     const variablesMapping: { [key: string]: string } = {};
+    
     matches.forEach((match) => {
       const temp = match[1].split('.');
       const dollarIdx = temp.findIndex((p) => p.startsWith('$'));
@@ -383,7 +384,53 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
         return;
       }
     });
+    
     return variablesMapping;
+  };
+
+  /**
+   * 新增：获取公式中引用的相关字段
+   * 用于运行态实时监听字段变化
+   */
+  const getRelatedFields = (formulaData: string) => {
+    const regex = /\[\[(.*?)\]\]/g;
+    const copyFormulaData = formulaData;
+    const matches = [...copyFormulaData.matchAll(regex)];
+    const relatedFields: Array<{
+      fieldId: string;
+      fieldName: string;
+      formFieldName: string;
+    }> = [];
+    
+    matches.forEach((match) => {
+      const temp = match[1].split('.');
+      const dollarIdx = temp.findIndex((p) => p.startsWith('$'));
+      
+      if (dollarIdx !== -1 && dollarIdx < temp.length - 1) {
+        return;
+      }
+
+      if (temp.length === 2) {
+        const fieldId = temp[0] || '';
+        const fieldName = temp[1] || '';
+        if (fieldName) {
+          let fieldInfo: any = null;
+          for (const entity of variables) {
+            fieldInfo = entity.fields?.find((f: any) => f.id === fieldId);
+            if (fieldInfo) break;
+          }
+          
+          relatedFields.push({
+            fieldId,
+            fieldName,
+            formFieldName: fieldInfo?.fieldName || fieldName
+          });
+        }
+        return;
+      }
+    });
+    
+    return relatedFields;
   };
 
   /**
@@ -392,9 +439,10 @@ export function FormulaEditor({ fieldName, visible, onCancel, onConfirm, initial
   const handleConfirm = useCallback(async () => {
     const newFormula = formattedFormula();
     const params = getParameters(formula);
-    onConfirm(formula, newFormula, params);
+    const relatedFields = getRelatedFields(formula);
+    onConfirm(formula, newFormula, params, relatedFields);
     setIsDebugMode(false);
-  }, [formula, onConfirm, onCancel]);
+  }, [formula, onConfirm, onCancel, variables]);
 
   /**
    * 公式编辑器准备就绪

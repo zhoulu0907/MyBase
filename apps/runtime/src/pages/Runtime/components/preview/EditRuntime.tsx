@@ -10,6 +10,8 @@ import {
   STATUS_VALUES,
   useEditorSignalMap,
   usePageViewEditorSignal,
+  useFormulaWatchManager,
+  FormulaWatchProvider,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -44,12 +46,18 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
 
   const { pageViews, curViewId } = usePageViewEditorSignal;
   const { editPageViewId, curPage, subEntities } = pagesRuntimeSignal;
+  const formulaWatchManager = useFormulaWatchManager();
 
   const [cpStates, setCpStates] = useState<Record<string, any>>({});
   const isLoadingFromDraftBoxRef = useRef(false);
 
+  useEffect(() => {
+    formulaWatchManager.setForm(form);
+  }, [form, formulaWatchManager]);
+
   const handleFormValuesChange = useCallback(
     async (_value: Partial<any>, values: Partial<any>) => {
+      formulaWatchManager.handleValuesChange(_value, values);
       const states = await initInteractionRule(
         values,
         pageViews.value[curViewId.value]?.interactionRules,
@@ -57,7 +65,7 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
       );
       setCpStates(states);
     },
-    [pageViews.value, curViewId.value, editPageViewId.value]
+    [pageViews.value, curViewId.value, editPageViewId.value, formulaWatchManager]
   );
 
   // 载入草稿数据
@@ -196,49 +204,51 @@ const EditRuntime: React.FC<EditRuntimeProps> = ({
           className={styles.editRuntimeContent}
           style={{ maxHeight: fullScreen ? '80vh' : '55vh', minHeight: fullScreen ? '80vh' : '20vh', overflow: 'auto' }}
         >
-          <Form
-            layout="inline"
-            labelCol={{ span: 10 }}
-            wrapperCol={{ span: 14 }}
-            form={form}
-            onValuesChange={handleFormValuesChange}
-          >
-            <Form.Item field="draftId" hidden={true}>
-              <Input />
-            </Form.Item>
+          <FormulaWatchProvider value={formulaWatchManager}>
+            <Form
+              layout="inline"
+              labelCol={{ span: 10 }}
+              wrapperCol={{ span: 14 }}
+              form={form}
+              onValuesChange={handleFormValuesChange}
+            >
+              <Form.Item field="draftId" hidden={true}>
+                <Input />
+              </Form.Item>
 
-            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
-              <Fragment key={cp.id}>
-                {hiddenState(cp.id) && (
-                  //   {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
-                  //     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                  <div
-                    key={cp.id}
-                    className={styles.componentItem}
-                    style={{
-                      width: `calc(${getComponentWidth(
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
-                        cp.type
-                      )} - 8px)`,
-                      margin: '4px'
-                    }}
-                  >
-                    <PreviewRender
-                      cpId={cp.id}
-                      cpType={cp.type}
-                      pageType={EDITOR_TYPES.FORM_EDITOR}
-                      pageComponentSchema={
-                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
-                      }
-                      runtime={true}
-                      showFromPageData={() => {}}
-                      cpState={cpStates[cp.id]}
-                    />
-                  </div>
-                )}
-              </Fragment>
-            ))}
-          </Form>
+              {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
+                <Fragment key={cp.id}>
+                  {hiddenState(cp.id) && (
+                    //   {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                    //     STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: `calc(${getComponentWidth(
+                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )} - 8px)`,
+                        margin: '4px'
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageType={EDITOR_TYPES.FORM_EDITOR}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        showFromPageData={() => {}}
+                        cpState={cpStates[cp.id]}
+                      />
+                    </div>
+                  )}
+                </Fragment>
+              ))}
+            </Form>
+          </FormulaWatchProvider>
         </div>
       </Modal>
     </>
