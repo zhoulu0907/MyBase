@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.bpm.core.listener;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowCcRecordRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowCcRecordDO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import com.cmsr.onebase.module.bpm.core.enums.BpmNodeApproveStatusEnum;
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.annotation.Resource;
@@ -12,11 +13,11 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dromara.warm.flow.core.dto.FlowParams;
+import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.entity.Task;
 import org.dromara.warm.flow.core.enums.SkipType;
 import org.dromara.warm.flow.core.listener.ListenerVariable;
 import org.dromara.warm.flow.core.service.TaskService;
-import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +46,10 @@ public class BpmCcNodeListener {
         Map<String, Object> flowVariable = listenerVariable.getVariable();
         Task currTask = listenerVariable.getTask();
         String currHandler = BpmConstants.SYS_USER_ID;
+        Instance instance = listenerVariable.getInstance();
+
+        // 获取上一个节点的状态
+        String lastFlowStatus = instance.getFlowStatus();
 
         // 使用系统用户进行跳转
         FlowParams skipParams = FlowParams.build()
@@ -52,6 +57,7 @@ public class BpmCcNodeListener {
                 .message("自动抄送")
                 .skipType(SkipType.PASS.getKey())
                 .hisStatus(BpmNodeApproveStatusEnum.POST_AUTO_CC.getCode())
+                .flowStatus(lastFlowStatus)
                 .handler(currHandler);
 
         log.info("自动抄送任务开始执行..., nodeCode：{} nodeName：{}", currTask.getNodeCode(), currTask.getNodeName());
