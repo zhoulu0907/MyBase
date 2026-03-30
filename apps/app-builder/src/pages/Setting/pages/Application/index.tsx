@@ -29,7 +29,6 @@ import {
   TENANT_APP_PERMISSION as ACTIONS,
   UserPermissionManager
 } from '@onebase/common';
-import { oauthAuthorize } from '@onebase/platform-center';
 import { debounce } from 'lodash-es';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -283,28 +282,6 @@ const AppManagement: React.FC = () => {
     setDeleteVisible(true);
   };
 
-  const handleAgentConsole = async () => {
-    try {
-      const authorizeRes = await oauthAuthorize({
-        client_id: 'aitool',
-        scope: '',
-        redirect_uri: 'http://10.0.13.16:29500/bote/manager/',
-        response_type: 'code',
-        auto_approve: true
-      });
-
-      if (authorizeRes.code) {
-        const callbackUrl = `http://bote.sit.artifex-cmcc.com.cn/bote/api/bote/oauth2/callback?systemCode=onebase&redirect=http://bote.sit.artifex-cmcc.com.cn/bote/manager/%23/&code=${authorizeRes.code}`;
-        window.open(callbackUrl, '_blank');
-      } else {
-        Message.error('获取授权码失败');
-      }
-    } catch (error) {
-      console.error('智能体控制台调用失败:', error);
-      Message.error('智能体控制台调用失败');
-    }
-  };
-
   return (
     <div className={styles.appPage}>
       <div className={styles.appContainer}>
@@ -327,7 +304,7 @@ const AppManagement: React.FC = () => {
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
-                <div className={styles.otherCreate}>
+                <div className={styles.otherCreate} onClick={() => Message.info('功能正在建设中，敬请期待！')}>
                   <div className={styles.otherCreateContent}>
                     <div className={styles.otherCreateTitle}>智能克隆</div>
                     <div className={styles.otherCreateDesc}>智能解析高码应用，快速转换为零代码应用</div>
@@ -363,9 +340,6 @@ const AppManagement: React.FC = () => {
 
             {/* 筛选下拉框 */}
             <div>
-              <Button type="primary" onClick={handleAgentConsole}>
-                智能体控制台
-              </Button>
               <Select
                 placeholder="全部应用"
                 bordered={false}

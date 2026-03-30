@@ -7,13 +7,14 @@ import { FORM_COMPONENT_TYPES } from '../../../componentTypes';
 import { DEFAULT_VALUE_TYPES, STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import type { XInputNumberConfig } from './schema';
 import { securityEncodeText } from '@/utils';
+import { useFormulaWatchContext } from '../../../../../contexts';
 
 import '../index.css';
 import { useFormFieldWatch } from '../useFormField';
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
-const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; }) => {
+const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any; id?: string; }) => {
   // ===== 外部 props begin =====
   const {
     label,
@@ -30,7 +31,8 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     runtime = true,
     detailMode,
     numberFormat,
-    security
+    security,
+    id: cpId
   } = props;
   const { showUnit, unitValue, showPrecision, precision, showPercent, useThousandsSeparator } = numberFormat;
   // ===== 外部 props end =====
@@ -41,7 +43,32 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
 
   // ===== 表单上下文与字段名与值读取 begin =====
   const { form, fieldValue } = useFormFieldWatch(dataField);
+  const targetFieldName = dataField.length > 0 ? dataField[dataField.length - 1] : '';
   // ===== 表单上下文与字段名与值读取 end =====
+
+  // ===== 公式监听 begin =====
+  const formulaWatchContext = useFormulaWatchContext();
+  const isFormulaType = defaultValueConfig?.type === DEFAULT_VALUE_TYPES.FORMULA;
+  const formattedFormula = defaultValueConfig?.formattedFormula || '';
+  const relatedFieldsStr = JSON.stringify(defaultValueConfig?.relatedFields || []);
+
+  useEffect(() => {
+    if (!isFormulaType || !formulaWatchContext || !targetFieldName || !cpId) {
+      return;
+    }
+
+    formulaWatchContext.registerFormulaComponent({
+      cpId,
+      targetFieldName,
+      defaultValueConfig,
+      formattedFormula
+    });
+
+    return () => {
+      formulaWatchContext.unregisterFormulaComponent(cpId);
+    };
+  }, [isFormulaType, formulaWatchContext, cpId, targetFieldName, formattedFormula, relatedFieldsStr]);
+  // ===== 公式监听 end =====
 
   // ===== 外部事件：选择数据 begin =====
   // ===== 外部事件：选择数据 end =====

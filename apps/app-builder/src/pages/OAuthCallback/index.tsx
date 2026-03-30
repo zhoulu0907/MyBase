@@ -51,25 +51,25 @@ const OAuthCallback: React.FC = () => {
               if (state) {
                 try {
                   const redirectPath = atob(decodeURIComponent(state));
-                  navigate(redirectPath);
+                  navigate(redirectPath, { replace: true });
                 } catch (error) {
                   console.error('解析state失败:', error);
-                  navigate(`/onebase/${response.tenantId}/home/enterprise-app`);
+                  navigate(`/onebase/${response.tenantId}/home/enterprise-app`, { replace: true });
                 }
               } else {
-                navigate(`/onebase/${response.tenantId}/home/enterprise-app`);
+                navigate(`/onebase/${response.tenantId}/home/enterprise-app`, { replace: true });
               }
             }
           } catch (error) {
             console.error('天工登录失败:', error);
             if ((error as any)?.response?.status !== 302) {
               Message.error((error as any)?.message || t('oauth.callback.loginFailed'));
-              navigate('/login');
+              navigate('/login', { replace: true });
             }
           }
         } else {
           Message.error(t('oauth.callback.codeMissing'));
-          navigate('/login');
+          navigate('/login', { replace: true });
         }
       };
 

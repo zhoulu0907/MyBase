@@ -48,8 +48,9 @@ const DynamicLabelInputConfig = ({ handlePropsChange, item, configs, isInSubTabl
           )}
         </>
       }
+      rules={[{ maxLength: 20, message: '标题名称不能超过20个字符' }]}
     >
-      <Input placeholder={`请输入${item.name}`} value={localValue} onChange={handleChange} />
+      <Input placeholder={`请输入${item.name}`} value={localValue} onChange={handleChange} maxLength={20} />
     </Form.Item>
   );
 };

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Form, Select, Spin } from '@arco-design/web-react';
 import { registerConfigRenderer } from '../../registry';
 import { WORKBENCH_CONFIG_TYPES, type IWbAgentSelectorConfigType } from '@onebase/ui-kit';
+import { TokenManager } from '@onebase/common';
 import axios from 'axios';
 import styles from '../../index.module.less';
 
@@ -35,10 +36,11 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
   const fetchAgentList = async () => {
     setLoading(true);
     try {
+      const tenantId = TokenManager.getCurIdentifyId();
       const response = await axios.post(
         'http://bote.sit.artifex-cmcc.com.cn/bote/api/bote/manager/bot/queryPublishedAppPage',
         {
-          extTenantId: '153935442021842944',
+          extTenantId: tenantId,
           spaceId: '1348207178626895872',
           pageNum: 1,
           pageSize: 10

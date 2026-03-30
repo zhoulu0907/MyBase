@@ -47,7 +47,7 @@ import {
   type UpdateApplicationMenuVisibleReq
 } from '@onebase/app';
 import { updateApplicationMenuVisibleMobile, updateApplicationMenuVisiblePC } from '@onebase/app/src/services';
-import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
+import { getDashBoardURL, pagesRuntimeSignal, TokenManager } from '@onebase/common';
 import { EDITOR_TYPES, menuDictSignal, setMainMetaData, useAppEntityStore } from '@onebase/ui-kit';
 import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -130,6 +130,7 @@ const PageManagerPage: FC = () => {
   const dashboardType = 'dashboard';
 
   const { tenantId } = useParams();
+  const curTenantId = TokenManager.getCurIdentifyId();
 
   const { curAppId } = useAppStore();
 
@@ -461,7 +462,7 @@ const PageManagerPage: FC = () => {
       const dashboardInfo = await listPageView({ pageSetId, isDev: true });
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
       if (screenMethod !== DashBoardCreateType.DashboardLink) {
-        window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+        window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${curTenantId}`, '_blank');
       }
     });
   };
@@ -594,7 +595,7 @@ const PageManagerPage: FC = () => {
       const dashboardInfo = await listPageView({ pageSetId, isDev: true });
 
       const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
-      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${curTenantId}`, '_blank');
     } else {
       const editorType =
         curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;

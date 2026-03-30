@@ -32,6 +32,7 @@ export const EntryList = ({ entries, onSortChange, onEdit, onDelete, onAddEntry,
                 value={entry.entryName}
                 onChange={(value) => onEditEntry(entry.entryId, 'entryName', value)}
                 placeholder="请输入入口名称"
+                maxLength={20}
               />
             </div>
             <div className={styles.entryActions}>

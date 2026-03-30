@@ -52,15 +52,17 @@
       var urlParams = new URLSearchParams(window.location.search);
       var code = urlParams.get('code');
       var state = urlParams.get('state');
+      var isSitHost = window.location.host === 'onebase.sit.artifex-cmcc.com.cn';
+      var baseUrl = isSitHost ? '' : '/v0';
 
       if (code) {
-        var redirectUrl = '/v0/obappbuilder/#/oauth/obbuilder/app?code=' + encodeURIComponent(code);
+        var redirectUrl = baseUrl + '/obappbuilder/#/oauth/obbuilder/app?code=' + encodeURIComponent(code);
         if (state) {
           redirectUrl += '&state=' + encodeURIComponent(state);
         }
-        window.location.href = redirectUrl;
+        window.location.replace(redirectUrl);
       } else {
-        window.location.href = '/v0/obappbuilder/#/login';
+        window.location.replace(baseUrl + '/obappbuilder/#/login');
       }
     })();
   </script>

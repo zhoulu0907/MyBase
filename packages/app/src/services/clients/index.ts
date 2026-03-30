@@ -9,6 +9,7 @@ export {
   runtimeAppService,
   runtimeBpmService,
   runtimeFlowService,
+  runtimeFormulaService,
   runtimeListdataService,
   runtimeMetadataService,
   dashboardService

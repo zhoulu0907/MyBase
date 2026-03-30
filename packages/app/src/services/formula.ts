@@ -1,5 +1,6 @@
+import { isRuntimeEnv } from '@onebase/common';
 import { formulaParams } from '../types/formula';
-import { formulaService } from './clients';
+import { formulaService, runtimeFormulaService } from './clients';
 
 /**
  * 获取函数精简信息列表
@@ -22,5 +23,5 @@ export const getFormulaById = (id: string) => {
  * @returns 返回计算结果
  */
 export const debugFormula = (formulaData: formulaParams) => {
-  return formulaService.post('/engine/debug-formula',formulaData);
+  return (isRuntimeEnv() ? runtimeFormulaService : formulaService).post('/engine/debug-formula', formulaData);
 }
