@@ -379,7 +379,7 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
     }
 
     private void fillPredictRecord(Instance instance, LinkedHashMap<Long, BpmOperatorRecordRespVO.OperatorRecord> recordMap) {
-       String currNodeCode = instance.getNodeCode();
+        String currNodeCode = instance.getNodeCode();
         Long loginUserId = WebFrameworkUtils.getLoginUserId();
 
         if (NodeType.isEnd(instance.getNodeType())) {
@@ -397,13 +397,18 @@ public class BpmOperatorRecordServiceImpl implements BpmOperatorRecordService {
         }
 
         while (true) {
-            // todo：理论上只会有一条路径，需要结合实体信息预测下一步走向，主要是涉及到条件分支的
-            Node nextNode = nodeService.getNextNode(definition.getId(), currNodeCode, null, SkipType.PASS.getKey());
+            // 获取下一节点列表，支持条件分支和并行网关
+            List<Node> nextNodes = nodeService.getNextNodeList(definition.getId(), currNodeCode, null,
+                    SkipType.PASS.getKey(), instance.getVariableMap());
 
-            if (nextNode == null) {
-                log.warn("下一个节点为空");
+            if (CollectionUtils.isEmpty(nextNodes)) {
+                // 找不到下一个节点，结束
+                log.warn("没找到下一个节点");
                 break;
             }
+
+            // 并行网关可能返回多个，条件分支只会返回一个；预测场景取第一个继续
+            Node nextNode = nextNodes.get(0);
 
             if (NodeType.isEnd(nextNode.getNodeType())) {
                 break;
