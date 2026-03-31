@@ -26,8 +26,8 @@ public class SystemExternalUserServiceImpl implements SystemExternalUserService 
     }
 
     @Override
-    public SystemExternalUserDO getByExternalUserId(String externalUserId, String platformType, String externalTenantId) {
-        return systemExternalUserDataRepository.findByExternalUserId(externalUserId, platformType, externalTenantId);
+    public SystemExternalUserDO getByExternalUserId(String externalUserId, String platformType) {
+        return systemExternalUserDataRepository.findByExternalUserIdAndTenantId(externalUserId, platformType);
     }
 }
 

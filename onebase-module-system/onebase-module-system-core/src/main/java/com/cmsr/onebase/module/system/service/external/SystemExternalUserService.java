@@ -26,7 +26,7 @@ public interface SystemExternalUserService {
      * @param externalUserId 外部用户 id
      * @return 关联列表
      */
-    SystemExternalUserDO getByExternalUserId(String externalUserId, String platformType, String externalTenantId);
+    SystemExternalUserDO getByExternalUserId(String externalUserId, String platformType);
 
 }
 

@@ -276,7 +276,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AdminUserDO updateOrAddUser(ExternalUserInfoReqVO userInfoReqVO) {
-        SystemExternalUserDO externalUserDO = systemExternalUserDataRepository.findByExternalUserId(userInfoReqVO.getId(), userInfoReqVO.getPlatformType(), userInfoReqVO.getCurrentTenantId());
+        // todo 这里暂时忽略天工的租户ID
+        SystemExternalUserDO externalUserDO = systemExternalUserDataRepository.findByExternalUserId(userInfoReqVO.getId(), userInfoReqVO.getPlatformType());
 
         if (externalUserDO != null) {
             AdminUserDO adminUserDO = userDataRepository.findById(externalUserDO.getObUserId());
