@@ -28,6 +28,7 @@ public class WebProperties {
     private Api buildApi = new Api(BUILD, new String[]{
         "**.controller.admin.**",
         "**.build.controller.**",
+        "**.build.semantic.controller.**",
         "**.module.**.controller.admin.**"
     });
 

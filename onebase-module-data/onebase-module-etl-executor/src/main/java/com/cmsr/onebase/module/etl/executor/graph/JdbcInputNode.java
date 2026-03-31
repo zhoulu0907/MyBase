@@ -26,8 +26,17 @@ public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableA
     @Override
     public void createTable(TableEnvironment tableEnv, WorkflowGraph graph) {
         Schema.Builder schemaBuilder = Schema.newBuilder();
+        String databaseTypeHint = resolveDatabaseTypeHint();
+        boolean mysqlJdbc = isMysqlJdbc(databaseTypeHint);
         for (Field field : config.getFields()) {
-            DataType dataType = FlinkUtil.toFlinkTableType(field.getFieldType(), field.getLength(), field.getPrecision(), field.getScale());
+            Integer normalizedScale = normalizeScaleForMysqlJdbc(field.getFieldType(), field.getScale(), mysqlJdbc);
+            DataType dataType = FlinkUtil.toFlinkTableType(
+                    field.getFieldType(),
+                    field.getLength(),
+                    field.getPrecision(),
+                    normalizedScale,
+                    databaseTypeHint
+            );
             schemaBuilder.column(field.getFieldName(), dataType);
         }
         TableDescriptor tableDescriptor = TableDescriptor.forConnector("jdbc")
@@ -40,5 +49,38 @@ public class JdbcInputNode extends Node<JdbcInputConfig> implements CreateTableA
                 .build();
         log.info("create table: {}, {}", getId(), tableDescriptor);
         tableEnv.createTable(getId(), tableDescriptor);
+    }
+
+    private String resolveDatabaseTypeHint() {
+        String databaseType = config.getJdbcConfig().getDatabaseType();
+        String driver = config.getJdbcConfig().getDriver();
+        String jdbcUrl = config.getJdbcConfig().getJdbcUrl();
+        return String.join("|",
+                databaseType == null ? "" : databaseType,
+                driver == null ? "" : driver,
+                jdbcUrl == null ? "" : jdbcUrl);
+    }
+
+    private Integer normalizeScaleForMysqlJdbc(String fieldType, Integer scale, boolean mysqlJdbc) {
+        if (!mysqlJdbc || !isTimestampType(fieldType)) {
+            return scale;
+        }
+        int resolvedScale = scale == null ? 6 : scale;
+        if (resolvedScale < 0) {
+            return 0;
+        }
+        return Math.min(resolvedScale, 6);
+    }
+
+    private boolean isTimestampType(String fieldType) {
+        if (fieldType == null) {
+            return false;
+        }
+        String normalizedType = fieldType.trim().toUpperCase();
+        return normalizedType.startsWith("TIMESTAMP");
+    }
+
+    private boolean isMysqlJdbc(String databaseTypeHint) {
+        return databaseTypeHint != null && databaseTypeHint.toLowerCase().contains("mysql");
     }
 }

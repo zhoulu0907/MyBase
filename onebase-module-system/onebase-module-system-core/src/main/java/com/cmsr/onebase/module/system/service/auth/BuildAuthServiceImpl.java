@@ -564,7 +564,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         
         // 4. 通过 access_token 获取用户信息
         JSONObject userInfo = getTianGongUserInfo(config, accessToken);
-        
+        log.info("获取天工用户信息，userInfo={}", userInfo);
         // 5. 处理用户信息并登录
         return processTianGongUserLogin(userInfo, config, deviceId, tenantDo);
     }

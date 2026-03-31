@@ -136,8 +136,8 @@ public class UserAppRelationServiceImpl implements UserAppRelationService {
     public UserAppCountRespVO getUserAppCount(UserAppCountReqVO reqVO) {
 
         UserAppCountRespVO respVO = new UserAppCountRespVO();
-        //1.查询用户关联表有无关联用户
-        SystemExternalUserDO systemExternalUserDO = systemExternalUserService.getByExternalUserId(reqVO.getUserId(), reqVO.getPlatformType(), reqVO.getTenantId());
+        //1.查询用户关联表有无关联用户（后续需考虑添加天工租户对应关系）
+        SystemExternalUserDO systemExternalUserDO = systemExternalUserService.getByExternalUserId(reqVO.getUserId(), reqVO.getPlatformType());
         if (systemExternalUserDO != null) {
             //2.查询用户关联表关联用户关联应用数量
             Long count = appApplicationApi.countApplicationByTenantIdAndUserId(systemExternalUserDO.getObTenantId(), systemExternalUserDO.getObUserId());

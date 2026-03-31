@@ -6,7 +6,6 @@ import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
 import com.cmsr.onebase.module.formula.service.engine.FormulaEngineService;
 import com.cmsr.onebase.module.formula.vo.formula.FormulaExecuteRespVO;
-import com.cmsr.onebase.module.system.api.logger.dto.OperateLogRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -26,15 +25,15 @@ public class FormulaEngineApiImpl implements FormulaEngineApi {
     @Override
     public CommonResult<FormulaExecuteRespDTO> executeFormula(FormulaExecuteReqDTO reqDTO) {
         long startTime = System.currentTimeMillis();
-        log.info("############: "+reqDTO.getFormula());
-        Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(),
+        log.info("FormulaEngineApi executeFormula start ---> "+reqDTO.getFormula());
+        Object result = formulaEngineService.executeFormulaWithParamsData(reqDTO.getFormula(),
                 reqDTO.getParameters(),reqDTO.getContextData());
 
         long executionTime = System.currentTimeMillis() - startTime;
 
         FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
 
-        log.info("公式执行成功，公式：{}，结果：{}，耗时：{}ms", reqDTO.getFormula(), result, executionTime);
+        log.info("FormulaEngineApi executeFormula end --->，公式：{}，结果：{}，耗时：{}ms", reqDTO.getFormula(), result, executionTime);
 
         return CommonResult.success(BeanUtils.toBean(respVO, FormulaExecuteRespDTO.class));
 

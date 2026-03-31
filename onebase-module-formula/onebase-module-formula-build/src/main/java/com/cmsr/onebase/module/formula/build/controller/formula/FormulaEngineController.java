@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author matianyu
  * @date 2025-09-01
  */
-@Tag(name = "公式引擎")
+@Tag(name = "公式引擎Build")
 @RestController
 @RequestMapping("/formula/engine")
 @Validated
@@ -39,36 +39,30 @@ public class FormulaEngineController {
     @PostMapping("/debug-formula")
     @Operation(summary = "调试公式计算")
     public CommonResult<FormulaExecuteRespVO> debugFormula(@Valid @RequestBody FormulaExecuteReqVO reqVO) {
+        log.info("debugFormula -->开始 formula: {} , params: {} " ,reqVO.getFormula(), reqVO.getParameters());
+
         long startTime = System.currentTimeMillis();
-        log.info("debugFormula --> formula: {}" ,reqVO.getFormula());
-        log.info("debugFormula --> params: {} ",reqVO.getParameters());
         Object result = formulaEngineService.executeFormulaWithParams(reqVO.getFormula(), reqVO.getParameters());
-
         long executionTime = System.currentTimeMillis() - startTime;
-
         FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
 
-        log.info("debugFormula成功，公式：{}，结果：{}，耗时：{}ms", reqVO.getFormula(), result, executionTime);
-
+        log.info("debugFormula -->结束，公式：{}，结果：{}，耗时：{}ms", reqVO.getFormula(), result, executionTime);
         return CommonResult.success(respVO);
     }
 
     @PostMapping("/execute-formula")
     @Operation(summary = "执行公式计算")
     public CommonResult<FormulaExecuteRespDTO> executeFormula(@Valid @RequestBody FormulaExecuteReqDTO reqDTO) {
+        log.info("executeFormula -->开始 formula: {} , params: {} " ,reqDTO.getFormula(), reqDTO.getParameters());
+
         long startTime = System.currentTimeMillis();
-        log.info("executeFormula --> formula"+reqDTO.getFormula());
-        Object result = formulaEngineService.executeFormulaWithParamsForFlow(reqDTO.getFormula(), reqDTO.getParameters(),
-                reqDTO.getContextData());
-
+        Object result = formulaEngineService.executeFormulaWithParamsData(reqDTO.getFormula(), reqDTO.getParameters(), reqDTO.getContextData());
         long executionTime = System.currentTimeMillis() - startTime;
-
         FormulaExecuteRespVO respVO = FormulaExecuteRespVO.success(result, executionTime);
 
-        log.info("executeFormula成功，公式：{}，结果：{}，耗时：{}ms", reqDTO.getFormula(), result, executionTime);
+        log.info("executeFormula -->结束，公式：{}，结果：{}，耗时：{}ms", reqDTO.getFormula(), result, executionTime);
 
         return CommonResult.success(BeanUtils.toBean(respVO, FormulaExecuteRespDTO.class));
-
     }
 
 

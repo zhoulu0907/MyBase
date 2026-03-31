@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.module.flow.api.FlowProcessExecApi;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerReqDTO;
 import com.cmsr.onebase.module.flow.api.dto.EntityTriggerRespDTO;
@@ -92,10 +93,11 @@ public class SemanticWorkflowExecutor {
         else if (op == SemanticDataMethodOpEnum.DELETE) reqDTO.setTriggerEvent(TriggerEventEnum.AFTER_DELETE);
         else return;
         reqDTO.setFieldData(mainFieldValues);
-        log.debug("[{}]开始出发FLOW工作流, {}", traceId, reqDTO);
+        log.info("FLOW工作流-->entityTrigger start, traceid={}, req={}", traceId, JsonUtils.toJsonString(reqDTO));
         EntityTriggerRespDTO respDTO = flowProcessExecApi.entityTrigger(reqDTO);
+        log.info("FLOW工作流-->entityTrigger end, traceid={}, respDTO={}", traceId, JsonUtils.toJsonString(respDTO));
         if (!respDTO.isTriggered()) {
-            log.debug("[{}]流程未触发", traceId);
+            log.info("[{}]流程未触发", traceId);
             return;
         }
         if (!respDTO.isSuccess()) {
