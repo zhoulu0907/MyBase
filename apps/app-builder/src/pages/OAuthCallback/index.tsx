@@ -54,10 +54,10 @@ const OAuthCallback: React.FC = () => {
                   navigate(redirectPath, { replace: true });
                 } catch (error) {
                   console.error('解析state失败:', error);
-                  navigate(`/onebase/${response.tenantId}/home/enterprise-app`, { replace: true });
+                  navigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
                 }
               } else {
-                navigate(`/onebase/${response.tenantId}/home/enterprise-app`, { replace: true });
+                navigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
               }
             }
           } catch (error) {
