@@ -39,7 +39,10 @@ function buildVariableOptions(mainEntity: any, subEntities: any): TreeSelectData
       children: mainEntity.fields.map((field: any) => ({
         key: `${mainEntity.tableName}.${field.fieldName}`,
         title: field.displayName || field.fieldName,
-        fieldType: field.fieldType
+        fieldType: field.fieldType,
+        id: field.id,
+        fieldId: field.fieldId,
+        fieldName: field.fieldName
       }))
     });
   }
@@ -54,7 +57,10 @@ function buildVariableOptions(mainEntity: any, subEntities: any): TreeSelectData
           children: entity.fields.map((field: any) => ({
             key: `${entity.tableName}.${field.fieldName}`,
             title: field.displayName || field.fieldName,
-            fieldType: field.fieldType
+            fieldType: field.fieldType,
+            id: field.id,
+            fieldId: field.fieldId,
+            fieldName: field.fieldName
           }))
         });
       }

@@ -33,6 +33,7 @@ import { isRuntimeEnv, menuPermissionSignal, pagesRuntimeSignal } from '@onebase
 import { useSignals } from '@preact/signals-react/runtime';
 import PreviewRender from 'src/components/render/PreviewRender';
 import { useFormEditorSignal } from 'src/signals/page_editor';
+import { useAppEntityStore } from 'src/signals';
 import { ENTITY_FIELD_TYPE } from '../../../../DataFactory/const';
 import { COMPONENT_MAP } from '../../../componentsMap';
 import { getComponentSchema } from '../../../schema';
@@ -67,6 +68,7 @@ const XTable = memo(
 
     const { pageComponentSchemas: fromPageComponentSchemas } = useFormEditorSignal;
     const { canCreate, canEdit, canDelete } = menuPermissionSignal;
+    const { mainEntity, subEntities } = useAppEntityStore();
 
     const {
       curPage,
@@ -123,6 +125,17 @@ const XTable = memo(
     const [selectedRowId, setSelectedRowId] = useState<string | number | null>(
       props?.xTableSelectProps?.defaultSelectedId ?? null
     );
+
+    // 根据字段类型获取默认操作符
+    const getDefaultOperatorByFieldType = (fieldType: string): string => {
+      // 文本类字段使用 CONTAINS（包含/模糊搜索）
+      const CONTAINS_TYPES = ['TEXT', 'LONG_TEXT', 'EMAIL', 'PHONE', 'URL', 'ADDRESS', 'AUTO_CODE'];
+
+      if (CONTAINS_TYPES.includes(fieldType)) {
+        return VALIDATION_TYPE.CONTAINS;
+      }
+      return VALIDATION_TYPE.EQUALS;
+    };
 
     const opearate: any = {
       title: '操作',
@@ -542,10 +555,24 @@ const XTable = memo(
               fieldValue: [startStr, endStr]
             });
           } else {
+            // 获取字段类型
+            const fieldInfo = mainEntity.fields.find(
+              (field: AppEntityField) => field.fieldName === key
+            );
+            // 如果没找到，尝试从子实体查找
+            let fieldType = fieldInfo?.fieldType;
+            if (!fieldType && tableName) {
+              const subEntity = subEntities.entities.find((e) => e.tableName === tableName);
+              const subField = subEntity?.fields.find((f: AppEntityField) => f.fieldName === key);
+              fieldType = subField?.fieldType;
+            }
+            // 根据字段类型选择操作符，默认使用 TEXT 类型（CONTAINS）
+            const operator = getDefaultOperatorByFieldType(fieldType || 'TEXT');
+
             conditions.push({
               nodeType: 'CONDITION',
               fieldName: key,
-              operator: VALIDATION_TYPE.EQUALS,
+              operator,
               fieldValue: Array.isArray(value) ? value : (typeof value === 'object' ? [value?.id] : [value])
             });
           };

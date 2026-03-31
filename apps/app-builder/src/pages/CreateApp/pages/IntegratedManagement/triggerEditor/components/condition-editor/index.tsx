@@ -426,9 +426,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return title;
   };
 
-  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any, relatedFields: any[]) => {
     setFormulaVisible(false);
-    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    // 保存公式数据，包含 relatedFields 用于运行时获取正确的表单字段名
+    form.setFieldValue(formulaFieldKey, {
+      formulaData: formulaData,
+      formula: formattedFormula,
+      parameters: params,
+      relatedFields: relatedFields
+    });
     setFormulaData('');
     setFormulaFieldKey('');
   };
