@@ -42,4 +42,7 @@ public class MenuCreateReqVO {
 
     @Schema(description = "大屏/大屏模板id")
     private Long dashboardId;
+
+    @Schema(description = "菜单排序（可选，不传则自动追加到末尾）")
+    private Integer menuSort;
 }

@@ -115,6 +115,10 @@ onebase:
       - /actuator/health
       - /swagger-ui/**
       - /v3/api-docs/**
+      - /admin-api/build/ai/dashboard/file/download/**
+      - /admin-api/build/ai/rag/download/**
+      - /admin-api/build/ai/copilot/image/download/**
+      - /admin-api/build/ai/ai-app/download/**
   tenant: # 多租户相关配置项
     enable: true
     ignore-urls:
@@ -127,6 +131,10 @@ onebase:
       - /admin-api/system/oauth2/authorize/token
       - /admin-api/plugin/context/manifest
       - /admin-api/system/lingji-sso/** # 灵畿SSO登录，无需租户编号
+      - /admin-api/build/ai/dashboard/file/download/**
+      - /admin-api/build/ai/rag/download/**
+      - /admin-api/build/ai/copilot/image/download/**
+      - /admin-api/build/ai/ai-app/download/**
     ignore-visit-urls:
       - /admin-api/system/user/profile/**
       - /admin-api/system/auth/**
