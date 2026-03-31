@@ -116,10 +116,15 @@ public class SemanticRefResolver {
         // 构建数据选择上下文（关系元信息 + 主数据缓存），供 DATA_SELECTION/MULTI_DATA_SELECTION 解析
         DataSelectionContext dataSelection = buildDataSelectionContext(entity, value);
 
+        // 收集数据选择字段中被选择字段的字典类型ID（用于嵌套SELECT字段解析）
+        Set<Long> nestedDictTypeIds = collectNestedDictTypeIds(dataSelection.metaByFieldUuid);
+        // 构建按字典类型ID的标签缓存
+        Map<Long, Map<String, String>> dictLabelCacheByDictTypeId = buildDictLabelCacheByDictTypeId(nestedDictTypeIds);
+
         // 构建文件缓存（按收集的文件ID批量查询，供 FILE/IMAGE 解析）
         Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
 
-        ResolveContext context = new ResolveContext(users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dataSelection.metaByFieldUuid, dataSelection.mainsByTable, files);
+        ResolveContext context = new ResolveContext(users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dictLabelCacheByDictTypeId, dataSelection.metaByFieldUuid, dataSelection.mainsByTable, files);
 
         if (log.isDebugEnabled()) {
             log.debug("mainsByTable: {}", dataSelection.mainsByTable);
@@ -149,9 +154,15 @@ public class SemanticRefResolver {
         Map<Long, Map<String, String>> dictLabelCacheByFieldId = buildDictLabelCacheByFieldId(entity, selectFieldIds, fieldSchemaMap);
         // 修复：批量处理时需要收集所有记录的数据选择ID，而不是只用第一条记录
         DataSelectionContext dataSelection = buildDataSelectionContextBatch(entity, values);
+
+        // 收集数据选择字段中被选择字段的字典类型ID（用于嵌套SELECT字段解析）
+        Set<Long> nestedDictTypeIds = collectNestedDictTypeIds(dataSelection.metaByFieldUuid);
+        // 构建按字典类型ID的标签缓存
+        Map<Long, Map<String, String>> dictLabelCacheByDictTypeId = buildDictLabelCacheByDictTypeId(nestedDictTypeIds);
+
         Map<Long, FileListRespDTO> files = buildFileCache(fileIds);
 
-        ResolveContext context = new ResolveContext(users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dataSelection.metaByFieldUuid, dataSelection.mainsByTable, files);
+        ResolveContext context = new ResolveContext(users, depts, fieldSchemaMap, fieldOptionsCache, dictLabelCacheByFieldId, dictLabelCacheByDictTypeId, dataSelection.metaByFieldUuid, dataSelection.mainsByTable, files);
         for (SemanticEntityValueDTO v : values) {
             forEachRow(v, fields -> applyToFields(fields, context));
         }
@@ -382,7 +393,7 @@ public class SemanticRefResolver {
             } else if (t == SemanticFieldTypeEnum.DEPARTMENT || t == SemanticFieldTypeEnum.MULTI_DEPARTMENT) {
                 applyDept(v, ctx.depts);
             } else if (t == SemanticFieldTypeEnum.DATA_SELECTION || t == SemanticFieldTypeEnum.MULTI_DATA_SELECTION) {
-                applyDataSelectionUnified(v, ctx.dataSelectMetaBySourceFieldUuid, ctx.mainsByTable);
+                applyDataSelectionUnified(v, ctx.dataSelectMetaBySourceFieldUuid, ctx.mainsByTable, ctx);
             } else if (t == SemanticFieldTypeEnum.SELECT || t == SemanticFieldTypeEnum.MULTI_SELECT) {
                 applyDict(v, ctx.fieldSchemaMap, ctx.fieldOptionsCache, ctx.dictLabelCacheByFieldId);
             } else if (t == SemanticFieldTypeEnum.FILE || t == SemanticFieldTypeEnum.IMAGE) {
@@ -574,9 +585,10 @@ public class SemanticRefResolver {
     }
 
     /**
-     * 解析数据选择字段：从引用值里提取 `id/name`
+     * 解析数据选择字段：从引用值里提取 `id/name/value`
+     * 支持嵌套引用类型字段（如被选择的字段是USER、DEPARTMENT、DATA_SELECTION、SELECT类型）
      */
-    private void applyDataSelectionUnified(SemanticFieldValueDTO<Object> v, Map<String, DataSelectMeta> metaByFieldUuid, Map<String, Map<Object, Row>> mainsByTable) {
+    private void applyDataSelectionUnified(SemanticFieldValueDTO<Object> v, Map<String, DataSelectMeta> metaByFieldUuid, Map<String, Map<Object, Row>> mainsByTable, ResolveContext ctx) {
         String fieldUuid = v.getFieldUuid();
         DataSelectMeta meta = fieldUuid == null ? null : metaByFieldUuid.get(fieldUuid);
         if (meta == null) {
@@ -591,10 +603,33 @@ public class SemanticRefResolver {
             Map<String, Object> m = new HashMap<>();
             m.put("id", idObj);
             if (r != null && meta.selectFieldName != null) {
-                m.put("name", r.get(meta.selectFieldName));
+                Object fieldValue = r.get(meta.selectFieldName);
+                // 根据被选择字段的类型进行差异化解析
+                if (meta.selectFieldTypeEnum != null && meta.selectFieldTypeEnum.isRefType()) {
+                    // 引用类型字段：需要进一步解析
+                    Object resolvedName = resolveNestedRefName(fieldValue, meta.selectFieldTypeEnum, meta.selectFieldDictTypeId, ctx);
+                    m.put("name", resolvedName);
+                } else {
+                    // 普通字段：直接使用字段值
+                    m.put("name", fieldValue);
+                }
+                // 添加完整的目标表记录对象
+                m.put("value", rowToMap(r));
             }
             return m;
         });
+    }
+
+    /**
+     * 将 Row 转换为 Map
+     */
+    private Map<String, Object> rowToMap(Row row) {
+        if (row == null) return null;
+        Map<String, Object> map = new HashMap<>();
+        for (String key : row.keySet()) {
+            map.put(key, row.get(key));
+        }
+        return map;
     }
 
     /**
@@ -611,6 +646,121 @@ public class SemanticRefResolver {
             if (name != null) m.put("name", name);
             return m;
         });
+    }
+
+    /**
+     * 解析嵌套引用类型字段的显示名称
+     *
+     * <p>当数据选择字段选择的字段本身是引用类型（USER、DEPARTMENT、SELECT、DATA_SELECTION）时，
+     * 需要根据该字段的类型进一步解析获取显示名称。</p>
+     *
+     * @param rawValue       字段原始值（通常是ID）
+     * @param fieldType      字段类型枚举
+     * @param dictTypeId     如果是SELECT类型，关联的字典类型ID
+     * @param ctx            解析上下文
+     * @return 解析后的显示名称
+     */
+    private Object resolveNestedRefName(Object rawValue, SemanticFieldTypeEnum fieldType, Long dictTypeId, ResolveContext ctx) {
+        if (rawValue == null) return null;
+
+        // 处理多选类型
+        if (fieldType.isListType()) {
+            return resolveNestedMultiRefName(rawValue, fieldType, dictTypeId, ctx);
+        }
+
+        // 处理单选类型
+        switch (fieldType) {
+            case USER:
+                return resolveNestedUserName(rawValue, ctx.users);
+            case DEPARTMENT:
+                return resolveNestedDeptName(rawValue, ctx.depts);
+            case SELECT:
+                return resolveNestedSelectLabel(rawValue, dictTypeId, ctx);
+            case DATA_SELECTION:
+                // 数据选择嵌套数据选择：暂时返回原始值（需要更复杂的递归解析）
+                return rawValue;
+            default:
+                return rawValue;
+        }
+    }
+
+    /**
+     * 解析嵌套的多选引用类型字段
+     */
+    private Object resolveNestedMultiRefName(Object rawValue, SemanticFieldTypeEnum fieldType, Long dictTypeId, ResolveContext ctx) {
+        if (rawValue == null) return null;
+        List<?> list = null;
+        if (rawValue instanceof List<?> l) {
+            list = l;
+        } else if (rawValue instanceof String s && s.startsWith("[")) {
+            try {
+                list = JsonUtils.parseArray(s, Object.class);
+            } catch (Exception ignored) {}
+        }
+        if (list == null || list.isEmpty()) return rawValue;
+
+        List<Object> results = new ArrayList<>();
+        for (Object item : list) {
+            Object resolved = resolveNestedRefName(item, getSingleType(fieldType), dictTypeId, ctx);
+            if (resolved != null) results.add(resolved);
+        }
+        return results.isEmpty() ? rawValue : results;
+    }
+
+    /**
+     * 获取单选类型（多选类型对应的基础类型）
+     */
+    private SemanticFieldTypeEnum getSingleType(SemanticFieldTypeEnum listType) {
+        if (listType == SemanticFieldTypeEnum.MULTI_USER) return SemanticFieldTypeEnum.USER;
+        if (listType == SemanticFieldTypeEnum.MULTI_DEPARTMENT) return SemanticFieldTypeEnum.DEPARTMENT;
+        if (listType == SemanticFieldTypeEnum.MULTI_SELECT) return SemanticFieldTypeEnum.SELECT;
+        if (listType == SemanticFieldTypeEnum.MULTI_DATA_SELECTION) return SemanticFieldTypeEnum.DATA_SELECTION;
+        return listType;
+    }
+
+    /**
+     * 解析嵌套的用户字段名称
+     */
+    private String resolveNestedUserName(Object userId, Map<Long, AdminUserRespDTO> users) {
+        Long id = toLong(userId);
+        if (id == null) return userId != null ? String.valueOf(userId) : null;
+        AdminUserRespDTO user = users.get(id);
+        return user != null ? user.getNickname() : String.valueOf(id);
+    }
+
+    /**
+     * 解析嵌套的部门字段名称
+     */
+    private String resolveNestedDeptName(Object deptId, Map<Long, DeptRespDTO> depts) {
+        Long id = toLong(deptId);
+        if (id == null) return deptId != null ? String.valueOf(deptId) : null;
+        DeptRespDTO dept = depts.get(id);
+        return dept != null ? dept.getName() : String.valueOf(id);
+    }
+
+    /**
+     * 解析嵌套的单选/多选字段标签
+     */
+    private String resolveNestedSelectLabel(Object rawValue, Long dictTypeId, ResolveContext ctx) {
+        if (rawValue == null) return null;
+        String valueStr = String.valueOf(rawValue);
+
+        // 如果有字典类型ID，从字典缓存中获取标签
+        if (dictTypeId != null && ctx.dictLabelCacheByDictTypeId != null) {
+            Map<String, String> labelMap = ctx.dictLabelCacheByDictTypeId.get(dictTypeId);
+            if (labelMap != null) {
+                String label = labelMap.get(valueStr);
+                if (label != null) return label;
+            }
+        }
+
+        // 尝试从值中提取名称（如果值本身是{id, name}格式）
+        if (rawValue instanceof Map<?, ?> m) {
+            Object name = m.get("name");
+            if (name != null) return String.valueOf(name);
+        }
+
+        return valueStr;
     }
 
     /**
@@ -645,6 +795,16 @@ public class SemanticRefResolver {
                 meta.tableName = c.getTargetEntityTableName();
                 meta.pkField = pkField;
                 meta.selectFieldName = selectFieldName;
+                // 获取被选择字段的类型信息
+                if (metadataEntityFieldCoreService != null && selectFieldUuid != null) {
+                    MetadataEntityFieldDO selectField = metadataEntityFieldCoreService.getEntityFieldByUuid(selectFieldUuid);
+                    if (selectField != null) {
+                        meta.selectFieldUuid = selectFieldUuid;
+                        meta.selectFieldType = selectField.getFieldType();
+                        meta.selectFieldTypeEnum = SemanticFieldTypeEnum.ofCode(selectField.getFieldType());
+                        meta.selectFieldDictTypeId = selectField.getDictTypeId();
+                    }
+                }
                 map.put(sourceKeyFieldUuid, meta);
             }
             
@@ -688,7 +848,7 @@ public class SemanticRefResolver {
                             if (targetField != null && targetField.getEntityUuid() != null) {
                                 // 从主表connectors中查找目标表名
                                 for (SemanticRelationSchemaDTO c : entity.getConnectors()) {
-                                    if (c != null && rel.getTargetEntityUuid() != null 
+                                    if (c != null && rel.getTargetEntityUuid() != null
                                         && rel.getTargetEntityUuid().equals(c.getTargetEntityUuid())) {
                                         targetTableName = c.getTargetEntityTableName();
                                         break;
@@ -701,13 +861,23 @@ public class SemanticRefResolver {
                             }
                         }
                     }
-                    
+
                     if (targetTableName == null) continue;
-                    
+
                     DataSelectMeta meta = new DataSelectMeta();
                     meta.tableName = targetTableName;
                     meta.pkField = pkField;
                     meta.selectFieldName = selectFieldName;
+                    // 获取被选择字段的类型信息
+                    if (metadataEntityFieldCoreService != null && selectFieldUuid != null) {
+                        MetadataEntityFieldDO selectField = metadataEntityFieldCoreService.getEntityFieldByUuid(selectFieldUuid);
+                        if (selectField != null) {
+                            meta.selectFieldUuid = selectFieldUuid;
+                            meta.selectFieldType = selectField.getFieldType();
+                            meta.selectFieldTypeEnum = SemanticFieldTypeEnum.ofCode(selectField.getFieldType());
+                            meta.selectFieldDictTypeId = selectField.getDictTypeId();
+                        }
+                    }
                     map.put(sourceKeyFieldUuid, meta);
                     
                     if (log.isDebugEnabled()) {
@@ -784,6 +954,14 @@ public class SemanticRefResolver {
         String tableName;
         String pkField;
         String selectFieldName;
+        /** 被选择字段的UUID */
+        String selectFieldUuid;
+        /** 被选择字段的类型 */
+        String selectFieldType;
+        /** 被选择字段的类型枚举 */
+        SemanticFieldTypeEnum selectFieldTypeEnum;
+        /** 如果是SELECT类型，关联的字典类型ID */
+        Long selectFieldDictTypeId;
 
         @Override
         public String toString() {
@@ -991,6 +1169,56 @@ public class SemanticRefResolver {
     }
 
     /**
+     * 构建字典标签缓存（按字典类型ID）
+     *
+     * <p>用于数据选择字段选择SELECT类型字段时的嵌套解析。</p>
+     *
+     * @param dictTypeIds 字典类型ID集合
+     * @return 字典类型ID到`(值->标签)`映射
+     */
+    private Map<Long, Map<String, String>> buildDictLabelCacheByDictTypeId(Set<Long> dictTypeIds) {
+        Map<Long, Map<String, String>> result = new HashMap<>();
+        if (dictTypeIds == null || dictTypeIds.isEmpty()) return result;
+
+        Map<Long, List<DictDataRespDTO>> dictDataBatch = dictDataApi.getDictDataListByTypeIds(dictTypeIds).getCheckedData();
+        if (dictDataBatch == null || dictDataBatch.isEmpty()) return result;
+
+        for (Map.Entry<Long, List<DictDataRespDTO>> entry : dictDataBatch.entrySet()) {
+            Long dictTypeId = entry.getKey();
+            List<DictDataRespDTO> list = entry.getValue();
+            if (list == null || list.isEmpty()) continue;
+            Map<String, String> labelMap = new HashMap<>();
+            for (DictDataRespDTO d : list) {
+                if (d.getId() != null) {
+                    labelMap.put(String.valueOf(d.getId()), d.getLabel());
+                }
+                if (d.getValue() != null) {
+                    labelMap.put(String.valueOf(d.getValue()), d.getLabel());
+                }
+            }
+            result.put(dictTypeId, labelMap);
+        }
+        return result;
+    }
+
+    /**
+     * 收集数据选择字段中被选择字段的字典类型ID
+     *
+     * @param metaByFieldUuid 数据选择元信息映射
+     * @return 字典类型ID集合
+     */
+    private Set<Long> collectNestedDictTypeIds(Map<String, DataSelectMeta> metaByFieldUuid) {
+        Set<Long> dictTypeIds = new HashSet<>();
+        if (metaByFieldUuid == null) return dictTypeIds;
+        for (DataSelectMeta meta : metaByFieldUuid.values()) {
+            if (meta != null && meta.selectFieldDictTypeId != null) {
+                dictTypeIds.add(meta.selectFieldDictTypeId);
+            }
+        }
+        return dictTypeIds;
+    }
+
+    /**
      * 统一解析上下文
      *
      * <p>聚合各类型所需的缓存：用户、部门、字段Schema与选项、字典标签、数据选择关系与主数据、文件。</p>
@@ -1001,6 +1229,8 @@ public class SemanticRefResolver {
         final Map<Long, MetadataEntityFieldDO> fieldSchemaMap;
         final Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache;
         final Map<Long, Map<String, String>> dictLabelCacheByFieldId;
+        /** 按字典类型ID的标签缓存，用于嵌套SELECT字段解析 */
+        final Map<Long, Map<String, String>> dictLabelCacheByDictTypeId;
         final Map<String, DataSelectMeta> dataSelectMetaBySourceFieldUuid;
         final Map<String, Map<Object, Row>> mainsByTable;
         final Map<Long, FileListRespDTO> files;
@@ -1010,6 +1240,7 @@ public class SemanticRefResolver {
                        Map<Long, MetadataEntityFieldDO> fieldSchemaMap,
                        Map<Long, List<SemanticFieldOptionDTO>> fieldOptionsCache,
                        Map<Long, Map<String, String>> dictLabelCacheByFieldId,
+                       Map<Long, Map<String, String>> dictLabelCacheByDictTypeId,
                        Map<String, DataSelectMeta> dataSelectMetaBySourceFieldUuid,
                        Map<String, Map<Object, Row>> mainsByTable,
                        Map<Long, FileListRespDTO> files) {
@@ -1018,6 +1249,7 @@ public class SemanticRefResolver {
             this.fieldSchemaMap = fieldSchemaMap;
             this.fieldOptionsCache = fieldOptionsCache;
             this.dictLabelCacheByFieldId = dictLabelCacheByFieldId;
+            this.dictLabelCacheByDictTypeId = dictLabelCacheByDictTypeId;
             this.dataSelectMetaBySourceFieldUuid = dataSelectMetaBySourceFieldUuid;
             this.mainsByTable = mainsByTable;
             this.files = files;
