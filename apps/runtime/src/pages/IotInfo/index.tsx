@@ -69,7 +69,7 @@ const createThirdPartyClient = (baseURL: string) => {
   };
 };
 
-const thirdPartyClient = createThirdPartyClient('https://api.sit.artifex-cmcc.com.cn');
+const thirdPartyClient = createThirdPartyClient('http://dfecoc.ft.internal.virtueit.net');
 
 interface DatapointPageRequest {
   deviceId: number;
