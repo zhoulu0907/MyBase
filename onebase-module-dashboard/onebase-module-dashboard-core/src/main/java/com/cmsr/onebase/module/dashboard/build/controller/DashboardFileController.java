@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
@@ -351,16 +352,56 @@ public class DashboardFileController extends BaseController {
     }
 
 
-    public  final static File getAbsoluteFile(String uploadDir, String filename) throws IOException
-    {
-        File desc = new File(uploadDir+File.separator + filename);
+    /**
+     * 清洗文件名，防止路径遍历攻击
+     * 1. Unicode 规范化（NFKC）
+     * 2. 移除路径分隔符，防止目录穿越
+     * 3. 合并连续的点号，防止 ".." 攻击
+     *
+     * @param filename 原始文件名
+     * @return 清洗后的安全文件名
+     */
+    private static String sanitizeFilename(String filename) {
+        if (filename == null || filename.isEmpty()) {
+            return "";
+        }
+        // Unicode 规范化，避免特殊字符绕过校验
+        filename = Normalizer.normalize(filename, Normalizer.Form.NFKC);
+        // 移除路径分隔符，替换为下划线，防止目录穿越
+        filename = filename.replaceAll("[/\\\\]+", "_");
+        // 合并连续点号（例如 ".." -> "."）
+        filename = filename.replaceAll("\\.{2,}", ".");
+        return filename;
+    }
 
-        if (!desc.getParentFile().exists())
-        {
+    /**
+     * 获取绝对文件路径，包含路径安全验证
+     * 防止路径遍历攻击，确保文件路径在指定上传目录范围内
+     *
+     * @param uploadDir 上传目录
+     * @param filename  文件名
+     * @return 安全的绝对文件路径
+     * @throws IOException 如果检测到路径遍历攻击
+     */
+    public final static File getAbsoluteFile(String uploadDir, String filename) throws IOException {
+        // 清洗文件名，防止路径遍历
+        filename = sanitizeFilename(filename);
+
+        File desc = new File(uploadDir + File.separator + filename);
+
+        // 创建目录
+        if (!desc.getParentFile().exists()) {
             desc.getParentFile().mkdirs();
         }
-        if (!desc.exists())
-        {
+
+        // 验证路径范围：确保最终路径在 uploadDir 范围内
+        String canonicalPath = desc.getCanonicalPath();
+        String canonicalUploadDir = new File(uploadDir).getCanonicalPath();
+        if (!canonicalPath.startsWith(canonicalUploadDir + File.separator)) {
+            throw new IOException("非法文件路径：检测到路径遍历攻击");
+        }
+
+        if (!desc.exists()) {
             desc.createNewFile();
         }
         return desc;
