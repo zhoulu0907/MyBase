@@ -47,10 +47,9 @@ interface SiderProps {
   className?: string;
   collapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
-  isIframe?: boolean;
 }
 
-const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse, isIframe = false }) => {
+const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse }) => {
   useSignals();
 
   const { permissionInfo } = userPermissionSignal;
@@ -58,6 +57,10 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
+
+  const isArtifexDomain = useMemo(() => {
+    return window.location.hostname.includes('artifex-cmcc');
+  }, []);
 
   const { tenantId } = useParams();
 
@@ -393,7 +396,7 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     );
   };
 
-  if (!isIframe) {
+  if (!isArtifexDomain) {
     return (
       <Sider
         className={`${styles.sider} ${className || ''}`}
