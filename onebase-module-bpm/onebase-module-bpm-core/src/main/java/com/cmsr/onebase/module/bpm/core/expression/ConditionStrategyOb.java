@@ -4,20 +4,16 @@ import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.util.date.DateUtils;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
-import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
 import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowInsBizExtRepository;
 import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowInsBizExtDO;
 import com.cmsr.onebase.module.bpm.core.dto.edge.condition.BpmConditionItem;
-import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
 import com.cmsr.onebase.module.bpm.core.enums.*;
 import com.cmsr.onebase.module.bpm.core.jsonconvert.FieldTypeConvertor;
-import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
 import com.cmsr.onebase.module.formula.api.formula.FormulaEngineApi;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteReqDTO;
 import com.cmsr.onebase.module.formula.api.formula.dto.FormulaExecuteRespDTO;
 import com.cmsr.onebase.module.metadata.api.semantic.SemanticDynamicDataApi;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
-import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.type.UserRefType;
 import com.cmsr.onebase.module.metadata.core.semantic.vo.SemanticTargetBodyVO;
@@ -26,10 +22,9 @@ import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.collections4.MapUtils;
 import org.dromara.warm.flow.core.FlowEngine;
-import org.dromara.warm.flow.core.strategy.ConditionStrategy;
-import org.dromara.warm.flow.core.entity.HisTask;
 import org.dromara.warm.flow.core.entity.Instance;
 import org.dromara.warm.flow.core.invoker.FrameInvoker;
+import org.dromara.warm.flow.core.strategy.ConditionStrategy;
 import org.dromara.warm.flow.core.strategy.ExpressionStrategy;
 import org.dromara.warm.flow.core.utils.StringUtils;
 
@@ -37,8 +32,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
-import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * 自定义 OneBase 条件表达式解析策略，解析流程设计器保存的 JSON 条件串。
@@ -178,11 +171,25 @@ public class ConditionStrategyOb implements ConditionStrategy {
         Map<String, Object> variable = ctx.variable;
         // 表单属性
         if (FieldScopeEnum.ENTITY.getCode().equalsIgnoreCase(fieldScope)) {
-            SemanticEntityValueDTO entity = ctx.getOrBuildEntity(this);
-            if (entity == null || entity.getGlobalRawMap() == null) {
-                return null;
+            Map<String, Object> entityMap = null;
+            Object predictEntityData = variable.get("predictEntityData");
+
+            // 优先从预测数据中取
+            if (predictEntityData instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> rawMap = (Map<String, Object>) predictEntityData;
+                entityMap = new HashMap<>(rawMap);
             }
-            Map<String, Object> entityMap = entity.getGlobalRawMap();
+
+            // 再获取实体数据
+            if (entityMap == null) {
+                SemanticEntityValueDTO entity = ctx.getOrBuildEntity(this);
+                if (entity == null || entity.getGlobalRawMap() == null) {
+                    return null;
+                }
+                entityMap = entity.getGlobalRawMap();
+            }
+
             if (entityMap != null) {
                 Object v = entityMap.get(fieldName);
                 // 如果是系统字段UserRefType，不能直接返回

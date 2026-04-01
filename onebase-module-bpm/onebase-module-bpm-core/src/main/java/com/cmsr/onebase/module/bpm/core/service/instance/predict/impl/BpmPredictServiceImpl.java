@@ -95,15 +95,25 @@ public class BpmPredictServiceImpl implements BpmPredictService {
         Node currentNode = startNode;
         Set<Long> allUserIds = new HashSet<>();
 
-        while (true) {
-            // todo：理论上只会有一条路径，需要结合实体信息预测下一步走向，主要是涉及到条件分支的
-            Node nextNode = nodeService.getNextNode(definition.getId(), currentNode.getNodeCode(), null, SkipType.PASS.getKey());
+        // 从请求中获取流程变量（用于条件分支判断），包装成 predict_data 结构避免冲突
+        Map<String, Object> variable = new HashMap<>();
+        if (reqVO.getEntity() != null) {
+            variable.put("predictEntityData", reqVO.getEntity().getData());
+        }
 
-            if (nextNode == null) {
-                // 找不到下一个节点，结束，todo 是否应该抛出异常
+        while (true) {
+            // 获取下一节点列表，支持条件分支和并行网关
+            List<Node> nextNodes = nodeService.getNextNodeList(definition.getId(), currentNode.getNodeCode(), null,
+                    SkipType.PASS.getKey(), variable);
+
+            if (CollectionUtils.isEmpty(nextNodes)) {
+                // 找不到下一个节点，结束
                 log.warn("没找到下一个节点");
                 break;
             }
+
+            // 并行网关可能返回多个，条件分支只会返回一个；预测场景取第一个继续
+            Node nextNode = nextNodes.get(0);
 
             if (NodeType.isEnd(nextNode.getNodeType())) {
                 break;

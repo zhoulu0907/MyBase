@@ -653,7 +653,7 @@ public class BuildAuthServiceImpl implements BuildAuthService {
         AtomicReference<AuthLoginRespVO> loginRespRef = new AtomicReference<>();
         TenantUtils.execute(tenantDo.getId(), () -> {
             // 保存用户信息
-            AdminUserDO adminUser = userService.updateOrAddUser(userInfoReqVO);
+            AdminUserDO adminUser = userService.updateOrAddTianGongUser(userInfoReqVO);
             // 创建 Token
             AuthLoginRespVO authLoginRespVO = createTokenAfterLoginSuccess(
                 adminUser.getUserType(), 
