@@ -41,13 +41,17 @@ const ScreenTemplate: FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   const [total, setTotal] = useState(1);
+  const [activeTab, setActiveTab] = useState('1');
+  const [searchValue, setSearchValue] = useState('');
+
   useEffect(() => {
-    getTemplateList('app');
-  }, []);
-  //列表
-  const getTemplateList = async (tabType: string = 'app', searchValue: string = '', pageNum?: number) => {
+    getTemplateList();
+  }, [currentPage, activeTab, searchValue]);
+
+  const getTemplateList = async () => {
+    const tabType = activeTab === '1' ? 'app' : 'system';
     const res = await DashboardTemplateParams({
-      pageNo: pageNum || currentPage,
+      pageNo: currentPage,
       pageSize: pageSize,
       type: tabType,
       templateName: searchValue
@@ -55,34 +59,26 @@ const ScreenTemplate: FC = () => {
     setApplicationDataList(res.list);
     setTotal(res.total);
   };
-  // 处理分页变化
-  const handlePageChange = async (pageNum: number) => {
+
+  const handlePageChange = (pageNum: number) => {
     setCurrentPage(pageNum);
-    const currentType = activeTab === '1' ? 'app' : 'system';
-    getTemplateList(currentType, '', pageNum);
   };
 
-  const [activeTab, setActiveTab] = useState('1');
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      // 清除之前的定时器
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-      // 设置新的定时器
-      searchTimeoutRef.current = setTimeout(() => {
-        console.log(value);
-        // 在这里执行搜索逻
-        getTemplateList(activeTab === '1' ? 'app' : 'system', value);
-      }, 1000);
-    },
-    [activeTab]
-  );
+  const handleSearchChange = useCallback((value: string) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchValue(value);
+      setCurrentPage(1);
+    }, 1000);
+  }, []);
+
   const handleTabChange = (key: string) => {
-    const tabType = key === '1' ? 'app' : 'system';
     setActiveTab(key);
-    getTemplateList(tabType);
+    setCurrentPage(1);
+    setSearchValue('');
   };
   // 修改弹框
   const [editForm] = useForm();
@@ -103,8 +99,7 @@ const ScreenTemplate: FC = () => {
       remarks: editForm.getFieldValue('remarks')
     });
     setEditVisible(false);
-    const currentType = activeTab === '1' ? 'app' : 'system';
-    await getTemplateList(currentType);
+    await getTemplateList();
   };
   const handleEditTemplate = (item: screenTemplate) => {
     window.open(`${resourceUrl}chart/home/${item.id}/${appId}/template?tenantId=${tenantId}`, '_blank');
@@ -144,8 +139,7 @@ const ScreenTemplate: FC = () => {
   const handleDeleteOk = async () => {
     await DelDashboardTemplate(delid);
     setDeleteVisible(false);
-    const currentType = activeTab === '1' ? 'app' : 'system';
-    await getTemplateList(currentType);
+    await getTemplateList();
   };
   const TabPaneList = [
     {
