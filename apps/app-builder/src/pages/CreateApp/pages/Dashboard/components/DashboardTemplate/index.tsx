@@ -42,12 +42,12 @@ const ScreenTemplate: FC = () => {
   const [pageSize, setPageSize] = useState(6);
   const [total, setTotal] = useState(1);
   useEffect(() => {
-    getTemplateList();
-  }, [currentPage]);
+    getTemplateList('app');
+  }, []);
   //列表
-  const getTemplateList = async (tabType: string = 'app', searchValue: string = '') => {
+  const getTemplateList = async (tabType: string = 'app', searchValue: string = '', pageNum?: number) => {
     const res = await DashboardTemplateParams({
-      pageNo: currentPage,
+      pageNo: pageNum || currentPage,
       pageSize: pageSize,
       type: tabType,
       templateName: searchValue
@@ -58,7 +58,8 @@ const ScreenTemplate: FC = () => {
   // 处理分页变化
   const handlePageChange = async (pageNum: number) => {
     setCurrentPage(pageNum);
-    getTemplateList();
+    const currentType = activeTab === '1' ? 'app' : 'system';
+    getTemplateList(currentType, '', pageNum);
   };
 
   const [activeTab, setActiveTab] = useState('1');
