@@ -28,7 +28,7 @@ const APP_BUILDER_DASHBOARD_URL = 'http://onebase.4c-uat.hq.cmcc:20011/appdashbo
 // Chatbot 服务地址
 const CHATBOT_BASE_URL = '';
 // App Dashboard 配置 (明文配置)
-const DASHBOARD_URL = 'http://onebase.4c-uat.hq.cmcc:20011/onebaseserver';
+const DASHBOARD_URL = 'http://onebase.4c-uat.hq.cmcc:20011/observerbuilder';
 const PREVIEW_URL = 'http://onebase.4c-uat.hq.cmcc:20011/appdashboard/#/chart/preview';
 const DATASET_URL = 'http://10.0.104.38:8100/de2api';
 
@@ -126,6 +126,9 @@ async function renderEncryptedConfigJs(obj: FrontendConfig) {
   return `window.global_config = {\n  CONFIG: ${JSON.stringify(encryptedData)}\n};\n`;
 }
 
+// 不需要加密的配置 key
+const PLAIN_CONFIG_KEYS = ['app-dashboard'];
+
 async function emitConfigFiles(
   configKeys: string[],
   outDir: string,
@@ -144,7 +147,10 @@ async function emitConfigFiles(
     }
     const fileName = CONFIG_KEY_TO_DEPLOY_FILENAME[configKey] || `${configKey}_config.js`;
     const filePath = path.resolve(outDir, fileName);
-    const content = await render(obj);
+    // app-dashboard 使用明文配置，其他使用加密配置
+    const content = PLAIN_CONFIG_KEYS.includes(configKey)
+      ? renderPlainConfigJs(obj)
+      : await render(obj);
     fs.writeFileSync(filePath, content, 'utf8');
     outputs.push({ configKey, filePath });
   }
