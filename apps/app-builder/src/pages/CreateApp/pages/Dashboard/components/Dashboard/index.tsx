@@ -2,11 +2,10 @@ import TablePagination from '@/components/TablePagination';
 import CreateDashboardModal from '@/components/CreateDashboardModal';
 import { Button, Form, Input, Modal, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 import ScreenCard from '../DashboardCard';
 import styles from './index.module.less';
 import { useSearchParams } from 'react-router-dom';
-import { throttle } from 'lodash-es';
 import {
   getDashboardListApi,
   editDashboardInfoApi,
@@ -36,39 +35,43 @@ const Dashboard: FC = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNo, setPageNo] = useState(1);
   const [searchText, setSearchText] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>('');
 
   const [dashboardData, setDashboardData] = useState<dataList>();
   const [searchParams] = useSearchParams();
   const appId = searchParams.get('appId');
   const dashboardType = 'dashboard';
   const tenantId = TokenManager.getCurIdentifyId();
-  useEffect(() => {
-    setLoading(false);
-    getDashboardList();
-  }, []);
+  const resourceUrl = getDashBoardURL();
 
-  const getDashboardList = async (searchText?: string, pageNo: number = 1) => {
+  useEffect(() => {
+    getDashboardList();
+  }, [pageNo, pageSize, searchText]);
+
+  const getDashboardList = async () => {
+    setLoading(true);
     const params = {
       page: pageNo,
       limit: pageSize,
       searchText: searchText
     };
     const res = await getDashboardListApi(params);
-    console.log('res:', res);
+    setLoading(false);
     setDataList(res.list);
     setTotal(res.total);
   };
-  const throttledSearch = useCallback(
-    throttle((value: string) => {
-      setPageNo(1); // 重置到第一页
-      getDashboardList(value); // 重新获取数据，传入搜索值
-    }, 1000), // 1000ms 节流延迟
-    [getDashboardList] // 依赖数组，只包含 getDashboardList
-  );
-  const resourceUrl = getDashBoardURL();
+
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleSearchChange = (value: string) => {
-    setSearchText(value);
-    throttledSearch(value);
+    setInputValue(value);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchText(value);
+      setPageNo(1);
+    }, 1000);
   };
   // 创建大屏弹窗
   const [createForm] = Form.useForm();
@@ -186,7 +189,7 @@ const Dashboard: FC = () => {
         suffix={<IconSearch />}
         onChange={handleSearchChange}
         placeholder="搜索"
-        value={searchText}
+        value={inputValue}
       />
       <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中...">
         <div className={styles.appList}>
@@ -204,16 +207,15 @@ const Dashboard: FC = () => {
         </div>
       </Spin>
       <TablePagination
-        className={styles.appPagination}
-        total={total}
         current={pageNo}
         pageSize={pageSize}
+        total={total}
         onChange={(pNo) => {
           setPageNo(pNo);
-          getDashboardList(searchText, pNo);
         }}
         onPageSizeChange={(pSize) => {
           setPageSize(pSize);
+          setPageNo(1);
         }}
       />
       {/* 编辑弹框 */}
