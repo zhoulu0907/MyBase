@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.*;
@@ -457,10 +458,26 @@ public class PluginTestEnvironmentManager {
         // 构建 Maven 命令 - 一次性编译所有插件模块
         List<String> command = new ArrayList<>();
 
-        // Windows 环境使用 mvn.cmd, Linux/Mac 使用 mvn
-        String mvnCommand = System.getProperty("os.name").toLowerCase().contains("windows")
-                ? "mvn.cmd"
-                : "mvn";
+        // 安全修复：使用环境变量中的 MAVEN_HOME 获取 mvn 绝对路径
+        String mvnHome = System.getenv("MAVEN_HOME");
+        String mvnCommand;
+        if (mvnHome != null && !mvnHome.isEmpty()) {
+            // 使用绝对路径
+            mvnCommand = mvnHome + File.separator + "bin" + File.separator + "mvn";
+            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+                mvnCommand += ".cmd";
+            }
+            // 验证 mvn 文件存在
+            File mvnFile = new File(mvnCommand);
+            if (!mvnFile.exists()) {
+                log.warn("MAVEN_HOME 中的 mvn 不存在: {}, 降级使用 PATH", mvnCommand);
+                mvnCommand = System.getProperty("os.name").toLowerCase().contains("windows") ? "mvn.cmd" : "mvn";
+            }
+        } else {
+            // 降级：使用 PATH 中的 mvn（仅限测试环境）
+            mvnCommand = System.getProperty("os.name").toLowerCase().contains("windows") ? "mvn.cmd" : "mvn";
+            log.warn("未设置 MAVEN_HOME 环境变量，使用 PATH 中的 mvn");
+        }
 
         command.add(mvnCommand);
         command.add("clean");

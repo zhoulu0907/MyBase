@@ -30,6 +30,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -69,6 +70,13 @@ public class DashboardProjectController extends BaseController {
     @ResponseBody
     @ApiSignIgnore
     public AjaxResult add(@RequestBody DashboardProject goviewProject) {
+        // XSS 防护：对用户输入的字符串字段进行 HTML 转义，保留用户原始输入
+        if (goviewProject.getProjectName() != null) {
+            goviewProject.setProjectName(HtmlUtils.htmlEscape(goviewProject.getProjectName()));
+        }
+        if (goviewProject.getRemarks() != null) {
+            goviewProject.setRemarks(HtmlUtils.htmlEscape(goviewProject.getRemarks()));
+        }
         goviewProject.setState(-1);
         boolean b = dashboardProjectService.save(goviewProject);
         if (b) {
@@ -200,6 +208,13 @@ public class DashboardProjectController extends BaseController {
     @ApiSignIgnore
     @TenantIgnore
     public AjaxResult editSave(@RequestBody DashboardProject goviewProject) {
+        // XSS 防护：对用户输入的字符串字段进行 HTML 转义，保留用户原始输入
+        if (goviewProject.getProjectName() != null) {
+            goviewProject.setProjectName(HtmlUtils.htmlEscape(goviewProject.getProjectName()));
+        }
+        if (goviewProject.getRemarks() != null) {
+            goviewProject.setRemarks(HtmlUtils.htmlEscape(goviewProject.getRemarks()));
+        }
         Boolean b = dashboardProjectService.updateById(goviewProject);
         if (b) {
             return successData(0, goviewProject).put("msg", "保存成功");
@@ -213,6 +228,13 @@ public class DashboardProjectController extends BaseController {
     @ResponseBody
     @ApiSignIgnore
     public AjaxResult rename(@RequestBody DashboardProject goviewProject) {
+        // XSS 防护：对用户输入的字符串字段进行 HTML 转义，保留用户原始输入
+        if (goviewProject.getProjectName() != null) {
+            goviewProject.setProjectName(HtmlUtils.htmlEscape(goviewProject.getProjectName()));
+        }
+        if (goviewProject.getRemarks() != null) {
+            goviewProject.setRemarks(HtmlUtils.htmlEscape(goviewProject.getRemarks()));
+        }
 
         Boolean b = dashboardProjectService.updateById(goviewProject);
         if (b) {

@@ -60,8 +60,9 @@ class PwdEnHelperTest {
         // When
         String enText = pwdEnHelper.encryptHexStr(plainPassword);
         String plainText = pwdEnHelper.decryptHexStr(enText);
-        System.out.println("Encrypted Text: " + enText);
-        System.out.println("Decrypted Text: " + plainText);
+        // 安全修复：移除敏感信息打印，避免密码泄露
+        // System.out.println("Encrypted Text: " + enText);
+        // System.out.println("Decrypted Text: " + plainText);
 
         // Then
         assertNotNull(enText);

@@ -166,14 +166,15 @@ public class SM4Utils {
             if (sm4Encrypt != null) {
                 System.out.println("加密后的长度: " + sm4Encrypt.length());
 
-                // 生成加密文件路径
+                // 生成加密文件路径（使用项目内相对路径，防止路径遍历）
                 String licenseDirPath = System.getProperty("user.dir") + File.separator + "license";
                 File licenseDir = new File(licenseDirPath);
                 if (!licenseDir.exists()) {
                     licenseDir.mkdirs();
                 }
                 String now = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-                String sm4FilePath = "M:\\Device\\F\\onebase-v3-be\\.idea\\httpRequests\\license.lic-5.sm4";
+                // 修复：使用 license 目录下的相对路径，避免硬编码绝对路径
+                String sm4FilePath = licenseDirPath + File.separator + "license_temp_" + now + ".sm4";
                 String licFilePath = licenseDirPath + File.separator + "license_encrypted__testuser_" + now + ".lic";
 
                 // 写入加密数据到文件

@@ -152,7 +152,8 @@ public class TemporaryDatasourceService {
             // 创建数据源和临时服务 - 增强错误处理和连接验证
             DataSource dataSource = null;
             try {
-                log.info("开始创建数据源，URL: {}", url);
+                // 安全修复：脱敏 URL 后再打印日志
+                log.info("开始创建数据源，URL: {}", maskUrl(url));
                 dataSource = DataSourceUtil.build(dsConfig);
 
                 // 立即测试连接有效性，避免延迟发现问题
@@ -228,10 +229,36 @@ public class TemporaryDatasourceService {
             return config;
         }
         Map<String, Object> masked = new HashMap<>(config);
+        // 脱敏密码
         if (masked.containsKey("password")) {
             masked.put("password", "******");
         }
+        // 脱敏 URL 中可能包含的用户名和密码
+        if (masked.containsKey("jdbcUrl")) {
+            masked.put("jdbcUrl", maskUrl((String) masked.get("jdbcUrl")));
+        }
+        if (masked.containsKey("url")) {
+            masked.put("url", maskUrl((String) masked.get("url")));
+        }
+        // 脱敏用户名
+        if (masked.containsKey("username")) {
+            String username = (String) masked.get("username");
+            if (username != null && username.length() > 2) {
+                masked.put("username", username.substring(0, 1) + "***" + username.substring(username.length() - 1));
+            }
+        }
         return masked;
+    }
+
+    /**
+     * 对 URL 进行脱敏处理，隐藏可能包含的用户名和密码
+     */
+    private String maskUrl(String url) {
+        if (url == null) {
+            return null;
+        }
+        // 隐藏 URL 中可能包含的密码（格式：jdbc:mysql://user:password@host:port/db）
+        return url.replaceAll("://([^:]+):([^@]+)@", "://$1:***@");
     }
 
     /**

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Random;
+import java.security.SecureRandom;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -34,7 +34,7 @@ public class TGDeviceController {
     @GetMapping("/device-runtime-params")
     @Operation(summary ="获取设备运行参数（动态数据）")
     public CommonResult<List<DeviceRuntimeParamResVO>> getDeviceRuntimeParams() {
-        Random random = new Random();
+        SecureRandom random = new SecureRandom();
         List<DeviceRuntimeParamResVO> paramList = List.of(
                 createDeviceRuntimeParam("861556071807043", "鹿井士腾高速井泵", random),
                 createDeviceRuntimeParam("861556071789019", "日虹背负永磁", random),
@@ -46,7 +46,7 @@ public class TGDeviceController {
 
 
     // 私有辅助方法
-    private DeviceRuntimeParamResVO createDeviceRuntimeParam(String deviceId, String deviceName, Random random) {
+    private DeviceRuntimeParamResVO createDeviceRuntimeParam(String deviceId, String deviceName, SecureRandom random) {
         DeviceRuntimeParamResVO param = new DeviceRuntimeParamResVO();
         param.setDeviceId(deviceId);
         param.setDeviceName(deviceName);

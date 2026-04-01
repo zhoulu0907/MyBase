@@ -290,12 +290,23 @@ public class DevModeHotReloadTest {
                 try {
                         log.info("编译单个文件: {} -> {}", sourceFile, outputDir);
 
-                        // 构建javac命令
-                        // 需要包含classpath以解析依赖
+                        // 安全修复：使用 java.home 获取绝对路径，确保 javac 来自 JDK 安装目录
                         String javaHome = System.getProperty("java.home");
+                        if (javaHome == null || javaHome.isEmpty()) {
+                                log.error("无法获取 java.home 属性");
+                                return false;
+                        }
+
                         String javacPath = javaHome + java.io.File.separator + "bin" + java.io.File.separator + "javac";
                         if (System.getProperty("os.name").toLowerCase().contains("win")) {
                                 javacPath += ".exe";
+                        }
+
+                        // 验证 javac 文件存在
+                        java.io.File javacFile = new java.io.File(javacPath);
+                        if (!javacFile.exists() || !javacFile.isFile()) {
+                                log.error("javac 不存在于预期路径: {}", javacPath);
+                                return false;
                         }
 
                         // 获取当前classpath
@@ -355,9 +366,21 @@ public class DevModeHotReloadTest {
 
                         log.info("编译插件: {} (目录: {})", pluginName, pluginDir);
 
-                        // 在Windows上使用mvn.cmd，在Unix/Linux上使用mvn
-                        String mvnCommand = System.getProperty("os.name").toLowerCase().contains("win") ? "mvn.cmd"
-                                        : "mvn";
+                        // 安全修复：使用环境变量中的 MAVEN_HOME 获取 mvn 绝对路径
+                        String mvnHome = System.getenv("MAVEN_HOME");
+                        String mvnCommand;
+                        if (mvnHome != null && !mvnHome.isEmpty()) {
+                                // 使用绝对路径
+                                mvnCommand = mvnHome + java.io.File.separator + "bin" + java.io.File.separator + "mvn";
+                                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                                        mvnCommand += ".cmd";
+                                }
+                        } else {
+                                // 降级：使用 PATH 中的 mvn（仅限测试环境）
+                                mvnCommand = System.getProperty("os.name").toLowerCase().contains("win") ? "mvn.cmd" : "mvn";
+                                log.warn("未设置 MAVEN_HOME 环境变量，使用 PATH 中的 mvn");
+                        }
+
                         ProcessBuilder pb = new ProcessBuilder(mvnCommand, "compile", "-DskipTests", "-q");
                         pb.directory(pluginDir.toFile());
                         pb.redirectErrorStream(true);

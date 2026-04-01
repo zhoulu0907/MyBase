@@ -108,17 +108,33 @@ public class PluginPackageUtil {
      * @param targetDir 目标目录
      */
     public static void unzip(Path zipFile, Path targetDir) throws IOException {
+        // 获取目标目录的规范化绝对路径
+        Path canonicalTargetDir = targetDir.normalize().toAbsolutePath();
+
         try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile))) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.isDirectory()) {
                     continue;
                 }
-                Path targetFile = targetDir.resolve(entry.getName());
-                // 防止Zip Slip
-                if (!targetFile.normalize().startsWith(targetDir.normalize())) {
-                    throw new IOException("Zip entry is outside of the target dir: " + entry.getName());
+
+                // 获取条目名称并清洗
+                String entryName = entry.getName();
+
+                // 防止路径遍历：检查是否包含 .. 等危险字符
+                if (entryName.contains("..") || entryName.contains(":") ||
+                    entryName.startsWith("/") || entryName.startsWith("\\")) {
+                    throw new IOException("检测到潜在路径遍历攻击: " + entryName);
                 }
+
+                Path targetFile = targetDir.resolve(entryName);
+
+                // 防止Zip Slip：验证最终路径在目标目录范围内
+                Path canonicalTargetFile = targetFile.normalize().toAbsolutePath();
+                if (!canonicalTargetFile.startsWith(canonicalTargetDir)) {
+                    throw new IOException("Zip entry is outside of the target dir: " + entryName);
+                }
+
                 createDirectories(targetFile.getParent());
                 try (OutputStream os = Files.newOutputStream(targetFile)) {
                     copy(zis, os);

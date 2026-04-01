@@ -66,11 +66,8 @@ public class PwdEnHelper {
             return pwd;
         }
         try {
-            // 调试日志：打印密文格式信息
-            log.info("收到密文 - 长度: {}, 前4位: {}, 后4位: {}",
-                    pwd.length(),
-                    pwd.length() >= 4 ? pwd.substring(0, 4) : "N/A",
-                    pwd.length() >= 4 ? pwd.substring(pwd.length() - 4) : "N/A");
+            // 安全修复：移除敏感信息日志打印，避免密文信息泄露
+            // 原 log.info 打印密文格式信息已移除
 
             // 测试用，临时解密字符串，实际使用时请从前端获取
             byte[] cipherBytes = HexUtil.decodeHex(pwd);

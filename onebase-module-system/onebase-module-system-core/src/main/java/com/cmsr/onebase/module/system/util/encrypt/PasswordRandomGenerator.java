@@ -77,9 +77,12 @@ public class PasswordRandomGenerator {
     }
 
     public static void main(String[] args) {
+        // 安全修复：移除敏感信息打印，避免密码泄露
         // 测试生成10个密码
         for (int i = 0; i < 10; i++) {
-            System.out.println("生成的密码: " + generateSecurePassword(15));
+            String password = generateSecurePassword(15);
+            // 仅打印生成成功信息，不打印具体密码
+            System.out.println("密码 " + (i + 1) + " 生成成功，长度: " + (password != null ? password.length() : 0));
         }
     }
 }

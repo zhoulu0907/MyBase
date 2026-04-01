@@ -103,8 +103,8 @@ public class PluginRuntimeAutoConfiguration {
         // STAGING模式：只加载plugin目录ZIP包扩展点
         if (mode.isStaging()) {
             // 创建 STAGING 模式插件管理器
-            // 修正：指向 backend 目录
-            Path backendPath = this.absolutePath.resolve(properties.getBackendDir());
+            // 修正：指向 backend 目录，并验证路径安全性
+            Path backendPath = resolveSecurePath(this.absolutePath, properties.getBackendDir());
             if (!backendPath.toFile().exists()) {
                 backendPath.toFile().mkdirs();
             }
@@ -114,14 +114,40 @@ public class PluginRuntimeAutoConfiguration {
         }
 
         // PROD模式：使用SpringPluginManager加载plugin目录
-        // 修正：指向 backend 目录
-        Path backendPath = this.absolutePath.resolve(properties.getBackendDir());
+        // 修正：指向 backend 目录，并验证路径安全性
+        Path backendPath = resolveSecurePath(this.absolutePath, properties.getBackendDir());
         if (!backendPath.toFile().exists()) {
             backendPath.toFile().mkdirs();
         }
         SpringPluginManager pluginManager = createSpringPluginManager(backendPath);
         // 配置并初始化插件管理器
         return configureAndInitPluginManager(pluginManager);
+    }
+
+    /**
+     * 安全解析路径，防止路径遍历攻击
+     *
+     * @param basePath 基础路径
+     * @param relativePath 相对路径
+     * @return 安全的绝对路径
+     */
+    private Path resolveSecurePath(Path basePath, String relativePath) {
+        if (relativePath == null || relativePath.isEmpty()) {
+            return basePath;
+        }
+
+        // 清洗相对路径：移除路径遍历字符
+        String sanitizedPath = relativePath.replaceAll("\\.{2,}", ".");
+        sanitizedPath = sanitizedPath.replaceAll("^[./\\\\]+", "");
+
+        Path resolvedPath = basePath.resolve(sanitizedPath).normalize().toAbsolutePath();
+
+        // 验证最终路径在基础路径范围内
+        if (!resolvedPath.startsWith(basePath.normalize().toAbsolutePath())) {
+            throw new SecurityException("检测到路径遍历攻击: " + relativePath);
+        }
+
+        return resolvedPath;
     }
 
     private void initLogs(PluginProperties properties) {

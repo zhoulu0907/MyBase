@@ -11,6 +11,7 @@ import jakarta.annotation.Resource;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -45,6 +46,12 @@ public class AppTagController {
     @PostMapping("/update-tags")
     @Operation(summary = "更新应用标签集合")
     public CommonResult<Boolean> updateTags(@RequestBody List<TagRespVO> tagRespVOS) {
+        // XSS 防护：对标签名进行 HTML 转义，保留用户原始输入
+        tagRespVOS.forEach(tag -> {
+            if (tag.getTagName() != null) {
+                tag.setTagName(HtmlUtils.htmlEscape(tag.getTagName()));
+            }
+        });
         appTagService.updateTags(tagRespVOS);
         return success(true);
     }
@@ -52,7 +59,9 @@ public class AppTagController {
     @PostMapping("/create")
     @Operation(summary = "创建应用标签")
     public CommonResult<Boolean> createTag(@RequestBody CreateTagReqVO createTagReqVO) {
-        appTagService.createTag(createTagReqVO.getTagName());
+        // XSS 防护：对标签名进行 HTML 转义，保留用户原始输入
+        String sanitizedTagName = HtmlUtils.htmlEscape(createTagReqVO.getTagName());
+        appTagService.createTag(sanitizedTagName);
         return success(true);
     }
 

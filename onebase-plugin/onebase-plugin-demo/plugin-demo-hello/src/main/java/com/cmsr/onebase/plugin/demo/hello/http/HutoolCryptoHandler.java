@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -70,8 +71,9 @@ public class HutoolCryptoHandler implements HttpHandler {
             log.info("Hutool依赖加载成功！");
         } catch (Exception e) {
             result.put("success", false);
-            result.put("error", e.getMessage());
-            result.put("errorType", e.getClass().getName());
+            // XSS 转义异常消息，防止跨站脚本攻击
+            result.put("error", HtmlUtils.htmlEscape(e.getMessage()));
+            result.put("errorType", HtmlUtils.htmlEscape(e.getClass().getName()));
             result.put("hutoolLoaded", false);
             log.error("Hutool依赖加载失败！");
         }
@@ -106,11 +108,13 @@ public class HutoolCryptoHandler implements HttpHandler {
 
         } catch (ClassNotFoundException e) {
             result.put("hutoolClassLoaded", false);
-            result.put("error", "Hutool类未找到: " + e.getMessage());
+            // XSS 转义异常消息，防止跨站脚本攻击
+            result.put("error", HtmlUtils.htmlEscape("Hutool类未找到: " + e.getMessage()));
             result.put("success", false);
         } catch (Exception e) {
-            result.put("error", e.getMessage());
-            result.put("errorType", e.getClass().getName());
+            // XSS 转义异常消息，防止跨站脚本攻击
+            result.put("error", HtmlUtils.htmlEscape(e.getMessage()));
+            result.put("errorType", HtmlUtils.htmlEscape(e.getClass().getName()));
             result.put("success", false);
         }
 

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 import com.cmsr.onebase.plugin.demo.hello.service.HelloService;
 
 import java.time.LocalDateTime;
@@ -41,16 +42,18 @@ public class HelloWorldHandler implements HttpHandler {
      */
     @GetMapping("/hello")
     public Map<String, Object> hello(@RequestParam(defaultValue = "World") String name) {
+        // XSS 防护：对用户输入进行转义
+        String sanitizedName = HtmlUtils.htmlEscape(name);
         Map<String, Object> result = new HashMap<>();
-        result.put("message", "hello, " + name + "!");
+        result.put("message", "hello, " + sanitizedName + "!");
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         result.put("plugin", "hello-plugin-00135");
-        
+
         // 动态检测加载方式
         String loadSource = detectLoadSource();
         result.put("loadSource", loadSource);
         result.put("version", getVersionBySource(loadSource));
-        
+
         return result;
     }
 
@@ -128,10 +131,12 @@ public class HelloWorldHandler implements HttpHandler {
 
     @GetMapping("/service-test")
     public Map<String, Object> serviceTest(@RequestParam(defaultValue = "cys") String name) {
+        // XSS 防护：对用户输入进行转义
+        String sanitizedName = HtmlUtils.htmlEscape(name);
         HelloService helloService = new HelloService();
         Map<String, Object> result = new HashMap<>();
-        result.put("service-hello", helloService.hello(name) );
-        result.put("service-hello2", helloService.hello2(name) );
+        result.put("service-hello", helloService.hello(sanitizedName) );
+        result.put("service-hello2", helloService.hello2(sanitizedName) );
         result.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         return result;

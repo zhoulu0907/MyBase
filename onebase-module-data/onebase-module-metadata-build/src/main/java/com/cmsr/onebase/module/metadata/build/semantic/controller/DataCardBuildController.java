@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Tag(name = "构建态 - 数据卡片接口")
 @RestController
@@ -27,13 +28,21 @@ public class DataCardBuildController {
     @Resource(name = "buildDashMetaDataCardExecutor")
     private DashMetaDataCardExecutor dashMetaDataCardExecutor;
 
+    /**
+     * UUID 格式正则表达式，用于验证 traceId
+     */
+    private static final Pattern UUID_PATTERN = Pattern.compile(
+            "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    );
+
     @PostMapping("/query")
     @Operation(summary = "数据卡片批量查询(构建态)")
     public CommonResult<List<Map<String, Object>>> query(@RequestBody List<Map<String, Object>> cards,
                                                         HttpServletRequest request,
                                                         HttpServletResponse response) {
         String traceId = request.getHeader("X-Trace-Id");
-        if (StringUtils.isBlank(traceId)) {
+        // XSS 防护：验证 traceId 格式，只允许合法的 UUID 格式
+        if (StringUtils.isBlank(traceId) || !UUID_PATTERN.matcher(traceId).matches()) {
             traceId = UUID.randomUUID().toString();
         }
         List<Map<String, Object>> result = dashMetaDataCardExecutor.execute(cards, traceId);
