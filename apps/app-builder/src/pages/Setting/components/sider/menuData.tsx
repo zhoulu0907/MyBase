@@ -1,11 +1,12 @@
 import React from 'react';
 
-// 菜单项类型定义
 export interface MenuItemType {
   key: string;
   title: string;
   icon?: React.ReactNode;
   iconActive?: React.ReactNode;
+  iconClass?: string;
+  iconActiveClass?: string;
   path?: string;
   children?: MenuItemType[];
   disabled?: boolean;

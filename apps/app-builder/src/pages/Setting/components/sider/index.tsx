@@ -36,6 +36,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import type { MenuItemType } from './menuData';
 import styles from './sider.module.less';
+import VerticalMenuItem from './VerticalMenuItem';
+import verticalStyles from './VerticalSider.module.less';
 
 const { Sider } = Layout;
 const MenuItem = Menu.Item;
@@ -45,9 +47,10 @@ interface SiderProps {
   className?: string;
   collapsed?: boolean;
   onCollapse?: (collapsed: boolean) => void;
+  isIframe?: boolean;
 }
 
-const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse }) => {
+const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollapse, isIframe = false }) => {
   useSignals();
 
   const { permissionInfo } = userPermissionSignal;
@@ -58,13 +61,14 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
 
   const { tenantId } = useParams();
 
-  // 默认菜单项
   const menuConfig: MenuItemType[] = [
     {
       key: 'application',
       title: '应用管理',
       icon: <img src={appLicationManageSVG} />,
       iconActive: <img src={appLicationManageActiveSVG} />,
+      iconClass: 'icon-xiangmukongjian1',
+      iconActiveClass: 'icon-yingyongguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/application`,
       permissionKey: TENANT_MENUS.APP
     },
@@ -73,6 +77,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '用户管理',
       icon: <img src={userSVG} />,
       iconActive: <img src={userActiveSVG} />,
+      iconClass: 'icon-yonghuguanli1',
+      iconActiveClass: 'icon-yonghuguanli-xuanzhong1',
       path: `/onebase/${tenantId}/setting/user`,
       permissionKey: TENANT_MENUS.USER
     },
@@ -81,6 +87,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '角色管理',
       icon: <img src={roleSVG} />,
       iconActive: <img src={roleActiveSVG} />,
+      iconClass: 'icon-jiaoseguanli1',
+      iconActiveClass: 'icon-jiaoseguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/role`,
       permissionKey: TENANT_MENUS.ROLE
     },
@@ -89,6 +97,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '组织管理',
       icon: <img src={organizationSVG} />,
       iconActive: <img src={organizationActiveSVG} />,
+      iconClass: 'icon-zuzhiguanli',
+      iconActiveClass: 'icon-zuzhiguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/organization`,
       permissionKey: TENANT_MENUS.DEPT
     },
@@ -97,6 +107,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '空间信息',
       icon: <img src={tenantInfoSVG} />,
       iconActive: <img src={tenantInfoActiveSVG} />,
+      iconClass: 'icon-kongjianxinxi',
+      iconActiveClass: 'icon-kongjianxinxi-xuanzhong',
       path: `/onebase/${tenantId}/setting/spaceInfo`,
       permissionKey: TENANT_MENUS.INFO
     },
@@ -105,6 +117,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '数据字典管理',
       icon: <img src={dictSVG} />,
       iconActive: <img src={dictActiveSVG} />,
+      iconClass: 'icon-a-shujuzidianguanli',
+      iconActiveClass: 'icon-a-shujuzidianguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/system-dict`,
       permissionKey: TENANT_MENUS.DICT
     },
@@ -113,6 +127,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '安全设置',
       icon: <img src={securitySVG} />,
       iconActive: <img src={securityActiveSVG} />,
+      iconClass: 'icon-anquanshezhi',
+      iconActiveClass: 'icon-anquanshezhi-xuanzhong',
       path: `/onebase/${tenantId}/setting/security`,
       permissionKey: TENANT_MENUS.SECURITY
     },
@@ -121,6 +137,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '个人中心',
       icon: <img src={userInfoSVG} />,
       iconActive: <img src={userInfoActiveSVG} />,
+      iconClass: 'icon-gerenzhongxin',
+      iconActiveClass: 'icon-gerenzhongxin-xuanzhong',
       path: `/onebase/${tenantId}/setting/profile`,
       permissionKey: TENANT_MENUS.PROFILE
     },
@@ -129,6 +147,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '插件管理',
       icon: <img src={plugSVG} />,
       iconActive: <img src={plugActiveSVG} />,
+      iconClass: 'icon-chajianguanli',
+      iconActiveClass: 'icon-chajianguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/plugin`,
       permissionKey: TENANT_MENUS.PLUGIN
     },
@@ -137,6 +157,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '外部用户',
       icon: <img src={externalUserSVG} />,
       iconActive: <img src={externalUserActiveSVG} />,
+      iconClass: 'icon-yonghuguanli',
+      iconActiveClass: 'icon-yonghuguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/externalUser`,
       permissionKey: TENANT_MENUS.THIRD
     },
@@ -145,6 +167,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '企业管理',
       icon: <img src={corpSVG} />,
       iconActive: <img src={corpActiveSVG} />,
+      iconClass: 'icon-qiyeguanli',
+      iconActiveClass: 'icon-qiyeguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/enterprise`,
       permissionKey: TENANT_MENUS.CORP
     },
@@ -153,6 +177,8 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: '智能体管理',
       icon: <img src={agentSVG} />,
       iconActive: <img src={agentActiveSVG} />,
+      iconClass: 'icon-zhinengtiguanli',
+      iconActiveClass: 'icon-zhinengtiguanli-xuanzhong',
       path: `/onebase/${tenantId}/setting/agent`
     },
     {
@@ -160,16 +186,18 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
       title: 'AI生成文档',
       icon: <img src={copilotdocSVG} />,
       iconActive: <img src={copilotdocActiveSVG} />,
+      iconClass: 'icon-a-AIshengchengwendang',
+      iconActiveClass: 'icon-AIshengchengwendang-xuanzhong',
       path: `/onebase/${tenantId}/setting/copilotdoc`
-      //   permissionKey: TENANT_MENUS.AIDOC
     },
     {
       key: 'wxmini',
       title: 'AI生成小程序',
       icon: <img src={wxminiSVG} />,
       iconActive: <img src={wxminiActiveSVG} />,
+      iconClass: 'icon-AIshengchengxiaochengxu',
+      iconActiveClass: 'icon-AIshengchengxiaochengxu-xuanzhong',
       path: `/onebase/${tenantId}/setting/wxmini`
-      //   permissionKey: TENANT_MENUS.WXMINI
     }
   ];
 
@@ -193,7 +221,6 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     return platMenuData();
   }, [menuConfig]);
 
-  // 查找选中菜单项的函数
   const findSelectedKeys = React.useCallback((items: MenuItemType[], path: string): string[] => {
     for (const item of items) {
       if (path === item.path || path.startsWith(item.path + '/')) {
@@ -209,13 +236,11 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     return [];
   }, []);
 
-  // 根据当前路径设置选中的菜单项
   useEffect(() => {
     const keys = findSelectedKeys(finalMenuItems, location.pathname);
     setSelectedKeys(keys);
   }, [location.pathname, findSelectedKeys]);
 
-  // 处理菜单点击
   const handleMenuClick = async (key: string) => {
     const findPathByKey = (items: MenuItemType[], targetKey: string): string | null => {
       for (const item of items) {
@@ -257,23 +282,19 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     }
   };
 
-  // 处理折叠按钮点击
   const handleCollapseClick = useCallback(() => {
     if (onCollapse) {
       onCollapse(!collapsed);
     }
   }, [onCollapse, collapsed]);
 
-  // 递归渲染菜单项
   const renderMenuItems = React.useCallback(
     (items: MenuItemType[]): React.ReactNode => {
       return items
         .map((item) => {
-          // TODO 后端返回数据暂未更新，暂不开启权限控制
           const permissionKey = item.permissionKey;
           if (permissionReady && permissionKey && !hasMenu(permissionKey as any)) return null;
 
-          // 如果 children length === 0，则不渲染这个菜单
           if (item.children && item.children.length === 0) {
             return null;
           }
@@ -317,6 +338,37 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     [collapsed, permissionReady, selectedKeys]
   );
 
+  const renderVerticalMenuItems = React.useCallback(
+    (items: MenuItemType[]): React.ReactNode => {
+      return items
+        .map((item, index) => {
+          const permissionKey = item.permissionKey;
+          if (permissionReady && permissionKey && !hasMenu(permissionKey as any)) return null;
+
+          if (item.children && item.children.length === 0) {
+            return null;
+          }
+
+          const isActive = selectedKeys.includes(item.key);
+          const iconClass = isActive && item.iconActiveClass ? item.iconActiveClass : item.iconClass;
+          const isLast = index === items.length - 1;
+
+          return (
+            <VerticalMenuItem
+              key={item.key}
+              iconClass={iconClass}
+              title={item.title}
+              active={isActive}
+              onClick={() => handleMenuClick(item.key)}
+              showDivider={false}
+            />
+          );
+        })
+        .filter(Boolean);
+    },
+    [permissionReady, selectedKeys, handleMenuClick]
+  );
+
   const defaultKeys = defaultSelectedKeys();
 
   const renderContent = () => {
@@ -333,28 +385,48 @@ const AppSider: React.FC<SiderProps> = ({ className, collapsed = false, onCollap
     );
   };
 
-  return (
-    <Sider
-      className={`${styles.sider} ${className || ''}`}
-      collapsed={collapsed}
-      onCollapse={onCollapse}
-      trigger={null}
-      width={240}
-    >
-      <div className={styles.siderContent}>
-        <div className={styles.sliderTitle}>AI+零代码开发平台</div>
-        <div className={styles.menuContainer}>{renderContent()}</div>
+  const renderVerticalContent = () => {
+    return (
+      <div className={verticalStyles.verticalMenuContainer}>
+        {renderVerticalMenuItems(menuConfig)}
+      </div>
+    );
+  };
 
-        <div className={styles.collapseButtonContainer}>
-          <Button
-            type="text"
-            icon={collapsed ? <IconMenuUnfold /> : <IconMenuFold />}
-            onClick={handleCollapseClick}
-            className={styles.collapseButton}
-          />
+  if (!isIframe) {
+    return (
+      <Sider
+        className={`${styles.sider} ${className || ''}`}
+        collapsed={collapsed}
+        onCollapse={onCollapse}
+        trigger={null}
+        width={240}
+      >
+        <div className={styles.siderContent}>
+          <div className={styles.sliderTitle}>AI+零代码开发平台</div>
+          <div className={styles.menuContainer}>{renderContent()}</div>
+
+          <div className={styles.collapseButtonContainer}>
+            <Button
+              type="text"
+              icon={collapsed ? <IconMenuUnfold /> : <IconMenuFold />}
+              onClick={handleCollapseClick}
+              className={styles.collapseButton}
+            />
+          </div>
+        </div>
+      </Sider>
+    );
+  }
+
+  return (
+    <div className={`${verticalStyles.verticalSider} ${className || ''}`}>
+      <div className={verticalStyles.verticalSiderContent}>
+        <div className={verticalStyles.verticalMenuWrapper}>
+          {renderVerticalContent()}
         </div>
       </div>
-    </Sider>
+    </div>
   );
 };
 
