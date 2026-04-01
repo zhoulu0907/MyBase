@@ -91,7 +91,7 @@ const SettingPage: React.FC = () => {
       {!isIframe && <AppHeader className={styles.settingPageHeader} avatarUrl={avatarUrl} tenantInfo={tenantInfo} />}
 
       <Layout className={styles.settingPageContent}>
-        <AppSider collapsed={collapsed} onCollapse={handleCollapse} />
+        <AppSider collapsed={collapsed} onCollapse={handleCollapse} isIframe={isIframe} />
         <Layout className={styles.settingPageContentMain}>
           <AppBreadcrumb />
 
