@@ -42,7 +42,7 @@ public interface UserService {
      * @param createReqVO 用户信息
      * @return 用户编号
      */
-    AdminUserDO updateOrAddUser(@Valid ExternalUserInfoReqVO createReqVO);
+    AdminUserDO updateOrAddTianGongUser(@Valid ExternalUserInfoReqVO createReqVO);
 
     /**
      * 创建平台用户

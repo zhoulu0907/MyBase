@@ -275,7 +275,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AdminUserDO updateOrAddUser(ExternalUserInfoReqVO userInfoReqVO) {
+    public AdminUserDO updateOrAddTianGongUser(ExternalUserInfoReqVO userInfoReqVO) {
         // todo 这里暂时忽略天工的租户ID
         SystemExternalUserDO externalUserDO = systemExternalUserDataRepository.findByExternalUserId(userInfoReqVO.getId(), userInfoReqVO.getPlatformType());
 
@@ -296,7 +296,7 @@ public class UserServiceImpl implements UserService {
         validateUserForCreateOrUpdate(null, userDO.getUsername(),
                 userDO.getMobile(), userDO.getEmail(), userDO.getDeptId(), userDO.getPostIds(), userDO.getUserType());
 
-        userDO.setPassword(encodePassword("AdminChina2025!")); // 加密密码
+        userDO.setPassword(encodePassword("Cmcc@135!")); // 天工加密密码
         userDO.setId(null);
         userDataRepository.save(userDO);
         RoleDO roleIdsByCodeAndTenantId = roleService.getRoleByCode(RoleCodeEnum.TENANT_ADMIN.getCode());
