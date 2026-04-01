@@ -44,7 +44,6 @@ const Dashboard: FC = () => {
   const tenantId = TokenManager.getCurIdentifyId();
   useEffect(() => {
     setLoading(false);
-    console.log('tokenInfo:', tokenInfo);
     getDashboardList();
   }, []);
 
