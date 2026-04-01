@@ -72,6 +72,10 @@ export const getCorpResourceURL = (): string => {
   return envConfig?.CORP_RESOURCE_URL;
 };
 
+export const getChatbotBaseURL = (): string => {
+  return envConfig?.CHATBOT_BASE_URL || 'http://bote.sit.artifex-cmcc.com.cn/bote';
+};
+
 const RUNTIME_DEV_PATH = '/runtime-dev';
 
 /**

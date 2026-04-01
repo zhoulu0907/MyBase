@@ -1,6 +1,6 @@
 import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import { Form } from '@arco-design/web-react';
-import { getEntityFieldsWithChildren, getPageSetMetaData, type AppEntityField } from '@onebase/app';
+import { getEntityListWithFields, getPageSetMetaData, type AppEntityField } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
@@ -95,16 +95,21 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
-    const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId });
-    setMainMetaData(mainMetaDataId);
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
+    const entityUuid = await getPageSetMetaData({ pageSetId: pageSetId });
+    setMainMetaData(entityUuid);
 
-    // 设置 pagesRuntimeSignal（原有逻辑）
-    setMainMetaDataFields(entityWithChildren.parentFields);
-    setSubEntities(entityWithChildren.childEntities);
+    // 使用 getEntityListWithFields 获取完整的字段信息（包含 dictTypeId）
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [entityUuid] });
+    const [entityWithChildren] = entityListWithFields;
 
-    // 同步设置 useAppEntityStore，确保 SelectOne 等组件能获取枚举选项
-    setMainMetaDataToStore(entityWithChildren, setMainEntity, setSubEntitiesToStore, batchSetAppDict);
+    if (entityWithChildren) {
+      // 设置 pagesRuntimeSignal（原有逻辑）
+      setMainMetaDataFields(entityWithChildren.fields);
+      setSubEntities(entityWithChildren.childEntities);
+
+      // 同步设置 useAppEntityStore，确保 SelectOne 等组件能获取枚举选项
+      setMainMetaDataToStore(entityWithChildren, setMainEntity, setSubEntitiesToStore, batchSetAppDict);
+    }
   };
 
   const updateComponentStatus = async () => {

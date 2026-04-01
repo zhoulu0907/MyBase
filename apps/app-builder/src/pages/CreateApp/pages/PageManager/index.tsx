@@ -805,7 +805,9 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {curMenu.value?.menuCode && curMenu.value?.menuCode?.indexOf('TASK-') < 0 && (
+                  {curMenu.value?.menuCode &&
+                    curMenu.value?.menuCode?.indexOf('TASK-') < 0 &&
+                    curMenu.value?.menuType !== MenuType.GROUP && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
