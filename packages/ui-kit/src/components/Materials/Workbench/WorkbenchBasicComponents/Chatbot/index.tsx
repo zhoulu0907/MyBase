@@ -21,7 +21,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
   useEffect(() => {
     const calculateHeight = () => {
       const bodyHeight = document.body.offsetHeight;
-      setIframeHeight(bodyHeight - 200);
+      setIframeHeight(bodyHeight - 50);
     };
 
     calculateHeight();
