@@ -18,12 +18,52 @@
     display: flex;
     cursor: pointer;
 
-    .cardHeaderTitle {
+    .cardHeaderIcon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgb(var(--primary-1));
+      border-radius: 8px;
+      flex-shrink: 0;
+
+      img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+      }
+    }
+
+    .cardHeaderContent {
+      flex: 1;
+      padding-left: 16px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+
+      .cardHeaderTitle {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .cardHeaderContentNoIcon {
       flex: 1;
       overflow: hidden;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+
+      .cardHeaderTitle {
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
     }
   }
 

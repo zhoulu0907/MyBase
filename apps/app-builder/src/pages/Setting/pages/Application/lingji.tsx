@@ -2,6 +2,7 @@ import {
   Divider,
   Form,
   Input,
+  Message,
   Modal,
   Pagination,
   Select,
@@ -48,6 +49,7 @@ const LingjiApplicationPage: React.FC = () => {
     setCreateType,
     deleteApp,
     datasource,
+    setDdtasource,
     deleteVisible,
     setDeleteVisible,
     createVisible,
@@ -99,7 +101,7 @@ const LingjiApplicationPage: React.FC = () => {
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
-                <div className={styles.otherCreate}>
+                <div className={styles.otherCreate} onClick={() => Message.info('功能正在建设中，敬请期待！')}>
                   <div className={styles.otherCreateContent}>
                     <div className={styles.otherCreateTitle}>智能克隆</div>
                     <div className={styles.otherCreateDesc}>智能解析高码应用，快速转换为零代码应用</div>
@@ -297,6 +299,7 @@ const LingjiApplicationPage: React.FC = () => {
                       onClick={async () => {
                         if (createType === 'datasource') {
                           const res = await createDatasourceRef.current?.handleGetDatasource?.();
+                          setDdtasource(res);
                         }
                         setCreateType('app');
                         setCurrentStep(1);

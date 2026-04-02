@@ -25,14 +25,15 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ onChange, ite
             必填
           </Checkbox>
 
-          {typeof config.noRepeat === 'boolean' && (
+          {/* 不允许重复校验配置，目前在数据模型那里支持 */}
+          {/* {typeof config.noRepeat === 'boolean' && (
             <Checkbox
               checked={config.noRepeat}
               onChange={(v) => handleChange('noRepeat', v)}
             >
               不允许重复
             </Checkbox>
-          )}
+          )} */}
 
           {typeof config.lengthLimit === 'boolean' && (
             <Grid.Row align="center">

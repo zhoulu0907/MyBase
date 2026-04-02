@@ -1,4 +1,4 @@
-import { Divider, Form, Input, Modal, Pagination, Select, Space, Spin, Typography, Grid } from '@arco-design/web-react';
+import { Divider, Form, Input, Message, Modal, Pagination, Select, Space, Spin, Typography, Grid } from '@arco-design/web-react';
 import { IconLeft, IconRight, IconSearch } from '@arco-design/web-react/icon';
 import React from 'react';
 
@@ -36,6 +36,7 @@ const TiangongApplicationPage: React.FC = () => {
     setCreateType,
     deleteApp,
     datasource,
+    setDdtasource,
     deleteVisible,
     setDeleteVisible,
     createVisible,
@@ -88,7 +89,7 @@ const TiangongApplicationPage: React.FC = () => {
                 </div>
               </div>
               <div>
-                <div className={styles.otherCreate}>
+                <div className={styles.otherCreate} onClick={() => Message.info('功能正在建设中，敬请期待！')}>
                   <div className={styles.otherCreateContent}>
                     <div className={styles.otherCreateTitle}>智能克隆</div>
                     <div className={styles.otherCreateDesc}>智能解析高码应用，快速转换为零代码应用</div>
@@ -286,6 +287,7 @@ const TiangongApplicationPage: React.FC = () => {
                       onClick={async () => {
                         if (createType === 'datasource') {
                           const res = await createDatasourceRef.current?.handleGetDatasource?.();
+                          setDdtasource(res);
                         }
                         setCreateType('app');
                         setCurrentStep(1);

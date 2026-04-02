@@ -22,16 +22,16 @@ const XSelectMutiple = memo((props: XInputSelectMutipleConfig & { runtime?: bool
 
   const [options, setOptions] = useState<DictData[]>([]);
 
-  useEffect(() => {
-    if (dataField?.length) {
-      getOptions();
-    }
-  }, [dataField]);
-
   const getOptions = async () => {
     const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
     setOptions(newOptions);
   };
+
+  useEffect(() => {
+    if (dataField?.length && mainEntity?.tableName && mainEntity?.fields) {
+      getOptions();
+    }
+  }, [dataField, mainEntity, subEntities, appDict.value]);
 
   const getTagColor = (ele: any, isBackground?: boolean) => {
     const curTag = options.find((e) => e.value === ele || e.value === ele?.id || e.id === ele?.id || e.id === ele)

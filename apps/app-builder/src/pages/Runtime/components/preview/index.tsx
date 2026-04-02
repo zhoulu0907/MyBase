@@ -100,6 +100,12 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     console.log('mainMetaData: ', mainMetaData);
     setMainMetaData(mainMetaData);
 
+    // 防御性检查：如果没有 mainMetaData，不继续获取实体数据
+    if (!mainMetaData) {
+      console.log('无主表元数据，跳过实体数据加载');
+      return;
+    }
+
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
     console.log('当前主表及所有子表数据: ', entityWithChildren);
 

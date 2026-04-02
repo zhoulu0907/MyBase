@@ -727,11 +727,11 @@ export const INDICATOR_CARD_STYLE_TYPE = {
 // 指标字段计算方式  求和/平均值/最大值/最小值/计数/去重计数
 export const INDICATOR_CALCULATE_TYPE = {
   SUM: 'sum',
-  AVERAGE: 'average',
+  AVERAGE: 'avg',
   MAX: 'max',
   MIN: 'min',
   COUNT: 'count',
-  DEDUCE: 'deduce'
+  DEDUCE: 'count_distinct'
 }
 // 指标 时间维度 timeDimension 时/天/周/月（默认）/年
 export const INDICATOR_TIME_DEMENSION = {

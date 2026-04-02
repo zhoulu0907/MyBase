@@ -12,9 +12,10 @@ interface OperationButtonsProps {
   component: GridItem;
   pageComponentSchema: WorkbenchComponentSchema;
   onOperation: WorkbenchComponentOperation;
+  canNotCopy: boolean;
 }
 
-export function OperationButtons({ component, pageComponentSchema, onOperation }: OperationButtonsProps) {
+export function OperationButtons({ component, pageComponentSchema, onOperation, canNotCopy }: OperationButtonsProps) {
   const isHidden = pageComponentSchema.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN];
 
   const handleShow = (e: React.MouseEvent) => {
@@ -43,10 +44,14 @@ export function OperationButtons({ component, pageComponentSchema, onOperation }
         </>
       )}
 
-      <div className={styles.copyButton} onClick={handleCopy}>
-        <img src={CompCopyIcon} alt="component copy" />
-      </div>
-      <Divider className={styles.divider} type="vertical" />
+      {!canNotCopy && (
+        <div className={styles.copyButton} onClick={handleCopy}>
+          <img src={CompCopyIcon} alt="component copy" />
+        </div>
+      )}
+
+      {!canNotCopy && <Divider className={styles.divider} type="vertical" />}
+
       <div className={styles.deleteButton} onClick={handleDelete}>
         <img src={CompDeleteIcon} alt="component delete" />
       </div>

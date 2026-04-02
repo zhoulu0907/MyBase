@@ -235,6 +235,23 @@ export class TokenManager {
       return null;
     }
   }
+
+  /**
+   * 设置 tenant_id 到 session/localStorage
+   * 用于从 URL 获取 tenant_id 后存储到 session
+   * @param tenantId 租户ID
+   * @param rememberMe 是否持久化存储
+   */
+  static setTenantId(tenantId: string, rememberMe: boolean = false): void {
+    try {
+      sessionStorage.setItem(this.addEnv(this.TENANT_ID), tenantId);
+      if (rememberMe) {
+        localStorage.setItem(this.addEnv(this.TENANT_ID), tenantId);
+      }
+    } catch (error) {
+      console.error('存储 tenant_id 失败:', error);
+    }
+  }
 }
 
 /**

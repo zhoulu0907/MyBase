@@ -22,6 +22,16 @@ const APP_RUNTIME_FE_URL = 'http://onebase.4c-uat.hq.cmcc:20011/appruntime';
 const APP_MOBILE_BUILDER_FE_URL = 'http://onebase.4c-uat.hq.cmcc:20011/mobilebuilder';
 const APP_MOBILE_RUNTIME_FE_URL = 'http://onebase.4c-uat.hq.cmcc:20011/mobileruntime';
 
+// 数据集和仪表板服务地址
+const APP_BUILDER_DATASET_URL = 'http://onebase.4c-uat.hq.cmcc:20011/observerbuilder';
+const APP_BUILDER_DASHBOARD_URL = 'http://onebase.4c-uat.hq.cmcc:20011/appdashboard/#/';
+// Chatbot 服务地址
+const CHATBOT_BASE_URL = '';
+// App Dashboard 配置 (明文配置)
+const DASHBOARD_URL = 'http://onebase.4c-uat.hq.cmcc:20011/observerbuilder';
+const PREVIEW_URL = 'http://onebase.4c-uat.hq.cmcc:20011/appdashboard/#/chart/preview';
+const DATASET_URL = 'http://10.0.104.38:8100/de2api';
+
 const FRONTEND_APP_KEY = 'onebase';
 const FRONTEND_APP_SECRET =
   'ac47af767231f0d08e3787b7d032443a2c7baedaeee07d596cff4525b94ce6a7';
@@ -55,6 +65,8 @@ const CONFIG_SOURCES: Record<string, FrontendConfig> = {
     RUNTIME_URL: APP_RUNTIME_FE_URL,
     RUNTIME_MOBILE_URL: APP_MOBILE_RUNTIME_FE_URL,
     PLUGIN_URL: ONEBASESERVER_BASE_URL,
+    APP_BUILDER_DATASET_URL: APP_BUILDER_DATASET_URL,
+    APP_BUILDER_DASHBOARD_URL: APP_BUILDER_DASHBOARD_URL,
     PUBLIC_KEY: FRONTEND_PUBLIC_KEY
   },
   'mobile-runtime': {
@@ -80,12 +92,19 @@ const CONFIG_SOURCES: Record<string, FrontendConfig> = {
     CORP_RESOURCE_URL:
       `${ONEBASERUNTIMESERVER_BASE_URL}/runtime/infra/file/corp/download`,
     PLUGIN_URL: `${ONEBASESERVER_BASE_URL}/plugins`,
+    APP_BUILDER_DASHBOARD_URL,
+    CHATBOT_BASE_URL,
     PUBLIC_KEY: FRONTEND_PUBLIC_KEY
   },
   'mobile-editor': {
     BASE_URL: `${ONEBASESERVER_BASE_URL}/admin-api`,
     RUNTIME_BASE_URL: `${ONEBASERUNTIMESERVER_BASE_URL}/runtime`,
     RUNTIME_URL: APP_RUNTIME_FE_URL
+  },
+  'app-dashboard': {
+    DASHBOARD_URL,
+    PREVIEW_URL,
+    DATASET_URL
   }
 };
 
@@ -94,7 +113,8 @@ const CONFIG_KEY_TO_DEPLOY_FILENAME: Record<string, string> = {
   'admin-console': 'console_config.js',
   runtime: 'runtime_config.js',
   'mobile-runtime': 'mobile_runtime_config.js',
-  'mobile-editor': 'mobile_editor_config.js'
+  'mobile-editor': 'mobile_editor_config.js',
+  'app-dashboard': 'dashboard_config.js'
 };
 
 function renderPlainConfigJs(obj: FrontendConfig) {
@@ -105,6 +125,9 @@ async function renderEncryptedConfigJs(obj: FrontendConfig) {
   const encryptedData = await sm2Encrypt(CONFIG_PUBLIC_KEY, `${JSON.stringify(obj)}`);
   return `window.global_config = {\n  CONFIG: ${JSON.stringify(encryptedData)}\n};\n`;
 }
+
+// 不需要加密的配置 key
+const PLAIN_CONFIG_KEYS = ['app-dashboard'];
 
 async function emitConfigFiles(
   configKeys: string[],
@@ -124,7 +147,10 @@ async function emitConfigFiles(
     }
     const fileName = CONFIG_KEY_TO_DEPLOY_FILENAME[configKey] || `${configKey}_config.js`;
     const filePath = path.resolve(outDir, fileName);
-    const content = await render(obj);
+    // app-dashboard 使用明文配置，其他使用加密配置
+    const content = PLAIN_CONFIG_KEYS.includes(configKey)
+      ? renderPlainConfigJs(obj)
+      : await render(obj);
     fs.writeFileSync(filePath, content, 'utf8');
     outputs.push({ configKey, filePath });
   }

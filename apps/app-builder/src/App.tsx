@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import LingjiCallback from './pages/LingjiCallback';
 import OAuthCallback from './pages/OAuthCallback';
 import SettingPage from './pages/Setting';
+import { initSupervisionPlugin, updatePageInfo, showPlugin, hidePlugin, extractRouteInfo, isPluginInitialized } from './utils/supervisionPlugin';
 
 function AppContent() {
   //   // 启用token自动刷新
@@ -42,9 +43,59 @@ function AppContent() {
   useEffect(() => {
     if (tenantId) {
       TokenManager.setCurIdentifyId(tenantId);
+
+      // 如果 session 中没有 tenant_id，从 URL 获取并存储
+      const existingTenantId = TokenManager.getTenantInfo()?.tenantId;
+      if (!existingTenantId) {
+        TokenManager.setTenantId(tenantId);
+      }
       // initPlugins(); // 已在 main.tsx 中提前初始化
     }
   }, [tenantId, location.pathname]);
+
+  // 监督插件初始化 - 在用户登录后初始化
+  useEffect(() => {
+    const tokenInfo = TokenManager.getToken();
+    if (tokenInfo && !isPluginInitialized()) {
+      // 尝试初始化，如果用户信息还未加载则重试
+      const tryInit = (retries: number) => {
+        if (retries <= 0) {
+          console.log('[SupervisionPlugin] 初始化重试次数用尽');
+          return;
+        }
+
+        // 检查配置是否加载
+        const config = (window as any).supervision_config;
+        if (!config) {
+          console.log('[SupervisionPlugin] 配置未加载，等待重试...');
+          setTimeout(() => tryInit(retries - 1), 500);
+          return;
+        }
+
+        initSupervisionPlugin();
+      };
+
+      tryInit(5);
+    }
+  }, [location.pathname]);
+
+  // 监督插件路由埋点监听
+  useEffect(() => {
+    const { pathname } = location;
+
+    // 判断是否为需要隐藏插件的页面
+    const hidePages = ['/login', '/lingji-callback', '/oauth', '/tenant'];
+    const shouldHide = hidePages.some(page => pathname.startsWith(page));
+
+    if (shouldHide) {
+      hidePlugin();
+    } else if (isPluginInitialized()) {
+      // 插件已初始化且不在隐藏页面，更新埋点信息
+      showPlugin();
+      const { moduleCode, menuCode } = extractRouteInfo(pathname);
+      updatePageInfo(moduleCode, menuCode);
+    }
+  }, [location.pathname]);
 
   return (
     <Routes>

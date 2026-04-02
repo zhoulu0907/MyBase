@@ -21,7 +21,9 @@ const ConnectorCard: React.FC<ConnectorCardProps> = ({ data, isSelected, onClick
       onClick={handleCardClick}
     >
       <div className={styles.cardHeader}>
-        <div className={styles.cardHeaderIcon}>{data.icon}</div>
+        <div className={styles.cardHeaderIcon}>
+          <img src={data.icon as string} alt={data.name} />
+        </div>
         <div className={styles.cardHeaderContent}>
           <div className={styles.titleRow}>
             <Typography.Text ellipsis={{ showTooltip: true }} className={styles.cardHeaderContentTitle}>

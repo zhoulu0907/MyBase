@@ -74,7 +74,7 @@ const XDataList: XDataListSchema = {
       metaData: '',
       columns: [],
     },
-    dataCount: 2,
+    dataCount: 5,
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
     status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT],
   }

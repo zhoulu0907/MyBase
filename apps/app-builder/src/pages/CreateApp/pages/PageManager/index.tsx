@@ -1,6 +1,8 @@
-import CreateGroupIcon from '@/assets/images/addfolder.svg';
-import CreatePageIcon from '@/assets/images/addpage.svg';
-import CreateWorkbenchIcon from '@/assets/images/addworkbench.svg';
+import CreateGroupIcon from '@/assets/images/create_group_icon.svg';
+import CreateNormalPageIcon from '@/assets/images/create_normal_page_icon.svg';
+import CreateBpmPageIcon from '@/assets/images/create_bpm_page_icon.svg';
+import CreateWorkbenchIcon from '@/assets/images/create_workbench_icon.svg';
+import CreateScreenIcon from '@/assets/images/create_screen_icon.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
 import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
 import CreateScreenModal from '@/components/CreatePageDashboardModal';
@@ -14,6 +16,8 @@ import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-reac
 import {
   copyApplicationMenu,
   createApplicationMenu,
+  CREATE_MENU_CATEGORIES,
+  CreateMenuCategoryLabelMap,
   DashBoardCreateType,
   deleteApplicationMenu,
   getEntityListByApp,
@@ -33,6 +37,7 @@ import {
   type ApplicationMenu,
   type CopyApplicationMenuReq,
   type CreateApplicationMenuReq,
+  type CreateMenuCategory,
   type DeleteApplicationMenuReq,
   type GetPageSetIdReq,
   type ListApplicationMenuReq,
@@ -84,6 +89,35 @@ const menuStyles = {
   height: '32px'
 };
 
+// 创建菜单分类列表
+const createMenuItems: Array<{ category: CreateMenuCategory; icon: string }> = [
+  { category: CREATE_MENU_CATEGORIES.NORMAL_FORM, icon: CreateNormalPageIcon },
+  { category: CREATE_MENU_CATEGORIES.BPM_FORM, icon: CreateBpmPageIcon },
+  { category: CREATE_MENU_CATEGORIES.WORKBENCH, icon: CreateWorkbenchIcon },
+  { category: CREATE_MENU_CATEGORIES.SCREEN, icon: CreateScreenIcon },
+  { category: CREATE_MENU_CATEGORIES.GROUP, icon: CreateGroupIcon }
+];
+
+// 菜单分类对应的页面类型
+const pageTypeMap: Record<CreateMenuCategory, PageType | undefined> = {
+  [CREATE_MENU_CATEGORIES.NORMAL_FORM]: PageType.NORMAL,
+  [CREATE_MENU_CATEGORIES.BPM_FORM]: PageType.BPM,
+  [CREATE_MENU_CATEGORIES.WORKBENCH]: PageType.WORKBENCH,
+  [CREATE_MENU_CATEGORIES.SCREEN]: PageType.DASHBOARD,
+  [CREATE_MENU_CATEGORIES.GROUP]: undefined
+};
+
+// 菜单分类队形的菜单类型
+const menuTypeMap: Record<CreateMenuCategory, MenuType> = {
+  [CREATE_MENU_CATEGORIES.NORMAL_FORM]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.BPM_FORM]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.WORKBENCH]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.SCREEN]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.GROUP]: MenuType.GROUP
+};
+
+const needsEntityMap = new Set([CREATE_MENU_CATEGORIES.NORMAL_FORM, CREATE_MENU_CATEGORIES.BPM_FORM]);
+
 const PageManagerPage: FC = () => {
   useSignals();
   const { setMainEntity, setSubEntities } = useAppEntityStore();
@@ -105,9 +139,9 @@ const PageManagerPage: FC = () => {
   const [copyForm] = Form.useForm();
   const resourceUrl = getDashBoardURL();
   // 创建弹窗
-  const [visibleCreateForm, setVisibleCreateForm] = useState('');
+  const [visibleCreateForm, setVisibleCreateForm] = useState<CreateMenuCategory | ''>('');
   // 创建大屏弹窗
-  const [visibleCreateScreenForm, setVisibleCreateScreenForm] = useState('');
+  const [visibleCreateScreenForm, setVisibleCreateScreenForm] = useState<CreateMenuCategory | ''>('');
   // 重命名弹窗
   const [visibleRenameForm, setVisibleRenameForm] = useState(false);
   // 复制弹窗
@@ -115,11 +149,6 @@ const PageManagerPage: FC = () => {
 
   const [title, setTitle] = useState('');
   const [showGuide, setShowGuide] = useState<boolean>(false);
-  const pageSetTypeOptions = [
-    { label: '普通表单', value: PageType.NORMAL },
-    { label: '流程表单', value: PageType.BPM },
-    { label: '工作台', value: PageType.WORKBENCH }
-  ];
 
   const [treeData, setTreeData] = useState<TreeNode[]>();
   const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
@@ -321,87 +350,31 @@ const PageManagerPage: FC = () => {
     setEntityListOptions(entityOptions);
   };
 
+  const openCreateMenu = (category: CreateMenuCategory) => {
+    if (category === CREATE_MENU_CATEGORIES.SCREEN) {
+      setVisibleCreateScreenForm(category);
+    } else {
+      setVisibleCreateForm(category);
+    }
+    createForm.resetFields();
+    setTitle(CreateMenuCategoryLabelMap[category]);
+  };
+
   const createMenuDropList = (
     <Menu style={{ padding: '10px 5px' }}>
-      <MenuItem
-        key="page"
-        onClick={() => {
-          setVisibleCreateForm('page');
-          createForm.resetFields();
-          setTitle(t('createApp.createPage'));
-        }}
-      >
-        <div className={styles.createItem}>
-          <ReactSVG
-            className={styles.customSvg}
-            src={CreatePageIcon}
-            beforeInjection={(svg) => {
-              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
-              svg.setAttribute('fill', '#4E5969');
-              svg.setAttribute('width', '16px');
-              svg.setAttribute('height', '16px');
-            }}
-          />
-          {t('createApp.createPage')}
-        </div>
-      </MenuItem>
-      <MenuItem
-        key="workbench"
-        onClick={() => {
-          setVisibleCreateForm('workbench');
-          createForm.resetFields();
-          setTitle(t('createApp.createWorkbench'));
-        }}
-      >
-        <div className={styles.createItem}>
-          <ReactSVG className={styles.customSvg} src={CreateWorkbenchIcon} />
-          {t('createApp.createWorkbench')}
-        </div>
-      </MenuItem>
-      <MenuItem
-        key="group"
-        onClick={() => {
-          setVisibleCreateForm('group');
-          createForm.resetFields();
-          setTitle(t('createApp.createGroup'));
-        }}
-      >
-        <div className={styles.createItem}>
-          <ReactSVG
-            className={styles.customSvg}
-            src={CreateGroupIcon}
-            beforeInjection={(svg) => {
-              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
-              svg.setAttribute('fill', '#4E5969');
-              svg.setAttribute('width', '16px');
-              svg.setAttribute('height', '16px');
-            }}
-          />
-          {t('createApp.createGroup')}
-        </div>
-      </MenuItem>
-      <MenuItem
-        key="screen"
-        onClick={() => {
-          setVisibleCreateScreenForm('screen');
-          createForm.resetFields();
-          setTitle(t('createApp.createScreen'));
-        }}
-      >
-        <div className={styles.createItem}>
-          <ReactSVG
-            className={styles.customSvg}
-            src={CreateGroupIcon}
-            beforeInjection={(svg) => {
-              svg.querySelectorAll('*').forEach((el) => el.removeAttribute('fill'));
-              svg.setAttribute('fill', '#4E5969');
-              svg.setAttribute('width', '16px');
-              svg.setAttribute('height', '16px');
-            }}
-          />
-          {t('createApp.createScreen')}
-        </div>
-      </MenuItem>
+      {createMenuItems.map(({ category, icon }) => (
+        <MenuItem
+          key={category}
+          onClick={() => {
+            openCreateMenu(category);
+          }}
+        >
+          <div className={styles.createItem}>
+            <ReactSVG className={styles.customSvg} src={icon} />
+            {CreateMenuCategoryLabelMap[category]}
+          </div>
+        </MenuItem>
+      ))}
     </Menu>
   );
 
@@ -410,16 +383,8 @@ const PageManagerPage: FC = () => {
     setTitle(t('createApp.rename'));
   };
 
-  const triggerCreate = (formType: string) => {
-    setVisibleCreateForm(formType);
-    createForm.resetFields();
-    if (formType == 'page') {
-      setTitle(t('createApp.createPage'));
-    }
-
-    if (formType == 'group') {
-      setTitle(t('createApp.createGroup'));
-    }
+  const triggerCreate = (formType: CreateMenuCategory) => {
+    openCreateMenu(formType);
   };
 
   const triggerCopy = () => {
@@ -505,26 +470,21 @@ const PageManagerPage: FC = () => {
   const handleCreate = async () => {
     createForm.validate(async (error) => {
       if (error !== null) return;
+      if (!visibleCreateForm) return;
+
       const req: CreateApplicationMenuReq = {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-        pageSetType: createForm.getFieldValue('pageSetType'),
+        pageSetType: pageTypeMap[visibleCreateForm],
         menuName: createForm.getFieldValue('menuName'),
-        menuType: MenuType.PAGE,
+        menuType: menuTypeMap[visibleCreateForm],
         menuIcon: createForm.getFieldValue('menuIcon'),
-        entityUuid: visibleCreateForm === 'page' ? createForm.getFieldValue('entityUuid') : ''
+        entityUuid: needsEntityMap.has(visibleCreateForm) ? createForm.getFieldValue('entityUuid') : ''
       };
 
-      if (visibleCreateForm === 'page') {
-        req.menuType = MenuType.PAGE;
-      }
-      if (visibleCreateForm === 'group') {
-        req.menuType = MenuType.GROUP;
-      }
-      if (visibleCreateForm === 'workbench') {
-        req.menuType = MenuType.PAGE;
-        req.pageType = 'workbench';
+      if (visibleCreateForm === CREATE_MENU_CATEGORIES.WORKBENCH) {
+        req.pageType = CREATE_MENU_CATEGORIES.WORKBENCH;
       }
 
       const menuResp = await createApplicationMenu(req);
@@ -533,6 +493,7 @@ const PageManagerPage: FC = () => {
         Message.success('创建成功');
       }
       setVisibleCreateForm('');
+
       getMenuList(undefined, menuResp.id);
 
       const pageSetId = await getPageSetId({
@@ -547,7 +508,7 @@ const PageManagerPage: FC = () => {
 
         // 根据页面类型跳转到对应的编辑器
         let editorType: string = EDITOR_TYPES.FORM_EDITOR;
-        if (visibleCreateForm === 'workbench') {
+        if (visibleCreateForm === CREATE_MENU_CATEGORIES.WORKBENCH) {
           editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
           setCurMenu({ ...menuResp, pagesetType: PageType.WORKBENCH });
         } else {
@@ -830,8 +791,7 @@ const PageManagerPage: FC = () => {
                 <div
                   className={styles.guideButton}
                   onClick={() => {
-                    setTitle(t('createApp.createPage'));
-                    setVisibleCreateForm('page');
+                    openCreateMenu(CREATE_MENU_CATEGORIES.NORMAL_FORM);
                   }}
                 />
               </div>
@@ -845,7 +805,9 @@ const PageManagerPage: FC = () => {
                 </div>
               ) : (
                 <>
-                  {curMenu.value?.menuCode && curMenu.value?.menuCode?.indexOf('TASK-') < 0 && (
+                  {curMenu.value?.menuCode &&
+                    curMenu.value?.menuCode?.indexOf('TASK-') < 0 &&
+                    curMenu.value?.menuType !== MenuType.GROUP && (
                     <>
                       <div className={styles.contentHeader}>
                         <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
@@ -906,7 +868,6 @@ const PageManagerPage: FC = () => {
         }}
         form={createForm}
         entityListOptions={entityListOptions}
-        pageSetTypeOptions={pageSetTypeOptions}
         visibleCreateForm={visibleCreateForm}
         initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
         treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}

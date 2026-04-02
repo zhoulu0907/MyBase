@@ -246,7 +246,7 @@ export function FormFooter({ nodeInfo }: { nodeInfo: any }) {
               return {
                 label: item.field,
                 value: item.field,
-                fieldType: item.operatorType
+                fieldType: item.fieldType || ENTITY_FIELD_TYPE.TEXT.VALUE
               };
             });
           updateDataCalcOutputs(curNode.id, dataCalcFields);

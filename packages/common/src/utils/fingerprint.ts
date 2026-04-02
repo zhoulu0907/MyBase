@@ -1,5 +1,5 @@
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
-import md5 from 'crypto-js/md5';
+import SHA256 from 'crypto-js/sha256';
 
 export const getOrCreateDeviceInfo: any = async () => {
   const STORAGE_KEY = 'onebase_device_id';
@@ -10,7 +10,7 @@ export const getOrCreateDeviceInfo: any = async () => {
     const result = await fp.get();
     let deviceId = `${result.visitorId.substring(0, 16)}`;
 
-    deviceInfo = md5(
+    deviceInfo = SHA256(
       JSON.stringify({
         deviceId: deviceId,
         ua: navigator.userAgent

@@ -41,6 +41,28 @@ export enum PageType {
   DASHBOARD = 4
 }
 
+/**
+ * 页面管理-创建菜单分类
+ * 覆盖：普通表单、流程表单、工作台、大屏、分组
+ */
+export const CREATE_MENU_CATEGORIES = {
+  NORMAL_FORM: 'normal-page',
+  BPM_FORM: 'bpm-page',
+  WORKBENCH: 'workbench',
+  SCREEN: 'screen',
+  GROUP: 'group'
+} as const;
+
+export type CreateMenuCategory = typeof CREATE_MENU_CATEGORIES[keyof typeof CREATE_MENU_CATEGORIES];
+
+export const CreateMenuCategoryLabelMap: Record<CreateMenuCategory, string> = {
+  'normal-page': '新建普通表单',
+  'bpm-page': '新建流程表单',
+  'workbench': '新建工作台',
+  'screen': '新建大屏',
+  'group': '新建分组'
+};
+
 export enum CATEGORY_TYPE {
   NAVIGATE = 'navigate',
   LAYOUT = 'layout',

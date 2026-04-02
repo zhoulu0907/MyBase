@@ -8,12 +8,235 @@ import { STATUS_OPTIONS, STATUS_VALUES } from '../../../constants';
 import PreviewDataSelectModal from './previewDataSelectModal';
 import { XDataSelectConfig } from './schema';
 
-import { dataMethodPageV2, menuSignal, PageMethodV2Params } from '@onebase/app';
+import { dataMethodPageV2, debugFormula, menuSignal, PageMethodV2Params } from '@onebase/app';
 import { useFormField } from '../useFormField';
 
 import { useFormEditorSignal } from '@/index';
 import { isRuntimeEnv } from '@onebase/common';
 import './index.css';
+
+// ===== 过滤条件转换函数 begin =====
+/**
+ * 将前端 filterCondition 转换为后端 API 需要的 filters 格式（异步版本，支持公式计算）
+ */
+async function transformFilterConditionToFiltersAsync(filterCondition: any[], form?: any): Promise<any> {
+  if (!filterCondition || filterCondition.length === 0) {
+    return undefined;
+  }
+
+  // 如果只有一个顶级组
+  if (filterCondition.length === 1) {
+    const children = await transformConditionsAsync(filterCondition[0].conditions, form);
+    if (!children || children.length === 0) return undefined;
+
+    return {
+      nodeType: 'GROUP',
+      combinator: 'AND',
+      children
+    };
+  }
+
+  // 多个顶级组，用 OR 连接
+  const childrenPromises = filterCondition.map(async (group) => {
+    const groupChildren = await transformConditionsAsync(group.conditions, form);
+    return {
+      nodeType: 'GROUP',
+      combinator: 'AND',
+      children: groupChildren || []
+    };
+  });
+
+  const children = await Promise.all(childrenPromises);
+  const filteredChildren = children.filter((g: any) => g.children && g.children.length > 0);
+
+  if (filteredChildren.length === 0) return undefined;
+
+  return {
+    nodeType: 'GROUP',
+    combinator: 'OR',
+    children: filteredChildren
+  };
+}
+
+/**
+ * 转换条件列表（异步版本）
+ */
+async function transformConditionsAsync(conditions: any[], form?: any): Promise<any[]> {
+  if (!conditions) return [];
+
+  const promises = conditions
+    .filter(cond => cond && cond.fieldKey && cond.op)
+    .map(async (cond) => {
+      const fieldName = cond.fieldKey?.split('.')[1] || cond.fieldKey;
+      const fieldValue = await resolveFieldValueAsync(cond, form);
+
+      return {
+        nodeType: 'CONDITION',
+        fieldName,
+        operator: cond.op,
+        fieldValue
+      };
+    });
+
+  return Promise.all(promises);
+}
+
+/**
+ * 解析字段值（处理静态值、变量、公式）- 异步版本
+ */
+async function resolveFieldValueAsync(cond: any, form?: any): Promise<any[]> {
+  const { operatorType, value } = cond;
+
+  if (!value) return [];
+
+  switch (operatorType) {
+    case 'value':
+      // 静态值：转为数组
+      return Array.isArray(value) ? value : [value];
+
+    case 'variables':
+      // 变量：从当前表单上下文获取值
+      return resolveVariableValue(value, form);
+
+    case 'formula':
+      // 公式：计算公式结果
+      return await resolveFormulaValue(value, form);
+
+    default:
+      // 默认当作静态值处理
+      return Array.isArray(value) ? value : [value];
+  }
+}
+
+/**
+ * 解析公式值
+ * @param formulaData 公式数据对象 { formulaData, formula, parameters, relatedFields }
+ * @param form 当前表单实例
+ */
+async function resolveFormulaValue(formulaData: any, form?: any): Promise<any[]> {
+  console.log('[DataSelect] resolveFormulaValue called');
+  console.log('[DataSelect] formulaData:', JSON.stringify(formulaData, null, 2));
+  console.log('[DataSelect] form exists:', !!form);
+
+  if (!formulaData || !formulaData.formula) {
+    console.log('[DataSelect] No formulaData or formula, returning []');
+    return [];
+  }
+
+  try {
+    // 构建参数对象：从表单获取各参数的实际值
+    const parameters: Record<string, any> = {};
+
+    console.log('[DataSelect] formulaData.parameters:', formulaData.parameters);
+    console.log('[DataSelect] formulaData.relatedFields:', formulaData.relatedFields);
+
+    // 构建 displayName -> formFieldName 的映射
+    const fieldNameMap: Record<string, string> = {};
+    if (formulaData.relatedFields && Array.isArray(formulaData.relatedFields)) {
+      formulaData.relatedFields.forEach((field: any) => {
+        // relatedFields 中有 fieldName（显示名）和 formFieldName（实际表单字段名）
+        if (field.fieldName && field.formFieldName) {
+          fieldNameMap[field.fieldName] = field.formFieldName;
+        }
+      });
+    }
+    console.log('[DataSelect] fieldNameMap:', fieldNameMap);
+
+    if (formulaData.parameters) {
+      Object.entries(formulaData.parameters).forEach(([paramName, paramValue]) => {
+        console.log('[DataSelect] Processing param:', paramName, 'raw value:', paramValue);
+
+        if (form) {
+          // 跳过节点ID映射（值是 nodeId）
+          if (paramName.startsWith('$') && !paramName.includes('.')) {
+            console.log('[DataSelect] Skipping node ID param:', paramName);
+            return;
+          }
+
+          // 使用 relatedFields 中的映射获取正确的表单字段名
+          let formFieldName = fieldNameMap[paramName] || paramName;
+
+          // 子表/节点字段：去掉 $ 前缀，取字段名部分
+          if (paramName.startsWith('$') && paramName.includes('.')) {
+            const parts = paramName.split('.');
+            formFieldName = parts[parts.length - 1]; // 取最后一段作为字段名
+          }
+
+          console.log('[DataSelect] Using formFieldName:', formFieldName);
+          const fieldValue = form.getFieldValue(formFieldName);
+          console.log('[DataSelect] form.getFieldValue("' + formFieldName + '"):', fieldValue);
+
+          // 处理数据选择组件的特殊值格式 { id, name }
+          if (fieldValue && typeof fieldValue === 'object' && fieldValue.id !== undefined) {
+            parameters[paramName] = fieldValue.id;
+            console.log('[DataSelect] Extracted id from object:', fieldValue.id);
+          } else {
+            parameters[paramName] = fieldValue ?? '';
+            console.log('[DataSelect] Set param', paramName, 'to:', fieldValue ?? '(empty)');
+          }
+        } else {
+          console.log('[DataSelect] No form available');
+          parameters[paramName] = '';
+        }
+      });
+    }
+
+    console.log('[DataSelect] Final Formula params:', JSON.stringify(parameters, null, 2));
+    console.log('[DataSelect] Formula to calculate:', formulaData.formula);
+
+    // 调用公式计算 API
+    const response = await debugFormula({
+      formula: formulaData.formula,
+      parameters
+    });
+
+    const result = response?.result;
+    console.log('[DataSelect] Formula API response:', response);
+    console.log('[DataSelect] Formula result:', result);
+
+    // 处理不同格式的结果
+    if (result == null) return [];
+    if (typeof result === 'object' && result.id !== undefined) {
+      return [result.id];
+    }
+    if (Array.isArray(result)) return result;
+    return [result];
+  } catch (error) {
+    console.error('[DataSelect] Formula evaluation failed:', error);
+    return [];
+  }
+}
+
+/**
+ * 解析变量值
+ * @param variablePath 变量路径，格式：currentForm.fieldName 或 tableName.fieldName
+ * @param form 当前表单实例
+ */
+function resolveVariableValue(variablePath: string, form?: any): any[] {
+  if (!variablePath || !form) return [];
+
+  // 解析变量路径
+  const parts = variablePath.split('.');
+  const fieldKey = parts[parts.length - 1];  // 取最后一段作为字段名
+
+  // 从表单获取字段值
+  const formValue = form.getFieldValue(fieldKey);
+
+  if (formValue == null) return [];
+
+  // 处理对象格式的值（如数据选择组件 { id, name }）
+  if (typeof formValue === 'object' && formValue.id !== undefined) {
+    return [formValue.id];
+  }
+
+  // 数组值
+  if (Array.isArray(formValue)) {
+    return formValue;
+  }
+
+  return [formValue];
+}
+// ===== 过滤条件转换函数 end =====
 // ===== 导入 end =====
 
 // ===== 组件定义 begin =====
@@ -62,11 +285,13 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     const normalize = (data: any) => {
       if (!data) return '';
       if (typeof data === 'object') {
+        // 新格式：{ id, name, value } - 保留 value 用于显示和访问
         if (typeof data.id !== 'undefined' || typeof data.name !== 'undefined') {
-          return { id: data.id ?? '', name: data.name ?? '' };
+          return { id: data.id ?? '', name: data.name ?? '', value: data.value ?? null };
         }
+        // 旧格式兼容：{ selectID, displayValue }
         if (typeof data.selectID !== 'undefined' || typeof data.displayValue !== 'undefined') {
-          return { id: data.selectID ?? '', name: data.displayValue ?? '' };
+          return { id: data.selectID ?? '', name: data.displayValue ?? '', value: null };
         }
       } else if (typeof data === 'string') {
         return data;
@@ -158,9 +383,15 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     const tableName = props?.selectedDataSource?.tableName;
     if (!tableName) return;
     const { curMenu } = menuSignal;
+
+    // 处理过滤条件（异步，支持公式计算）
+    const filterCondition = props?.filterCondition;
+    const filters = await transformFilterConditionToFiltersAsync(filterCondition, form);
+
     const req: PageMethodV2Params = {
       pageNo: 1,
-      pageSize: 100
+      pageSize: 100,
+      filters
     };
 
     const res = await dataMethodPageV2(tableName, curMenu.value?.id, req);
@@ -185,7 +416,8 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
     props.selectMethod,
     props?.dynamicTableConfig?.metaData,
     props?.selectedDataSource?.entityUuid,
-    displayFields
+    displayFields,
+    props.filterCondition
   ]);
 
   const renderInteractiveContent = () => (
@@ -229,6 +461,7 @@ const XDataSelect = memo((props: XDataSelectConfig & { runtime?: boolean; detail
           options={finalOptions}
           style={{ minWidth: '120px', width: '100%' }}
           onChange={(v, option) => internalEvents.selectDropdown(v, option)}
+          onFocus={() => fetchOptions()}
         />
       </div>
     );

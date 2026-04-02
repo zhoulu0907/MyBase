@@ -42,6 +42,14 @@ async function init() {
       const tenantId = match[1];
       console.log('[App Builder] Early init: Found tenantId', tenantId);
       TokenManager.setCurIdentifyId(tenantId);
+
+      // 如果 session 中没有 tenant_id，从 URL 获取并存储
+      const existingTenantId = TokenManager.getTenantInfo()?.tenantId;
+      if (!existingTenantId) {
+        TokenManager.setTenantId(tenantId);
+        console.log('[App Builder] Set tenant_id from URL:', tenantId);
+      }
+
       initPlugins();
     }
   } catch (e) {

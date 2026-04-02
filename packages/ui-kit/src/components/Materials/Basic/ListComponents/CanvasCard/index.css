@@ -1,5 +1,7 @@
 .canvas-card-container {
   padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .canvas-card-header {
@@ -10,6 +12,7 @@
   justify-content: flex-start;
   flex-wrap: wrap;
   margin-bottom: 10px;
+  order: 1;
 }
 
 .headerActions {
@@ -89,6 +92,7 @@
 .canvas-card-body {
   display: flex;
   gap: 10px;
+  order: 3;
 }
 
 .canvas-card-content-wrapper {
@@ -171,6 +175,7 @@
 /* Type 2 Card Styles */
 .canvas-card-body-type2 {
   display: flex;
+  order: 3;
   gap: 20px;
   padding: 16px;
 }
@@ -268,6 +273,7 @@
   flex-direction: column;
   gap: 16px;
   padding: 8px 0;
+  order: 3;
 }
 
 .canvas-card-item {

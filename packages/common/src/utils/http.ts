@@ -1,7 +1,7 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
-import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
+import { isBuilderEnv, isPlatformEnv, isRuntimeEnv, isRuntimeDevPath } from './env';
 import { getHashQueryParam } from './router';
 import { generateSignature } from './signature';
 import TokenManager from './token';
@@ -75,6 +75,11 @@ export class HttpClient {
         // // 将签名信息添加到请求头
         Object.assign(config.headers, signature.headers);
         // =========================== 签名校验结束 ===========================
+
+        // Runtime-Dev 环境添加 X-Version-Tag
+        if (isRuntimeDevPath()) {
+          config.headers['X-Version-Tag'] = '0';
+        }
 
         let appId = getHashQueryParam('appId');
         if (!appId) {

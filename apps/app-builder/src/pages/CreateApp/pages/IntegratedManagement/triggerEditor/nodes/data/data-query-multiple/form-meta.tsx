@@ -312,7 +312,7 @@ export const renderForm = ({ form }: FormRenderProps<FlowNodeJSON['data']>) => {
               </Grid.Col>
               <Grid.Col span={3}>
                 <Form.Item field="maxCount" style={{ marginTop: '20px' }}>
-                  <InputNumber min={1} max={500} />
+                  <InputNumber min={1} max={2000} />
                 </Form.Item>
               </Grid.Col>
               <Grid.Col span={4} style={{ color: 'grey' }}>

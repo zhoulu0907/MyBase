@@ -88,7 +88,11 @@
       font-weight: 500;
       color: #272E3B;
     }
+    .todoListNoStatus {
+      display: none;
+    }
     .todoListStatueNormal {
+      display: block;
       background-color: #d3d3d35c;
       color: #86909C;
       font-size: 12px;
@@ -96,6 +100,7 @@
       border-radius: 4px;
     }
     .todoListStatueTimeout {
+      display: block;
       color: #F53F3F;
       background-color: #FFECE8;
       font-size: 12px;
