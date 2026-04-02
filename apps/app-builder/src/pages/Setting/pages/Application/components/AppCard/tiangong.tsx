@@ -7,11 +7,12 @@ import { Avatar, Divider, Dropdown, Menu, Space, Tag, Tooltip, Typography } from
 import { IconDelete, IconEdit, IconMoreVertical } from '@arco-design/web-react/icon';
 import { type Application } from '@onebase/app';
 import { appIconMap } from '@onebase/ui-kit';
-import { getFileUrlById, PlatformTenantPublishMode } from '@onebase/platform-center';
+import { getFileUrlById } from '@onebase/platform-center';
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
-import { ApplicationStatus, ApplicationStatusLabel, TagColor } from '../../const';
-import styles from './index.module.less';
+import React from 'react';
+import { useAppCard } from './useAppCard';
+import { TagColor } from '../../const';
+import styles from './lingji.module.less';
 import type { developUser } from '@onebase/app/src/types';
 import { hasPermission, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import AppExportModal from '@/components/AppExportModal';
@@ -30,7 +31,7 @@ interface AppCardProps {
   onUpdate?: () => void;
 }
 
-const AppCard: React.FC<AppCardProps> = ({
+const TiangongAppCard: React.FC<AppCardProps> = ({
   item,
   optionVisibleId,
   onOptionVisibleChange,
@@ -39,40 +40,18 @@ const AppCard: React.FC<AppCardProps> = ({
   onDelete,
   onUpdate
 }) => {
-  const getModel = (model?: string) => {
-    if (model === PlatformTenantPublishMode.inner) {
-      return '内部模式';
-    } else if (model === PlatformTenantPublishMode.saas) {
-      return 'SaaS模式';
-    }
-    return '未知模式';
-  };
-
-  // const getColor = (model?: string) => {
-  //   return model === PlatformTenantPublishMode.inner ? 'cyan' : 'blue';
-  // };
-
-  const getDevelopStatus = (developStatus?: string) => {
-    if (developStatus === ApplicationStatus.ITERATE) {
-      return ApplicationStatusLabel.ITERATE;
-    }
-    return '';
-  };
-
-  const getTagColor = (item: Application) => {
-    return item.appStatus === 0 ? '#547781' : '#2DC86D';
-  };
-
-  const getTagBackgroundColor = (item: Application) => {
-    return item.appStatus === 0 ? 'rgba(36, 81, 93, 0.08)' : 'rgba(34, 206, 118, 0.08)';
-  };
-
-  // 应用导出/下载弹窗
-  const [exportVisible, setExportVisible] = useState(false);
-  // 应用导入/更新弹窗
-  const [importVisible, setImportVisible] = useState(false);
-  // 基础信息编辑弹窗
-  const [editModalVisible, setEditModalVisible] = useState(false);
+  const {
+    exportVisible,
+    setExportVisible,
+    importVisible,
+    setImportVisible,
+    editModalVisible,
+    setEditModalVisible,
+    getModel,
+    getDevelopStatus,
+    getTagColor,
+    getTagBackgroundColor
+  } = useAppCard();
 
   const menu = (
     <Menu style={{ marginRight: '10px' }}>
@@ -313,4 +292,4 @@ const AppCard: React.FC<AppCardProps> = ({
   );
 };
 
-export default AppCard;
+export default TiangongAppCard;
