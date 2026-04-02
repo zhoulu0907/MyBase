@@ -12,7 +12,7 @@ import dayjs from 'dayjs';
 import React from 'react';
 import { useAppCard } from './useAppCard';
 import { TagColor } from '../../const';
-import styles from './lingji.module.less';
+import styles from './tiangong.module.less';
 import type { developUser } from '@onebase/app/src/types';
 import { hasPermission, TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import AppExportModal from '@/components/AppExportModal';

@@ -1,4 +1,16 @@
-import { Divider, Form, Input, Message, Modal, Pagination, Select, Space, Spin, Typography, Grid } from '@arco-design/web-react';
+import {
+  Divider,
+  Form,
+  Input,
+  Message,
+  Modal,
+  Pagination,
+  Select,
+  Space,
+  Spin,
+  Typography,
+  Grid
+} from '@arco-design/web-react';
 import { IconLeft, IconRight, IconSearch } from '@arco-design/web-react/icon';
 import React from 'react';
 
@@ -12,6 +24,7 @@ import { PermissionButton as Button } from '@/components/PermissionControl';
 import createSvg from '@/assets/images/appSetting/app_create.svg';
 import cloneSvg from '@/assets/images/appSetting/app_clone.svg';
 import importSvg from '@/assets/images/appSetting/app_import.svg';
+import applicationSettingLogo from '@/assets/images/appSetting/application_setting_logo.svg';
 import AppImportModal from '@/components/AppImportModal';
 import { TENANT_APP_PERMISSION as ACTIONS } from '@onebase/common';
 import { useApplicationPage } from './utils/useApplicationPage';
@@ -115,6 +128,45 @@ const TiangongApplicationPage: React.FC = () => {
               pointerEvents: applicationEmpty ? 'auto' : 'unset'
             }}
           >
+            <Select
+              placeholder="全部应用"
+              bordered={false}
+              style={{ width: 100 }}
+              value={ownerTag}
+              onChange={(value) => setOwnerTag(value as 0 | 1)}
+            >
+              {appOptions.map((option, index) => (
+                <Option key={index} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
+            <Select
+              placeholder="按创建时间排序"
+              bordered={false}
+              style={{ width: 138 }}
+              onChange={(value) => setOrderByTime(value as 'create' | 'update')}
+              value={orderByTime}
+            >
+              {createTimeOptions.map((option, index) => (
+                <Option key={index} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
+            <Select
+              placeholder="全部状态"
+              bordered={false}
+              style={{ width: 100 }}
+              onChange={(value) => setStatus(value)}
+              value={status}
+            >
+              {statusOptions.map((option, index) => (
+                <Option key={index} value={option.value}>
+                  {option.label}
+                </Option>
+              ))}
+            </Select>
             <Input
               className={styles.appInput}
               allowClear
@@ -122,48 +174,6 @@ const TiangongApplicationPage: React.FC = () => {
               onChange={handleSearchChange}
               placeholder="请输入"
             />
-
-            <div>
-              <Select
-                placeholder="全部应用"
-                bordered={false}
-                style={{ width: 100 }}
-                value={ownerTag}
-                onChange={(value) => setOwnerTag(value as 0 | 1)}
-              >
-                {appOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-              <Select
-                placeholder="按创建时间排序"
-                bordered={false}
-                style={{ width: 138 }}
-                onChange={(value) => setOrderByTime(value as 'create' | 'update')}
-                value={orderByTime}
-              >
-                {createTimeOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-              <Select
-                placeholder="全部状态"
-                bordered={false}
-                style={{ width: 100 }}
-                onChange={(value) => setStatus(value)}
-                value={status}
-              >
-                {statusOptions.map((option, index) => (
-                  <Option key={index} value={option.value}>
-                    {option.label}
-                  </Option>
-                ))}
-              </Select>
-            </div>
           </div>
 
           <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中..." ref={appContainerRef}>
@@ -343,6 +353,7 @@ const TiangongApplicationPage: React.FC = () => {
           getApplicationList();
         }}
       />
+      <img className={styles.cornerLogo} src={applicationSettingLogo} alt="" />
     </div>
   );
 };
