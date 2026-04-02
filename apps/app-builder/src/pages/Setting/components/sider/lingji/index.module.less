@@ -1,0 +1,128 @@
+.sider {
+  background-color: rgba(255, 255, 255, 1);
+  border-right: 1px solid #e5e6eb;
+}
+
+.siderContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.sliderTitle {
+  display: flex;
+  width: 100%;
+  height: 60px;
+  padding: 10px 12px 10px 10px;
+  flex-direction: column;
+  justify-content: center;
+  border-bottom: 1px solid #EAEEEF;
+  box-sizing: border-box;
+  color: #24515D;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 20px;
+  background-color: #F5F7F8;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.menuContainer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #F5F7F8;
+
+  .menuItemWrapper {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    height: 48px;
+    border-left: 4px solid transparent;
+    background-color: transparent;
+  }
+
+  :global(.pc-menu-inner) {
+    padding-left: 0;
+  }
+
+  :global(.pc-menu-selected) {
+    border-left: 4px solid rgb(var(--primary-6));
+    background-color: rgb(var(--primary-6), 0.15) !important;
+
+    .menuTitle {
+      color: rgb(var(--primary-6));
+    }
+  }
+}
+
+.collapseButtonContainer {
+  position: absolute;
+  bottom: 16px;
+  right: 8px;
+  z-index: 10;
+}
+
+.collapseButton {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f2f3f5;
+  border: 1px solid #e5e6eb;
+  color: #4e5969;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #e5e6eb;
+    color: #165dff;
+    transform: scale(1.05);
+  }
+
+  svg {
+    font-size: 24px;
+    color: #86909c;
+  }
+}
+
+.menuItemContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  & > img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.menuTitle {
+  margin-left: 12px;
+  color: #24515D;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+:global(.pc-tooltip-content-inner) .menuTitle {
+  color: #fff;
+}
+
+.subMenuWrapper {
+  :global(.pc-icon-down) {
+    display: none;
+  }
+  :global(.pc-menu-indent) {
+    display: none;
+  }
+  :global(.pc-menu-inline-header) {
+    pointer-events: none;
+  }
+}
