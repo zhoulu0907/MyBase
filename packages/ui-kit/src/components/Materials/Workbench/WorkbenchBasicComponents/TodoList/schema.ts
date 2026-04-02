@@ -32,10 +32,14 @@ export interface ITodoItem {
     name: string;
     avatar: string;
   };
-  flowStatus: string;
+  flowStatus?: string;
+  taskStatus?: string;
   formSummary: string;
-  arrivalTime: number;
-  submitTime: number;
+  arrivalTime?: number;
+  createTime?: number;
+  submitTime?: number;
+  handleTime?: number;
+  updateTime?: number;
   taskId: string;
   instanceId: string;
   businessUuid: string;
@@ -143,7 +147,7 @@ const XTodoList: XTodoListSchema = {
     },
     showMore: false,
     showMoreLink: '',
-    dataCount: 2,
+    dataCount: 5,
     userAvatar: '',
     userName: '',
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
