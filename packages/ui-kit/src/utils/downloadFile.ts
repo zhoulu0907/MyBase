@@ -17,11 +17,9 @@ const getBlob = async (url: string): Promise<Blob> => {
   if (!isValidUrl(url)) {
     throw new Error('Invalid URL: only http and https protocols are allowed');
   }
-  // 使用 same-origin 凭证模式，仅同源请求携带 Cookie
-  // 注意：这是一个只读的 GET 请求，不涉及状态修改，CSRF 风险较低
-  const response = await fetch(url, {
-    // credentials: 'same-origin'
-  });
+  // 这是一个只读的 GET 请求，不涉及状态修改，CSRF 风险较低
+  // fetch 默认 credentials: 'same-origin'，仅同源请求携带 Cookie
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Request failed with status ${response.status}`);
   }
