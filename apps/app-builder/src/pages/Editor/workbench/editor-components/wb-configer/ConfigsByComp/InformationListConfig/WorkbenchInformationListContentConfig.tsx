@@ -116,13 +116,13 @@ const WbInformationListContentConfig = ({ item, configs, handlePropsChange, hand
             value={selectValue}
             onChange={(value) => onOptionChange(field.key, value)}
           >
-            {field.key === 'contentSource' &&
+            {field.key === FORM_KEY.contentSource &&
               entityOptions.map((option: { entityUuid: string; displayName: string; tableName: string }) => (
                 <Option key={option.entityUuid} value={option.entityUuid}>
                   {option.displayName ?? option.entityUuid}
                 </Option>
               ))}
-            {field.key !== 'contentSource' &&
+            {field.key !== FORM_KEY.contentSource &&
               fieldOptions.map((option: { fieldUuid: string; fieldName: string; displayName: string }) => (
                 <Option key={option.fieldUuid} value={option.fieldUuid}>
                   {option.displayName ?? option.fieldName ?? option.fieldUuid}

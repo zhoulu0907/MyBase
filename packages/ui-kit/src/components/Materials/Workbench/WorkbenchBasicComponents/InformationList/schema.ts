@@ -66,7 +66,7 @@ export interface FieldSelection {
 }
 
 /**
- * 内容来源信息（表单）
+ * 内容来源信息（实体）
  */
 export interface ContentSourceInfo {
   entityUuid?: string;
@@ -93,10 +93,6 @@ export interface XInformationListConfig extends ICommonBaseWorkbenchType {
    * 动态内容来源（实体）
    */
   contentSource?: ContentSourceInfo;
-  /**
-   * 表名（用于接口调用）
-   */
-  tableName?: string;
   /**
    * 动态字段映射（包含 compoId 和 name）
    */
