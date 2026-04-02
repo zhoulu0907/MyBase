@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.HtmlUtils;
 import reactor.core.publisher.Flux;
 
 import java.util.*;
@@ -160,9 +161,9 @@ public class AiChatController {
                 answer.setAnswer(String.valueOf(answerMsg));
                 Map map = new HashMap();
                 map.put("intention", answer.getIntention());
-                map.put("reason", answer.getReason());
+                map.put("reason", escapeHtml(answer.getReason()));
                 map.put("reliability", answer.getReliability());
-                map.put("answer", answer.getAnswer());
+                map.put("answer", escapeHtml(answer.getAnswer()));
                 if ("0".equals(String.valueOf(dataResMap.get("code"))) && dataResMap.get("data") != null) {
                     map.put("data", dataResMap.get("data"));
                 }
@@ -219,7 +220,7 @@ public class AiChatController {
                 List list2 = (List) sumMap.get("list");
                 detailMaps.put("data", list2);
                 detailMaps.put("intention", answer.getIntention());
-                detailMaps.put("reason", answer.getReason());
+                detailMaps.put("reason", escapeHtml(answer.getReason()));
                 detailMaps.put("reliability", answer.getReliability());
 
                 StringBuilder answerSb = new StringBuilder();
@@ -243,7 +244,7 @@ public class AiChatController {
                     }
                 }
 
-                detailMaps.put("answer", answerSb.toString());
+                detailMaps.put("answer", escapeHtml(answerSb.toString()));
 
                 resMap = new HashMap();
                 resMap.put("code", 0);
@@ -323,9 +324,9 @@ public class AiChatController {
                         StringUtils.isEmpty(picTabAnswer.getDatasetId()))) {
                     Map respMap = new HashMap();
                     respMap.put("intention", answer.getIntention());
-                    respMap.put("reason", answer.getReason());
+                    respMap.put("reason", escapeHtml(answer.getReason()));
                     respMap.put("reliability", answer.getReliability());
-                    respMap.put("answer", picTabAnswer.getReason());
+                    respMap.put("answer", escapeHtml(picTabAnswer.getReason()));
                     respMap.put("data", null);
                     respMap.put("generateSuccess", false);
                     resMap = new HashMap();
@@ -462,9 +463,9 @@ public class AiChatController {
                 Map resDataMap = new HashMap();
 
                 resDataMap.put("intention", answer.getIntention());
-                resDataMap.put("reason", answer.getReason());
+                resDataMap.put("reason", escapeHtml(answer.getReason()));
                 resDataMap.put("reliability", answer.getReliability());
-                resDataMap.put("answer", answer.getAnswer() == null ? "图表生成成功\n" + answer.getReason() : answer.getAnswer());
+                resDataMap.put("answer", escapeHtml(answer.getAnswer() == null ? "图表生成成功\n" + answer.getReason() : answer.getAnswer()));
                 resDataMap.put("data", picTabAnswer);
                 resDataMap.put("generateSuccess", true);
                 resDataMap.put("generateDSL", dslMap);
@@ -488,10 +489,10 @@ public class AiChatController {
                     Map<String, Object> resultMap = new HashMap<>();
                     resultMap.put("textGenerateDSL", gson.fromJson(znkfDSL, Map.class));
                     resultMap.put("intention", answer.getIntention());
-                    resultMap.put("reason", answer.getReason());
+                    resultMap.put("reason", escapeHtml(answer.getReason()));
                     resultMap.put("reliability", myAnswer.getReliability());
 
-                    resultMap.put("answer", myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer());
+                    resultMap.put("answer", escapeHtml(myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer()));
                     resultMap.put("generateSuccess", true);
 
                     result.put("data", resultMap);
@@ -499,10 +500,10 @@ public class AiChatController {
                     Map<String, Object> resultMap = new HashMap<>();
                     resultMap.put("textGenerateDSL", gson.fromJson(kjrjDSL, Map.class));
                     resultMap.put("intention", answer.getIntention());
-                    resultMap.put("reason", answer.getReason());
+                    resultMap.put("reason", escapeHtml(answer.getReason()));
                     resultMap.put("reliability", myAnswer.getReliability());
 
-                    resultMap.put("answer", myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer());
+                    resultMap.put("answer", escapeHtml(myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer()));
                     resultMap.put("generateSuccess", true);
 
                     result.put("data", resultMap);
@@ -510,10 +511,10 @@ public class AiChatController {
                     Map<String, Object> resultMap = new HashMap<>();
                     resultMap.put("textGenerateDSL", gson.fromJson(yqjgDSL, Map.class));
                     resultMap.put("intention", answer.getIntention());
-                    resultMap.put("reason", answer.getReason());
+                    resultMap.put("reason", escapeHtml(answer.getReason()));
                     resultMap.put("reliability", myAnswer.getReliability());
 
-                    resultMap.put("answer", myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer());
+                    resultMap.put("answer", escapeHtml(myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer()));
                     resultMap.put("generateSuccess", true);
 
                     result.put("data", resultMap);
@@ -521,10 +522,10 @@ public class AiChatController {
                     Map<String, Object> resultMap = new HashMap<>();
                     resultMap.put("textGenerateDSL", gson.fromJson(dzswDSL, Map.class));
                     resultMap.put("intention", answer.getIntention());
-                    resultMap.put("reason", answer.getReason());
+                    resultMap.put("reason", escapeHtml(answer.getReason()));
                     resultMap.put("reliability", myAnswer.getReliability());
 
-                    resultMap.put("answer", myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer());
+                    resultMap.put("answer", escapeHtml(myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer()));
                     resultMap.put("generateSuccess", true);
 
                     result.put("data", resultMap);
@@ -532,20 +533,20 @@ public class AiChatController {
                     Map<String, Object> resultMap = new HashMap<>();
                     resultMap.put("textGenerateDSL", gson.fromJson(rlzyDSL, Map.class));
                     resultMap.put("intention", answer.getIntention());
-                    resultMap.put("reason", answer.getReason());
+                    resultMap.put("reason", escapeHtml(answer.getReason()));
                     resultMap.put("reliability", myAnswer.getReliability());
 
-                    resultMap.put("answer", myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer());
+                    resultMap.put("answer", escapeHtml(myAnswer.getReason() != null ? "大屏生成成功\n" + myAnswer.getReason() : answer.getAnswer()));
                     resultMap.put("generateSuccess", true);
 
                     result.put("data", resultMap);
                 } else {
                     Map<String, Object> resultMap = new HashMap<>();
                     resultMap.put("intention", answer.getIntention());
-                    resultMap.put("reason", answer.getReason());
+                    resultMap.put("reason", escapeHtml(answer.getReason()));
                     resultMap.put("reliability", myAnswer.getReliability());
 
-                    resultMap.put("answer", "暂不支持快速创建此类数据大屏。\n" + myAnswer.getReason());
+                    resultMap.put("answer", escapeHtml("暂不支持快速创建此类数据大屏。\n" + myAnswer.getReason()));
                     resultMap.put("generateSuccess", false);
 
                     result.put("data", resultMap);
@@ -560,7 +561,7 @@ public class AiChatController {
                 res = res.replace("```", "").replace("json", "");
                 Map resMap2 = new HashMap();
                 resMap2.put("intention", answer.getIntention());
-                resMap2.put("reason", answer.getReason());
+                resMap2.put("reason", escapeHtml(answer.getReason()));
                 resMap2.put("reliability", answer.getReliability());
                 resMap2.put("answer", gson.fromJson(res, Map.class));
 
@@ -571,10 +572,16 @@ public class AiChatController {
             // resMap.put("data", answer);
             // return resMap;
             case "6":
+                // XSS 防护：对 answer 对象中的字段进行转义处理
+                Map safeAnswerMap = new HashMap();
+                safeAnswerMap.put("intention", answer.getIntention());
+                safeAnswerMap.put("reason", escapeHtml(answer.getReason()));
+                safeAnswerMap.put("reliability", answer.getReliability());
+                safeAnswerMap.put("answer", escapeHtml(answer.getAnswer()));
                 resMap = new HashMap();
                 resMap.put("code", 0);
                 resMap.put("msg", null);
-                resMap.put("data", answer);
+                resMap.put("data", safeAnswerMap);
                 return resMap;
         }
         // 3.返回大屏数据，调大屏数据接口
@@ -714,6 +721,20 @@ public class AiChatController {
                                 .param(CHAT_MEMORY_CONVERSATION_ID_KEY, id)
                                 .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 100)
                 ).stream().content();
+    }
+
+    /**
+     * XSS 防护：对字符串进行 HTML 转义
+     * 防止存储型跨站脚本攻击
+     *
+     * @param input 原始字符串
+     * @return 转义后的安全字符串
+     */
+    private String escapeHtml(String input) {
+        if (input == null) {
+            return null;
+        }
+        return HtmlUtils.htmlEscape(input);
     }
 
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
@@ -35,7 +36,8 @@ public class RuntimeCaptchaController {
     @TenantIgnore
     public CommonResult<ResponseModel> get(@RequestBody CaptchaVO data, HttpServletRequest request) {
         assert request.getRemoteHost() != null;
-        data.setBrowserInfo(getRemoteId(request));
+        // XSS防护：browserInfo 来自 user-agent 请求头，需进行 HTML 转义
+        data.setBrowserInfo(HtmlUtils.htmlEscape(getRemoteId(request)));
         return success(captchaService.get(data));
     }
 
@@ -44,7 +46,8 @@ public class RuntimeCaptchaController {
     @PermitAll
     @TenantIgnore
     public CommonResult<ResponseModel> check(@RequestBody CaptchaVO data, HttpServletRequest request) {
-        data.setBrowserInfo(getRemoteId(request));
+        // XSS防护：browserInfo 来自 user-agent 请求头，需进行 HTML 转义
+        data.setBrowserInfo(HtmlUtils.htmlEscape(getRemoteId(request)));
         return success(captchaService.check(data));
     }
 
