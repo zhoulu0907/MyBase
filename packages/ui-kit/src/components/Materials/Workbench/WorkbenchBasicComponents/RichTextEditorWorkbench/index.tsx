@@ -19,7 +19,7 @@ const XRichText = memo((props: XRichTextConfig & { runtime?: boolean; detailMode
     width: '100%',
     backgroundColor: Wb_Color,
     padding: '10px',
-    borderRadius: '4px',
+    borderRadius: '8px',
     boxSizing: 'border-box' as const,
     minHeight: '100px',
   };
