@@ -1,9 +1,8 @@
 @appPageHeaderHeight: 200px;
-@appFilterHeight: 32px;
+@nameFilterHeight: 32px;
 @appPaginationHeight: 50px;
 @homePageHeight: 60px;
 @appCardWidth: 332px;
-// @appContainerMaxWidth: 1460px;
 
 .appPage {
   width: 100%;
@@ -11,8 +10,17 @@
   min-width: 754px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   box-sizing: border-box;
+  .welcomeText {
+    padding: 20px;
+    background: linear-gradient(90deg, #6c67fc, #0f89fc, #09d5f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    font-weight: 500;
+    font-size: 28px;
+  }
 
   .appContainer {
     flex: 1;
@@ -24,7 +32,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    background-color: #fff;
+    background-color: transparent !important;
     border-radius: 4px;
     position: relative;
 
@@ -56,50 +64,66 @@
     }
 
     .appCreate {
+      display: flex;
       margin-bottom: 16px;
       .aiCreate {
-        height: 120px;
-        border-radius: 8px;
-        background-position: 100% 100%;
-        background-size: auto 100%;
+        margin-right: 12px;
+        height: 97px;
+        width: 350px;
+        border-radius: 7px;
+        background-position:
+          right bottom,
+          100% 100%;
+        background-size:
+          124px 68px,
+          auto 100%;
         background-repeat: no-repeat;
         box-sizing: border-box;
-        padding: 26px 20px;
+        padding: 16px 18px;
         cursor: pointer;
         background-image:
-          linear-gradient(
-            99.09deg,
-            #badaff 0%,
-            #eff6ff 42.07%,
-            rgba(239, 246, 255, 0) 56.73%,
-            rgba(239, 246, 255, 0) 87.76%
-          ),
-          url('@/assets/images/appBasic/app_ai.png');
+          url('@/assets/images/appSetting/shengcheng.svg'),
+          linear-gradient(90deg, #095ffc 0%, rgba(26, 106, 255, 0.5) 100%);
 
         &:hover {
           box-shadow: 4px 4px 16px 0px #24515d1a;
         }
         .aiCreateTitle {
-          font-weight: 700;
-          font-size: 22px;
-          line-height: 26px;
+          font-weight: 500;
+          font-size: 17px;
+          color: #ffffff;
+          line-height: 24px;
         }
         .aiCreateDesc {
-          padding-top: 8px;
-          width: 150px;
-          color: #547781;
+          width: 184px;
+          margin-top: 4px;
+          font-weight: 400;
           font-size: 12px;
-          line-height: 17px;
+          color: rgba(255, 255, 255, 0.84);
+          line-height: 19px;
         }
       }
       .otherCreate {
-        height: 120px;
-        border-radius: 8px;
-        border: 1px solid #eaeeef;
+        margin-right: 12px;
         box-sizing: border-box;
+        width: 224px;
+        height: 97px;
+        border-radius: 12px 12px 12px 12px;
+        border: 1px solid #ffffff;
         cursor: pointer;
-        padding: 26px 12px 26px 16px;
+        padding: 16px;
         display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(45deg, #dbeafe 0%, #eff6ff 100%);
+
+        &:nth-child(2) {
+          background: linear-gradient(45deg, #daf4fa 0%, #eff9ff 100%);
+        }
+
+        &:nth-child(3) {
+          background: linear-gradient(45deg, #eef2ff 0%, #eff6ff 100%);
+        }
         &:hover {
           box-shadow: 4px 4px 16px 0px #24515d1a;
         }
@@ -108,25 +132,28 @@
           overflow: hidden;
           .otherCreateTitle {
             font-weight: 500;
-            font-size: 18px;
-            line-height: 32px;
+            font-size: 17px;
+            color: #2a2b33;
+            line-height: 24px;
           }
           .otherCreateDesc {
             width: 132px;
-            color: #7c979e;
+            margin-top: 4px;
+            font-weight: 400;
             font-size: 12px;
-            line-height: 17px;
+            color: #64677a;
+            line-height: 19px;
           }
         }
-        .otherCreateImg {
-          width: 60px;
-          height: 60px;
+        img {
+          width: 36px;
+          height: 36px;
         }
       }
     }
 
     .appFilter {
-      height: @appFilterHeight;
+      height: @nameFilterHeight;
       display: flex;
       justify-content: space-between;
       width: 100%;
@@ -158,7 +185,6 @@
       gap: 24px;
       padding-bottom: 15px;
 
-      /* 滚动条美化：变细 */
       &::-webkit-scrollbar {
         width: 6px;
         height: 6px;
