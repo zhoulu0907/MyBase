@@ -75,6 +75,8 @@ const AppHeader: React.FC<HeaderProps> = ({ className }) => {
       setTenantInfoFromSession(tenantInfoRes);
       setTenantInfor(tenantInfoRes)
     }
+
+    // 监督插件初始化已在 App.tsx 中统一处理
   };
 
   const maskMobile = (value?: string) => {
