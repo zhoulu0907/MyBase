@@ -1,7 +1,10 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ICON_Map_By_Type } from '@/components/MaterialCard/icons';
 import { useWorkbenchSignal, isPageConfig } from '@onebase/ui-kit';
+import { getEntityList } from '@onebase/app';
 import { useSignals } from '@preact/signals-react/runtime';
+import { useResourceStore } from '@/store/store_resource';
+import { useAppEntitiesStore } from '@/store/store_appEntities';
 import pageIcon from '@/assets/workbench/page_icon.svg';
 import * as ComponentConfig from './ConfigsByComp';
 import styles from './index.module.less';
@@ -14,6 +17,9 @@ const WorkbenchConfiger = () => {
   useSignals();
 
   const { curComponentID, curComponentSchema } = useWorkbenchSignal();
+
+  const { curDataSourceId } = useResourceStore();
+  const { setAppEntities } = useAppEntitiesStore();
 
   const componentType = useMemo(() => curComponentSchema?.type, [curComponentSchema?.type]);
   // 使用工具函数判断是否为页面配置
@@ -50,6 +56,26 @@ const WorkbenchConfiger = () => {
     }
     return ICON_Map_By_Type[componentType];
   }, [isPageConfigType, componentType]);
+
+  // 加载实体列表
+  const loadEntities = async () => {
+    try {
+      const response = await getEntityList(curDataSourceId);
+      if (response) {
+        console.log('entity', response);
+        // 将接口数据存到 store
+        setAppEntities(response);
+      }
+    } catch (error) {
+      console.error('加载实体列表失败:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (curDataSourceId) {
+      loadEntities();
+    }
+  }, [curDataSourceId]);
 
   return (
     <div className={styles.workbenchConfigs}>

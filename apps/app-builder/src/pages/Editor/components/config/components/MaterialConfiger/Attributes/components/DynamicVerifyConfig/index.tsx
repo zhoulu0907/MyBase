@@ -26,7 +26,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             必填
           </Checkbox>
 
-          {typeof configs[verifyKey]['noRepeat'] === 'boolean' && (
+{/*           {typeof configs[verifyKey]['noRepeat'] === 'boolean' && (
             <Checkbox
               checked={configs[verifyKey]['noRepeat']}
               onChange={(value) => {
@@ -35,7 +35,7 @@ const DynamicVerifyConfig: React.FC<DynamicVerifyConfigProps> = ({ handlePropsCh
             >
               不允许重复
             </Checkbox>
-          )}
+          )} */}
 
           {typeof configs[verifyKey]['lengthLimit'] === 'boolean' && (
             <Grid.Row align="center">

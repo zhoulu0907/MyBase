@@ -52,6 +52,18 @@ export type TXCarouselEditData = Array<
   | ILayoutConfigType<any>
 >;
 
+export interface ContentSourceInfo {
+  entityUuid?: string;
+  displayName?: string;
+  tableName?: string;
+}
+
+export interface FieldSelection {
+  fieldUuid?: string;
+  fieldName?: string;
+  displayName?: string;
+}
+
 interface Images {
   image: string;
   text?: string;
@@ -102,15 +114,15 @@ export interface XCarouselConfig extends ICommonBaseWorkbenchType {
   /**
    * 动态内容来源（表单/实体）
    */
-  contentSource?: string;
+  contentSource?: ContentSourceInfo;
   /**
    * 轮播图片字段
    */
-  imageField?: string;
+  imageField?: FieldSelection;
   /**
    * 链接字段
    */
-  linkField?: string;
+  linkField?: FieldSelection;
   /**
    * 筛选条件
    */
@@ -198,9 +210,9 @@ const XCarousel: XCarouselSchema = {
       maxSize: 5
     },
     dataSourceMode: 'static',
-    contentSource: '',
-    imageField: '',
-    linkField: '',
+    contentSource: {},
+    imageField: {},
+    linkField: {},
     filterCondition: [],
     displayCount: DEFAULT_CAROUSEL_CONTENT.length,
     status: WORKBENCH_STATUS_VALUES[WORKBENCH_STATUS_OPTIONS.DEFAULT]
