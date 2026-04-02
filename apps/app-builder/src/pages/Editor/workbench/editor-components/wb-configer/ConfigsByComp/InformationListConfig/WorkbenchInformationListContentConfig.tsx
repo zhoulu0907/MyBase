@@ -1,5 +1,8 @@
-import { Button, Form, Message, Radio, Select } from '@arco-design/web-react';
+import { Form, Radio, Select } from '@arco-design/web-react';
+import { useEffect, useState } from 'react';
 import { WORKBENCH_CONFIG_TYPES } from '@onebase/ui-kit';
+import { getEntityFields } from '@onebase/app';
+import { useAppEntitiesStore } from '@/store/store_appEntities';
 import { registerConfigRenderer } from '../../registry';
 import StaticInformationList from './StaticInformationList';
 import type { InformationListItem, Props, InformationListContentMeta, VerifyConfig } from './types';
@@ -8,53 +11,141 @@ import styles from '../../index.module.less';
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-const WbInformationListContentConfig = ({ item, configs, handlePropsChange }: Props) => {
+const FORM_KEY = {
+  contentSource: 'contentSource'
+};
+
+const WbInformationListContentConfig = ({ item, configs, handlePropsChange, handleMultiPropsChange }: Props) => {
   const meta: InformationListContentMeta = item.meta ?? {};
   const modeField = meta.modeField ?? { key: 'dataSourceMode', options: [] };
   const dynamicFields = meta.dynamicFields ?? [];
-  const filterField = meta.filterField;
-  const staticFieldKey = meta.staticFieldKey ?? 'informationListConfig';
+  // const filterField = meta.filterField;
+  const staticFieldKey = meta.staticFieldKey ?? 'dynamicInformationList';
+  const [entityOptions, setEntityOptions] = useState([]);
+  const [fieldOptions, setFieldOptions] = useState([]);
+  const { appEntities } = useAppEntitiesStore();
 
   const currentMode =
     (typeof configs[modeField.key] === 'string' ? (configs[modeField.key] as string) : undefined) ??
     modeField.defaultValue ??
     'dynamic';
 
+  // 获取实体列表
+  useEffect(() => {
+    if (appEntities.length > 0) {
+      setEntityOptions(appEntities);
+
+      const enUuid = (configs[FORM_KEY.contentSource] as { entityUuid: string })?.entityUuid;
+      if (enUuid) {
+        getFieldList(enUuid);
+      }
+    }
+  }, [appEntities]);
+
   const handleModeChange = (value: string) => {
     handlePropsChange(modeField.key, value);
   };
 
-  const renderDynamicFields = () =>
-    dynamicFields.map((field) => (
-      <FormItem key={field.key} className={styles.formItem} label={field.label}>
-        <Select
-          allowClear
-          placeholder={field.placeholder}
-          value={typeof configs[field.key] === 'string' ? (configs[field.key] as string) : undefined}
-          onChange={(value) => handlePropsChange(field.key, value)}
-        >
-          {(field.options ?? []).map((option) => (
-            <Option key={option.value} value={option.value}>
-              {option.label ?? option.value}
-            </Option>
-          ))}
-        </Select>
-      </FormItem>
-    ));
+  // 获取字段列表
+  const getFieldList = async (entityUuid: string) => {
+    try {
+      const res = await getEntityFields({ entityUuid });
+      if (res) {
+        setFieldOptions(res);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
-  const renderFilterField = () =>
-    filterField ? (
-      <FormItem className={styles.formItem} label={filterField.label}>
-        <Button
-          type="outline"
-          onClick={() => {
-            Message.info('筛选条件配置功能开发中');
-          }}
-        >
-          {filterField.buttonText ?? '设置条件'}
-        </Button>
-      </FormItem>
-    ) : null;
+  const onOptionChange = (key: string, value: string) => {
+    // 内容来源变化时，清空其他字段
+    if (key === FORM_KEY.contentSource) {
+      const option = (entityOptions as Array<{ entityUuid: string; displayName: string; tableName: string }>).find(
+        (opt: { entityUuid: string }) => opt?.entityUuid === value
+      );
+
+      if (option) {
+        const updates: { key: string; value: { entityUuid: string; displayName: string; tableName: string } }[] = [
+          {
+            key: FORM_KEY.contentSource,
+            value: {
+              entityUuid: option.entityUuid,
+              displayName: option.displayName,
+              tableName: option.tableName
+            }
+          }
+        ];
+
+        dynamicFields.forEach((field) => {
+          if (field.key !== FORM_KEY.contentSource) {
+            updates.push({ key: field.key, value: {} });
+          }
+        });
+
+        handleMultiPropsChange?.(updates);
+        // 查询实体下字段列表
+        getFieldList(value);
+      }
+    } else {
+      const option = (fieldOptions as Array<{ fieldUuid: string; fieldName: string; displayName: string }>).find(
+        (opt) => opt.fieldUuid === value
+      );
+      handlePropsChange(key, {
+        fieldUuid: option?.fieldUuid,
+        fieldName: option?.fieldName,
+        displayName: option?.displayName
+      });
+    }
+  };
+
+  const renderDynamicFields = () =>
+    dynamicFields.map((field) => {
+      let selectValue = undefined;
+      if (field.key === FORM_KEY.contentSource) {
+        selectValue = (configs[field.key] as { entityUuid: string })?.entityUuid;
+      } else {
+        selectValue = (configs[field.key] as { fieldUuid: string })?.fieldUuid;
+      }
+
+      return (
+        <FormItem key={field.key} className={styles.formItem} label={field.label}>
+          <Select
+            allowClear
+            placeholder={field.placeholder}
+            value={selectValue}
+            onChange={(value) => onOptionChange(field.key, value)}
+          >
+            {field.key === FORM_KEY.contentSource &&
+              entityOptions.map((option: { entityUuid: string; displayName: string; tableName: string }) => (
+                <Option key={option.entityUuid} value={option.entityUuid}>
+                  {option.displayName ?? option.entityUuid}
+                </Option>
+              ))}
+            {field.key !== FORM_KEY.contentSource &&
+              fieldOptions.map((option: { fieldUuid: string; fieldName: string; displayName: string }) => (
+                <Option key={option.fieldUuid} value={option.fieldUuid}>
+                  {option.displayName ?? option.fieldName ?? option.fieldUuid}
+                </Option>
+              ))}
+          </Select>
+        </FormItem>
+      );
+    });
+
+  // const renderFilterField = () =>
+  //   filterField ? (
+  //     <FormItem className={styles.formItem} label={filterField.label}>
+  //       <Button
+  //         type="outline"
+  //         onClick={() => {
+  //           Message.info('筛选条件配置功能开发中');
+  //         }}
+  //       >
+  //         {filterField.buttonText ?? '设置条件'}
+  //       </Button>
+  //     </FormItem>
+  //   ) : null;
 
   return (
     <div>
@@ -71,7 +162,8 @@ const WbInformationListContentConfig = ({ item, configs, handlePropsChange }: Pr
       {currentMode === 'dynamic' ? (
         <>
           {renderDynamicFields()}
-          {renderFilterField()}
+          {/* 暂时隐藏，后期开发 */}
+          {/* {renderFilterField()} */}
         </>
       ) : (
         <StaticInformationList
@@ -97,8 +189,14 @@ const WbInformationListContentConfig = ({ item, configs, handlePropsChange }: Pr
 
 registerConfigRenderer(
   WORKBENCH_CONFIG_TYPES.WB_INFORMATION_LIST_CONTENT,
-  ({ id, item, configs, handlePropsChange }) => (
-    <WbInformationListContentConfig id={id} item={item} configs={configs} handlePropsChange={handlePropsChange} />
+  ({ id, item, configs, handlePropsChange, handleMultiPropsChange }) => (
+    <WbInformationListContentConfig
+      id={id}
+      item={item}
+      configs={configs}
+      handlePropsChange={handlePropsChange}
+      handleMultiPropsChange={handleMultiPropsChange}
+    />
   )
 );
 

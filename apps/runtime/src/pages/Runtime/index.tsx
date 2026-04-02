@@ -195,6 +195,7 @@ const Runtime: React.FC = () => {
         }
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
+          handleCurMenuUrl(curMenuObj.node.id || '');
           setCurMenu(curMenuObj.node);
         }
       } else {
@@ -202,6 +203,7 @@ const Runtime: React.FC = () => {
 
         if (curMenuObj) {
           setExpandedKeys(curMenuObj.parentIds);
+          handleCurMenuUrl(curMenuObj.node.id || '');
           setCurMenu(curMenuObj.node);
         }
       }

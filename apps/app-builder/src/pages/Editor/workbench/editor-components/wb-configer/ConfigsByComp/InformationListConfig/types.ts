@@ -50,6 +50,7 @@ export interface Props {
   };
   configs: Record<string, unknown>;
   handlePropsChange: (key: string, value: unknown) => void;
+  handleMultiPropsChange?: (updates: { key: string; value: string | number | boolean | object }[]) => void;
 }
 
 export interface VerifyConfig {
