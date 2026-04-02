@@ -56,6 +56,24 @@ export interface InformationListItem {
   [key: string]: unknown;
 }
 
+/**
+ * 字段选择信息（包含组件id和组件name，用于编辑态显示）
+ */
+export interface FieldSelection {
+  fieldUuid?: string;
+  fieldName?: string;
+  displayName?: string;
+}
+
+/**
+ * 内容来源信息（表单）
+ */
+export interface ContentSourceInfo {
+  entityUuid?: string;
+  displayName?: string;
+  tableName?: string;
+}
+
 export interface XInformationListConfig extends ICommonBaseWorkbenchType {
   componentName: string;
   label: {
@@ -68,28 +86,28 @@ export interface XInformationListConfig extends ICommonBaseWorkbenchType {
   jumpPageId?: TTextDefaultType;
   jumpExternalUrl?: TTextDefaultType;
   /**
-   * 静态资讯列表数据
-   */
-  informationListConfig: InformationListItem[];
-  /**
    * 数据源模式（静态/动态）
    */
   dataSourceMode: 'static' | 'dynamic';
   /**
-   * 动态内容来源（表单/实体）
+   * 动态内容来源（实体）
    */
-  contentSource?: string;
+  contentSource?: ContentSourceInfo;
   /**
-   * 动态字段映射
+   * 表名（用于接口调用）
    */
-  imageField?: string;
-  titleField?: string;
-  subtitleField?: string;
-  authorField?: string;
-  dateField?: string;
-  linkField?: string;
+  tableName?: string;
   /**
-   * 静态资讯列表数据
+   * 动态字段映射（包含 compoId 和 name）
+   */
+  imageField?: FieldSelection;
+  titleField?: FieldSelection;
+  subtitleField?: FieldSelection;
+  authorField?: FieldSelection;
+  dateField?: FieldSelection;
+  linkField?: FieldSelection;
+  /**
+   * 静态、动态资讯列表数据
    */
   staticInformationList?: InformationListItem[];
   /**
@@ -155,15 +173,14 @@ const XInformationList: XInformationListSchema = {
     jumpPageId: '',
     jumpExternalUrl: '',
     dataCount: 10,
-    informationListConfig: [],
     dataSourceMode: 'static',
-    contentSource: '',
-    imageField: '',
-    titleField: '',
-    subtitleField: '',
-    authorField: '',
-    dateField: '',
-    linkField: '',
+    contentSource: {},
+    imageField: {},
+    titleField: {},
+    subtitleField: {},
+    authorField: {},
+    dateField: {},
+    linkField: {},
     filterCondition: [],
     staticInformationList: [],
     width: WORKBENCH_WIDTH_VALUES[WORKBENCH_WIDTH_OPTIONS.FULL],
