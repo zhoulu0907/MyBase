@@ -250,7 +250,7 @@ export const handleMenuClick = async (key: string, finalMenuItems: MenuItemType[
       });
 
       if (authorizeRes.code) {
-        const callbackUrl = `https://bote.sit.artifex-cmcc.com.cn/bote/api/bote/oauth2/callback?systemCode=onebase&redirect=https://bote.sit.artifex-cmcc.com.cn/bote/manager/%23/&code=${authorizeRes.code}`;
+        const callbackUrl = `https://bote-sit.artifex-cmcc.com.cn/bote/api/bote/oauth2/callback?systemCode=onebase&redirect=https://bote-sit.artifex-cmcc.com.cn/bote/manager/%23/&code=${authorizeRes.code}`;
         window.open(callbackUrl, '_blank');
       } else {
         Message.error('获取授权码失败');
