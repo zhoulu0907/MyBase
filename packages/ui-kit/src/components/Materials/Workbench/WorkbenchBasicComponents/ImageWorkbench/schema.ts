@@ -37,12 +37,6 @@ export type TXImageEditData = Array<
   IStatusConfigType<TFillSelectKeyType> | IImageConfigType | ICommonConfigType
 >;
 
-interface Images {
-  image: string;
-  text?: string;
-  url?: string;
-}
-
 export interface XImageConfig extends ICommonBaseType {
   label: {
     text: TTextDefaultType;

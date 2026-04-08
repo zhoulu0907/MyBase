@@ -4,20 +4,13 @@ import { Empty, Tabs } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
 import dayjs from 'dayjs';
 import { TokenManager } from '@onebase/common';
+import { FlowStatusMap } from '@onebase/app';
 import { getTodoPageList, getDonePageList, getMyCreatePageList, getMyCCPageList } from '@onebase/app/src/services/app_runtime';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS, DATA_CONFIG_NAME_MAP } from '../../core/constants';
 import { useJump } from '../../hooks/useJump';
 import type { XTodoListConfig, ITodoItem } from './schema';
 import { pendingListDefault } from './schema';
 import styles from './index.module.css';
-
-const statusMap: Record<string, string> = {
-  timeout: '超时',
-  normal: '正常',
-  completed: '已完成',
-  cancelled: '已取消',
-  in_approval: '审批中'
-}
 
 const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
   const { label, dataConfig, theme, status, runtime, dataCount, userAvatar, userName, showMore, showMoreLink } = props;
@@ -36,6 +29,13 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
     showCreated: createdList,
     showHandled: handledList,
     showCc: ccList
+  }
+
+  const timeKeyMap: Record<keyof XTodoListConfig['dataConfig'], { label: string; timeKey: keyof ITodoItem }> = {
+    showPending: { label: '发起时间', timeKey: 'submitTime' },
+    showCreated: { label: '创建时间', timeKey: 'createTime' },
+    showHandled: { label: '处理时间', timeKey: 'handleTime' },
+    showCc: { label: '到达时间', timeKey: 'arrivalTime' }
   }
 
   if (runtime && status === hiddenStatusValue) {
@@ -157,7 +157,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
       runtime
     });
   };
-  const containerStyle: CSSProperties = runtime && contentHeight 
+  const containerStyle: CSSProperties = runtime && contentHeight
     ? { overflow: 'hidden', display: 'flex', flexDirection: 'column' }
     : {};
 
@@ -183,30 +183,39 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
             value &&
             (<Tabs.TabPane key={key} title={DATA_CONFIG_NAME_MAP[key] || key}>
               <div className={styles.todoListContentList}>
-                {getListMap[key as keyof typeof getListMap].length > 0 && getListMap[key as keyof typeof getListMap]?.slice(0, dataCount)?.map((item: ITodoItem, index: number) => (
-                  <div key={item.id || index} className={styles.todoListContentItem}>
-                    <div className={styles.todoListContentItemLeft} style={{ display: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'flex' : 'none' }}>
-                      {item?.initiator?.avatar ? (
-                        <img src={item.initiator.avatar} alt={item.initiator.name} className={styles.userAvatar} />
-                      ) : (
-                        <div className={styles.userAvatar}>{item.initiator.name?.charAt(0)}</div>
-                      )}
-                    </div>
-                    <div className={styles.todoListContentItemRight}>
-                      <div className={styles.todoListContentItemRightTop}>
-                        <div className={styles.todoListTitle}>{item?.processTitle}</div>
-                        <div className={item?.flowStatus === 'timeout' ? styles.todoListStatueTimeout : styles.todoListStatueNormal}>
-                          {statusMap[item?.flowStatus] || item?.flowStatus}
+                {getListMap[key as keyof typeof getListMap].length > 0 && getListMap[key as keyof typeof getListMap]?.slice(0, dataCount)?.map((item: ITodoItem, index: number) => {
+                  const timeIndex = item[timeKeyMap[key as keyof typeof timeKeyMap].timeKey];
+                  return (
+                    <div key={item.id || index} className={styles.todoListContentItem}>
+                      <div className={styles.todoListContentItemLeft} style={{ display: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? 'flex' : 'none' }}>
+                        {item?.initiator?.avatar ? (
+                          <img src={item.initiator.avatar} alt={item.initiator.name} className={styles.userAvatar} />
+                        ) : (
+                          <div className={styles.userAvatar}>{item?.initiator?.name?.charAt(0)}</div>
+                        )}
+                      </div>
+                      <div className={styles.todoListContentItemRight}>
+                        <div className={styles.todoListContentItemRightTop}>
+                          <div className={styles.todoListTitle}>{item?.processTitle}</div>
+                          {(key === 'showCreated' || key === 'showCc') && <div className={!item?.flowStatus ? styles.todoListNoStatus : item.flowStatus === 'rejected' ? styles.todoListStatueTimeout : styles.todoListStatueNormal}>                            
+                            {item?.flowStatus ? FlowStatusMap[item.flowStatus] : ''}
+                          </div>}
+                          {/* {key === 'showHandled' && <div className={item?.taskStatus ? styles.todoListNoStatus : styles.todoListStatueNormal}>                            
+                            {item?.taskStatus}
+                          </div>} */}
+                        </div>
+                        <div className={styles.todoListContentItemRightBottom}>
+                          <div className={styles.todoListInitiator}>{item?.initiator?.name ? '发起人：' + item.initiator.name : ''}</div>
+                          {/* <div className={styles.todoListSourceSystem}>表单摘要：{item.formSummary}</div> */}
+                          <div className={styles.todoListCreateTime}>
+                            {timeIndex ? (timeKeyMap[key as keyof typeof timeKeyMap].label + '：' + dayjs(timeIndex).format('YYYY-MM-DD HH:mm:ss')) : ''}
+                          </div>
                         </div>
                       </div>
-                      <div className={styles.todoListContentItemRightBottom}>
-                        <div className={styles.todoListInitiator}>发起人：{item?.initiator?.name}</div>
-                        {/* <div className={styles.todoListSourceSystem}>表单摘要：{item.formSummary}</div> */}
-                        <div className={styles.todoListCreateTime}>创建时间：{dayjs(item?.submitTime).format('YYYY-MM-DD HH:mm:ss')}</div>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                }
+                )}
 
                 {/* {getListMap[key as keyof typeof getListMap].length === 0 && (
                   <div className={styles.todoListContentItemEmpty}>

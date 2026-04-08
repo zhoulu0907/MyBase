@@ -36,13 +36,13 @@ const XImageWorkbench = memo((props: XImageConfig & { runtime?: boolean; detailM
 
       <Image
         className={styles.imageStyle}
-        height={label?.display ? 'calc(100% - 36px)' : '100%'}
-        width={'100%'}
+        height='300px'
+        width='100%'
         preview={false}
         src={getFileUrlById(imageConfig)}
         style={
           {
-            objectFit: fillStyle,
+            '--fit': fillStyle,
             opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
           } as React.CSSProperties
         }

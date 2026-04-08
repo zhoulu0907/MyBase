@@ -1,0 +1,243 @@
+@appPageHeaderHeight: 200px;
+@nameFilterHeight: 44px;
+@appPaginationHeight: 50px;
+@homePageHeight: 60px;
+@appCardWidth: 332px;
+
+.appPage {
+  width: 100%;
+  height: 100%;
+  min-width: 754px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  position: relative;
+  .welcomeText {
+    padding: 20px;
+    background: linear-gradient(90deg, #6c67fc, #0f89fc, #09d5f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    font-weight: 500;
+    font-size: 28px;
+  }
+
+  .appContainer {
+    z-index: 1;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: transparent !important;
+    border-radius: 4px;
+    position: relative;
+
+    .applicationEmpty {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      .goCreateApplication {
+        margin-top: 10px;
+        background-color: rgb(var(--primary-6));
+        color: #ffffff;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+
+    .appHasDataBox {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .appCreate {
+      display: flex;
+      margin-bottom: 50px;
+      .aiCreate {
+        margin-right: 12px;
+        height: 97px;
+        width: 350px;
+        border-radius: 7px;
+        background-position:
+          right bottom,
+          100% 100%;
+        background-size:
+          124px 68px,
+          auto 100%;
+        background-repeat: no-repeat;
+        box-sizing: border-box;
+        padding: 16px 18px;
+        cursor: pointer;
+        background-image:
+          url('@/assets/images/appSetting/shengcheng.svg'),
+          linear-gradient(90deg, #095ffc 0%, rgba(26, 106, 255, 0.5) 100%);
+
+        &:hover {
+          box-shadow: 4px 4px 16px 0px #24515d1a;
+        }
+        .aiCreateTitle {
+          font-weight: 500;
+          font-size: 17px;
+          color: #ffffff;
+          line-height: 24px;
+        }
+        .aiCreateDesc {
+          width: 184px;
+          margin-top: 4px;
+          font-weight: 400;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.84);
+          line-height: 19px;
+        }
+      }
+      .otherCreate {
+        margin-right: 12px;
+        box-sizing: border-box;
+        width: 224px;
+        height: 97px;
+        border-radius: 12px 12px 12px 12px;
+        border: 1px solid #ffffff;
+        cursor: pointer;
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(45deg, #dbeafe 0%, #eff6ff 100%);
+
+        &:nth-child(2) {
+          background: linear-gradient(45deg, #daf4fa 0%, #eff9ff 100%);
+        }
+
+        &:nth-child(3) {
+          background: linear-gradient(45deg, #eef2ff 0%, #eff6ff 100%);
+        }
+        &:hover {
+          box-shadow: 4px 4px 16px 0px #24515d1a;
+        }
+        .otherCreateContent {
+          flex: 1;
+          overflow: hidden;
+          .otherCreateTitle {
+            font-weight: 500;
+            font-size: 17px;
+            color: #2a2b33;
+            line-height: 24px;
+          }
+          .otherCreateDesc {
+            width: 132px;
+            margin-top: 4px;
+            font-weight: 400;
+            font-size: 12px;
+            color: #64677a;
+            line-height: 19px;
+          }
+        }
+        img {
+          width: 36px;
+          height: 36px;
+        }
+      }
+    }
+
+    .appFilter {
+      padding-left: 8px;
+      height: @nameFilterHeight;
+      display: flex;
+      align-items: center;
+      width: 588px;
+      background: #ffffff;
+      box-shadow: 0px 1px 4px 0px rgba(100, 103, 122, 0.06);
+      border-radius: 8px 8px 8px 8px;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+      .appInput {
+        width: 240px;
+        height: 32px;
+        :global(.pc-input-inner-wrapper) {
+          border: none;
+          outline: none;
+          background-color: transparent;
+          color: #2a2b33;
+          font-weight: 500;
+          font-size: 17px;
+          line-height: 24px;
+        }
+      }
+    }
+
+    .appListLoading {
+      width: 100%;
+      height: 100%;
+      flex: 1;
+    }
+
+    .appList {
+      flex: 1;
+      width: 100%;
+      min-height: 500px;
+      height: 100%;
+      overflow-y: auto;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(@appCardWidth, 1fr));
+      grid-auto-rows: min-content;
+      padding: 2px 2px 0;
+      gap: 24px;
+      padding-bottom: 15px;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+        background: transparent;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #e5e5e5;
+        border-radius: 3px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    }
+
+    .appPagination {
+      width: 100%;
+      height: @appPaginationHeight;
+      display: flex;
+      justify-content: flex-end;
+      align-items: flex-start;
+      box-sizing: border-box;
+    }
+  }
+}
+
+.createAppModal {
+  .createAppWrapper {
+    box-sizing: border-box;
+    min-height: 518px;
+    position: relative;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+.cornerLogo {
+  position: absolute;
+  top: 57px;
+  right: 45px;
+  z-index: 0;
+}

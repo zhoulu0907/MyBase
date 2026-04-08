@@ -235,7 +235,11 @@ const CreateSpace = () => {
           validateTrigger={['onBlur']}
         >
           <Input
-            addBefore={<div style={{ width: '250px' }}>{getPlatformFeDomain()}</div>}
+            addBefore={
+              <div className={styles.website} title={getPlatformFeDomain()}>
+                {getPlatformFeDomain()}
+              </div>
+            }
             placeholder="请输入访问地址"
           />
         </Form.Item>
