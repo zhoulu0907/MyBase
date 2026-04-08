@@ -102,11 +102,8 @@ const ConnectorInstancesPage: React.FC = () => {
       <div className={styles.header}>
         <div className={styles.title}>连接器实例</div>
 
-        <div
-          className={styles.searchContainer}
-          style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}
-        >
-          <div style={{ display: 'flex', gap: 8 }}>
+        <div className={styles.searchContainer}>
+          <div className={styles.searchLeft}>
             <Select placeholder="全部类型" style={{ width: 120 }} allowClear>
               {/* Options will be populated possibly from API */}
             </Select>
@@ -117,7 +114,7 @@ const ConnectorInstancesPage: React.FC = () => {
             <Input.Search
               allowClear
               placeholder="请输入实例名称搜索"
-              style={{ width: 300 }}
+              style={{ width: 240 }}
               onSearch={(val) => {
                 setKeyword(val);
               }}

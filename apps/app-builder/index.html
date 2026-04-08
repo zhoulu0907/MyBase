@@ -4,21 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OneBase 3.0</title>
+    <script src="./config.js"></script>
     <script>
       const currentDomain = window.location.hostname;
-      const configScript = document.createElement('script');
-
-      if (currentDomain === 'onebase-sit.artifex-cmcc.com.cn') {
-        configScript.src = './artifex_config.js';
-      } else {
-        configScript.src = './config.js';
-      }
-
-      document.head.prepend(configScript);
 
       const favicon = document.createElement('link');
       favicon.rel = 'icon';
-      if (currentDomain === 'onebase-sit.artifex-cmcc.com.cn') {
+      if (currentDomain.includes('artifex-cmcc')) {
         favicon.type = 'image/x-icon';
         favicon.href = './tiangong-logo.ico';
       } else {
@@ -27,6 +19,8 @@
       }
       document.head.appendChild(favicon);
     </script>
+    <!-- 监督插件配置 -->
+    <script src="./supervision.config.js"></script>
     <link rel="stylesheet" href="./icon-font/iconfont.css">
   </head>
   <body>

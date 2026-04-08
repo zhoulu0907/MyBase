@@ -21,16 +21,16 @@ const XSelectOne = memo((props: XInputSelectOneConfig & { runtime?: boolean; det
 
   const [options, setOptions] = useState<DictData[]>([]);
 
-  useEffect(() => {
-    if (dataField?.length) {
-      getOptions();
-    }
-  }, [dataField]);
-
   const getOptions = async () => {
     const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
     setOptions(newOptions);
   };
+
+  useEffect(() => {
+    if (dataField?.length && mainEntity?.tableName && mainEntity?.fields) {
+      getOptions();
+    }
+  }, [dataField, mainEntity, subEntities, appDict.value]);
 
   return (
     <div className="formWrapper">

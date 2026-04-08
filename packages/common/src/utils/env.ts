@@ -21,7 +21,9 @@ export const getProdConfig = (key = 'CONFIG') => {
   return null;
 };
 
-export const envConfig = process.env.NODE_ENV === 'production' ? getProdConfig() : ((window as any).global_config || DEFAULT_CONFIG);
+export const envConfig = process.env.NODE_ENV === 'production' 
+  ? getProdConfig(window.location.hostname.includes('artifex-cmcc') ? 'ARTIFEX_CONFIG' : 'CONFIG')
+  : ((window as any).global_config || DEFAULT_CONFIG);
 export const aiConfig = process.env.NODE_ENV === 'production' ? getProdConfig('AI_CONFIG') : ((window as any).global_config || DEFAULT_CONFIG);
 console.log("engconfig:" , envConfig)
 // 平台、空间、应用端环境
@@ -70,6 +72,10 @@ export const getResourceURL = (): string => {
 
 export const getCorpResourceURL = (): string => {
   return envConfig?.CORP_RESOURCE_URL;
+};
+
+export const getChatbotBaseURL = (): string => {
+  return envConfig?.CHATBOT_BASE_URL || 'https://bote-sit.artifex-cmcc.com.cn/bote';
 };
 
 const RUNTIME_DEV_PATH = '/runtime-dev';

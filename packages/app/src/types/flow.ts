@@ -365,7 +365,7 @@ export interface ConnectorTypeInfo {
 export interface ConnectorItem {
   id: string;
   name: string;
-  icon: string | React.ReactNode;
+  icon: string | React.ReactNode | null;
   category: string;
   type: 'system_preset' | 'custom';
   fields: {

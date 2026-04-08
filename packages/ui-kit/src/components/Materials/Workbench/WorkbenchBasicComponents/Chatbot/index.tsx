@@ -1,5 +1,6 @@
 import { Modal } from '@arco-design/web-react';
 import { useState, useEffect, useMemo } from 'react';
+import { getChatbotBaseURL } from '@onebase/common';
 import ChatboxIcon from '@/assets/images/cp/chatbox.svg';
 import './index.css';
 
@@ -21,7 +22,7 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
   useEffect(() => {
     const calculateHeight = () => {
       const bodyHeight = document.body.offsetHeight;
-      setIframeHeight(bodyHeight - 200);
+      setIframeHeight(bodyHeight - 50);
     };
 
     calculateHeight();
@@ -59,7 +60,8 @@ const XChatbot: React.FC<XChatbotProps> = ({ agentId, agentName, agentTenantId, 
     }
   };
 
-  const DEFAULT_URL_TEMPLATE = 'http://bote.sit.artifex-cmcc.com.cn/bote/#/driver/bot?tenantId={{tenantId}}&botId={{botId}}&modeType=single&systemCode=ONEBASE-Runtime&code={{code}}';
+  const chatbotBaseUrl = getChatbotBaseURL();
+  const DEFAULT_URL_TEMPLATE = `${chatbotBaseUrl}/#/driver/bot?tenantId={{tenantId}}&botId={{botId}}&modeType=single&systemCode=ONEBASE-Runtime&code={{code}}`;
 
   const displayUrl = useMemo(() => {
     if (hasCustomUrl) {

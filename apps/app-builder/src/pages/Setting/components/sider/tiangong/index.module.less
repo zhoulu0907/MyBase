@@ -1,0 +1,35 @@
+.verticalSider {
+  margin-right: 16px;
+  background-color: #f7f8fa;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.verticalSiderContent {
+  background-color: #fff;
+  border-radius: 8px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.verticalMenuWrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.verticalMenuContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

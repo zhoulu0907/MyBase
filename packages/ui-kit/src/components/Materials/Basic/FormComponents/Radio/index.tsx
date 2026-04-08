@@ -33,16 +33,16 @@ const XRadio = memo((props: XInputRadioConfig & { runtime?: boolean; detailMode?
 
   const [options, setOptions] = useState<DictData[]>([]);
 
-  useEffect(() => {
-    if (dataField?.length) {
-      getOptions();
-    }
-  }, [dataField]);
-
   const getOptions = async () => {
     const newOptions = await getFieldOptionsConfig(dataField, mainEntity, subEntities, appDict.value);
     setOptions(newOptions);
   };
+
+  useEffect(() => {
+    if (dataField?.length && mainEntity?.tableName && mainEntity?.fields) {
+      getOptions();
+    }
+  }, [dataField, mainEntity, subEntities, appDict.value]);
 
   const renderTag = () => {
     const option = options.find((op) => op.value === fieldValue?.id || op.id === fieldValue?.id || op.value === fieldValue || op.id === fieldValue);

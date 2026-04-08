@@ -38,7 +38,7 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
     try {
       const tenantId = TokenManager.getCurIdentifyId();
       const response = await axios.post(
-        'http://bote.sit.artifex-cmcc.com.cn/bote/api/bote/manager/bot/queryPublishedAppPage',
+        'https://bote-sit.artifex-cmcc.com.cn/bote/api/bote/manager/bot/queryPublishedAppPage',
         {
           extTenantId: tenantId,
           spaceId: '1348207178626895872',

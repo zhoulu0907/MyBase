@@ -52,7 +52,7 @@
       var urlParams = new URLSearchParams(window.location.search);
       var code = urlParams.get('code');
       var state = urlParams.get('state');
-      var isSitHost = window.location.host === 'onebase-sit.artifex-cmcc.com.cn';
+      var isSitHost = window.location.host.includes('artifex-cmcc');
       var baseUrl = isSitHost ? '' : '/v0';
 
       if (code) {
