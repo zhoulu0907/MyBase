@@ -27,7 +27,7 @@ import wxminiSVG from '@/assets/images/wxmini_line2.svg';
 import wxminiActiveSVG from '@/assets/images/wxmini_line_active2.svg';
 import agentSVG from '@/assets/images/agent.svg';
 import agentActiveSVG from '@/assets/images/agent_active.svg';
-import { TENANT_MENUS } from '@onebase/common';
+import { TENANT_MENUS, getChatbotBaseURL } from '@onebase/common';
 import { Message } from '@arco-design/web-react';
 import { oauthAuthorize } from '@onebase/platform-center';
 import { useNavigate } from 'react-router-dom';
@@ -250,7 +250,7 @@ export const handleMenuClick = async (key: string, finalMenuItems: MenuItemType[
       });
 
       if (authorizeRes.code) {
-        const callbackUrl = `https://bote-sit.artifex-cmcc.com.cn/bote/api/bote/oauth2/callback?systemCode=onebase&redirect=https://bote-sit.artifex-cmcc.com.cn/bote/manager/%23/&code=${authorizeRes.code}`;
+        const callbackUrl = `${getChatbotBaseURL()}/api/bote/oauth2/callback?systemCode=onebase&redirect=${getChatbotBaseURL()}/manager/%23/&code=${authorizeRes.code}`;
         window.open(callbackUrl, '_blank');
       } else {
         Message.error('获取授权码失败');

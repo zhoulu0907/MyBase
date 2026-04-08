@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Form, Select, Spin } from '@arco-design/web-react';
 import { registerConfigRenderer } from '../../registry';
 import { WORKBENCH_CONFIG_TYPES, type IWbAgentSelectorConfigType } from '@onebase/ui-kit';
-import { TokenManager } from '@onebase/common';
+import { TokenManager, getChatbotBaseURL } from '@onebase/common';
 import axios from 'axios';
 import styles from '../../index.module.less';
 
@@ -38,7 +38,7 @@ const AgentSelectorConfig = ({ handlePropsChange, handleMultiPropsChange, item, 
     try {
       const tenantId = TokenManager.getCurIdentifyId();
       const response = await axios.post(
-        'https://bote-sit.artifex-cmcc.com.cn/bote/api/bote/manager/bot/queryPublishedAppPage',
+        `${getChatbotBaseURL()}/api/bote/manager/bot/queryPublishedAppPage`,
         {
           extTenantId: tenantId,
           spaceId: '1348207178626895872',
