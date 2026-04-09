@@ -14,3 +14,16 @@
   border-radius: 12px;
   overflow: hidden;
 }
+.contentInner {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* background-color: #fff; */
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
