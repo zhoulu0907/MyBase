@@ -1,21 +1,9 @@
-/**
- * 灵畿 SSO 回调组件
- * @deprecated 此文件已废弃，请使用 @onebase/product-lingji 包中的 LingjiCallback 组件
- * import { LingjiCallback } from '@onebase/product-lingji';
- */
-
-console.warn(
-  '[DEPRECATED] pages/LingjiCallback 已废弃，请使用 @onebase/product-lingji 包。\n' +
-  '新用法: import { LingjiCallback } from "@onebase/product-lingji";'
-);
-
+import React from 'react';
 import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useI18n } from '../../hooks/useI18n';
 import { getPermissionInfo, CodeType } from '@onebase/platform-center';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
-import styles from './index.module.less';
 
 interface LingjiLoginData {
   userId: string;
@@ -25,8 +13,11 @@ interface LingjiLoginData {
   tenantId: string;
 }
 
-const LingjiCallback: React.FC = () => {
-  const { t } = useI18n();
+/**
+ * 灵畿 SSO 回调组件
+ * 处理灵畿平台的 SSO 登录回调
+ */
+export const LingjiCallback: React.FC = () => {
   const navigate = useNavigate();
   const processedRef = useRef(false);
 
@@ -78,10 +69,6 @@ const LingjiCallback: React.FC = () => {
           try {
             const permissionInfo = await getPermissionInfo(CodeType.TENANT);
             UserPermissionManager.setUserPermissionInfo(permissionInfo);
-            // 同时设置到信号中
-            import('@/store/singals/user_permission').then(({ userPermissionSignal }) => {
-              userPermissionSignal.setPermissionInfo(permissionInfo);
-            });
           } catch (error) {
             console.error('获取权限信息失败:', error);
           }
@@ -100,13 +87,25 @@ const LingjiCallback: React.FC = () => {
   }, [navigate]);
 
   return (
-    <div className={styles.callbackContainer}>
-      <div className={styles.loadingContent}>
-        <div className={styles.spinner} />
-        <p className={styles.text}>{t('oauth.callback.processing')}</p>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      backgroundColor: '#f5f5f5'
+    }}>
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '3px solid #e5e5e5',
+          borderTopColor: '#165dff',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto 20px'
+        }} />
+        <p style={{ color: '#666', fontSize: '14px' }}>正在处理登录...</p>
       </div>
     </div>
   );
 };
-
-export default LingjiCallback;

@@ -23,7 +23,7 @@ import ProfileEditPage from './pages/Profile/edit';
 import SecurityPage from './pages/Security';
 import PluginPage from './pages/Plugin';
 import ExternalUserPage from './pages/ExternalUser';
-import { isArtifexDomain, useIframeDetection, useIframeNavigation, useTenantInfo, useCollapsed } from './utils';
+import { isTiangongPlatform, useIframeDetection, useIframeNavigation, useTenantInfo, useCollapsed } from './utils';
 
 const SettingPage: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string>('');
@@ -33,7 +33,7 @@ const SettingPage: React.FC = () => {
 
   useIframeNavigation(isIframe);
 
-  const shouldUseTiangongLayout = isArtifexDomain();
+  const shouldUseTiangongLayout = isTiangongPlatform();
 
   const renderRoutes = () => (
     <Routes>

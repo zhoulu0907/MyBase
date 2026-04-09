@@ -1,24 +1,15 @@
-/**
- * 天工 OAuth 回调组件
- * @deprecated 此文件已废弃，请使用 @onebase/product-tiangong 包中的 TiangongOAuthCallback 组件
- * import { TiangongOAuthCallback } from '@onebase/product-tiangong';
- */
-
-console.warn(
-  '[DEPRECATED] pages/OAuthCallback 已废弃，请使用 @onebase/product-tiangong 包。\n' +
-  '新用法: import { TiangongOAuthCallback } from "@onebase/product-tiangong";'
-);
-
+import React from 'react';
 import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useI18n } from '../../hooks/useI18n';
 import { tiangongLogin, getPermissionInfo, CodeType } from '@onebase/platform-center';
 import { TokenManager, UserPermissionManager, getOrCreateDeviceInfo } from '@onebase/common';
-import styles from './index.module.less';
 
-const OAuthCallback: React.FC = () => {
-  const { t } = useI18n();
+/**
+ * 天工 OAuth 回调组件
+ * 处理天工平台的 OAuth 登录回调
+ */
+export const TiangongOAuthCallback: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const processedRef = useRef(false);
@@ -30,7 +21,7 @@ const OAuthCallback: React.FC = () => {
       const handleOAuthCallback = async () => {
         const code = searchParams.get('code');
         const state = searchParams.get('state');
-        
+
         if (code) {
           try {
             const deviceId = await getOrCreateDeviceInfo();
@@ -38,7 +29,7 @@ const OAuthCallback: React.FC = () => {
             const response = await tiangongLogin({ code, deviceId });
             if (response && response.accessToken) {
               TokenManager.setCurIdentifyId(response.tenantId);
-              
+
               TokenManager.setToken({
                 userId: response.userId,
                 accessToken: response.accessToken,
@@ -52,9 +43,6 @@ const OAuthCallback: React.FC = () => {
               try {
                 const permissionInfo = await getPermissionInfo(CodeType.TENANT);
                 UserPermissionManager.setUserPermissionInfo(permissionInfo);
-                import('@/store/singals/user_permission').then(({ userPermissionSignal }) => {
-                  userPermissionSignal.setPermissionInfo(permissionInfo);
-                });
               } catch (error) {
                 console.error('获取权限信息失败:', error);
               }
@@ -74,12 +62,12 @@ const OAuthCallback: React.FC = () => {
           } catch (error) {
             console.error('天工登录失败:', error);
             if ((error as any)?.response?.status !== 302) {
-              Message.error((error as any)?.message || t('oauth.callback.loginFailed'));
+              Message.error((error as any)?.message || '登录失败');
               navigate('/login', { replace: true });
             }
           }
         } else {
-          Message.error(t('oauth.callback.codeMissing'));
+          Message.error('缺少授权码');
           navigate('/login', { replace: true });
         }
       };
@@ -89,13 +77,25 @@ const OAuthCallback: React.FC = () => {
   }, []);
 
   return (
-    <div className={styles.callbackContainer}>
-      <div className={styles.loadingContent}>
-        <div className={styles.spinner} />
-        <p className={styles.text}>{t('oauth.callback.processing')}</p>
+    <div style={{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: '100vh',
+      backgroundColor: '#f5f5f5'
+    }}>
+      <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '3px solid #e5e5e5',
+          borderTopColor: '#165dff',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto 20px'
+        }} />
+        <p style={{ color: '#666', fontSize: '14px' }}>正在处理登录...</p>
       </div>
     </div>
   );
 };
-
-export default OAuthCallback;

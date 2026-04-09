@@ -1,13 +1,7 @@
 /**
  * 监督插件管理模块
- * @deprecated 此文件已废弃，请使用 @onebase/product-lingji 包中的对应功能
- * import { initSupervisionPlugin, updatePageInfo, showPlugin, hidePlugin, destroyPlugin } from '@onebase/product-lingji';
+ * 用于管理监督插件的加载、初始化、埋点更新和销毁
  */
-
-console.warn(
-  '[DEPRECATED] supervisionPlugin.ts 已废弃，请使用 @onebase/product-lingji 包。\n' +
-  '新用法: import { initSupervisionPlugin, ... } from "@onebase/product-lingji";'
-);
 
 import { UserPermissionManager } from '@onebase/common';
 

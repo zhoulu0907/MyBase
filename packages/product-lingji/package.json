@@ -1,0 +1,29 @@
+{
+  "name": "@onebase/product-lingji",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup"
+  },
+  "dependencies": {
+    "@onebase/common": "workspace:*",
+    "@onebase/platform-center": "workspace:*",
+    "@arco-design/web-react": "^2.64.1",
+    "react": "^18.3.1",
+    "react-router-dom": "^6.30.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "tsup": "^8.3.5",
+    "typescript": "~5.8.3"
+  },
+  "peerDependencies": {
+    "@arco-design/web-react": "^2.64.1",
+    "react": "^18.3.1",
+    "react-router-dom": "^6.30.0"
+  }
+}
