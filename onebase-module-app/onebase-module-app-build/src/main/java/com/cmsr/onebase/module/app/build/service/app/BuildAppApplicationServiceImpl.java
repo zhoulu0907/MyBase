@@ -13,7 +13,6 @@ import com.cmsr.onebase.module.app.build.service.auth.BuildAppAuthRoleService;
 import com.cmsr.onebase.module.app.build.service.menu.BuildAppMenuService;
 import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
-import com.cmsr.onebase.module.app.build.vo.app.AppConfigUpdateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
