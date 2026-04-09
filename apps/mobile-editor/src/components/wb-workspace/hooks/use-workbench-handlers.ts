@@ -21,6 +21,7 @@ interface UseWorkbenchHandlersParams {
   setCurComponentSchema: (schema: any) => void;
   setShowDeleteButton: (show: boolean) => void;
   workbenchComponents: GridItem[];
+  getCurrentComponents: () => GridItem[];
 }
 
 /**
@@ -36,7 +37,8 @@ export function useWorkbenchHandlers({
   clearCurComponentID,
   setCurComponentSchema,
   setShowDeleteButton,
-  workbenchComponents
+  workbenchComponents,
+  getCurrentComponents
 }: UseWorkbenchHandlersParams) {
   // 取消隐藏组件
   const handleShowComponent = (componentId: string) => {
@@ -96,11 +98,13 @@ export function useWorkbenchHandlers({
   // 删除组件
   const handleDeleteComponent = (componentId: string) => {
     delWorkbenchComponents(componentId);
-    delWbComponentSchemas(componentId);
+    const newComponents = workbenchComponents.filter((cp: GridItem) => cp.id !== componentId);
+    setWorkbenchComponents(newComponents);
 
     // 如果删除的是当前选中的组件，清除选中状态
     if (wbComponentSchemas[componentId]) {
       clearCurComponentID();
+      setShowDeleteButton(false);
     }
   };
 
@@ -113,6 +117,7 @@ export function useWorkbenchHandlers({
       displayName: component?.displayName,
       ...wbComponentSchemas[componentId]
     };
+    console.log('mobile curComponentSchema', curComponentSchema, wbComponentSchemas);
     setCurComponentSchema(curComponentSchema);
     setShowDeleteButton(true);
   };
@@ -187,6 +192,20 @@ export function useWorkbenchHandlers({
   
       if (cpID) {
         setWbComponentSchemas(cpID, schema);
+
+        const newGridItem: GridItem = {
+          id: cpID,
+          type: itemType,
+          displayName: itemDisplayName || ''
+        };
+        const currentList = getCurrentComponents();
+        const insertIndex = e.item.parentElement
+          ? Array.from(e.item.parentElement.children).indexOf(e.item)
+          : currentList.length;
+        const nextComponents = [...currentList];
+        nextComponents.splice(insertIndex, 0, newGridItem);
+        setWorkbenchComponents(nextComponents);
+
         const completeSchema = {
           id: cpID,
           type: itemType || undefined,

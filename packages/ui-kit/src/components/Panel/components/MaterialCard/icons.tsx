@@ -54,6 +54,7 @@ import InformationListIcon from '@/assets/images/cp/information_list_cp.svg';
 import ImageWorkbenchIcon from '@/assets/images/cp/image_workbench_cp.svg';
 
 import CarouselWorkbenchIcon from '@/assets/images/cp/carousel_workbench_cp.svg';
+import ChatbotIcon from '@/assets/images/cp/chatbot_cp.svg';
 
 export const ICON_Map: Record<string, React.ReactNode> = {
   // 表单组件
@@ -116,6 +117,8 @@ export const ICON_Map: Record<string, React.ReactNode> = {
   'todo_list_cp.svg': <img src={TodoListIcon} alt="XTodoList" />,
   'information_list_cp.svg': <img src={InformationListIcon} alt="XInformationList" />,
   'image_workbench_cp.svg': <img src={ImageWorkbenchIcon} alt="XImageWorkbench" />,
+  'chatbot_cp.svg': <img src={ChatbotIcon} alt="XChatbot" height={16} />,
+
   // 工作台高级组件
   'carousel_workbench_cp.svg': <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };
@@ -182,6 +185,7 @@ export const ICON_Map_By_Type: Record<string, React.ReactNode> = {
   XTodoList: <img src={TodoListIcon} alt="XTodoList" />,
   XInformationList: <img src={InformationListIcon} alt="XInformationList" />,
   XImageWorkbench: <img src={ImageWorkbenchIcon} alt="XImageWorkbench" />,
+  XChatbot: <img src={ChatbotIcon} alt="XChatbot" height={16} />,
   // 工作台高级组件
   XCarouselWorkbench: <img src={CarouselWorkbenchIcon} alt="XCarouselWorkbench" />,
 };
