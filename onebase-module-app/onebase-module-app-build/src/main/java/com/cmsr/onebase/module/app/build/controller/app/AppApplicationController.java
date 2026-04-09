@@ -1,24 +1,11 @@
 package com.cmsr.onebase.module.app.build.controller.app;
 
-import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
+import com.cmsr.onebase.module.app.build.vo.app.AppConfigUpdateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
@@ -27,11 +14,18 @@ import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationRespVO;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.security.PermitAll;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
 
 /**
  * @Author：huangjie
@@ -76,6 +70,15 @@ public class AppApplicationController {
     public CommonResult<Boolean> updateApplication(
             @Validated @RequestBody ApplicationCreateReqVO applicationCreateReqVO) {
         appApplicationService.updateApplication(applicationCreateReqVO);
+        return CommonResult.success(true);
+    }
+
+
+    @PostMapping("/update-app-login-config")
+    @Operation(summary = "更新应用")
+    @PreAuthorize("@ss.hasPermission('tenant:app:update')")
+    public CommonResult<Boolean> updateAppLoginConfig(@Validated @RequestBody AppConfigUpdateReqVO configUpdateReqVO) {
+        appApplicationService.updateAppLoginConfig(configUpdateReqVO);
         return CommonResult.success(true);
     }
 

@@ -23,7 +23,7 @@ import com.cmsr.onebase.module.app.api.app.dto.ApplicationDTO;
 import com.cmsr.onebase.module.app.api.auth.AppAuthRoleUserService;
 import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
 import com.cmsr.onebase.module.app.api.version.AppVersionApi;
-import com.cmsr.onebase.module.app.api.version.dto.AppVersionDTO;
+import com.cmsr.onebase.module.app.api.version.dto.AppNavigationDTO;
 import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
 import com.cmsr.onebase.module.system.api.sms.SmsCodeApi;
 import com.cmsr.onebase.module.system.api.sms.dto.code.SmsCodeSendReqDTO;
@@ -35,7 +35,6 @@ import com.cmsr.onebase.module.system.dal.dataobject.permission.RoleDO;
 import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
 import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
 import com.cmsr.onebase.module.system.enums.catcha.SendTypeEnum;
-import com.cmsr.onebase.module.system.enums.config.ConfigTypeEnum;
 import com.cmsr.onebase.module.system.enums.config.SystemConfigKeyEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
 import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
@@ -59,7 +58,6 @@ import com.cmsr.onebase.module.system.service.user.UserAppRelationService;
 import com.cmsr.onebase.module.system.service.user.UserService;
 import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
 import com.cmsr.onebase.module.system.vo.auth.*;
-import com.cmsr.onebase.module.system.vo.config.SystemConfigSearchReqVO;
 import com.cmsr.onebase.module.system.vo.corp.CorpRespVO;
 import com.cmsr.onebase.module.system.vo.user.ThirdSupplementUserReqVO;
 import com.cmsr.onebase.module.system.vo.user.UserAppVO;
@@ -85,10 +83,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.INTERNAL_SERVER_ERROR;
@@ -398,8 +394,8 @@ public class RuntimeAuthServiceImpl implements RuntimeAuthService {
             throw exception(AUTH_VERIFY_THIRD_USER_ERROR);
         }
 
-        AppVersionDTO appVersionDTO = appVersionApi.getAppThirdEnableStatus(appId);
-        if (appVersionDTO == null || CommonStatusEnum.DISABLE.getStatus().equals(appVersionDTO.getAppThirdUserEnable())) {
+        AppNavigationDTO appNavigationDTO = appVersionApi.getAppNavigationRuntime(appId);
+        if (appNavigationDTO == null || CommonStatusEnum.DISABLE.getStatus().equals(appNavigationDTO.getAppThirdUserEnable())) {
             throw exception(AUTH_VERIFY_APPTHIRDUSERENABLE_ERROR);
         }
     }

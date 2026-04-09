@@ -1,33 +1,18 @@
-package com.cmsr.onebase.module.app.runtime.vo.app;
+package com.cmsr.onebase.module.app.build.vo.app;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * @Author：huangjie
- * @Date：2025/12/20 11:23
+ * @Author：matianyu
+ * @Date：2026/4/9
  */
+@Schema(description = "应用管理 - 应用创建/修改 Request VO")
 @Data
-public class AppLeastInfo {
+public class AppConfigUpdateReqVO {
 
-    @Schema(description = "应用Id")
+    @Schema(description = "应用ID")
     private Long id;
-
-    @Schema(description = "图标名称")
-    private String iconName;
-
-    @Schema(description = "图标颜色")
-    private String iconColor;
-
-    @Schema(description = "应用名称")
-    private String appName;
-
-    @Schema(description = "应用描述")
-    private String description;
-
-    @Schema(description = "发布模式")
-    private String publishModel;
-
 
     /**
      * appThirdUserEnable 0-不启用第三方登录 1-启用第三方登录
@@ -50,4 +35,5 @@ public class AppLeastInfo {
      */
     @Schema(description = "登录页主图")
     private String appLoginMainPic;
+
 }
