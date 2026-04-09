@@ -7,6 +7,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { getMenuConfig, platMenuData, type MenuItemType } from '../../../utils/menuData';
 import { useMenuSelection } from '../../../utils/useMenuSelection';
+import { getHiddenMenuKeys } from '../../../hooks/useHideInLingji';
 import styles from './index.module.less';
 
 const { Sider } = Layout;
@@ -30,6 +31,9 @@ const LingjiSider: React.FC<LingjiSiderProps> = ({ className, collapsed = false,
   const finalMenuItems = useMemo(() => platMenuData(menuConfig), [menuConfig]);
   const { selectedKeys, onMenuClick } = useMenuSelection(finalMenuItems, permissionReady);
 
+  // 获取需要隐藏的菜单 key
+  const hiddenMenuKeys = useMemo(() => getHiddenMenuKeys(), []);
+
   const handleCollapseClick = useCallback(() => {
     if (onCollapse) {
       onCollapse(!collapsed);
@@ -42,6 +46,9 @@ const LingjiSider: React.FC<LingjiSiderProps> = ({ className, collapsed = false,
     (items: MenuItemType[]): React.ReactNode => {
       return items
         .map((item) => {
+          // 隐藏指定菜单
+          if (hiddenMenuKeys.includes(item.key)) return null;
+
           const permissionKey = item.permissionKey;
           if (permissionReady && permissionKey && !hasMenu(permissionKey as any)) return null;
 
@@ -85,7 +92,7 @@ const LingjiSider: React.FC<LingjiSiderProps> = ({ className, collapsed = false,
         })
         .filter(Boolean);
     },
-    [collapsed, permissionReady, selectedKeys]
+    [collapsed, permissionReady, selectedKeys, hiddenMenuKeys]
   );
 
   return (
