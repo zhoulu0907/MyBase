@@ -41,6 +41,4 @@ public interface AppApplicationService {
     ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id);
 
     void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO);
-
-    void updateAppLoginConfig(AppConfigUpdateReqVO configUpdateReqVO);
 }

@@ -5,7 +5,6 @@ import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
 import com.cmsr.onebase.module.app.build.service.app.AppApplicationService;
-import com.cmsr.onebase.module.app.build.vo.app.AppConfigUpdateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
@@ -74,14 +73,6 @@ public class AppApplicationController {
     }
 
 
-    @PostMapping("/update-app-login-config")
-    @Operation(summary = "更新应用")
-    @PreAuthorize("@ss.hasPermission('tenant:app:update')")
-    public CommonResult<Boolean> updateAppLoginConfig(@Validated @RequestBody AppConfigUpdateReqVO configUpdateReqVO) {
-        appApplicationService.updateAppLoginConfig(configUpdateReqVO);
-        return CommonResult.success(true);
-    }
-
     @PostMapping("/update-name")
     @Operation(summary = "更新应用名称")
     @PreAuthorize("@ss.hasPermission('tenant:app:update')")
@@ -122,14 +113,14 @@ public class AppApplicationController {
     }
 
     @GetMapping("/get-navigation-config")
-    @Operation(summary = "获取应用导航配置")
+    @Operation(summary = "获取应用登录/导航配置")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
     public CommonResult<ApplicationNavigationConfigVO> getApplicationNavigationConfig(@RequestParam("id") Long id) {
         return CommonResult.success(appApplicationService.getApplicationNavigationConfig(id));
     }
 
     @PostMapping("/update-navigation-config")
-    @Operation(summary = "更新应用导航配置")
+    @Operation(summary = "更新应用登录/导航配置")
     @PreAuthorize("@ss.hasPermission('tenant:app:update')")
     public CommonResult<Boolean> updateApplicationNavigationConfig(
             @Validated @RequestBody ApplicationNavigationConfigVO updateReqVO) {

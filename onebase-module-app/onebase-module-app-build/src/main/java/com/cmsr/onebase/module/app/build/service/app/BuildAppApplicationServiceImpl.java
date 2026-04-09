@@ -458,23 +458,13 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         appNavigationDO.setWebNavLayout(updateReqVO.getWebNavLayout());
         appNavigationDO.setMobileDefaultMenu(updateReqVO.getMobileDefaultMenu());
         appNavigationDO.setMobileNavLayout(updateReqVO.getMobileNavLayout());
+
+        // 登录相关配置
+        appNavigationDO.setAppLoginMainPic(updateReqVO.getAppLoginMainPic());
+        appNavigationDO.setAppThirdUserEnable(updateReqVO.getAppThirdUserEnable());
+        appNavigationDO.setAppUserForgetPwdShow(updateReqVO.getAppUserForgetPwdShow());
+        appNavigationDO.setAppUserRegisterShow(updateReqVO.getAppUserRegisterShow());
         appNavigationRepository.saveOrUpdate(appNavigationDO);
     }
-
-    @Override
-    public void updateAppLoginConfig(AppConfigUpdateReqVO configUpdateReqVO) {
-        AppNavigationDO appNavigationDO = appNavigationRepository.findByApplicationIdAndVersionTag(configUpdateReqVO.getId(), VersionTagEnum.BUILD.getValue());
-        if (appNavigationDO == null) {
-            appNavigationDO = new AppNavigationDO();
-        }
-        appNavigationDO.setApplicationId(configUpdateReqVO.getId());
-        appNavigationDO.setVersionTag(VersionTagEnum.BUILD.getValue());
-        appNavigationDO.setAppLoginMainPic(configUpdateReqVO.getAppLoginMainPic());
-        appNavigationDO.setAppThirdUserEnable(configUpdateReqVO.getAppThirdUserEnable());
-        appNavigationDO.setAppUserForgetPwdShow(configUpdateReqVO.getAppUserForgetPwdShow());
-        appNavigationDO.setAppUserRegisterShow(configUpdateReqVO.getAppUserRegisterShow());
-        appNavigationRepository.saveOrUpdate(appNavigationDO);
-    }
-
 
 }
