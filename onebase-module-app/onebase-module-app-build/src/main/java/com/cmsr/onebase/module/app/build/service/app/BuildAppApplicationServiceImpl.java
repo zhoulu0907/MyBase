@@ -1,23 +1,5 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
-import com.cmsr.onebase.module.app.core.enums.app.DevelopStatusEnum;
-import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
-import com.cmsr.onebase.module.system.api.dict.DictDataApi;
-import jakarta.annotation.Resource;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.validation.annotation.Validated;
-
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
@@ -33,6 +15,7 @@ import com.cmsr.onebase.module.app.build.service.version.AppDataManager;
 import com.cmsr.onebase.module.app.build.util.AppUtils;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
+import com.cmsr.onebase.module.app.build.vo.app.ApplicationSimpleRespVO;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppApplicationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.app.AppNavigationRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthRoleRepository;
@@ -45,6 +28,7 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppVersionDO;
 import com.cmsr.onebase.module.app.core.enums.AppErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.app.AppPublishEnum;
 import com.cmsr.onebase.module.app.core.enums.app.AppStatusEnum;
+import com.cmsr.onebase.module.app.core.enums.app.DevelopStatusEnum;
 import com.cmsr.onebase.module.app.core.vo.app.AppUserPhotoDTO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
@@ -57,13 +41,30 @@ import com.cmsr.onebase.module.metadata.api.datasource.MetadataDatasourceApi;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceCreateDefaultReqDTO;
 import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
-
+import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
+import com.cmsr.onebase.module.system.api.dict.DictDataApi;
+import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.validation.annotation.Validated;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @Author：huangjie
- *                  @Date：2025/7/23 17:11
+ * @Date：2025/7/23 17:11
  */
 @Setter
 @Service
@@ -71,9 +72,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
-    public static final String APP = "app";
+    public static final String       APP = "app";
     @Autowired
-    private UidGenerator uidGenerator;
+    private             UidGenerator uidGenerator;
 
     @Autowired
     private AppApplicationRepository applicationRepository;
@@ -456,6 +457,12 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         appNavigationDO.setWebNavLayout(updateReqVO.getWebNavLayout());
         appNavigationDO.setMobileDefaultMenu(updateReqVO.getMobileDefaultMenu());
         appNavigationDO.setMobileNavLayout(updateReqVO.getMobileNavLayout());
+
+        // 登录相关配置
+        appNavigationDO.setAppLoginMainPic(updateReqVO.getAppLoginMainPic());
+        appNavigationDO.setAppThirdUserEnable(updateReqVO.getAppThirdUserEnable());
+        appNavigationDO.setAppUserForgetPwdShow(updateReqVO.getAppUserForgetPwdShow());
+        appNavigationDO.setAppUserRegisterShow(updateReqVO.getAppUserRegisterShow());
         appNavigationRepository.saveOrUpdate(appNavigationDO);
     }
 

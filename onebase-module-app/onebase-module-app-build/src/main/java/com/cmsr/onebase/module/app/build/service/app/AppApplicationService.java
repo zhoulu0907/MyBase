@@ -1,7 +1,5 @@
 package com.cmsr.onebase.module.app.build.service.app;
 
-import java.util.List;
-
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateReqVO;
 import com.cmsr.onebase.module.app.build.vo.app.ApplicationCreateRespVO;
@@ -10,6 +8,8 @@ import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationNavigationConfigVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationPageReqVO;
 import com.cmsr.onebase.module.app.core.vo.app.ApplicationRespVO;
+
+import java.util.List;
 
 /**
  * @Author：huangjie
@@ -40,5 +40,4 @@ public interface AppApplicationService {
     ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id);
 
     void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO);
-
 }
