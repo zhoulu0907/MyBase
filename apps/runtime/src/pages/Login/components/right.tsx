@@ -4,10 +4,8 @@ import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import { appInfoSignal } from '@/store/app';
 import { Button, Checkbox, Form, Input, Message, Space, Typography } from '@arco-design/web-react';
 import { IconLock, IconMobile, IconUser } from '@arco-design/web-react/icon';
-import { getApplicationLeast } from '@onebase/app';
 import {
   getHashQueryParam,
-  getHashTenantIdAndAppId,
   getOrCreateDeviceInfo,
   getPublicKey,
   PUBLISH_MODULE,
@@ -39,62 +37,39 @@ import styles from '../index.module.less';
 
 const { Paragraph } = Typography;
 
-/**
- * 运行态登录一共有三种模式
-1.企业登录（手机号 + 密码）仅需传递tenantId.
-2.空间应用saas模式登录 （手机号 + 密码） 需传递appId+ tenantId
-3.空间应用inner模式登录（账号+ 密码） 需传递appId+ tenantId
-4.原本的登录模式（账号+密码） 需传递appId
- * @returns
- */
+interface RightProps {
+  appInfo: any;
+  appId: string;
+  tenantId: string;
+}
 
-const Right: React.FC = () => {
+const Right: React.FC<RightProps> = ({ appInfo, appId, tenantId }) => {
   useSignals();
 
-  const { curAppInfo, setCurAppInfo } = appInfoSignal;
+  const { setCurAppInfo } = appInfoSignal;
 
   const navigate = useNavigate();
   const [form] = Form.useForm();
   const { t } = useI18n();
   const sliderCaptchaRef = useRef<SliderCaptchaRef>(null);
 
-  const [appId, setAppId] = useState('');
-  const [tenantId, setTenantId] = useState('');
-
   const isDev = useIsRuntimeDev();
 
   useEffect(() => {
-    // 从 window.location.hash 中解析 redirectURL，再从 redirectURL 解析 appId 和 tenantId
-    getHashTenantIdAndAppId(setTenantId, setAppId);
-  }, []);
+    if (appInfo) {
+      setCurAppInfo(appInfo);
+    }
+  }, [appInfo]);
 
-  // 使用记住我hook
   const { rememberMe, savedAccount, saveRememberMe } = useRememberMe();
 
-  // 状态管理
   const [loading, setLoading] = useState(false);
 
-  // 组件初始化时设置保存的账号
   useEffect(() => {
     if (savedAccount) {
       form.setFieldValue('account', savedAccount);
     }
   }, []);
-
-  useEffect(() => {
-    if (appId) {
-      handleGetApplication();
-    }
-  }, [appId]);
-
-  const handleGetApplication = async () => {
-    if (appId) {
-      const res = await getApplicationLeast({ id: appId });
-      if (res) {
-        setCurAppInfo(res);
-      }
-    }
-  };
 
   // 处理记住我状态变化
   const handleRememberMeChange = (checked: boolean) => {
@@ -129,7 +104,7 @@ const Right: React.FC = () => {
         values.password = await sm2Encrypt(getPublicKey(), values.password);
       }
 
-      if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
+      if (appInfo?.publishModel === PUBLISH_MODULE.SASS) {
         const sassloginData: RuntimeMobileLoginRequest = {
           password: values.password!,
           mobile: (values as RuntimeMobileLoginRequest).mobile!,
@@ -139,7 +114,7 @@ const Right: React.FC = () => {
         };
 
         response = await sassLogin(sassloginData, headers);
-      } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
+      } else if (appInfo?.publishModel === PUBLISH_MODULE.INNER) {
         const innerloginData: RuntimeAccountLoginRequest = {
           password: values.password!,
           username: (values as RuntimeAccountLoginRequest).username!,
@@ -197,9 +172,9 @@ const Right: React.FC = () => {
         );
 
         // 保存记住我状态和账号信息
-        if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
+        if (appInfo?.publishModel === PUBLISH_MODULE.INNER) {
           saveRememberMe((values as RuntimeAccountLoginRequest).username!, rememberMe);
-        } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
+        } else if (appInfo?.publishModel === PUBLISH_MODULE.SASS) {
           saveRememberMe((values as RuntimeMobileLoginRequest).mobile!, rememberMe);
         } else if (!appId) {
           saveRememberMe((values as RuntimeCorpLoginRequest).mobile!, rememberMe);
@@ -250,14 +225,14 @@ const Right: React.FC = () => {
 
     const deviceId = await getOrCreateDeviceInfo();
 
-    if (curAppInfo.value.publishModel === PUBLISH_MODULE.SASS) {
+    if (appInfo?.publishModel === PUBLISH_MODULE.SASS) {
       handleSubmit({
         mobile: values.mobile,
         password: values.password,
         captchaVerification: token,
         deviceId: deviceId
       } as RuntimeMobileLoginRequest);
-    } else if (curAppInfo.value.publishModel === PUBLISH_MODULE.INNER) {
+    } else if (appInfo?.publishModel === PUBLISH_MODULE.INNER) {
       handleSubmit({
         username: values.username,
         password: values.password,
@@ -298,22 +273,22 @@ const Right: React.FC = () => {
   return (
     <div className={styles.loginPageRight}>
       <div className={styles.loginFormContainer}>
-        {curAppInfo.value.iconName && (
+        {appInfo?.iconName && (
           <div className={styles.appInfo}>
             <div
               className={styles.appIcon}
               style={{
-                background: curAppInfo.value.iconColor || 'transparent'
+                background: appInfo.iconColor || 'transparent'
               }}
             >
               <DynamicIcon
-                IconComponent={appIconMap[curAppInfo.value.iconName as keyof typeof appIconMap]}
+                IconComponent={appIconMap[appInfo.iconName as keyof typeof appIconMap]}
                 theme="outline"
                 size="40"
                 fill="#F2F3F5"
               />
             </div>
-            <div className={styles.appName}>{curAppInfo.value.appName}</div>
+            <div className={styles.appName}>{appInfo.appName}</div>
           </div>
         )}
         <h1 className={styles.title}>欢迎登录</h1>
@@ -326,7 +301,7 @@ const Right: React.FC = () => {
           requiredSymbol={false}
           className={styles.loginForm}
         >
-          {((curAppInfo.value.publishModel === PUBLISH_MODULE.SASS || !appId) && (
+          {((appInfo?.publishModel === PUBLISH_MODULE.SASS || !appId) && (
             <Form.Item label="手机号" field="mobile" rules={[{ required: true, message: '请输入手机号' }]}>
               <Input placeholder="输入手机号" maxLength={11} prefix={<IconMobile />} />
             </Form.Item>
