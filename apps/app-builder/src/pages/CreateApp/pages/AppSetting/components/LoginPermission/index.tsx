@@ -1,16 +1,16 @@
 //登录设置
 import loginBg from '@/assets/images/login_bg.svg';
 import loginBgMask from '@/assets/images/login_bg_mask.svg';
-import { Button, Card, Radio, Space, Spin, Switch, Typography } from '@arco-design/web-react';
+import { useAppStore } from '@/store';
+import { Button, Card, Radio, Space, Spin, Switch, Typography, Message } from '@arco-design/web-react';
 import { IconRefresh, IconUpload } from '@arco-design/web-react/icon';
 import { getRuntimeMobileURL, getRuntimeURL, TokenManager, UploadCommonComponent } from '@onebase/common';
 import {
-  loginConfigListByKeyApi,
-  updateLoginConfigApi,
-  uploadFile,
-  type loginPermissionRes,
-  type updateLoginConfigParams
-} from '@onebase/platform-center';
+  getAppNavigationConfig,
+  updateAppNavigationConfig,
+  type GetAppNavigationConfigRes
+} from '@onebase/app';
+import { uploadFile } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import { thirdUserConfigKey } from './constant';
 import ExternalLoginLinks from './ExternalLoginLinks';
@@ -26,64 +26,85 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [imageUrl, setImageUrl] = useState<string>('');
   const tenantId = TokenManager.getTenantInfo()?.tenantId || '';
-  const [loginConfigData, setLoginConfigData] = useState<loginPermissionRes[] | null>(null);
+  const [configData, setConfigData] = useState<GetAppNavigationConfigRes | null>(null);
   const redirectURL = `${getRuntimeURL()}/#/onebase/${tenantId}/${appId}/runtime/`;
   const hrefPC = `${getRuntimeURL()}/#/third/login?redirectURL=${redirectURL}`;
   const hrefMobile = `${getRuntimeMobileURL()}/#/third/login?redirectURL=${redirectURL}`;
 
-  const fetchLoginConfig = async () => {
+  const fetchConfig = async () => {
     try {
       setLoading(true);
-      const configKeys = [thirdUserConfigKey.ENABLE, thirdUserConfigKey.REGISTER_SHOW, thirdUserConfigKey.FORGOT_PWD];
-      const params = {
-        appId,
-        configKeys
-      };
-      const res = await loginConfigListByKeyApi(params);
-      setLoginConfigData(res);
+      const res = await getAppNavigationConfig({ id: appId });
+      setConfigData(res);
+      if (res.appLoginMainPic) {
+        setImageUrl(res.appLoginMainPic);
+      }
     } catch (error) {
+      console.error('获取配置失败:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLoginConfig();
+    fetchConfig();
   }, []);
 
   const navigateToRunTime = (text: string) => {
     window.open(text);
   };
 
-  const updateLoginSettings = async (configKey: string, configValue: string) => {
+  const updateConfig = async (params: Partial<GetAppNavigationConfigRes>) => {
     try {
-      const params: updateLoginConfigParams = {
-        appId: appId,
-        configKey: configKey,
-        configValue: configValue
-      };
-      await updateLoginConfigApi(params);
+      setLoading(true);
+      await updateAppNavigationConfig({
+        id: appId,
+        ...params
+      });
+      Message.success('保存成功');
+      await fetchConfig();
     } catch (error) {
-      console.log('error');
+      console.error('更新配置失败:', error);
+      Message.error('保存失败');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSwitchChange = async (key: string, value: string) => {
-    await updateLoginSettings(key, value);
-    await fetchLoginConfig();
+  const handleSwitchChange = async (key: string, value: boolean) => {
+    const valueStr = value ? '1' : '0';
+    await updateConfig({ [key]: valueStr });
   };
 
-  const getEachConfigValue = (type: string) => {
-    const targetConfig = loginConfigData?.find((item) => item.configKey === type);
-    return targetConfig ? targetConfig.configValue : 'false';
+  const handleImageUpload = async (formData: FormData, onProgress?: (progressEvent: ProgressEvent) => void) => {
+    try {
+      const res = await uploadFile(formData, onProgress);
+      if (res) {
+        await updateConfig({ appLoginMainPic: res });
+        setImageUrl(res.id);
+      }
+      return res.id;
+    } catch (error) {
+      console.error('上传图片失败:', error);
+      Message.error('上传图片失败');
+      return '';
+    }
+  };
+
+  const handleResetImage = async () => {
+    await updateConfig({ appLoginMainPic: '' });
+    setImageUrl(loginBgMask);
+  };
+
+  const getConfigValue = (key: keyof GetAppNavigationConfigRes) => {
+    return configData?.[key] || '0';
   };
 
   const convertStrToBoolean = (value: string) => {
-    const newValue = value === 'true' ? true : false;
-    return newValue;
+    return value === '1';
   };
 
-  const canShowURL = convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.ENABLE) || '');
+  const canShowURL = convertStrToBoolean(getConfigValue('appThirdUserEnable'));
 
   return (
     <Spin loading={loading} style={{ width: '100%' }}>
@@ -96,7 +117,7 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
             <Switch
               size="small"
               onChange={(value: boolean) => {
-                handleSwitchChange(thirdUserConfigKey.ENABLE, JSON.stringify(value));
+                handleSwitchChange('appThirdUserEnable', value);
               }}
               checked={canShowURL}
             />
@@ -118,8 +139,8 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
               <div className={styles.loginPageRight}>
                 <LoginForm
                   appId={appId}
-                  showRegister={convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.REGISTER_SHOW) || '')}
-                  showForgotPWD={convertStrToBoolean(getEachConfigValue(thirdUserConfigKey.FORGOT_PWD) || '')}
+                  showRegister={convertStrToBoolean(getConfigValue('appUserRegisterShow'))}
+                  showForgotPWD={convertStrToBoolean(getConfigValue('appUserForgetPwdShow'))}
                 />
               </div>
             </div>
@@ -140,7 +161,7 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
                 imagePreview={true}
                 onUpdateUrl={setImageUrl}
                 uploadRef={uploadRef}
-                getUploadFile={uploadFile}
+                getUploadFile={handleImageUpload}
               />
               <>
                 <Space direction="horizontal">
@@ -157,9 +178,7 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
                     type="default"
                     icon={<IconRefresh />}
                     style={{ marginLeft: 8 }}
-                    onClick={() => {
-                      setImageUrl(loginBgMask);
-                    }}
+                    onClick={handleResetImage}
                   >
                     重置
                   </Button>
@@ -176,21 +195,21 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
               注册入口
             </Typography.Text>
             <Radio.Group
-              value={getEachConfigValue(thirdUserConfigKey.REGISTER_SHOW)}
-              onChange={handleSwitchChange.bind(null, thirdUserConfigKey.REGISTER_SHOW)}
+              value={getConfigValue('appUserRegisterShow')}
+              onChange={(value: string) => handleSwitchChange('appUserRegisterShow', value === '1')}
             >
-              <Radio value="true">显示</Radio>
-              <Radio value="false">隐藏</Radio>
+              <Radio value="1">显示</Radio>
+              <Radio value="0">隐藏</Radio>
             </Radio.Group>
 
             {/* 忘记密码入口配置 */}
             <Typography.Text className={styles.rightText}>忘记密码入口</Typography.Text>
             <Radio.Group
-              value={getEachConfigValue(thirdUserConfigKey.FORGOT_PWD)}
-              onChange={handleSwitchChange.bind(null, thirdUserConfigKey.FORGOT_PWD)}
+              value={getConfigValue('appUserForgetPwdShow')}
+              onChange={(value: string) => handleSwitchChange('appUserForgetPwdShow', value === '1')}
             >
-              <Radio value="true">显示</Radio>
-              <Radio value="false">隐藏</Radio>
+              <Radio value="1">显示</Radio>
+              <Radio value="0">隐藏</Radio>
             </Radio.Group>
           </div>
         </div>
