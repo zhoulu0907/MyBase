@@ -1,3 +1,14 @@
+/**
+ * 天工 OAuth 回调组件
+ * @deprecated 此文件已废弃，请使用 @onebase/product-tiangong 包中的 TiangongOAuthCallback 组件
+ * import { TiangongOAuthCallback } from '@onebase/product-tiangong';
+ */
+
+console.warn(
+  '[DEPRECATED] pages/OAuthCallback 已废弃，请使用 @onebase/product-tiangong 包。\n' +
+  '新用法: import { TiangongOAuthCallback } from "@onebase/product-tiangong";'
+);
+
 import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -13,20 +24,19 @@ const OAuthCallback: React.FC = () => {
   const processedRef = useRef(false);
 
   useEffect(() => {
-    // 确保登录逻辑只执行一次
     if (!processedRef.current) {
       processedRef.current = true;
 
       const handleOAuthCallback = async () => {
         const code = searchParams.get('code');
+        const state = searchParams.get('state');
+        
         if (code) {
           try {
-            // 获取设备ID
             const deviceId = await getOrCreateDeviceInfo();
 
             const response = await tiangongLogin({ code, deviceId });
             if (response && response.accessToken) {
-              // 先设置当前身份ID，再设置token
               TokenManager.setCurIdentifyId(response.tenantId);
               
               TokenManager.setToken({
@@ -39,11 +49,9 @@ const OAuthCallback: React.FC = () => {
                 loginURL: window.location.href
               }, true);
 
-              // 获取并设置用户权限信息
               try {
                 const permissionInfo = await getPermissionInfo(CodeType.TENANT);
                 UserPermissionManager.setUserPermissionInfo(permissionInfo);
-                // 同时设置到信号中
                 import('@/store/singals/user_permission').then(({ userPermissionSignal }) => {
                   userPermissionSignal.setPermissionInfo(permissionInfo);
                 });
@@ -51,24 +59,34 @@ const OAuthCallback: React.FC = () => {
                 console.error('获取权限信息失败:', error);
               }
 
-              navigate(`/onebase/${response.tenantId}/home/enterprise-app`);
+              if (state) {
+                try {
+                  const redirectPath = atob(decodeURIComponent(state));
+                  navigate(redirectPath, { replace: true });
+                } catch (error) {
+                  console.error('解析state失败:', error);
+                  navigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
+                }
+              } else {
+                navigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
+              }
             }
           } catch (error) {
             console.error('天工登录失败:', error);
             if ((error as any)?.response?.status !== 302) {
               Message.error((error as any)?.message || t('oauth.callback.loginFailed'));
-              navigate('/login');
+              navigate('/login', { replace: true });
             }
           }
         } else {
           Message.error(t('oauth.callback.codeMissing'));
-          navigate('/login');
+          navigate('/login', { replace: true });
         }
       };
 
       handleOAuthCallback();
     }
-  }, []); // 空依赖数组，确保只执行一次
+  }, []);
 
   return (
     <div className={styles.callbackContainer}>

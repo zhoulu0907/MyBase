@@ -1,9 +1,10 @@
 import { type EntityNode } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
-import { Collapse, Empty, Spin } from '@arco-design/web-react';
+import { Collapse, Spin } from '@arco-design/web-react';
 import React, { useEffect, useState } from 'react';
 import { getEntityRelations } from '@onebase/app';
 import { ALL_RELATIONSHIP_TYPE_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import styles from './Relations.module.less';
+import EmptyState from '@/components/EmptyState';
 
 // 数据方法接口定义
 interface DataRelation {
@@ -71,7 +72,7 @@ const DataMethods: React.FC<DataMethodsProps> = ({ node }) => {
             <span>加载中...</span>
           </div>
         ) : relations.length === 0 ? (
-          <Empty description="暂无关联关系" />
+          <EmptyState type="table" description="暂无关联关系" />
         ) : (
           <Collapse
             expandIconPosition="right"

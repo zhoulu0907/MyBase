@@ -32,7 +32,7 @@ const defaultGroupConfig: QuickEntryGroupConfig = {
 };
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detailMode?: boolean }) => {
-  const { id, status, width, titleConfig, styleConfig, groupConfig, runtime } = props;
+  const { id, status, label, width, titleConfig, styleConfig, groupConfig, runtime } = props;
 
   const finalTitleConfig = titleConfig || defaultTitleConfig;
   const finalStyleConfig = styleConfig || defaultStyleConfig;
@@ -237,10 +237,10 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; detail
       className={`${styles.quickEntry} ${themeClass ? themeClassMap[themeClass] || '' : ''}`}
       style={containerStyle}
     >
-      {(finalTitleConfig?.showTitle || finalTitleConfig?.showMore) && (
+      {(label?.display || finalTitleConfig?.showMore) && (
         <div className={styles.quickEntryHeader}>
-          {finalTitleConfig?.showTitle && (
-            <span className={styles.quickEntryHeaderTitle}>{finalTitleConfig?.titleName || '快捷入口'}</span>
+          {label?.display && (
+            <span className={styles.quickEntryHeaderTitle}>{label?.text}</span>
           )}
           {finalTitleConfig?.showMore && (
             <span className={styles.quickEntryMore} onClick={() => handleClickMore()} >

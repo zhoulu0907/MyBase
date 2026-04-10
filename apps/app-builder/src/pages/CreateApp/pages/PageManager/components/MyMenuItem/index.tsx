@@ -1,5 +1,8 @@
-import CreateGroupIcon from '@/assets/images/addfolder.svg';
-import CreatePageIcon from '@/assets/images/addpage.svg';
+import CreateGroupIcon from '@/assets/images/create_group_icon.svg';
+import CreateNormalPageIcon from '@/assets/images/create_normal_page_icon.svg';
+import CreateBpmPageIcon from '@/assets/images/create_bpm_page_icon.svg';
+import CreateWorkbenchIcon from '@/assets/images/create_workbench_icon.svg';
+import CreateScreenIcon from '@/assets/images/create_screen_icon.svg';
 import DeleteMenuIcon from '@/assets/images/app_delete.svg';
 import CopyIcon from '@/assets/images/copy_comp_icon.svg';
 import EditIcon from '@/assets/images/edit_menu_icon.svg';
@@ -7,9 +10,11 @@ import RenameIcon from '@/assets/images/edit_page_name_icon.svg';
 import HiddenIcon from '@/assets/images/eye_off_icon.svg';
 import VisibleIcon from '@/assets/images/eye_on_icon.svg';
 import { useAppStore } from '@/store';
-import { Dropdown, Menu, Message, Tooltip, type FormInstance } from '@arco-design/web-react';
+import { Dropdown, Menu, Message, Tooltip, Divider, type FormInstance } from '@arco-design/web-react';
 import { IconEyeInvisible, IconMoreVertical, IconSettings } from '@arco-design/web-react/icon';
 import {
+  CREATE_MENU_CATEGORIES,
+  CreateMenuCategoryLabelMap,
   getPageSetId,
   menuSignal,
   MenuType,
@@ -18,6 +23,7 @@ import {
   VisibleType,
   TASKMENU_TYPE,
   type ApplicationMenu,
+  type CreateMenuCategory,
   type GetPageSetIdReq
 } from '@onebase/app';
 import { EDITOR_TYPES, webMenuIcons } from '@onebase/ui-kit';
@@ -54,7 +60,7 @@ interface MenuItemProps {
   menuType?: number;
   pagesetType: number;
   onClick?: () => void;
-  triggerCreate?: (formType: string) => void;
+  triggerCreate?: (formType: CreateMenuCategory, pageSetType?: PageType) => void;
   triggerRename?: () => void;
   triggerCopy?: () => void;
   triggerHide?: (menuID: string, isVisible: number, platform: 'pc' | 'mobile') => void;
@@ -111,6 +117,39 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
     { key: TASKMENU_TYPE.TASKTASKPROXY, value: taskproxySvg }
   ];
 
+  const groupCreateMenus = [
+    {
+      key: 'createNormalPage',
+      formType: CREATE_MENU_CATEGORIES.NORMAL_FORM,
+      label: CreateMenuCategoryLabelMap[CREATE_MENU_CATEGORIES.NORMAL_FORM],
+      icon: CreateNormalPageIcon
+    },
+    {
+      key: 'createBpmPage',
+      formType: CREATE_MENU_CATEGORIES.BPM_FORM,
+      label: CreateMenuCategoryLabelMap[CREATE_MENU_CATEGORIES.BPM_FORM],
+      icon: CreateBpmPageIcon
+    },
+    {
+      key: 'createWorkbench',
+      formType: CREATE_MENU_CATEGORIES.WORKBENCH,
+      label: CreateMenuCategoryLabelMap[CREATE_MENU_CATEGORIES.WORKBENCH],
+      icon: CreateWorkbenchIcon
+    },
+    {
+      key: 'createScreen',
+      formType: CREATE_MENU_CATEGORIES.SCREEN,
+      label: CreateMenuCategoryLabelMap[CREATE_MENU_CATEGORIES.SCREEN],
+      icon: CreateScreenIcon
+    },
+    {
+      key: 'createGroup',
+      formType: CREATE_MENU_CATEGORIES.GROUP,
+      label: CreateMenuCategoryLabelMap[CREATE_MENU_CATEGORIES.GROUP],
+      icon: CreateGroupIcon
+    }
+  ] as const;
+
   const dropList = (
     <Menu style={{ padding: '10px 5px', maxHeight: 'none' }}>
       {!isGroup && (
@@ -144,37 +183,6 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           重命名
         </MenuItem>
       )}
-      <MenuItem
-        className={styles.menuContent}
-        key="visible"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerHide && triggerHide(menuID, isVisiblePc, 'pc');
-        }}
-      >
-        {isVisiblePc === VisibleType.HIDDEN ? (
-          <img src={VisibleIcon} alt="隐藏web端" />
-        ) : (
-          <img src={HiddenIcon} alt="取消隐藏web端" />
-        )}
-        {isVisiblePc === VisibleType.HIDDEN ? '取消隐藏web端' : '隐藏web端'}
-      </MenuItem>
-      <MenuItem
-        className={styles.menuContent}
-        key="visible"
-        onClick={(e) => {
-          e.stopPropagation();
-          triggerHide && triggerHide(menuID, isVisibleMobile, 'mobile');
-        }}
-      >
-        {isVisibleMobile === VisibleType.HIDDEN ? (
-          <img src={VisibleIcon} alt="隐藏移动端" />
-        ) : (
-          <img src={HiddenIcon} alt="取消隐藏移动端" />
-        )}
-        {isVisibleMobile === VisibleType.HIDDEN ? '取消隐藏移动端' : '隐藏移动端'}
-      </MenuItem>
-
       {!isGroup && copyForm && triggerCopy && (
         <MenuItem
           className={styles.menuContent}
@@ -191,37 +199,62 @@ const MyMenuItem: React.FC<MenuItemProps> = ({
           复制
         </MenuItem>
       )}
-      {isGroup && createForm && triggerCreate && (
-        <MenuItem
-          className={styles.menuContent}
-          key="createPage"
-          onClick={(e) => {
-            e.stopPropagation();
-            triggerCreate('page');
 
-            createForm.setFieldValue('parentId', menuID);
-          }}
-        >
-          <img src={CreatePageIcon} alt="新建页面" />
-          新建页面
-        </MenuItem>
-      )}
+      <Divider className={styles.divider} />
 
-      {isGroup && createForm && triggerCreate && (
-        <MenuItem
-          className={styles.menuContent}
-          key="createGroup"
-          onClick={(e) => {
-            e.stopPropagation();
-            triggerCreate('group');
+      <MenuItem
+        className={styles.menuContent}
+        key="visible-web"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerHide && triggerHide(menuID, isVisiblePc, 'pc');
+        }}
+      >
+        {isVisiblePc === VisibleType.HIDDEN ? (
+          <img src={VisibleIcon} alt="隐藏web端" />
+        ) : (
+          <img src={HiddenIcon} alt="取消隐藏web端" />
+        )}
+        {isVisiblePc === VisibleType.HIDDEN ? '取消隐藏web端' : '隐藏web端'}
+      </MenuItem>
+      <MenuItem
+        className={styles.menuContent}
+        key="visible-mobile"
+        onClick={(e) => {
+          e.stopPropagation();
+          triggerHide && triggerHide(menuID, isVisibleMobile, 'mobile');
+        }}
+      >
+        {isVisibleMobile === VisibleType.HIDDEN ? (
+          <img src={VisibleIcon} alt="隐藏移动端" />
+        ) : (
+          <img src={HiddenIcon} alt="取消隐藏移动端" />
+        )}
+        {isVisibleMobile === VisibleType.HIDDEN ? '取消隐藏移动端' : '隐藏移动端'}
+      </MenuItem>
 
-            createForm.setFieldValue('parentId', menuID);
-          }}
-        >
-          <img src={CreateGroupIcon} alt="新建分组" />
-          新建分组
-        </MenuItem>
-      )}
+      {isGroup && menuType !== MenuType.BPM && <Divider className={styles.divider} />}
+
+      {isGroup &&
+        createForm &&
+        triggerCreate &&
+        groupCreateMenus.map((menu) => (
+          <MenuItem
+            className={styles.menuContent}
+            key={menu.key}
+            onClick={(e) => {
+              e.stopPropagation();
+              triggerCreate(menu.formType);
+              createForm.setFieldValue('parentId', menuID);
+            }}
+          >
+            <img src={menu.icon} alt={menu.label} />
+            {menu.label}
+          </MenuItem>
+        ))}
+
+      {triggerDelete && <Divider className={styles.divider} />}
+
       {triggerDelete && (
         <MenuItem
           className={styles.menuContent}

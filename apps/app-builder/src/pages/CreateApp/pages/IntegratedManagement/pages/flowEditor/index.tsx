@@ -1,6 +1,7 @@
+import ResizableTable from '@/components/ResizableTable';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { triggerNodeOutputSignal } from '@/store/singals/trigger_node_output';
-import { Button, Input, Modal, Select, Switch, Table, Tabs, Message } from '@arco-design/web-react';
+import { Button, Input, Modal, Select, Switch, Tabs, Message } from '@arco-design/web-react';
 import { useAppStore } from '@/store';
 import { IconArrowLeft } from '@arco-design/web-react/icon';
 import { ProcessStatus, updateFlowMgmtDefinition } from '@onebase/app';
@@ -194,7 +195,7 @@ const FlowEditorPage: React.FC = () => {
                 添加一行
               </Button>
             </div>
-            <Table
+            <ResizableTable
               data={draftInputs}
               pagination={false}
               size="small"
@@ -293,7 +294,7 @@ const FlowEditorPage: React.FC = () => {
                 添加一行
               </Button>
             </div>
-            <Table
+            <ResizableTable
               data={draftOutputs}
               pagination={false}
               size="small"

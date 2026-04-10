@@ -1,3 +1,4 @@
+import ActionButtons from '@/components/ActionButtons';
 import { Divider, Button, Popconfirm } from '@arco-design/web-react';
 import styles from './index.module.less';
 import dayjs from 'dayjs';
@@ -98,27 +99,23 @@ export const getVersionColumns = (
   {
     key: 'operation',
     title: '操作',
+    width: 150,
     render: (_, record) => (
-      <div>
+      <ActionButtons>
         <Button type="text" status="success" onClick={() => handleView(record)}>
           查看
         </Button>
-        <Divider type="vertical" />
         <Button type="text" status="success" onClick={() => handleEditRemark(record)}>
           修改备注
         </Button>
-
         {record.bpmVersionStatus !== VersionStatus.PUBLISHED && (
-          <>
-            <Popconfirm title="确定要删除此流程版本吗？" onOk={() => handleDelete(record)} focusLock>
-              <Divider type="vertical" />
-              <Button type="text" status="warning">
-                删除
-              </Button>
-            </Popconfirm>
-          </>
+          <Popconfirm title="确定要删除此流程版本吗？" onOk={() => handleDelete(record)} focusLock>
+            <Button type="text" status="warning">
+              删除
+            </Button>
+          </Popconfirm>
         )}
-      </div>
+      </ActionButtons>
     )
   }
 ];

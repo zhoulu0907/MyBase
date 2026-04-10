@@ -1,7 +1,10 @@
+import ActionButtons from '@/components/ActionButtons';
 import { PermissionButton as Button } from '@/components/PermissionControl';
 import PlaceholderPanel from '@/components/PlaceholderPanel';
+import ResizableTable from '@/components/ResizableTable';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { listToTree } from '@/utils/tree';
-import { Input, Message, Modal, Space, Table } from '@arco-design/web-react';
+import { Input, Message, Space } from '@arco-design/web-react';
 import { IconCaretDown, IconCaretRight, IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import { TENANT_DEPT_PERMISSION as ACTIONS, hasAnyPermission, hasPermission } from '@onebase/common';
 import { createDept, deleteDept, getDeptList, updateDept, type DeptForm, type DeptVO } from '@onebase/platform-center';
@@ -20,6 +23,8 @@ const OrganizationPage: React.FC = () => {
   const [editRecord, setEditRecord] = useState<any>(null);
   const [isSubDept, setIsSubDept] = useState<boolean>(false); // 子部门
   const [modalType, setModalType] = useState<'create' | 'edit'>(); // 子部门
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<DeptVO | null>(null);
 
   const columns = [
     {
@@ -51,9 +56,9 @@ const OrganizationPage: React.FC = () => {
     {
       title: '操作',
       dataIndex: 'operations',
-      width: 242,
+      width: 240,
       render: (_: any, record: any) => (
-        <Space size="mini">
+        <ActionButtons>
           <Button permission={ACTIONS.SUB_DEPT} type="text" onClick={(e) => handleAddSubDepart(e, record)}>
             添加子部门
           </Button>
@@ -63,7 +68,7 @@ const OrganizationPage: React.FC = () => {
           <Button permission={ACTIONS.DELETE} type="text" onClick={(e) => handleDelete(e, record)}>
             删除
           </Button>
-        </Space>
+        </ActionButtons>
       )
     }
   ];
@@ -92,21 +97,16 @@ const OrganizationPage: React.FC = () => {
 
   const handleDelete = (e: any, record: DeptVO) => {
     e.stopPropagation();
-    Modal.confirm({
-      title: `确认要删除部门（${record.name}）吗？`,
-      content: '删除部门后，该部门下的用户将转移到其他部门，请谨慎操作。',
-      okText: '确认',
-      cancelText: '取消',
-      okButtonProps: {
-        status: 'danger'
-      },
-      onOk: async () => {
-        deleteDept(record.id).then(() => {
-          Message.success('删除成功');
-          fetchDeptList(searchValue);
-        });
-      }
-    });
+    setDeleteTarget(record);
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await deleteDept(deleteTarget.id);
+    Message.success('删除成功');
+    setDeleteModalVisible(false);
+    fetchDeptList(searchValue);
   };
 
   const handleAdd = () => {
@@ -186,7 +186,7 @@ const OrganizationPage: React.FC = () => {
         </Button>
       </div>
       <PlaceholderPanel hasPermission={hasPermission(ACTIONS.QUERY)}>
-        <Table
+        <ResizableTable
           loading={loading}
           columns={filteredColumns}
           data={data}
@@ -214,6 +214,13 @@ const OrganizationPage: React.FC = () => {
         initialValues={editRecord || undefined}
         isSubDept={isSubDept}
         modalType={modalType}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
+        title={deleteTarget ? `确认要删除部门（${deleteTarget.name}）吗？` : '确认删除'}
+        content="删除部门后，该部门下的用户将转移到其他部门，请谨慎操作。"
       />
     </div>
   );

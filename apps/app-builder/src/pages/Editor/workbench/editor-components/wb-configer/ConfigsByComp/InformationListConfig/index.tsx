@@ -24,7 +24,7 @@ const InfortmationListConfig = () => {
 
   return (
     <WorkbenchAttributes
-      renderPanels={({ cpID, editData, configs, handlePropsChange, renderEditItem }) => {
+      renderPanels={({ cpID, editData, configs, handlePropsChange, handleMultiPropsChange, renderEditItem }) => {
         const configItems = {
           label: findItem(editData, 'label'),
           theme: findItem(editData, 'theme'),
@@ -73,6 +73,7 @@ const InfortmationListConfig = () => {
                   item={configItems.informationListContent.item as Props['item']}
                   configs={configs}
                   handlePropsChange={handlePropsChange}
+                  handleMultiPropsChange={handleMultiPropsChange}
                 />
               )}
               {configItems.dataCount && <div>{renderEditItem(configItems.dataCount)}</div>}

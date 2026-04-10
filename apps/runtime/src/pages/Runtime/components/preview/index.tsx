@@ -25,7 +25,7 @@ import {
   type UpdateMethodV2Params
 } from '@onebase/app';
 import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
-import { getDashBoardURL, pagesRuntimeSignal } from '@onebase/common';
+import { getDashBoardURL, pagesRuntimeSignal, TokenManager } from '@onebase/common';
 import {
   EDITOR_TYPES,
   ENTITY_FIELD_TYPE,
@@ -99,6 +99,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const dashboardType = 'dashboard';
   const resourceUrl = getDashBoardURL();
   const isDev = useIsRuntimeDev();
+  const tenantId = TokenManager.getTokenInfo()?.tenantId || '';
 
   useEffect(() => {
     if (drawerVisible.value) {
@@ -367,7 +368,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
         setTimeout(() => setRefresh(Date.now()), 150);
         setSubmitLoading(false);
       } catch (error) {
-        Message.error('创建失败');
+        debugger
+        Message.error((error as any).message || '创建失败');
         console.error('创建失败', error);
         setPredictVisible(false);
         setSubmitLoading(false);
@@ -542,7 +544,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
           <div className={styles.dashboardPreview}>
             <iframe
               key={`dashboard-${dashboardId}`}
-              src={`${resourceUrl}chart/preview/${dashboardId}/${dashboardType}`}
+              src={`${resourceUrl}chart/preview/${dashboardId}/${dashboardType}?tenantId=${tenantId}`}
               style={{ width: '100%', height: '100%', border: 'none' }}
               title="Dashboard Preview"
             />

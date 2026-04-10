@@ -1,5 +1,6 @@
 import MenuComp from '@/components/MenuIcon';
-import { Button, Form, Input, Modal, Pagination, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import TablePagination from '@/components/TablePagination';
+import { Button, Form, Input, Modal, Select, TreeSelect, type FormInstance } from '@arco-design/web-react';
 import { getDashboardListApi, getDashboardTemplateListApi, IsHot, RootParentPage } from '@onebase/app';
 import { webMenuIcons } from '@onebase/ui-kit';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -9,7 +10,7 @@ import dashboardTemplate from '@/assets/images/dashboard_template.svg';
 import dashboardLink from '@/assets/images/dashboard_link.svg';
 import dashboardChange from '@/assets/images/dashboard_change.svg';
 import { getFileUrlById } from '@onebase/platform-center';
-import { getDashBoardURL } from '@onebase/common';
+import { getDashBoardURL, TokenManager } from '@onebase/common';
 import { DashBoardCreateType } from '@onebase/app';
 
 interface CreateModalProps {
@@ -54,6 +55,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   const [dashboardTemplateData, setDashboardTemplateData] = useState<any[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const dashboardType = 'dashboard';
+  const tenantId = TokenManager.getCurIdentifyId();
 
   useEffect(() => {
     if (menuIcon) {
@@ -273,8 +275,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
   };
 
   const handlePreview = (dashboardProjectId: string) => {
-    // 在新窗口打开预览页面，使用 hash 路由
-    window.open(`${resourceUrl}chart/preview/${dashboardProjectId}/${dashboardType}`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${dashboardProjectId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
   };
 
   const handleDashboardTemplateCard = (id: string) => {
@@ -495,15 +496,12 @@ const CreateModal: React.FC<CreateModalProps> = ({
             )}
             {dashboardMethod !== DashBoardCreateType.DashboardNew && (
               <div className={styles.dashboardPagination}>
-                <Pagination
+                <TablePagination
                   total={total}
                   current={dashboardPagination.current}
                   pageSize={dashboardPagination.pageSize}
-                  sizeOptions={[8]}
-                  showTotal
-                  sizeCanChange
                   onChange={handleChangePagination}
-                  disabled={dashboardTemplateTabLoading}
+                  sizeOptions={[8]}
                 />
               </div>
             )}

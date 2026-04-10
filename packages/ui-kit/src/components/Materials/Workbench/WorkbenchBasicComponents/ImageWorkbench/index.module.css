@@ -21,6 +21,5 @@
   border-radius: 8px;
   img {
     object-fit: var(--fit, contain);
-    max-height: 100%;
   }
 }

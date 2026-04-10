@@ -255,7 +255,6 @@ const EnterpriseAppPage: React.FC = () => {
               <Button
                 type="text"
                 icon={<IconSettings />}
-                style={{ color: '#21252e' }}
                 onClick={() => {
                   setTagModalVisible(true);
                 }}

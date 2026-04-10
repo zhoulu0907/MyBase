@@ -1,5 +1,7 @@
+import ResizableTable from '@/components/ResizableTable';
 import { useState, useEffect } from 'react';
-import { Table, Spin, Empty, Button } from '@arco-design/web-react';
+import { Spin, Button } from '@arco-design/web-react';
+import EmptyState from '@/components/EmptyState';
 import { useConnectorWizardStore } from '../store';
 import styles from '../index.module.less';
 
@@ -47,9 +49,9 @@ const RelatedFlowsStep: React.FC = () => {
 
       <Spin loading={loading} size={40}>
         {flows.length > 0 ? (
-          <Table data={flows} columns={columns} pagination={{ total }} />
+          <ResizableTable data={flows} columns={columns} pagination={{ total }} />
         ) : (
-          <Empty description="暂无关联的逻辑流" />
+          <EmptyState type="table" description="暂无关联的逻辑流" />
         )}
       </Spin>
 

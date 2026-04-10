@@ -4,7 +4,7 @@ import { triggerEditorSignal } from '@/store/singals/trigger_editor';
 import { Form, Spin, Steps } from '@arco-design/web-react';
 import { type Form as FormilyForm } from '@formily/core';
 import {
-  listConnectorActionInfos,
+  listConnectorActionsByUuid,
   listConnectorByType,
   listConnectorNodeConfig,
   type ConnectorNodeConfig,
@@ -66,35 +66,22 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
   // 使用 ref 存储 ActionFormConfig 的 form 实例，用于在保存时读取最新值
   const actionFormRef = useRef<FormilyForm | null>(null);
 
-  // 使用 listConnectorActions 接口获取动作列表
+  // 使用 listConnectorActionsByUuid 接口获取动作列表
   useEffect(() => {
-    if (!selectedConnector?.id) {
+    if (!selectedConnector?.connectorUuid) {
       setActionItems([]);
       return;
     }
     setActionsLoading(true);
-    listConnectorActionInfos({
-      id: selectedConnector.id,
-      pageNo: 1,
-      pageSize: 500
-    })
+    listConnectorActionsByUuid(selectedConnector.connectorUuid)
       .then((res: any) => {
         const items: ActionItem[] = [];
-        const raw = res?.list ?? res?.records ?? res;
-
-        if (raw?.properties && typeof raw.properties === 'object') {
-          Object.entries(raw.properties).forEach(([key, property]: [string, any]) => {
+        // 新 API 返回的是 ConnectorActionDO 数组
+        if (Array.isArray(res)) {
+          res.forEach((item) => {
             items.push({
-              key,
-              title: property?.title,
-              description: property?.description
-            });
-          });
-        } else if (Array.isArray(raw)) {
-          (raw as any[]).forEach((item) => {
-            items.push({
-              key: item.actionName ?? item.key ?? item.id,
-              title: item.title ?? item.actionName ?? item.name,
+              key: item.actionCode ?? item.actionName ?? item.id,
+              title: item.actionName,
               description: item.description
             });
           });

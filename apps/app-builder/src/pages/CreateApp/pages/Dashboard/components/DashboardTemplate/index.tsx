@@ -1,5 +1,6 @@
+import TablePagination from '@/components/TablePagination';
 import { useCallback, useRef, useEffect, useState, type FC } from 'react';
-import { Button, Input, Tabs, Typography, Modal, Form, Space, Pagination } from '@arco-design/web-react';
+import { Button, Input, Tabs, Typography, Modal, Form, Space } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
 import TemplateCard from '../TemplateCard';
 import styles from './index.module.less';
@@ -13,7 +14,7 @@ import {
   createDashboardTemplate
 } from '@onebase/platform-center';
 import { useLocation } from 'react-router-dom';
-import { getDashBoardURL } from '@onebase/common';
+import { getDashBoardURL, TokenManager } from '@onebase/common';
 
 const TabPane = Tabs.TabPane;
 const FormItem = Form.Item;
@@ -31,20 +32,24 @@ const ScreenTemplate: FC = () => {
   const searchParams = new URLSearchParams(location.search);
   const appId = searchParams.get('appId');
   const resourceUrl = getDashBoardURL();
-  //创建模板
+  const tenantId = TokenManager.getCurIdentifyId();
   const handleAdd = async () => {
     const res = await createDashboardTemplate({ templateType: 'app', appId: appId });
-    window.open(`${resourceUrl}chart/home/${res}/${appId}/template`, '_blank');
+    window.open(`${resourceUrl}chart/home/${res}/${appId}/template?tenantId=${tenantId}`, '_blank');
   };
   const [applicationDataList, setApplicationDataList] = useState<screenTemplate[]>();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(6);
   const [total, setTotal] = useState(1);
+  const [activeTab, setActiveTab] = useState('1');
+  const [searchValue, setSearchValue] = useState('');
+
   useEffect(() => {
     getTemplateList();
-  }, [currentPage]);
-  //列表
-  const getTemplateList = async (tabType: string = 'app', searchValue: string = '') => {
+  }, [currentPage, activeTab, searchValue]);
+
+  const getTemplateList = async () => {
+    const tabType = activeTab === '1' ? 'app' : 'system';
     const res = await DashboardTemplateParams({
       pageNo: currentPage,
       pageSize: pageSize,
@@ -54,33 +59,26 @@ const ScreenTemplate: FC = () => {
     setApplicationDataList(res.list);
     setTotal(res.total);
   };
-  // 处理分页变化
-  const handlePageChange = async (pageNum: number) => {
+
+  const handlePageChange = (pageNum: number) => {
     setCurrentPage(pageNum);
-    getTemplateList();
   };
 
-  const [activeTab, setActiveTab] = useState('1');
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      // 清除之前的定时器
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-      // 设置新的定时器
-      searchTimeoutRef.current = setTimeout(() => {
-        console.log(value);
-        // 在这里执行搜索逻
-        getTemplateList(activeTab === '1' ? 'app' : 'system', value);
-      }, 1000);
-    },
-    [activeTab]
-  );
+  const handleSearchChange = useCallback((value: string) => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchValue(value);
+      setCurrentPage(1);
+    }, 1000);
+  }, []);
+
   const handleTabChange = (key: string) => {
-    const tabType = key === '1' ? 'app' : 'system';
     setActiveTab(key);
-    getTemplateList(tabType);
+    setCurrentPage(1);
+    setSearchValue('');
   };
   // 修改弹框
   const [editForm] = useForm();
@@ -101,19 +99,16 @@ const ScreenTemplate: FC = () => {
       remarks: editForm.getFieldValue('remarks')
     });
     setEditVisible(false);
-    const currentType = activeTab === '1' ? 'app' : 'system';
-    await getTemplateList(currentType);
+    await getTemplateList();
   };
   const handleEditTemplate = (item: screenTemplate) => {
-    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/template`, '_blank');
+    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/template?tenantId=${tenantId}`, '_blank');
   };
-  //取消弹框
   const handleEditCancel = () => {
     setEditVisible(false);
   };
-  //预览
   const handlePreview = (item: screenTemplate) => {
-    window.open(`${resourceUrl}chart/preview/${item.id}/template`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${item.id}/template?tenantId=${tenantId}`, '_blank');
   };
   //导入模板
   const [selectedButton, setSelectedButton] = useState('');
@@ -144,8 +139,7 @@ const ScreenTemplate: FC = () => {
   const handleDeleteOk = async () => {
     await DelDashboardTemplate(delid);
     setDeleteVisible(false);
-    const currentType = activeTab === '1' ? 'app' : 'system';
-    await getTemplateList(currentType);
+    await getTemplateList();
   };
   const TabPaneList = [
     {
@@ -199,15 +193,11 @@ const ScreenTemplate: FC = () => {
           ))}
         </Tabs>
       </div>
-      <Pagination
+      <TablePagination
         current={currentPage}
         pageSize={pageSize}
         total={total}
         onChange={handlePageChange}
-        showTotal
-        style={{
-          justifyContent: 'flex-end'
-        }}
       />
       {/* 编辑弹框 */}
       <Modal

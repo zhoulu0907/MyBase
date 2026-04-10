@@ -1,10 +1,11 @@
 import { Message } from '@arco-design/web-react';
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BaseResponse, RequestConfig, RequestInterceptor, ResponseInterceptor } from '../types';
-import { isBuilderEnv, isPlatformEnv, isRuntimeEnv } from './env';
+import { isBuilderEnv, isPlatformEnv, isRuntimeEnv, isRuntimeDevPath } from './env';
 import { getHashQueryParam } from './router';
 import { generateSignature } from './signature';
 import TokenManager from './token';
+import { ProjectStorage } from './project';
 
 /**
  * 拼接域名和服务路径
@@ -75,6 +76,11 @@ export class HttpClient {
         Object.assign(config.headers, signature.headers);
         // =========================== 签名校验结束 ===========================
 
+        // Runtime-Dev 环境添加 X-Version-Tag
+        if (isRuntimeDevPath()) {
+          config.headers['X-Version-Tag'] = '0';
+        }
+
         let appId = getHashQueryParam('appId');
         if (!appId) {
           appId = TokenManager.getCurAppId();
@@ -83,6 +89,15 @@ export class HttpClient {
         // 如果获取到 appId 且 header 中未设置，则自动添加
         if (appId && !config.headers['X-Application-Id']) {
           config.headers['X-Application-Id'] = appId;
+        }
+
+        // 自动添加 projectCode 到请求参数
+        const projectCode = ProjectStorage.get();
+        if (projectCode) {
+          config.params = {
+            ...config.params,
+            projectCode
+          };
         }
 
         // 执行自定义请求拦截器
@@ -127,11 +142,11 @@ export class HttpClient {
           if (data.code !== 0) {
             Message.error({ id: 'http-error', content: data.msg || '请求失败' });
             if (data.code === 401) {
-              // 如果在iframe中，发送logout消息给父窗口
               if (window.self !== window.top) {
                 const message = { timestamp: new Date().getTime(), type: 'logout' };
                 console.log('[Iframe] postMessage:', message);
                 window.parent.postMessage(message, '*');
+                return response;
               }
 
               const loginURL = TokenManager.getTokenInfo()?.loginURL;
@@ -157,7 +172,11 @@ export class HttpClient {
                 }
               }
             }
-            return Promise.reject(new Error(data.msg || '请求失败'));
+            const error = new Error(data.msg || '请求失败');
+            (error as any).code = data.code;
+            (error as any).statusCode = data.code;
+            error.message = data.msg || '请求失败';
+            return Promise.reject(error);
           }
         }
 

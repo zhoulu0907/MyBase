@@ -37,6 +37,16 @@ export const getFileListByIds = (ids: string[]) => {
   return envService.get(`/file/list-by-ids?ids=${ids}`);
 };
 
+// 下载文件
+export const downloadFile = async (id: string, applicationId?: string): Promise<string> => {
+  const params: any = {};
+  if (applicationId) {
+    params.applicationId = applicationId;
+  }
+  const url = `/file/download/${id}?${new URLSearchParams(params).toString()}`;
+  return await envService.download(url, undefined, undefined, true);
+};
+
 // 获取文件内容
 export const getFileUrlById = (id: string, applicationId?: string) => {
   const resourceUrl = getResourceURL();

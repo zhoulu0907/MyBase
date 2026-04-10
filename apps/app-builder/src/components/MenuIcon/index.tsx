@@ -25,15 +25,15 @@ const MenuIcon = (props: IProps) => {
 
   useEffect(() => {
     if (inputValue) {
-      const result = webMenuIcons
-        .filter((item) => item.name.includes(inputValue))
-        .filter((item) => item.type === activeMenu || activeMenu === 'all');
-
+      const scopedIcons =
+        activeMenu === 'all' ? allWebMenuIcons : webMenuIcons.find((item) => item.type === activeMenu)?.children || [];
+      const result = scopedIcons.filter((item) => item.name.includes(inputValue));
       setData(result);
-    } else {
-      const result = activeMenu === 'all' ? allWebMenuIcons : webMenuIcons.find((v) => v.type === activeMenu)?.children;
-      setData(result || []);
+      return;
     }
+
+    const result = activeMenu === 'all' ? allWebMenuIcons : webMenuIcons.find((v) => v.type === activeMenu)?.children;
+    setData(result || []);
   }, [inputValue, activeMenu]);
 
   const handleReset = () => {

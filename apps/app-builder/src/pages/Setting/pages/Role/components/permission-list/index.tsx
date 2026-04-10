@@ -1,5 +1,8 @@
+import ResizableTable from '@/components/ResizableTable';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import ActionButtons from '@/components/ActionButtons';
 import { listToTree } from '@/utils/tree';
-import { Button, Message, Modal, Table } from '@arco-design/web-react';
+import { Button, Message } from '@arco-design/web-react';
 import { PERMISSION_TYPES } from '@onebase/common';
 import type { Permission } from '@onebase/platform-center';
 import { configureRolePermissions, getConfiguredPermissions, removeRolePermission, UserType } from '@onebase/platform-center';
@@ -16,6 +19,8 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
   const [configModalVisible, setConfigModalVisible] = useState(false);
   const [configLoading, setConfigLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   // 获取已配置的权限数据
   const fetchPermissions = useCallback(async () => {
@@ -52,25 +57,21 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
   };
 
   const handleRemove = useCallback(
-    (id: string, data: Permission[]) => {
-      const permissionIds = getPermissionIds(id, data);
-
-      Modal.confirm({
-        title: `确认要移除权限功能（${permissions.find((p) => p.id === id)?.name}）吗？`,
-        content: '移除该权限功能后，关联该权限功能的角色用户将失去权限，请谨慎操作。',
-        okButtonProps: { status: 'danger' },
-        okText: '确认',
-        cancelText: '取消',
-        onOk: () => {
-          removeRolePermission(selectedRoleId!, permissionIds).then(() => {
-            fetchPermissions();
-            Message.success('操作成功');
-          });
-        }
-      });
+    (id: string) => {
+      setDeleteTargetId(id);
+      setDeleteModalVisible(true);
     },
-    [permissions, selectedRoleId]
+    []
   );
+
+  const handleRemoveConfirm = async () => {
+    if (!selectedRoleId || !deleteTargetId) return;
+    const permissionIds = getPermissionIds(deleteTargetId, permissions);
+    await removeRolePermission(selectedRoleId, permissionIds);
+    setDeleteModalVisible(false);
+    fetchPermissions();
+    Message.success('操作成功');
+  };
 
   // 权限配置
   const handleConfig = useCallback(() => {
@@ -120,9 +121,11 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
         dataIndex: 'op',
         width: 120,
         render: (_: any, record: Permission) => (
-          <Button type="text" size="small" disabled ={type === UserType.SYSTEM} onClick={() => handleRemove(record.id, permissions)}>
-            移除
-          </Button>
+          <ActionButtons>
+            <Button type="text" size="small" disabled ={type === UserType.SYSTEM} onClick={() => handleRemove(record.id)}>
+              移除
+            </Button>
+          </ActionButtons>
         )
       }
     ],
@@ -151,7 +154,7 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
         </Button>
       </div>
 
-      <Table {...tableConfig} />
+      <ResizableTable {...tableConfig} />
 
       {configModalVisible && (
         <PermissionConfigModal
@@ -163,6 +166,13 @@ const PermissionList: React.FC<PermissionListProps> = ({ selectedRoleId, type })
           type={type}
         />
       )}
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleRemoveConfirm}
+        title={deleteTargetId ? `确认要移除权限功能（${permissions.find((p) => p.id === deleteTargetId)?.name}）吗？` : '确认移除'}
+        content="移除该权限功能后，关联该权限功能的角色用户将失去权限，请谨慎操作。"
+      />
     </>
   );
 };

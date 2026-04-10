@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import { useState, type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
+import { type TableColumnProps, Button, Tag, Space, Radio } from '@arco-design/web-react';
 import TableSearch from './TableSearch';
 import DetailPop from './DetailPop'
 import '../style/tcPage.less'
@@ -54,7 +55,6 @@ const ICreated:FC = () => {
         {
             title: '操作',
             dataIndex: 'op',
-            align: 'center',
             render: (_, record) => (
                 <Button type='text' status='success' onClick={() => {handleDetailPage(record)}}>详情</Button>
             ),
@@ -94,7 +94,7 @@ const ICreated:FC = () => {
             </div>
             <TableSearch uiConfig={{hasInput: true, hasFilter: true, hasSort: true, hasBatch: false}}/>
         </div>
-        <Table className='task-tb-box' columns={columns} data={data} />
+        <ResizableTable className='task-tb-box' columns={columns} data={data} />
         {detailPopVisible && <DetailPop detailPopVisible={detailPopVisible} setPopVisible={setPopVisible}/>}
     </section>
 }

@@ -218,6 +218,18 @@ export interface TiangongLoginResponse {
   };
 }
 
+export interface OAuthAuthorizeRequest {
+  client_id: string;
+  scope: string;
+  redirect_uri: string;
+  response_type: string;
+  auto_approve?: boolean;
+}
+
+export interface OAuthAuthorizeResponse {
+  code: string;
+}
+
 export interface ThirdUserLoginResponse {
   userId: string; // 用户ID
   accessToken: string; // 访问令牌

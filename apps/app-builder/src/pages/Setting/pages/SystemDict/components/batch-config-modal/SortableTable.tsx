@@ -1,5 +1,5 @@
-import React from 'react';
-import { Table } from '@arco-design/web-react';
+import ResizableTable from '@/components/ResizableTable';
+import React, { useMemo } from 'react';
 import { IconDragDotVertical } from '@arco-design/web-react/icon';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import type { DictData } from '@onebase/platform-center';
@@ -41,7 +41,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
   const tableRef = React.useRef<HTMLDivElement>(null);
 
   // 表格组件配置
-  const components = {
+  const components = useMemo(() => ({
     header: {
       operations: () => [
         {
@@ -85,11 +85,11 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
         );
       }
     }
-  };
+  }), [onSort]);
 
   return (
     <div ref={tableRef}>
-      <Table
+      <ResizableTable
         data={data}
         columns={columns}
         pagination={false}
@@ -97,6 +97,7 @@ const SortableTable: React.FC<SortableTableProps> = ({ data, columns, onSort }) 
         rowKey="id"
         components={components}
         scroll={{ y: 510 }}
+        resizable={true}
       />
     </div>
   );

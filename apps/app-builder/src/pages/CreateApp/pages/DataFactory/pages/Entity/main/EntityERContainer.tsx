@@ -19,9 +19,9 @@ import { deleteEntity, getEntityGraph, updateEntity, type UpdateEntityReqVO } fr
 import {
   ConfigFieldModal,
   CreateMasterDetailModal,
-  CreateRelationModal,
-  DeleteConfirmModal
+  CreateRelationModal
 } from '../components/Modals';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import type { DatasourceRecord } from './EntityPageContainer';
 import { RELATIONSHIP_TYPE_LABEL_MAP, type RelationshipType } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
 import styles from '../index.module.less';
@@ -334,10 +334,7 @@ export const EntityERContainer: React.FC<{
         onVisibleChange={(visible) => !visible && closeModal()}
         onConfirm={confirmDelete}
         confirmLoading={deleteLoading}
-        title="确认删除"
         content="确定要删除这个数据资产吗？删除后无法恢复。"
-        okText="确认删除"
-        cancelText="取消"
       />
     </div>
   );

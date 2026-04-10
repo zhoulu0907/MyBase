@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, MouseEvent } from 'react';
 import { memo, useEffect, useState } from 'react';
 import { Tabs } from '@arco-design/mobile-react';
 import dayjs from 'dayjs';
@@ -112,7 +112,9 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
     }
   };
   
-  const handleShowMoreClick = () => {
+  const handleShowMoreClick = (e?: MouseEvent<HTMLAnchorElement>) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     if (!runtime) {
       return;
     }

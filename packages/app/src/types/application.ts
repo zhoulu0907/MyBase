@@ -149,6 +149,11 @@ export interface CreateApplicationReq {
   datasourceSaveReq?: DatasourceSaveReqDTO;
 
   publishModel?: PUBLISH_MODULE;
+
+  /**
+   * 项目编码（可选）
+   */
+  projectCode?: string;
 }
 
 /**
@@ -280,10 +285,26 @@ export interface GetAppNavigationConfigReq {
   id: string;
 }
 
+export interface GetAppNavigationConfigRes {
+  id: string;
+  webDefaultMenu?: string;
+  webNavLayout?: string;
+  mobileDefaultMenu?: string;
+  mobileNavLayout?: string;
+  appThirdUserEnable?: string;
+  appUserRegisterShow?: string;
+  appUserForgetPwdShow?: string;
+  appLoginMainPic?: string;
+}
+
 export interface UpdateAppNavigationConfigReq {
   id: string;
-  webDefaultMenu: string;
-  webNavLayout: string;
-  mobileDefaultMenu: string;
-  mobileNavLayout: string;
+  webDefaultMenu?: string;
+  webNavLayout?: string;
+  mobileDefaultMenu?: string;
+  mobileNavLayout?: string;
+  appThirdUserEnable?: string;
+  appUserRegisterShow?: string;
+  appUserForgetPwdShow?: string;
+  appLoginMainPic?: string;
 }

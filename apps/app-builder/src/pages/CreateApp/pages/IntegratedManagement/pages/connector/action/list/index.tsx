@@ -1,9 +1,10 @@
+import TablePagination from '@/components/TablePagination';
+import ResizableTable from '@/components/ResizableTable';
 import {
   Button,
   Input,
   Message,
   Modal,
-  Pagination,
   Popconfirm,
   Select,
   Space,
@@ -15,13 +16,13 @@ import {
 import { IconPlus } from '@arco-design/web-react/icon';
 import {
   ConnectorActionStatusText,
-  deleteHTTPAction,
-  listConnectorActionInfos,
+  ConnectorActionStatus,
+  deleteConnectorAction,
+  listConnectorActionsByUuid,
+  createConnectorAction,
   deleteScriptAction,
   listScriptAction,
-  saveConnectorAction,
-  type ConnectorActionStatus,
-  type ListConnectorActionReq,
+  type ConnectorActionDO,
   type ListScriptActionReq,
   type ScriptActionItem
 } from '@onebase/app';
@@ -43,6 +44,21 @@ import {
 import styles from './index.module.less';
 
 /**
+ * 生成动作编码：ACTION_ + 8位，英文大写开头，包含英文大写和数字
+ */
+const generateActionCode = (): string => {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  // 第一位必须是英文大写
+  let code = letters.charAt(Math.floor(Math.random() * letters.length));
+  // 后面7位是英文大写或数字
+  for (let i = 0; i < 7; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `ACTION_${code}`;
+};
+
+/**
  * 连接器动作列表页面
  */
 interface ScriptActionListPageProps {
@@ -56,7 +72,7 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
   const [total, setTotal] = useState(0);
 
   const [loading, setLoading] = useState(false);
-  const [actionList, setActionList] = useState<ScriptActionItem[]>();
+  const [actionList, setActionList] = useState<(ScriptActionItem | ConnectorActionDO)[]>();
   const [isCreate, setIsCreate] = useState(false);
   const [editingScriptId, setEditingScriptId] = useState<string | null>(null);
   const [openApiCreateModalOpen, setOpenApiCreateModalOpen] = useState(false);
@@ -121,21 +137,17 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
           setLoading(false);
         }
       } else {
-        const req: ListConnectorActionReq = {
-          id: id,
-          pageNo: pageNo,
-          pageSize: pageSize
-        };
-        const res = await getCommonPaginationList(
-          (param: unknown) => listConnectorActionInfos(param as ListConnectorActionReq),
-          req,
-          setPageNo
-        );
-        if (res) {
-          type RowItem = ScriptActionItem & { actionName?: string };
-          const list = ((res as unknown as RowItem[]) || []).map((item: RowItem, index: number) => ({
+        // 使用新的统一动作表 API 查询 HTTP 动作列表
+        const res = await listConnectorActionsByUuid(id);
+        if (res && Array.isArray(res)) {
+          const list = res.map((item: ConnectorActionDO, index: number) => ({
             ...item,
-            _rowKey: item.id ?? item.actionName ?? item.scriptName ?? `row-${index}`
+            _rowKey: item.id ?? item.actionCode ?? `row-${index}`,
+            actionCode: item.actionCode,
+            actionName: item.actionName,
+            description: item.description,
+            updateTime: item.updateTime,
+            status: item.activeStatus === 1 ? ConnectorActionStatus.Published : ConnectorActionStatus.Unpublished
           }));
           setActionList(list);
           setTotal(list.length);
@@ -160,9 +172,9 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
     }
   };
 
-  const handleDeleteHttp = async (connectorId: string, actionName: string) => {
+  const handleDeleteHttp = async (actionId: number) => {
     try {
-      const res = await deleteHTTPAction(connectorId, actionName);
+      const res = await deleteConnectorAction(actionId);
       if (res) {
         Message.success('删除成功');
         handleGetScriptActionList(searchActionName);
@@ -175,12 +187,11 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
     }
   };
 
-  const handleEdit = (record: ScriptActionItem & { actionName?: string }) => {
-    // 列表接口可能返回 id 或 actionCode，getConnectorActionInfo 需要 actionCode
-    console.log(record);
-    const actionName = record.id ?? record.actionName;
-    if (actionName) {
-      setEditingScriptId(actionName);
+  const handleEdit = (record: ConnectorActionDO) => {
+    // 使用 actionCode 作为编辑标识（getConnectorActionByCode 需要 actionCode）
+    const actionCode = record.actionCode;
+    if (actionCode) {
+      setEditingScriptId(actionCode);
     } else {
       Message.warning('无法获取动作标识，请稍后重试');
     }
@@ -198,6 +209,12 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
       dataIndex: isScript ? 'scriptName' : 'actionName',
       width: 200
     },
+    ...(!isScript ? [{
+      title: '动作编码',
+      dataIndex: 'actionCode',
+      width: 180,
+      render: (actionCode: string) => <span style={{ fontFamily: 'monospace', color: '#86909c' }}>{actionCode || '-'}</span>
+    } as TableColumnProps] : []),
     {
       title: '描述',
       dataIndex: 'description',
@@ -207,7 +224,7 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
       title: '创建时间',
       dataIndex: 'updateTime',
       width: 180,
-      render: (createTime: number) => {
+      render: (createTime: string | number) => {
         return <span>{dayjs(createTime).format('YYYY-MM-DD HH:mm:ss')}</span>;
       }
     },
@@ -222,14 +239,14 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
       dataIndex: 'operation',
       width: 150,
       fixed: 'right',
-      render: (_: unknown, record: ScriptActionItem & { actionName?: string }) => (
+      render: (_: unknown, record: ScriptActionItem | ConnectorActionDO) => (
         <Space>
           <Button
             type="text"
             size="mini"
             onClick={(e) => {
               e.stopPropagation();
-              handleEdit(record);
+              handleEdit(record as ConnectorActionDO);
             }}
           >
             编辑
@@ -239,16 +256,16 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
             content="删除后不可恢复"
             onOk={() => {
               if (isScript) {
-                handleDeleteScript(record.id);
+                handleDeleteScript((record as ScriptActionItem).id);
                 return;
               }
-              const connectorId = getHashQueryParam('id') || '';
-              const actionName = record.actionName ?? record.id;
-              if (!connectorId || !actionName) {
+              // 使用新的 API 删除（需要动作 ID）
+              const actionId = (record as ConnectorActionDO).id;
+              if (!actionId) {
                 Message.warning('无法获取动作标识，请稍后重试');
                 return;
               }
-              handleDeleteHttp(connectorId, actionName);
+              handleDeleteHttp(actionId);
             }}
           >
             <Button type="text" size="mini" status="danger">
@@ -311,17 +328,17 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
       const built = buildHttpActionConfigFromOpenApi(doc, selected);
       const actionName = built.actionName;
       const actionConfig = built.actionConfig;
-      const res = await saveConnectorAction(connectorId, { actionConfig });
-      const createdName =
-        typeof res === 'string'
-          ? res
-          : isRecord(res) && typeof res.data === 'string'
-            ? (res.data as string)
-            : actionName;
+      await createConnectorAction({
+        connectorUuid: connectorId,
+        connectorType: 'HTTP',
+        actionCode: generateActionCode(),
+        actionName,
+        actionConfig: JSON.stringify(actionConfig),
+        activeStatus: 1
+      });
       Message.success('创建成功');
       setOpenApiCreateModalOpen(false);
-      setEditingScriptId(createdName);
-      setIsCreate(true);
+      handleGetScriptActionList(searchActionName);
     } catch (e) {
       Message.error((e as Error)?.message ?? '创建失败');
     } finally {
@@ -382,7 +399,14 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
         try {
           const actionName = genUniqueName(buildActionNameFromOpenApi(op));
           const actionConfig = buildHttpActionConfigFromOpenApi(doc, op, actionName).actionConfig;
-          await saveConnectorAction(connectorId, { actionConfig });
+          await createConnectorAction({
+            connectorUuid: connectorId,
+            connectorType: 'HTTP',
+            actionCode: generateActionCode(),
+            actionName,
+            actionConfig: JSON.stringify(actionConfig),
+            activeStatus: 1
+          });
           ok += 1;
         } catch (e) {
           failed.push({ key, reason: (e as Error)?.message ?? '创建失败' });
@@ -464,7 +488,7 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
           <div className={styles.content}>
             <Spin loading={loading} size={40} style={{ width: '100%', height: '100%' }} tip="加载中...">
               <div className={styles.tableContainer}>
-                <Table
+                <ResizableTable
                   rowKey="_rowKey"
                   columns={columns}
                   data={actionList || []}
@@ -475,13 +499,15 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
             </Spin>
           </div>
           <div className={styles.footer}>
-            <Pagination
+            <TablePagination
               className={styles.myAppPagination}
               total={total}
               current={pageNo}
               pageSize={pageSize}
-              onChange={(pNo, pSize) => {
+              onChange={(pNo) => {
                 setPageNo(pNo);
+              }}
+              onPageSizeChange={(pSize) => {
                 setPageSize(pSize);
               }}
             />
@@ -573,16 +599,18 @@ const ScriptActionListPage: React.FC<ScriptActionListPageProps> = ({ isScript = 
                 try {
                   const actionName = buildActionNameFromOpenApi(op);
                   const actionConfig = buildHttpActionConfigFromOpenApi(doc, op, actionName).actionConfig;
-                  const res = await saveConnectorAction(connectorId, { actionConfig });
-                  const createdName =
-                    typeof res === 'string'
-                      ? res
-                      : isRecord(res) && typeof res.data === 'string'
-                        ? (res.data as string)
-                        : actionName;
+                  const actionCode = generateActionCode();
+                  await createConnectorAction({
+                    connectorUuid: connectorId,
+                    connectorType: 'HTTP',
+                    actionCode,
+                    actionName,
+                    actionConfig: JSON.stringify(actionConfig),
+                    activeStatus: 1
+                  });
                   Message.success('创建成功');
                   setOpenApiBatchCreateModalOpen(false);
-                  setEditingScriptId(createdName);
+                  setEditingScriptId(actionCode);
                   setIsCreate(true);
                 } catch (e) {
                   Message.error((e as Error)?.message ?? '创建失败');

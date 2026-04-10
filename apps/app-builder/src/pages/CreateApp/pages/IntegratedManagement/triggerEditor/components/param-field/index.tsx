@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import { useEffect, useState } from 'react';
-import { Button, Form, Input, Table, type FormInstance } from '@arco-design/web-react';
+import { Button, Form, Input, type FormInstance } from '@arco-design/web-react';
 import { IconDelete, IconDragDotVertical, IconPlusCircle } from '@arco-design/web-react/icon';
 import { SortableContainer, SortableElement, SortableHandle } from 'react-sortable-hoc';
 import { nanoid } from 'nanoid';
@@ -186,7 +187,7 @@ const ParamField: React.FC<ParamFieldsProps> = ({ data, form }) => {
   };
   return (
     <Form.Item field="paramFields" className={styles.paramFields} id="param-field-config">
-      <Table rowKey="id" components={components} columns={columns} data={tableData} pagination={false} />
+      <ResizableTable rowKey="id" components={components} columns={columns} data={tableData} pagination={false} />
       <Button type="text" icon={<IconPlusCircle />} onClick={addRow} className={styles.addBtn}>
         添加收集字段
       </Button>

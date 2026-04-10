@@ -81,21 +81,6 @@ const WbEntryTitleConfig = ({ handlePropsChange, item, configs }: Props) => {
   return (
     <div className={styles.entryTitleConfig}>
       <div className={styles.formItem}>
-        <label>标题名称</label>
-        <Input
-          value={currentTitleConfig.titleName || ''}
-          onChange={(value) => handleTitleConfigChange({ titleName: value })}
-          placeholder="请输入标题名称"
-        />
-      </div>
-      <div className={styles.formItem}>
-        <label>显示标题</label>
-        <Switch
-          checked={currentTitleConfig.showTitle ?? true}
-          onChange={(value) => handleTitleConfigChange({ showTitle: value })}
-        />
-      </div>
-      <div className={styles.formItem}>
         <label>查看更多</label>
         <Switch
           checked={currentTitleConfig.showMore ?? true}

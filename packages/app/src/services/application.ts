@@ -1,8 +1,9 @@
 // 应用服务
 
-import { isRuntimeEnv } from '@onebase/common';
+import { isRuntimeEnv, ProjectStorage } from '@onebase/common';
 import {
   GetAppNavigationConfigReq,
+  GetAppNavigationConfigRes,
   UpdateAppNavigationConfigReq,
   type CreateApplicationReq,
   type DeleteApplicationReq,
@@ -26,7 +27,11 @@ export const getApplicationLeast = (params: GetApplicationReq) => {
 };
 
 export const createApplication = (params: CreateApplicationReq) => {
-  return appService.post('/application/create', params);
+  const projectCode = ProjectStorage.get();
+  return appService.post('/application/create', {
+    ...params,
+    projectCode: projectCode || undefined
+  });
 };
 
 export const updateApplication = (params: UpdateApplicationReq) => {
@@ -51,7 +56,7 @@ export const getApplicationSimple = (ownerTag: number, appName: string) => {
   return appService.get(`/application/simple-list-by-name?ownerTag=${ownerTag}&appName=${appName}`);
 };
 
-export const getAppNavigationConfig = (params: GetAppNavigationConfigReq) => {
+export const getAppNavigationConfig = (params: GetAppNavigationConfigReq): Promise<GetAppNavigationConfigRes> => {
   return (isRuntimeEnv() ? runtimeAppService : appService).get('/application/get-navigation-config', params);
 };
 

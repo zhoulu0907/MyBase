@@ -1,6 +1,7 @@
 import jsNodeIcon from '@/assets/flow/connect/js_node.svg';
 import { triggerEditorSignal } from '@/store/singals/trigger_editor';
-import { Form, Input, Pagination, Steps } from '@arco-design/web-react';
+import TablePagination from '@/components/TablePagination';
+import { Form, Input, Steps } from '@arco-design/web-react';
 import { IconSync } from '@douyinfe/semi-icons';
 import { type FormMeta, type FormRenderProps } from '@flowgram.ai/fixed-layout-editor';
 import {
@@ -226,14 +227,12 @@ export const renderForm = ({}: FormRenderProps<FlowNodeJSON['data']>) => {
 
               {currentStep === 1 && (
                 <div className={styles.paginationContainer}>
-                  <Pagination
+                  <TablePagination
                     total={total}
                     current={pageNo}
                     pageSize={pageSize}
-                    onChange={(pNo, pSize) => {
-                      setPageNo(pNo);
-                      setPageSize(pSize);
-                    }}
+                    onChange={(pNo) => setPageNo(pNo)}
+                    onPageSizeChange={(pSize) => setPageSize(pSize)}
                   />
                 </div>
               )}

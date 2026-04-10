@@ -310,10 +310,13 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
   // 使用 useCallback 缓存函数，避免不必要的重新创建
   const getVariableOptions = useCallback(
     (nodeId: string, item: any): TreeSelectDataType[] => {
+      // 优先使用传入的 variableOptions（表单设计器场景）
+      if (variableOptions && variableOptions.length > 0) {
+        return variableOptions;
+      }
+
+      // 触发器编辑器场景：从节点链路获取变量
       if (nodeId == undefined || nodeId == '') {
-        if (variableOptions) {
-          return variableOptions;
-        }
         return [];
       }
 
@@ -377,11 +380,20 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
 
   const showTriggerElement = (params: any, options: TreeSelectDataType[]) => {
     if (params.value) {
-      const parentId = params.value.split('.')[0];
-      const parentNode = options.find((item) => item.key == parentId);
-
-      const childrenName = parentNode?.children?.find((item) => item.key == params.value)?.title;
-      return `${parentNode?.title} - ${childrenName}`;
+      // 处理三层结构：currentForm -> tableName -> tableName.fieldName
+      // 遍历所有节点查找匹配的字段
+      for (const rootNode of options) {
+        if (rootNode.children) {
+          for (const tableNode of rootNode.children) {
+            if (tableNode.children) {
+              const fieldNode = tableNode.children.find((item) => item.key === params.value);
+              if (fieldNode) {
+                return `${tableNode.title} - ${fieldNode.title}`;
+              }
+            }
+          }
+        }
+      }
     }
 
     return '';
@@ -414,9 +426,15 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
     return title;
   };
 
-  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any, relatedFields: any[]) => {
     setFormulaVisible(false);
-    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    // 保存公式数据，包含 relatedFields 用于运行时获取正确的表单字段名
+    form.setFieldValue(formulaFieldKey, {
+      formulaData: formulaData,
+      formula: formattedFormula,
+      parameters: params,
+      relatedFields: relatedFields
+    });
     setFormulaData('');
     setFormulaFieldKey('');
   };

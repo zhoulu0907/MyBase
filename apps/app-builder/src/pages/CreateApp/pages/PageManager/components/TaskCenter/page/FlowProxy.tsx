@@ -1,5 +1,7 @@
+import ActionButtons from '@/components/ActionButtons';
+import ResizableTable from '@/components/ResizableTable';
 import { useState, type FC } from 'react';
-import { Table, type TableColumnProps, Button, Tag, Radio, Space } from '@arco-design/web-react';
+import { type TableColumnProps, Button, Tag, Radio, Space } from '@arco-design/web-react';
 import { IconPlusCircle } from '@arco-design/web-react/icon';
 import TableSearch from './TableSearch';
 import EditProxyModal from '../modal/editProxyForm';
@@ -84,9 +86,9 @@ const FlowProxy: FC = () => {
     {
       title: '操作',
       dataIndex: 'op',
-      align: 'center',
+      width: 80,
       render: (_, record) => (
-        <>
+        <ActionButtons>
           <Button type="text" status="success" onClick={() => {}}>
             撤消
           </Button>
@@ -100,7 +102,7 @@ const FlowProxy: FC = () => {
           >
             编辑
           </Button>
-        </>
+        </ActionButtons>
       )
     }
   ];
@@ -151,7 +153,7 @@ const FlowProxy: FC = () => {
           </Button>
         </Space>
       </div>
-      <Table className="task-tb-box task-proxy-tb" columns={columns} data={data} />
+      <ResizableTable className="task-tb-box task-proxy-tb" columns={columns} data={data} />
       {editVisible && (
         <EditProxyModal
           visible={editVisible}

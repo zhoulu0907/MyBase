@@ -13,12 +13,18 @@ export function WorkbenchItem({
   currentWidth,
   containerWidth,
   pageComponentSchema,
-  onOperation
-}: WorkbenchItemProps) {
+  onOperation,
+  wbFontSize
+}: WorkbenchItemProps & { wbFontSize?: string }) {
   // 按钮组件在 web 端完全隐藏，不渲染任何内容
   if (component.type === WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH) {
     return null;
   }
+
+  // 快捷入口和欢迎卡片组件仅能有一个，不可复制
+  const canNotCopy =
+    component.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY ||
+    component.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD;
 
   const handleSelect = () => {
     onOperation.select(component.id, component);
@@ -42,7 +48,12 @@ export function WorkbenchItem({
         ).layout
       }
     >
-      <div data-cp-type={component.type} data-cp-displayname={component.displayName} data-cp-id={component.id}>
+      <div
+        data-cp-type={component.type}
+        data-cp-displayname={component.displayName}
+        data-cp-id={component.id}
+        style={wbFontSize ? { fontSize: wbFontSize } : undefined}
+      >
         <EditRender
           cpId={component.id}
           cpType={component.type}
@@ -57,7 +68,12 @@ export function WorkbenchItem({
         )}
 
         {isSelected && pageComponentSchema && (
-          <OperationButtons component={component} pageComponentSchema={pageComponentSchema} onOperation={onOperation} />
+          <OperationButtons
+            component={component}
+            pageComponentSchema={pageComponentSchema}
+            onOperation={onOperation}
+            canNotCopy={canNotCopy}
+          />
         )}
       </div>
     </ResizableWorkbenchItem>

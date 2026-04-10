@@ -364,10 +364,8 @@ const extractRequestBodyRows = (op: Record<string, unknown>, doc: unknown) => {
 
 const extractResponse = (op: Record<string, unknown>, doc: unknown) => {
   const responseObj = isRecord(op.responses) ? (op.responses as Record<string, unknown>) : {};
-  console.log('[extractResponse] responseObj:', responseObj);
   const status =
     ['200', '201', 'default'].find((k) => isRecord(responseObj) && k in responseObj) || Object.keys(responseObj)[0];
-  console.log('[extractResponse] status:', status);
   const resp = status && isRecord(responseObj) ? responseObj[status] : undefined;
   const respRec = isRecord(resp) ? (resp as Record<string, unknown>) : undefined;
   const respContent = respRec && isRecord(respRec.content) ? (respRec.content as Record<string, unknown>) : undefined;
@@ -376,25 +374,23 @@ const extractResponse = (op: Record<string, unknown>, doc: unknown) => {
       ? (respContent['application/json'] as Record<string, unknown>)
       : undefined;
 
-  console.log('[extractResponse] respJson:', respJson);
-
   let responseBody: ParamRow[] = [];
   let responseBodyJson = '';
+  let respSchema: unknown = null;
   let firstSchemaExample: unknown = null;
 
   if (respJson) {
     // 优先使用 content 级别的 example
     const example = respJson.example;
-    console.log('[extractResponse] content-level example:', example);
-    // 其次检查 schema 级别的 examples 数组
+
+    // 解析 schema（用于保存结构信息）
     const respSchemaRaw = respJson.schema;
-    const respSchema = resolveAllRefs(respSchemaRaw, doc);
-    console.log('[extractResponse] respSchema:', respSchema);
-    console.log('[extractResponse] respSchema.examples:', isRecord(respSchema) ? (respSchema as Record<string, unknown>).examples : 'not a record');
+    // 使用 resolveAllRefs 递归解析所有 $ref，获取完整的 properties 和 title
+    respSchema = resolveAllRefs(respSchemaRaw, doc);
+
+    // 直接检查 examples（用于示例数据）
     const schemaExamples = isRecord(respSchema) && Array.isArray(respSchema.examples) ? respSchema.examples : [];
-    console.log('[extractResponse] schemaExamples:', schemaExamples);
     firstSchemaExample = schemaExamples.length > 0 ? schemaExamples[0] : null;
-    console.log('[extractResponse] firstSchemaExample:', firstSchemaExample);
 
     if (example !== undefined && example !== null) {
       responseBodyJson = JSON.stringify(example, null, 2);
@@ -521,9 +517,6 @@ const extractResponse = (op: Record<string, unknown>, doc: unknown) => {
     }
   }
 
-  console.log('[extractResponse] final responseBody:', responseBody);
-  console.log('[extractResponse] final responseBodyJson:', responseBodyJson);
-
   const responseHeadersRaw =
     respRec && isRecord(respRec.headers) ? (respRec.headers as Record<string, unknown>) : undefined;
   const responseHeaders = responseHeadersRaw
@@ -581,7 +574,7 @@ const extractResponse = (op: Record<string, unknown>, doc: unknown) => {
     }
   }
 
-  return { responseHeaders, responseBody, responseBodyJson, successConditionPath, successConditionValue, errorMessagePath };
+  return { responseHeaders, responseBody, responseBodyJson, responseSchema: respSchema, successConditionPath, successConditionValue, errorMessagePath };
 };
 
 export const buildHttpFormValuesFromOpenApi = (doc: unknown, operation: OpenApiOperation) => {
@@ -591,9 +584,9 @@ export const buildHttpFormValuesFromOpenApi = (doc: unknown, operation: OpenApiO
   const op = isRecord(operation.raw) ? (operation.raw as Record<string, unknown>) : {};
   const { headers, query, path } = extractParameters(op);
   const { rows: requestBody, isJsonBody, requestBodyJson } = extractRequestBodyRows(op, doc);
-  const { responseHeaders, responseBody, responseBodyJson: respBodyJson, successConditionPath, successConditionValue, errorMessagePath } = extractResponse(op, doc);
+  const { responseHeaders, responseBody, responseBodyJson: respBodyJson, responseSchema, successConditionPath, successConditionValue, errorMessagePath } = extractResponse(op, doc);
 
-  const method = operation.method.toUpperCase() === 'POST' && isJsonBody ? 'POST_JSON' : operation.method.toUpperCase();
+  const method = operation.method.toUpperCase();
 
   const requestHeaders = isJsonBody ? upsertHeaderRow(headers, 'Content-Type', 'application/json') : headers;
   const bodyMode = isJsonBody ? 'json' : (requestBody.length > 0 ? 'kv' : 'none');
@@ -652,8 +645,13 @@ export const buildHttpFormValuesFromOpenApi = (doc: unknown, operation: OpenApiO
       responseHeaders,
       responseBodyTab: {
         responseBodyMode: respBodyMode,
-        responseBodyJson: respBodyJson,
-        responseBodyText: ''
+        responseBodyTextWrapper: {
+          responseBodyText: ''
+        },
+        responseBodyJsonWrapper: {
+          responseBodyJson: respBodyJson
+        },
+        responseSchema
       },
       responseBody
     }
@@ -671,11 +669,9 @@ export const buildHttpActionConfigFromOpenApi = (doc: unknown, operation: OpenAp
 
   const name = (actionName || '').trim() || buildActionNameFromOpenApi(operation);
   const method = operation.method.toUpperCase();
-  const methodMode = method === 'POST' && isJsonBody ? 'POST_JSON' : undefined;
-  const debugMethod = methodMode === 'POST_JSON' ? 'POST' : method;
 
   const requestHeaders =
-    methodMode === 'POST_JSON' ? upsertHeaderRow(headers, 'Content-Type', 'application/json') : headers;
+    isJsonBody ? upsertHeaderRow(headers, 'Content-Type', 'application/json') : headers;
 
   const toDebugRows = (rows: unknown[]) =>
     Array.isArray(rows)
@@ -706,8 +702,7 @@ export const buildHttpActionConfigFromOpenApi = (doc: unknown, operation: OpenAp
       },
       debug: {
         url,
-        method: debugMethod,
-        methodMode,
+        method,
         requestHeaders: toDebugRows(requestHeaders),
         requestBody: toDebugRows(requestBody),
         queryParams: toDebugRows(query),

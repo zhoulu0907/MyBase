@@ -259,6 +259,52 @@ export interface ListConnectorActionReq {
   id: string;
 }
 
+/** 连接器动作 - 创建请求 */
+export interface CreateConnectorActionReq {
+  connectorUuid: string;
+  connectorType: 'HTTP' | 'SCRIPT' | 'DATABASE' | 'EMAIL';
+  actionCode?: string;
+  actionName: string;
+  description?: string;
+  inputSchema?: string;
+  outputSchema?: string;
+  actionConfig: string;
+  activeStatus?: number;
+  sortOrder?: number;
+}
+
+/** 连接器动作 - 更新请求 */
+export interface UpdateConnectorActionReq {
+  id: number;
+  actionCode?: string;
+  actionName?: string;
+  description?: string;
+  inputSchema?: string;
+  outputSchema?: string;
+  actionConfig?: string;
+  activeStatus?: number;
+  sortOrder?: number;
+}
+
+/** 连接器动作 - 数据对象 */
+export interface ConnectorActionDO {
+  id: number;
+  connectorUuid: string;
+  connectorType: string;
+  actionUuid: string;
+  actionCode: string;
+  actionName: string;
+  description: string;
+  inputSchema: string;
+  outputSchema: string;
+  actionConfig: string;
+  activeStatus: number;
+  sortOrder: number;
+  createTime: string;
+  updateTime: string;
+}
+
+/** @deprecated 使用 CreateConnectorActionReq 代替 */
 export interface SaveConnectorActionReq {
   actionConfig: any;
 }
@@ -319,7 +365,7 @@ export interface ConnectorTypeInfo {
 export interface ConnectorItem {
   id: string;
   name: string;
-  icon: string | React.ReactNode;
+  icon: string | React.ReactNode | null;
   category: string;
   type: 'system_preset' | 'custom';
   fields: {
@@ -343,3 +389,39 @@ export const ConnectorActionStatusText: Record<ConnectorActionStatus, string> = 
   [ConnectorActionStatus.Published]: '已发布',
   [ConnectorActionStatus.Unpublished]: '未发布'
 };
+
+// ============ 连接器环境配置相关类型定义 ============
+
+/** 连接器环境配置（精简）- 列表项 */
+export interface FlowConnectorEnvLiteVO {
+  id: number;
+  envUuid: string;
+  envName: string;
+  envCode: string;
+  typeCode: string;
+  envUrl: string;
+  authType: string;
+  description: string;
+  activeStatus: number; // 0-禁用，1-启用
+  createTime: string;
+}
+
+/** 环境配置 Schema（Formily） */
+export interface EnvironmentConfigVO {
+  schema: Record<string, any>;
+  envCode: string;
+  typeCode: string;
+}
+
+/** 环境配置模板 */
+export interface EnvConfigTemplateVO {
+  schema: Record<string, any>;
+}
+
+/** 保存环境配置请求 */
+export interface SaveEnvironmentConfigReqVO {
+  config: {
+    envMode?: string;
+    envConfig?: Record<string, any>;
+  };
+}

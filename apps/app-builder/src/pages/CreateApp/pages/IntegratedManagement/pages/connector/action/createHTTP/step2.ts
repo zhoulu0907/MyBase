@@ -9,6 +9,29 @@ export const step2Schema: ISchema = {
       title: '请求定义',
       'x-component': 'SectionTitle'
     },
+    url: {
+      title: '请求路径',
+      type: 'string',
+      required: true,
+      'x-decorator': 'FormItem',
+      'x-component': 'Input',
+      'x-component-props': { placeholder: '类似: /api/v1/users' },
+      description: '请求的相对路径，如 /api/v1/users'
+    },
+    method: {
+      title: '请求方法',
+      type: 'string',
+      default: 'GET',
+      enum: [
+        { label: 'GET', value: 'GET' },
+        { label: 'POST', value: 'POST' },
+        { label: 'PUT', value: 'PUT' },
+        { label: 'DELETE', value: 'DELETE' }
+      ],
+      'x-decorator': 'FormItem',
+      'x-component': 'Select',
+      'x-component-props': { placeholder: '请选择' }
+    },
     tabs: {
       type: 'object',
       'x-component': 'Tabs',
@@ -191,6 +214,10 @@ export const step2Schema: ISchema = {
                   'x-component': 'JsonEditor'
                 }
               }
+            },
+            responseSchema: {
+              type: 'object',
+              'x-display': 'none'  // 隐藏字段，仅用于存储 schema 数据
             }
           }
         },

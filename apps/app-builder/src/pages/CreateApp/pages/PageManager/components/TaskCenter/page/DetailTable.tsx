@@ -1,5 +1,6 @@
+import ResizableTable from '@/components/ResizableTable';
 import { useState, type FC } from 'react';
-import { Table, type TableColumnProps, Button } from '@arco-design/web-react';
+import { type TableColumnProps, Button } from '@arco-design/web-react';
 import { IconDownload, IconEye } from '@arco-design/web-react/icon';
 import '../style/tcPage.less'
 import ExpendSp from '@/assets/images/task_center/expend-sp.svg'
@@ -63,7 +64,7 @@ const DetailTable:FC = () => {
 
     return <>
         <Button type='outline' icon={<IconDownload />} className='left-export-btn'>导出Excel</Button>
-        <Table className='detail-left-tb' columns={columns} data={data} />
+        <ResizableTable className='detail-left-tb' columns={columns} data={data} />
         <p className='gray-color photo-box'>附件</p>
         <ul className='fj-file-box'>
             <li className='flex-bw-center'>

@@ -24,7 +24,6 @@ const StaticInformationList = ({
   maxCount = 10,
   onConfigChange
 }: StaticInformationListProps) => {
-  console.log('staticInformationList', staticInformationList);
   const [items, setItems] = useState<InformationListItem[]>(() =>
     (staticInformationList || []).map((item) => ({
       ...item,

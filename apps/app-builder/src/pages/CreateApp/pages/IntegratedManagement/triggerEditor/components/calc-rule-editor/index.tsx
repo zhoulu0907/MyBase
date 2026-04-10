@@ -2,6 +2,7 @@ import { FormulaEditor } from '@/components/FormulaEditor';
 import { Button, Form, Grid, Input, Select, type FormInstance } from '@arco-design/web-react';
 import { IconDelete, IconLaunch, IconPlus } from '@arco-design/web-react/icon';
 import { FieldType } from '@onebase/app';
+import { ENTITY_FIELD_TYPE } from '@onebase/ui-kit';
 import React, { useEffect, useState } from 'react';
 import styles from './index.module.less';
 
@@ -13,6 +14,15 @@ export interface CalcRuleEditorProps {
 const valueTypeOptions = [
   { label: '值', value: FieldType.VALUE },
   { label: '公式', value: FieldType.FORMULA }
+];
+
+// 字段类型选项（常用的几种）
+const fieldTypeOptions = [
+  { label: '文本', value: ENTITY_FIELD_TYPE.TEXT.VALUE },
+  { label: '数字', value: ENTITY_FIELD_TYPE.NUMBER.VALUE },
+  { label: '布尔', value: ENTITY_FIELD_TYPE.BOOLEAN.VALUE },
+  { label: '日期', value: ENTITY_FIELD_TYPE.DATE.VALUE },
+  { label: '日期时间', value: ENTITY_FIELD_TYPE.DATETIME.VALUE }
 ];
 
 const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
@@ -59,7 +69,7 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                 {fields.map((item: any, index: number) => {
                   return (
                     <Grid.Row gutter={8} key={item.key} align="center">
-                      <Grid.Col span={7}>
+                      <Grid.Col span={5}>
                         <Form.Item
                           field={item.field + '.field'}
                           rules={[
@@ -85,7 +95,7 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                         <div style={{ marginBottom: '15px' }}>的值设为</div>
                       </Grid.Col>
 
-                      <Grid.Col span={5}>
+                      <Grid.Col span={4}>
                         <Form.Item field={item.field + '.operatorType'}>
                           <Select
                             disabled={form.getFieldValue(item.field + '.field') == undefined}
@@ -97,7 +107,7 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                         </Form.Item>
                       </Grid.Col>
 
-                      <Grid.Col span={8}>
+                      <Grid.Col span={6}>
                         {form.getFieldValue(item.field + '.operatorType') == undefined && (
                           <Form.Item field={item.field + '.value'}>
                             <Input placeholder="请输入" disabled />
@@ -121,6 +131,15 @@ const CaclRuleEditor: React.FC<CalcRuleEditorProps> = ({ form, nodeId }) => {
                             </Button>
                           </Form.Item>
                         )}
+                      </Grid.Col>
+
+                      <Grid.Col span={5}>
+                        <Form.Item field={item.field + '.fieldType'} initialValue={ENTITY_FIELD_TYPE.TEXT.VALUE}>
+                          <Select
+                            options={fieldTypeOptions}
+                            placeholder="选择类型"
+                          />
+                        </Form.Item>
                       </Grid.Col>
 
                       <Grid.Col span={2}>

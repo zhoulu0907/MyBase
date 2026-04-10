@@ -1,4 +1,4 @@
-import { Empty, Menu, Message, Popconfirm, Tabs } from '@arco-design/web-react';
+import { Menu, Message, Popconfirm, Tabs } from '@arco-design/web-react';
 import { IconClose, IconEdit, IconPlus, IconUser } from '@arco-design/web-react/icon';
 import {
   createRole,
@@ -18,6 +18,7 @@ import {
 import { useEffect, useState, type FC } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import RoleInfo from '../Role';
+import EmptyState from '@/components/EmptyState';
 import styles from './index.module.less';
 import InputRoleName from './inputRoleName';
 import TabPane from '@arco-design/web-react/es/Tabs/tab-pane';
@@ -368,7 +369,7 @@ const AppPermission: FC = () => {
       <div className={styles.right}>
         {!activeTab || showEmpty ? (
           <>
-            <Empty />
+            <EmptyState type="card" description="请选择角色" />
           </>
         ) : (
           <RoleInfo

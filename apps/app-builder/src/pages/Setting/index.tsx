@@ -1,9 +1,8 @@
 import { Layout } from '@arco-design/web-react';
-import React, { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
-import AppBreadcrumb from '../../components/Breadcrumb';
+import React, { useState } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import AppHeader from './components/header';
-import AppSider from './components/sider';
+import { LingjiLayout, TiangongLayout } from './components/layout';
 
 import ApplicationPage from './pages/Application';
 import OrganizationPage from './pages/Organization';
@@ -24,107 +23,58 @@ import ProfileEditPage from './pages/Profile/edit';
 import SecurityPage from './pages/Security';
 import PluginPage from './pages/Plugin';
 import ExternalUserPage from './pages/ExternalUser';
-import { getTenantInfoFromSession, setTenantInfoFromSession } from '@/utils';
-import { TokenManager } from '@onebase/common';
-import { getTenantInfo, type TenantInfo } from '@onebase/platform-center';
-
-const Content = Layout.Content;
+import { isTiangongPlatform, useIframeDetection, useIframeNavigation, useTenantInfo, useCollapsed } from './utils';
 
 const SettingPage: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
-  const [isIframe, setIsIframe] = useState(false);
-  const { tenantId } = useParams();
-  const location = useLocation();
+  const isIframe = useIframeDetection();
+  const { tenantInfo, handleTenantInfoChange } = useTenantInfo();
+  const { collapsed, handleCollapse } = useCollapsed();
 
-  const [tenantInfo, setTenantInfo] = useState<TenantInfo | null>(() => getTenantInfoFromSession());
+  useIframeNavigation(isIframe);
 
-  const handleTenantInfoChange = (info: TenantInfo) => {
-    setTenantInfo(info);
-    setTenantInfoFromSession(info); // 继续保持和 session 同步
-  };
+  const shouldUseTiangongLayout = isTiangongPlatform();
 
-  const handleCollapse = (collapsed: boolean) => {
-    setCollapsed(collapsed);
-  };
-
-  useEffect(() => {
-    setIsIframe(window.self !== window.top);
-  }, []);
-
-  useEffect(() => {
-    if (isIframe) {
-      const message = { timestamp: new Date().getTime(), type: 'loaded' };
-      console.log('[Iframe] postMessage:', message);
-      window.parent.postMessage(message, '*');
-    }
-  }, [isIframe]);
-
-  useEffect(() => {
-    if (isIframe) {
-      const currentUrl = window.location.href;
-      const message = { timestamp: new Date().getTime(), type: 'redirect', url: currentUrl };
-      console.log('[Iframe] postMessage:', message);
-      window.parent.postMessage(message, '*');
-    }
-  }, [location.pathname, isIframe]);
-
-  // 获取用户信息
-  const tokenInfo = TokenManager.getTokenInfo();
-
-  useEffect(() => {
-    if (tokenInfo?.accessToken) {
-      getInfo();
-    }
-  }, [tokenInfo?.accessToken]);
-
-  const getInfo = async () => {
-    const tenantInfoRes = await getTenantInfo(tenantId || '');
-    if (tenantInfoRes) {
-      setTenantInfoFromSession(tenantInfoRes);
-      setTenantInfo(tenantInfoRes);
-    }
-  };
+  const renderRoutes = () => (
+    <Routes>
+      <Route path="application" element={<ApplicationPage />} />
+      <Route path="user" element={<UserPage />} />
+      <Route path="role" element={<RolePage />} />
+      <Route path="organization" element={<OrganizationPage />} />
+      <Route path="system-dict" element={<SystemDictPage />} />
+      <Route path="security" element={<SecurityPage />} />
+      <Route path="spaceInfo" element={<SpaceInfo onTenantInfoChange={handleTenantInfoChange} />} />
+      <Route path="copilotdoc" element={<AiCopilotDoc />} />
+      <Route path="wxmini" element={<AiWXMini />} />
+      <Route path="profile" element={<ProfilePage />} />
+      <Route path="plugin" element={<PluginPage />} />
+      <Route path="externalUser" element={<ExternalUserPage />} />
+      <Route path="enterprise" element={<BusinessPage />}>
+        <Route path="create-enterprise" element={<CreateBusinessPage />} />
+        <Route path=":enterpriseName" element={<RedirectEnterprise />} />
+        <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
+      </Route>
+      <Route
+        path="profile/edit"
+        element={<ProfileEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />}
+      />
+      <Route path="" element={<Navigate to="application" replace />} />
+    </Routes>
+  );
 
   return (
     <Layout className={styles.settingPage}>
       {!isIframe && <AppHeader className={styles.settingPageHeader} avatarUrl={avatarUrl} tenantInfo={tenantInfo} />}
-
-      <Layout className={styles.settingPageContent}>
-        <AppSider collapsed={collapsed} onCollapse={handleCollapse} />
-        <Layout className={styles.settingPageContentMain}>
-          <AppBreadcrumb />
-
-          <Content className={styles.content}>
-            <div className={styles.contentInner}>
-              <Routes>
-                <Route path="application" element={<ApplicationPage />} />
-                <Route path="user" element={<UserPage />} />
-                <Route path="role" element={<RolePage />} />
-                <Route path="organization" element={<OrganizationPage />} />
-                <Route path="system-dict" element={<SystemDictPage />} />
-                <Route path="security" element={<SecurityPage />} />
-                <Route path="spaceInfo" element={<SpaceInfo onTenantInfoChange={handleTenantInfoChange} />} />
-                <Route path="copilotdoc" element={<AiCopilotDoc />} />
-                <Route path="wxmini" element={<AiWXMini />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="plugin" element={<PluginPage />} />
-                <Route path="externalUser" element={<ExternalUserPage />} />
-                <Route path="enterprise" element={<BusinessPage />}>
-                  <Route path="create-enterprise" element={<CreateBusinessPage />} />
-                  <Route path=":enterpriseName" element={<RedirectEnterprise />} />
-                  <Route path=":enterpriseName/:activeTab" element={<EnterpriseInfoPage />} />
-                </Route>
-                <Route
-                  path="profile/edit"
-                  element={<ProfileEditPage setAvatarUrl={setAvatarUrl} avatarUrl={avatarUrl} />}
-                />
-                <Route path="" element={<Navigate to="application" replace />} />
-              </Routes>
-            </div>
-          </Content>
-        </Layout>
-      </Layout>
+      
+      {shouldUseTiangongLayout ? (
+        <TiangongLayout>
+          {renderRoutes()}
+        </TiangongLayout>
+      ) : (
+        <LingjiLayout collapsed={collapsed} onCollapse={handleCollapse}>
+          {renderRoutes()}
+        </LingjiLayout>
+      )}
     </Layout>
   );
 };

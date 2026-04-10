@@ -1,6 +1,6 @@
 import { useIsRuntimeDev } from '@/hooks/useIsRuntimeDev';
 import { Form } from '@arco-design/web-react';
-import { getEntityFieldsWithChildren, getPageSetMetaData, type AppEntityField } from '@onebase/app';
+import { getEntityListWithFields, getPageSetMetaData, type AppEntityField } from '@onebase/app';
 import { pagesRuntimeSignal } from '@onebase/common';
 import {
   EDITOR_TYPES,
@@ -14,6 +14,9 @@ import {
   useEditorSignalMap,
   useFormEditorSignal,
   ENTITY_FIELD_TYPE,
+  useAppEntityStore,
+  menuDictSignal,
+  setMainMetaData as setMainMetaDataToStore,
   type GridItem
 } from '@onebase/ui-kit';
 import { useSignals } from '@preact/signals-react/runtime';
@@ -73,6 +76,8 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
   const isDev = useIsRuntimeDev();
   const { editPageViewId, mainMetaDataFields, setMainMetaDataFields, subEntities, setSubEntities } = pagesRuntimeSignal;
   const { loadPageComponentSchemas: loadFormPageComponentSchemas } = useFormEditorSignal;
+  const { setMainEntity, setSubEntities: setSubEntitiesToStore } = useAppEntityStore();
+  const { batchSetAppDict } = menuDictSignal;
   const [pageType, setPageType] = useState('');
   const [mainMetaData, setMainMetaData] = useState<string>('');
   const [newCompents, setNewCompents] = useState<any>();
@@ -90,11 +95,21 @@ const PreviewContainer = forwardRef<any, PreviewProps>((props: PreviewProps, ref
 
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
-    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
-    setMainMetaData(mainMetaData);
-    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
-    setMainMetaDataFields(entityWithChildren.parentFields);
-    setSubEntities(entityWithChildren.childEntities);
+    const entityUuid = await getPageSetMetaData({ pageSetId: pageSetId });
+    setMainMetaData(entityUuid);
+
+    // 使用 getEntityListWithFields 获取完整的字段信息（包含 dictTypeId）
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [entityUuid] });
+    const [entityWithChildren] = entityListWithFields;
+
+    if (entityWithChildren) {
+      // 设置 pagesRuntimeSignal（原有逻辑）
+      setMainMetaDataFields(entityWithChildren.fields);
+      setSubEntities(entityWithChildren.childEntities);
+
+      // 同步设置 useAppEntityStore，确保 SelectOne 等组件能获取枚举选项
+      setMainMetaDataToStore(entityWithChildren, setMainEntity, setSubEntitiesToStore, batchSetAppDict);
+    }
   };
 
   const updateComponentStatus = async () => {

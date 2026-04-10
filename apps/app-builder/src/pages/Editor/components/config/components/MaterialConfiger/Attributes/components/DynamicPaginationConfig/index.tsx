@@ -32,7 +32,9 @@ const DynamicPaginationConfig = ({ handlePropsChange, item, configs }: Props) =>
         <Checkbox
           checked={configs[paginationConfigKey]?.display}
           onChange={(value) => {
-            handlePropsChange(item.key, { ...configs[paginationConfigKey], display: value });
+            const pageSize = configs[paginationConfigKey]?.pageSize || 20;
+            const pagePosition = configs[paginationConfigKey]?.pagePosition || 'br';
+            handlePropsChange(item.key, { ...configs[paginationConfigKey], display: value, pageSize, pagePosition });
           }}
         >
           开启分页

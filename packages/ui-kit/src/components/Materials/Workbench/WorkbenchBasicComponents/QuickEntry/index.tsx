@@ -4,7 +4,7 @@ import type { CSSProperties } from 'react';
 import { memo, useMemo, useState } from 'react';
 import { ReactSVG } from 'react-svg';
 import { WORKBENCH_STATUS_OPTIONS, WORKBENCH_STATUS_VALUES, WORKBENCH_THEME_OPTIONS } from '../../core/constants';
-import type { QuickEntryTitleConfig, QuickEntryStyleConfig, QuickEntryGroupConfig } from '../../core/types';
+import type { QuickEntryStyleConfig, QuickEntryGroupConfig } from '../../core/types';
 import { mobileMenuIcons } from '@/utils/menuIcons';
 import { type XQuickEntryConfig } from './schema';
 import { getDefaultIcon } from './getDefaultIcon';
@@ -15,9 +15,12 @@ import CheckMoreModal from './checkMoreModal';
 // 主题三使用的颜色数组（对应 arcoPalette.primary 的颜色，添加 20% 透明度）
 const THEME_THREE_COLORS = ['#24b28f20', '#eb693a20', '#1979ff20', '#7e5aea20', '#009e9e20', '#ebbc0020'];
 
-const defaultTitleConfig: QuickEntryTitleConfig = {
-  showTitle: true,
-  titleName: '快捷入口',
+const defaultLabel: XQuickEntryConfig['label'] = {
+  text: '快捷入口',
+  display: true
+};
+
+const defaultTitleConfig: XQuickEntryConfig['titleConfig'] = {
   showMore: true,
   jumpType: 'internal',
   jumpPageId: '',
@@ -35,16 +38,17 @@ const defaultGroupConfig: QuickEntryGroupConfig = {
 };
 
 const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; preview?: boolean }) => {
-  const { id, status, width, titleConfig, styleConfig, groupConfig, runtime, preview } = props;
+  const { id, status, width, label, titleConfig, styleConfig, groupConfig, runtime, preview } = props;
   const { handleJump } = useJump();
   const [moreModalVisible, setMoreModalVisible] = useState(false);
 
+  const finalLabel = label || defaultLabel;
   const finalTitleConfig = titleConfig || defaultTitleConfig;
   const finalStyleConfig = styleConfig || defaultStyleConfig;
   const finalGroupConfig = groupConfig || defaultGroupConfig;
 
   const groups = finalGroupConfig?.groups ?? [];
-  const enableGroup = Boolean(finalGroupConfig?.enableGroup);
+  const enableGroup = Boolean(finalGroupConfig?.enableGroup ?? finalTitleConfig?.enableGroup);
 
   // 扁平化所有菜单图标，用于查找
   const allWebMenuIcons = useMemo(
@@ -221,7 +225,8 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
   const isHidden = status === statusValueHidden;
   const containerStyle: CSSProperties = {
     // width: width || '100%',
-    opacity: isHidden ? 0.4 : 1
+    opacity: isHidden ? 0.4 : 1,
+    height: '100%'
   };
 
   if (runtime && isHidden) {
@@ -254,13 +259,13 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
       className={`${styles.quickEntry} ${themeClass ? themeClassMap[themeClass] || '' : ''}`}
       style={containerStyle}
     >
-      {(finalTitleConfig?.showTitle || finalTitleConfig?.showMore) && (
+      {(finalLabel?.display || finalTitleConfig?.showMore) && (
         <div className={styles.quickEntryHeader}>
-          {finalTitleConfig?.showTitle && (
-            <span className={styles.quickEntryHeaderTitle}>{finalTitleConfig?.titleName || '快捷入口'}</span>
+          {finalLabel?.display && (
+            <span className={styles.quickEntryHeaderTitle}>{finalLabel?.text}</span>
           )}
           {finalTitleConfig?.showMore && (
-            <span className={styles.quickEntryMore} onClick={() => handleClickMore()}>
+            <span className={styles.quickEntryMore} style={runtime ? {cursor: 'pointer'} : {}} onClick={() => handleClickMore()}>
               更多 <IconRight />
             </span>
           )}
@@ -273,7 +278,7 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
         onClose={handleCloseMoreModal}
         runtime={runtime}
         preview={preview}
-        title={finalTitleConfig?.titleName}
+        title={finalLabel?.text}
         contentClassName={`${styles.quickEntryModalContent} ${styles.quickEntry} ${themeClass ? themeClassMap[themeClass] || '' : ''}`}
       >
         {renderContent(true)}

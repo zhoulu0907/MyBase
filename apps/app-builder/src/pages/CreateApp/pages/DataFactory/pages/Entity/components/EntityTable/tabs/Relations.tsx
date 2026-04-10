@@ -1,7 +1,9 @@
+import ActionButtons from '@/components/ActionButtons';
+import ResizableTable from '@/components/ResizableTable';
 import type { EntityListItem } from '@/pages/CreateApp/pages/DataFactory/utils/interface';
 import { useAppStore } from '@/store/store_app';
 import type { TableColumnProps } from '@arco-design/web-react';
-import { Button, Dropdown, Menu, Message, Space, Table, Tag } from '@arco-design/web-react';
+import { Button, Dropdown, Menu, Message, Space, Tag } from '@arco-design/web-react';
 import { getEntityRelations, deleteRelation } from '@onebase/app';
 import React, { useEffect, useState } from 'react';
 import { ALL_RELATIONSHIP_TYPE_MAP } from '@/pages/CreateApp/pages/DataFactory/utils/relation';
@@ -123,15 +125,16 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
     {
       title: '操作',
       key: 'operation',
+      width: 80,
       render: (_, record: RelationData) => (
-        <Space>
+        <ActionButtons>
           <Button type="text" size="mini" onClick={() => handleEditRelation(record)}>
             编辑
           </Button>
           <Button type="text" size="mini" status="danger" onClick={() => handleDelete(record)}>
             删除
           </Button>
-        </Space>
+        </ActionButtons>
       )
     }
   ];
@@ -180,7 +183,7 @@ const Relations: React.FC<RelationsProps> = ({ entity, activeTab, reloadList }) 
           </Button>
         </Dropdown>
       </div>
-      <Table
+      <ResizableTable
         columns={columns}
         data={relations}
         rowKey="id"

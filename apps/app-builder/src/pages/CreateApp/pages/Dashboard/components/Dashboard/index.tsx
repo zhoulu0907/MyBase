@@ -1,11 +1,11 @@
+import TablePagination from '@/components/TablePagination';
 import CreateDashboardModal from '@/components/CreateDashboardModal';
-import { Button, Form, Input, Modal, Pagination, Spin } from '@arco-design/web-react';
+import { Button, Form, Input, Modal, Spin } from '@arco-design/web-react';
 import { IconPlus, IconSearch } from '@arco-design/web-react/icon';
-import { useCallback, useEffect, useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 import ScreenCard from '../DashboardCard';
 import styles from './index.module.less';
 import { useSearchParams } from 'react-router-dom';
-import { throttle } from 'lodash-es';
 import {
   getDashboardListApi,
   editDashboardInfoApi,
@@ -35,42 +35,43 @@ const Dashboard: FC = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNo, setPageNo] = useState(1);
   const [searchText, setSearchText] = useState<string>('');
+  const [inputValue, setInputValue] = useState<string>('');
 
   const [dashboardData, setDashboardData] = useState<dataList>();
   const [searchParams] = useSearchParams();
   const appId = searchParams.get('appId');
   const dashboardType = 'dashboard';
-  const tokenInfo = TokenManager.getTokenInfo();
-  const tenantId = tokenInfo?.tenantId;
-  const accessToken = tokenInfo?.accessToken;
-  useEffect(() => {
-    setLoading(false);
-    console.log('tokenInfo:', tokenInfo);
-    getDashboardList();
-  }, []);
+  const tenantId = TokenManager.getCurIdentifyId();
+  const resourceUrl = getDashBoardURL();
 
-  const getDashboardList = async (searchText?: string, pageNo: number = 1) => {
+  useEffect(() => {
+    getDashboardList();
+  }, [pageNo, pageSize, searchText]);
+
+  const getDashboardList = async () => {
+    setLoading(true);
     const params = {
       page: pageNo,
       limit: pageSize,
       searchText: searchText
     };
     const res = await getDashboardListApi(params);
-    console.log('res:', res);
+    setLoading(false);
     setDataList(res.list);
     setTotal(res.total);
   };
-  const throttledSearch = useCallback(
-    throttle((value: string) => {
-      setPageNo(1); // 重置到第一页
-      getDashboardList(value); // 重新获取数据，传入搜索值
-    }, 1000), // 1000ms 节流延迟
-    [getDashboardList] // 依赖数组，只包含 getDashboardList
-  );
-  const resourceUrl = getDashBoardURL();
+
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleSearchChange = (value: string) => {
-    setSearchText(value);
-    throttledSearch(value);
+    setInputValue(value);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setSearchText(value);
+      setPageNo(1);
+    }, 1000);
   };
   // 创建大屏弹窗
   const [createForm] = Form.useForm();
@@ -83,7 +84,7 @@ const Dashboard: FC = () => {
     if (id) {
       const dashboardId = await getDashboardIdFromTemplateApi(id);
       console.log('dashboardId:', dashboardId);
-      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
     }
     if (!id && appId && tenantId) {
       const params = {
@@ -92,9 +93,8 @@ const Dashboard: FC = () => {
         appId: appId
       };
       const dashboardId = await getDashboardIdApi(params);
-      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}`, '_blank');
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
     }
-    // window.open(`${resourceUrl}chart/home/${id}/${appId}/${dashboardType}`, '_blank');
     setVisibleCreateScreenForm('');
     getDashboardList();
   };
@@ -126,14 +126,12 @@ const Dashboard: FC = () => {
   const handleEditCancel = () => {
     setEditVisible(false);
   };
-  //编辑大屏
   const handleEdit = (item: dataList) => {
-    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/${dashboardType}`, '_blank');
+    window.open(`${resourceUrl}chart/home/${item.id}/${appId}/${dashboardType}?tenantId=${tenantId}`, '_blank');
   };
-  //预览
   const handlePreview = (item: dataList) => {
     console.log('预览 item:', item);
-    window.open(`${resourceUrl}chart/preview/${item.id}/${dashboardType}`, '_blank');
+    window.open(`${resourceUrl}chart/preview/${item.id}/${dashboardType}?tenantId=${tenantId}`, '_blank');
   };
   // 删除弹框
   const [deleteVisible, setDeleteVisible] = useState<boolean>(false);
@@ -191,7 +189,7 @@ const Dashboard: FC = () => {
         suffix={<IconSearch />}
         onChange={handleSearchChange}
         placeholder="搜索"
-        value={searchText}
+        value={inputValue}
       />
       <Spin className={styles.appListLoading} loading={loading} size={40} tip="加载中...">
         <div className={styles.appList}>
@@ -208,15 +206,16 @@ const Dashboard: FC = () => {
           ))}
         </div>
       </Spin>
-      <Pagination
-        className={styles.appPagination}
-        total={total}
+      <TablePagination
         current={pageNo}
         pageSize={pageSize}
-        onChange={(pNo, pSize) => {
+        total={total}
+        onChange={(pNo) => {
           setPageNo(pNo);
+        }}
+        onPageSizeChange={(pSize) => {
           setPageSize(pSize);
-          getDashboardList(searchText, pNo);
+          setPageNo(1);
         }}
       />
       {/* 编辑弹框 */}

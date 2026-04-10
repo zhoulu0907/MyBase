@@ -30,6 +30,7 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const [form] = Form.useForm();
+  const isHydratingFormRef = useRef(false);
 
   useEffect(() => {
     setItems(
@@ -72,6 +73,7 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
     const item = items.find((item) => item.id === id);
     if (!item) return;
 
+    isHydratingFormRef.current = true;
     form.setFieldsValue({
       title: item.title || item.text || '',
       image: item.image || '',
@@ -79,6 +81,11 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
       internalPageId: item.internalPageId || '',
       url: item.url || ''
     });
+    setSelectedKeys(item.internalPageId ? [item.internalPageId] : []);
+    queueMicrotask(() => {
+      isHydratingFormRef.current = false;
+    });
+
     setEditingId(id);
     setDrawerVisible(true);
   };
@@ -109,26 +116,22 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
   const handleDrawerClose = () => {
     setDrawerVisible(false);
     setEditingId(null);
+    setSelectedKeys([]);
     form.resetFields();
   };
 
-  const [pendingValues, setPendingValues] = useState<CarouselItem | null>(null);
+  const handleFormValuesChange = useCallback(
+    (_: Record<string, unknown>, allValues: CarouselItem) => {
+      if (editingId === null || isHydratingFormRef.current) {
+        return;
+      }
 
-  useEffect(() => {
-    if (editingId === null || !pendingValues) {
-      return;
-    }
-    setItems((prevItems) => {
-      const newItems = prevItems.map((item) => (item.id === editingId ? { ...item, ...pendingValues } : item));
+      const newItems = items.map((item) => (item.id === editingId ? { ...item, ...allValues } : item));
+      setItems(newItems);
       onConfigChange(newItems);
-      return newItems;
-    });
-    setPendingValues(null);
-  }, [editingId, onConfigChange, pendingValues]);
-
-  const handleFormValuesChange = useCallback((_: Record<string, unknown>, allValues: CarouselItem) => {
-    setPendingValues(allValues);
-  }, []);
+    },
+    [editingId, items, onConfigChange]
+  );
 
   const handleUpload = async (file: File, onProgress?: (percent: number, event?: ProgressEvent) => void) => {
     const formData = new FormData();
@@ -173,7 +176,7 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
               const uploadImgId = await handleUpload(file);
               if (uploadImgId !== '') {
                 form.setFieldValue('image', uploadImgId);
-                setPendingValues(form.getFieldsValue());
+                handleFormValuesChange({}, form.getFieldsValue() as CarouselItem);
                 Message.success('图片上传成功');
               } else {
                 Message.error('图片上传失败');
@@ -186,7 +189,7 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
         }
       }
     },
-    [maxSizeMB, form]
+    [maxSizeMB, form, handleFormValuesChange]
   );
 
   // 处理文件选择上传
@@ -209,7 +212,7 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
       if (uploadImgId !== '') {
         const urlImg = getFileUrlById(uploadImgId);
         form.setFieldValue('image', urlImg);
-        setPendingValues(form.getFieldsValue() as CarouselItem);
+        handleFormValuesChange({}, form.getFieldsValue() as CarouselItem);
         Message.success('图片上传成功');
       } else {
         Message.error('图片上传失败');
@@ -235,7 +238,10 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
   }, [drawerVisible, handlePaste]);
 
   const handleMenuChange = (value: string | string[]) => {
-    setSelectedKeys(Array.isArray(value) ? value : [value]);
+    const nextKeys = Array.isArray(value) ? value : [value];
+    setSelectedKeys(nextKeys);
+    form.setFieldValue('internalPageId', nextKeys[0] || '');
+    handleFormValuesChange({}, form.getFieldsValue() as CarouselItem);
   };
 
   return (
@@ -281,8 +287,8 @@ const StaticCarouselList = ({ carouselConfig, maxSizeMB = 5, onConfigChange }: S
           className={attributeStyles.attributes}
           onValuesChange={handleFormValuesChange}
         >
-          <FormItem label="图片标题" field="title">
-            <Input placeholder="请输入图片标题" />
+          <FormItem label="图片标题" field="title" rules={[{ maxLength: 20, message: '标题名称不能超过20个字符' }]}> 
+            <Input placeholder="请输入图片标题" maxLength={20} />
           </FormItem>
           <FormItem label="轮播图片" field="image">
             <Form.Item noStyle shouldUpdate={(prev, next) => prev.image !== next.image}>

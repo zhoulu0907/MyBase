@@ -1,0 +1,29 @@
+@import '../common.module.less';
+
+.settingPageContent {
+  padding: 8px;
+  padding-right: 12px;
+  box-sizing: border-box;
+  background-image: url('../../../../../assets/images/application_setting.svg');
+  background-repeat: no-repeat;
+  background-color: transparent;
+  background-size: cover;
+}
+.settingPageContentMain {
+  background-color: transparent;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.contentInner {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* background-color: #fff; */
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

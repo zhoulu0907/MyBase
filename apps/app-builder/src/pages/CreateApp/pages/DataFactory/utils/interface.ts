@@ -101,6 +101,8 @@ export interface EntityListItem {
   id: string;
   displayName: string;
   code: string;
+  entityUuid?: string;
+  tableName?: string;
 }
 
 // 资产关系

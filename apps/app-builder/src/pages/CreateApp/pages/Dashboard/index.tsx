@@ -1,10 +1,10 @@
-import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg';
+// import baseSettingSVG from '@/assets/images/appRelease/base_setting.svg'; // 隐藏数据集管理
 import appPermissionSVG from '@/assets/images/appRelease/app_auth.svg';
 import appReleaseSVG from '@/assets/images/appRelease/app_release.svg';
 import { ReactSVG } from 'react-svg';
 import { Layout, Menu } from '@arco-design/web-react';
 import { useEffect, useState, type FC } from 'react';
-import DataSet from './components/DataSet';
+// import DataSet from './components/DataSet'; // 隐藏数据集管理
 import Dashboard from './components/Dashboard';
 import DashboardTemplate from './components/DashboardTemplate';
 import AppBreadcrumb from '@/components/Breadcrumb';
@@ -20,15 +20,15 @@ interface BreadcrumbItemType {
 
 const DashboardPage: FC = () => {
   const menuData = [
-    { title: '数据集', icon: baseSettingSVG, key: 'dataSet' },
+    // { title: '数据集', icon: baseSettingSVG, key: 'dataSet' }, // 隐藏数据集管理
     { title: '大屏', icon: appPermissionSVG, key: 'largeScreen' },
     { title: '大屏模板', icon: appReleaseSVG, key: 'screenTemplate' }
   ];
 
-  const [activeTab, setActiveTab] = useState('dataSet');
+  const [activeTab, setActiveTab] = useState('largeScreen');
   const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItemType[]>([
     { key: 'screenTemplate', title: '大屏报表' },
-    { key: 'dataSet', title: '数据集' }
+    { key: 'largeScreen', title: '大屏' }
   ]); // 菜单路径
   const [collapsed, setCollapsed] = useState<boolean>(false);
   const handleMenuClick = (key: string) => {
@@ -76,7 +76,7 @@ const DashboardPage: FC = () => {
           <AppBreadcrumb items={breadcrumbItems} />
           <Content className={styles.content}>
             <div className={styles.contentInner}>
-              {activeTab === 'dataSet' && <DataSet />}
+              {/* {activeTab === 'dataSet' && <DataSet />} */}
               {activeTab === 'largeScreen' && <Dashboard />}
               {activeTab === 'screenTemplate' && <DashboardTemplate />}
             </div>
