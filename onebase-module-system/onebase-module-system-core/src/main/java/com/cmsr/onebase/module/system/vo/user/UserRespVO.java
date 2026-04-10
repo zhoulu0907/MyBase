@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.system.vo.user;
 
 import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
 import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.NicknameDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.UsernameDesensitize;
 import com.cmsr.onebase.framework.excel.core.annotations.DictFormat;
 import com.cmsr.onebase.framework.excel.core.convert.DictConvert;
 import com.cmsr.onebase.module.system.enums.DictTypeConstants;
@@ -26,10 +28,12 @@ public class UserRespVO{
 
     @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("用户名称")
+    @UsernameDesensitize
     private String username;
 
     @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
     @ExcelProperty("用户昵称")
+    @NicknameDesensitize
     private String nickname;
 
     @Schema(description = "备注", example = "我是一个用户")

@@ -2,6 +2,8 @@ package com.cmsr.onebase.module.system.vo.auth;
 
 import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
 import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.NicknameDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.UsernameDesensitize;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -42,6 +44,7 @@ public class AuthPermissionInfoRespVO {
         private Long id;
 
         @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户")
+        @NicknameDesensitize
         private String nickname;
 
         @Schema(description = "用户头像", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.cmsr.com")
@@ -51,6 +54,7 @@ public class AuthPermissionInfoRespVO {
         private Long deptId;
 
         @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+        @UsernameDesensitize
         private String username;
 
         @Schema(description = "用户邮箱", example = "onebase@aaa.com")

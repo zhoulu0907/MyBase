@@ -2,15 +2,19 @@ package com.cmsr.onebase.module.system.vo.tenant;
 
 import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
 import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.NicknameDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.UsernameDesensitize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
 public class TenantAdminUserResVO {
     @Schema(description = "管理员昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminNickName")
+    @NicknameDesensitize
     private String adminNickName;
 
     @Schema(description = "管理员账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminUserName")
+    @UsernameDesensitize
     private String adminUserName;
 
     @Schema(description = "管理员手机", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminMobile")

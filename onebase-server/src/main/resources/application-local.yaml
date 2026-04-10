@@ -38,6 +38,12 @@ debug: false
 
 # OneBase配置项，设置当前项目所有自定义的配置
 onebase:
+  # 脱敏配置 - 配置文件优先模式
+  desensitize:
+    # 需要脱敏的字段（逗号分隔），可选值：mobile,email,nickname,username
+    fields: mobile,email,nickname,username
+    # 是否启用配置文件优先模式，默认true
+    config-first: true
   plugin:
     enabled: false # 编辑态(onebase-server)禁用插件系统，避免加载 plugins 目录的插件
     plugins-dir: /opt/plugins # 插件目录路径

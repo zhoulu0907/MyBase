@@ -1,28 +1,27 @@
 package com.cmsr.onebase.framework.desensitize.serializer;
 
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.util.spring.SpringContextHolder;
+import com.cmsr.onebase.framework.desensitize.config.DesensitizeProperties;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import jakarta.annotation.Resource;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Set;
 
 /**
- * @Author：huangjie
- * @Date：2025/8/31 9:37
+ * 邮箱脱敏序列化器
+ *
+ * 脱敏规则：前1位 + ** + @后缀（如：g**@163.com）
+ *
+ * 配置优先级：
+ * 1. 配置文件 onebase.desensitize.fields（优先）
+ * 2. 数据库租户配置
  */
 public class EMailJsonSerializer extends JsonSerializer<String> {
 
-    @Resource
-    private SecurityConfigApi securityConfigApi;
-
-    /**
-     * [电子邮箱] 邮箱前缀仅显示第一个字母，前缀其他隐藏，用星号代替，@及后面的地址显示
-     * <例子:g**@163.com>
-     */
     @Override
     public void serialize(String value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         if (StringUtils.isEmpty(value)) {
@@ -30,14 +29,13 @@ public class EMailJsonSerializer extends JsonSerializer<String> {
             return;
         }
 
-        // 获取租户配置项
-        Set<String> tenantConfigValues = securityConfigApi.getTenantDesensitizedFieldValues();
-
-        if (!tenantConfigValues.contains("email")) {
+        // 检查是否需要脱敏
+        if (!shouldDesensitize("email")) {
             gen.writeString(value);
             return;
         }
 
+        // 邮箱脱敏：前1位 + ** + @后缀
         int index = value.indexOf("@");
         if (index <= 1) {
             gen.writeString(value);
@@ -49,4 +47,28 @@ public class EMailJsonSerializer extends JsonSerializer<String> {
         gen.writeString(begin + stars + end);
     }
 
+    /**
+     * 判断字段是否需要脱敏
+     * 优先使用配置文件配置，否则使用数据库配置
+     */
+    private boolean shouldDesensitize(String fieldName) {
+        if (!SpringContextHolder.isInitialized()) {
+            return false;
+        }
+
+        // 尝试获取配置属性
+        DesensitizeProperties properties = SpringContextHolder.getBean(DesensitizeProperties.class);
+        if (properties != null && properties.useConfigFirst()) {
+            return properties.getDesensitizeFields().contains(fieldName);
+        }
+
+        // 使用数据库配置
+        SecurityConfigApi securityConfigApi = SpringContextHolder.getBean(SecurityConfigApi.class);
+        if (securityConfigApi != null) {
+            Set<String> tenantConfigValues = securityConfigApi.getTenantDesensitizedFieldValues();
+            return tenantConfigValues.contains(fieldName);
+        }
+
+        return false;
+    }
 }

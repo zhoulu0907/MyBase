@@ -265,10 +265,13 @@ public class AiProxyController {
     /**
      * 判断路径是否为文件上传接口
      *
+     * <p>包含 /upload 的路径且有 multipart 请求体的都会进行文件类型验证，
+     * 例如：aidoc/file/upload、copilot/image/upload、ai-app/upload</p>
+     *
      * @param path 请求路径
      * @return 是否为文件上传接口
      */
     private static boolean isFileUploadPath(String path) {
-        return path != null && path.contains("/file/upload");
+        return path != null && path.contains("/upload");
     }
 }

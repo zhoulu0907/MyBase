@@ -94,6 +94,13 @@ onebase:
   info:
     version: 1.0.0
     base-package: com.cmsr.onebase
+  # 脱敏配置
+  desensitize:
+    # 需要脱敏的字段（逗号分隔），可选值：mobile,email,nickname,username
+    # 配置此值后将优先使用，不再查询数据库配置
+    fields: mobile,email,nickname,username
+    # 是否启用配置文件优先模式，默认true
+    config-first: true
   sign:
     request-timeout: 86400 # 签名请求超时时间（秒）
   file-upload:
