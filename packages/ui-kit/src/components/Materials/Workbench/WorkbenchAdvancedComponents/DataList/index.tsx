@@ -124,9 +124,12 @@ const XDataList = memo((props: XDataListConfig & { runtime?: boolean }) => {
   };
 
   useEffect(() => {
-    const customCols = tableInfo?.columns.map(item => ({
+    // 临时处理：不显示bpm表单相关字段
+    const originCols = tableInfo?.columns?.filter(item => item.dataIndex.indexOf('bpm_') < 0);
+    const customCols = originCols?.map(item => ({
       ...(item as ColumnDef),
       ellipsis: true,
+      width: item?.width || 150,
       headerCellStyle: { whiteSpace: 'nowrap' as const },
     }));
 

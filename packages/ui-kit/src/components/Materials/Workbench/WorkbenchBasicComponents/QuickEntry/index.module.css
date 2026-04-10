@@ -33,7 +33,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  width: 190px;
+  width: 8em;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
@@ -73,7 +73,6 @@
   text-align: center;
   padding: 8px;
   color: var(--color-neutral-6);
-  cursor: pointer;
   font-size: 14px;
   white-space: nowrap;
 }
@@ -88,7 +87,7 @@
 .quickEntryThemeThree .quickEntryItems {
   display: grid;
   justify-content: space-between;
-  grid-template-columns: repeat(auto-fit, max(22%, 190px));
+  grid-template-columns: repeat(auto-fit, max(22%, 8em));
   gap: min(10px);
   border-radius: 8px;
 }
@@ -101,7 +100,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  min-width: 190px;
+  min-width: 8em;
   padding: 16px;
   border-radius: 8px;
   box-sizing: border-box;
