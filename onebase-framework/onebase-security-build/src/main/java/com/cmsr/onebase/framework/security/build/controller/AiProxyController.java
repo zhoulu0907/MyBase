@@ -69,24 +69,29 @@ public class AiProxyController {
         }
 
         // === 文件上传安全验证 ===
-        if (isFileUploadPath(path) && FileValidateUtil.isMultipartRequest(request)) {
+        // 注意：DisableMultipartFilter 会伪装 Content-Type，需要先创建 CachedMultipartRequestWrapper
+        // 来恢复真实的 Content-Type，才能正确判断是否 multipart 请求
+        if (isFileUploadPath(path)) {
             try {
-                // 使用缓存 wrapper 包装请求，允许多次读取流
+                // 创建缓存 wrapper，它会恢复真实的 Content-Type 并支持 getParts()
                 CachedMultipartRequestWrapper wrappedRequest = new CachedMultipartRequestWrapper(request);
 
-                // 验证文件类型
-                if (!FileValidateUtil.validateMultipartFiles(wrappedRequest)) {
-                    log.warn("[proxy] 文件类型验证失败，拒绝请求: path={}", path);
-                    response.setStatus(HttpStatus.BAD_REQUEST.value());
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"code\":400,\"msg\":\"文件类型不允许\"}");
+                // 用 wrapper 判断是否 multipart 请求（wrapper 恢复了真实 Content-Type）
+                if (FileValidateUtil.isMultipartRequest(wrappedRequest)) {
+                    // 验证文件类型
+                    if (!FileValidateUtil.validateMultipartFiles(wrappedRequest)) {
+                        log.warn("[proxy] 文件类型验证失败，拒绝请求: path={}", path);
+                        response.setStatus(HttpStatus.BAD_REQUEST.value());
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.getWriter().write("{\"code\":400,\"msg\":\"文件类型不允许\"}");
+                        return;
+                    }
+
+                    // 验证通过，使用缓存的请求继续处理
+                    log.debug("[proxy] 文件类型验证通过: path={}", path);
+                    doProxy(wrappedRequest, response, path, base);
                     return;
                 }
-
-                // 验证通过，使用缓存的请求继续处理
-                log.debug("[proxy] 文件类型验证通过: path={}", path);
-                doProxy(wrappedRequest, response, path, base);
-                return;
             } catch (Exception e) {
                 log.error("[proxy] 文件验证异常: path={}, error={}", path, e.getMessage());
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
