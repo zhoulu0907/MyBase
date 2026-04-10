@@ -595,6 +595,8 @@ public class BuildAuthServiceImpl implements BuildAuthService {
 
         // 发送请求
         String responseBody = OkHttpClientUtils.sendRequest(request, Boolean.TRUE.equals(config.getHttpDebugLogEnabled()));
+        log.info("getTianGongAccessToken，http response： {}", responseBody);
+
         JSONObject tokenObj = JSONUtil.parseObj(responseBody);
         String accessToken = tokenObj.getStr("access_token");
         if (StringUtils.isBlank(accessToken)) {
@@ -616,13 +618,14 @@ public class BuildAuthServiceImpl implements BuildAuthService {
                 .build();
         
         String userInfoResponseBody = OkHttpClientUtils.sendRequest(request, Boolean.TRUE.equals(config.getHttpDebugLogEnabled()));
-        
+        log.info("getTianGongUserInfo，http response： {}", userInfoResponseBody);
+
         // 解析响应
         JSONObject userObj = JSONUtil.parseObj(userInfoResponseBody);
         Integer status = userObj.getInt("code");
         
         if (!NumberUtils.INTEGER_ZERO.equals(status)) {
-            log.info("获取用户信息失败，msg={}", userObj.get("message"));
+            log.error("获取用户信息失败，msg={}", userObj.get("message"));
             throw exception(TIAN_GONG_OAUTH2_GET_USER_INFO_FAILED);
         }
         
