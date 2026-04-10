@@ -1,6 +1,5 @@
 //登录设置
 import loginBg from '@/assets/images/login_bg.svg';
-import loginBgMask from '@/assets/images/login_bg_mask.svg';
 import { Button, Card, Radio, Space, Spin, Switch, Typography, Message } from '@arco-design/web-react';
 import { IconRefresh, IconUpload } from '@arco-design/web-react/icon';
 import { getRuntimeMobileURL, getRuntimeURL, TokenManager, UploadCommonComponent } from '@onebase/common';
@@ -9,7 +8,7 @@ import {
   updateAppNavigationConfig,
   type GetAppNavigationConfigRes
 } from '@onebase/app';
-import { uploadFile } from '@onebase/platform-center';
+import { downloadFile, uploadFile } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
 import ExternalLoginLinks from './ExternalLoginLinks';
 import styles from './index.module.less';
@@ -35,7 +34,10 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
       const res = await getAppNavigationConfig({ id: appId });
       setConfigData(res);
       if (res.appLoginMainPic) {
-        setImageUrl(res.appLoginMainPic);
+        const url = await downloadFile(res.appLoginMainPic, appId);
+        if (url) {
+          setImageUrl(url);
+        }
       }
     } catch (error) {
       console.error('获取配置失败:', error);
@@ -79,7 +81,6 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
       const res = await uploadFile(formData, onProgress);
       if (res) {
         await updateConfig({ appLoginMainPic: res });
-        setImageUrl(res);
       }
       return res;
     } catch (error) {
@@ -89,9 +90,20 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
     }
   };
 
+  const handleImageUrlUpdate = async (fileId: string) => {
+    if (fileId) {
+      const url = await downloadFile(fileId, appId);
+      if (url) {
+        setImageUrl(url);
+      }
+    } else {
+      setImageUrl('');
+    }
+  };
+
   const handleResetImage = async () => {
     await updateConfig({ appLoginMainPic: '' });
-    setImageUrl(loginBgMask);
+    setImageUrl('');
   };
 
   const getConfigValue = (key: keyof GetAppNavigationConfigRes) => {
@@ -128,11 +140,8 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
           <Card className={styles.previewImage} bodyStyle={{ padding: 0 }}>
             {/* TODO(shenyue): 改成真实渲染 */}
             <div className={styles.wrapper}>
-              <div
-                className={styles.loginPageLeft}
-                style={{ backgroundImage: `url(${imageUrl ? imageUrl : loginBgMask})` }}
-              >
-                <img src={loginBg} alt="loginBg" className={styles.loginBg} />
+              <div className={styles.loginPageLeft}>
+                <img src={imageUrl || loginBg} alt="loginBg" className={styles.loginBg} />
               </div>
               <div className={styles.loginPageRight}>
                 <LoginForm
@@ -157,7 +166,7 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
             <>
               <UploadCommonComponent
                 imagePreview={true}
-                onUpdateUrl={setImageUrl}
+                onUpdateUrl={handleImageUrlUpdate}
                 uploadRef={uploadRef}
                 getUploadFile={handleImageUpload}
               />

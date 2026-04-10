@@ -336,9 +336,11 @@ const Right: React.FC<RightProps> = ({ appInfo, appId, tenantId }) => {
               <Checkbox checked={rememberMe} onChange={handleRememberMeChange}>
                 {t('auth.rememberMe')}
               </Checkbox>
-              <Button type="text" size="small">
-                {t('auth.forgotPassword')}
-              </Button>
+              {appInfo?.appUserForgetPwdShow == 1 && (
+                <Button type="text" size="small">
+                  {t('auth.forgotPassword')}
+                </Button>
+              )}
             </Space>
           </Form.Item>
 
