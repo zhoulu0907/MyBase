@@ -529,8 +529,19 @@ export default function EditorHeader() {
         wbComponentSchemas: cloneDeep(wbComponentSchemas.value || {})
       };
 
-      await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
-      setSaveLoading(false);
+      try {
+        await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
+      } catch (error) {
+        console.error('保存失败:', error);
+        Message.error('保存失败');
+      } finally {
+        setSaveLoading(false);
+      }
+
+      if (exit) {
+        backToPageManager();
+      }
+
       return;
     }
 

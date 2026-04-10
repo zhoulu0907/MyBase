@@ -128,8 +128,21 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
 
   const handleOpenEditDrawer = useCallback(
     (item: EntryItem) => {
-      const normalizedItem = { ...item, id: item.entryId };
+      const defaultEntryValues: Partial<EntryItem> = {
+        entryIcon: '',
+        entryDesc: '',
+        entryType: 'menu',
+        menuUuid: '',
+        linkAddress: '',
+        group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME
+      };
+      const normalizedItem = {
+        ...defaultEntryValues,
+        ...item,
+        id: item.entryId
+      };
 
+      form.resetFields();
       form.setFieldsValue(normalizedItem);
       setState({
         ...state,
@@ -222,7 +235,7 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
         return { ...prev, selectMenuModalVisible: false };
       });
     },
-    [normalizedValue, onChange, state.entries]
+    [normalizedValue, onChange]
   );
 
   const handleSortListChange = useCallback(
