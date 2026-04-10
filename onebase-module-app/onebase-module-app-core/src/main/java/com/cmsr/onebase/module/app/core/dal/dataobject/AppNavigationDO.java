@@ -50,4 +50,26 @@ public class AppNavigationDO extends BaseBizEntity implements Serializable {
     @Column(value = "mobile_nav_layout", comment = "移动端导航布局")
     private String mobileNavLayout;
 
+    /**
+     * appThirdUserEnable 0-不启用第三方登录 1-启用第三方登录
+     */
+    @Column(value = "app_third_user_enable", comment = "启用三方登录")
+    private String appThirdUserEnable;
+
+    /**
+     * 0-不显示 1-显示
+     */
+    @Column(value = "app_user_register_show", comment = "显示注册入口")
+    private String appUserRegisterShow;
+    /**
+     *  0-不显示 1-显示
+     */
+    @Column(value = "app_user_forgetpwd_show", comment = "显示忘记密码入口")
+    private String appUserForgetPwdShow;
+    /**
+     * 登录页主图，文件ID
+     */
+    @Column(value = "app_login_main_pic", comment = "登录页主图")
+    private String appLoginMainPic;
+
 }

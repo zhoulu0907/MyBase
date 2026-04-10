@@ -341,7 +341,7 @@ public class MetadataDataMethodCreateImpl extends AbstractMetadataDataMethodCore
             // 获取主键值
             Object primaryKeyValue = getPrimaryKeyValue(processedData, fields);
 
-            // AnyLine开启事务
+            // 事务引擎===》开启事务
             TransactionState transactionState = temporaryService.start();
             try {
                 Object insertResult = temporaryService.insert(quoteTableName(entity.getTableName()), dataRow);

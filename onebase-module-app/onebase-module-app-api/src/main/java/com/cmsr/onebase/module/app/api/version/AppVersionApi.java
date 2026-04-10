@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.app.api.version;
 
+import com.cmsr.onebase.module.app.api.version.dto.AppNavigationDTO;
 import com.cmsr.onebase.module.app.api.version.dto.AppVersionDTO;
 
 /**
@@ -8,7 +9,8 @@ import com.cmsr.onebase.module.app.api.version.dto.AppVersionDTO;
  */
 public interface AppVersionApi {
 
-    AppVersionDTO getAppThirdEnableStatus(Long appId);
+    AppVersionDTO getAppVersionRuntime(Long appId);
 
 
+    AppNavigationDTO getAppNavigationRuntime(Long applicationId);
 }
