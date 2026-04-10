@@ -1,7 +1,6 @@
 //登录设置
 import loginBg from '@/assets/images/login_bg.svg';
 import loginBgMask from '@/assets/images/login_bg_mask.svg';
-import { useAppStore } from '@/store';
 import { Button, Card, Radio, Space, Spin, Switch, Typography, Message } from '@arco-design/web-react';
 import { IconRefresh, IconUpload } from '@arco-design/web-react/icon';
 import { getRuntimeMobileURL, getRuntimeURL, TokenManager, UploadCommonComponent } from '@onebase/common';
@@ -12,7 +11,6 @@ import {
 } from '@onebase/app';
 import { uploadFile } from '@onebase/platform-center';
 import { useEffect, useRef, useState } from 'react';
-import { thirdUserConfigKey } from './constant';
 import ExternalLoginLinks from './ExternalLoginLinks';
 import styles from './index.module.less';
 import LoginForm from './loginForm';
@@ -81,9 +79,9 @@ const LoginPermission: React.FC<ILoginPermissionProps> = ({ appId }) => {
       const res = await uploadFile(formData, onProgress);
       if (res) {
         await updateConfig({ appLoginMainPic: res });
-        setImageUrl(res.id);
+        setImageUrl(res);
       }
-      return res.id;
+      return res;
     } catch (error) {
       console.error('上传图片失败:', error);
       Message.error('上传图片失败');
