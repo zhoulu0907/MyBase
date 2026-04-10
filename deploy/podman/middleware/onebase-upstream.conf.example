@@ -1,0 +1,24 @@
+# 后端 API Upstream 配置
+# 请根据实际后端地址修改 server 行
+#
+# 使用方式：
+# 1. 复制此文件为 onebase-upstream.conf（去掉 .example 后缀）
+# 2. 修改 server 地址为实际后端服务地址
+# 3. 前端网关会自动通过 include 引用此配置
+
+upstream onebase-backend {
+    # 后端服务地址（请修改为实际地址）
+    # 示例格式：
+    #   server 127.0.0.1:8080;        # 本地后端
+    #   server 10.0.1.100:8080;       # 远程后端 IP
+    #   server backend.example.com;   # 后端域名
+    server 127.0.0.1:8080;
+
+    # 可选：负载均衡配置
+    # keepalive 32;
+}
+
+upstream onebase-flink {
+    # Flink 服务地址（请修改为实际地址）
+    server 127.0.0.1:8081;
+}
