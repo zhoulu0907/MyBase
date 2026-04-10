@@ -14,11 +14,15 @@ const Sider = Layout.Sider;
  * 工作台面板容器组件
  * 包含左侧标签页和右侧内容区域
  */
-export default function WorkbenchPanel() {
+export default function WorkbenchPanel({ props }: any) {
   const [activeLeftTabKey, setActiveLeftTabKey] = useState<'material'>('material');
   const [childCollapsed, setChildCollapsed] = useState<'material' | undefined>('material');
   const [showSearchInput, setShowSearchInput] = useState<boolean>(false);
   const [keyword, setKeyword] = useState<string>('');
+
+  const {
+    workbenchComponents: currentComponents
+  } = props;
 
   return (
     <div
@@ -91,7 +95,7 @@ export default function WorkbenchPanel() {
 
           <div className={styles.rightBody}>
             <div className={styles.componentList}>
-              <WorkbenchPanelContent keyword={keyword} />
+              <WorkbenchPanelContent keyword={keyword} currentComponents={currentComponents}/>
             </div>
           </div>
         </Sider>

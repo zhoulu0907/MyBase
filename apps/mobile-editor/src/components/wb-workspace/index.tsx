@@ -5,7 +5,8 @@ import {
   COMPONENT_GROUP_NAME,
   type GridItem,
   getWorkbenchComponentWidth,
-  WORKBENCH_COMPONENT_TYPES
+  WORKBENCH_COMPONENT_TYPES,
+  type WorkbenchComponentType
 } from '@onebase/ui-kit';
 import {
   EditRender,
@@ -46,7 +47,6 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
   // 直接从 props 获取数据和函数（已在 WorkbenchEditor 中合并处理）
   const {
     setEditMode,
-    editMode,
     workbenchComponents: currentComponents,
     wbComponentSchemas: currentSchemas,
     setWorkbenchComponents,
@@ -63,11 +63,16 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
 
   // 移动端过滤掉数据列表组件
   const displayComponents = currentComponents?.filter((cp: GridItem) => cp.type !== WORKBENCH_COMPONENT_TYPES.DATA_LIST);
+  const getCurrentComponents = () => currentComponents?.filter((cp: GridItem) => cp.type !== WORKBENCH_COMPONENT_TYPES.DATA_LIST) ?? [];
 
   // 处理组件列表变化
   useEffect(() => {
     setShowEmpty(displayComponents?.length === 0);
   }, [displayComponents]);
+
+
+  const selectedComponent = displayComponents?.find((cp: GridItem) => cp.id === curComponentID);
+  const selectedComponentSchema = curComponentID ? currentSchemas?.[curComponentID] : undefined;
 
   // 事件处理hooks
   const handlers = useWorkbenchHandlers({
@@ -80,7 +85,8 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
     setCurComponentID,
     clearCurComponentID,
     setCurComponentSchema,
-    setShowDeleteButton
+    setShowDeleteButton,
+    getCurrentComponents
   });
 
   // 初始化时设置页面配置
@@ -117,7 +123,7 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
         <ReactSortable
           id="workspace-content"
           list={displayComponents ?? []}
-          setList={setWorkbenchComponents}
+          setList={() => {}}
           group={{ name: COMPONENT_GROUP_NAME, put: true }}
           filter={SORTABLE_CONFIG.filter}
           preventOnFilter={SORTABLE_CONFIG.preventOnFilter}
@@ -130,88 +136,87 @@ const WorkbenchWorkspace: React.FC<EditorWorkspaceProps> = ({ props }) => {
         >
           {(displayComponents ?? [])
             .filter((cp: GridItem) => cp.type !== 'entity')
-            .map((cp: GridItem) => (
-              <div
-                key={cp.id}
-                data-cp-type={cp.type}
-                data-cp-displayname={cp.displayName}
-                data-cp-id={cp.id}
-                className={styles.componentItem}
-                style={{
-                  width: `calc(${getWorkbenchComponentWidth(currentSchemas[cp.id], cp.type)} - 8px)`,
-                  borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
-                  borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
-                  background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
-                  margin: '4px'
-                }}
-                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                  e.stopPropagation();
-                  console.log('点击组件: ', cp.id);
+            .map((cp: GridItem) => {
+              // 快捷入口和欢迎卡片组件仅能有一个，不可复制
+              const canNotCopy =
+                cp.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY ||
+                cp.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD;
 
-                  setCurComponentID(cp.id);
+              return (
+                <div
+                  key={cp.id}
+                  data-cp-type={cp.type}
+                  data-cp-displayname={cp.displayName}
+                  data-cp-id={cp.id}
+                  className={styles.componentItem}
+                  style={{
+                    width: `calc(${getWorkbenchComponentWidth(currentSchemas[cp.id], cp.type as WorkbenchComponentType)} - 8px)`,
+                    borderColor: curComponentID === cp.id ? 'rgb(var(--primary-6))' : '',
+                    borderStyle: curComponentID === cp.id ? 'solid' : 'dashed',
+                    background: curComponentID === cp.id ? 'rgb(var(--primary-1))' : '',
+                    margin: '4px'
+                  }}
+                  onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                    e.stopPropagation();
+                    console.log('点击组件: ', cp.id);
+                    handlers.handleSelectComponent(cp.id, cp);
+                  }}
+                >
+                  <EditRender
+                    cpId={cp.id}
+                    cpType={cp.type}
+                    runtime={false}
+                    pageComponentSchema={currentSchemas[cp.id]}
+                  />
 
-                  const curComponentSchema = {
-                    id: cp.id,
-                    type: cp.type,
-                    displayName: cp.displayName,
-                    ...currentSchemas[cp.id]
-                  };
+                  {selectedComponent?.id === cp.id && showDeleteButton && (
+                    <div className={styles.operationArea}>
+                      {selectedComponentSchema?.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                        <>
+                          <div
+                            className={styles.copyButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.debug('取消隐藏组件: ', cp);
+                              handlers.handleShowComponent(cp.id);
+                            }}
+                          >
+                            <img src={CompShowIcon} alt="component show" />
+                          </div>
+                          <span>|</span>
+                        </>
+                      )}
 
-                  setCurComponentSchema(curComponentSchema);
-
-                  setShowDeleteButton(true);
-                }}
-              >
-                <EditRender
-                  cpId={cp.id}
-                  cpType={cp.type}
-                  runtime={false}
-                  pageComponentSchema={currentSchemas[cp.id]}
-                />
-
-                {curComponentID === cp.id && showDeleteButton && (
-                  <div className={styles.operationArea}>
-                    {currentSchemas[cp.id]?.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
-                      <>
-                        <div
-                          className={styles.copyButton}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.debug('取消隐藏组件: ', cp);
-                            handlers.handleShowComponent(cp.id);
-                          }}
-                        >
-                          <img src={CompShowIcon} alt="component show" />
-                        </div>
-                        <span>|</span>
-                      </>
-                    )}
-
-                    <div
-                      className={styles.copyButton}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('复制组件: ', cp);
-                        handlers.handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
-                      }}
-                    >
-                      <img src={CompCopyIcon} alt="component copy" />
+                      {!canNotCopy && (
+                        <>
+                          <div
+                            className={styles.copyButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              console.log('复制组件: ', cp);
+                              handlers.handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id);
+                            }}
+                          >
+                            <img src={CompCopyIcon} alt="component copy" />
+                          </div>
+                          <span>|</span>
+                        </>
+                      )}
+                      <div
+                        className={styles.deleteButton}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('删除组件: ', cp.id);
+                          handlers.handleDeleteComponent(cp.id);
+                        }}
+                      >
+                        <img src={CompDeleteIcon} alt="component delete" />
+                      </div>
                     </div>
-                    <span>|</span>
-                    <div
-                      className={styles.deleteButton}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('删除组件: ', cp.id);
-                        handlers.handleDeleteComponent(cp.id);
-                      }}
-                    >
-                      <img src={CompDeleteIcon} alt="component delete" />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              )
+            })}
         </ReactSortable>
 
         {showEmpty && <EmptyState />}
