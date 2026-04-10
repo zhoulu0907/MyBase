@@ -95,7 +95,7 @@ public class BuildSecurityAutoConfiguration {
     public FilterRegistrationBean<DisableMultipartFilter> disableMultipartFilter() {
         FilterRegistrationBean<DisableMultipartFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new DisableMultipartFilter());
-        registration.addUrlPatterns("/admin-api/build/ai/*");
+        registration.addUrlPatterns("/admin-api/build/ai/**");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         registration.setName("disableMultipartFilter");
         return registration;

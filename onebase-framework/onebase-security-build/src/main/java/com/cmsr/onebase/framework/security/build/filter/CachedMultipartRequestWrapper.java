@@ -1,6 +1,7 @@
 package com.cmsr.onebase.framework.security.build.filter;
 
 import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
@@ -151,7 +152,7 @@ public class CachedMultipartRequestWrapper extends HttpServletRequestWrapper {
      * @throws IOException 解析 multipart 时发生异常
      */
     @Override
-    public Collection<Part> getParts() throws IOException {
+    public Collection<Part> getParts() throws ServletException, IOException {
         // 如果不是 multipart 请求，返回空集合
         if (realContentType == null || !realContentType.toLowerCase().startsWith("multipart/")) {
             return Collections.emptyList();
@@ -169,7 +170,7 @@ public class CachedMultipartRequestWrapper extends HttpServletRequestWrapper {
      * 获取指定名称的 Part
      */
     @Override
-    public Part getPart(String name) throws IOException {
+    public Part getPart(String name) throws ServletException, IOException {
         Collection<Part> parts = getParts();
         for (Part part : parts) {
             if (part.getName().equals(name)) {

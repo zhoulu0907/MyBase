@@ -72,12 +72,15 @@ public class AiProxyController {
         // 注意：DisableMultipartFilter 会伪装 Content-Type，需要先创建 CachedMultipartRequestWrapper
         // 来恢复真实的 Content-Type，才能正确判断是否 multipart 请求
         if (isFileUploadPath(path)) {
+            log.info("[proxy] 检测到上传路径: path={}, 原始Content-Type={}", path, request.getContentType());
             try {
                 // 创建缓存 wrapper，它会恢复真实的 Content-Type 并支持 getParts()
                 CachedMultipartRequestWrapper wrappedRequest = new CachedMultipartRequestWrapper(request);
+                log.info("[proxy] wrapper恢复的Content-Type={}", wrappedRequest.getContentType());
 
                 // 用 wrapper 判断是否 multipart 请求（wrapper 恢复了真实 Content-Type）
                 if (FileValidateUtil.isMultipartRequest(wrappedRequest)) {
+                    log.info("[proxy] 确认是multipart请求，开始验证文件");
                     // 验证文件类型
                     if (!FileValidateUtil.validateMultipartFiles(wrappedRequest)) {
                         log.warn("[proxy] 文件类型验证失败，拒绝请求: path={}", path);
@@ -88,12 +91,14 @@ public class AiProxyController {
                     }
 
                     // 验证通过，使用缓存的请求继续处理
-                    log.debug("[proxy] 文件类型验证通过: path={}", path);
+                    log.info("[proxy] 文件类型验证通过: path={}", path);
                     doProxy(wrappedRequest, response, path, base);
                     return;
+                } else {
+                    log.info("[proxy] 不是multipart请求，直接转发");
                 }
             } catch (Exception e) {
-                log.error("[proxy] 文件验证异常: path={}, error={}", path, e.getMessage());
+                log.error("[proxy] 文件验证异常: path={}, error={}", path, e.getMessage(), e);
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"code\":400,\"msg\":\"文件验证失败\"}");
