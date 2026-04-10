@@ -246,6 +246,12 @@ importers:
       '@onebase/platform-center':
         specifier: workspace:*
         version: link:../../packages/platform-center
+      '@onebase/product-lingji':
+        specifier: workspace:*
+        version: link:../../packages/product-lingji
+      '@onebase/product-tiangong':
+        specifier: workspace:*
+        version: link:../../packages/product-tiangong
       '@onebase/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui-kit
@@ -1090,6 +1096,68 @@ importers:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.7
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(@swc/core@1.13.1(@swc/helpers@0.5.17))(jiti@2.6.1)(postcss@8.5.6)(typescript@5.8.3)
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+
+  packages/product-lingji:
+    dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.64.1
+        version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@onebase/common':
+        specifier: workspace:*
+        version: link:../common
+      '@onebase/platform-center':
+        specifier: workspace:*
+        version: link:../platform-center
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-router-dom:
+        specifier: ^6.30.0
+        version: 6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.7
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.23
+      tsup:
+        specifier: ^8.3.5
+        version: 8.5.0(@swc/core@1.13.1(@swc/helpers@0.5.17))(jiti@2.6.1)(postcss@8.5.6)(typescript@5.8.3)
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+
+  packages/product-tiangong:
+    dependencies:
+      '@arco-design/web-react':
+        specifier: ^2.64.1
+        version: 2.66.1(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@onebase/common':
+        specifier: workspace:*
+        version: link:../common
+      '@onebase/platform-center':
+        specifier: workspace:*
+        version: link:../platform-center
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-router-dom:
+        specifier: ^6.30.0
+        version: 6.30.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.7
+      '@types/react':
+        specifier: ^18.3.0
+        version: 18.3.23
       tsup:
         specifier: ^8.3.5
         version: 8.5.0(@swc/core@1.13.1(@swc/helpers@0.5.17))(jiti@2.6.1)(postcss@8.5.6)(typescript@5.8.3)
@@ -11797,7 +11865,7 @@ snapshots:
       eslint-define-config: 1.12.0
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1)
       eslint-plugin-babel: 5.3.1(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-prettier: 4.2.5(eslint-config-prettier@8.10.2(eslint@8.57.1))(eslint@8.57.1)(prettier@2.8.8)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
@@ -15655,11 +15723,11 @@ snapshots:
       tinyglobby: 0.2.14
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-module-utils@2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -15675,7 +15743,7 @@ snapshots:
       eslint: 8.57.1
       eslint-rule-composer: 0.3.0
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -15686,7 +15754,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint@9.31.0(jiti@2.6.1)))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-module-utils: 2.12.1(@typescript-eslint/parser@6.21.0(eslint@9.31.0(jiti@2.6.1))(typescript@5.8.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3

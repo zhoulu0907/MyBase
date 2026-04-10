@@ -1,3 +1,14 @@
+/**
+ * 天工 OAuth 回调组件
+ * @deprecated 此文件已废弃，请使用 @onebase/product-tiangong 包中的 TiangongOAuthCallback 组件
+ * import { TiangongOAuthCallback } from '@onebase/product-tiangong';
+ */
+
+console.warn(
+  '[DEPRECATED] pages/OAuthCallback 已废弃，请使用 @onebase/product-tiangong 包。\n' +
+  '新用法: import { TiangongOAuthCallback } from "@onebase/product-tiangong";'
+);
+
 import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';

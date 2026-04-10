@@ -13,6 +13,7 @@ import {
   useListEditorSignal,
   usePageEditorSignal,
   useWorkbenchEditorSignal,
+  useWorkbenchSignal,
   type GridItem,
   type WorkbenchComponentType
 } from '@onebase/ui-kit';
@@ -98,11 +99,9 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     setSubTableComponents
   } = usePageEditorSignal();
 
-  const qiankunActions = initGlobalState({
-    drag: false,
-    components: pageType === EDITOR_TYPES.FORM_EDITOR ? formComponents.value : listComponents.value,
-    pageComponentSchemas:
-      pageType === EDITOR_TYPES.FORM_EDITOR ? formPageComponentSchemas.value : listPageComponentSchemas.value,
+  const workbenchSignal = useWorkbenchSignal();
+
+  const formListPreviewGlobalCommon = {
     curComponentID,
     setCurComponentID,
     clearCurComponentID,
@@ -113,17 +112,50 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     setShowDeleteButton,
     subTableComponents,
     setSubTableComponents
+  };
+
+  const previewGlobalStateByPageType: Record<string, () => Record<string, unknown>> = {
+    [EDITOR_TYPES.FORM_EDITOR]: () => ({
+      components: formComponents.value,
+      pageComponentSchemas: formPageComponentSchemas.value,
+      ...formListPreviewGlobalCommon
+    }),
+    [EDITOR_TYPES.LIST_EDITOR]: () => ({
+      components: listComponents.value,
+      pageComponentSchemas: listPageComponentSchemas.value,
+      ...formListPreviewGlobalCommon
+    }),
+    [EDITOR_TYPES.WORKBENCH_EDITOR]: () => ({
+      workbenchComponents: workbenchSignal.workbenchComponents,
+      wbComponentSchemas: workbenchSignal.wbComponentSchemas,
+      curComponentID: workbenchSignal.curComponentID,
+      setCurComponentID: workbenchSignal.setCurComponentID,
+      clearCurComponentID: workbenchSignal.clearCurComponentID,
+      setCurComponentSchema: workbenchSignal.setCurComponentSchema,
+      setWbComponentSchemas: workbenchSignal.setWbComponentSchemas,
+      delWbComponentSchemas: workbenchSignal.delWbComponentSchemas,
+      setWorkbenchComponents: workbenchSignal.setWorkbenchComponents,
+      delWorkbenchComponents: workbenchSignal.delWorkbenchComponents,
+      showDeleteButton: workbenchSignal.showDeleteButton,
+      setShowDeleteButton: workbenchSignal.setShowDeleteButton
+    })
+  };
+
+  const qiankunActions = initGlobalState({
+    drag: false,
+    ...(previewGlobalStateByPageType[pageType]?.() ?? previewGlobalStateByPageType[EDITOR_TYPES.LIST_EDITOR]())
   });
   useEffect(() => {
     if (editMode.value !== EditMode.MOBILE || !visible) {
       return;
     }
-    console.log('loading mobile-editor-preview-list');
+    console.log('loading mobile-editor-preview-list', editMode.value);
 
     const mobileEditorPreview = loadMicroApp({
-      name: 'mobile-editor-preview-list',
+      name: pageType == EDITOR_TYPES.WORKBENCH_EDITOR ? 'mobile-wb-editor-preview-list' : 'mobile-editor-preview-list',
       entry: getMobileEditorURL(),
-      container: '#mobile-editor-preview-list',
+      container:
+        pageType == EDITOR_TYPES.WORKBENCH_EDITOR ? '#mobile-wb-editor-preview-list' : '#mobile-editor-preview-list',
       props: {
         onGlobalStateChange: qiankunActions.onGlobalStateChange,
         setGlobalState: qiankunActions.setGlobalState,
@@ -216,6 +248,14 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     RUNTIME_CONTENT_PADDING -
     RUNTIME_INNER_PADDING;
 
+  // 预览区宽度：移动端 450px；Web 工作台 100%；Web 非工作台 60%
+  let previewPageWidth = '60%';
+  if (editMode.value === EditMode.MOBILE) {
+    previewPageWidth = '450px';
+  } else if (pageType === EDITOR_TYPES.WORKBENCH_EDITOR) {
+    previewPageWidth = '100%';
+  }
+
   return (
     <Drawer
       placement="bottom"
@@ -231,7 +271,7 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
     >
       <div
         className={classNames(styles.previewPage, { [styles.mobilePreview]: editMode.value === EditMode.MOBILE })}
-        style={{ width: pageType == EDITOR_TYPES.WORKBENCH_EDITOR ? '100%' : '60%' }}
+        style={{ width: previewPageWidth }}
       >
         <div className={styles.content}>
           {/* ── 列表页预览 ── */}
@@ -323,78 +363,81 @@ const PartPreview: React.FC<PartPreviewProps> = ({ visible, setVisible, pageType
           )}
 
           {/* ── 工作台预览：以运行态真实宽度渲染，grid 布局与运行态完全一致 ── */}
-          {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
-            <div className={styles.wbPreviewWrap}>
-              {/* 浮动组件 */}
-              {workbenchComponents.value
-                .filter((cp: GridItem) => shouldShowInWorkspace(cp.type) && isFloatingComponent(cp.type))
-                .map((cp: GridItem) => {
-                  const schema = wbComponentSchemas.value[cp.id];
-                  if (!schema) return null;
-                  const floatingConfig = schema?.config?.floatingConfig;
-                  return (
-                    <div
-                      key={cp.id}
-                      style={{
-                        position: 'fixed',
-                        right: floatingConfig?.right ?? 80,
-                        bottom: floatingConfig?.bottom ?? 80,
-                        width: floatingConfig?.width ?? 80,
-                        height: floatingConfig?.height ?? 80,
-                        zIndex: 100
-                      }}
-                    >
-                      <PreviewRender
-                        cpId={cp.id}
-                        cpType={cp.type}
-                        pageComponentSchema={schema}
-                        runtime={true}
-                        preview={true}
-                      />
-                    </div>
-                  );
-                })}
-
-              {/* 普通组件：固定运行态宽度的 grid 画布，布局与运行态完全一致 */}
-              <div
-                className={styles.wbRuntimeCanvas}
-                style={{
-                  width: runtimeContentWidth,
-                  backgroundColor: wbPageConfig?.pageBgColor || undefined,
-                  backgroundImage: wbPageConfig?.pageBgImg ? `url(${wbPageConfig.pageBgImg})` : undefined,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
-                }}
-              >
+          {pageType == EDITOR_TYPES.WORKBENCH_EDITOR &&
+            (editMode.value === EditMode.MOBILE ? (
+              <div id="mobile-wb-editor-preview-list" style={{ width: '100%' }}></div>
+            ) : (
+              <div className={styles.wbPreviewWrap}>
+                {/* 浮动组件 */}
                 {workbenchComponents.value
-                  .filter((cp: GridItem) => shouldShowInWorkspace(cp.type) && !isFloatingComponent(cp.type))
+                  .filter((cp: GridItem) => shouldShowInWorkspace(cp.type) && isFloatingComponent(cp.type))
                   .map((cp: GridItem) => {
                     const schema = wbComponentSchemas.value[cp.id];
                     if (!schema) return null;
-                    if (schema.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) return null;
-                    const widthStr = getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType);
-                    const colSpan = percentageToColSpan(widthStr);
-                    const rowSpan = schema?.config?.gridLayout?.rowSpan ?? 1;
+                    const floatingConfig = schema?.config?.floatingConfig;
                     return (
                       <div
                         key={cp.id}
-                        className={styles.wbComponentItem}
-                        style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
+                        style={{
+                          position: 'fixed',
+                          right: floatingConfig?.right ?? 80,
+                          bottom: floatingConfig?.bottom ?? 80,
+                          width: floatingConfig?.width ?? 80,
+                          height: floatingConfig?.height ?? 80,
+                          zIndex: 100
+                        }}
                       >
                         <PreviewRender
                           cpId={cp.id}
                           cpType={cp.type}
                           pageComponentSchema={schema}
-                          runtime={false}
+                          runtime={true}
                           preview={true}
                         />
                       </div>
                     );
                   })}
+
+                {/* 普通组件：固定运行态宽度的 grid 画布，布局与运行态完全一致 */}
+                <div
+                  className={styles.wbRuntimeCanvas}
+                  style={{
+                    width: runtimeContentWidth,
+                    backgroundColor: wbPageConfig?.pageBgColor || undefined,
+                    backgroundImage: wbPageConfig?.pageBgImg ? `url(${wbPageConfig.pageBgImg})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundRepeat: 'no-repeat'
+                  }}
+                >
+                  {workbenchComponents.value
+                    .filter((cp: GridItem) => shouldShowInWorkspace(cp.type) && !isFloatingComponent(cp.type))
+                    .map((cp: GridItem) => {
+                      const schema = wbComponentSchemas.value[cp.id];
+                      if (!schema) return null;
+                      if (schema.config?.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) return null;
+                      const widthStr = getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType);
+                      const colSpan = percentageToColSpan(widthStr);
+                      const rowSpan = schema?.config?.gridLayout?.rowSpan ?? 1;
+                      return (
+                        <div
+                          key={cp.id}
+                          className={styles.wbComponentItem}
+                          style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
+                        >
+                          <PreviewRender
+                            cpId={cp.id}
+                            cpType={cp.type}
+                            pageComponentSchema={schema}
+                            runtime={false}
+                            preview={true}
+                          />
+                        </div>
+                      );
+                    })}
+                </div>
               </div>
-            </div>
-          )}
+            ))}
         </div>
       </div>
     </Drawer>

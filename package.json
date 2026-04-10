@@ -1,7 +1,8 @@
 {
   "name": "onebase-platform-fe",
   "scripts": {
-    "build:packages": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/app... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./packages/ui-kit... build",
+    "build:packages": "pnpm --filter ./packages/common... build && pnpm --filter ./packages/app... build && pnpm --filter ./packages/platform-center... build && pnpm --filter ./packages/ui-kit... build && pnpm --filter ./packages/product-lingji... build && pnpm --filter ./packages/product-tiangong... build",
+    "build:product-packages": "pnpm --filter ./packages/product-lingji build && pnpm --filter ./packages/product-tiangong build",
     "build:plugins": "pnpm --filter ./sdks/ob-plugin... build",
     "build:admin-console": "pnpm build:packages && pnpm --filter ./apps/admin-console... devops_build",
     "build:app-builder": "pnpm build:packages && pnpm build:plugins && pnpm --filter ./apps/app-builder... devops_build",

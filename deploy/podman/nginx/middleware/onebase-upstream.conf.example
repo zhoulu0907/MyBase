@@ -1,0 +1,21 @@
+# OneBase 后端服务 Upstream 定义
+# 放置位置：http 块内
+# 使用方式：include /path/to/onebase-upstream.conf;
+
+# 后端 API 服务（编辑态）
+upstream onebase-build-api {
+    server ${BACKEND_HOST}:${BACKEND_PORT};
+    # 示例：server 10.0.1.100:8080;
+}
+
+# 后端 API 服务（运行态）
+upstream onebase-runtime-api {
+    server ${BACKEND_HOST}:${BACKEND_PORT};
+    # 示例：server 10.0.1.100:8080;
+}
+
+# Flink 服务
+upstream onebase-flink-api {
+    server ${FLINK_HOST}:${FLINK_PORT};
+    # 示例：server 10.0.1.101:8081;
+}

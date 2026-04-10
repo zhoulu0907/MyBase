@@ -13,9 +13,10 @@ interface ComponentListProps {
   items: WorkbenchItem[];
   components: WorkbenchItem[];
   onItemsChange: (items: WorkbenchItem[]) => void;
+  currentComponents: WorkbenchItem[];
 }
 
-export function ComponentList({ items, components, onItemsChange }: ComponentListProps) {
+export function ComponentList({ items, components, onItemsChange, currentComponents }: ComponentListProps) {
   // 移动端组件库过滤数据列表组件
   const displayComponents = components.filter((item) => item.type !== WORKBENCH_COMPONENT_TYPES.DATA_LIST);
 
@@ -23,6 +24,10 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
     return <div className={styles.emptyTip}>暂无组件</div>;
   }
 
+  // 检查workspace中是否已经存在快捷入口、欢迎卡片组件（仅能拖入一个）
+  const hasQuickEntry = currentComponents?.some((cp) => cp.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY);
+  const hasWelcomeCard = currentComponents?.some((cp) => cp.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD);
+ 
   return (
     <ReactSortable
       list={displayComponents}
@@ -32,27 +37,33 @@ export function ComponentList({ items, components, onItemsChange }: ComponentLis
         pull: 'clone',
         put: false
       }}
+      filter=".disabled-drag"
       sort={false}
       className={styles.componentCollapseContent}
       forceFallback={true}
       animation={150}
       onClone={(e) => {
         const cpType = e.item.getAttribute('data-cp-type');
-        e.item.id = `${cpType}-${uuidv4()}`;
+        const clonedId = `${cpType}-${uuidv4()}`;
 
-        onItemsChange(items.map((item) => (item.type === cpType ? { ...item, id: e.item.id } : item)));
+        e.item.id = clonedId;
+        e.item.setAttribute('data-cp-id', clonedId);
       }}
     >
-      {displayComponents.map((item) => (
-        <MaterialCard
+      {displayComponents.map((item) => {
+        // 如果是快捷入口、欢迎卡片组件且workspace中已存在，则禁用拖拽
+        const isQuickEntryDisabled = item.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY && hasQuickEntry;
+        const isWelcomeCardDisabled = item.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD && hasWelcomeCard;
+        return (<MaterialCard
           key={item.type}
           id={item.id}
           displayName={item.displayName}
           type={item.type}
           icon={item.icon || ''}
           layout="column"
-        />
-      ))}
+          disabled={isQuickEntryDisabled || isWelcomeCardDisabled}
+        />)
+      })}
     </ReactSortable>
   );
 }
