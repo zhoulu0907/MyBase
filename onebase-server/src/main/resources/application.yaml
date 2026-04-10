@@ -96,6 +96,21 @@ onebase:
     base-package: com.cmsr.onebase
   sign:
     request-timeout: 86400 # 签名请求超时时间（秒）
+  file-upload:
+    security:
+      enabled: true # 是否启用文件上传安全验证
+      # 允许的文件类型白名单（扩展名 -> MIME类型列表）
+      # 如未配置，使用内置默认白名单（详见 FileUploadSecurityProperties）
+      # allowed-extensions:
+      #   .pdf:
+      #     - application/pdf
+      #   .png:
+      #     - image/png
+      # 危险的 MIME 类型列表
+      # 如未配置，使用内置默认危险类型列表
+      # dangerous-mime-types:
+      #   - application/x-php
+      #   - application/x-jsp
   swagger:
     title: OneBase快速开发平台
     description: 提供管理后台、用户 App 的所有功能

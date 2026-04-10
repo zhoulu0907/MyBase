@@ -22,7 +22,8 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgresql_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+      # 数据库初始化 SQL 脚本（按字母顺序执行）
+      - ../ob_sql:/docker-entrypoint-initdb.d:ro
     networks:
       - onebase-middleware
     healthcheck:

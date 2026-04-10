@@ -5,10 +5,13 @@ import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.security.build.config.AiBridgeProperties;
 import com.cmsr.onebase.framework.security.build.context.AiBridgeContextHolder;
+import com.cmsr.onebase.framework.security.build.filter.CachedMultipartRequestWrapper;
 import com.cmsr.onebase.framework.security.build.util.AiBridgeCryptoUtils;
+import com.cmsr.onebase.framework.common.util.file.FileValidateUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,11 +39,13 @@ import java.util.*;
  *     <li>请求体与响应体都以流式方式转发，支持 multipart/form-data（附件上传）与大文件下载。</li>
  *     <li>对 SSE（text/event-stream）响应进行及时 flush，保证事件实时到达客户端。</li>
  *     <li>过滤 hop-by-hop headers，避免代理层协议冲突（如 connection/transfer-encoding/content-length）。</li>
+ *     <li>文件上传接口进行安全验证，防止任意文件上传漏洞。</li>
  * </ul>
  */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/build/ai")
+@Slf4j
 public class AiProxyController {
 
     private final AiBridgeProperties properties;
@@ -48,7 +53,7 @@ public class AiProxyController {
     /**
      * 代理 /build/ai/{*path} 的所有请求到上游。
      *
-     * <p>注意：这里使用 HttpServletRequest/Response 做“协议层”转发，不依赖 Spring 的 @RequestBody 绑定，
+     * <p>注意：这里使用 HttpServletRequest/Response 做"协议层"转发，不依赖 Spring 的 @RequestBody 绑定，
      * 以避免 multipart/SSE 等场景下框架对 body 的提前消费或缓存。</p>
      */
     @RequestMapping("/{*path}")
@@ -62,6 +67,44 @@ public class AiProxyController {
             response.setStatus(HttpStatus.BAD_GATEWAY.value());
             return;
         }
+
+        // === 文件上传安全验证 ===
+        if (isFileUploadPath(path) && FileValidateUtil.isMultipartRequest(request)) {
+            try {
+                // 使用缓存 wrapper 包装请求，允许多次读取流
+                CachedMultipartRequestWrapper wrappedRequest = new CachedMultipartRequestWrapper(request);
+
+                // 验证文件类型
+                if (!FileValidateUtil.validateMultipartFiles(wrappedRequest)) {
+                    log.warn("[proxy] 文件类型验证失败，拒绝请求: path={}", path);
+                    response.setStatus(HttpStatus.BAD_REQUEST.value());
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"code\":400,\"msg\":\"文件类型不允许\"}");
+                    return;
+                }
+
+                // 验证通过，使用缓存的请求继续处理
+                log.debug("[proxy] 文件类型验证通过: path={}", path);
+                doProxy(wrappedRequest, response, path, base);
+                return;
+            } catch (Exception e) {
+                log.error("[proxy] 文件验证异常: path={}, error={}", path, e.getMessage());
+                response.setStatus(HttpStatus.BAD_REQUEST.value());
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"code\":400,\"msg\":\"文件验证失败\"}");
+                return;
+            }
+        }
+        // === 验证结束 ===
+
+        // 非 multipart 请求，直接转发
+        doProxy(request, response, path, base);
+    }
+
+    /**
+     * 执行实际的代理转发
+     */
+    private void doProxy(HttpServletRequest request, HttpServletResponse response, String path, String base) throws Exception {
         String query = request.getQueryString();
         String fullPath = path + (StringUtils.isNotBlank(query) ? "?" + query : "");
         boolean hasSlash = base.endsWith("/") || fullPath.startsWith("/");
@@ -217,5 +260,15 @@ public class AiProxyController {
             if (s.equalsIgnoreCase(a)) return true;
         }
         return false;
+    }
+
+    /**
+     * 判断路径是否为文件上传接口
+     *
+     * @param path 请求路径
+     * @return 是否为文件上传接口
+     */
+    private static boolean isFileUploadPath(String path) {
+        return path != null && path.contains("/file/upload");
     }
 }
