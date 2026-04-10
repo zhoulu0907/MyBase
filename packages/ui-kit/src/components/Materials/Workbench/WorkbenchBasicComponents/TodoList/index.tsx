@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, MouseEvent } from 'react';
 import { memo, useEffect, useState } from 'react';
 import { Empty, Tabs } from '@arco-design/web-react';
 import { IconRight } from '@arco-design/web-react/icon';
@@ -147,7 +147,9 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
     setContentHeight(calculatedHeight);
   }, [dataCount]);
 
-  const handleShowMoreClick = () => {
+  const handleShowMoreClick = (e?: MouseEvent<HTMLAnchorElement>) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     if (!runtime) {
       return;
     }
@@ -173,7 +175,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
           <span className={styles.todoListHeaderTitle}>{label?.text}</span>
         )}
         {showMore && (
-          <a href={showMoreLink} className={styles.showMore} onClick={() => handleShowMoreClick()}>更多<IconRight /></a>
+          <a href={showMoreLink} className={styles.showMore} onClick={handleShowMoreClick}>更多<IconRight /></a>
         )}
       </div>
 

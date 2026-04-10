@@ -2,9 +2,11 @@ import { Collapse } from '@arco-design/web-react';
 import IconCollapsedDown from '@/assets/images/collapse_down_icon.svg';
 import { ComponentList } from './component-list';
 import { useWorkbenchItems } from '../hook/use-workbench-items';
+import type { WorkbenchItem } from '../types/workbench';
 
 interface WorkbenchPanelContentProps {
   keyword: string;
+  currentComponents: WorkbenchItem[];
 }
 
 const COLLAPSE_ITEM_STYLE = {
@@ -15,7 +17,7 @@ const COLLAPSE_ITEM_STYLE = {
 /**
  * 工作台组件面板内容
  */
-export function WorkbenchPanelContent({ keyword }: WorkbenchPanelContentProps) {
+export function WorkbenchPanelContent({ keyword, currentComponents }: WorkbenchPanelContentProps) {
   const basicItems = useWorkbenchItems({ keyword, category: 'basic' });
   const advancedItems = useWorkbenchItems({ keyword, category: 'advanced' });
 
@@ -38,6 +40,7 @@ export function WorkbenchPanelContent({ keyword }: WorkbenchPanelContentProps) {
           items={basicItems.items}
           components={basicItems.components}
           onItemsChange={basicItems.setItems}
+          currentComponents={currentComponents}
         />
       </Collapse.Item>
 
@@ -52,6 +55,7 @@ export function WorkbenchPanelContent({ keyword }: WorkbenchPanelContentProps) {
           items={advancedItems.items}
           components={advancedItems.components}
           onItemsChange={advancedItems.setItems}
+          currentComponents={currentComponents}
         />
       </Collapse.Item>
     </Collapse>
