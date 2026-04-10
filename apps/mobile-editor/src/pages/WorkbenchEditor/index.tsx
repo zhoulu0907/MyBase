@@ -5,8 +5,7 @@ import {
   STATUS_OPTIONS,
   STATUS_VALUES,
   WorkbenchPanel,
-  useWorkbenchSignal,
-  type GridItem
+  useWorkbenchSignal
 } from '@onebase/ui-kit';
 import { PreviewRender } from '@onebase/ui-kit-mobile';
 import WorkbenchWorkspace from '../../components/wb-workspace';
@@ -47,6 +46,9 @@ const WorkbenchEditor: React.FC<EditorWorkspaceProps & { instanceId: string }> =
     setShowDeleteButton: props.setShowDeleteButton ?? workbenchSignal.setShowDeleteButton,
   };
 
+  /**
+   * 预览模式渲染
+   */
   if (isPreview) {
     return (
       <MobileForm layout="inline">
