@@ -1,0 +1,34 @@
+# OneBase 后端 Upstream 定义
+# ================================
+# 放在 http 块中引用: include /path/to/onebase-upstream.conf;
+#
+# 部署时请复制此文件并根据实际后端地址修改
+# cp onebase-upstream.conf.example onebase-upstream.conf
+
+# ====================
+# 编辑态服务（Build）
+# ====================
+# 修改为实际的后端服务地址
+upstream onebase-build {
+    server onebase-server-build:8080;
+    keepalive 32;
+}
+
+# ====================
+# 运行态服务（Runtime）
+# ====================
+# 修改为实际的后端服务地址
+upstream onebase-runtime {
+    server onebase-server-runtime:8080;
+    keepalive 32;
+}
+
+# ====================
+# Flink 服务
+# ====================
+# 修改为实际的 Flink 服务地址
+# 如不使用 Flink，可删除此块
+upstream onebase-flink {
+    server onebase-server-flink:8080;
+    keepalive 16;
+}
