@@ -45,13 +45,21 @@ function getPlatformId(): string {
   if (typeof window === 'undefined') return 'default';
 
   // 优先使用 PLATFORM 配置
-  const platform = (window as any).global_config?.PLATFORM;
-  if (platform) return platform;
+  let platform = (window as any).global_config?.PLATFORM;
 
-  // 兼容：根据 THEME 配置推断平台
-  const theme = (window as any).global_config?.THEME;
-  if (theme === 'lingji') return 'lingji';
-  if (theme === 'tiangong') return 'tiangong';
+  // 如果 PLATFORM 不存在，使用 THEME 的值作为 PLATFORM
+  if (!platform) {
+    const theme = (window as any).global_config?.THEME;
+    if (theme === 'lingji' || theme === 'tiangong') {
+      platform = theme;
+      // 将 PLATFORM 写入 global_config，避免后续重复判断
+      if ((window as any).global_config) {
+        (window as any).global_config.PLATFORM = theme;
+      }
+    }
+  }
+
+  if (platform) return platform;
 
   // 兼容：通过域名判断
   if (window.location.hostname.includes('artifex-cmcc')) return 'tiangong';

@@ -14,32 +14,42 @@ import { getPlatformExports, getPlatform, type PlatformExports } from './product
 // 延迟加载的平台组件
 const LingjiCallback = () => {
   const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getPlatformExports().then(exports => {
+      setLoading(false);
       if (exports.LingjiCallback) {
         setComponent(() => exports.LingjiCallback!);
+      } else {
+        console.warn('[App] LingjiCallback 组件未找到，当前平台:', exports?.config?.platform);
       }
     });
   }, []);
 
-  if (!Component) return null;
-  return <Component />;
+  if (Component) return <Component />;
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>加载中...</div>;
+  return <NotFoundPage />;
 };
 
 const OAuthCallback = () => {
   const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getPlatformExports().then(exports => {
+      setLoading(false);
       if (exports.TiangongOAuthCallback) {
         setComponent(() => exports.TiangongOAuthCallback!);
+      } else {
+        console.warn('[App] TiangongOAuthCallback 组件未找到，当前平台:', exports?.config?.platform);
       }
     });
   }, []);
 
-  if (!Component) return null;
-  return <Component />;
+  if (Component) return <Component />;
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>加载中...</div>;
+  return <NotFoundPage />;
 };
 
 function AppContent() {
@@ -70,16 +80,16 @@ function AppContent() {
   useEffect(() => {
     if (!platformExports) return;
 
-    console.log('[App] 平台包加载完成:', platformExports.config?.platform);
+    console.log('[App] 平台包加载完成:', getPlatform());
 
     // 灵畿平台初始化监督插件
-    if (platformExports.config?.platform === 'lingji') {
+    if (isLingji) {
       import('@onebase/product-lingji').then(({ initLingjiPlatform }) => {
         console.log('[App] 初始化灵畿平台...');
         initLingjiPlatform();
       });
     }
-  }, [platformExports]);
+  }, [platformExports, isLingji]);
 
   useEffect(() => {
     if (tenantId) {
