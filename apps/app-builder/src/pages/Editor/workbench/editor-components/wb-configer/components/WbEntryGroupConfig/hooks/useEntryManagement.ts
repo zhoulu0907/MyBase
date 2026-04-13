@@ -93,7 +93,6 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
 
   const handleEditEntry = useCallback(
     (entryId: string, field: string, value: string) => {
-      console.log('entry edit', 'field: ' + field, 'value: ' + value);
       setState((prev) => {
         const existingEntry = prev.entries.find((e) => e.entryId === entryId);
         if (existingEntry && existingEntry[field as keyof EntryItem] === value) {
