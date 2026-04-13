@@ -12,7 +12,6 @@ import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,8 +82,17 @@ public class BuildAiBridgeFilter extends OncePerRequestFilter {
             String userId = StringUtils.trimToEmpty(request.getHeader(HDR_USER_ID));
             String tenantId = StringUtils.trimToEmpty(request.getHeader(HDR_TENANT_ID));
             String appId = StringUtils.trimToEmpty(request.getHeader(HDR_APP_ID));
-            String body = ServletUtils.getBody(request);
-            String bodyHash = AiBridgeCryptoUtils.sm3Hex(body);
+
+            // 对于 multipart 请求，不读取 body（避免消费流）
+            String contentType = request.getContentType();
+            boolean isMultipart = contentType != null && contentType.startsWith("multipart/");
+            String bodyHash = "";
+            if (!isMultipart) {
+                String body = ServletUtils.getBody(request);
+                bodyHash = AiBridgeCryptoUtils.sm3Hex(body);
+            } else {
+                log.debug("[BuildAiBridgeFilter] multipart请求，跳过body读取, contentType={}", contentType);
+            }
 
             String canonical = request.getMethod() + "|" + request.getRequestURI() + "|" + ts + "|" + nonce + "|" + userId + "|" + tenantId + "|" + appId + "|" + bodyHash;
             if (StringUtils.isNotBlank(properties.getSm3Key())) {
