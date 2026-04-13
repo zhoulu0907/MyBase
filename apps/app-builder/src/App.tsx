@@ -2,7 +2,7 @@ import { Message } from '@arco-design/web-react';
 import '@icon-park/react/styles/index.css';
 import { NotFoundPage, TokenManager } from '@onebase/common';
 import { useEffect, useState } from 'react';
-import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch } from 'react-router-dom';
+import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch, useSearchParams, useNavigate } from 'react-router-dom';
 import { initPlugins } from './plugin';
 import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
@@ -29,6 +29,8 @@ const LingjiCallback = () => {
 
 const OAuthCallback = () => {
   const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     getPlatformExports().then(exports => {
@@ -39,7 +41,7 @@ const OAuthCallback = () => {
   }, []);
 
   if (!Component) return null;
-  return <Component />;
+  return <Component searchParams={searchParams} navigate={navigate} />;
 };
 
 function AppContent() {

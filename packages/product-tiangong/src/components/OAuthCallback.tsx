@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { NavigateFunction } from 'react-router-dom';
 import { tiangongLogin, getPermissionInfo, CodeType } from '@onebase/platform-center';
 import { TokenManager, UserPermissionManager, getOrCreateDeviceInfo } from '@onebase/common';
+
+interface TiangongOAuthCallbackProps {
+  searchParams?: URLSearchParams;
+  navigate?: NavigateFunction;
+}
 
 /**
  * 天工 OAuth 回调组件
  * 处理天工平台的 OAuth 登录回调
  */
-export const TiangongOAuthCallback: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+export const TiangongOAuthCallback: React.FC<TiangongOAuthCallbackProps> = ({ searchParams: searchParamsProp, navigate: navigateProp }) => {
+  const searchParams = searchParamsProp || new URLSearchParams(window.location.search);
+  const navigate = navigateProp || (() => { throw new Error('navigate function is required'); });
   const processedRef = useRef(false);
 
   useEffect(() => {
