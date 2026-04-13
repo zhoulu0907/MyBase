@@ -94,7 +94,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
 
   // 获取第一个展示的 tab key
   const getFirstVisibleTabKey = (): string | null => {
-    const entries = Object.entries(dataConfig);
+    const entries = Object.entries(dataConfig || []);
     const firstVisibleTab = entries.find(([_, value]) => value === true);
     return firstVisibleTab ? firstVisibleTab[0] : null;
   };
@@ -181,7 +181,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
 
       <div className={styles.todoListContent} style={contentStyle}>
         <Tabs style={{ width: '100%', height: '100%' }} onChange={runtime ? fetchListData : undefined}>
-          {Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
+          {Object.entries(dataConfig || []).map(([key, value]: [string, boolean], index: number) => (
             value &&
             (<Tabs.TabPane key={key} title={DATA_CONFIG_NAME_MAP[key] || key}>
               <div className={styles.todoListContentList}>

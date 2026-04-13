@@ -5,10 +5,17 @@
 
 import * as defaultProduct from './default/index';
 import { envConfig } from '@onebase/common';
+import type { NavigateFunction } from 'react-router-dom';
 
 // Callback 组件的 Props 类型
 export interface CallbackProps {
-  navigate?: (path: string, options?: { replace?: boolean }) => void;
+  navigate?: NavigateFunction;
+}
+
+// OAuthCallback 组件的 Props 类型（包含 searchParams）
+export interface OAuthCallbackProps {
+  searchParams?: URLSearchParams;
+  navigate?: NavigateFunction;
 }
 
 // 平台包的导出类型
@@ -33,7 +40,7 @@ export interface PlatformExports {
     hide: () => void;
   };
   LingjiCallback?: React.ComponentType<CallbackProps>;
-  TiangongOAuthCallback?: React.ComponentType<CallbackProps>;
+  TiangongOAuthCallback?: React.ComponentType<OAuthCallbackProps>;
   LingjiAppCard?: React.ComponentType<any>;
   TiangongAppCard?: React.ComponentType<any>;
   LingjiLayout?: React.ComponentType<any>;

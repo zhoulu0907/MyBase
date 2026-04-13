@@ -1,6 +1,7 @@
 import React from 'react';
 import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
+import type { NavigateFunction } from 'react-router-dom';
 import { getPermissionInfo, CodeType } from '@onebase/platform-center';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
 
@@ -17,7 +18,7 @@ interface LingjiLoginData {
  * navigate 函数由主应用传入，避免 useNavigate hook context 问题
  */
 export interface CallbackProps {
-  navigate?: (path: string, options?: { replace?: boolean }) => void;
+  navigate?: NavigateFunction;
 }
 
 /**

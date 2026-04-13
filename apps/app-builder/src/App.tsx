@@ -2,18 +2,15 @@ import { Message } from '@arco-design/web-react';
 import '@icon-park/react/styles/index.css';
 import { NotFoundPage, TokenManager } from '@onebase/common';
 import { useEffect, useState } from 'react';
-import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch, useSearchParams, useNavigate } from 'react-router-dom';
+import { initPlugins } from './plugin';
 import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SettingPage from './pages/Setting';
-import { getPlatformExports, getPlatform, type PlatformExports } from './products';
-
-// 定义 Callback 组件的 Props 类型
-interface CallbackProps {
-  navigate?: (path: string, options?: { replace?: boolean }) => void;
-}
+import { getPlatformExports, getPlatform, type PlatformExports, type CallbackProps, type OAuthCallbackProps } from './products';
+import type { NavigateFunction } from 'react-router-dom';
 
 // 延迟加载的平台组件 - 使用 wrapper 传递 navigate
 const LingjiCallback = () => {
@@ -38,9 +35,10 @@ const LingjiCallback = () => {
 };
 
 const OAuthCallback = () => {
-  const navigate = useNavigate();
-  const [Component, setComponent] = useState<React.ComponentType<CallbackProps> | null>(null);
+  const [Component, setComponent] = useState<React.ComponentType<OAuthCallbackProps> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     getPlatformExports().then(exports => {
@@ -53,7 +51,7 @@ const OAuthCallback = () => {
     });
   }, []);
 
-  if (Component) return <Component navigate={navigate} />;
+  if (Component) return <Component searchParams={searchParams} navigate={navigate} />;
   if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>加载中...</div>;
   return <NotFoundPage />;
 };

@@ -1,22 +1,25 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Message } from '@arco-design/web-react';
-import { useEffect, useRef } from 'react';
+import { NavigateFunction } from 'react-router-dom';
 import { tiangongLogin, getPermissionInfo, CodeType } from '@onebase/platform-center';
 import { TokenManager, UserPermissionManager, getOrCreateDeviceInfo } from '@onebase/common';
 
 /**
  * OAuthCallback 组件的 Props
- * navigate 函数由主应用传入，避免 useNavigate hook context 问题
+ * navigate 和 searchParams 函数由主应用传入，避免 hooks context 问题
  */
 export interface OAuthCallbackProps {
-  navigate?: (path: string, options?: { replace?: boolean }) => void;
+  searchParams?: URLSearchParams;
+  navigate?: NavigateFunction;
 }
 
 /**
  * 天工 OAuth 回调组件
  * 处理天工平台的 OAuth 登录回调
  */
-export const TiangongOAuthCallback: React.FC<OAuthCallbackProps> = ({ navigate }) => {
+export const TiangongOAuthCallback: React.FC<OAuthCallbackProps> = ({ searchParams: searchParamsProp, navigate: navigateProp }) => {
+  const searchParams = searchParamsProp || new URLSearchParams(window.location.search);
+  const navigate = navigateProp || (() => { throw new Error('navigate function is required'); });
   const processedRef = useRef(false);
 
   // 导航函数：优先使用传入的 navigate，否则使用 window.location
@@ -32,21 +35,13 @@ export const TiangongOAuthCallback: React.FC<OAuthCallbackProps> = ({ navigate }
     }
   };
 
-  // 从 URL 获取参数（不依赖 useSearchParams）
-  const getSearchParams = () => {
-    const params = new URLSearchParams(window.location.search);
-    return {
-      code: params.get('code'),
-      state: params.get('state')
-    };
-  };
-
   useEffect(() => {
     if (!processedRef.current) {
       processedRef.current = true;
 
       const handleOAuthCallback = async () => {
-        const { code, state } = getSearchParams();
+        const code = searchParams.get('code');
+        const state = searchParams.get('state');
 
         if (code) {
           try {
@@ -100,7 +95,7 @@ export const TiangongOAuthCallback: React.FC<OAuthCallbackProps> = ({ navigate }
 
       handleOAuthCallback();
     }
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
   return (
     <div style={{

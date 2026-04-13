@@ -68,9 +68,18 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
       if (state.formInitialized) return;
       if (!state.currentEntry?.entryId) return;
 
+      const normalizedChangedValues: Partial<EntryItem> = { ...changedValues };
+      if (changedValues.entryType === 'menu') {
+        normalizedChangedValues.linkAddress = '';
+        form.setFieldValue('linkAddress', '');
+      } else if (changedValues.entryType === 'link') {
+        normalizedChangedValues.menuUuid = '';
+        form.setFieldValue('menuUuid', '');
+      }
+
       const updatedEntry = {
         ...state.currentEntry,
-        ...changedValues
+        ...normalizedChangedValues
       } as EntryItem;
       updatedEntry.id = updatedEntry.entryId;
 
@@ -84,6 +93,7 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
 
   const handleEditEntry = useCallback(
     (entryId: string, field: string, value: string) => {
+      console.log('entry edit', 'field: ' + field, 'value: ' + value);
       setState((prev) => {
         const existingEntry = prev.entries.find((e) => e.entryId === entryId);
         if (existingEntry && existingEntry[field as keyof EntryItem] === value) {
@@ -128,8 +138,21 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
 
   const handleOpenEditDrawer = useCallback(
     (item: EntryItem) => {
-      const normalizedItem = { ...item, id: item.entryId };
+      const defaultEntryValues: Partial<EntryItem> = {
+        entryIcon: '',
+        entryDesc: '',
+        entryType: 'menu',
+        menuUuid: '',
+        linkAddress: '',
+        group: state.enableGroup ? state.entries[0]?.group || DEFAULT_GROUP_NAME : DEFAULT_GROUP_NAME
+      };
+      const normalizedItem = {
+        ...defaultEntryValues,
+        ...item,
+        id: item.entryId
+      };
 
+      form.resetFields();
       form.setFieldsValue(normalizedItem);
       setState({
         ...state,
@@ -222,7 +245,7 @@ export const useEntryManagement = ({ value, onChange }: UseEntryManagementProps)
         return { ...prev, selectMenuModalVisible: false };
       });
     },
-    [normalizedValue, onChange, state.entries]
+    [normalizedValue, onChange]
   );
 
   const handleSortListChange = useCallback(

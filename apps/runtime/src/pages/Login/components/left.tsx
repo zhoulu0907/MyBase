@@ -1,12 +1,20 @@
 import React from 'react';
-import loginBg from '../../../assets/images/login_bg.svg';
-import loginBgMask from '../../../assets/images/login_bg_mask.svg';
 import styles from '../index.module.less';
 
-const Left: React.FC = () => {
+interface LeftProps {
+  loginImageUrl?: string;
+  defaultImage: string;
+  configLoaded: boolean;
+}
+
+const Left: React.FC<LeftProps> = ({ loginImageUrl, defaultImage, configLoaded }) => {
+  if (!configLoaded) {
+    return <div className={styles.loginPageLeft}></div>;
+  }
+
   return (
     <div className={styles.loginPageLeft}>
-      <img src={loginBg} alt="loginBg" className={styles.loginBg} />
+      <img src={loginImageUrl || defaultImage} alt="loginBg" className={styles.loginBg} />
     </div>
   );
 };

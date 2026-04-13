@@ -88,7 +88,7 @@ const XTodoCenter = memo((props: XTodoCenterConfig & { runtime?: boolean }) => {
       </div>
 
       <div className={styles.todoCenterContent}>
-        {Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
+        {Object.entries(dataConfig || []).map(([key, value]: [string, boolean], index: number) => (
           value &&
           (<div key={key} className={styles.todoCenterContentItem} style={{ backgroundColor: theme === WORKBENCH_THEME_OPTIONS.THEME_1 ? '#F2F3F5' : colorList[index % colorList.length] + '20', cursor: runtime ? 'pointer' : 'default' }} onClick={() => handleClick(key)}>
             <div className={styles.todoCenterContentItemLeft}>
