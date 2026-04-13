@@ -137,7 +137,7 @@ const XCarousel = memo((props: XCarouselConfig & { runtime?: boolean }) => {
 
   return (
     <div className={styles.carouselWrapper}>
-      {label.display && label.text && <div className={styles.title}>{label.text}</div>}
+      {label?.display && label?.text && <div className={styles.title}>{label?.text}</div>}
 
       <Carousel
         className={styles.carousel}
