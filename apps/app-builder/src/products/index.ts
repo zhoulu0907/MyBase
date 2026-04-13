@@ -91,16 +91,25 @@ async function loadPlatformPackage(platformId: string): Promise<PlatformExports>
 
 // 缓存加载的平台包
 let cachedPlatform: PlatformExports | null = null;
+let cachedPlatformId: string | null = null;
 
 /**
  * 获取平台导出
  */
 export async function getPlatformExports(): Promise<PlatformExports> {
+  const platformId = getPlatformId();
+
+  // 如果平台ID发生变化，清除缓存重新加载
+  if (cachedPlatform && cachedPlatformId !== platformId) {
+    console.log('[Platform] 平台ID变化，重新加载:', cachedPlatformId, '->', platformId);
+    cachedPlatform = null;
+  }
+
   if (cachedPlatform) {
     return cachedPlatform;
   }
 
-  const platformId = getPlatformId();
+  cachedPlatformId = platformId;
   cachedPlatform = await loadPlatformPackage(platformId);
   return cachedPlatform;
 }
