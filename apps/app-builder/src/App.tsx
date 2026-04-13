@@ -3,7 +3,6 @@ import '@icon-park/react/styles/index.css';
 import { NotFoundPage, TokenManager } from '@onebase/common';
 import { useEffect, useState } from 'react';
 import { Navigate, Route, HashRouter as Router, Routes, useLocation, useMatch } from 'react-router-dom';
-import { initPlugins } from './plugin';
 import { EditorPage } from './pages/Editor';
 import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
@@ -71,7 +70,7 @@ function AppContent() {
   // 加载平台包
   useEffect(() => {
     getPlatformExports().then(exports => {
-      console.log('[App] 平台包加载完成:', exports?.config?.platform);
+      console.log('[App] 平台包加载完成:', getPlatform());
       setPlatformExports(exports);
     });
   }, []);
