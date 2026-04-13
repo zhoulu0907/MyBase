@@ -11,7 +11,8 @@ export default function Login() {
   const [appId, setAppId] = useState('');
   const [tenantId, setTenantId] = useState('');
   const [appInfo, setAppInfo] = useState<any>(null);
-  const [loginImageUrl, setLoginImageUrl] = useState<string>('');
+  const [loginImageUrl, setLoginImageUrl] = useState<string | undefined>(undefined);
+  const [configLoaded, setConfigLoaded] = useState(false);
 
   useEffect(() => {
     getHashTenantIdAndAppId(setTenantId, setAppId);
@@ -35,17 +36,24 @@ export default function Login() {
           const url = await downloadFile(res.appLoginMainPic, appId);
           if (url) {
             setLoginImageUrl(url);
+          } else {
+            setLoginImageUrl('');
           }
+        } else {
+          setLoginImageUrl('');
         }
       }
     } catch (error) {
       console.error('获取应用信息失败:', error);
+      setLoginImageUrl('');
+    } finally {
+      setConfigLoaded(true);
     }
   };
 
   return (
     <div className={styles.loginPage}>
-      <Left loginImageUrl={loginImageUrl} defaultImage={loginBg} />
+      <Left loginImageUrl={loginImageUrl} defaultImage={loginBg} configLoaded={configLoaded} />
       <Right appInfo={appInfo} appId={appId} tenantId={tenantId} />
     </div>
   );
