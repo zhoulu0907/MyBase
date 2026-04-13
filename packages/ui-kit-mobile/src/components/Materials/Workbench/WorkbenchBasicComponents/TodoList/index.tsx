@@ -50,7 +50,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
 
   const { handleJump } = useJump();
 
-  const tabData = Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
+  const tabData = Object.entries(dataConfig || []).map(([key, value]: [string, boolean], index: number) => (
     value &&
     ({
       key: key,
@@ -127,7 +127,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
 
   // 获取第一个展示的 tab key
   const getFirstVisibleTabKey = (): string | null => {
-    const entries = Object.entries(dataConfig);
+    const entries = Object.entries(dataConfig || []);
     const firstVisibleTab = entries.find(([_, value]) => value === true);
     return firstVisibleTab ? firstVisibleTab[0] : null;
   };
@@ -155,7 +155,7 @@ const XTodoList = memo((props: XTodoListConfig & { runtime?: boolean }) => {
 
       <div className={styles.todoListContent}>
         <Tabs className={styles.todoListTabs} tabs={tabData as TabData[]} type="line-divide" onTabClick={(tab) => fetchListData(tab.key)}>
-          {Object.entries(dataConfig).map(([key, value]: [string, boolean], index: number) => (
+          {Object.entries(dataConfig || []).map(([key, value]: [string, boolean], index: number) => (
             value &&
             <div className={styles.todoListContentList} key={key}>
               {getListMap[key as keyof typeof getListMap].length > 0 && getListMap[key as keyof typeof getListMap]?.slice(0, dataCount)?.map((item: ITodoItem, index: number) => (
