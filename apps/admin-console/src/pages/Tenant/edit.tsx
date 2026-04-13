@@ -274,7 +274,11 @@ const EditTenant = () => {
                   validateTrigger={['onBlur']}
                 >
                   <Input
-                    addBefore={<div className={styles.website}>{getPlatformFeDomain()}</div>}
+                    addBefore={
+                      <div className={styles.website} title={getPlatformFeDomain()}>
+                        {getPlatformFeDomain()}
+                      </div>
+                    }
                     placeholder="www.onebase.com"
                   />
                 </Form.Item>
