@@ -7,6 +7,7 @@ import { createHostSDK, pluginEmitter as _pluginEmitter } from '@ob/plugin/sdk';
 import { useAppEntityStore } from '@onebase/ui-kit';
 import { pluginBridge } from './bridge';
 import { PluginHostAPI } from './host-api';
+import { envConfig } from '@onebase/common';
 
 let isInitialized = false;
 
@@ -16,7 +17,7 @@ export async function initPlugins() {
 
   try {
     // 开发模式：检查是否启用插件
-    const enablePlugins = (window as any)?.global_config?.ENABLE_PLUGINS !== false;
+    const enablePlugins = envConfig?.ENABLE_PLUGINS !== false;
     if (!enablePlugins) {
       console.log('[Plugin Loader] 插件功能已禁用');
       return;
@@ -80,7 +81,7 @@ export async function initPlugins() {
 
     // 6.2 如果服务端为空，尝试本地配置
     if (pluginList.length === 0) {
-      pluginList = ((window as any)?.global_config?.PLUGINS) || [];
+      pluginList = envConfig?.PLUGINS || [];
     }
 
     // 7. 统一注册流程
@@ -92,8 +93,8 @@ export async function initPlugins() {
       
       let baseUrl = item.baseUrl || '';
       // 处理 baseUrl (如果存在且是相对路径)
-      if (baseUrl && !baseUrl.startsWith('http') && (window as any).global_config?.PLUGIN_URL) {
-          const prefix = (window as any).global_config.PLUGIN_URL.replace(/\/$/, '');
+      if (baseUrl && !baseUrl.startsWith('http://') && !baseUrl.startsWith('https://') && envConfig?.PLUGIN_URL) {
+          const prefix = envConfig.PLUGIN_URL.replace(/\/$/, '');
           const path = baseUrl.startsWith('/') ? baseUrl : `/${baseUrl}`;
           baseUrl = `${prefix}${path}`;
       }

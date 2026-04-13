@@ -70,7 +70,7 @@ function AppContent() {
   // 加载平台包
   useEffect(() => {
     getPlatformExports().then(exports => {
-      console.log('[App] 平台包加载完成:', getPlatform());
+      console.log('[App] 平台加载完成:', getPlatform());
       setPlatformExports(exports);
     });
   }, []);
@@ -79,12 +79,9 @@ function AppContent() {
   useEffect(() => {
     if (!platformExports) return;
 
-    console.log('[App] 平台包加载完成:', getPlatform());
-
     // 灵畿平台初始化监督插件
     if (isLingji) {
       import('@onebase/product-lingji').then(({ initLingjiPlatform }) => {
-        console.log('[App] 初始化灵畿平台...');
         initLingjiPlatform();
       });
     }

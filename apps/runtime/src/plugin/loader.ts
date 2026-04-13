@@ -3,9 +3,9 @@ import { PluginManager } from '@ob/plugin/host';
 import * as ReactDOM from 'react-dom';
 import * as ReactRouterDOM from 'react-router-dom';
 import * as Arco from '@arco-design/web-react';
-import { useAppEntityStore } from '@onebase/ui-kit';
 import { pluginBridge } from './bridge';
 import { PluginHostAPI } from './host-api';
+import { envConfig } from '@onebase/common';
 
 let isInitialized = false;
 
@@ -46,8 +46,8 @@ export async function initPlugins() {
         // 1. 注册插件
         for (const item of manifest) {
           let baseUrl = item.baseUrl;
-          if (!baseUrl.startsWith('http') && (window as any).global_config?.PLUGIN_URL) {
-             const prefix = (window as any).global_config.PLUGIN_URL.replace(/\/$/, '');
+          if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://') && envConfig?.PLUGIN_URL) {
+             const prefix = envConfig.PLUGIN_URL.replace(/\/$/, '');
              const path = baseUrl.startsWith('/') ? baseUrl : `/${baseUrl}`;
              baseUrl = `${prefix}${path}`;
           }
@@ -137,7 +137,7 @@ export async function initPlugins() {
     
     if (loadedFromServer) return;
 
-    const configPlugins = ((window as any)?.global_config?.PLUGINS) || [];
+    const configPlugins = envConfig?.PLUGINS || [];
     
     if (Array.isArray(configPlugins) && configPlugins.length > 0) {
       for (const pluginCfg of configPlugins) {
@@ -148,17 +148,19 @@ export async function initPlugins() {
         await pluginBridge.integratePlugin(p, sdk);
       }
     } else {
-      // Local development fallback
-      const base = (window as any)?.global_config?.PLUGIN_BASE_URL || 'http://localhost:3001';
-      pm.registerPlugin({
-        name: 'ob-plugin-template',
-        version: '0.0.0',
-        displayName: '示例插件',
-        routePrefix: '/ob-plugin-template',
-        resources: { js: `${base}/ob-plugin-template.umd.js`, css: `${base}/ob-plugin-template.css` }
-      });
-      const p = await pm.loadPlugin('ob-plugin-template');
-      await pluginBridge.integratePlugin(p, sdk);
+      // 本地开发模式：从 PLUGIN_BASE_URL 加载示例插件
+      const base = envConfig?.PLUGIN_BASE_URL;
+      if (base) {
+        pm.registerPlugin({
+          name: 'ob-plugin-template',
+          version: '0.0.0',
+          displayName: '示例插件',
+          routePrefix: '/ob-plugin-template',
+          resources: { js: `${base}/ob-plugin-template.umd.js`, css: `${base}/ob-plugin-template.css` }
+        });
+        const p = await pm.loadPlugin('ob-plugin-template');
+        await pluginBridge.integratePlugin(p, sdk);
+      }
     }
   } catch (e) {
     console.error('Plugin initialization failed:', e);
