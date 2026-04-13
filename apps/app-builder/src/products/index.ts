@@ -6,6 +6,11 @@
 import * as defaultProduct from './default/index';
 import { envConfig } from '@onebase/common';
 
+// Callback 组件的 Props 类型
+export interface CallbackProps {
+  navigate?: (path: string, options?: { replace?: boolean }) => void;
+}
+
 // 平台包的导出类型
 export interface PlatformExports {
   config: {
@@ -27,8 +32,8 @@ export interface PlatformExports {
     show: () => void;
     hide: () => void;
   };
-  LingjiCallback?: React.ComponentType<any>;
-  TiangongOAuthCallback?: React.ComponentType<any>;
+  LingjiCallback?: React.ComponentType<CallbackProps>;
+  TiangongOAuthCallback?: React.ComponentType<CallbackProps>;
   LingjiAppCard?: React.ComponentType<any>;
   TiangongAppCard?: React.ComponentType<any>;
   LingjiLayout?: React.ComponentType<any>;
