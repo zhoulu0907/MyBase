@@ -30,7 +30,7 @@ build:
 	@echo "Build completed: $(IMAGE_FULL)"
 
 ## tag: 给镜像打 registry 标签
-tag: build
+tag:
 	docker tag $(IMAGE_FULL) $(IMAGE_WITH_REGISTRY)
 
 ## push: 推送镜像到仓库
@@ -41,7 +41,7 @@ push: tag
 build-multi: ## 构建多平台基础镜像并推送到 Registry (amd64 + arm64)
 	@echo "▶ 构建并推送多平台镜像 $(IMAGE_WITH_REGISTRY)..."
 	@docker buildx inspect multiplatform-builder >/dev/null 2>&1 || \
-		(docker buildx create --name multiplatform-builder --driver docker-container --config buildkitd.toml --use && docker buildx inspect --bootstrap multiplatform-builder)
+		(docker buildx create --name multiplatform-builder --driver docker-container --config ../buildkitd.toml --use && docker buildx inspect --bootstrap multiplatform-builder)
 	@docker buildx use multiplatform-builder
 	docker buildx build -f Dockerfile \
 		--platform linux/amd64,linux/arm64 \
@@ -59,7 +59,7 @@ run:
 	docker run --rm -it $(IMAGE_FULL) /bin/bash
 
 ## test: 测试镜像
-test: build
+test:
 	@docker run --rm $(IMAGE_FULL) java -version
 	@docker run --rm $(IMAGE_FULL) cat /etc/os-release | grep PRETTY
 
