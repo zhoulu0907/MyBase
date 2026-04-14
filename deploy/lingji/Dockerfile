@@ -1,6 +1,14 @@
 FROM m.daocloud.io/docker.io/library/debian:bookworm-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates openjdk-17-jdk
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates openjdk-17-jdk locales
+
+# 配置中文支持
+RUN sed -i 's/# zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/' /etc/locale.gen \
+    && locale-gen zh_CN.UTF-8
+
+ENV LANG=zh_CN.UTF-8
+ENV LANGUAGE=zh_CN:zh
+ENV LC_ALL=zh_CN.UTF-8
 
 # 备份并删除原源配置，创建传统格式源列表（使用阿里云镜像）
 RUN mv /etc/apt/sources.list.d/debian.sources /etc/apt/sources.list.d/debian.sources.bak 2>/dev/null || true \

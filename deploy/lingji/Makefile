@@ -55,7 +55,7 @@ build-multi: ## 构建多平台基础镜像并推送到 Registry (amd64 + arm64)
 	@echo "✓ 推送完成: $(IMAGE_WITH_REGISTRY)"
 
 ## run: 运行容器进行测试
-run: build
+run:
 	docker run --rm -it $(IMAGE_FULL) /bin/bash
 
 ## test: 测试镜像
