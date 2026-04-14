@@ -12,7 +12,6 @@ import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -172,7 +171,6 @@ public class FormulaExtendsServiceImpl implements FormulaExtendsService {
         }
     }
 
-    @Nullable
     private static Long getId(Map<String, Object> parameters, String id) {
         Object valueObj = parameters.get(id);
         Long value = null;

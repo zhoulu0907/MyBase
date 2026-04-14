@@ -20,7 +20,6 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.update.UpdateChain;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -190,7 +189,6 @@ public class DeptDataRepository extends BaseDataRepository<SystemDeptMapper, Dep
                 .orderBy(DeptDO.SORT, true));
     }
 
-    @NotNull
     private QueryWrapper buildQueryWrapperByType(String deptType) {
         if (StringUtils.isBlank(deptType)) {
             // 1. 如果前端给用户类型为空，则按照登录用户类型过滤。
