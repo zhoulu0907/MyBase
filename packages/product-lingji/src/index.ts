@@ -15,6 +15,8 @@ export { LingjiCallback as Callback } from './components/Callback';
 export { LingjiAppCard as AppCard } from './components/AppCard';
 export { LingjiLayout as Layout } from './components/Layout';
 export { LingjiSider as Sider } from './components/Sider';
+export { LingjiLogo } from './components/Logo';
+export { LingjiLogo as Logo } from './components/Logo';
 
 // 导出路由
 export { PlatformRoutes } from './routes';

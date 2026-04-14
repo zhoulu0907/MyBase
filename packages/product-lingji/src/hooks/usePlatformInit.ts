@@ -28,9 +28,13 @@ export function initLingjiPlatform() {
         if (success) {
           // 初始化成功后，立即设置当前页面的编码
           const pathname = window.location.pathname;
-          const { moduleCode, menuCode } = extractRouteInfo(pathname);
-          updatePageInfo(moduleCode, menuCode);
-          console.log('[SupervisionPlugin] 初始化后设置编码:', { moduleCode, menuCode });
+          const routeInfo = extractRouteInfo(pathname);
+          if (routeInfo) {
+            updatePageInfo(routeInfo.moduleCode, routeInfo.menuCode);
+            console.log('[SupervisionPlugin] 初始化后设置编码:', routeInfo);
+          } else {
+            console.log('[SupervisionPlugin] 当前路由不在配置中，跳过设置编码');
+          }
         }
       });
     };

@@ -258,8 +258,9 @@ export function destroyPlugin(): void {
 /**
  * 从路由路径提取模块编码和菜单编码
  * @param pathname 路由路径
+ * @returns 如果路由不在 MENU_CODES 配置中，返回 null 表示不需要更新
  */
-export function extractRouteInfo(pathname: string): { moduleCode: string; menuCode: string } {
+export function extractRouteInfo(pathname: string): { moduleCode: string; menuCode: string } | null {
   const config = getPluginConfig();
 
   // 移除租户ID前缀
@@ -270,14 +271,19 @@ export function extractRouteInfo(pathname: string): { moduleCode: string; menuCo
   const parts = pathWithoutTenant.split('/').filter(Boolean);
 
   // 模块编码：使用配置中的固定值
-  const moduleCode = config?.MODULE_CODE || 'M_ONEBASE_001';
+  const moduleCode = config?.MODULE_CODE || 'CMDEVOPS-ZEROCODE';
 
   // 菜单编码：从路由最后一级提取（一级菜单 key）
   // 如 /setting/user -> user, /home/create-app/data-factory -> data-factory
   const menuKey = parts.length > 0 ? parts[parts.length - 1] : 'home';
 
-  // 从配置获取菜单编码，若无配置则使用默认值
-  const menuCode = config?.MENU_CODES?.[menuKey] || config?.DEFAULT_MENU_CODE || 'C_HOME_020';
+  // 从配置获取菜单编码
+  const menuCode = config?.MENU_CODES?.[menuKey];
+
+  // 如果不在 MENU_CODES 配置中，返回 null 表示不需要更新
+  if (!menuCode) {
+    return null;
+  }
 
   return { moduleCode, menuCode };
 }

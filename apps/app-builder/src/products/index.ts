@@ -47,6 +47,8 @@ export interface PlatformExports {
   TiangongLayout?: React.ComponentType<any>;
   LingjiSider?: React.ComponentType<any>;
   TiangongSider?: React.ComponentType<any>;
+  LingjiLogo?: React.ComponentType<any>;
+  TiangongLogo?: React.ComponentType<any>;
   VerticalMenuItem?: React.ComponentType<any>;
   PlatformRoutes?: React.ComponentType<any>;
   themeLoader?: () => Promise<void>;

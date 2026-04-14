@@ -22,8 +22,10 @@ export function useSupervisionPlugin() {
     } else if (isPluginInitialized()) {
       // 插件已初始化且不在隐藏页面，更新埋点信息
       showPlugin();
-      const { moduleCode, menuCode } = extractRouteInfo(pathname);
-      updatePageInfo(moduleCode, menuCode);
+      const routeInfo = extractRouteInfo(pathname);
+      if (routeInfo) {
+        updatePageInfo(routeInfo.moduleCode, routeInfo.menuCode);
+      }
     }
   }, [location.pathname]);
 
