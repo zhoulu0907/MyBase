@@ -38,6 +38,7 @@ import com.cmsr.onebase.module.system.util.oauth2.LingjiSsoSignatureUtils;
 import com.cmsr.onebase.module.system.util.oauth2.OkHttpClientUtils;
 import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
 import com.cmsr.onebase.module.system.vo.auth.LingjiSsoUserInfoVO;
+import com.cmsr.onebase.module.system.vo.auth.LingjiTenantDetailVO;
 import com.cmsr.onebase.module.system.vo.project.ProjectInfoCreateReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantAdminUserReqVO;
 import com.cmsr.onebase.module.system.vo.tenant.TenantInsertReqVO;
@@ -123,22 +124,28 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         // 2. 获取用户信息
         LingjiSsoUserInfoVO userInfo = getUserInfo(code);
 
-        // 3. 查找租户
+        // 3. 获取租户信息（调用灵畿接口）
+        LingjiTenantDetailVO tenantDetail = getTenantDetail(userInfo.getEnterpriseId());
+
+        // 4. 查找租户
         TenantDO tenantDo = findTenant(userInfo.getEnterpriseId());
 
-        // 4. 如果租户不存在，创建新租户
+        // 5. 如果租户不存在，创建新租户（使用真实租户名称）
         if (tenantDo == null) {
-            tenantDo = createTenant(userInfo);
+            tenantDo = createTenant(userInfo, tenantDetail);
+        } else {
+            // 如果租户存在，检查并更新租户名称（如有变化）
+            updateTenantNameIfNeeded(tenantDo, tenantDetail);
         }
 
         tenantService.validTenant(tenantDo.getId());
 
-        // 5. 处理项目信息（如果启用了项目功能且有传projectCode）
+        // 6. 处理项目信息（如果启用了项目功能且有传projectCode）
         if (projectProperties.isEnabled() && StringUtils.isNotBlank(projectCode)) {
             handleProjectCode(projectCode, tenantDo.getId());
         }
 
-        // 6. 处理用户信息并登录
+        // 7. 处理用户信息并登录
         return processUserLogin(userInfo, deviceId, tenantDo);
     }
 
@@ -175,7 +182,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
             log.error("灵畿 SSO 配置错误：userInfoUrl 不能为空");
             throw exception(LINGJI_SSO_CONFIG_DISABLED);
         }
-    
+
         // 生成时间戳 (格式：yyyyMMddHHmmssSSS)
         String timestamp = LingjiSsoSignatureUtils.generateTimestamp();
 
@@ -287,6 +294,65 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
     }
 
     /**
+     * 获取灵畿租户信息
+     * 调用 /moss/manage/openapi/tenant/detail 接口
+     *
+     * @param tenantId 租户ID（enterpriseId）
+     * @return 租户信息，接口调用失败时返回 null
+     */
+    private LingjiTenantDetailVO getTenantDetail(String tenantId) {
+        // 校验配置
+        if (StringUtils.isBlank(lingjiSsoProperties.getTenantDetailUrl())) {
+            log.warn("灵畿租户信息查询接口未配置，跳过获取租户详情");
+            return null;
+        }
+
+        try {
+            // 构建 GET 请求 URL
+            String url = lingjiSsoProperties.getTenantDetailUrl() + "?tenantId=" + tenantId;
+            log.info("灵畿获取租户信息请求: {}", url);
+
+            // 创建 GET 请求
+            Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .build();
+
+            // 发送请求
+            String responseBody = OkHttpClientUtils.sendRequest(request, lingjiSsoProperties.isHttpDebugLogEnabled());
+            log.info("灵畿获取租户信息响应: {}", responseBody);
+
+            // 解析响应
+            JSONObject responseObj = JSONUtil.parseObj(responseBody);
+
+            // 检查响应状态
+            JSONObject respHead = responseObj.getJSONObject("head");
+            if (respHead != null) {
+                String respStatus = respHead.getStr("respStatus");
+                String respDesc = respHead.getStr("respDesc");
+
+                // 成功状态为 "00"
+                if (!"00".equals(respStatus)) {
+                    log.warn("灵畿获取租户信息失败: respStatus={}, respDesc={}", respStatus, respDesc);
+                    return null;
+                }
+            }
+
+            // 解析 data 部分
+            JSONObject respData = responseObj.getJSONObject("data");
+            if (respData == null) {
+                log.warn("灵畿获取租户信息响应 data 为空");
+                return null;
+            }
+
+            return JSONUtil.toBean(respData, LingjiTenantDetailVO.class);
+        } catch (Exception e) {
+            log.error("灵畿获取租户信息异常: tenantId={}, error={}", tenantId, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
      * 解析 JWT payload
      */
     private LingjiSsoUserInfoVO parseJwtPayload(String jwt) {
@@ -316,9 +382,9 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
     }
 
     /**
-     * 创建租户
+     * 创建租户（使用真实租户名称）
      */
-    private TenantDO createTenant(LingjiSsoUserInfoVO userInfo) {
+    private TenantDO createTenant(LingjiSsoUserInfoVO userInfo, LingjiTenantDetailVO tenantDetail) {
         String enterpriseId = userInfo.getEnterpriseId();
         log.info("未找到企业租户映射，创建新租户: enterpriseId={}, userName={}", enterpriseId, userInfo.getUserName());
 
@@ -336,7 +402,7 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
 
         // 构建租户创建请求
         TenantInsertReqVO tenantReqVO = new TenantInsertReqVO();
-        tenantReqVO.setName(buildTenantName(enterpriseId));
+        tenantReqVO.setName(buildTenantName(enterpriseId, tenantDetail));
         tenantReqVO.setTenantCode(buildTenantCode(enterpriseId));
         tenantReqVO.setStatus(CommonStatusEnum.ENABLE.getStatus());
         tenantReqVO.setPackageId(tenantPackage.getId());
@@ -355,7 +421,8 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
 
         // 创建租户
         Long tenantId = createTenantWithFallbackOperator(tenantReqVO);
-        log.info("创建租户成功: tenantId={}, enterpriseId={}, tenantCode={}", tenantId, enterpriseId, tenantReqVO.getTenantCode());
+        log.info("创建租户成功: tenantId={}, enterpriseId={}, tenantCode={}, tenantName={}",
+                tenantId, enterpriseId, tenantReqVO.getTenantCode(), tenantReqVO.getName());
 
         // 更新租户 website，格式：/tenant/{tenantId}/{tenantCode}/
         String tenantWebsite = lingjiSsoProperties.getTenantWebsite() + "/tenant/" + tenantId + "/";
@@ -363,6 +430,25 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
         log.info("更新租户website: tenantId={}, website={}", tenantId, tenantWebsite);
 
         return tenantService.getTenant(tenantId);
+    }
+
+    /**
+     * 更新租户名称（如果获取到了真实的租户名称且与当前不同）
+     */
+    private void updateTenantNameIfNeeded(TenantDO tenantDo, LingjiTenantDetailVO tenantDetail) {
+        if (tenantDetail == null || StringUtils.isBlank(tenantDetail.getTenantName())) {
+            return;
+        }
+
+        // 如果租户名称不同，则更新
+        if (!Objects.equals(tenantDo.getName(), tenantDetail.getTenantName())) {
+            log.info("租户名称变化: {} -> {}", tenantDo.getName(), tenantDetail.getTenantName());
+            TenantUpdateReqVO updateReqVO = new TenantUpdateReqVO();
+            updateReqVO.setId(tenantDo.getId());
+            updateReqVO.setName(tenantDetail.getTenantName());
+            tenantService.updateTenant(updateReqVO);
+            log.info("更新租户名称成功: tenantId={}, newName={}", tenantDo.getId(), tenantDetail.getTenantName());
+        }
     }
 
     /**
@@ -391,8 +477,12 @@ public class LingjiSsoServiceImpl implements LingjiSsoService {
 
     /**
      * 构建租户名称
+     * 如果获取到了真实的租户名称，使用真实名称；否则使用 enterpriseId 生成默认名称
      */
-    private String buildTenantName(String enterpriseId) {
+    private String buildTenantName(String enterpriseId, LingjiTenantDetailVO tenantDetail) {
+        if (tenantDetail != null && StringUtils.isNotBlank(tenantDetail.getTenantName())) {
+            return tenantDetail.getTenantName();
+        }
         return "企业" + enterpriseId + "的空间";
     }
 

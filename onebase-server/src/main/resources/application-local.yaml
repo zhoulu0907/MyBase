@@ -94,6 +94,7 @@ onebase:
     source-key: "JhxsQ3whI26YTMvt"
     tenant-website: "http://onebase.4c-uat.hq.cmcc:20011/appbuilder/"
     user-info-url: "http://rdcloud.4c-uat.hq.cmcc/moss/web/auth/v1/user/oauth/userInfo"
+    tenant-detail-url: "http://rdcloud.4c-uat.hq.cmcc/moss/manage/openapi/tenant/detail"
     http-debug-log-enabled: true
 justauth:
   enabled: true
