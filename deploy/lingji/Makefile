@@ -1,7 +1,7 @@
 # Makefile for building Debian 12 + OpenJDK 17 base image
 
 # 镜像配置
-IMAGE_NAME ?= debian-secuity
+IMAGE_NAME ?= debian-security
 IMAGE_TAG ?= bookworm-17-jre
 IMAGE_FULL ?= $(IMAGE_NAME):$(IMAGE_TAG)
 
