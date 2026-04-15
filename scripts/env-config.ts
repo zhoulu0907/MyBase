@@ -3,7 +3,7 @@
  * 每个环境定义独立的服务地址配置
  */
 
-export type EnvironmentKey = 'lingji-dev' | 'lingji-sit' | 'tiangong-dev' | 'tiangong-sit';
+export type EnvironmentKey = 'lingji-dev' | 'lingji-sit' | 'lingji-prod' | 'tiangong-dev' | 'tiangong-sit';
 
 export interface EnvironmentConfig {
   name: string;
@@ -41,16 +41,16 @@ export const ENVIRONMENTS: Record<EnvironmentKey, EnvironmentConfig> = {
   // ==================== 灵畿环境 ====================
   'lingji-dev': {
     name: '灵畿开发环境',
-    ONEBASESERVER_BASE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/observerbuilder',
-    ONEBASERUNTIMESERVER_BASE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/observerruntime',
+    ONEBASESERVER_BASE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/cmdevops-zerocode/builder',
+    ONEBASERUNTIMESERVER_BASE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/cmdevops-zerocode',
     APP_BUILDER_FE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/appbuilder',
     APP_RUNTIME_FE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/appruntime',
     APP_MOBILE_BUILDER_FE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/mobilebuilder',
     APP_MOBILE_RUNTIME_FE_URL: 'http://onebase.4c-uat.hq.cmcc:20011/mobileruntime',
-    APP_BUILDER_DATASET_URL: 'http://onebase.4c-uat.hq.cmcc:20011/observerbuilder',
+    APP_BUILDER_DATASET_URL: 'http://onebase.4c-uat.hq.cmcc:20011/cmdevops-zerocode/builder',
     APP_BUILDER_DASHBOARD_URL: 'http://onebase.4c-uat.hq.cmcc:20011/appdashboard/#/',
     CHATBOT_BASE_URL: '',
-    DASHBOARD_URL: 'http://onebase.4c-uat.hq.cmcc:20011/observerbuilder',
+    DASHBOARD_URL: 'http://onebase.4c-uat.hq.cmcc:20011/cmdevops-zerocode/builder',
     PREVIEW_URL: 'http://onebase.4c-uat.hq.cmcc:20011/appdashboard/#/chart/preview',
     DATASET_URL: 'http://10.0.104.38:8100/de2api',
     // AI 配置
@@ -62,7 +62,7 @@ export const ENVIRONMENTS: Record<EnvironmentKey, EnvironmentConfig> = {
     SUPERVISION_URL: 'http://supervision-web-uat1.4c-uat.cmdevops.cn:20011',
     SUPERVISION_SSO_URL: 'http://4c-uat.hq.cmcc/moss/micrologin/#/sso/getauthorizecode',
     // SSO 配置（灵畿）
-    LINGJI_HOME_URL: 'https://rdcloud.4c-uat.hq.cmcc/cmdevops-platform-desktop-web/home',
+    LINGJI_HOME_URL: 'http://rdcloud.4c-uat.hq.cmcc/cmdevops-platform-desktop-web/home',
     LINGJI_SSO_SOURCE_ID: '5570132830',
   },
 
@@ -91,6 +91,33 @@ export const ENVIRONMENTS: Record<EnvironmentKey, EnvironmentConfig> = {
     // SSO 配置（灵畿）
     LINGJI_HOME_URL: 'https://4c-uat3.hq.cmcc/cmdevops-platform-desktop-web/home',
     LINGJI_SSO_SOURCE_ID: '5570132830',
+  },
+
+  'lingji-prod': {
+    name: '灵畿生产环境',
+    ONEBASESERVER_BASE_URL: 'https://onebase.rdcloud.4c.hq.cmcc/cmdevops-zerocode/builder',
+    ONEBASERUNTIMESERVER_BASE_URL: 'https://onebase.rdcloud.4c.hq.cmcc/cmdevops-zerocode/runtime',
+    APP_BUILDER_FE_URL: 'https://onebase.rdcloud.4c.hq.cmcc/appbuilder',
+    APP_RUNTIME_FE_URL: 'https://onebase.rdcloud.4c.hq.cmcc/appruntime',
+    APP_MOBILE_BUILDER_FE_URL: 'https://onebase.rdcloud.4c.hq.cmcc/mobilebuilder',
+    APP_MOBILE_RUNTIME_FE_URL: 'https://onebase.rdcloud.4c.hq.cmcc/mobileruntime',
+    APP_BUILDER_DATASET_URL: 'https://onebase.rdcloud.4c.hq.cmcc/observerbuilder',
+    APP_BUILDER_DASHBOARD_URL: 'https://onebase.rdcloud.4c.hq.cmcc/appdashboard/#/',
+    CHATBOT_BASE_URL: '',
+    DASHBOARD_URL: 'https://onebase.rdcloud.4c.hq.cmcc/cmdevops-zerocode/builder',
+    PREVIEW_URL: 'https://onebase.rdcloud.4c.hq.cmcc/appdashboard/#/chart/preview',
+    DATASET_URL: 'http://10.0.104.38:8100/de2api',
+    // AI 配置
+    AI_GENAPP_URL: 'https://onebase.rdcloud.4c.hq.cmcc/aigenapp/',
+    AI_COPILOT_URL: 'https://onebase.rdcloud.4c.hq.cmcc/aicopilot/',
+    // 监督插件配置
+    SUPERVISION_ENABLE: true,
+    SUPERVISION_PLATFORM: '01',
+    SUPERVISION_URL: 'http://rdcloud.4c.hq.cmcc/supervision',
+    SUPERVISION_SSO_URL: 'http://4c.hq.cmcc/moss/micrologin/#/sso/getauthorizecode',
+    // SSO 配置（灵畿）
+    LINGJI_HOME_URL: 'https://rdcloud.4c.hq.cmcc/cmdevops-platform-desktop-web/home',
+    LINGJI_SSO_SOURCE_ID: '3287493026',
   },
 
   // ==================== 天工环境 ====================
