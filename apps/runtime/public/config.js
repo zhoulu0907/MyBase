@@ -6,14 +6,14 @@ window.global_config = {
   ENVIRONMENT: 'runtime',
   APP_KEY: 'onebase',
   APP_SECRET: 'ac47af767231f0d08e3787b7d032443a2c7baedaeee07d596cff4525b94ce6a7',
-  BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
-  RUNTIME_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
+  // BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
+  // RUNTIME_BASE_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
   RESOURCE_URL:
     'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime/infra/file/download',
   CORP_RESOURCE_URL:
     'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime/infra/file/corp/download',
-  //   BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api',
-  //   RUNTIME_BASE_URL: 'http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserverruntime/runtime',
+  BASE_URL: 'http://localhost:48080/admin-api',
+  RUNTIME_BASE_URL: 'http://localhost:48081/runtime',
   PLUGIN_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v1-snapshot/onebaseserver/plugins',
   APP_BUILDER_DASHBOARD_URL: 'http://s25029301301.dev.internal.virtueit.net:81/v0/appdashboard/#/',
   PUBLIC_KEY:

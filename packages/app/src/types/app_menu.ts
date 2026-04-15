@@ -38,7 +38,9 @@ export enum PageType {
   // 工作台
   WORKBENCH = 3,
   // 仪表盘
-  DASHBOARD = 4
+  DASHBOARD = 4,
+  // iframe 嵌入
+  IFRAME = 5
 }
 
 /**
@@ -96,12 +98,14 @@ export interface CreateApplicationMenuReq {
   pageType?: string;
   createDashboardType?: string;
   dashboardId?: string;
+  iframeUrl?: string;
 }
 
 export interface UpdateApplicationMenuNameReq {
   id: string;
   menuName: string;
   menuIcon?: string;
+  iframeUrl?: string;
 }
 
 export interface UpdateApplicationMenuOrderReq {

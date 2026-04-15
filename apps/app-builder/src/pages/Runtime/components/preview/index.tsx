@@ -10,7 +10,7 @@ import {
   type AppEntityField,
   type GetPageSetIdReq
 } from '@onebase/app';
-import { getHashQueryParam, pagesRuntimeSignal } from '@onebase/common';
+import { getHashQueryParam, pagesRuntimeSignal, TokenManager } from '@onebase/common';
 import { getFileUrlById } from '@onebase/platform-center';
 import {
   EDITOR_TYPES,
@@ -76,6 +76,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   const [loading, setLoading] = useState(false);
   const preview = true;
   const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
+  const [iframeUrl, setIframeUrl] = useState<string>('');
 
   // 获取页面配置
   const getPageConfig = () => {
@@ -176,8 +177,8 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         }
       };
 
-      // 工作台、大屏页面不获取主表数据
-      if (pagesetType === PageType.WORKBENCH || pagesetType === PageType.DASHBOARD) {
+      // 工作台、大屏、iframe 页面不获取主表数据
+      if (pagesetType === PageType.WORKBENCH || pagesetType === PageType.DASHBOARD || pagesetType === PageType.IFRAME) {
         loadPageSetInfo(pageSetId).finally(() => {
           setLoading(false);
         });
@@ -189,6 +190,9 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     if (pageSetId && pagesetType === PageType.DASHBOARD) {
       getDashboardId(pageSetId);
       setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+    } else if (pageSetId && pagesetType === PageType.IFRAME) {
+      getDashboardId(pageSetId);
+      setPageType(EDITOR_TYPES.IFRAME_PREVIEW);
     } else if (pagesetType === PageType.WORKBENCH) {
       setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
     } else {
@@ -205,6 +209,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
       if (res && res.pages && res.pages.length > 0) {
         const imgRes = getFileUrlById(res.pages[0].indexImage);
         setDashboardImgUrl(imgRes);
+        // 如果是 iframe 类型，获取 iframeUrl
+        if (res.pages[0].iframeUrl) {
+          setIframeUrl(res.pages[0].iframeUrl);
+        }
       }
     } catch (error) {
       console.error('获取页面视图失败:', error);
@@ -283,6 +291,17 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
   // 判断是否为工作台页面
   const isWorkbenchPage = pageType === EDITOR_TYPES.WORKBENCH_EDITOR;
 
+  // 替换 iframe URL 中的动态参数
+  const replaceIframeUrlParams = (url: string) => {
+    const tenantId = TokenManager.getTokenInfo()?.tenantId || '';
+    const userId = TokenManager.getTokenInfo()?.userId || '';
+    return url
+      .replace(/\$\{tenantId\}/g, tenantId)
+      .replace(/\$\{appId\}/g, appId)
+      .replace(/\$\{userId\}/g, userId)
+      .replace(/\$\{menuId\}/g, menuId);
+  };
+
   // 获取工作台页面的样式
   const getWbPageStyle = () => {
     if (isWorkbenchPage) {
@@ -298,12 +317,24 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
     return { backgroundColor: '#fff' };
   };
 
+  // iframe 类型需要去掉 padding，铺满屏幕
+  const getIframeStyle = () => {
+    if (pageType === EDITOR_TYPES.IFRAME_PREVIEW) {
+      return {
+        backgroundColor: '#fff',
+        padding: 0,
+        height: '100%'
+      };
+    }
+    return getWbPageStyle();
+  };
+
   return (
     <div className={styles.previewPage}>
       <div
         className={`${styles.content} ${isWorkbenchPage ? styles.workbenchContent : ''}`}
         style={{
-          ...getWbPageStyle()
+          ...getIframeStyle()
         }}
       >
         {loading ? (
@@ -498,6 +529,16 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType
         {pageType === EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardImgUrl && (
           <div className={styles.dashboardPreview}>
             <img src={dashboardImgUrl} alt="大屏预览" />
+          </div>
+        )}
+
+        {pageType === EDITOR_TYPES.IFRAME_PREVIEW && iframeUrl && (
+          <div className={styles.iframePreview}>
+            <iframe
+              key={`iframe-${menuId}`}
+              src={replaceIframeUrlParams(iframeUrl)}
+              title="iframe Preview"
+            />
           </div>
         )}
       </div>

@@ -167,6 +167,7 @@ export const EDITOR_TYPES = {
   FLOW_EDITOR:'flow_editor',
   WORKBENCH_EDITOR: 'workbench_editor',
   DASHBOARD_PREVIEW: "dashboard_preview",
+  IFRAME_PREVIEW: "iframe_preview",
 } as const;
 
 // 编辑器类型联合类型

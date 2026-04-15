@@ -6,7 +6,20 @@ import viteCompression from 'vite-plugin-compression';
 // https://vitejs.dev/config/
 export default defineConfig({
   server: {
-    port: 9527
+    port: 9527,
+    proxy: {
+      // 代理 iframe 外部站点，解决跨域 iframe 问题
+      '/share-app': {
+        target: 'http://10.0.13.12:18000',
+        changeOrigin: true,
+        secure: false
+      },
+      '/storage_area': {
+        target: 'http://10.0.13.12:18000',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   base: './',
   plugins: [
