@@ -192,7 +192,18 @@ export const RenderElement: React.FC<RenderElementProps> = ({
           </Select>
         );
       case ElementType.NUMBER:
-        return <InputNumber disabled={isDisabled} className={styles.ruleItemInputNumber} style={{ width: 150 }} />;
+        return (
+          <InputNumber
+            disabled={isDisabled}
+            className={styles.ruleItemInputNumber}
+            style={{ width: 150 }}
+            value={item.value}
+            onChange={(value) => {
+              console.log('static number==', value);
+              onRuleChange(groupIndex, index, OperatorType.VALUE, value);
+            }}
+          />
+        );
       default:
         return (
           <Input
@@ -201,7 +212,9 @@ export const RenderElement: React.FC<RenderElementProps> = ({
             allowClear
             value={item.value}
             disabled={isDisabled}
-            onChange={(value) => onRuleChange(groupIndex, index, OperatorType.VALUE, value)}
+            onChange={(value) => {
+              onRuleChange(groupIndex, index, OperatorType.VALUE, value);
+            }}
           />
         );
     }
