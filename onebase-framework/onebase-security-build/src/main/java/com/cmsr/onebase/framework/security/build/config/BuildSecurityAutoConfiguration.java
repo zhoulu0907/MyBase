@@ -5,7 +5,6 @@ import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
 import com.cmsr.onebase.framework.common.config.FileUploadSecurityProperties;
 import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
-import com.cmsr.onebase.framework.security.build.filter.DisableMultipartFilter;
 import com.cmsr.onebase.framework.common.util.file.FileValidateUtil;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
@@ -22,7 +21,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -89,16 +87,6 @@ public class BuildSecurityAutoConfiguration {
     public BuildAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
                                                                OAuth2TokenCommonApi oauth2TokenApi, SecurityConfigApi securityConfigApi) {
         return new BuildAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi,securityConfigApi);
-    }
-
-    @Bean
-    public FilterRegistrationBean<DisableMultipartFilter> disableMultipartFilter() {
-        FilterRegistrationBean<DisableMultipartFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new DisableMultipartFilter());
-        registration.addUrlPatterns("/admin-api/build/ai/**");
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        registration.setName("disableMultipartFilter");
-        return registration;
     }
 
     @Bean("ss") // 使用 Spring Security 的缩写，方便使用

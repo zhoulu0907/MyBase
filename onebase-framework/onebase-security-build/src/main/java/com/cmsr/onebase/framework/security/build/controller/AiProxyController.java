@@ -3,11 +3,12 @@ package com.cmsr.onebase.framework.security.build.controller;
 import com.cmsr.onebase.framework.common.annotaion.ApiSignIgnore;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
 import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.util.file.FileValidateUtil;
 import com.cmsr.onebase.framework.security.build.config.AiBridgeProperties;
 import com.cmsr.onebase.framework.security.build.context.AiBridgeContextHolder;
 import com.cmsr.onebase.framework.security.build.filter.CachedMultipartRequestWrapper;
+import com.cmsr.onebase.framework.security.build.filter.CachedMultipartRequestWrapper.FileInfo;
 import com.cmsr.onebase.framework.security.build.util.AiBridgeCryptoUtils;
-import com.cmsr.onebase.framework.common.util.file.FileValidateUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -69,40 +70,51 @@ public class AiProxyController {
         }
 
         // === 文件上传安全验证 ===
-        // 注意：DisableMultipartFilter 会伪装 Content-Type，需要先创建 CachedMultipartRequestWrapper
-        // 来恢复真实的 Content-Type，才能正确判断是否 multipart 请求
         if (isFileUploadPath(path)) {
             log.info("[proxy] 检测到上传路径: path={}, 原始Content-Type={}", path, request.getContentType());
+            CachedMultipartRequestWrapper wrappedRequest = null;
+            boolean forwarded = false;
             try {
-                // 创建缓存 wrapper，它会恢复真实的 Content-Type 并支持 getParts()
-                CachedMultipartRequestWrapper wrappedRequest = new CachedMultipartRequestWrapper(request);
-                log.info("[proxy] wrapper恢复的Content-Type={}", wrappedRequest.getContentType());
+                // 创建缓存 wrapper，通过 Servlet Part API 获取文件并重建 multipart body
+                wrappedRequest = new CachedMultipartRequestWrapper(request);
+                log.info("[proxy] wrapper重建multipart body大小={}KB", wrappedRequest.getCachedSize() / 1024);
 
-                // 用 wrapper 判断是否 multipart 请求（wrapper 恢复了真实 Content-Type）
-                if (FileValidateUtil.isMultipartRequest(wrappedRequest)) {
-                    log.info("[proxy] 确认是multipart请求，开始验证文件");
-                    // 验证文件类型
-                    if (!FileValidateUtil.validateMultipartFiles(wrappedRequest)) {
-                        log.warn("[proxy] 文件类型验证失败，拒绝请求: path={}", path);
+                // 获取解析出的文件列表（已通过 Part API 获取）
+                List<FileInfo> files = wrappedRequest.getFiles();
+                log.info("[proxy] 获取到 {} 个文件", files.size());
+
+                for (FileInfo file : files) {
+                    String filename = file.getFilename();
+                    byte[] content = file.getContent();
+
+                    log.info("[proxy] 文件信息: filename={}, contentSize={}KB", filename, content.length / 1024);
+
+                    if (!FileValidateUtil.validateFileType(content, filename)) {
+                        log.warn("[proxy] 文件类型验证失败: filename={}", filename);
                         response.setStatus(HttpStatus.BAD_REQUEST.value());
                         response.setContentType("application/json;charset=UTF-8");
                         response.getWriter().write("{\"code\":400,\"msg\":\"文件类型不允许\"}");
                         return;
                     }
-
-                    // 验证通过，使用缓存的请求继续处理
-                    log.info("[proxy] 文件类型验证通过: path={}", path);
-                    doProxy(wrappedRequest, response, path, base);
-                    return;
-                } else {
-                    log.info("[proxy] 不是multipart请求，直接转发");
+                    log.info("[proxy] 文件验证通过: filename={}, size={}KB", filename, content.length / 1024);
                 }
+
+                // 验证通过，使用缓存的请求继续处理
+                log.info("[proxy] 所有文件验证通过: path={}", path);
+                forwarded = true;
+                doProxy(wrappedRequest, response, path, base);
+                return;
             } catch (Exception e) {
                 log.error("[proxy] 文件验证异常: path={}, error={}", path, e.getMessage(), e);
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"code\":400,\"msg\":\"文件验证失败\"}");
                 return;
+            } finally {
+                // 只在未转发情况下清理临时文件（转发过程中需要保持文件）
+                if (!forwarded && wrappedRequest != null) {
+                    wrappedRequest.cleanup();
+                }
             }
         }
         // === 验证结束 ===
@@ -123,9 +135,23 @@ public class AiProxyController {
         HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
         HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url)).version(HttpClient.Version.HTTP_1_1);
         String method = request.getMethod().toUpperCase(Locale.ROOT);
-        boolean hasBody = hasBody(request, method);
-        // 附件上传与大 body 场景必须走流式转发，避免整体读入内存
-        builder.method(method, hasBody ? bodyPublisher(request) : HttpRequest.BodyPublishers.noBody());
+
+        // 对于 CachedMultipartRequestWrapper，直接使用缓存的 byte[]，避免 lambda 延迟执行问题
+        if (request instanceof CachedMultipartRequestWrapper) {
+            CachedMultipartRequestWrapper wrapper = (CachedMultipartRequestWrapper) request;
+            byte[] cachedBody = wrapper.getCachedBody();
+            String contentType = wrapper.getContentType();
+            log.info("[doProxy] 使用缓存 body 转发: size={}KB, Content-Type={}, body前100字节={}",
+                    cachedBody.length / 1024, contentType,
+                    new String(cachedBody, 0, Math.min(100, cachedBody.length), java.nio.charset.StandardCharsets.UTF_8));
+            builder.method(method, HttpRequest.BodyPublishers.ofByteArray(cachedBody));
+        } else {
+            boolean hasBody = hasBody(request, method);
+            builder.method(method, hasBody ? bodyPublisher(request) : HttpRequest.BodyPublishers.noBody());
+        }
+
+        // 打印要转发的 headers
+        log.info("[doProxy] 转发headers: Content-Type={}", request.getHeader("Content-Type"));
 
         Collections.list(request.getHeaderNames()).forEach(name -> {
             if (!isHopByHopHeader(name)) {
@@ -247,6 +273,9 @@ public class AiProxyController {
      * hop-by-hop headers（逐跳头）不应被代理转发。
      *
      * <p>参考 RFC 7230：这些头的语义仅对单一连接生效，透传可能导致上游/下游协议栈行为异常。</p>
+     *
+     * <p><b>注意：</b>content-length 需要过滤，因为 JDK HttpClient 使用 ofByteArray() 时会自动计算，
+     * 手动设置会报 "restricted header" 错误。</p>
      */
     private static boolean isHopByHopHeader(String headerName) {
         if (StringUtils.isBlank(headerName)) {
@@ -262,7 +291,7 @@ public class AiProxyController {
                 "trailers",
                 "transfer-encoding",
                 "upgrade",
-                "content-length");
+                "content-length");  // JDK HttpClient 自动计算，手动设置会报错
     }
 
     private static boolean equalsAnyIgnoreCase(String s, String... arr) {
