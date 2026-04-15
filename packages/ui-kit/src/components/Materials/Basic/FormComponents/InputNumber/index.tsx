@@ -30,7 +30,14 @@ const XInputNumber = memo((props: XInputNumberConfig & { runtime?: boolean; deta
     layout,
     runtime = true,
     detailMode,
-    numberFormat,
+    numberFormat = {
+      showUnit: false,
+      unitValue: '',
+      showPrecision: false,
+      precision: 0,
+      showPercent: false,
+      useThousandsSeparator: false
+    },
     security,
     id: cpId
   } = props;
