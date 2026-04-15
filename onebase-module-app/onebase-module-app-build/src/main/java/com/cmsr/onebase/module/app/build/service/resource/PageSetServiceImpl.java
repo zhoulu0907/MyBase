@@ -129,6 +129,25 @@ public class PageSetServiceImpl implements PageSetService {
             return String.valueOf(pageSetDO.getDashboardId());
         }
 
+        // iframe 类型，只创建页面记录并设置 iframeUrl
+        if (PageTypeSetEnum.isIframeType(createPageSetDTO.getPageSetType())) {
+            String iframePageCode = UUID.randomUUID().toString();
+            String iframePageName = pageSetDO.getPageSetName() + "_iframe";
+            String iframeRouterPath = iframePageCode + "/iframe";
+            String iframePageType = PageEnum.FORM.getValue();
+            Boolean iframeOpenViewMode = false;
+            AppResourcePageDO iframePageDO = PageUtils.initPage(
+                    applicationId,
+                    pageSetDO.getPageSetUuid(),
+                    iframePageName,
+                    iframeRouterPath,
+                    iframePageType,
+                    iframeOpenViewMode);
+            iframePageDO.setIframeUrl(createPageSetDTO.getIframeUrl());
+            pageRepository.save(iframePageDO);
+            return pageSetDO.getPageSetCode();
+        }
+
         // 创建空的表单设计页面和列表设计页面
         String formPageCode = UUID.randomUUID().toString();
         String formPageName = pageSetDO.getPageSetName() + "_表单";

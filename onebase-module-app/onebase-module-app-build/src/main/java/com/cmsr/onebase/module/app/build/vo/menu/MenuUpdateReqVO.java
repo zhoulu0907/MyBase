@@ -24,4 +24,7 @@ public class MenuUpdateReqVO {
     @Schema(description = "菜单图标")
     @NotBlank(message = "菜单图标不能为空")
     private String menuIcon;
+
+    @Schema(description = "iframe URL")
+    private String iframeUrl;
 }

@@ -11,9 +11,11 @@ import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthDataGroupReposi
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthFieldRepository;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppApplicationDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePageDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.dto.resource.CopyPageSetDTO;
 import com.cmsr.onebase.module.app.core.dto.resource.CreatePageSetDTO;
@@ -55,6 +57,9 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
 
     @Autowired
     private AppPageSetRepository appPageSetRepository;
+
+    @Autowired
+    private AppPageRepository appPageRepository;
 
     @Autowired
     private PageSetService pageSetService;
@@ -302,6 +307,7 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
         createPageSetDTO.setMainMetadata(createReqVO.getEntityUuid());
         createPageSetDTO.setCreateDashboardType(createReqVO.getCreateDashboardType());
         createPageSetDTO.setDashboardId(createReqVO.getDashboardId());
+        createPageSetDTO.setIframeUrl(createReqVO.getIframeUrl());
         pageSetService.createPageSet(createPageSetDTO);
         // 返回结果
         MenuCreateRespVO menuCreateRespVO = BeanUtils.toBean(menuDO, MenuCreateRespVO.class);
@@ -333,6 +339,35 @@ public class BuildAppMenuServiceImpl implements BuildAppMenuService {
         menuDO.setMenuName(updateReqVO.getMenuName());
         menuDO.setMenuIcon(updateReqVO.getMenuIcon());
         appMenuRepository.updateById(menuDO);
+        // 更新 iframe URL
+        if (StringUtils.isNotBlank(updateReqVO.getIframeUrl())) {
+            updateIframeUrl(menuDO, updateReqVO.getIframeUrl());
+        }
+    }
+
+    /**
+     * 更新 iframe 类型菜单的 iframe URL
+     *
+     * @param menuDO   菜单信息
+     * @param iframeUrl iframe URL
+     */
+    private void updateIframeUrl(AppMenuDO menuDO, String iframeUrl) {
+        // 1. 查询关联的 pageSet
+        AppResourcePagesetDO pageSetDO = appPageSetRepository.findPageSetByAppIdAndMenuUuid(
+                menuDO.getApplicationId(), menuDO.getMenuUuid());
+        if (pageSetDO == null || !PageTypeSetEnum.isIframeType(pageSetDO.getPageSetType())) {
+            return;
+        }
+        // 2. 查询关联的 page
+        List<AppResourcePageDO> pages = appPageRepository.findByPageSetUuid(
+                menuDO.getApplicationId(), pageSetDO.getPageSetUuid());
+        if (CollectionUtils.isEmpty(pages)) {
+            return;
+        }
+        // 3. 更新第一个页面的 iframeUrl
+        AppResourcePageDO pageDO = pages.get(0);
+        pageDO.setIframeUrl(iframeUrl);
+        appPageRepository.updateById(pageDO);
     }
 
     @Override

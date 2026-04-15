@@ -38,4 +38,7 @@ public class CreatePageSetDTO {
 
     @Schema(description = "数据大屏/模板id", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "xxx")
     private Long dashboardId;
+
+    @Schema(description = "iframe嵌入URL", requiredMode = Schema.RequiredMode.NOT_REQUIRED, example = "https://example.com?tenant=${tenantId}")
+    private String iframeUrl;
 }

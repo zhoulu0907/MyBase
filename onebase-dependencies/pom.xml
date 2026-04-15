@@ -100,7 +100,7 @@
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <calcite.version>1.41.0</calcite.version>
         <!-- 间接依赖安全版本覆盖 -->
-        <kotlin.version>2.1.0</kotlin.version>
+        <!-- <kotlin.version>2.1.0</kotlin.version> -->
         <yawk-lz4-java.version>1.11.0</yawk-lz4-java.version>
     </properties>
 
@@ -796,6 +796,8 @@
 
             <!-- 间接依赖安全版本覆盖 -->
             <!-- Kotlin stdlib 安全修复 -->
+            <!-- Kotlin 依赖版本管理（暂时注释，2.1.0 版本在仓库中不可用） -->
+            <!--
             <dependency>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-stdlib</artifactId>
@@ -821,6 +823,7 @@
                 <artifactId>kotlin-reflect</artifactId>
                 <version>${kotlin.version}</version>
             </dependency>
+            -->
             <!-- LZ4 Java 压缩库安全修复（CVE-2025-66566, CVE-2025-12183）-->
             <dependency>
                 <groupId>at.yawk.lz4</groupId>

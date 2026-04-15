@@ -1,0 +1,3 @@
+[registry."artifact.ec.rdcloud.4c.hq.cmcc:80"]
+  http = true
+  insecure = true

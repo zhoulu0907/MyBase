@@ -36,8 +36,11 @@ public class DashboardServiceProvider {
                 throw ServiceExceptionUtil.exception(AppResourceErrorCodeConstants.DASHBOARD_TEMPLATE_NOT_EXIST);
             }
             return newDashboardId;
+        } else if (Objects.equals(createType, DashboardCreateTypeSetEnum.DASHBOARD_IFRAME.getCode())){
+            //1.3 iframe 类型，不创建大屏页面
+            return null;
         } else {
-            //1.3 从空白页创建数据大屏
+            //1.4 从空白页创建数据大屏
             DashboardProjectDTO goViewProjectDTO = new DashboardProjectDTO();
 
             goViewProjectDTO.setProjectName(dashboardName);

@@ -36,4 +36,6 @@ public class PageDTO {
 
     private String indexImage;
 
+    private String iframeUrl;
+
 }

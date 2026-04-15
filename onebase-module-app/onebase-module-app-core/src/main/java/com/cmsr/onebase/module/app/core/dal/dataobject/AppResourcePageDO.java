@@ -72,4 +72,7 @@ public class AppResourcePageDO extends BaseBizEntity {
 
     @Column(value = "interaction_rules")
     private String interactionRules;
+
+    @Column(value = "iframe_url")
+    private String iframeUrl;
 }
