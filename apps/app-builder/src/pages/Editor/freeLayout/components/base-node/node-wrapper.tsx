@@ -87,10 +87,10 @@ export const NodeWrapper: React.FC<NodeWrapperProps> = (props) => {
         }
       });
       if (!flag) {
-        errorMsg = '该节点为独立节点';
+        errorMsg = '流程存在循环触发，运行时可能导致错误';
       }
     }
-    if (!nodeRender.data.errorMsg || nodeRender.data.errorMsg == '该节点为独立节点') {
+    if (!nodeRender.data.errorMsg || nodeRender.data.errorMsg == '流程存在循环触发，运行时可能导致错误') {
       nodeRender.updateData(Object.assign({}, nodeRender.data, { errorMsg }));
     }
   }, [node]);
