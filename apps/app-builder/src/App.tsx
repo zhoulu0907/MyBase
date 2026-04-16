@@ -9,39 +9,51 @@ import { ETLFlowEditorPage } from './pages/ETLFlowEditor';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SettingPage from './pages/Setting';
-import { getPlatformExports, getPlatform, type PlatformExports } from './products';
+import { getPlatformExports, getPlatform, type PlatformExports, type CallbackProps, type OAuthCallbackProps } from './products';
+import type { NavigateFunction } from 'react-router-dom';
 
-// 延迟加载的平台组件
+// 延迟加载的平台组件 - 使用 wrapper 传递 navigate
 const LingjiCallback = () => {
-  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+  const navigate = useNavigate();
+  const [Component, setComponent] = useState<React.ComponentType<CallbackProps> | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getPlatformExports().then(exports => {
+      setLoading(false);
       if (exports.LingjiCallback) {
         setComponent(() => exports.LingjiCallback!);
+      } else {
+        console.warn('[App] LingjiCallback 组件未找到，当前平台:', exports?.config?.platform);
       }
     });
   }, []);
 
-  if (!Component) return null;
-  return <Component />;
+  if (Component) return <Component navigate={navigate} />;
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>加载中...</div>;
+  return <NotFoundPage />;
 };
 
 const OAuthCallback = () => {
-  const [Component, setComponent] = useState<React.ComponentType<any> | null>(null);
+  const [Component, setComponent] = useState<React.ComponentType<OAuthCallbackProps> | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     getPlatformExports().then(exports => {
+      setLoading(false);
       if (exports.TiangongOAuthCallback) {
         setComponent(() => exports.TiangongOAuthCallback!);
+      } else {
+        console.warn('[App] TiangongOAuthCallback 组件未找到，当前平台:', exports?.config?.platform);
       }
     });
   }, []);
 
-  if (!Component) return null;
-  return <Component searchParams={searchParams} navigate={navigate} />;
+  if (Component) return <Component searchParams={searchParams} navigate={navigate} />;
+  if (loading) return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>加载中...</div>;
+  return <NotFoundPage />;
 };
 
 function AppContent() {
@@ -63,7 +75,7 @@ function AppContent() {
   // 加载平台包
   useEffect(() => {
     getPlatformExports().then(exports => {
-      console.log('[App] 平台包加载完成:', exports?.config?.platform);
+      console.log('[App] 平台加载完成:', getPlatform());
       setPlatformExports(exports);
     });
   }, []);
@@ -72,16 +84,13 @@ function AppContent() {
   useEffect(() => {
     if (!platformExports) return;
 
-    console.log('[App] 平台包加载完成:', platformExports.config?.platform);
-
     // 灵畿平台初始化监督插件
-    if (platformExports.config?.platform === 'lingji') {
+    if (isLingji) {
       import('@onebase/product-lingji').then(({ initLingjiPlatform }) => {
-        console.log('[App] 初始化灵畿平台...');
         initLingjiPlatform();
       });
     }
-  }, [platformExports]);
+  }, [platformExports, isLingji]);
 
   useEffect(() => {
     if (tenantId) {

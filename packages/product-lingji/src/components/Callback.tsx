@@ -1,7 +1,7 @@
 import React from 'react';
 import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import type { NavigateFunction } from 'react-router-dom';
 import { getPermissionInfo, CodeType } from '@onebase/platform-center';
 import { TokenManager, UserPermissionManager } from '@onebase/common';
 
@@ -14,12 +14,32 @@ interface LingjiLoginData {
 }
 
 /**
+ * Callback 组件的 Props
+ * navigate 函数由主应用传入，避免 useNavigate hook context 问题
+ */
+export interface CallbackProps {
+  navigate?: NavigateFunction;
+}
+
+/**
  * 灵畿 SSO 回调组件
  * 处理灵畿平台的 SSO 登录回调
  */
-export const LingjiCallback: React.FC = () => {
-  const navigate = useNavigate();
+export const LingjiCallback: React.FC<CallbackProps> = ({ navigate }) => {
   const processedRef = useRef(false);
+
+  // 导航函数：优先使用传入的 navigate，否则使用 window.location
+  const doNavigate = (path: string, options?: { replace?: boolean }) => {
+    if (navigate) {
+      navigate(path, options);
+    } else {
+      // fallback: 使用 hash 路由跳转
+      window.location.hash = '#' + path;
+      if (options?.replace) {
+        window.history.replaceState(null, '', window.location.href);
+      }
+    }
+  };
 
   useEffect(() => {
     // 确保登录逻辑只执行一次
@@ -32,7 +52,7 @@ export const LingjiCallback: React.FC = () => {
 
         if (!loginDataStr) {
           Message.error('登录数据不存在，请重新登录');
-          navigate('/login');
+          doNavigate('/login');
           return;
         }
 
@@ -41,7 +61,7 @@ export const LingjiCallback: React.FC = () => {
 
           if (!loginData.accessToken || !loginData.tenantId) {
             Message.error('登录数据不完整，请重新登录');
-            navigate('/login');
+            doNavigate('/login');
             return;
           }
 
@@ -74,11 +94,11 @@ export const LingjiCallback: React.FC = () => {
           }
 
           // 4. 跳转到应用管理页面
-          navigate(`/onebase/${loginData.tenantId}/setting/application`);
+          doNavigate(`/onebase/${loginData.tenantId}/setting/application`);
         } catch (error) {
           console.error('灵畿登录处理失败:', error);
           Message.error((error as any)?.message || '登录处理失败');
-          navigate('/login');
+          doNavigate('/login');
         }
       };
 

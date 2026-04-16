@@ -23,28 +23,28 @@ window.supervision_config = {
 
   // 模块编码（固定的编码）
   // 根据《监督插件集成方案》文档格式
-  MODULE_CODE: 'M_ONEBASE_001',
+  MODULE_CODE: 'CMDEVOPS-ZEROCODE',
 
   // 菜单编码映射（一级菜单）
   // 一级菜单切换时生效，遵循文档格式
   MENU_CODES: {
     // 设置页面侧边栏菜单
-    'application': 'C_APPLICATION_001',
-    'user': 'C_USER_002',
-    'role': 'C_ROLE_003',
-    'organization': 'C_ORGANIZATION_004',
-    'spaceInfo': 'C_SPACE_INFO_005',
-    'system-dict': 'C_SYSTEM_DICT_006',
-    'security': 'C_SECURITY_007',
-    'profile': 'C_PROFILE_008',
-    'plugin': 'C_PLUGIN_009',
-    'externalUser': 'C_EXTERNAL_USER_010',
-    'enterprise': 'C_ENTERPRISE_011',
-    'agent': 'C_AGENT_012',
-    'copilotdoc': 'C_COPILOT_DOC_013',
-    'wxmini': 'C_WXMINI_014'
+    'application': 'menu_zerocode_c_application_001',
+    'user': 'menu_zerocode_c_user_002',
+    'role': 'menu_zerocode_c_role_003',
+    'organization': 'menu_zerocode_c_organization_004',
+    'spaceInfo': 'menu_zerocode_c_space_info_005',
+    'system-dict': 'menu_zerocode_c_system_dict_006',
+    'security': 'menu_zerocode_c_security_007',
+    'profile': 'menu_zerocode_c_profile_008',
+    'plugin': 'menu_zerocode_c_plugin_009',
+    'externalUser': 'menu_zerocode_c_external_user_010',
+    'enterprise': 'menu_zerocode_c_enterprise_011',
+    'agent': 'menu_zerocode_c_agent_012',
+    'copilotdoc': 'menu_zerocode_c_copilot_doc_013',
+    'wxmini': 'menu_zerocode_c_wxmini_014'
   },
 
   // 默认菜单编码
-  DEFAULT_MENU_CODE: 'C_APPLICATION_001'
+  DEFAULT_MENU_CODE: 'menu_zerocode_c_application_001'
 };

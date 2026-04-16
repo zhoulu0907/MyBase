@@ -12,6 +12,8 @@ import { CodeType, getPermissionInfo, getTenantInfo, systemLogout, type TenantIn
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styles from './header.module.less';
+import mapPinIcon from '@/assets/images/map-pin-2-line.svg';
+import { getPlatform } from '@/products';
 
 const { Header } = Layout;
 
@@ -98,7 +100,18 @@ const AppHeader: React.FC<HeaderProps> = ({ className, avatarUrl, tenantInfo }) 
             应用中心
           </Button>
 
-          <div className={styles.username}>{userPermissionInfo?.user.nickname}</div>
+          {/* 当前租户名称 - 仅灵畿显示 */}
+          {getPlatform() === 'lingji' && (
+            <div className={styles.tenantName}>
+              <img src={mapPinIcon} alt="tenant" className={styles.tenantIcon} />
+              <span>{tenantInfo?.name || tenantInfor?.tenant?.name || ''}</span>
+            </div>
+          )}
+
+          {/* 用户名 - 仅非灵畿显示 */}
+          {getPlatform() !== 'lingji' && (
+            <div className={styles.username}>{userPermissionInfo?.user.nickname}</div>
+          )}
 
           <Dropdown droplist={userMenu} position="bottom">
             <div className={styles.userDropdown}>

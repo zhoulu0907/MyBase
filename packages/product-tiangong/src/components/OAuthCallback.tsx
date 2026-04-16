@@ -4,7 +4,11 @@ import { NavigateFunction } from 'react-router-dom';
 import { tiangongLogin, getPermissionInfo, CodeType } from '@onebase/platform-center';
 import { TokenManager, UserPermissionManager, getOrCreateDeviceInfo } from '@onebase/common';
 
-interface TiangongOAuthCallbackProps {
+/**
+ * OAuthCallback 组件的 Props
+ * navigate 和 searchParams 函数由主应用传入，避免 hooks context 问题
+ */
+export interface OAuthCallbackProps {
   searchParams?: URLSearchParams;
   navigate?: NavigateFunction;
 }
@@ -13,10 +17,23 @@ interface TiangongOAuthCallbackProps {
  * 天工 OAuth 回调组件
  * 处理天工平台的 OAuth 登录回调
  */
-export const TiangongOAuthCallback: React.FC<TiangongOAuthCallbackProps> = ({ searchParams: searchParamsProp, navigate: navigateProp }) => {
+export const TiangongOAuthCallback: React.FC<OAuthCallbackProps> = ({ searchParams: searchParamsProp, navigate: navigateProp }) => {
   const searchParams = searchParamsProp || new URLSearchParams(window.location.search);
   const navigate = navigateProp || (() => { throw new Error('navigate function is required'); });
   const processedRef = useRef(false);
+
+  // 导航函数：优先使用传入的 navigate，否则使用 window.location
+  const doNavigate = (path: string, options?: { replace?: boolean }) => {
+    if (navigate) {
+      navigate(path, options);
+    } else {
+      // fallback: 使用 hash 路由跳转
+      window.location.hash = '#' + path;
+      if (options?.replace) {
+        window.history.replaceState(null, '', window.location.href);
+      }
+    }
+  };
 
   useEffect(() => {
     if (!processedRef.current) {
@@ -54,31 +71,31 @@ export const TiangongOAuthCallback: React.FC<TiangongOAuthCallbackProps> = ({ se
               if (state) {
                 try {
                   const redirectPath = atob(decodeURIComponent(state));
-                  navigate(redirectPath, { replace: true });
+                  doNavigate(redirectPath, { replace: true });
                 } catch (error) {
                   console.error('解析state失败:', error);
-                  navigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
+                  doNavigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
                 }
               } else {
-                navigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
+                doNavigate(`/onebase/${response.tenantId}/setting/application`, { replace: true });
               }
             }
           } catch (error) {
             console.error('天工登录失败:', error);
             if ((error as any)?.response?.status !== 302) {
               Message.error((error as any)?.message || '登录失败');
-              navigate('/login', { replace: true });
+              doNavigate('/login', { replace: true });
             }
           }
         } else {
           Message.error('缺少授权码');
-          navigate('/login', { replace: true });
+          doNavigate('/login', { replace: true });
         }
       };
 
       handleOAuthCallback();
     }
-  }, []);
+  }, [navigate, searchParams]);
 
   return (
     <div style={{

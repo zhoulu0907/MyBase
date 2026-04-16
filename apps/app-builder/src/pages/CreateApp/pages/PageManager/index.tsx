@@ -419,7 +419,7 @@ const PageManagerPage: FC = () => {
   };
 
   //页面设计新建大屏创建
-  const handleScreenCreate = async (id?: string, screenMethod?: string) => {
+  const handleScreenCreate = async (id?: string, screenMethod?: string, iframeUrl?: string) => {
     console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
 
     if (screenMethod === DashBoardCreateType.DashboardTemplate && !id) {
@@ -430,6 +430,10 @@ const PageManagerPage: FC = () => {
       // 关联大屏创建，关联大屏ID不可为空
       Message.error('请选择一个大屏');
       return;
+    } else if (screenMethod === DashBoardCreateType.DashboardIframe && !iframeUrl) {
+      // iframe 嵌入，URL 不可为空
+      Message.error('请输入 iframe URL');
+      return;
     }
     // 产品需求：当新建大屏且选择了模板时，更新为通过模板创建。
     if (screenMethod === DashBoardCreateType.DashboardNew && id) {
@@ -438,17 +442,20 @@ const PageManagerPage: FC = () => {
 
     createForm.validate(async (error) => {
       if (error !== null) return;
+      // iframe 类型使用 PageType.IFRAME = 5，其他大屏类型使用 PageType.DASHBOARD = 4
+      const pageSetTypeValue = screenMethod === DashBoardCreateType.DashboardIframe ? PageType.IFRAME : dashboardPageType;
       const req: CreateApplicationMenuReq = {
         applicationId: curAppId,
         parentId:
           createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
-        pageSetType: dashboardPageType,
+        pageSetType: pageSetTypeValue,
         menuName: createForm.getFieldValue('menuName'),
         menuType: MenuType.PAGE,
         menuIcon: createForm.getFieldValue('menuIcon'),
         entityUuid: '',
         createDashboardType: screenMethod,
-        dashboardId: id
+        dashboardId: screenMethod === DashBoardCreateType.DashboardIframe ? undefined : id,
+        iframeUrl: screenMethod === DashBoardCreateType.DashboardIframe ? iframeUrl : undefined
       };
       const menuResp = await createApplicationMenu(req);
       if (menuResp) {
@@ -456,6 +463,10 @@ const PageManagerPage: FC = () => {
       }
       setVisibleCreateScreenForm('');
       getMenuList(undefined, menuResp.id);
+      // iframe 类型不需要打开大屏编辑器
+      if (screenMethod === DashBoardCreateType.DashboardIframe) {
+        return;
+      }
       const pageSetId = await getPageSetId({
         menuId: menuResp.id
       });

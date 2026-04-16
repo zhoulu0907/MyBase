@@ -94,6 +94,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   const [isAdd, setAdd] = useState(false);
 
   const [dashboardId, setDashboardId] = useState<string>('');
+  const [iframeUrl, setIframeUrl] = useState<string>('');
   const isRuntimeDev = useIsRuntimeDev();
 
   const dashboardType = 'dashboard';
@@ -113,9 +114,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId, isDev: isRuntimeDev });
-    console.log('pageSetId: ', pageSetId);
-    console.log('mainMetaDataId: ', mainMetaDataId);
-    setMainMetaData(mainMetaData);
+
+    // 如果 mainMetaDataId 不存在，不继续获取实体数据
+    if (!mainMetaDataId) {
+      console.log('无主表元数据，跳过实体数据加载');
+      return;
+    }
+
+    setMainMetaData(mainMetaDataId);
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
     console.log('当前主表及所有子表数据: ', entityWithChildren);
@@ -135,7 +141,10 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
       if (res && res.pages && res.pages.length > 0) {
         setDashboardId(res.pages[0].id);
-        // const imgRes = await getFileUrlById(res.pages[0].indexImage);
+        // 如果是 iframe 类型，获取 iframeUrl
+        if (res.pages[0].iframeUrl) {
+          setIframeUrl(res.pages[0].iframeUrl);
+        }
       }
     } catch (error) {
       console.error('获取页面视图失败:', error);
@@ -164,25 +173,32 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   }, [tableName, mainMetaDataFields.value]);
 
   useEffect(() => {
-    // 工作台和大屏页面不获取主表数据
-    if (pageSetId && pageSetType !== PageType.WORKBENCH && pageSetType !== PageType.DASHBOARD) {
+    // 工作台、大屏、iframe 页面不获取主表数据
+    if (pageSetId && pageSetType !== PageType.WORKBENCH && pageSetType !== PageType.DASHBOARD && pageSetType !== PageType.IFRAME) {
       getMainMetaData(pageSetId);
       setPageType(EDITOR_TYPES.LIST_EDITOR);
       return;
     }
 
-    if (pageSetId && pageSetType == PageType.DASHBOARD) {
+    if (pageSetId && pageSetType === PageType.DASHBOARD) {
       getDashboardId(pageSetId);
 
       setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
       return;
     }
 
-    if (pageSetType == PageType.WORKBENCH) {
+    if (pageSetId && pageSetType === PageType.IFRAME) {
+      getDashboardId(pageSetId);
+
+      setPageType(EDITOR_TYPES.IFRAME_PREVIEW);
+      return;
+    }
+
+    if (pageSetType === PageType.WORKBENCH) {
       setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
       return;
     }
-  }, [pageSetId]);
+  }, [pageSetId, pageSetType]);
 
   // 收集信息弹窗
   const [inputParams, setInputParams] = useState<any>({});
@@ -485,6 +501,29 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   const getBGcolor = { backgroundColor: pageType === EDITOR_TYPES.WORKBENCH_EDITOR ? 'transparent' : '#fff' };
 
+  // iframe 类型需要去掉 padding，铺满屏幕
+  const getContentStyle = () => {
+    if (pageType === EDITOR_TYPES.IFRAME_PREVIEW) {
+      return {
+        backgroundColor: '#fff',
+        padding: 0,
+        height: '100%'
+      };
+    }
+    return getBGcolor;
+  };
+
+  // 替换 iframe URL 中的动态参数
+  const replaceIframeUrlParams = (url: string) => {
+    const appId = TokenManager.getCurAppId() || '';
+    const userId = TokenManager.getTokenInfo()?.userId || '';
+    return url
+      .replace(/\$\{tenantId\}/g, tenantId)
+      .replace(/\$\{appId\}/g, appId)
+      .replace(/\$\{userId\}/g, userId)
+      .replace(/\$\{menuId\}/g, menuId);
+  };
+
   React.useEffect(() => {
     pluginBridge.registerContext({ form });
     return () => {
@@ -494,7 +533,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
 
   return (
     <div className={`${styles.previewPage} runtime-preview-formpage`} style={getBGcolor}>
-      <div className={styles.content} style={getBGcolor}>
+      <div className={styles.content} style={getContentStyle()}>
         {pageType === EDITOR_TYPES.WORKBENCH_EDITOR && <WorkbenchRuntime pageSetId={pageSetId} runtime={runtime} />}
 
         {(pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.FORM_EDITOR) && (
@@ -547,6 +586,15 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
               src={`${resourceUrl}chart/preview/${dashboardId}/${dashboardType}?tenantId=${tenantId}`}
               style={{ width: '100%', height: '100%', border: 'none' }}
               title="Dashboard Preview"
+            />
+          </div>
+        )}
+        {pageType == EDITOR_TYPES.IFRAME_PREVIEW && iframeUrl && (
+          <div className={styles.iframePreview}>
+            <iframe
+              key={`iframe-${menuId}`}
+              src={replaceIframeUrlParams(iframeUrl)}
+              title="iframe Preview"
             />
           </div>
         )}

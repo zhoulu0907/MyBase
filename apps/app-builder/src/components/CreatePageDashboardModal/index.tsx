@@ -9,6 +9,7 @@ import dashboardNew from '@/assets/images/dashboard_new.svg';
 import dashboardTemplate from '@/assets/images/dashboard_template.svg';
 import dashboardLink from '@/assets/images/dashboard_link.svg';
 import dashboardChange from '@/assets/images/dashboard_change.svg';
+import dashboardIframe from '@/assets/images/dashboard_iframe.svg';
 import { getFileUrlById } from '@onebase/platform-center';
 import { getDashBoardURL, TokenManager } from '@onebase/common';
 import { DashBoardCreateType } from '@onebase/app';
@@ -16,7 +17,7 @@ import { DashBoardCreateType } from '@onebase/app';
 interface CreateModalProps {
   title: string;
   type: 'page' | 'dashboard';
-  handleCreate: (selectedTemplateId?: string, dashboardMethod?: string) => void;
+  handleCreate: (selectedTemplateId?: string, dashboardMethod?: string, iframeUrl?: string) => void;
   onCancel: () => void;
   visibleCreateForm: string;
   form: FormInstance;
@@ -41,6 +42,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
 
   const [menuIcon, setMenuIcon] = useState<string>();
   const [visibleMenuIcon, setVisibleMenuIcon] = useState<boolean>(false);
+  const [iframeUrl, setIframeUrl] = useState<string>('');
   const [dashboardMethod, setDashboardMethod] = useState<string>(DashBoardCreateType.DashboardNew);
   const [dashboardTemplateTab, setDashboardTemplateTab] = useState<string>('allTemplate');
   const resourceUrl = getDashBoardURL();
@@ -112,6 +114,11 @@ const CreateModal: React.FC<CreateModalProps> = ({
           key: DashBoardCreateType.DashboardLink,
           icon: dashboardLink,
           dashboardName: '关联已有大屏'
+        },
+        {
+          key: DashBoardCreateType.DashboardIframe,
+          icon: dashboardIframe,
+          dashboardName: 'iframe 嵌入'
         }
       ];
     }
@@ -277,7 +284,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
     <Modal
       title={title}
       visible={visibleCreateForm !== ''}
-      onOk={() => handleCreate(selectedTemplateId, dashboardMethod)}
+      onOk={() => handleCreate(selectedTemplateId, dashboardMethod, iframeUrl)}
       onCancel={handleCloseModal}
       closable={!visibleMenuIcon}
       autoFocus={false}
@@ -289,7 +296,7 @@ const CreateModal: React.FC<CreateModalProps> = ({
           <Button type="default" onClick={handleCloseModal} style={{ marginRight: 12 }}>
             取消
           </Button>
-          <Button type="primary" onClick={() => handleCreate(selectedTemplateId, dashboardMethod)}>
+          <Button type="primary" onClick={() => handleCreate(selectedTemplateId, dashboardMethod, iframeUrl)}>
             创建
           </Button>
         </div>
@@ -405,7 +412,9 @@ const CreateModal: React.FC<CreateModalProps> = ({
                     ? '热门模版'
                     : dashboardMethod === DashBoardCreateType.DashboardTemplate
                       ? '大屏模版'
-                      : '已创建的大屏'}
+                      : dashboardMethod === DashBoardCreateType.DashboardIframe
+                        ? 'iframe 配置'
+                        : '已创建的大屏'}
                 </span>
               </div>
               {dashboardMethod === DashBoardCreateType.DashboardNew && (
@@ -475,6 +484,19 @@ const CreateModal: React.FC<CreateModalProps> = ({
                   ))}
                 </div>
               </>
+            )}
+            {dashboardMethod === DashBoardCreateType.DashboardIframe && (
+              <div className={styles.iframeConfigContainer}>
+                <div className={styles.iframeConfigTip}>
+                  支持动态参数：${'{tenantId}'}、${'{appId}'}、${'{userId}'}、${'{menuId}'}
+                </div>
+                <Input
+                  placeholder="请输入 iframe URL，如 https://example.com?tenant=${'{tenantId}'"
+                  value={iframeUrl}
+                  onChange={(value) => setIframeUrl(value)}
+                  style={{ width: '100%' }}
+                />
+              </div>
             )}
             {dashboardMethod !== DashBoardCreateType.DashboardNew && (
               <div className={styles.dashboardPagination}>

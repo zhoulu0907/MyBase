@@ -55,7 +55,7 @@ const DynamicNumberFormatConfig = ({ handlePropsChange, item, configs }: Props) 
         <Row>
           <Col style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Checkbox
-              checked={configs[item.key]['showUnit']}
+              checked={configs[item.key]?.['showUnit']}
               onChange={(value) => {
                 handlePropsChange(item.key, { ...configs[item.key], showUnit: value });
               }}
@@ -67,7 +67,7 @@ const DynamicNumberFormatConfig = ({ handlePropsChange, item, configs }: Props) 
               style={{ width: 80 }}
               size="mini"
               value={configs[item.key]['unitValue']}
-              status={configs[item.key]['showUnit'] && configs[item.key]['unitValue'] === '' ? 'error' : undefined}
+              status={configs[item.key]?.['showUnit'] && configs[item.key]['unitValue'] === '' ? 'error' : undefined}
               maxLength={10}
               onChange={(value) => {
                 handlePropsChange(item.key, { ...configs[item.key], unitValue: value });

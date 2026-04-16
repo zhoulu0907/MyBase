@@ -25,6 +25,15 @@ import { debounce } from 'lodash-es';
 import { useRefresh } from '@flowgram.ai/fixed-layout-editor';
 const sourceNodeIDMap = new Map();
 
+const Port3Ids: any = {
+  approver_input: 'approver2',
+  approver_output: 'approver1',
+  cc_input: 'copyc2',
+  cc_output: 'copyc1',
+  executor_input: 'executor2',
+  executor_output: 'executor1'
+};
+
 export const Editor = () => {
   const refresh = useRefresh();
   const { currentFlowId, setEditorRef, flowData, setFlowData, initFlowData, configData, setConfigData } =
@@ -76,20 +85,12 @@ export const Editor = () => {
   }, [currentFlowId]);
 
   const normalizeNodes = (obj: WorkflowJSON | undefined) => {
-    obj?.edges.forEach((item) => {
-      if (item.targetNodeID.includes('branch')) {
-        item.targetPortID = 'input-top';
-      }
-      if (item.sourceNodeID.includes('branch')) {
-        item.sourcePortID = 'output-bottom';
-      }
-      if (item?.type) {
-        sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
-      } else {
-        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
-      }
-    });
+    // 审批人、抄送人、执行人 三个节点的端口连线变成了左右端口，需要改成上下端口
+    const node3PortObx: any = {};
     const newNodes = obj?.nodes.map((node) => {
+      if (node.type === 'approver' || node.type === 'cc' || node.type === 'executor') {
+        node3PortObx[node.id] = node.type;
+      }
       if (node.id.includes('branch') && node.meta) {
         node.meta.defaultPorts = [
           { type: 'input', portID: 'input-top', location: 'top' },
@@ -102,6 +103,29 @@ export const Editor = () => {
         return { ...node, name: node.data.name };
       }
       return node;
+    });
+    obj?.edges.forEach((item) => {
+      if (item.targetNodeID.includes('branch')) {
+        item.targetPortID = 'input-top';
+      }
+      if (item.sourceNodeID.includes('branch')) {
+        item.sourcePortID = 'output-bottom';
+      }
+      // targetPortID
+      const inType: number = node3PortObx[item.targetNodeID];
+      if (inType) {
+        item.targetPortID = Port3Ids[`${inType}_input`];
+      }
+      //sourcePortID
+      const outType: number = node3PortObx[item.sourceNodeID];
+      if (outType) {
+        item.sourcePortID = Port3Ids[`${outType}_output`];
+      }
+      if (item?.type) {
+        sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
+      } else {
+        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
+      }
     });
     return { ...obj, nodes: newNodes };
   };

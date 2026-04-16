@@ -4,6 +4,19 @@
  */
 
 import * as defaultProduct from './default/index';
+import { envConfig } from '@onebase/common';
+import type { NavigateFunction } from 'react-router-dom';
+
+// Callback 组件的 Props 类型
+export interface CallbackProps {
+  navigate?: NavigateFunction;
+}
+
+// OAuthCallback 组件的 Props 类型（包含 searchParams）
+export interface OAuthCallbackProps {
+  searchParams?: URLSearchParams;
+  navigate?: NavigateFunction;
+}
 
 // 平台包的导出类型
 export interface PlatformExports {
@@ -26,14 +39,16 @@ export interface PlatformExports {
     show: () => void;
     hide: () => void;
   };
-  LingjiCallback?: React.ComponentType<any>;
-  TiangongOAuthCallback?: React.ComponentType<any>;
+  LingjiCallback?: React.ComponentType<CallbackProps>;
+  TiangongOAuthCallback?: React.ComponentType<OAuthCallbackProps>;
   LingjiAppCard?: React.ComponentType<any>;
   TiangongAppCard?: React.ComponentType<any>;
   LingjiLayout?: React.ComponentType<any>;
   TiangongLayout?: React.ComponentType<any>;
   LingjiSider?: React.ComponentType<any>;
   TiangongSider?: React.ComponentType<any>;
+  LingjiLogo?: React.ComponentType<any>;
+  TiangongLogo?: React.ComponentType<any>;
   VerticalMenuItem?: React.ComponentType<any>;
   PlatformRoutes?: React.ComponentType<any>;
   themeLoader?: () => Promise<void>;
@@ -42,19 +57,27 @@ export interface PlatformExports {
 
 // 获取平台 ID
 function getPlatformId(): string {
-  if (typeof window === 'undefined') return 'default';
+  if (typeof window === 'undefined') {
+    return 'default';
+  }
 
-  // 优先使用 PLATFORM 配置
-  const platform = (window as any).global_config?.PLATFORM;
-  if (platform) return platform;
+  // 统一从 envConfig 获取配置（已解密）
+  const platform = envConfig?.PLATFORM;
+  const theme = envConfig?.THEME;
 
-  // 兼容：根据 THEME 配置推断平台
-  const theme = (window as any).global_config?.THEME;
-  if (theme === 'lingji') return 'lingji';
-  if (theme === 'tiangong') return 'tiangong';
+  // 如果 PLATFORM 不存在，使用 THEME 的值作为 PLATFORM
+  if (platform) {
+    return platform;
+  }
+
+  if (theme === 'lingji' || theme === 'tiangong') {
+    return theme;
+  }
 
   // 兼容：通过域名判断
-  if (window.location.hostname.includes('artifex-cmcc')) return 'tiangong';
+  if (window.location.hostname.includes('artifex-cmcc')) {
+    return 'tiangong';
+  }
 
   return 'default';
 }
@@ -65,34 +88,41 @@ async function loadPlatformPackage(platformId: string): Promise<PlatformExports>
     switch (platformId) {
       case 'lingji':
         const lingjiModule = await import('@onebase/product-lingji');
-        console.log('[Platform] 已加载平台: lingji');
+        console.log('[Platform] 加载平台: lingji');
         return lingjiModule as PlatformExports;
       case 'tiangong':
         const tiangongModule = await import('@onebase/product-tiangong');
-        console.log('[Platform] 已加载平台: tiangong');
+        console.log('[Platform] 加载平台: tiangong');
         return tiangongModule as PlatformExports;
       default:
-        console.log('[Platform] 使用默认平台');
         return defaultProduct;
     }
   } catch (e) {
-    console.warn('[Platform] 平台包加载失败，使用默认实现:', e);
+    console.warn('[Platform] 平台包加载失败:', e);
     return defaultProduct;
   }
 }
 
 // 缓存加载的平台包
 let cachedPlatform: PlatformExports | null = null;
+let cachedPlatformId: string | null = null;
 
 /**
  * 获取平台导出
  */
 export async function getPlatformExports(): Promise<PlatformExports> {
+  const platformId = getPlatformId();
+
+  // 如果平台ID发生变化，清除缓存重新加载
+  if (cachedPlatform && cachedPlatformId !== platformId) {
+    cachedPlatform = null;
+  }
+
   if (cachedPlatform) {
     return cachedPlatform;
   }
 
-  const platformId = getPlatformId();
+  cachedPlatformId = platformId;
   cachedPlatform = await loadPlatformPackage(platformId);
   return cachedPlatform;
 }

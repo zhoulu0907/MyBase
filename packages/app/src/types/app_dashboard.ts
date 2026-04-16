@@ -9,7 +9,8 @@ export  enum IsHot {
 export enum  DashBoardCreateType {
   DashboardNew = 'dashboardNew', // 新建大屏
   DashboardTemplate = 'dashboardTemplate', // 大屏模版
-  DashboardLink = 'dashboardLink' // 关联已创建大屏
+  DashboardLink = 'dashboardLink', // 关联已创建大屏
+  DashboardIframe = 'dashboardIframe' // iframe 嵌入
 }
 
 export interface DashboardTemplateListParams {

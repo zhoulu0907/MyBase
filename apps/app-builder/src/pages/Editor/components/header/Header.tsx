@@ -231,7 +231,11 @@ export default function EditorHeader() {
     const data = editorRef?.document.toJSON();
     const errorMsgList: any = [];
     const conditionalBranch: any = []; // 条件节点
+    let endNodeId: string = '';
     data?.nodes.forEach((item) => {
+      if (item?.type === 'end') {
+        endNodeId = item.id;
+      }
       if (item.type === 'approver') {
         if (
           (item.data.approverConfig.handlerType === 'user' &&
@@ -285,12 +289,21 @@ export default function EditorHeader() {
       showConfirm(errorMsgList);
       return;
     }
+
+    let endNodeHasEdge: boolean = false;
     const currentJsonData = normalizeNodes(data);
     currentJsonData.edges?.forEach((item) => {
       if (item.data) {
         item.name = item.data.name;
       }
+      if (item?.targetNodeID === endNodeId) {
+        endNodeHasEdge = true;
+      }
     });
+    if (!endNodeHasEdge) {
+      Message.error({ id: 'end-node-err', content: '流程存在循环触发，运行时可能导致错误' });
+      return;
+    }
     const { id, flowCode, flowName, bpmVersionAlias, businessUuid } = flowData;
     const params = {
       id: isCreate ? '' : id || '',
@@ -512,7 +525,7 @@ export default function EditorHeader() {
         await onFlowSave();
         return;
       } catch (error) {
-        console.error('保存失败:', error);
+        console.info('保存失败:', error);
         return;
       } finally {
         setSaveLoading(false);
@@ -529,8 +542,19 @@ export default function EditorHeader() {
         wbComponentSchemas: cloneDeep(wbComponentSchemas.value || {})
       };
 
-      await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
-      setSaveLoading(false);
+      try {
+        await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
+      } catch (error) {
+        console.error('保存失败:', error);
+        Message.error('保存失败');
+      } finally {
+        setSaveLoading(false);
+      }
+
+      if (exit) {
+        backToPageManager();
+      }
+
       return;
     }
 

@@ -15,8 +15,8 @@ import wait from './../../assets/bpmLogo/wait.png';
 import task from './../../assets/bpmLogo/task.png';
 import message from './../../assets/bpmLogo/message.png';
 import subprocessTwo from './../../assets/bpmLogo/subprocessTwo.png';
-import copy from './../../assets/bpmLogo/copy.png';
-import deleteIcon from './../../assets/bpmLogo/deleteIcon.png';
+// import copy from './../../assets/bpmLogo/copy.png';
+// import deleteIcon from './../../assets/bpmLogo/deleteIcon.png';
 import classNames from 'classnames';
 import { ApproverNodeRegistry, CcRecipientsNodeRegistry, ExecutorNodeRegistry } from '../../nodes/index';
 
@@ -83,29 +83,26 @@ const LeftNavBar: React.FC = () => {
               )}
             </div>
             {/* 左侧子节点 */}
-            {item.navList.map((nodeItem:any, index) => (
+            {item.navList.map((nodeItem: any, index) => (
               <Button
                 className={styles.nodeItem}
                 key={index}
-                onMouseDown={(e) =>{
-                    if(nodeItem?.type){
-                        startDragSerivce.startDragCard(nodeItem?.type, e, {
-                          data: {
-                            name: nodeItem?.title,
-                            registry: nodeItem?.registry
-                          }
-                        });
-
-                    }else{
-                         startDragSerivce.startDragCard('node', e, {
-                           data: {
-                             title: `${nodeItem.title}`
-                           }
-                         });
-                    }
-                }
-                  
-                }
+                onMouseDown={(e) => {
+                  if (nodeItem?.type) {
+                    startDragSerivce.startDragCard(nodeItem?.type, e, {
+                      data: {
+                        name: nodeItem?.title,
+                        registry: nodeItem?.registry
+                      }
+                    });
+                  } else {
+                    startDragSerivce.startDragCard('node', e, {
+                      data: {
+                        title: `${nodeItem.title}`
+                      }
+                    });
+                  }
+                }}
               >
                 <img
                   src={nodeItem.img}
@@ -122,7 +119,7 @@ const LeftNavBar: React.FC = () => {
         ))}
       </div>
 
-      <div className={styles.line}></div>
+      {/* <div className={styles.line}></div>
       <div className={styles.remark}>
         <div className={styles.copy}>
           <img src={copy} alt="" loading="lazy" width="12px" height="13px" />
@@ -132,7 +129,7 @@ const LeftNavBar: React.FC = () => {
           <img src={deleteIcon} alt="" loading="lazy" width="13px" height="13px" />
           <span className={styles.delete}>删除</span>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

@@ -101,4 +101,5 @@ export interface PageView {
 
   pageSetUuid?: string;
   pageUuid: string;
+  iframeUrl?: string; // iframe 嵌入 URL
 }

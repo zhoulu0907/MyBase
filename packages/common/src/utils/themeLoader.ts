@@ -1,3 +1,5 @@
+import { envConfig } from './env';
+
 export type ThemeLoaders = Record<string, () => Promise<unknown>>;
 
 export interface LoadThemeOptions {
@@ -73,13 +75,11 @@ export function resetThemeInsertPosition(): void {
 /**
  * 加载应用主题样式
  * @param themeLoaders - 主题加载器映射，key 是主题名（如 'tiangong', 'lingji', 'default'），value 是动态导入函数
- * @param theme - 当前主题名称，如果不传则从 window.global_config.THEME 读取
+ * @param theme - 当前主题名称，如果不传则从 envConfig.THEME 读取
  */
 export async function loadTheme(themeLoaders: ThemeLoaders, theme?: string): Promise<void> {
-  // 获取主题名称：优先使用传入的 theme，否则从 global_config 读取
-  const rawTheme = theme ?? (typeof window !== 'undefined'
-    ? (window as unknown as { global_config?: { THEME?: string } }).global_config?.THEME
-    : undefined);
+  // 获取主题名称：优先使用传入的 theme，否则从 envConfig 读取
+  const rawTheme = theme ?? envConfig?.THEME;
 
   // 确定要加载的主题：优先使用 rawTheme，如果不存在则依次尝试 'tiangong', 'default'
   let actualTheme: string | undefined;

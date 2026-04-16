@@ -272,7 +272,7 @@ const XTable: XTableSchema = {
   config: {
     ...baseDefault,
     label: {
-      text: '表格',
+      text: '列表',
       display: false
     },
     stripe: true,
