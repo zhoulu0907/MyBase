@@ -8,6 +8,10 @@
     <script>
       const currentDomain = window.location.hostname;
 
+      if (currentDomain.includes('artifex')) {
+        document.title = '天工使能引擎';
+      }
+
       const favicon = document.createElement('link');
       favicon.rel = 'icon';
       if (currentDomain.includes('artifex-cmcc')) {
