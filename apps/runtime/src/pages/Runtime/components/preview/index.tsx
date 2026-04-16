@@ -114,9 +114,14 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
   // 获取主表字段和子表字段
   const getMainMetaData = async (pageSetId: string) => {
     const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId, isDev: isRuntimeDev });
-    console.log('pageSetId: ', pageSetId);
-    console.log('mainMetaDataId: ', mainMetaDataId);
-    setMainMetaData(mainMetaData);
+
+    // 如果 mainMetaDataId 不存在，不继续获取实体数据
+    if (!mainMetaDataId) {
+      console.log('无主表元数据，跳过实体数据加载');
+      return;
+    }
+
+    setMainMetaData(mainMetaDataId);
 
     const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
     console.log('当前主表及所有子表数据: ', entityWithChildren);
