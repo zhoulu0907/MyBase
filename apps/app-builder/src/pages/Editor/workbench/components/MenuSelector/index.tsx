@@ -37,6 +37,7 @@ const MenuSelector = ({
 }: MenuSelectorProps) => {
   const { curAppId } = useAppStore();
   const [searchValue, setSearchValue] = useState('');
+  const [singleValue, setSingleValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [menuList, setMenuList] = useState<ApplicationMenu[]>([]);
 
@@ -102,6 +103,7 @@ const MenuSelector = ({
 
     const selectedMenu = selectedValue ? findMenuById(menuList, selectedValue) : null;
     onChange(selectedValue || '', selectedMenu!);
+    setSingleValue(selectedValue);
   };
 
   useEffect(() => {
@@ -118,6 +120,12 @@ const MenuSelector = ({
       .catch((err: any) => console.log(err))
       .finally(setLoading(false));
   }, [curAppId]);
+
+  useEffect(() => {
+    if (value) {
+      setSingleValue(Array.isArray(value) ? value[0] : value);
+    }
+  }, [value]);
 
   return (
     <div className={className} style={style}>
@@ -152,13 +160,13 @@ const MenuSelector = ({
       {mode === 'single' && (
         <TreeSelect
           treeData={menuList}
-          value={Array.isArray(value) ? value[0] : value}
+          value={singleValue}
           onChange={handleTreeSelectChange}
           placeholder={searchPlaceholder}
           allowClear
           showSearch={searchable}
           filterTreeNode={(inputValue, treeNode) => {
-            return treeNode.menuName?.toLowerCase().includes(inputValue.toLowerCase()) || false;
+            return treeNode.props.menuName?.toLowerCase().includes(inputValue.toLowerCase()) || false;
           }}
           fieldNames={{
             key: 'menuUuid',

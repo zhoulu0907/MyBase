@@ -1,7 +1,13 @@
 /**
  * 监督插件管理模块
- * 用于管理监督插件的加载、初始化、埋点更新和销毁
+ * @deprecated 此文件已废弃，请使用 @onebase/product-lingji 包中的对应功能
+ * import { initSupervisionPlugin, updatePageInfo, showPlugin, hidePlugin, destroyPlugin } from '@onebase/product-lingji';
  */
+
+console.warn(
+  '[DEPRECATED] supervisionPlugin.ts 已废弃，请使用 @onebase/product-lingji 包。\n' +
+  '新用法: import { initSupervisionPlugin, ... } from "@onebase/product-lingji";'
+);
 
 import { UserPermissionManager } from '@onebase/common';
 
@@ -11,6 +17,12 @@ interface SupervisionPluginConfig {
   PLATFORM: string;
   SUPERVISION_URL: string;
   SSO_URL: string;
+  // 模块编码（固定的编码）
+  MODULE_CODE?: string;
+  // 菜单编码映射（路由对应的菜单编码）
+  MENU_CODES?: Record<string, string>;
+  // 默认菜单编码
+  DEFAULT_MENU_CODE?: string;
 }
 
 // 埋点信息接口
@@ -254,32 +266,24 @@ export function destroyPlugin(): void {
  * @param pathname 路由路径
  */
 export function extractRouteInfo(pathname: string): { moduleCode: string; menuCode: string } {
+  const config = getPluginConfig();
+
   // 移除租户ID前缀
-  // 路径格式: /onebase/:tenantId/home/... 或 /onebase/:tenantId/editor/...
+  // 路径格式: /onebase/:tenantId/setting/user 或 /onebase/:tenantId/home/create-app/data-factory
   const pathWithoutTenant = pathname.replace(/^\/onebase\/[^/]+/, '');
 
-  // 提取模块编码和菜单编码
+  // 提取路由层级
   const parts = pathWithoutTenant.split('/').filter(Boolean);
 
-  // 根据路由结构映射
-  // home -> enterprise-app, app-center, mall-center, help-center, create-app
-  // editor -> 页面编辑器
-  // setting -> 设置页面
+  // 模块编码：使用配置中的固定值
+  const moduleCode = config?.MODULE_CODE || 'M_ONEBASE_001';
 
-  let moduleCode = '';
-  let menuCode = '';
+  // 菜单编码：从路由最后一级提取（一级菜单 key）
+  // 如 /setting/user -> user, /home/create-app/data-factory -> data-factory
+  const menuKey = parts.length > 0 ? parts[parts.length - 1] : 'home';
 
-  if (parts.length >= 1) {
-    // 第一级作为模块编码
-    moduleCode = parts[0] || 'home';
-
-    // 后续层级作为菜单编码
-    if (parts.length >= 2) {
-      menuCode = parts.slice(1).join('-');
-    } else {
-      menuCode = moduleCode;
-    }
-  }
+  // 从配置获取菜单编码，若无配置则使用默认值
+  const menuCode = config?.MENU_CODES?.[menuKey] || config?.DEFAULT_MENU_CODE || 'C_HOME_020';
 
   return { moduleCode, menuCode };
 }

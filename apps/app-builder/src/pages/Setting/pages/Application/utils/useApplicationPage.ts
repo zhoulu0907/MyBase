@@ -181,12 +181,8 @@ export function useApplicationPage() {
   }, []);
 
   const handleEdit = useCallback((appId: string) => {
-    if (isIframe) {
-      nagivateToDataFactoryInternal(appId);
-    } else {
-      nagivateToDataFactory(appId);
-    }
-  }, [isIframe, nagivateToDataFactory, nagivateToDataFactoryInternal]);
+    nagivateToDataFactory(appId);
+  }, [nagivateToDataFactory]);
 
   const handleLaunch = useCallback((appId: string) => {
     nagivateToRuntimeApp(appId);

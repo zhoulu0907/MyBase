@@ -262,10 +262,10 @@ const XQuickEntry = memo((props: XQuickEntryConfig & { runtime?: boolean; previe
       {(finalLabel?.display || finalTitleConfig?.showMore) && (
         <div className={styles.quickEntryHeader}>
           {finalLabel?.display && (
-            <span className={styles.quickEntryHeaderTitle}>{finalLabel?.text || '快捷入口'}</span>
+            <span className={styles.quickEntryHeaderTitle}>{finalLabel?.text}</span>
           )}
           {finalTitleConfig?.showMore && (
-            <span className={styles.quickEntryMore} onClick={() => handleClickMore()}>
+            <span className={styles.quickEntryMore} style={runtime ? {cursor: 'pointer'} : {}} onClick={() => handleClickMore()}>
               更多 <IconRight />
             </span>
           )}

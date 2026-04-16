@@ -1,3 +1,14 @@
+/**
+ * 灵畿 SSO 回调组件
+ * @deprecated 此文件已废弃，请使用 @onebase/product-lingji 包中的 LingjiCallback 组件
+ * import { LingjiCallback } from '@onebase/product-lingji';
+ */
+
+console.warn(
+  '[DEPRECATED] pages/LingjiCallback 已废弃，请使用 @onebase/product-lingji 包。\n' +
+  '新用法: import { LingjiCallback } from "@onebase/product-lingji";'
+);
+
 import { Message } from '@arco-design/web-react';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';

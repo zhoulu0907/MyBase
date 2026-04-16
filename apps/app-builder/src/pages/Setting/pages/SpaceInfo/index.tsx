@@ -27,6 +27,7 @@ import React, { useEffect, useState } from 'react';
 import copy from 'copy-to-clipboard';
 import styles from './index.module.less';
 import Tags from './Tags';
+import { useHideInLingji } from '../../hooks/useHideInLingji';
 
 const { Col, Row } = Grid;
 const { Text } = Typography;
@@ -37,6 +38,9 @@ const SpaceInfo: React.FC<{ onTenantInfoChange?: (info: PlatformTenantInfo) => v
   const [loading, setLoading] = useState(true);
   const [logoUrl, setLogoUrl] = useState<string>();
   const [renameVisible, setRenameVisible] = useState<boolean>(false);
+
+  // 灵畿平台隐藏控制
+  const { hideCorpCount } = useHideInLingji();
 
   // 获取用户信息
   const tokenInfo = TokenManager.getTokenInfo();
@@ -269,10 +273,12 @@ const SpaceInfo: React.FC<{ onTenantInfoChange?: (info: PlatformTenantInfo) => v
 
               {/* 统计信息 */}
               <div className={styles.statsSection}>
-                <div className={styles.statCard}>
-                  <div className={styles.statLabel}>企业数(个)</div>
-                  <div className={styles.statValue}>{spaceInfo.corpCount || 0}</div>
-                </div>
+                {!hideCorpCount && (
+                  <div className={styles.statCard}>
+                    <div className={styles.statLabel}>企业数(个)</div>
+                    <div className={styles.statValue}>{spaceInfo.corpCount || 0}</div>
+                  </div>
+                )}
                 <div className={styles.statCard}>
                   <div className={styles.statLabel}>应用数量(个)</div>
                   <div className={styles.statValue}>{spaceInfo.appCount || 0}</div>
