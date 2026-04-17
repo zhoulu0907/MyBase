@@ -383,13 +383,18 @@ const ConditionEditor: React.FC<ConditionEditorProps> = ({
       // 处理三层结构：currentForm -> tableName -> tableName.fieldName
       // 遍历所有节点查找匹配的字段
       for (const rootNode of options) {
-        if (rootNode.children) {
-          for (const tableNode of rootNode.children) {
-            if (tableNode.children) {
-              const fieldNode = tableNode.children.find((item) => item.key === params.value);
-              if (fieldNode) {
-                return `${tableNode.title} - ${fieldNode.title}`;
-              }
+        if (!rootNode.children) continue;
+
+        for (const childNode of rootNode.children) {
+          // 两层结构：root -> field
+          if (childNode.key === params.value) {
+            return `${rootNode.title} - ${childNode.title}`;
+          }
+          // 三层结构：root -> table -> field
+          if (childNode.children) {
+            const fieldNode = childNode.children.find((item) => item.key === params.value);
+            if (fieldNode) {
+              return `${rootNode.title} - ${childNode.title} - ${fieldNode.title}`;
             }
           }
         }
