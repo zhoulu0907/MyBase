@@ -27,7 +27,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-
+  width: 100%;
 }
 
 .backgroundImage {
@@ -49,6 +49,7 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  width: calc(100% - 60px);
 }
 
 .welcomeCardTitle {
@@ -56,11 +57,25 @@
   font-weight: 500;
   color: #272E3B;
   margin-bottom: 8px;
+  width: 100%;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .welcomeCardDesc {
   font-size: 14px;
   color: #86909c;
+  width: 100%;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .welcomeCardDescTheme3 {

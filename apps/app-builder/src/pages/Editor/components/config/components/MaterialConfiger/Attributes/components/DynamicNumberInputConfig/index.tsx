@@ -25,7 +25,18 @@ const DynamicNumberInputConfig = ({ handlePropsChange, item, configs }: Props) =
         step={item.step}
         precision={item.precision}
         onChange={(value) => {
-          handlePropsChange(item.key, value);
+          if (value === undefined || value === null || value === '') {
+            handlePropsChange(item.key, undefined);
+            return;
+          }
+
+          const nextValue = Math.floor(Number(value));
+          if (Number.isNaN(nextValue) || nextValue < 1) {
+            handlePropsChange(item.key, undefined);
+            return;
+          }
+
+          handlePropsChange(item.key, nextValue);
         }}
       />
     </Form.Item>

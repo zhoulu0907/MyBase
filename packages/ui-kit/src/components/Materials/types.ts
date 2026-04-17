@@ -28,6 +28,7 @@ export interface ITextConfigType extends ICommonConfigType {
   name: string;
   type: typeof CONFIG_TYPES.TEXT_INPUT;
   placeholder?: string;
+  maxLength?: number;
 }
 
 // 数字输入框配置

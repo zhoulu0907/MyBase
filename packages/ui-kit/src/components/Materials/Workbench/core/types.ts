@@ -223,6 +223,7 @@ export interface IWbCheckInputConfigType {
   name: string;
   type: typeof WORKBENCH_CONFIG_TYPES.WB_CHECK_INPUT;
   checkboxLabel?: string; // checkbox 的标题
+  maxLength?: number;
 }
 
 /**

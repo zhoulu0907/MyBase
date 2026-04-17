@@ -48,7 +48,12 @@ const WbCheckInputConfig = ({ handlePropsChange, item, configs }: Props) => {
         </>
       }
     >
-      <Input placeholder={`请输入${item.name}`} value={localTextValue} onChange={handleTextChange} />
+      <Input
+        placeholder={`请输入${item.name}`}
+        value={localTextValue}
+        onChange={handleTextChange}
+        maxLength={item?.maxLength}
+      />
     </Form.Item>
   );
 };

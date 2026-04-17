@@ -15,6 +15,7 @@ const DynamicTextInputConfig = ({ handlePropsChange, item, configs }: Props) => 
       <Input
         placeholder={`请输入${item.name}`}
         value={configs[item.key]}
+        maxLength={item?.maxLength}
         onChange={(value) => {
           handlePropsChange(item.key, value);
         }}
