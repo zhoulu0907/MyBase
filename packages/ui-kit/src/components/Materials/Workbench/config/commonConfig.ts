@@ -230,7 +230,8 @@ export const welcomeTextConfig: IWbCheckInputConfigType = {
   key: 'welcomeText',
   name: '欢迎语',
   type: WORKBENCH_CONFIG_TYPES.WB_CHECK_INPUT,
-  checkboxLabel: '显示用户名'
+  checkboxLabel: '显示用户名',
+  maxLength: 30
 };
 
 /**
@@ -239,7 +240,8 @@ export const welcomeTextConfig: IWbCheckInputConfigType = {
 export const welcomeDescConfig: ITextConfigType = {
   key: 'welcomeDesc',
   name: '辅助语',
-  type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT
+  type: WORKBENCH_CONFIG_TYPES.TEXT_INPUT,
+  maxLength: 30
 };
 
 /**
