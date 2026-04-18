@@ -198,7 +198,7 @@ const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, menuUuid, p
       setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
       return;
     }
-  }, [pageSetId, pageSetType]);
+  }, [pageSetId]);
 
   // 收集信息弹窗
   const [inputParams, setInputParams] = useState<any>({});
