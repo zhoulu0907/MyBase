@@ -5,6 +5,7 @@ import com.cmsr.onebase.framework.common.exception.ServiceException;
 import com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.base.Preconditions;
 import lombok.Data;
 
@@ -28,6 +29,7 @@ public class CommonResult<T> implements Serializable {
     /**
      * 返回数据
      */
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     private T data;
     /**
      * 错误提示，用户可阅读
