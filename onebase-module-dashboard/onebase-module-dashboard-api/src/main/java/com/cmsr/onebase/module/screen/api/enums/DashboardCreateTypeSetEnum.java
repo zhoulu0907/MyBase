@@ -7,7 +7,8 @@ public enum DashboardCreateTypeSetEnum {
 
     DASHBOARD_NEW_CREATE("dashboardNew", "空白页创建"),
     DASHBOARD_TEMPLATE_CREATE("dashboardTemplate", "模板创建"),
-    DASHBOARD_LINK_CREATE("dashboardLink", "绑定现有大屏");
+    DASHBOARD_LINK_CREATE("dashboardLink", "绑定现有大屏"),
+    DASHBOARD_IFRAME("dashboardIframe", "iframe嵌入");
     private final String code;
     private final String description;
     DashboardCreateTypeSetEnum(String code, String description) {

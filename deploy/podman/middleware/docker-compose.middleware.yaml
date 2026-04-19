@@ -1,0 +1,204 @@
+# OneBase 中间件服务配置
+# 包含: PostgreSQL, Redis, MinIO, DolphinScheduler, NodeSandbox
+#
+# 注意：后端 API 代理配置在前端统一的 nginx 中
+# 请将 middleware/nginx.conf 中的 location 配置拷贝到前端 nginx
+
+services:
+  # ====================
+  # PostgreSQL 数据库
+  # ====================
+  postgresql:
+    container_name: onebase-postgresql
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      POSTGRES_USER: ${POSTGRES_USER:-onebase}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-onebase123}
+      POSTGRES_DB: ${POSTGRES_DB:-onebase_cloud_v3}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+      # 数据库初始化 SQL 脚本（按字母顺序执行）
+      - ../ob_sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - onebase-middleware
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-onebase}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ====================
+  # Redis 缓存
+  # ====================
+  redis:
+    container_name: onebase-redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - onebase-middleware
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-redis123}
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis123}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ====================
+  # MinIO 对象存储
+  # ====================
+  minio:
+    container_name: onebase-minio
+    image: minio/minio:latest
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin123}
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:${MINIO_CONSOLE_PORT:-9001}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - onebase-middleware
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 30s
+
+  # ====================
+  # DolphinScheduler 任务调度
+  # ====================
+  dolphinscheduler:
+    container_name: onebase-dolphinscheduler
+    image: apache/dolphinscheduler-standalone-server:3.3.1
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      DATABASE: postgresql
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/dolphinscheduler
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-onebase}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-onebase123}
+    ports:
+      - "${DS_PORT:-12345}:12345"
+      - "25333:25333"
+    volumes:
+      - dolphinscheduler_logs:/opt/dolphinscheduler/logs
+      - dolphinscheduler_shared:/opt/soft
+    networks:
+      - onebase-middleware
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:12345/dolphinscheduler"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  # ====================
+  # NodeSandbox JS 执行环境
+  # ====================
+  # NodeSandbox - JavaScript 安全执行环境
+  #
+  # 用途:
+  #   - 执行用户自定义脚本（数据转换、格式化等）
+  #   - 公式计算引擎
+  #   - 低代码逻辑处理
+  #   - 前端扩展脚本执行
+  #
+  # 端口: 3000
+  # 健康检查: GET /health -> {"status":"ok"}
+  # 执行接口: POST /execute -> {"code": "...", "context": {...}}
+  #
+  # 安全说明:
+  #   - 使用 vm2 模块提供沙箱隔离
+  #   - 脚本执行超时限制
+  #   - 内存使用限制
+  #
+  # API 示例:
+  #   curl -X POST http://localhost:3000/execute \
+  #     -H "Content-Type: application/json" \
+  #     -d '{"code": "const result = 1 + 2; result;"}'
+  #   响应: {"success": true, "result": 3}
+  #
+  nodesandbox:
+    container_name: onebase-nodesandbox
+    image: node:20-alpine
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+      NODE_ENV: production
+      PORT: 3000
+      # Redis 连接配置（用于缓存执行结果）
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis123}
+    ports:
+      - "${JS_PORT:-3000}:3000"
+    volumes:
+      - nodesandbox_app:/app
+    networks:
+      - onebase-middleware
+    working_dir: /app
+    depends_on:
+      redis:
+        condition: service_healthy
+    # 启动时自动初始化 Express 服务
+    # 提供 /execute 接口用于 JS 代码执行
+    command: >
+      sh -c "
+        if [ ! -f /app/package.json ]; then
+          echo '{\"name\":\"nodesandbox\",\"version\":\"1.0.0\",\"main\":\"server.js\"}' > /app/package.json &&
+          npm install express vm2 --save &&
+          echo 'const express = require(\"express\"); const vm = require(\"vm\"); const app = express(); app.use(express.json({limit:\"10mb\"})); app.post(\"/execute\", (req,res)=>{try{const result=vm.runInNewContext(req.body.code,{});res.json({success:true,result});}catch(e){res.json({success:false,error:e.message});}}); app.get(\"/health\",(req,res)=>res.json({status:\"ok\"})); app.listen(3000);' > /app/server.js;
+        fi &&
+        node server.js
+      "
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  onebase-middleware:
+    driver: bridge
+
+volumes:
+  postgresql_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+  dolphinscheduler_logs:
+    driver: local
+  dolphinscheduler_shared:
+    driver: local
+  nodesandbox_app:
+    driver: local

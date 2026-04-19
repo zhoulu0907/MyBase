@@ -57,6 +57,19 @@
             <artifactId>flink-runtime</artifactId>
             <version>${flink.version}</version>
             <scope>${flink.scope}</scope>
+            <exclusions>
+                <!-- 排除存在漏洞的 org.lz4:lz4-java，使用修复版本 at.yawk.lz4:lz4-java -->
+                <exclusion>
+                    <groupId>org.lz4</groupId>
+                    <artifactId>lz4-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- LZ4 Java 压缩库安全修复版本（CVE-2025-66566, CVE-2025-12183）-->
+        <dependency>
+            <groupId>at.yawk.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+            <version>1.11.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>

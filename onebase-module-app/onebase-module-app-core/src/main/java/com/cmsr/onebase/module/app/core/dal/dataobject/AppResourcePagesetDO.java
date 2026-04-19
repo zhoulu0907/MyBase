@@ -1,5 +1,7 @@
 package com.cmsr.onebase.module.app.core.dal.dataobject;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.cmsr.onebase.framework.orm.entity.BaseBizEntity;
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Table;
@@ -46,5 +48,12 @@ public class AppResourcePagesetDO extends BaseBizEntity {
 
     @Column(value = "redirect_type", comment = "重定向类型")
     private Integer redirectType;
+
+    public String getMainMetadata() {
+        if ("null".equalsIgnoreCase(StringUtils.trimToEmpty(mainMetadata))) {
+            return null;
+        }
+        return mainMetadata;
+    }
 
 }

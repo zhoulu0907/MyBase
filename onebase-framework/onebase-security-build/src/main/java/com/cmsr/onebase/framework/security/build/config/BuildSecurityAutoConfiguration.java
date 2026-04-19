@@ -3,8 +3,9 @@ package com.cmsr.onebase.framework.security.build.config;
 import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
 import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
 import com.cmsr.onebase.framework.common.biz.system.permission.PermissionCommonApi;
+import com.cmsr.onebase.framework.common.config.FileUploadSecurityProperties;
 import com.cmsr.onebase.framework.security.build.filter.BuildAuthenticationFilter;
-import com.cmsr.onebase.framework.security.build.filter.DisableMultipartFilter;
+import com.cmsr.onebase.framework.common.util.file.FileValidateUtil;
 import com.cmsr.onebase.framework.security.config.SecurityProperties;
 import com.cmsr.onebase.framework.security.core.context.TransmittableThreadLocalSecurityContextHolderStrategy;
 import com.cmsr.onebase.framework.security.core.handler.AccessDeniedHandlerImpl;
@@ -12,6 +13,7 @@ import com.cmsr.onebase.framework.security.core.handler.AuthenticationEntryPoint
 import com.cmsr.onebase.framework.security.service.SystemPermissionService;
 import com.cmsr.onebase.framework.security.service.SystemPermissionServiceImpl;
 import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -19,7 +21,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,11 +36,22 @@ import org.springframework.security.web.access.AccessDeniedHandler;
  */
 @AutoConfiguration
 @AutoConfigureOrder(-1) // 目的：先于 Spring Security 自动配置，避免一键改包后，org.* 基础包无法生效
-@EnableConfigurationProperties({SecurityProperties.class, AiBridgeProperties.class})
+@EnableConfigurationProperties({SecurityProperties.class, AiBridgeProperties.class, FileUploadSecurityProperties.class})
 public class BuildSecurityAutoConfiguration {
 
     @Resource
     private SecurityProperties securityProperties;
+
+    @Resource
+    private FileUploadSecurityProperties fileUploadSecurityProperties;
+
+    /**
+     * 注入文件上传安全配置到工具类
+     */
+    @PostConstruct
+    public void initFileUploadSecurity() {
+        FileValidateUtil.setProperties(fileUploadSecurityProperties);
+    }
 
     /**
      * 认证失败处理类 Bean
@@ -75,16 +87,6 @@ public class BuildSecurityAutoConfiguration {
     public BuildAuthenticationFilter authenticationTokenFilter(GlobalExceptionHandler globalExceptionHandler,
                                                                OAuth2TokenCommonApi oauth2TokenApi, SecurityConfigApi securityConfigApi) {
         return new BuildAuthenticationFilter(securityProperties, globalExceptionHandler, oauth2TokenApi,securityConfigApi);
-    }
-
-    @Bean
-    public FilterRegistrationBean<DisableMultipartFilter> disableMultipartFilter() {
-        FilterRegistrationBean<DisableMultipartFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(new DisableMultipartFilter());
-        registration.addUrlPatterns("/admin-api/build/ai/*");
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        registration.setName("disableMultipartFilter");
-        return registration;
     }
 
     @Bean("ss") // 使用 Spring Security 的缩写，方便使用

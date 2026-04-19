@@ -45,4 +45,7 @@ public class MenuCreateReqVO {
 
     @Schema(description = "菜单排序（可选，不传则自动追加到末尾）")
     private Integer menuSort;
+
+    @Schema(description = "iframe URL，当 createDashboardType = 'dashboardIframe' 时必填")
+    private String iframeUrl;
 }

@@ -68,4 +68,12 @@ public class LingjiSsoProperties {
      */
     private boolean httpDebugLogEnabled = true;
 
+    /**
+     * 租户信息查询接口地址
+     *
+     * 用于在灵畿SSO登录时获取完整的租户信息（租户名称、状态等）
+     * 示例：http://rdcloud.4c-uat.hq.cmcc/moss/manage/openapi/tenant/detail
+     */
+    private String tenantDetailUrl;
+
 }

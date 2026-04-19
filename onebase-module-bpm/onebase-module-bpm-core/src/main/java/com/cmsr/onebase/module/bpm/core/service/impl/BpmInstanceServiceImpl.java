@@ -69,7 +69,6 @@ import org.dromara.warm.flow.core.service.DefService;
 import org.dromara.warm.flow.core.service.HisTaskService;
 import org.dromara.warm.flow.core.service.InsService;
 import org.dromara.warm.flow.core.service.TaskService;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -926,7 +925,6 @@ public class BpmInstanceServiceImpl implements BpmInstanceService {
      * @param idCondition   ID条件
      * @return 组合后的条件
      */
-    @NotNull
     private static SemanticConditionDTO getSemanticConditionDTO(SemanticPageConditionVO entityFilters, SemanticConditionDTO idCondition) {
         SemanticConditionDTO filterConditions = entityFilters.getSemanticConditionDTO();
 

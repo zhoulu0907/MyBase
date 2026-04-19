@@ -104,6 +104,10 @@ public class PageServiceProvider {
             // //数据大屏类型 查询数据大屏信息
             List<DashboardProjectDTO> dashboardList = dashboardServiceProvider.getDashboard(pageSetDO.getDashboardId());
             return BeanUtils.toBean(dashboardList, PageDTO.class);
+        } else if (PageTypeSetEnum.isIframeType(pageSetType)) {
+            // iframe 类型，查询普通页面表
+            List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByAppIdAndPageSetUuid(applicationId, pageSetUuid);
+            return BeanUtils.toBean(pageDOList, PageDTO.class);
         } else {
             // 普通表单或流程表单类型，查询普通页面表
             List<AppResourcePageDO> pageDOList = pageRepository.findAllFormPageByAppIdAndPageSetUuid(applicationId, pageSetUuid);

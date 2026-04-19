@@ -28,6 +28,7 @@ import com.cmsr.onebase.module.infra.enums.file.FileUploadCheckConstants;
 import com.cmsr.onebase.module.infra.enums.security.SecurityConfigKey;
 import com.cmsr.onebase.module.infra.framework.file.core.client.FileClient;
 import com.cmsr.onebase.module.infra.framework.file.core.client.s3.FilePresignedUrlRespDTO;
+import com.cmsr.onebase.framework.common.util.file.FileValidateUtil;
 import com.cmsr.onebase.module.infra.framework.file.core.utils.FileMNValidateUtil;
 import com.cmsr.onebase.module.infra.framework.file.core.utils.FileTypeUtils;
 import com.cmsr.onebase.module.infra.framework.file.core.utils.LightweightPdfXssDetector;
@@ -171,6 +172,12 @@ public class FileServiceImpl implements FileService {
      * @param type    MIME类型
      */
     private void validateFile(byte[] content, String name, String type) {
+        // 0. 使用 Tika 进行真实 MIME 类型检测，防止伪造文件头绕过
+        if (!FileValidateUtil.validateFileType(content, name)) {
+            log.warn("[validateFile] 文件类型验证失败（Tika检测），文件名: {}", name);
+            throw exception(FILE_FORMAT_AND_EXTENSION_MISMATCHING);
+        }
+
         // 获取租户配置项
         Long tenantId = TenantContextHolder.getTenantId();
         ArrayList<String> categoryCodes = new ArrayList<>();

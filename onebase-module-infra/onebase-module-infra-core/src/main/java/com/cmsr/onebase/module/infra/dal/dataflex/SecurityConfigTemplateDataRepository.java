@@ -7,7 +7,6 @@ import com.cmsr.onebase.module.infra.dal.vo.app.AppTenantVO;
 import com.mybatisflex.core.row.Db;
 import com.mybatisflex.core.row.Row;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -121,7 +120,6 @@ public class SecurityConfigTemplateDataRepository extends ServiceImpl<SecurityCo
         return getSecurityConfigTemplateDOS(rows);
     }
 
-    @NotNull
     private static List<SecurityConfigTemplateDO> getSecurityConfigTemplateDOS(List<Row> rows) {
         List<SecurityConfigTemplateDO> list = rows.stream().map(dataRow -> {
             SecurityConfigTemplateDO templateDO = new SecurityConfigTemplateDO();

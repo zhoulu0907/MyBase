@@ -109,6 +109,11 @@ public class AppResourcePageTableDef extends TableDef {
     public final QueryColumn INTERACTION_RULES = new QueryColumn(this, "interaction_rules");
 
     /**
+     * iframe 嵌入 URL
+     */
+    public final QueryColumn IFRAME_URL = new QueryColumn(this, "iframe_url");
+
+    /**
      * 是否默认编辑视图
      */
     public final QueryColumn IS_DEFAULT_EDIT_VIEW_MODE = new QueryColumn(this, "is_default_edit_view_mode");
@@ -126,7 +131,7 @@ public class AppResourcePageTableDef extends TableDef {
     /**
      * 默认字段，不包含逻辑删除或者 large 等字段。
      */
-    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PAGE_UUID, APPLICATION_ID, VERSION_TAG, PAGESET_UUID, PAGE_NAME, PAGE_TYPE, TITLE, LAYOUT, WIDTH, MARGIN, BACKGROUND_COLOR, MAIN_METADATA, ROUTER_PATH, ROUTER_NAME, ROUTER_META_TITLE, EDIT_VIEW_MODE, DETAIL_VIEW_MODE, IS_DEFAULT_EDIT_VIEW_MODE, IS_DEFAULT_DETAIL_VIEW_MODE, IS_LATEST_UPDATED, INTERACTION_RULES, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION, TENANT_ID};
+    public final QueryColumn[] DEFAULT_COLUMNS = new QueryColumn[]{ID, PAGE_UUID, APPLICATION_ID, VERSION_TAG, PAGESET_UUID, PAGE_NAME, PAGE_TYPE, TITLE, LAYOUT, WIDTH, MARGIN, BACKGROUND_COLOR, MAIN_METADATA, ROUTER_PATH, ROUTER_NAME, ROUTER_META_TITLE, EDIT_VIEW_MODE, DETAIL_VIEW_MODE, IS_DEFAULT_EDIT_VIEW_MODE, IS_DEFAULT_DETAIL_VIEW_MODE, IS_LATEST_UPDATED, INTERACTION_RULES, IFRAME_URL, CREATE_TIME, UPDATE_TIME, CREATOR, UPDATER, DELETED, LOCK_VERSION, TENANT_ID};
 
     public AppResourcePageTableDef() {
         super("", "app_resource_page");
