@@ -15,6 +15,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * 格式校验 Service 实现（含REGEX）
@@ -63,9 +64,9 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
 
     @Override
     public ValidationFormatRespVO getById(Long id) {
-        var group = ruleGroupService.getValidationRuleGroup(id);
+        var group = ruleGroupService.resolveRuleGroup(id, null, null);
         if (group == null) { return null; }
-        var list = formatRepository.findByGroupUuid(group.getGroupUuid());
+        var list = findByRuleGroup(group);
         if (list.isEmpty()) { return null; }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组UUID=" + group.getGroupUuid() + ")"); }
         MetadataValidationFormatDO formatDO = list.get(0);
@@ -86,9 +87,9 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        var group = ruleGroupService.getValidationRuleGroup(id);
+        var group = ruleGroupService.resolveRuleGroup(id, null, null);
         if (group == null) { return; }
-        var list = formatRepository.findByGroupUuid(group.getGroupUuid());
+        var list = findByRuleGroup(group);
         
         // 删除子表记录
         if (!list.isEmpty()) {
@@ -127,6 +128,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
         boolean needCreateGroup = false;
         if (existingGroup != null) {
+            existingGroup = ruleGroupService.resolveRuleGroup(existingGroup.getId(), existingGroup.getGroupUuid(), null);
             var groupFormatList = formatRepository.findByGroupUuid(existingGroup.getGroupUuid());
             boolean reused = groupFormatList.stream().anyMatch(u -> !u.getFieldUuid().equals(vo.getFieldUuid()));
             if (reused) {
@@ -221,13 +223,12 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         Assert.notNull(vo, "vo不能为空");
         Assert.notNull(vo.getId(), "groupId不能为空");
         Long groupIdParam = vo.getId();
-        // 先通过数据库主键ID获取规则组
-        var group = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        var group = ruleGroupService.resolveRuleGroup(groupIdParam, null, null);
         if (group == null) {
             throw new IllegalArgumentException("规则组不存在(组ID=" + groupIdParam + ")");
         }
         String groupUuidParam = group.getGroupUuid();
-        var list = formatRepository.findByGroupUuid(groupUuidParam);
+        var list = findByRuleGroup(group);
         Assert.notEmpty(list, "当前格式校验规则不存在(组UUID=" + groupUuidParam + ")");
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组UUID=" + groupUuidParam + ")"); }
         MetadataValidationFormatDO existing = list.get(0);
@@ -271,6 +272,37 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         // 删除关联的校验规则分组
         if (recordToDelete != null && recordToDelete.getGroupUuid() != null) {
             ruleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupUuid());
+        }
+    }
+
+    private java.util.List<MetadataValidationFormatDO> findByRuleGroup(
+            com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO group) {
+        if (group == null || !StringUtils.hasText(group.getGroupUuid())) {
+            return java.util.Collections.emptyList();
+        }
+        java.util.List<MetadataValidationFormatDO> list = formatRepository.findByGroupUuid(group.getGroupUuid());
+        if (!list.isEmpty()) {
+            return list;
+        }
+        String legacyGroupUuid = String.valueOf(group.getId());
+        if (legacyGroupUuid.equals(group.getGroupUuid())) {
+            return list;
+        }
+        list = formatRepository.findByGroupUuid(legacyGroupUuid);
+        migrateGroupUuid(list, group.getGroupUuid());
+        return list;
+    }
+
+    private void migrateGroupUuid(java.util.List<MetadataValidationFormatDO> records, String targetGroupUuid) {
+        if (!StringUtils.hasText(targetGroupUuid) || records == null || records.isEmpty()) {
+            return;
+        }
+        for (MetadataValidationFormatDO record : records) {
+            if (targetGroupUuid.equals(record.getGroupUuid())) {
+                continue;
+            }
+            record.setGroupUuid(targetGroupUuid);
+            formatRepository.updateById(record);
         }
     }
 }

@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * 必填校验 Service 实现
@@ -92,7 +93,8 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataValidationRuleGroupDO existingGroup = validationRuleGroupService.getByName(vo.getRgName());
         boolean canReuse = false;
         if (existingGroup != null) {
-            var groupRequiredList = requiredRepository.findByGroupId(existingGroup.getId());
+            existingGroup = validationRuleGroupService.resolveRuleGroup(existingGroup.getId(), existingGroup.getGroupUuid(), null);
+            var groupRequiredList = findByRuleGroup(existingGroup);
             if (groupRequiredList.isEmpty() || (groupRequiredList.size() == 1 && groupRequiredList.get(0).getFieldUuid().equals(vo.getFieldUuid()))) {
                 canReuse = true;
             }
@@ -120,7 +122,9 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
         data.setEntityUuid(field.getEntityUuid());
         data.setApplicationId(field.getApplicationId());
-        data.setGroupUuid(String.valueOf(groupId));
+        MetadataValidationRuleGroupDO group = validationRuleGroupService.resolveRuleGroup(groupId, null, null);
+        Assert.notNull(group, "规则组不存在");
+        data.setGroupUuid(group.getGroupUuid());
 
         // 保存必填校验规则
         requiredRepository.saveOrUpdate(data);
@@ -137,7 +141,9 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         // 约定：reqVO.id 为 groupId
         Long groupIdParam = reqVO.getId();
         Assert.notNull(groupIdParam, "规则组ID不能为空");
-        var list = requiredRepository.findByGroupId(groupIdParam);
+        MetadataValidationRuleGroupDO groupDO = validationRuleGroupService.resolveRuleGroup(groupIdParam, null, null);
+        Assert.notNull(groupDO, "规则组不存在(组ID=" + groupIdParam + ")");
+        var list = findByRuleGroup(groupDO);
         Assert.notEmpty(list, "当前必填校验规则不存在(组ID=" + groupIdParam + ")");
         if (list.size() > 1) {
             throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + groupIdParam + ")");
@@ -149,8 +155,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         Assert.notNull(entityFieldDO, "字段不存在");
 
         // 保留原 groupId，并同步可能更新的组级配置(popPrompt/valMethod/popType)
-        Long targetGroupId = groupIdParam;
-        var groupDO = validationRuleGroupService.getValidationRuleGroup(groupIdParam);
+        String targetGroupUuid = groupDO.getGroupUuid();
         if (groupDO != null) {
             boolean needGroupUpdate = false;
             ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
@@ -183,7 +188,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         updateDO.setFieldUuid(existingDO.getFieldUuid());
         updateDO.setEntityUuid(existingDO.getEntityUuid());
         updateDO.setApplicationId(existingDO.getApplicationId());
-        updateDO.setGroupUuid(String.valueOf(targetGroupId));
+        updateDO.setGroupUuid(targetGroupUuid);
         requiredRepository.updateById(updateDO);
 
         boolean isFieldRequired = updateDO.getIsEnabled() != null && updateDO.getIsEnabled() == 1;
@@ -201,7 +206,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         
         // 删除关联的校验规则分组
         if (recordToDelete != null && recordToDelete.getGroupUuid() != null) {
-            validationRuleGroupService.safeDeleteGroupDirect(Long.valueOf(recordToDelete.getGroupUuid()));
+            validationRuleGroupService.safeDeleteGroupDirect(recordToDelete.getGroupUuid());
         }
         
         // 同步更新字段的必填状态为非必填
@@ -210,26 +215,30 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
 
     @Override
     public ValidationRequiredRespVO getById(Long id) {
-        var list = requiredRepository.findByGroupId(id);
+        MetadataValidationRuleGroupDO group = validationRuleGroupService.resolveRuleGroup(id, null, null);
+        if (group == null) {
+            return null;
+        }
+        var list = findByRuleGroup(group);
         if (list.isEmpty()) { return null; }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
         MetadataValidationRequiredDO requiredDO = list.get(0);
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
         
         // 获取规则组信息，包括提示语等字段
-        // 修复：直接使用 groupId 查询规则组，因为 requiredDO.getGroupUuid() 存储的是 groupId 的字符串形式
-        var ruleGroup = validationRuleGroupService.getValidationRuleGroup(id);
-        if (ruleGroup != null) {
-            respVO.setRgName(ruleGroup.getRgName());
-            respVO.setPromptMessage(ruleGroup.getPopPrompt());
-        }
+        respVO.setRgName(group.getRgName());
+        respVO.setPromptMessage(group.getPopPrompt());
         return respVO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        var list = requiredRepository.findByGroupId(id);
+        MetadataValidationRuleGroupDO group = validationRuleGroupService.resolveRuleGroup(id, null, null);
+        if (group == null) {
+            return;
+        }
+        var list = findByRuleGroup(group);
         
         // 删除子表记录和同步字段状态
         if (!list.isEmpty()) {
@@ -259,6 +268,36 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         if (field != null && field.getIsRequired() != (required ? 1 : 0)) {
             field.setIsRequired(required ? 1 : 0);
             entityFieldRepository.updateById(field); // 使用updateById而不是upsert，避免主键冲突
+        }
+    }
+
+    private java.util.List<MetadataValidationRequiredDO> findByRuleGroup(MetadataValidationRuleGroupDO group) {
+        if (group == null || !StringUtils.hasText(group.getGroupUuid())) {
+            return java.util.Collections.emptyList();
+        }
+        java.util.List<MetadataValidationRequiredDO> list = requiredRepository.findByGroupUuid(group.getGroupUuid());
+        if (!list.isEmpty()) {
+            return list;
+        }
+        String legacyGroupUuid = String.valueOf(group.getId());
+        if (legacyGroupUuid.equals(group.getGroupUuid())) {
+            return list;
+        }
+        list = requiredRepository.findByGroupUuid(legacyGroupUuid);
+        migrateGroupUuid(list, group.getGroupUuid());
+        return list;
+    }
+
+    private void migrateGroupUuid(java.util.List<MetadataValidationRequiredDO> records, String targetGroupUuid) {
+        if (!StringUtils.hasText(targetGroupUuid) || records == null || records.isEmpty()) {
+            return;
+        }
+        for (MetadataValidationRequiredDO record : records) {
+            if (targetGroupUuid.equals(record.getGroupUuid())) {
+                continue;
+            }
+            record.setGroupUuid(targetGroupUuid);
+            requiredRepository.updateById(record);
         }
     }
 }

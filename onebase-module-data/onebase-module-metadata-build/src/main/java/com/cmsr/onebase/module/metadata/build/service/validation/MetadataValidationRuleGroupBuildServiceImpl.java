@@ -198,6 +198,30 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MetadataValidationRuleGroupDO resolveRuleGroup(Long groupId, String fallbackGroupUuid,
+            ValidationRuleGroupSaveReqVO recreateReqVO) {
+        MetadataValidationRuleGroupDO group = null;
+        if (groupId != null) {
+            group = validationRuleGroupRepository.getById(groupId);
+        }
+        if (group == null && StringUtils.hasText(fallbackGroupUuid)) {
+            group = validationRuleGroupRepository.getByGroupUuid(fallbackGroupUuid);
+        }
+        if (group != null) {
+            return ensureGroupUuid(group, fallbackGroupUuid);
+        }
+        if (recreateReqVO == null) {
+            return null;
+        }
+        if (!StringUtils.hasText(recreateReqVO.getGroupUuid()) && StringUtils.hasText(fallbackGroupUuid)) {
+            recreateReqVO.setGroupUuid(fallbackGroupUuid);
+        }
+        Long recreatedGroupId = createValidationRuleGroup(recreateReqVO);
+        return validationRuleGroupRepository.getById(recreatedGroupId);
+    }
+
+    @Override
     public PageResult<MetadataValidationRuleGroupDO> getValidationRuleGroupPage(ValidationRuleGroupPageReqVO pageReqVO) {
         // 优先使用entityUuid，若为空则使用entityId（转换为UUID）
         String entityUuid = pageReqVO.getEntityUuid();
@@ -339,10 +363,15 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         if (CollectionUtils.isEmpty(valueRules)) {
             return;
         }
+        MetadataValidationRuleGroupDO group = resolveRuleGroup(groupId, null, null);
+        if (group == null || !StringUtils.hasText(group.getGroupUuid())) {
+            throw new IllegalStateException("规则组不存在，无法保存规则定义(groupId=" + groupId + ")");
+        }
+        String groupUuid = group.getGroupUuid();
 
         // 创建主OR规则节点
         MetadataValidationRuleDefinitionDO mainOrRule = new MetadataValidationRuleDefinitionDO();
-        mainOrRule.setGroupUuid(String.valueOf(groupId));
+        mainOrRule.setGroupUuid(groupUuid);
         mainOrRule.setLogicType("LOGIC");
         mainOrRule.setLogicOperator("OR");
         mainOrRule.setStatus(StatusEnumUtil.ACTIVE);
@@ -359,7 +388,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 // 只有一个条件，直接添加到主OR节点下
                 ValidationRuleDefinitionVO singleRule = andGroup.get(0);
                 MetadataValidationRuleDefinitionDO ruleDO = convertVoToDo(singleRule);
-                ruleDO.setGroupUuid(String.valueOf(groupId));
+                ruleDO.setGroupUuid(groupUuid);
                 ruleDO.setParentRuleUuid(String.valueOf(mainOrRuleId));
                 ruleDO.setLogicType("CONDITION");
                 if (ruleDO.getStatus() == null) {
@@ -369,7 +398,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             } else {
                 // 多个条件，创建AND分组节点
                 MetadataValidationRuleDefinitionDO andGroupRule = new MetadataValidationRuleDefinitionDO();
-                andGroupRule.setGroupUuid(String.valueOf(groupId));
+                andGroupRule.setGroupUuid(groupUuid);
                 andGroupRule.setParentRuleUuid(String.valueOf(mainOrRuleId));
                 andGroupRule.setLogicType("LOGIC");
                 andGroupRule.setLogicOperator("AND");
@@ -380,7 +409,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                 // 添加AND分组内的所有条件
                 for (ValidationRuleDefinitionVO conditionRule : andGroup) {
                     MetadataValidationRuleDefinitionDO ruleDO = convertVoToDo(conditionRule);
-                    ruleDO.setGroupUuid(String.valueOf(groupId));
+                    ruleDO.setGroupUuid(groupUuid);
                     ruleDO.setParentRuleUuid(String.valueOf(andGroupRuleId));
                     ruleDO.setLogicType("CONDITION");
                     if (ruleDO.getStatus() == null) {
@@ -716,7 +745,17 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
             return null;
         }
     }
-
-
+    
+    private MetadataValidationRuleGroupDO ensureGroupUuid(MetadataValidationRuleGroupDO group, String preferredGroupUuid) {
+        if (group == null) {
+            return null;
+        }
+        if (StringUtils.hasText(group.getGroupUuid())) {
+            return group;
+        }
+        group.setGroupUuid(StringUtils.hasText(preferredGroupUuid) ? preferredGroupUuid : UuidUtils.getUuid());
+        validationRuleGroupRepository.updateById(group);
+        return group;
+    }
 
 }

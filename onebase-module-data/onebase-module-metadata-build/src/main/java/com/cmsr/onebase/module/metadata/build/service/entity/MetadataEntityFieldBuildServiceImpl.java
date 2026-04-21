@@ -7,6 +7,7 @@ import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.framework.tenant.core.util.TenantUtils;
 import com.cmsr.onebase.module.metadata.build.controller.admin.entity.vo.*;
+import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.relationship.vo.EntityRelationshipSaveReqVO;
 import com.cmsr.onebase.module.metadata.build.service.component.MetadataComponentFieldTypeBuildService;
 import com.cmsr.onebase.module.metadata.build.service.datasource.MetadataDatasourceBuildService;
@@ -1221,7 +1222,8 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
                     data.setFieldUuid(fieldUuid);
                     data.setIsEnabled(1);
                     data.setPromptMessage(promptMsg);
-                    data.setGroupUuid(String.valueOf(groupId));
+                    var group = validationRuleGroupService.resolveRuleGroup(groupId, null, null);
+                    data.setGroupUuid(group != null ? group.getGroupUuid() : null);
                     validationRequiredRepository.saveOrUpdate(data);
                 }
             } else {
@@ -3978,12 +3980,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                     if (targetGroupUuid == null) {
                         log.warn("长度校验同步失败，字段ID: {}, 缺少规则组UUID，跳过更新", fieldId);
-                        return;
                     }
-                    // 根据groupUuid获取规则组的数据库主键ID
-                    var group = validationRuleGroupService.getValidationRuleGroupByUuid(targetGroupUuid);
+                    var group = validationRuleGroupService.resolveRuleGroup(null, targetGroupUuid,
+                            buildRuleGroupSaveReq(buildLengthRuleGroupName(fieldId), "LENGTH", entityField,
+                                    existingDO.getPromptMessage()));
                     if (group == null) {
-                        log.warn("长度校验同步失败，字段ID: {}, 规则组不存在，跳过更新", fieldId);
+                        log.warn("长度校验同步失败，字段ID: {}, 规则组不存在且无法重建，跳过更新", fieldId);
                         return;
                     }
                     updateReqVO.setId(group.getId());
@@ -4051,12 +4053,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                     if (targetGroupUuid == null) {
                         log.warn("必填校验同步失败，字段ID: {}, 缺少规则组UUID，跳过更新", fieldId);
-                        return;
                     }
-                    // 根据groupUuid获取规则组的数据库主键ID
-                    var group = validationRuleGroupService.getValidationRuleGroupByUuid(targetGroupUuid);
+                    var group = validationRuleGroupService.resolveRuleGroup(null, targetGroupUuid,
+                            buildRuleGroupSaveReq(buildRequiredRuleGroupName(fieldId), "REQUIRED", entityField,
+                                    existingDO.getPromptMessage()));
                     if (group == null) {
-                        log.warn("必填校验同步失败，字段ID: {}, 规则组不存在，跳过更新", fieldId);
+                        log.warn("必填校验同步失败，字段ID: {}, 规则组不存在且无法重建，跳过更新", fieldId);
                         return;
                     }
                     updateReqVO.setId(group.getId());
@@ -4117,12 +4119,12 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
                     if (targetGroupUuid == null) {
                         log.warn("唯一校验同步失败，字段ID: {}, 缺少规则组UUID，跳过更新", fieldId);
-                        return;
                     }
-                    // 根据groupUuid获取规则组的数据库主键ID
-                    var group = validationRuleGroupService.getValidationRuleGroupByUuid(targetGroupUuid);
+                    var group = validationRuleGroupService.resolveRuleGroup(null, targetGroupUuid,
+                            buildRuleGroupSaveReq(buildUniqueRuleGroupName(fieldId), "UNIQUE", entityField,
+                                    existingDO.getPromptMessage()));
                     if (group == null) {
-                        log.warn("唯一校验同步失败，字段ID: {}, 规则组不存在，跳过更新", fieldId);
+                        log.warn("唯一校验同步失败，字段ID: {}, 规则组不存在且无法重建，跳过更新", fieldId);
                         return;
                     }
                     updateReqVO.setId(group.getId());
@@ -4269,6 +4271,19 @@ public class MetadataEntityFieldBuildServiceImpl implements MetadataEntityFieldB
 
     private String buildSelfDefinedRuleGroupName(Long fieldId) {
         return buildRuleGroupName(fieldId, "SELF_DEFINED");
+    }
+
+    private ValidationRuleGroupSaveReqVO buildRuleGroupSaveReq(String rgName, String validationType,
+            MetadataEntityFieldDO entityField, String popPrompt) {
+        ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
+        groupVO.setRgName(rgName);
+        groupVO.setRgDesc("自动重建的规则组：" + rgName);
+        groupVO.setRgStatus(StatusEnumUtil.ACTIVE);
+        groupVO.setValidationType(validationType);
+        groupVO.setEntityUuid(entityField.getEntityUuid());
+        groupVO.setApplicationId(entityField.getApplicationId());
+        groupVO.setPopPrompt(popPrompt);
+        return groupVO;
     }
 
     /**

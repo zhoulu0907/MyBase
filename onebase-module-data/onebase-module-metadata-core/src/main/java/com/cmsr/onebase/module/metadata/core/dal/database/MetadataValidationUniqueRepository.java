@@ -66,19 +66,6 @@ public class MetadataValidationUniqueRepository extends BaseBizRepository<Metada
                 .eq(MetadataValidationUniqueDO::getGroupUuid, groupUuid);
         return list(queryWrapper);
     }
-
-    /**
-     * 根据组ID查询唯一性验证规则列表（兼容旧代码）
-     *
-     * @deprecated 请使用 findByGroupUuid(String)
-     * @param groupId 组ID
-     * @return 唯一性验证规则列表
-     */
-    @Deprecated
-    public List<MetadataValidationUniqueDO> findByGroupId(Long groupId) {
-        return findByGroupUuid(groupId != null ? String.valueOf(groupId) : null);
-    }
-
     /**
      * 根据字段UUID查询唯一性验证规则列表
      *

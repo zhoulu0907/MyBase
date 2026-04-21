@@ -75,19 +75,6 @@ public class MetadataValidationLengthRepository extends BaseBizRepository<Metada
                 .in(MetadataValidationLengthDO::getFieldUuid, fieldUuids);
         return list(queryWrapper);
     }
-
-    /**
-     * 根据组ID查询长度验证规则列表（兼容旧代码）
-     *
-     * @deprecated 请使用 findByGroupUuid(String)
-     * @param groupId 组ID
-     * @return 长度验证规则列表
-     */
-    @Deprecated
-    public List<MetadataValidationLengthDO> findByGroupId(Long groupId) {
-        return findByGroupUuid(groupId != null ? String.valueOf(groupId) : null);
-    }
-
     @Deprecated
     public List<MetadataValidationLengthDO> findByFieldIds(Collection<Long> fieldIds) {
         if (fieldIds == null || fieldIds.isEmpty()) { return Collections.emptyList(); }

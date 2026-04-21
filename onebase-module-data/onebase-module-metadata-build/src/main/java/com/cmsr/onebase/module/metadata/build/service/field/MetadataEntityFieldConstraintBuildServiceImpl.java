@@ -117,41 +117,18 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 lengthVO.setPopPrompt(prompt);
                 lengthService.create(lengthVO);
             } else {
-                // 更新长度校验，需要通过groupUuid获取规则组ID
-                Long ruleGroupId = null;
-                if (exist.getGroupUuid() != null) {
-                    var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(exist.getGroupUuid());
-                    if (ruleGroup != null) {
-                        ruleGroupId = ruleGroup.getId();
-                    }
-                }
-                if (ruleGroupId == null) {
-                    // 规则组不存在，降级为新建
-                    log.warn("长度校验规则组不存在，降级为新建，fieldUuid={}", req.getFieldUuid());
-                    ValidationLengthSaveReqVO lengthVO = new ValidationLengthSaveReqVO();
-                    lengthVO.setFieldUuid(req.getFieldUuid());
-                    lengthVO.setEntityUuid(field.getEntityUuid());
-                    lengthVO.setIsEnabled(req.getIsEnabled());
-                    lengthVO.setMinLength(req.getMinLength());
-                    lengthVO.setMaxLength(req.getMaxLength());
-                    lengthVO.setPromptMessage(prompt);
-                    lengthVO.setVersionTag(req.getVersionTag());
-                    lengthVO.setRgName(buildLengthGroupName(field.getId()));
-                    lengthVO.setPopPrompt(prompt);
-                    lengthService.create(lengthVO);
-                } else {
-                    // 正常更新，传递规则组ID
-                    ValidationLengthUpdateReqVO lengthUpdateVO = new ValidationLengthUpdateReqVO();
-                    lengthUpdateVO.setId(ruleGroupId); // 传递规则组ID而非长度校验记录ID
-                    lengthUpdateVO.setIsEnabled(req.getIsEnabled());
-                    lengthUpdateVO.setMinLength(req.getMinLength());
-                    lengthUpdateVO.setMaxLength(req.getMaxLength());
-                    lengthUpdateVO.setPromptMessage(prompt);
-                    lengthUpdateVO.setVersionTag(req.getVersionTag());
-                    lengthUpdateVO.setRgName(buildLengthGroupName(field.getId()));
-                    lengthUpdateVO.setPopPrompt(prompt);
-                    lengthService.update(lengthUpdateVO);
-                }
+                var ruleGroup = resolveOrRebuildRuleGroup(exist.getGroupUuid(),
+                        buildRuleGroupSaveReq(buildLengthGroupName(field.getId()), "LENGTH", field, prompt));
+                ValidationLengthUpdateReqVO lengthUpdateVO = new ValidationLengthUpdateReqVO();
+                lengthUpdateVO.setId(ruleGroup.getId());
+                lengthUpdateVO.setIsEnabled(req.getIsEnabled());
+                lengthUpdateVO.setMinLength(req.getMinLength());
+                lengthUpdateVO.setMaxLength(req.getMaxLength());
+                lengthUpdateVO.setPromptMessage(prompt);
+                lengthUpdateVO.setVersionTag(req.getVersionTag());
+                lengthUpdateVO.setRgName(buildLengthGroupName(field.getId()));
+                lengthUpdateVO.setPopPrompt(prompt);
+                lengthService.update(lengthUpdateVO);
             }
         } else if ("REGEX".equalsIgnoreCase(type)) {
             // 获取字段信息用于生成默认提示语
@@ -190,6 +167,9 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             } else {
                 // 将DO转换为UpdateReqVO
                 ValidationFormatUpdateReqVO formatUpdateVO = BeanUtils.toBean(d, ValidationFormatUpdateReqVO.class);
+                var ruleGroup = resolveOrRebuildRuleGroup(exist.getGroupUuid(),
+                        buildRuleGroupSaveReq(buildFormatGroupName(field.getId()), "FORMAT", field, prompt));
+                formatUpdateVO.setId(ruleGroup.getId());
                 formatUpdateVO.setFormatCode("REGEX");
                 formatUpdateVO.setRgName(buildFormatGroupName(field.getId())); // 设置规则组名称
                 formatUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
@@ -224,11 +204,8 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             } else {
                 // 直接创建UpdateReqVO对象，避免DO到VO的转换问题
                 ValidationRequiredUpdateReqVO requiredUpdateVO = new ValidationRequiredUpdateReqVO();
-                // 需要通过groupUuid获取规则组ID
-                var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(exist.getGroupUuid());
-                if (ruleGroup == null) {
-                    throw new IllegalStateException("字段" + req.getFieldUuid() + "的规则组不存在，无法更新必填校验");
-                }
+                var ruleGroup = resolveOrRebuildRuleGroup(exist.getGroupUuid(),
+                        buildRuleGroupSaveReq(buildRequiredGroupName(field.getId()), "REQUIRED", field, prompt));
                 requiredUpdateVO.setId(ruleGroup.getId());
                 requiredUpdateVO.setIsEnabled(req.getIsEnabled());
                 requiredUpdateVO.setPromptMessage(prompt);
@@ -270,14 +247,8 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 if (groupUuid == null && respVO != null) {
                     groupUuid = respVO.getGroupUuid();
                 }
-                if (groupUuid == null) {
-                    throw new IllegalStateException("字段" + req.getFieldUuid() + "缺少唯一性规则组，无法更新");
-                }
-                // 通过groupUuid获取规则组ID
-                var ruleGroup = validationRuleGroupService.getValidationRuleGroupByUuid(groupUuid);
-                if (ruleGroup == null) {
-                    throw new IllegalStateException("字段" + req.getFieldUuid() + "的规则组不存在，无法更新唯一性校验");
-                }
+                var ruleGroup = resolveOrRebuildRuleGroup(groupUuid,
+                        buildRuleGroupSaveReq(defaultGroupName, "UNIQUE", field, prompt));
                 String groupName = (respVO != null && StringUtils.hasText(respVO.getRgName()))
                         ? respVO.getRgName()
                         : defaultGroupName;
@@ -418,6 +389,30 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
         return buildRuleGroupName(fieldId, "SELF_DEFINED");
     }
 
+    private ValidationRuleGroupSaveReqVO buildRuleGroupSaveReq(String rgName, String validationType,
+            MetadataEntityFieldDO field, String prompt) {
+        ValidationRuleGroupSaveReqVO groupVO = new ValidationRuleGroupSaveReqVO();
+        groupVO.setRgName(rgName);
+        groupVO.setRgDesc("自动重建的规则组：" + rgName);
+        groupVO.setRgStatus(1);
+        groupVO.setValidationType(validationType);
+        groupVO.setEntityUuid(field.getEntityUuid());
+        groupVO.setApplicationId(field.getApplicationId());
+        groupVO.setPopPrompt(prompt);
+        return groupVO;
+    }
+
+    private com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO resolveOrRebuildRuleGroup(
+            String existingGroupUuid, ValidationRuleGroupSaveReqVO recreateReqVO) {
+        var ruleGroup = validationRuleGroupService.resolveRuleGroup(null, existingGroupUuid, recreateReqVO);
+        if (ruleGroup == null) {
+            throw new IllegalStateException("规则组不存在且无法自动重建，groupUuid=" + existingGroupUuid);
+        }
+        if (!StringUtils.hasText(existingGroupUuid) || !existingGroupUuid.equals(ruleGroup.getGroupUuid())) {
+            log.warn("规则组已自动修复，oldGroupUuid={}, newGroupId={}, newGroupUuid={}",
+                    existingGroupUuid, ruleGroup.getId(), ruleGroup.getGroupUuid());
+        }
+        return ruleGroup;
+    }
+
 }
-
-

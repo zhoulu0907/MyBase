@@ -92,16 +92,6 @@ public class MetadataValidationFormatRepository extends BaseBizRepository<Metada
     public MetadataValidationFormatDO findRegexByFieldId(Long fieldId) {
         return findRegexByFieldUuid(String.valueOf(fieldId));
     }
-
-    /**
-     * 根据组ID查询格式验证规则列表（兼容旧代码）
-     * @deprecated 请使用 findByGroupUuid()
-     */
-    @Deprecated
-    public List<MetadataValidationFormatDO> findByGroupId(Long groupId) {
-        return findByGroupUuid(String.valueOf(groupId));
-    }
-
     /**
      * 根据字段ID删除格式验证规则（兼容旧代码）
      * @deprecated 请使用 deleteByFieldUuid()

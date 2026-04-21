@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * 唯一校验 Service 实现
@@ -83,6 +84,7 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
         boolean needCreateGroup = false;
         if (existingGroup != null) {
+            existingGroup = ruleGroupService.resolveRuleGroup(existingGroup.getId(), existingGroup.getGroupUuid(), null);
             // 检查该 groupUuid 是否已被其他字段的唯一性校验复用
             var groupUniqueList = uniqueRepository.findByGroupUuid(existingGroup.getGroupUuid());
             boolean reused = groupUniqueList.stream().anyMatch(u -> !u.getFieldUuid().equals(vo.getFieldUuid()));
@@ -136,10 +138,12 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     @Transactional(rollbackFor = Exception.class)
     public void update(ValidationUniqueUpdateReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
-        Assert.notNull(vo.getId(), "groupUuid不能为空");
-        String groupUuidParam = String.valueOf(vo.getId());
-        var list = uniqueRepository.findByGroupUuid(groupUuidParam);
-        Assert.notEmpty(list, "当前唯一性校验规则不存在(组UUID=" + groupUuidParam + ")");
+        Assert.notNull(vo.getId(), "规则组ID不能为空");
+        var groupDO = ruleGroupService.resolveRuleGroup(vo.getId(), null, null);
+        Assert.notNull(groupDO, "规则组不存在(组ID=" + vo.getId() + ")");
+        String groupUuidParam = groupDO.getGroupUuid();
+        var list = findByRuleGroup(groupDO);
+        Assert.notEmpty(list, "当前唯一性校验规则不存在(组ID=" + vo.getId() + ")");
         if (list.size() > 1) {
             throw new IllegalStateException("数据异常：同一组存在多条唯一性校验规则(组UUID=" + groupUuidParam + ")");
         }
@@ -149,7 +153,6 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
 
         // 不变更组，但需要同步组配置(popPrompt/valMethod/popType)
         String targetGroupUuid = groupUuidParam;
-        var groupDO = ruleGroupService.getValidationRuleGroupByUuid(groupUuidParam);
         if (groupDO != null) {
             boolean needGroupUpdate = false;
             ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
@@ -204,9 +207,9 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
 
     @Override
     public ValidationUniqueRespVO getById(Long id) {
-        var group = ruleGroupService.getValidationRuleGroup(id);
+        var group = ruleGroupService.resolveRuleGroup(id, null, null);
         if (group == null) { return null; }
-        var list = uniqueRepository.findByGroupUuid(group.getGroupUuid());
+        var list = findByRuleGroup(group);
         if (list.isEmpty()) { return null; }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条唯一性校验规则(组UUID=" + group.getGroupUuid() + ")"); }
         MetadataValidationUniqueDO uniqueDO = list.get(0);
@@ -221,9 +224,9 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        var group = ruleGroupService.getValidationRuleGroup(id);
+        var group = ruleGroupService.resolveRuleGroup(id, null, null);
         if (group == null) { return; }
-        var list = uniqueRepository.findByGroupUuid(group.getGroupUuid());
+        var list = findByRuleGroup(group);
         
         // 删除子表记录和同步字段状态
         if (!list.isEmpty()) {
@@ -260,6 +263,36 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
             // 如果更新失败，记录日志但不中断流程
             // 这种情况通常发生在同一事务中有其他操作正在处理同一字段
             log.warn("同步字段唯一性状态失败，fieldUuid: {}, unique: {}, 错误: {}", fieldUuid, unique, e.getMessage());
+        }
+    }
+
+    private java.util.List<MetadataValidationUniqueDO> findByRuleGroup(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO group) {
+        if (group == null || !StringUtils.hasText(group.getGroupUuid())) {
+            return java.util.Collections.emptyList();
+        }
+        java.util.List<MetadataValidationUniqueDO> list = uniqueRepository.findByGroupUuid(group.getGroupUuid());
+        if (!list.isEmpty()) {
+            return list;
+        }
+        String legacyGroupUuid = String.valueOf(group.getId());
+        if (legacyGroupUuid.equals(group.getGroupUuid())) {
+            return list;
+        }
+        list = uniqueRepository.findByGroupUuid(legacyGroupUuid);
+        migrateGroupUuid(list, group.getGroupUuid());
+        return list;
+    }
+
+    private void migrateGroupUuid(java.util.List<MetadataValidationUniqueDO> records, String targetGroupUuid) {
+        if (!StringUtils.hasText(targetGroupUuid) || records == null || records.isEmpty()) {
+            return;
+        }
+        for (MetadataValidationUniqueDO record : records) {
+            if (targetGroupUuid.equals(record.getGroupUuid())) {
+                continue;
+            }
+            record.setGroupUuid(targetGroupUuid);
+            uniqueRepository.updateById(record);
         }
     }
 }

@@ -2,9 +2,11 @@ package com.cmsr.onebase.module.metadata.core.dal.database;
 
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationRuleDefinitionMapper;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
@@ -24,6 +26,9 @@ import java.util.List;
 @Slf4j
 public class MetadataValidationRuleDefinitionRepository extends BaseBizRepository<MetadataValidationRuleDefinitionMapper, MetadataValidationRuleDefinitionDO> {
 
+    @Resource
+    private MetadataValidationRuleGroupRepository ruleGroupRepository;
+
     /**
      * 根据规则组ID查询所有规则定义
      *
@@ -31,8 +36,11 @@ public class MetadataValidationRuleDefinitionRepository extends BaseBizRepositor
      * @return 规则定义列表
      */
     public List<MetadataValidationRuleDefinitionDO> selectByGroupId(Long groupId) {
-        // 修复：使用 groupId 转换为字符串后按 groupUuid 过滤
-        return selectByGroupUuid(String.valueOf(groupId));
+        MetadataValidationRuleGroupDO group = ruleGroupRepository.getById(groupId);
+        if (group == null || group.getGroupUuid() == null || group.getGroupUuid().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return selectByGroupUuid(group.getGroupUuid());
     }
 
     /**
@@ -101,6 +109,10 @@ public class MetadataValidationRuleDefinitionRepository extends BaseBizRepositor
      */
     @Deprecated
     public void deleteByGroupId(Long groupId) {
-        deleteByGroupUuid(String.valueOf(groupId));
+        MetadataValidationRuleGroupDO group = ruleGroupRepository.getById(groupId);
+        if (group == null || group.getGroupUuid() == null || group.getGroupUuid().isEmpty()) {
+            return;
+        }
+        deleteByGroupUuid(group.getGroupUuid());
     }
 }

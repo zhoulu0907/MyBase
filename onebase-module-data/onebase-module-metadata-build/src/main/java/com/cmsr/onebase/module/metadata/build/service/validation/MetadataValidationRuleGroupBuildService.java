@@ -57,6 +57,18 @@ public interface MetadataValidationRuleGroupBuildService {
     MetadataValidationRuleGroupDO getValidationRuleGroupByUuid(String groupUuid);
 
     /**
+     * 解析规则组；优先按规则组ID查找，其次按已有的groupUuid查找。
+     * 如果记录缺失且提供了重建参数，则自动重建规则组。
+     *
+     * @param groupId 规则组ID
+     * @param fallbackGroupUuid 子表已存储的groupUuid，可用于兜底或重建
+     * @param recreateReqVO 重建规则组所需信息；为null时仅做解析
+     * @return 解析后的规则组，不存在且未提供重建信息时返回null
+     */
+    MetadataValidationRuleGroupDO resolveRuleGroup(Long groupId, String fallbackGroupUuid,
+            ValidationRuleGroupSaveReqVO recreateReqVO);
+
+    /**
      * 获得校验规则分组分页
      *
      * @param pageReqVO 分页查询

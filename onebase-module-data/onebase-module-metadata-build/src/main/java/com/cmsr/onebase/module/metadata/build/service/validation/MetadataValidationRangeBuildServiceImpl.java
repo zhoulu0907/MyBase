@@ -15,6 +15,7 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -82,6 +83,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         var existingGroup = ruleGroupService.getByName(vo.getRgName());
         boolean needCreateGroup = false;
         if (existingGroup != null) {
+            existingGroup = ruleGroupService.resolveRuleGroup(existingGroup.getId(), existingGroup.getGroupUuid(), null);
             var groupRangeList = rangeRepository.findByGroupUuid(existingGroup.getGroupUuid());
             boolean reused = groupRangeList.stream().anyMatch(u -> !u.getFieldUuid().equals(vo.getFieldUuid()));
             if (reused) {
@@ -150,11 +152,9 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 约定：reqVO.id 为 groupId(数据库主键)
         Long groupIdParam = reqVO.getId();
         Assert.notNull(groupIdParam, "规则组ID不能为空");
-        // 先根据主键ID获取规则组
-        var groupDO = ruleGroupService.getValidationRuleGroup(groupIdParam);
+        var groupDO = ruleGroupService.resolveRuleGroup(groupIdParam, null, null);
         Assert.notNull(groupDO, "规则组不存在(组ID=" + groupIdParam + ")");
-        // 再根据groupUuid获取范围校验记录
-        var list = rangeRepository.findByGroupUuid(groupDO.getGroupUuid());
+        var list = findByRuleGroup(groupDO);
         Assert.notEmpty(list, "当前范围校验规则不存在(组ID=" + groupIdParam + ")");
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + groupIdParam + ")"); }
         MetadataValidationRangeDO existingDO = list.get(0);
@@ -203,11 +203,9 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
 
     @Override
     public ValidationRangeRespVO getById(Long id) {
-        // 先根据主键ID获取规则组
-        var groupDO = ruleGroupService.getValidationRuleGroup(id);
+        var groupDO = ruleGroupService.resolveRuleGroup(id, null, null);
         if (groupDO == null) { return null; }
-        // 再根据groupUuid获取范围校验记录
-        var list = rangeRepository.findByGroupUuid(groupDO.getGroupUuid());
+        var list = findByRuleGroup(groupDO);
         if (list.isEmpty()) { return null; }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")"); }
         MetadataValidationRangeDO rangeDO = list.get(0);
@@ -225,12 +223,11 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        // 先根据主键ID获取规则组
-        var groupDO = ruleGroupService.getValidationRuleGroup(id);
+        var groupDO = ruleGroupService.resolveRuleGroup(id, null, null);
         
         // 删除子表记录
         if (groupDO != null) {
-            var list = rangeRepository.findByGroupUuid(groupDO.getGroupUuid());
+            var list = findByRuleGroup(groupDO);
             if (!list.isEmpty()) {
                 if (list.size() > 1) {
                     throw new IllegalStateException("数据异常：同一组存在多条范围校验规则(组ID=" + id + ")");
@@ -274,5 +271,36 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 使用stripTrailingZeros去除尾部的0，然后转为字符串
         // 使用toPlainString避免科学计数法
         return scaled.stripTrailingZeros().toPlainString();
+    }
+
+    private java.util.List<MetadataValidationRangeDO> findByRuleGroup(
+            com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO group) {
+        if (group == null || !StringUtils.hasText(group.getGroupUuid())) {
+            return java.util.Collections.emptyList();
+        }
+        java.util.List<MetadataValidationRangeDO> list = rangeRepository.findByGroupUuid(group.getGroupUuid());
+        if (!list.isEmpty()) {
+            return list;
+        }
+        String legacyGroupUuid = String.valueOf(group.getId());
+        if (legacyGroupUuid.equals(group.getGroupUuid())) {
+            return list;
+        }
+        list = rangeRepository.findByGroupUuid(legacyGroupUuid);
+        migrateGroupUuid(list, group.getGroupUuid());
+        return list;
+    }
+
+    private void migrateGroupUuid(java.util.List<MetadataValidationRangeDO> records, String targetGroupUuid) {
+        if (!StringUtils.hasText(targetGroupUuid) || records == null || records.isEmpty()) {
+            return;
+        }
+        for (MetadataValidationRangeDO record : records) {
+            if (targetGroupUuid.equals(record.getGroupUuid())) {
+                continue;
+            }
+            record.setGroupUuid(targetGroupUuid);
+            rangeRepository.updateById(record);
+        }
     }
 }
