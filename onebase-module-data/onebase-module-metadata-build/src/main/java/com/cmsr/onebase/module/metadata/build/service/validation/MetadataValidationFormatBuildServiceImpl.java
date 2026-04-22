@@ -367,11 +367,11 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
 
     private Integer resolveIsEnabledForUpdate(Integer requested, Integer existing) {
         if (requested == null) {
-            return existing;
+            return existing == null ? 1 : existing;
         }
-        // 兼容旧前端编辑弹窗误传 isEnabled=0，避免仅修改提示语时误关闭规则
-        if (requested == 0 && existing != null && existing == 1) {
-            return existing;
+        // 兼容旧前端编辑接口误传 isEnabled=0，统一按启用处理，避免规则被误关
+        if (requested == 0) {
+            return 1;
         }
         return requested;
     }
