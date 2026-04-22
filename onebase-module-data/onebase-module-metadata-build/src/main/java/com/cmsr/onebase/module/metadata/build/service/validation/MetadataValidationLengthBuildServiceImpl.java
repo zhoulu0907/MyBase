@@ -172,9 +172,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
                 rebuildDO.setApplicationId(fallbackFieldDO.getApplicationId());
                 rebuildDO.setGroupUuid(groupDO.getGroupUuid());
                 rebuildDO.setPromptMessage(mergedPrompt);
-                if (rebuildDO.getIsEnabled() == null) {
-                    rebuildDO.setIsEnabled(1);
-                }
+                rebuildDO.setIsEnabled(resolveIsEnabledForRebuild(reqVO.getIsEnabled()));
                 lengthRepository.saveOrUpdate(rebuildDO);
                 syncToEntityField(fallbackFieldDO.getFieldUuid(), rebuildDO.getMaxLength());
                 return;
@@ -250,9 +248,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             updateDO.setEntityUuid(existingDO.getEntityUuid());
             updateDO.setGroupUuid(targetGroupUuid);
             updateDO.setPromptMessage(mergedPrompt);
-            if (updateDO.getIsEnabled() == null) {
-                updateDO.setIsEnabled(existingDO.getIsEnabled());
-            }
+            updateDO.setIsEnabled(resolveIsEnabledForUpdate(reqVO.getIsEnabled(), existingDO.getIsEnabled()));
 
             // 执行更新
             lengthRepository.updateById(updateDO);
@@ -446,5 +442,24 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             return fallbackGroupPrompt;
         }
         return fallbackRulePrompt;
+    }
+
+    private Integer resolveIsEnabledForUpdate(Integer requested, Integer existing) {
+        if (requested == null) {
+            return existing;
+        }
+        // 兼容旧前端编辑弹窗误传 isEnabled=0，避免仅修改提示语时误关闭规则
+        if (requested == 0 && existing != null && existing == 1) {
+            return existing;
+        }
+        return requested;
+    }
+
+    private Integer resolveIsEnabledForRebuild(Integer requested) {
+        // 缺失记录补建场景默认启用，避免被旧前端误传 0 导致规则失效
+        if (requested == null || requested == 0) {
+            return 1;
+        }
+        return requested;
     }
 }

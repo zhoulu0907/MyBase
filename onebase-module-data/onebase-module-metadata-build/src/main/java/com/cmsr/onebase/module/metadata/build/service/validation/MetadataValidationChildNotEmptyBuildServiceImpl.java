@@ -231,9 +231,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             rebuildDO.setGroupUuid(group.getGroupUuid());
             rebuildDO.setFieldUuid(null);
             rebuildDO.setPromptMessage(mergedPrompt);
-            if (rebuildDO.getIsEnabled() == null) {
-                rebuildDO.setIsEnabled(1);
-            }
+            rebuildDO.setIsEnabled(resolveIsEnabledForRebuild(vo.getIsEnabled()));
             if (rebuildDO.getMinRows() == null) {
                 rebuildDO.setMinRows(1);
             }
@@ -272,6 +270,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         updateObj.setFieldUuid(null);
         // 提示信息
         updateObj.setPromptMessage(mergedPrompt);
+        updateObj.setIsEnabled(resolveIsEnabledForUpdate(vo.getIsEnabled(), existing.getIsEnabled()));
         childNotEmptyRepository.updateById(updateObj);
     }
 
@@ -331,5 +330,24 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             return fallbackGroupPrompt;
         }
         return fallbackRulePrompt;
+    }
+
+    private Integer resolveIsEnabledForUpdate(Integer requested, Integer existing) {
+        if (requested == null) {
+            return existing;
+        }
+        // 兼容旧前端编辑弹窗误传 isEnabled=0，避免仅修改提示语时误关闭规则
+        if (requested == 0 && existing != null && existing == 1) {
+            return existing;
+        }
+        return requested;
+    }
+
+    private Integer resolveIsEnabledForRebuild(Integer requested) {
+        // 缺失记录补建场景默认启用，避免被旧前端误传 0 导致规则失效
+        if (requested == null || requested == 0) {
+            return 1;
+        }
+        return requested;
     }
 }
