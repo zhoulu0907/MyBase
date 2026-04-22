@@ -122,6 +122,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataValidationRequiredDO data = BeanUtils.toBean(vo, MetadataValidationRequiredDO.class);
         data.setEntityUuid(field.getEntityUuid());
         data.setApplicationId(field.getApplicationId());
+        data.setPromptMessage(resolvePrompt(vo.getPopPrompt(), vo.getPromptMessage(), null, null));
         MetadataValidationRuleGroupDO group = validationRuleGroupService.resolveRuleGroup(groupId, null, null);
         Assert.notNull(group, "规则组不存在");
         data.setGroupUuid(group.getGroupUuid());
@@ -144,7 +145,43 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         MetadataValidationRuleGroupDO groupDO = validationRuleGroupService.resolveRuleGroup(groupIdParam, null, null);
         Assert.notNull(groupDO, "规则组不存在(组ID=" + groupIdParam + ")");
         var list = findByRuleGroup(groupDO);
-        Assert.notEmpty(list, "当前必填校验规则不存在(组ID=" + groupIdParam + ")");
+        if (list.isEmpty()) {
+            Assert.hasText(reqVO.getFieldUuid(), "当前必填校验规则缺失，请传入fieldUuid进行补建");
+            MetadataEntityFieldDO fallbackFieldDO = entityFieldService.getEntityFieldByUuid(reqVO.getFieldUuid());
+            Assert.notNull(fallbackFieldDO, "字段不存在");
+            String mergedPrompt = resolvePrompt(reqVO.getPopPrompt(), reqVO.getPromptMessage(), groupDO.getPopPrompt(), null);
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(groupDO.getId());
+            String targetRgName = StringUtils.hasText(reqVO.getRgName()) ? reqVO.getRgName() : groupDO.getRgName();
+            updateGroupVO.setRgName(targetRgName);
+            updateGroupVO.setRgDesc(groupDO.getRgDesc());
+            updateGroupVO.setRgStatus(groupDO.getRgStatus());
+            updateGroupVO.setValidationType(groupDO.getValidationType());
+            updateGroupVO.setEntityUuid(groupDO.getEntityUuid());
+            updateGroupVO.setApplicationId(groupDO.getApplicationId());
+            if (!targetRgName.equals(groupDO.getRgName())) { needGroupUpdate = true; }
+            if (mergedPrompt != null && !mergedPrompt.equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(mergedPrompt); needGroupUpdate = true; }
+            if (reqVO.getValMethod() != null && !reqVO.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(reqVO.getValMethod()); needGroupUpdate = true; }
+            if (reqVO.getPopType() != null && !reqVO.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(reqVO.getPopType()); needGroupUpdate = true; }
+            if (needGroupUpdate) {
+                validationRuleGroupService.updateValidationRuleGroup(updateGroupVO);
+            }
+            MetadataValidationRequiredDO rebuildDO = BeanUtils.toBean(reqVO, MetadataValidationRequiredDO.class);
+            rebuildDO.setId(null);
+            rebuildDO.setFieldUuid(fallbackFieldDO.getFieldUuid());
+            rebuildDO.setEntityUuid(fallbackFieldDO.getEntityUuid());
+            rebuildDO.setApplicationId(fallbackFieldDO.getApplicationId());
+            rebuildDO.setGroupUuid(groupDO.getGroupUuid());
+            rebuildDO.setPromptMessage(mergedPrompt);
+            if (rebuildDO.getIsEnabled() == null) {
+                rebuildDO.setIsEnabled(1);
+            }
+            requiredRepository.saveOrUpdate(rebuildDO);
+            boolean isFieldRequired = rebuildDO.getIsEnabled() == 1;
+            syncFieldRequiredStatus(fallbackFieldDO.getFieldUuid(), isFieldRequired);
+            return;
+        }
         if (list.size() > 1) {
             throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + groupIdParam + ")");
         }
@@ -156,18 +193,23 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
 
         // 保留原 groupId，并同步可能更新的组级配置(popPrompt/valMethod/popType)
         String targetGroupUuid = groupDO.getGroupUuid();
+        String mergedPrompt = resolvePrompt(reqVO.getPopPrompt(), reqVO.getPromptMessage(), groupDO.getPopPrompt(), existingDO.getPromptMessage());
         if (groupDO != null) {
             boolean needGroupUpdate = false;
             ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
             updateGroupVO.setId(groupDO.getId());
-            updateGroupVO.setRgName(groupDO.getRgName());
+            String targetRgName = StringUtils.hasText(reqVO.getRgName()) ? reqVO.getRgName() : groupDO.getRgName();
+            updateGroupVO.setRgName(targetRgName);
             updateGroupVO.setRgDesc(groupDO.getRgDesc());
             updateGroupVO.setRgStatus(groupDO.getRgStatus());
             updateGroupVO.setValidationType(groupDO.getValidationType());
             updateGroupVO.setEntityUuid(groupDO.getEntityUuid());
             updateGroupVO.setApplicationId(groupDO.getApplicationId());
-            if (reqVO.getPopPrompt() != null && !reqVO.getPopPrompt().equals(groupDO.getPopPrompt())) {
-                updateGroupVO.setPopPrompt(reqVO.getPopPrompt());
+            if (!targetRgName.equals(groupDO.getRgName())) {
+                needGroupUpdate = true;
+            }
+            if (mergedPrompt != null && !mergedPrompt.equals(groupDO.getPopPrompt())) {
+                updateGroupVO.setPopPrompt(mergedPrompt);
                 needGroupUpdate = true;
             }
             if (reqVO.getValMethod() != null && !reqVO.getValMethod().equals(groupDO.getValMethod())) {
@@ -189,6 +231,10 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
         updateDO.setEntityUuid(existingDO.getEntityUuid());
         updateDO.setApplicationId(existingDO.getApplicationId());
         updateDO.setGroupUuid(targetGroupUuid);
+        updateDO.setPromptMessage(mergedPrompt);
+        if (updateDO.getIsEnabled() == null) {
+            updateDO.setIsEnabled(existingDO.getIsEnabled());
+        }
         requiredRepository.updateById(updateDO);
 
         boolean isFieldRequired = updateDO.getIsEnabled() != null && updateDO.getIsEnabled() == 1;
@@ -220,7 +266,16 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             return null;
         }
         var list = findByRuleGroup(group);
-        if (list.isEmpty()) { return null; }
+        if (list.isEmpty()) {
+            ValidationRequiredRespVO fallbackVO = new ValidationRequiredRespVO();
+            fallbackVO.setRgName(group.getRgName());
+            fallbackVO.setEntityUuid(group.getEntityUuid());
+            fallbackVO.setGroupUuid(group.getGroupUuid());
+            fallbackVO.setApplicationId(group.getApplicationId() == null ? null : String.valueOf(group.getApplicationId()));
+            fallbackVO.setPromptMessage(group.getPopPrompt());
+            fallbackVO.setIsEnabled(1);
+            return fallbackVO;
+        }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条必填校验规则(组ID=" + id + ")"); }
         MetadataValidationRequiredDO requiredDO = list.get(0);
         ValidationRequiredRespVO respVO = BeanUtils.toBean(requiredDO, ValidationRequiredRespVO.class);
@@ -299,5 +354,18 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             record.setGroupUuid(targetGroupUuid);
             requiredRepository.updateById(record);
         }
+    }
+
+    private String resolvePrompt(String popPrompt, String promptMessage, String fallbackGroupPrompt, String fallbackRulePrompt) {
+        if (StringUtils.hasText(popPrompt)) {
+            return popPrompt;
+        }
+        if (StringUtils.hasText(promptMessage)) {
+            return promptMessage;
+        }
+        if (StringUtils.hasText(fallbackGroupPrompt)) {
+            return fallbackGroupPrompt;
+        }
+        return fallbackRulePrompt;
     }
 }

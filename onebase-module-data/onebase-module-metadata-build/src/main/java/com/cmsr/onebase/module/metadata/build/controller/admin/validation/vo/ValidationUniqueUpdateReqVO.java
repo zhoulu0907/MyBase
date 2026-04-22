@@ -48,4 +48,7 @@ public class ValidationUniqueUpdateReqVO {
 
     @Schema(description = "弹窗类型", example = "SHORT")
     private String popType;
+
+    @Schema(description = "字段UUID（兼容脏数据补建场景）", example = "019d8578-bf82-71cc-8130-1fa973c55a80")
+    private String fieldUuid;
 }
