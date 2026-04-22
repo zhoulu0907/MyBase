@@ -196,4 +196,23 @@ public class AppApplicationRepository extends ServiceImpl<AppApplicationMapper, 
         return newApp;
     }
 
+    public PageResult<AppApplicationDO> getApplicationPageByAppIds(Collection<Long> appIds, ApplicationPageReqVO pageReqVO) {
+        QueryWrapper queryWrapper = this.query()
+                .where(APP_APPLICATION.ID.in(appIds).when(CollectionUtils.isNotEmpty(appIds)))
+                .where(APP_APPLICATION.APP_NAME.like(pageReqVO.getName())
+                        .when(StringUtils.isNotBlank(pageReqVO.getName())))
+                .where(APP_APPLICATION.APP_STATUS.eq(pageReqVO.getStatus()).when(pageReqVO.getStatus() != null))
+                .where(APP_APPLICATION.PUBLISH_MODEL.eq(pageReqVO.getPublishModel())
+                        .when(StringUtils.isNotBlank(pageReqVO.getPublishModel())));
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "create")) {
+            queryWrapper = queryWrapper.orderBy(APP_APPLICATION.CREATE_TIME, false);
+        }
+        if (Strings.CI.equals(pageReqVO.getOrderByTime(), "update")) {
+            queryWrapper = queryWrapper.orderBy(APP_APPLICATION.UPDATE_TIME, false);
+        }
+        Page<AppApplicationDO> pageQuery = Page.of(pageReqVO.getPageNo(), pageReqVO.getPageSize());
+        Page<AppApplicationDO> pageResult = this.page(pageQuery, queryWrapper);
+        return new PageResult<>(pageResult.getRecords(), pageResult.getTotalRow());
+    }
+
 }

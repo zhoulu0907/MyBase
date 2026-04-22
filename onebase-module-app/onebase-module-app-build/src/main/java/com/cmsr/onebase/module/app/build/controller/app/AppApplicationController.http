@@ -2,4 +2,12 @@
 GET {{baseUrl}}/app/application/get?id=1
 Authorization: Bearer {{token}}
 
+### 根据项目ID获取应用列表-分页（默认参数）
+GET {{baseUrl}}/app/application/list-by-project-id?projectId=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
 
+### 根据项目ID获取应用列表-分页（带筛选条件）
+GET {{baseUrl}}/app/application/list-by-project-id?projectId=1&pageNo=1&pageSize=10&name=测试&status=1&orderByTime=create
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

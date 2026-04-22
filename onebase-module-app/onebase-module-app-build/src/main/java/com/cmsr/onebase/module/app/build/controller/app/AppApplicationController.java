@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -110,6 +111,14 @@ public class AppApplicationController {
     public CommonResult<List<ApplicationSimpleRespVO>> getSimpleAppListByName(
             @RequestParam(value = "appName", required = false) String appName) {
         return success(appApplicationService.getMySimpleAppListByName(appName));
+    }
+
+    @GetMapping("/list-by-project-id")
+    @Operation(summary = "根据项目标识获取应用列表")
+    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
+    public CommonResult<PageResult<ApplicationRespVO>> getApplicationListByProjectId(
+            @RequestParam("projectId") Long projectId) {
+        return success(appApplicationService.getAppListByProjectId(projectId, new ApplicationPageReqVO()));
     }
 
     @GetMapping("/get-navigation-config")

@@ -53,4 +53,7 @@ public class ApplicationCreateReqVO {
     @InEnum(value = CommonPublishModelEnum.class, message = "返回值类型必须是 {value}")
     private String publishModel;
 
+    @Schema(description = "项目ID")
+    private Long projectId;
+
 }

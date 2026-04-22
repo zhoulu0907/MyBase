@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
@@ -43,6 +44,7 @@ import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
+import com.cmsr.onebase.module.system.api.project.ProjectAppRelationApi;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -129,6 +131,9 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
 
     @Resource
     private DictDataApi dictDataApi;
+
+    @Resource
+    private ProjectAppRelationApi projectAppRelationApi;
 
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
@@ -282,6 +287,10 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
                     createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue()
                             : createReqVO.getPublishModel());
             applicationRepository.save(applicationDO);
+            if (createReqVO.getProjectId() != null) {
+                //插入项目应用关联表
+                projectAppRelationApi.createProjectAppRelation(createReqVO.getProjectId(), applicationDO.getId());
+            }
             // 保存导航配置
             AppNavigationDO appNavigationDO = new AppNavigationDO();
             BeanUtils.copyProperties(createReqVO, appNavigationDO);
@@ -391,6 +400,8 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
             dashboardProjectApi.removeDashboardByAppId(id);
             // 删除应用级别字典Dict
             dictDataApi.deleteDictDataByDictOwner(APP, id);
+
+            projectAppRelationApi.removeProjectAppRelation(id);
         });
     }
 
@@ -464,6 +475,37 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         appNavigationDO.setAppUserForgetPwdShow(updateReqVO.getAppUserForgetPwdShow());
         appNavigationDO.setAppUserRegisterShow(updateReqVO.getAppUserRegisterShow());
         appNavigationRepository.saveOrUpdate(appNavigationDO);
+    }
+
+    @Override
+    public PageResult<ApplicationRespVO> getAppListByProjectId(Long projectId, ApplicationPageReqVO pageReqVO) {
+        // 根据项目ID获取所有应用ID
+        CommonResult<List<Long>> projectResult = projectAppRelationApi.listApplicationIdsByProjectId(projectId);
+        if (projectResult == null || !projectResult.isSuccess() || CollectionUtils.isEmpty(projectResult.getData())) {
+            return PageResult.empty();
+        }
+        
+        List<Long> appIds = projectResult.getData();
+        
+        // 根据应用ID分页查询应用信息
+        PageResult<AppApplicationDO> pageResult = applicationRepository.getApplicationPageByAppIds(appIds, pageReqVO);
+        if (CollectionUtils.isEmpty(pageResult.getList())) {
+            return PageResult.empty();
+        }
+        
+        // 转换为 VO 并填充额外信息
+        List<ApplicationRespVO> respVOS = pageResult.getList().stream().map(v -> {
+            ApplicationRespVO bean = BeanUtils.toBean(v, ApplicationRespVO.class);
+            bean.setAppStatusText(DevelopStatusEnum.getText(v.getAppStatus()));
+            return bean;
+        }).toList();
+        
+        enrichIcons(respVOS);
+        enrichTags(respVOS);
+        enrichUser(respVOS);
+        enrichUserPhoto(respVOS);
+        
+        return new PageResult<>(respVOS, pageResult.getTotal());
     }
 
 }

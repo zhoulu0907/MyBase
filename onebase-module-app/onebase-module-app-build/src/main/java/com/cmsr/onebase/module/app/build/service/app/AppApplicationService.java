@@ -40,4 +40,6 @@ public interface AppApplicationService {
     ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id);
 
     void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO);
+
+    PageResult<ApplicationRespVO> getAppListByProjectId(Long projectId, ApplicationPageReqVO pageReqVO);
 }
