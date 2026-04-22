@@ -11,3 +11,8 @@ tenant-id: {{adminTenantId}}
 GET {{baseUrl}}/app/application/list-by-project-id?projectId=1&pageNo=1&pageSize=10&name=测试&status=1&orderByTime=create
 Authorization: Bearer {{token}}
 tenant-id: {{adminTenantId}}
+
+### 删除项目下的所有应用
+POST {{baseUrl}}/app/application/delete-by-project-id?projectId=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

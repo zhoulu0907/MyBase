@@ -287,6 +287,7 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
                     createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue()
                             : createReqVO.getPublishModel());
             applicationRepository.save(applicationDO);
+
             if (createReqVO.getProjectId() != null) {
                 //插入项目应用关联表
                 projectAppRelationApi.createProjectAppRelation(createReqVO.getProjectId(), applicationDO.getId());
@@ -506,6 +507,60 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         enrichUserPhoto(respVOS);
         
         return new PageResult<>(respVOS, pageResult.getTotal());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteApplicationsByProjectId(Long projectId) {
+        // 根据项目ID获取所有应用ID
+        CommonResult<List<Long>> projectResult = projectAppRelationApi.listApplicationIdsByProjectId(projectId);
+        if (projectResult == null || !projectResult.isSuccess() || CollectionUtils.isEmpty(projectResult.getData())) {
+            log.warn("项目ID: {} 下没有找到任何应用", projectId);
+            return;
+        }
+        
+        List<Long> appIds = projectResult.getData();
+        log.info("开始删除项目ID: {} 下的 {} 个应用", projectId, appIds.size());
+        
+        // 逐个删除应用
+        for (Long appId : appIds) {
+            try {
+                AppApplicationDO applicationDO = applicationRepository.getById(appId);
+                if (applicationDO == null) {
+                    log.warn("应用ID: {} 不存在，跳过", appId);
+                    continue;
+                }
+                
+                // 检查应用是否在线
+                if (AppStatusEnum.isOnline(applicationDO.getAppStatus())) {
+                    log.warn("应用ID: {} 处于在线状态，无法删除，先将其下线", appId);
+                    throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_ONLINE_ERROR);
+                }
+                
+                // 执行删除逻辑（复用现有的deleteApplication方法的核心逻辑）
+                etlDataManager.offlineAllByApplication(appId);
+                flowDataManager.deleteRuntimeData(appId);
+                
+                bpmDataManager.removeApplication(appId);
+                metadataDataManagerApi.deleteAllApplicationData(appId);
+                etlDataManager.deleteAllApplicationData(appId);
+                flowDataManager.deleteAllApplicationData(appId);
+                appDataManager.deleteAllApplicationData(appId);
+                versionRepository.deleteByApplicationId(appId);
+                applicationTagRepository.deleteByApplicationId(appId);
+                applicationRepository.removeById(appId);
+                dashboardProjectApi.removeDashboardByAppId(appId);
+                dictDataApi.deleteDictDataByDictOwner(APP, appId);
+                projectAppRelationApi.removeProjectAppRelation(appId);
+                
+                log.info("成功删除应用ID: {}, 名称: {}", appId, applicationDO.getAppName());
+            } catch (Exception e) {
+                log.error("删除应用ID: {} 时发生错误", appId, e);
+                throw e;
+            }
+        }
+        
+        log.info("成功删除项目ID: {} 下的所有应用", projectId);
     }
 
 }

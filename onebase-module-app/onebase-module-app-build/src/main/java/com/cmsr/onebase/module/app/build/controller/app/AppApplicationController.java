@@ -136,4 +136,12 @@ public class AppApplicationController {
         appApplicationService.updateApplicationNavigationConfig(updateReqVO);
         return CommonResult.success(true);
     }
+
+    @PostMapping("/delete-by-project-id")
+    @Operation(summary = "删除项目下的所有应用")
+    @PreAuthorize("@ss.hasPermission('tenant:app:delete')")
+    public CommonResult<Boolean> deleteApplicationsByProjectId(@RequestParam("projectId") Long projectId) {
+        appApplicationService.deleteApplicationsByProjectId(projectId);
+        return CommonResult.success(true);
+    }
 }
