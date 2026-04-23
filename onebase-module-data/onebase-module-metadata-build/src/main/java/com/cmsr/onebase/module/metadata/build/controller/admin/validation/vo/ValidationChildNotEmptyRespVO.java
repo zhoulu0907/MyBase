@@ -25,6 +25,12 @@ public class ValidationChildNotEmptyRespVO {
     @Schema(description = "字段UUID", example = "01onal1s-0000-0000-0000-000000000003")
     private String fieldUuid;
 
+    @Schema(description = "子实体UUID", example = "01onal1s-0000-0000-0000-000000000004")
+    private String childEntityUuid;
+
+    @Schema(description = "子实体ID（兼容字段）", example = "358605494458253314")
+    private String childEntityId;
+
     @Schema(description = "实体UUID", example = "01onal1s-0000-0000-0000-000000000002")
     private String entityUuid;
 

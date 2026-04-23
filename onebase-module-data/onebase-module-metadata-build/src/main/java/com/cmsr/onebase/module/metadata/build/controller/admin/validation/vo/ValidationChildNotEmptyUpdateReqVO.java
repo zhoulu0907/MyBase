@@ -1,7 +1,6 @@
 package com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -20,16 +19,20 @@ public class ValidationChildNotEmptyUpdateReqVO {
     private Long id;
 
     @Schema(description = "规则组名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "用户信息校验")
-    @NotBlank(message = "规则组名称不能为空")
+    @jakarta.validation.constraints.NotBlank(message = "规则组名称不能为空")
     private String rgName;
 
-    @Schema(description = "父实体UUID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "父实体UUID不能为空")
+    @Schema(description = "父实体UUID（与entityId二选一）")
     private String entityUuid;
 
-    @Schema(description = "子实体UUID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "子实体UUID不能为空")
+    @Schema(description = "父实体ID（兼容旧版，与entityUuid二选一）")
+    private String entityId;
+
+    @Schema(description = "子实体UUID（与childEntityId二选一）")
     private String childEntityUuid;
+
+    @Schema(description = "子实体ID（兼容旧版，与childEntityUuid二选一）")
+    private String childEntityId;
 
     @Schema(description = "是否启用", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "是否启用不能为空")
