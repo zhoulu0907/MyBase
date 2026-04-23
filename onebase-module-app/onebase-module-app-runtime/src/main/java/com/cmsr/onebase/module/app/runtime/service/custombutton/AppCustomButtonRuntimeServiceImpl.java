@@ -277,7 +277,7 @@ public class AppCustomButtonRuntimeServiceImpl implements AppCustomButtonRuntime
         logDO.setButtonName(buttonDO.getButtonName());
         logDO.setActionType(buttonDO.getActionType());
         logDO.setOperatorUserId(loginUser == null ? null : loginUser.getId());
-        logDO.setOperatorDeptId(loginUser == null ? null : loginUser.getDeptId());
+        logDO.setOperatorDeptId(SecurityFrameworkUtils.getLoginUserDeptId());
         logDO.setMenuUuid(resolveMenuUuid(menuId, buttonDO));
         logDO.setPageSetUuid(buttonDO.getPageSetUuid());
         logDO.setPageUuid(pageId == null ? null : String.valueOf(pageId));
