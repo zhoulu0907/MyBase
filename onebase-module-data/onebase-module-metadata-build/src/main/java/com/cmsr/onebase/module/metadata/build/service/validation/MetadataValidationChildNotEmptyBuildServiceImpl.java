@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChildNotEmptyRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -159,7 +160,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
-            groupVO.setValidationType("CHILD_NOT_EMPTY");
+            groupVO.setValidationType(MetadataValidationRuleTypeEnum.CHILD_NOT_EMPTY.getCode());
             // 同步entityUuid到规则组
             groupVO.setEntityUuid(vo.getEntityUuid());
             Long groupId = ruleGroupService.createValidationRuleGroup(groupVO);

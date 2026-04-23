@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dal.DynamicMetadataRepository;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
@@ -49,7 +50,7 @@ public class SemanticUniqueValidationService implements SemanticValidationServic
     }
 
     @Override
-    public String getValidationType() { return "UNIQUE"; }
+    public String getValidationType() { return MetadataValidationRuleTypeEnum.UNIQUE.getCode(); }
 
     @Override
     public boolean supports(String fieldType) { return true; }

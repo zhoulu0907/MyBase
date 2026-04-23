@@ -4,6 +4,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRangeRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRangeTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +34,8 @@ public class RangeValidationService implements PrefetchableValidationService {
     @Override
     public boolean supports(String fieldType) {
         // 支持数值和日期类型的范围校验
-        return "NUMBER".equalsIgnoreCase(fieldType) || 
-               "DECIMAL".equalsIgnoreCase(fieldType) ||
-               "DATE".equalsIgnoreCase(fieldType) ||
-               "DATETIME".equalsIgnoreCase(fieldType);
+        return MetadataValidationRangeTypeEnum.isNumericType(fieldType)
+                || MetadataValidationRangeTypeEnum.isDateType(fieldType);
     }
 
     @Override
@@ -72,9 +72,9 @@ public class RangeValidationService implements PrefetchableValidationService {
             }
 
             String rangeType = rule.getRangeType();
-            if ("NUMBER".equalsIgnoreCase(rangeType) || "DECIMAL".equalsIgnoreCase(rangeType)) {
+            if (MetadataValidationRangeTypeEnum.isNumericType(rangeType)) {
                 validateNumberRange(value, rule, field);
-            } else if ("DATE".equalsIgnoreCase(rangeType) || "DATETIME".equalsIgnoreCase(rangeType)) {
+            } else if (MetadataValidationRangeTypeEnum.isDateType(rangeType)) {
                 validateDateRange(value, rule, field);
             }
         }
@@ -181,12 +181,14 @@ public class RangeValidationService implements PrefetchableValidationService {
 
     @Override
     public String getValidationType() {
-        return "RANGE";
+        return MetadataValidationRuleTypeEnum.RANGE.getCode();
     }
 
     @Override
     public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
-        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("RANGE") : null;
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null
+                ? rulesByType.get(MetadataValidationRuleTypeEnum.RANGE.getCode())
+                : null;
         if (m != null) {
             this.prefetched = new java.util.HashMap<>();
             for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {

@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import org.springframework.stereotype.Component;
 
@@ -106,7 +107,7 @@ public class FormatValidationService implements PrefetchableValidationService {
 
     @Override
     public String getValidationType() {
-        return "FORMAT";
+        return MetadataValidationRuleTypeEnum.FORMAT.getCode();
     }
 
     @Override
@@ -117,7 +118,9 @@ public class FormatValidationService implements PrefetchableValidationService {
 
     @Override
     public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
-        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("FORMAT") : null;
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null
+                ? rulesByType.get(MetadataValidationRuleTypeEnum.FORMAT.getCode())
+                : null;
         if (m != null) {
             this.prefetched = new java.util.HashMap<>();
             for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {

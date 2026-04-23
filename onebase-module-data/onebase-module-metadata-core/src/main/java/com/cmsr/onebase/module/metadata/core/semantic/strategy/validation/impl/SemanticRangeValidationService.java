@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRangeTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
@@ -23,10 +25,8 @@ public class SemanticRangeValidationService implements SemanticValidationService
 
     @Override
     public boolean supports(String fieldType) {
-        return "NUMBER".equalsIgnoreCase(fieldType) ||
-               "DECIMAL".equalsIgnoreCase(fieldType) ||
-               "DATE".equalsIgnoreCase(fieldType) ||
-               "DATETIME".equalsIgnoreCase(fieldType);
+        return MetadataValidationRangeTypeEnum.isNumericType(fieldType)
+                || MetadataValidationRangeTypeEnum.isDateType(fieldType);
     }
 
     @Override
@@ -46,9 +46,9 @@ public class SemanticRangeValidationService implements SemanticValidationService
             for (MetadataValidationRangeDO rule : rules) {
                 if (rule.getIsEnabled() == null || rule.getIsEnabled() != 1) { continue; }
                 String rangeType = rule.getRangeType();
-                if ("NUMBER".equalsIgnoreCase(rangeType) || "DECIMAL".equalsIgnoreCase(rangeType)) {
+                if (MetadataValidationRangeTypeEnum.isNumericType(rangeType)) {
                     validateNumberRange(value, rule, field, context);
-                } else if ("DATE".equalsIgnoreCase(rangeType) || "DATETIME".equalsIgnoreCase(rangeType)) {
+                } else if (MetadataValidationRangeTypeEnum.isDateType(rangeType)) {
                     validateDateRange(value, rule, field, context);
                 }
             }
@@ -128,5 +128,5 @@ public class SemanticRangeValidationService implements SemanticValidationService
     }
 
     @Override
-    public String getValidationType() { return "RANGE"; }
+    public String getValidationType() { return MetadataValidationRuleTypeEnum.RANGE.getCode(); }
 }

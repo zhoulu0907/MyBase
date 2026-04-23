@@ -4,6 +4,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataTextStorageTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -103,7 +105,9 @@ public class LengthValidationService implements PrefetchableValidationService {
 
     @Override
     public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
-        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("LENGTH") : null;
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null
+                ? rulesByType.get(MetadataValidationRuleTypeEnum.LENGTH.getCode())
+                : null;
         if (m != null) {
             this.prefetched = new java.util.HashMap<>();
             for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
@@ -121,14 +125,11 @@ public class LengthValidationService implements PrefetchableValidationService {
 
     @Override
     public String getValidationType() {
-        return "LENGTH";
+        return MetadataValidationRuleTypeEnum.LENGTH.getCode();
     }
 
     @Override
     public boolean supports(String fieldType) {
-        // 长度校验主要支持字符串类型
-        return "VARCHAR".equalsIgnoreCase(fieldType) || 
-               "TEXT".equalsIgnoreCase(fieldType) ||
-               "CHAR".equalsIgnoreCase(fieldType);
+        return MetadataTextStorageTypeEnum.isTextType(fieldType);
     }
 }

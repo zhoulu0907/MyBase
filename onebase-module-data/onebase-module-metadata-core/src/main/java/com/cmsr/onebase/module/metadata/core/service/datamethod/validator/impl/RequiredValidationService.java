@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import org.springframework.stereotype.Component;
 
@@ -66,7 +67,9 @@ public class RequiredValidationService implements PrefetchableValidationService 
 
     @Override
     public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
-        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("REQUIRED") : null;
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null
+                ? rulesByType.get(MetadataValidationRuleTypeEnum.REQUIRED.getCode())
+                : null;
         if (m != null) {
             this.prefetched = new java.util.HashMap<>();
             for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
@@ -84,7 +87,7 @@ public class RequiredValidationService implements PrefetchableValidationService 
 
     @Override
     public String getValidationType() {
-        return "REQUIRED";
+        return MetadataValidationRuleTypeEnum.REQUIRED.getCode();
     }
 
     @Override

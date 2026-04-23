@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.core.dal.database;
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
 import com.cmsr.onebase.module.metadata.core.dal.mapper.MetadataValidationFormatMapper;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationFormatCodeEnum;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ public class MetadataValidationFormatRepository extends BaseBizRepository<Metada
     public MetadataValidationFormatDO findRegexByFieldUuid(String fieldUuid) {
         QueryWrapper queryWrapper = query()
                 .eq(MetadataValidationFormatDO::getFieldUuid, fieldUuid)
-                .eq(MetadataValidationFormatDO::getFormatCode, "REGEX");
+                .eq(MetadataValidationFormatDO::getFormatCode, MetadataValidationFormatCodeEnum.REGEX.getCode());
         return getOne(queryWrapper);
     }
 

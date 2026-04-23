@@ -10,6 +10,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRep
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
@@ -111,7 +112,7 @@ public class MetadataValidationRequiredBuildServiceImpl implements MetadataValid
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
-            groupVO.setValidationType("REQUIRED");
+            groupVO.setValidationType(MetadataValidationRuleTypeEnum.REQUIRED.getCode());
             // 修复：正确设置entityUuid和applicationId
             groupVO.setEntityUuid(field.getEntityUuid());
             groupVO.setApplicationId(field.getApplicationId());

@@ -2,6 +2,7 @@ package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChildNotEmptyRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntityValueDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
@@ -65,7 +66,7 @@ public class SemanticChildNotEmptyValidationService implements SemanticValidatio
     }
 
     @Override
-    public String getValidationType() { return "CHILD_NOT_EMPTY"; }
+    public String getValidationType() { return MetadataValidationRuleTypeEnum.CHILD_NOT_EMPTY.getCode(); }
 
     @Override
     public boolean supports(String fieldType) { return true; }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
@@ -63,7 +64,7 @@ public class SemanticFormatValidationService implements SemanticValidationServic
     }
 
     @Override
-    public String getValidationType() { return "FORMAT"; }
+    public String getValidationType() { return MetadataValidationRuleTypeEnum.FORMAT.getCode(); }
 
     @Override
     public boolean supports(String fieldType) { return true; }

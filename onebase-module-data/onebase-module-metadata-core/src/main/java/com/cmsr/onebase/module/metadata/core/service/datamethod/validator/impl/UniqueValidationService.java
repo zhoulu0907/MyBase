@@ -7,6 +7,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntit
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -105,7 +106,7 @@ public class UniqueValidationService implements PrefetchableValidationService {
 
     @Override
     public String getValidationType() {
-        return "UNIQUE";
+        return MetadataValidationRuleTypeEnum.UNIQUE.getCode();
     }
 
     @Override
@@ -116,7 +117,9 @@ public class UniqueValidationService implements PrefetchableValidationService {
 
     @Override
     public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
-        Map<String, ? extends java.util.List<?>> m = rulesByType != null ? rulesByType.get("UNIQUE") : null;
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null
+                ? rulesByType.get(MetadataValidationRuleTypeEnum.UNIQUE.getCode())
+                : null;
         if (m != null) {
             this.prefetched = new java.util.HashMap<>();
             for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {

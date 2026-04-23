@@ -13,6 +13,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationFormatCodeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -72,7 +74,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
     @Transactional(rollbackFor = Exception.class)
     public void saveFieldConstraintConfig(FieldConstraintSaveReqVO req) {
         String type = req.getConstraintType();
-        if ("LENGTH_RANGE".equalsIgnoreCase(type)) {
+        if (MetadataValidationRuleTypeEnum.LENGTH_RANGE.getCode().equalsIgnoreCase(type)) {
             Integer min = req.getMinLength();
             Integer max = req.getMaxLength();
             if (min != null && max != null && min > max) {
@@ -118,7 +120,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 lengthService.create(lengthVO);
             } else {
                 var ruleGroup = resolveOrRebuildRuleGroup(exist.getGroupUuid(),
-                        buildRuleGroupSaveReq(buildLengthGroupName(field.getId()), "LENGTH", field, prompt));
+                            buildRuleGroupSaveReq(buildLengthGroupName(field.getId()), MetadataValidationRuleTypeEnum.LENGTH.getCode(), field, prompt));
                 ValidationLengthUpdateReqVO lengthUpdateVO = new ValidationLengthUpdateReqVO();
                 lengthUpdateVO.setId(ruleGroup.getId());
                 lengthUpdateVO.setIsEnabled(req.getIsEnabled());
@@ -130,7 +132,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 lengthUpdateVO.setPopPrompt(prompt);
                 lengthService.update(lengthUpdateVO);
             }
-        } else if ("REGEX".equalsIgnoreCase(type)) {
+        } else if (MetadataValidationRuleTypeEnum.REGEX.getCode().equalsIgnoreCase(type)) {
             // 获取字段信息用于生成默认提示语
             MetadataEntityFieldDO field = entityFieldRepository.getByFieldUuid(req.getFieldUuid());
             if (field == null) {
@@ -151,7 +153,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             d.setFieldUuid(req.getFieldUuid());
             d.setEntityUuid(field.getEntityUuid());
             d.setIsEnabled(req.getIsEnabled());
-            d.setFormatCode("REGEX");
+            d.setFormatCode(MetadataValidationFormatCodeEnum.REGEX.getCode());
             d.setRegexPattern(req.getRegexPattern());
             d.setFlags(null);
             d.setPromptMessage(prompt);
@@ -159,7 +161,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             if (d.getId() == null) {
                 // 将DO转换为VO
                 ValidationFormatSaveReqVO formatVO = BeanUtils.toBean(d, ValidationFormatSaveReqVO.class);
-                formatVO.setFormatCode("REGEX");
+                formatVO.setFormatCode(MetadataValidationFormatCodeEnum.REGEX.getCode());
                 formatVO.setRegexPattern(req.getRegexPattern());
                 formatVO.setRgName(buildFormatGroupName(field.getId())); // 设置规则组名称
                 formatVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
@@ -168,14 +170,14 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 // 将DO转换为UpdateReqVO
                 ValidationFormatUpdateReqVO formatUpdateVO = BeanUtils.toBean(d, ValidationFormatUpdateReqVO.class);
                 var ruleGroup = resolveOrRebuildRuleGroup(exist.getGroupUuid(),
-                        buildRuleGroupSaveReq(buildFormatGroupName(field.getId()), "FORMAT", field, prompt));
+                        buildRuleGroupSaveReq(buildFormatGroupName(field.getId()), MetadataValidationRuleTypeEnum.FORMAT.getCode(), field, prompt));
                 formatUpdateVO.setId(ruleGroup.getId());
-                formatUpdateVO.setFormatCode("REGEX");
+                formatUpdateVO.setFormatCode(MetadataValidationFormatCodeEnum.REGEX.getCode());
                 formatUpdateVO.setRgName(buildFormatGroupName(field.getId())); // 设置规则组名称
                 formatUpdateVO.setPopPrompt(prompt); // 设置popPrompt确保errorMessage字段能正确返回
                 formatService.update(formatUpdateVO);
             }
-        } else if ("REQUIRED".equalsIgnoreCase(type)) {
+        } else if (MetadataValidationRuleTypeEnum.REQUIRED.getCode().equalsIgnoreCase(type)) {
             // 同步必填到 required 表
             MetadataValidationRequiredDO exist = requiredService.getByFieldId(req.getFieldUuid());
             MetadataEntityFieldDO field = entityFieldRepository.getByFieldUuid(req.getFieldUuid());
@@ -205,7 +207,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 // 直接创建UpdateReqVO对象，避免DO到VO的转换问题
                 ValidationRequiredUpdateReqVO requiredUpdateVO = new ValidationRequiredUpdateReqVO();
                 var ruleGroup = resolveOrRebuildRuleGroup(exist.getGroupUuid(),
-                        buildRuleGroupSaveReq(buildRequiredGroupName(field.getId()), "REQUIRED", field, prompt));
+                        buildRuleGroupSaveReq(buildRequiredGroupName(field.getId()), MetadataValidationRuleTypeEnum.REQUIRED.getCode(), field, prompt));
                 requiredUpdateVO.setId(ruleGroup.getId());
                 requiredUpdateVO.setIsEnabled(req.getIsEnabled());
                 requiredUpdateVO.setPromptMessage(prompt);
@@ -214,7 +216,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                 requiredUpdateVO.setRgName(buildRequiredGroupName(field.getId()));
                 requiredService.update(requiredUpdateVO);
             }
-        } else if ("UNIQUE".equalsIgnoreCase(type)) {
+        } else if (MetadataValidationRuleTypeEnum.UNIQUE.getCode().equalsIgnoreCase(type)) {
             MetadataValidationUniqueDO exist = uniqueService.getByFieldId(req.getFieldUuid());
             MetadataEntityFieldDO field = entityFieldRepository.getByFieldUuid(req.getFieldUuid());
             if (field == null) {
@@ -248,7 +250,7 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
                     groupUuid = respVO.getGroupUuid();
                 }
                 var ruleGroup = resolveOrRebuildRuleGroup(groupUuid,
-                        buildRuleGroupSaveReq(defaultGroupName, "UNIQUE", field, prompt));
+                        buildRuleGroupSaveReq(defaultGroupName, MetadataValidationRuleTypeEnum.UNIQUE.getCode(), field, prompt));
                 String groupName = (respVO != null && StringUtils.hasText(respVO.getRgName()))
                         ? respVO.getRgName()
                         : defaultGroupName;
@@ -267,16 +269,16 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(String fieldUuid, String constraintType) {
-        if ("LENGTH_RANGE".equalsIgnoreCase(constraintType)) {
+        if (MetadataValidationRuleTypeEnum.LENGTH_RANGE.getCode().equalsIgnoreCase(constraintType)) {
             MetadataValidationLengthDO exist = lengthService.getByFieldId(fieldUuid);
             if (exist != null) { lengthService.deleteByFieldId(fieldUuid); }
-        } else if ("REGEX".equalsIgnoreCase(constraintType)) {
+        } else if (MetadataValidationRuleTypeEnum.REGEX.getCode().equalsIgnoreCase(constraintType)) {
             MetadataValidationFormatDO exist = formatService.getRegexByFieldId(fieldUuid);
             if (exist != null) { formatService.deleteByFieldId(fieldUuid); }
-        } else if ("REQUIRED".equalsIgnoreCase(constraintType)) {
+        } else if (MetadataValidationRuleTypeEnum.REQUIRED.getCode().equalsIgnoreCase(constraintType)) {
             MetadataValidationRequiredDO exist = requiredService.getByFieldId(fieldUuid);
             if (exist != null) { requiredService.deleteByFieldId(fieldUuid); }
-        } else if ("UNIQUE".equalsIgnoreCase(constraintType)) {
+        } else if (MetadataValidationRuleTypeEnum.UNIQUE.getCode().equalsIgnoreCase(constraintType)) {
             MetadataValidationUniqueDO exist = uniqueService.getByFieldId(fieldUuid);
             if (exist != null) { uniqueService.deleteByFieldId(fieldUuid); }
         }
@@ -338,23 +340,27 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
             return "未知校验";
         }
         
-        switch (validationType.toUpperCase()) {
-            case "REQUIRED":
+        MetadataValidationRuleTypeEnum typeEnum = MetadataValidationRuleTypeEnum.getByCode(validationType);
+        if (typeEnum == null) {
+            return validationType + "校验";
+        }
+        switch (typeEnum) {
+            case REQUIRED:
                 return "必填校验";
-            case "UNIQUE":
+            case UNIQUE:
                 return "唯一校验";
-            case "LENGTH":
-            case "LENGTH_RANGE":
+            case LENGTH:
+            case LENGTH_RANGE:
                 return "长度校验";
-            case "RANGE":
+            case RANGE:
                 return "范围校验";
-            case "FORMAT":
-            case "REGEX":
+            case FORMAT:
+            case REGEX:
                 return "格式校验";
-            case "CHILD_NOT_EMPTY":
+            case CHILD_NOT_EMPTY:
                 return "子表空行校验";
-            case "SELF_DEFINED":
-            case "CUSTOM":
+            case SELF_DEFINED:
+            case CUSTOM:
                 return "自定义校验";
             default:
                 return validationType + "校验";
@@ -362,31 +368,31 @@ public class MetadataEntityFieldConstraintBuildServiceImpl implements MetadataEn
     }
 
     private String buildRequiredGroupName(Long fieldId) {
-        return buildRuleGroupName(fieldId, "REQUIRED");
+        return buildRuleGroupName(fieldId, MetadataValidationRuleTypeEnum.REQUIRED.getCode());
     }
 
     private String buildUniqueGroupName(Long fieldId) {
-        return buildRuleGroupName(fieldId, "UNIQUE");
+        return buildRuleGroupName(fieldId, MetadataValidationRuleTypeEnum.UNIQUE.getCode());
     }
 
     private String buildLengthGroupName(Long fieldId) {
-        return buildRuleGroupName(fieldId, "LENGTH");
+        return buildRuleGroupName(fieldId, MetadataValidationRuleTypeEnum.LENGTH.getCode());
     }
 
     private String buildFormatGroupName(Long fieldId) {
-        return buildRuleGroupName(fieldId, "FORMAT");
+        return buildRuleGroupName(fieldId, MetadataValidationRuleTypeEnum.FORMAT.getCode());
     }
 
     private String buildRangeGroupName(Long fieldId) {
-        return buildRuleGroupName(fieldId, "RANGE");
+        return buildRuleGroupName(fieldId, MetadataValidationRuleTypeEnum.RANGE.getCode());
     }
 
     private String buildChildNotEmptyGroupName(Long fieldId) {
-        return buildRuleGroupName(fieldId, "CHILD_NOT_EMPTY");
+        return buildRuleGroupName(fieldId, MetadataValidationRuleTypeEnum.CHILD_NOT_EMPTY.getCode());
     }
 
     private String buildSelfDefinedGroupName(Long fieldId) {
-        return buildRuleGroupName(fieldId, "SELF_DEFINED");
+        return buildRuleGroupName(fieldId, MetadataValidationRuleTypeEnum.SELF_DEFINED.getCode());
     }
 
     private ValidationRuleGroupSaveReqVO buildRuleGroupSaveReq(String rgName, String validationType,
