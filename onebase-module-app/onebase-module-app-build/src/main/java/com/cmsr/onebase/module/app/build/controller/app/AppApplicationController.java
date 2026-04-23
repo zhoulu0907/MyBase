@@ -113,14 +113,6 @@ public class AppApplicationController {
         return success(appApplicationService.getMySimpleAppListByName(appName));
     }
 
-    @GetMapping("/list-by-project-id")
-    @Operation(summary = "根据项目标识获取应用列表")
-    @PreAuthorize("@ss.hasPermission('tenant:app:query')")
-    public CommonResult<PageResult<ApplicationRespVO>> getApplicationListByProjectId(
-            @RequestParam("projectId") Long projectId) {
-        return success(appApplicationService.getAppListByProjectId(projectId, new ApplicationPageReqVO()));
-    }
-
     @GetMapping("/get-navigation-config")
     @Operation(summary = "获取应用登录/导航配置")
     @PreAuthorize("@ss.hasPermission('tenant:app:query')")
@@ -140,7 +132,7 @@ public class AppApplicationController {
     @PostMapping("/delete-by-project-id")
     @Operation(summary = "删除项目下的所有应用")
     @PreAuthorize("@ss.hasPermission('tenant:app:delete')")
-    public CommonResult<Boolean> deleteApplicationsByProjectId(@RequestParam("projectId") Long projectId) {
+    public CommonResult<Boolean> deleteApplicationsByProjectId(@RequestParam("projectId") String projectId) {
         appApplicationService.deleteApplicationsByProjectId(projectId);
         return CommonResult.success(true);
     }

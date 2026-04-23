@@ -54,6 +54,6 @@ public class ApplicationCreateReqVO {
     private String publishModel;
 
     @Schema(description = "项目ID")
-    private Long projectId;
+    private String projectId;
 
 }

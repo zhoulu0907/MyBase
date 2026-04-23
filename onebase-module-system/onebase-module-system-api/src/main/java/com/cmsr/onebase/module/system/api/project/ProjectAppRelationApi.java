@@ -21,7 +21,7 @@ public interface ProjectAppRelationApi {
     @Operation(summary = "创建项目应用关联")
     @Parameter(name = "projectId", description = "项目ID", example = "1024", required = true)
     @Parameter(name = "applicationId", description = "应用ID", example = "2048", required = true)
-    CommonResult<Long> createProjectAppRelation(@RequestParam("projectId") Long projectId, 
+    CommonResult<Long> createProjectAppRelation(@RequestParam("projectId") String projectId,
                                                  @RequestParam("applicationId") Long applicationId);
     @PostMapping(PREFIX + "/remove")
     @Operation(summary = "删除项目应用关联")
@@ -31,6 +31,6 @@ public interface ProjectAppRelationApi {
     @PostMapping(PREFIX + "/list-application-ids")
     @Operation(summary = "根据项目ID查询所有应用ID列表")
     @Parameter(name = "projectId", description = "项目ID", example = "1024", required = true)
-    CommonResult<List<Long>> listApplicationIdsByProjectId(@RequestParam("projectId") Long projectId);
+    CommonResult<List<Long>> listApplicationIdsByProjectId(@RequestParam("projectId") String projectId);
 
 }

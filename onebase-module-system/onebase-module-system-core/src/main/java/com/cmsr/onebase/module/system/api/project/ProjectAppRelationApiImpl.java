@@ -18,7 +18,7 @@ public class ProjectAppRelationApiImpl implements ProjectAppRelationApi {
     private ProjectAppRelationService projectAppRelationService;
 
     @Override
-    public CommonResult<Long> createProjectAppRelation(Long projectId, Long applicationId) {
+    public CommonResult<Long> createProjectAppRelation(String projectId, Long applicationId) {
         Long id = projectAppRelationService.createProjectAppRelation(projectId, applicationId);
         return success(id);
     }
@@ -30,7 +30,7 @@ public class ProjectAppRelationApiImpl implements ProjectAppRelationApi {
     }
 
     @Override
-    public CommonResult<List<Long>> listApplicationIdsByProjectId(Long projectId) {
+    public CommonResult<List<Long>> listApplicationIdsByProjectId(String projectId) {
         List<Long> applicationIds = projectAppRelationService.listApplicationIdsByProjectId(projectId);
         return success(applicationIds);
     }

@@ -41,7 +41,5 @@ public interface AppApplicationService {
 
     void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO);
 
-    PageResult<ApplicationRespVO> getAppListByProjectId(Long projectId, ApplicationPageReqVO pageReqVO);
-
-    void deleteApplicationsByProjectId(Long projectId);
+    void deleteApplicationsByProjectId(String projectId);
 }

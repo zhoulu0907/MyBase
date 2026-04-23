@@ -21,7 +21,7 @@ public interface ProjectAppRelationService {
      * @param applicationId 应用ID
      * @return 编号
      */
-    Long createProjectAppRelation(Long projectId, Long applicationId);
+    Long createProjectAppRelation(String projectId, Long applicationId);
 
     /**
      * 删除项目应用关联
@@ -36,6 +36,6 @@ public interface ProjectAppRelationService {
      * @param projectId 项目ID
      * @return 应用ID列表
      */
-    List<Long> listApplicationIdsByProjectId(Long projectId);
+    List<Long> listApplicationIdsByProjectId(String projectId);
 
 }

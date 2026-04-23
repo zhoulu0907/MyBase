@@ -23,7 +23,7 @@ public class ProjectAppRelationServiceImpl implements ProjectAppRelationService 
     private ProjectAppRelationDataRepository projectAppRelationDataRepository;
 
     @Override
-    public Long createProjectAppRelation(Long projectId, Long applicationId) {
+    public Long createProjectAppRelation(String projectId, Long applicationId) {
         // 插入
         ProjectAppRelationDO projectAppRelationDO = new ProjectAppRelationDO();
         projectAppRelationDO.setProjectId(projectId);
@@ -42,7 +42,7 @@ public class ProjectAppRelationServiceImpl implements ProjectAppRelationService 
     }
 
     @Override
-    public List<Long> listApplicationIdsByProjectId(Long projectId) {
+    public List<Long> listApplicationIdsByProjectId(String projectId) {
         // 查询
         List<ProjectAppRelationDO> relations = projectAppRelationDataRepository.list(
             projectAppRelationDataRepository.query()

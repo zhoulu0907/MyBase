@@ -19,13 +19,13 @@ public class ProjectAppRelationDO extends BaseTenantEntity {
 
     // 字段列名常量
     public static final String PROJECT_ID = "project_id";
-    public static final String APPLICATION_ID = "application_id";
+    public static final String APPLICATION_ID = "app_id";
 
     /**
      * 项目ID
      */
     @Column(value = PROJECT_ID)
-    private Long projectId;
+    private String projectId;
 
     /**
      * 应用ID
