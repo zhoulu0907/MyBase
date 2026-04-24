@@ -130,15 +130,3 @@ wx:
       type: RedisTemplate # 采用 RedisTemplate 操作 Redis，会自动从 Spring 中获取
       key-prefix: wa # Redis Key 的前缀
     http-client-type: HttpClient # 采用 HttpClient 请求微信公众号平台
-    # rocketmq 开发环境配置
-    rocketmq:
-      name-server: rocketmq-cluster-nameserver-headless.midware-sit:9876
-      # Topic 固定
-      topic:
-        resource-sync: tiangong_resource_sync
-      # Tag 配置
-      tag:
-        project-lifecycle: project_lifecycle
-      # 各引擎消费组（独立）
-      consumer:
-        group-capability: engine_capability
