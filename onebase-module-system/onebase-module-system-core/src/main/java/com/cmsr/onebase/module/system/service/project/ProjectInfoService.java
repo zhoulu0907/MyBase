@@ -49,6 +49,14 @@ public interface ProjectInfoService {
     ProjectInfoDO getProject(Long id);
 
     /**
+     * 获得项目
+     *
+     * @param externalId 外部项目编号
+     * @return 项目
+     */
+    ProjectInfoDO getProjectByExternalId(String externalId);
+
+    /**
      * 根据项目编码获得项目
      *
      * @param projectCode 项目编码

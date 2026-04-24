@@ -47,4 +47,10 @@ public class ProjectInfoRespVO {
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
+    @Schema(description = "行业标签")
+    private String industryTag;
+
+    @Schema(description = "项目封面", example = "https://example.com/cover.png")
+    private String projectCover;
+
 }

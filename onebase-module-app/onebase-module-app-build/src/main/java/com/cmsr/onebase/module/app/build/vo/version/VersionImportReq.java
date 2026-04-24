@@ -28,4 +28,11 @@ public class VersionImportReq {
      */
     @Schema(description = "应用ID（可选），如果传了则覆盖当前应用的开发版本，没传则创建新应用")
     private Long applicationId;
+
+    /**
+     * 项目ID（可选）
+     */
+    @Schema(description = "项目ID")
+    private String projectId;
+
 }

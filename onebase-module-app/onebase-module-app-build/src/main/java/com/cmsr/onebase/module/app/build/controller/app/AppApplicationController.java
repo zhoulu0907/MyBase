@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
@@ -125,6 +126,14 @@ public class AppApplicationController {
     public CommonResult<Boolean> updateApplicationNavigationConfig(
             @Validated @RequestBody ApplicationNavigationConfigVO updateReqVO) {
         appApplicationService.updateApplicationNavigationConfig(updateReqVO);
+        return CommonResult.success(true);
+    }
+
+    @PostMapping("/delete-by-project-id")
+    @Operation(summary = "删除项目下的所有应用")
+    @PreAuthorize("@ss.hasPermission('tenant:app:delete')")
+    public CommonResult<Boolean> deleteApplicationsByProjectId(@RequestParam("projectId") String projectId) {
+        appApplicationService.deleteApplicationsByProjectId(projectId);
         return CommonResult.success(true);
     }
 }

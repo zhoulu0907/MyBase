@@ -40,4 +40,6 @@ public interface AppApplicationService {
     ApplicationNavigationConfigVO getApplicationNavigationConfig(Long id);
 
     void updateApplicationNavigationConfig(ApplicationNavigationConfigVO updateReqVO);
+
+    void deleteApplicationsByProjectId(String projectId);
 }
