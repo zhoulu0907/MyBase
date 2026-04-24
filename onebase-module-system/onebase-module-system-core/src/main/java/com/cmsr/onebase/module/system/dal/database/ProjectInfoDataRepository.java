@@ -38,6 +38,16 @@ public class ProjectInfoDataRepository extends BaseDataRepository<SystemProjectI
     }
 
     /**
+     * 根据外部项目ID和来源平台查询
+     * @param externalId
+     * @param sourcePlatform
+     * @return
+     */
+    public ProjectInfoDO findByIdAndSource(String externalId, String sourcePlatform) {
+        return getOne(query().eq(ProjectInfoDO.EXTERNAL_PROJECT_ID, externalId).eq(ProjectInfoDO.SOURCE_PLATFORM, sourcePlatform));
+    }
+
+    /**
      * 根据状态查询项目列表
      *
      * @param status 状态

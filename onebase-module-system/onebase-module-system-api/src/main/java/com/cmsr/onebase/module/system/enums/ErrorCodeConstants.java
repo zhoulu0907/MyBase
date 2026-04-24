@@ -243,5 +243,6 @@ public interface ErrorCodeConstants {
     ErrorCode PROJECT_NOT_EXISTS = new ErrorCode(1_002_033_000, "项目不存在");
     ErrorCode PROJECT_CODE_EXISTS = new ErrorCode(1_002_033_001, "项目编码已存在");
     ErrorCode PROJECT_DISABLED = new ErrorCode(1_002_033_002, "项目已禁用");
+    ErrorCode PROJECT_SOURCE_PLATFORM_NOT_CONFIG = new ErrorCode(1_002_033_003, "项目来源平台为空");
 
 }

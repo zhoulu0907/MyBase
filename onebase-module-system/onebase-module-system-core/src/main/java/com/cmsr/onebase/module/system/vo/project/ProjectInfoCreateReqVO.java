@@ -26,4 +26,14 @@ public class ProjectInfoCreateReqVO {
     @Size(max = 512, message = "描述长度不能超过512个字符")
     private String description;
 
+    @Schema(description = "行业标签")
+    private String industryTag;
+
+    @Schema(description = "项目封面", example = "https://example.com/cover.png")
+    private String projectCover;
+
+    @Schema(description = "租户id", example = "1")
+    private Long tenantId;
+
+
 }

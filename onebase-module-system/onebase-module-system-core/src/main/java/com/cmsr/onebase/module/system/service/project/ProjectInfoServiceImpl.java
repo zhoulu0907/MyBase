@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.system.vo.project.ProjectInfoPageReqVO;
 import com.cmsr.onebase.module.system.vo.project.ProjectInfoRespVO;
 import com.cmsr.onebase.module.system.vo.project.ProjectInfoUpdateReqVO;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -31,6 +32,9 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
 
     @Resource
     private ProjectInfoDataRepository projectInfoDataRepository;
+
+    @Value("${project.source_platform}")
+    private String sourcePlatform;
 
     @Override
     public Long createProject(ProjectInfoCreateReqVO createReqVO) {
@@ -69,6 +73,14 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     @Override
     public ProjectInfoDO getProject(Long id) {
         return projectInfoDataRepository.findById(id);
+    }
+
+    @Override
+    public ProjectInfoDO getProjectByIdAndSource(String externalId) {
+        if (sourcePlatform == null) {
+            throw exception(PROJECT_SOURCE_PLATFORM_NOT_CONFIG);
+        }
+        return projectInfoDataRepository.findByIdAndSource(externalId, sourcePlatform);
     }
 
     @Override

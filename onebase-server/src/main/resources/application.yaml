@@ -203,3 +203,6 @@ pagehelper:
   helperDialect: postgresql
   reasonable: false
   defaultCount: true
+
+project:
+  source_platform: tiangong
