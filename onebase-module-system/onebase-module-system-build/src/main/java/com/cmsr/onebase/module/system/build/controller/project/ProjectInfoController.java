@@ -73,7 +73,6 @@ public class ProjectInfoController {
     @GetMapping("/get-by-source")
     @Operation(summary = "通过外部系统编号与来源获得项目详情")
     @Parameter(name = "externalId", description = "外部系统项目编号", required = true, example = "1")
-    @Parameter(name = "sourcePlatform", description = "外部系统来源", required = true, example = "tiangong")
     @PreAuthorize("@ss.hasPermission('system:project:query')")
     public CommonResult<ProjectInfoRespVO> getProjectByIdAndSource(@RequestParam("externalId") String externalId) {
         ProjectInfoDO project = projectInfoService.getProjectByIdAndSource(externalId);
