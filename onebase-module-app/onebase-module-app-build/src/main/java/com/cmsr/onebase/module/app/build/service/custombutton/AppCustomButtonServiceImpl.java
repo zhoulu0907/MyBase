@@ -4,11 +4,13 @@ import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.vo.custombutton.*;
-import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonActionFlowRepository;
+import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonActionConfigRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonRepository;
+import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonUpdateFieldRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonActionFlowDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonActionConfigDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonUpdateFieldDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
 import com.cmsr.onebase.module.app.core.enums.custombutton.AppCustomButtonErrorCodeConstants;
 import com.cmsr.onebase.module.app.core.enums.custombutton.CustomButtonActionTypeEnum;
@@ -32,7 +34,10 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
     private AppCustomButtonRepository customButtonRepository;
 
     @Resource
-    private AppCustomButtonActionFlowRepository actionFlowRepository;
+    private AppCustomButtonActionConfigRepository actionConfigRepository;
+
+    @Resource
+    private AppCustomButtonUpdateFieldRepository updateFieldRepository;
 
     @Resource
     private AppPageSetRepository pageSetRepository;
@@ -87,16 +92,17 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         respVO.setActionType(buttonDO.getActionType());
         respVO.setSortNo(buttonDO.getSortNo());
         respVO.setStatus(buttonDO.getStatus());
+        AppCustomButtonActionConfigDO actionConfigDO = actionConfigRepository.findByButtonUuid(buttonDO.getButtonUuid());
+        if (actionConfigDO != null) {
+            CustomButtonActionConfigReqVO actionConfigVO = toActionConfigReqVO(actionConfigDO);
+            respVO.setActionConfig(actionConfigVO);
+            respVO.setFlowAction(toFlowActionReqVO(actionConfigDO));
+        }
         if (CustomButtonActionTypeEnum.TRIGGER_FLOW.getCode().equalsIgnoreCase(buttonDO.getActionType())) {
-            AppCustomButtonActionFlowDO flowDO = actionFlowRepository.findByButtonUuid(buttonDO.getButtonUuid());
-            if (flowDO != null) {
-                CustomButtonFlowActionReqVO flowReqVO = new CustomButtonFlowActionReqVO();
-                flowReqVO.setFlowProcessId(flowDO.getFlowProcessId());
-                flowReqVO.setFlowProcessUuid(flowDO.getFlowProcessUuid());
-                flowReqVO.setConfirmRequired(flowDO.getConfirmRequired());
-                flowReqVO.setConfirmText(flowDO.getConfirmText());
-                respVO.setFlowAction(flowReqVO);
-            }
+            respVO.setFlowAction(toFlowActionReqVO(actionConfigDO));
+        }
+        if (CustomButtonActionTypeEnum.UPDATE_FORM.getCode().equalsIgnoreCase(buttonDO.getActionType())) {
+            respVO.setUpdateFields(toUpdateFieldReqVOList(updateFieldRepository.findByButtonUuid(buttonDO.getButtonUuid())));
         }
         return respVO;
     }
@@ -118,7 +124,8 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         buttonDO.setPageUuid(reqVO.getPageId() == null ? null : String.valueOf(reqVO.getPageId()));
         applySaveFields(buttonDO, reqVO);
         customButtonRepository.save(buttonDO);
-        upsertFlowConfig(buttonDO, reqVO);
+        upsertActionConfig(buttonDO, reqVO);
+        replaceUpdateFields(buttonDO, reqVO);
         return buttonDO.getId();
     }
 
@@ -139,7 +146,8 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         buttonDO.setPageUuid(reqVO.getPageId() == null ? null : String.valueOf(reqVO.getPageId()));
         applySaveFields(buttonDO, reqVO);
         customButtonRepository.updateById(buttonDO);
-        upsertFlowConfig(buttonDO, reqVO);
+        upsertActionConfig(buttonDO, reqVO);
+        replaceUpdateFields(buttonDO, reqVO);
         return true;
     }
 
@@ -150,7 +158,8 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         if (buttonDO == null) {
             return true;
         }
-        actionFlowRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        actionConfigRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        updateFieldRepository.removeByButtonUuid(buttonDO.getButtonUuid());
         customButtonRepository.removeById(id);
         return true;
     }
@@ -196,7 +205,7 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
             throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_NAME_DUPLICATE);
         }
         if (CustomButtonActionTypeEnum.TRIGGER_FLOW.getCode().equalsIgnoreCase(reqVO.getActionType())) {
-            if (reqVO.getFlowAction() == null || reqVO.getFlowAction().getFlowProcessId() == null) {
+            if (resolveFlowProcessId(reqVO) == null) {
                 throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_FLOW_CONFIG_REQUIRED);
             }
         }
@@ -219,30 +228,131 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         buttonDO.setStatus(StringUtils.isBlank(reqVO.getStatus()) ? CustomButtonStatusEnum.ENABLE.getCode() : reqVO.getStatus());
     }
 
-    private void upsertFlowConfig(AppCustomButtonDO buttonDO, CustomButtonSaveReqVO reqVO) {
-        if (!CustomButtonActionTypeEnum.TRIGGER_FLOW.getCode().equalsIgnoreCase(buttonDO.getActionType())) {
-            actionFlowRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+    private void upsertActionConfig(AppCustomButtonDO buttonDO, CustomButtonSaveReqVO reqVO) {
+        AppCustomButtonActionConfigDO configDO = actionConfigRepository.findByButtonUuid(buttonDO.getButtonUuid());
+        if (configDO == null) {
+            configDO = new AppCustomButtonActionConfigDO();
+            configDO.setButtonUuid(buttonDO.getButtonUuid());
+            configDO.setApplicationId(buttonDO.getApplicationId());
+        }
+        configDO.setActionType(buttonDO.getActionType());
+        applyActionConfigFields(configDO, reqVO);
+        if (configDO.getId() == null) {
+            actionConfigRepository.save(configDO);
+        } else {
+            actionConfigRepository.updateById(configDO);
+        }
+    }
+
+    private void replaceUpdateFields(AppCustomButtonDO buttonDO, CustomButtonSaveReqVO reqVO) {
+        updateFieldRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        if (!CustomButtonActionTypeEnum.UPDATE_FORM.getCode().equalsIgnoreCase(buttonDO.getActionType())
+                || CollectionUtils.isEmpty(reqVO.getUpdateFields())) {
             return;
+        }
+        List<AppCustomButtonUpdateFieldDO> fieldDOS = new ArrayList<>();
+        for (CustomButtonUpdateFieldReqVO fieldReqVO : reqVO.getUpdateFields()) {
+            AppCustomButtonUpdateFieldDO fieldDO = new AppCustomButtonUpdateFieldDO();
+            fieldDO.setApplicationId(buttonDO.getApplicationId());
+            fieldDO.setButtonUuid(buttonDO.getButtonUuid());
+            fieldDO.setFieldMode(fieldReqVO.getFieldMode());
+            fieldDO.setFieldUuid(fieldReqVO.getFieldUuid());
+            fieldDO.setFieldCode(fieldReqVO.getFieldCode());
+            fieldDO.setRequiredFlag(fieldReqVO.getRequiredFlag() == null ? 0 : fieldReqVO.getRequiredFlag());
+            fieldDO.setValueType(fieldReqVO.getValueType());
+            fieldDO.setValueConfig(fieldReqVO.getValueConfig());
+            fieldDO.setSortNo(fieldReqVO.getSortNo() == null ? 0 : fieldReqVO.getSortNo());
+            fieldDOS.add(fieldDO);
+        }
+        updateFieldRepository.saveBatch(fieldDOS);
+    }
+
+    private void applyActionConfigFields(AppCustomButtonActionConfigDO configDO, CustomButtonSaveReqVO reqVO) {
+        CustomButtonActionConfigReqVO actionConfigReqVO = reqVO.getActionConfig();
+        if (actionConfigReqVO != null) {
+            configDO.setOpenMode(actionConfigReqVO.getOpenMode());
+            configDO.setSubmitSuccessText(actionConfigReqVO.getSubmitSuccessText());
+            configDO.setTargetType(actionConfigReqVO.getTargetType());
+            configDO.setTargetPageSetUuid(actionConfigReqVO.getTargetPageSetUuid());
+            configDO.setTargetPageUuid(actionConfigReqVO.getTargetPageUuid());
+            configDO.setTargetUrl(actionConfigReqVO.getTargetUrl());
+            configDO.setTargetEntityUuid(actionConfigReqVO.getTargetEntityUuid());
+            configDO.setTargetRelationFieldUuid(actionConfigReqVO.getTargetRelationFieldUuid());
+            configDO.setTargetRelationScope(actionConfigReqVO.getTargetRelationScope());
+            configDO.setFlowProcessId(actionConfigReqVO.getFlowProcessId());
+            configDO.setFlowProcessUuid(actionConfigReqVO.getFlowProcessUuid());
+            configDO.setConfirmRequired(actionConfigReqVO.getConfirmRequired());
+            configDO.setConfirmText(actionConfigReqVO.getConfirmText());
+            configDO.setConfigJson(actionConfigReqVO.getConfigJson());
         }
         CustomButtonFlowActionReqVO flowReqVO = reqVO.getFlowAction();
-        if (flowReqVO == null) {
-            return;
+        if (flowReqVO != null) {
+            configDO.setFlowProcessId(flowReqVO.getFlowProcessId());
+            configDO.setFlowProcessUuid(flowReqVO.getFlowProcessUuid());
+            configDO.setConfirmRequired(flowReqVO.getConfirmRequired());
+            configDO.setConfirmText(flowReqVO.getConfirmText());
         }
-        AppCustomButtonActionFlowDO flowDO = actionFlowRepository.findByButtonUuid(buttonDO.getButtonUuid());
-        if (flowDO == null) {
-            flowDO = new AppCustomButtonActionFlowDO();
-            flowDO.setButtonUuid(buttonDO.getButtonUuid());
-            flowDO.setApplicationId(buttonDO.getApplicationId());
+        if (CustomButtonActionTypeEnum.TRIGGER_FLOW.getCode().equalsIgnoreCase(reqVO.getActionType())
+                && configDO.getConfirmRequired() == null) {
+            configDO.setConfirmRequired(1);
         }
-        flowDO.setFlowProcessId(flowReqVO.getFlowProcessId());
-        flowDO.setFlowProcessUuid(flowReqVO.getFlowProcessUuid());
-        flowDO.setConfirmRequired(flowReqVO.getConfirmRequired() == null ? 1 : flowReqVO.getConfirmRequired());
-        flowDO.setConfirmText(flowReqVO.getConfirmText());
-        if (flowDO.getId() == null) {
-            actionFlowRepository.save(flowDO);
-        } else {
-            actionFlowRepository.updateById(flowDO);
+    }
+
+    private Long resolveFlowProcessId(CustomButtonSaveReqVO reqVO) {
+        if (reqVO.getActionConfig() != null && reqVO.getActionConfig().getFlowProcessId() != null) {
+            return reqVO.getActionConfig().getFlowProcessId();
         }
+        return reqVO.getFlowAction() == null ? null : reqVO.getFlowAction().getFlowProcessId();
+    }
+
+    private CustomButtonActionConfigReqVO toActionConfigReqVO(AppCustomButtonActionConfigDO configDO) {
+        if (configDO == null) {
+            return null;
+        }
+        CustomButtonActionConfigReqVO reqVO = new CustomButtonActionConfigReqVO();
+        reqVO.setOpenMode(configDO.getOpenMode());
+        reqVO.setSubmitSuccessText(configDO.getSubmitSuccessText());
+        reqVO.setTargetType(configDO.getTargetType());
+        reqVO.setTargetPageSetUuid(configDO.getTargetPageSetUuid());
+        reqVO.setTargetPageUuid(configDO.getTargetPageUuid());
+        reqVO.setTargetUrl(configDO.getTargetUrl());
+        reqVO.setTargetEntityUuid(configDO.getTargetEntityUuid());
+        reqVO.setTargetRelationFieldUuid(configDO.getTargetRelationFieldUuid());
+        reqVO.setTargetRelationScope(configDO.getTargetRelationScope());
+        reqVO.setFlowProcessId(configDO.getFlowProcessId());
+        reqVO.setFlowProcessUuid(configDO.getFlowProcessUuid());
+        reqVO.setConfirmRequired(configDO.getConfirmRequired());
+        reqVO.setConfirmText(configDO.getConfirmText());
+        reqVO.setConfigJson(configDO.getConfigJson());
+        return reqVO;
+    }
+
+    private CustomButtonFlowActionReqVO toFlowActionReqVO(AppCustomButtonActionConfigDO configDO) {
+        if (configDO == null || configDO.getFlowProcessId() == null) {
+            return null;
+        }
+        CustomButtonFlowActionReqVO flowReqVO = new CustomButtonFlowActionReqVO();
+        flowReqVO.setFlowProcessId(configDO.getFlowProcessId());
+        flowReqVO.setFlowProcessUuid(configDO.getFlowProcessUuid());
+        flowReqVO.setConfirmRequired(configDO.getConfirmRequired());
+        flowReqVO.setConfirmText(configDO.getConfirmText());
+        return flowReqVO;
+    }
+
+    private List<CustomButtonUpdateFieldReqVO> toUpdateFieldReqVOList(List<AppCustomButtonUpdateFieldDO> fieldDOS) {
+        List<CustomButtonUpdateFieldReqVO> result = new ArrayList<>();
+        for (AppCustomButtonUpdateFieldDO fieldDO : fieldDOS) {
+            CustomButtonUpdateFieldReqVO reqVO = new CustomButtonUpdateFieldReqVO();
+            reqVO.setFieldMode(fieldDO.getFieldMode());
+            reqVO.setFieldUuid(fieldDO.getFieldUuid());
+            reqVO.setFieldCode(fieldDO.getFieldCode());
+            reqVO.setRequiredFlag(fieldDO.getRequiredFlag());
+            reqVO.setValueType(fieldDO.getValueType());
+            reqVO.setValueConfig(fieldDO.getValueConfig());
+            reqVO.setSortNo(fieldDO.getSortNo());
+            result.add(reqVO);
+        }
+        return result;
     }
 
     private AppResourcePagesetDO getAndValidatePageSet(Long pageSetId) {

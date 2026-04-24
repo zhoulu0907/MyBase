@@ -19,10 +19,10 @@ public class RuntimeCustomButtonExecLogRespVO {
     @Schema(description = "按钮名称")
     private String buttonName;
 
-    @Schema(description = "动作类型")
+    @Schema(description = "动作类型：UPDATE_FORM、CREATE_RELATED_RECORD、TRIGGER_FLOW、OPEN_PAGE")
     private String actionType;
 
-    @Schema(description = "执行状态")
+    @Schema(description = "执行状态：RUNNING、SUCCESS、FAILED 等")
     private String execStatus;
 
     @Schema(description = "错误码")
@@ -40,7 +40,7 @@ public class RuntimeCustomButtonExecLogRespVO {
     @Schema(description = "结束时间")
     private LocalDateTime endTime;
 
-    @Schema(description = "耗时")
+    @Schema(description = "耗时毫秒")
     private Long durationMs;
 
     @Schema(description = "明细")

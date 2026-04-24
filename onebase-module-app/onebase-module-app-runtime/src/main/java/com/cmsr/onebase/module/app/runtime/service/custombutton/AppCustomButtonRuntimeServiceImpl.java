@@ -7,7 +7,7 @@ import com.cmsr.onebase.framework.common.security.dto.LoginUser;
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
-import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonActionFlowRepository;
+import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonActionConfigRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonExecDetailRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonExecLogRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonRepository;
@@ -43,7 +43,7 @@ public class AppCustomButtonRuntimeServiceImpl implements AppCustomButtonRuntime
     private AppCustomButtonRepository customButtonRepository;
 
     @Resource
-    private AppCustomButtonActionFlowRepository actionFlowRepository;
+    private AppCustomButtonActionConfigRepository actionConfigRepository;
 
     @Resource
     private AppCustomButtonExecLogRepository execLogRepository;
@@ -292,11 +292,11 @@ public class AppCustomButtonRuntimeServiceImpl implements AppCustomButtonRuntime
     private String doExecuteAction(AppCustomButtonDO buttonDO, String recordId) {
         String actionType = buttonDO.getActionType();
         if (CustomButtonActionTypeEnum.TRIGGER_FLOW.getCode().equalsIgnoreCase(actionType)) {
-            AppCustomButtonActionFlowDO flowDO = actionFlowRepository.findByButtonUuid(buttonDO.getButtonUuid());
-            if (flowDO == null || flowDO.getFlowProcessId() == null) {
+            AppCustomButtonActionConfigDO actionConfigDO = actionConfigRepository.findByButtonUuid(buttonDO.getButtonUuid());
+            if (actionConfigDO == null || actionConfigDO.getFlowProcessId() == null) {
                 throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_FLOW_CONFIG_REQUIRED);
             }
-            return String.format("已受理自动化流触发请求，流程ID=%s，记录ID=%s", flowDO.getFlowProcessId(), recordId);
+            return String.format("已受理自动化流触发请求，流程ID=%s，记录ID=%s", actionConfigDO.getFlowProcessId(), recordId);
         }
         if (CustomButtonActionTypeEnum.UPDATE_FORM.getCode().equalsIgnoreCase(actionType)) {
             return String.format("已受理修改当前表单请求，记录ID=%s", recordId);

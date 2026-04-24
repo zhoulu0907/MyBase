@@ -16,18 +16,18 @@ public class RuntimeCustomButtonRespVO {
     @Schema(description = "按钮描述")
     private String buttonDesc;
 
-    @Schema(description = "动作类型")
+    @Schema(description = "动作类型：UPDATE_FORM、CREATE_RELATED_RECORD、TRIGGER_FLOW、OPEN_PAGE")
     private String actionType;
 
-    @Schema(description = "操作范围")
+    @Schema(description = "操作范围：SINGLE 单条记录、BATCH 批量记录、FORM 表单视图")
     private String operationScope;
 
-    @Schema(description = "样式类型")
+    @Schema(description = "样式类型。示例：PRIMARY、DEFAULT、LINK、WARNING")
     private String styleType;
 
-    @Schema(description = "颜色")
+    @Schema(description = "按钮颜色HEX值")
     private String colorHex;
 
-    @Schema(description = "图标")
+    @Schema(description = "图标编码")
     private String iconCode;
 }
