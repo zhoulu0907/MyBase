@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.zip.ZipOutputStream;
 
@@ -66,7 +67,6 @@ import com.cmsr.onebase.module.app.core.enums.version.VersionTypeEnum;
 import com.cmsr.onebase.module.bpm.api.datamanager.BpmDataManager;
 import com.cmsr.onebase.module.flow.api.FlowDataManager;
 import com.cmsr.onebase.module.infra.api.file.FileApi;
-import com.cmsr.onebase.module.metadata.api.datasource.dto.export.MetadataExportDataDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -296,20 +296,20 @@ public class AppVersionServiceImpl implements AppVersionService {
             throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_VERSION_IMPORT_ERROR);
         }
 
-        Long applicationId = versionImportReq.getApplicationId();
-        if (applicationId != null) {
+        AtomicReference<Long> applicationId = new AtomicReference<>(versionImportReq.getApplicationId());
+        if (applicationId.get() != null) {
             // 覆盖当前应用的开发版本
-            AppApplicationDO existingApp = appCommonService.validateApplicationExist(applicationId);
+            AppApplicationDO existingApp = appCommonService.validateApplicationExist(applicationId.get());
             transactionTemplate.executeWithoutResult(transactionStatus -> {
                 // 删除现有的开发版本数据（version_tag 为 0）
-                appDataManager.deleteApplicationVersionData(applicationId, VersionTagEnum.BUILD.getValue());
-                appDataManager.deleteAuthRole(applicationId);
+                appDataManager.deleteApplicationVersionData(applicationId.get(), VersionTagEnum.BUILD.getValue());
+                appDataManager.deleteAuthRole(applicationId.get());
 
                 // 导入配置数据到开发版本
-                appDataManager.saveApplicationVersionConfigData(applicationId, existingApp.getAppUid(),
+                appDataManager.saveApplicationVersionConfigData(applicationId.get(), existingApp.getAppUid(),
                         existingApp.getTenantId(), VersionTagEnum.BUILD.getValue(), importPackage.getConfigData());
                 if (StringUtils.isNotBlank(versionImportReq.getProjectId())) {
-                    projectAppRelationApi.createProjectAppRelation(versionImportReq.getProjectId(), applicationId);
+                    projectAppRelationApi.createProjectAppRelation(versionImportReq.getProjectId(), applicationId.get());
                 }
             });
         } else {
@@ -325,11 +325,12 @@ public class AppVersionServiceImpl implements AppVersionService {
                 appDataManager.saveApplicationVersionConfigData(newApplicationId, appUid, newApp.getTenantId(),
                         VersionTagEnum.BUILD.getValue(), importPackage.getConfigData());
                 log.info("创建新应用，newApplicationId: {}", newApplicationId);
+                applicationId.set(newApplicationId);
 
-                if (versionImportReq.getProjectId() != null) {
-                    projectAppRelationApi.createProjectAppRelation(versionImportReq.getProjectId(), newApplicationId);
-                }
             });
+        }
+        if (versionImportReq.getProjectId() != null) {
+            projectAppRelationApi.createProjectAppRelation(versionImportReq.getProjectId(), applicationId.get());
         }
     }
 
