@@ -6,6 +6,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataV
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleDefinitionRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
@@ -359,7 +360,7 @@ public class SelfDefinedValidationService implements ValidationService {
     private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(String entityUuid) {
         // 使用entityUuid查询
         QueryWrapper queryWrapper = ruleGroupRepository.query()
-                .eq(MetadataValidationRuleGroupDO::getValidationType, "SELF_DEFINED")
+                .eq(MetadataValidationRuleGroupDO::getValidationType, MetadataValidationRuleTypeEnum.SELF_DEFINED.getCode())
                 .eq(MetadataValidationRuleGroupDO::getRgStatus, 1);
         return ruleGroupRepository.list(queryWrapper);
     }
@@ -406,7 +407,7 @@ public class SelfDefinedValidationService implements ValidationService {
 
     @Override
     public String getValidationType() {
-        return "SELF_DEFINED";
+        return MetadataValidationRuleTypeEnum.SELF_DEFINED.getCode();
     }
 
     @Override
@@ -414,4 +415,3 @@ public class SelfDefinedValidationService implements ValidationService {
         return true;
     }
 }
-

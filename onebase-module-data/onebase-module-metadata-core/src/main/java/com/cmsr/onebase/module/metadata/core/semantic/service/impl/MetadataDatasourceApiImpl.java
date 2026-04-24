@@ -18,6 +18,10 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoN
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.number.MetadataAutoNumberRuleItemDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.*;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataBooleanLiteralEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataTypeCodeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDefaultValueKeywordEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDatasourceTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.mybatisflex.core.query.QueryWrapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -1040,8 +1044,10 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         }
         String upperValue = defaultValue.toUpperCase().trim();
         // 时间戳相关函数
-        if (upperValue.contains("CURRENT_TIMESTAMP") || upperValue.contains("NOW()")
-                || upperValue.contains("CURRENT_DATE") || upperValue.contains("CURRENT_TIME")) {
+        if (MetadataDefaultValueKeywordEnum.CURRENT_TIMESTAMP.containsIn(upperValue)
+                || MetadataDefaultValueKeywordEnum.NOW_CALL.containsIn(upperValue)
+                || MetadataDefaultValueKeywordEnum.CURRENT_DATE.containsIn(upperValue)
+                || MetadataDefaultValueKeywordEnum.CURRENT_TIME.containsIn(upperValue)) {
             return true;
         }
         // 纯数字（包括小数和负数）
@@ -1049,11 +1055,11 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
             return true;
         }
         // NULL 值
-        if ("NULL".equals(upperValue)) {
+        if (MetadataDefaultValueKeywordEnum.NULL.equalsTo(upperValue)) {
             return true;
         }
         // 布尔值
-        if ("TRUE".equals(upperValue) || "FALSE".equals(upperValue)) {
+        if (MetadataBooleanLiteralEnum.isSqlBooleanLiteral(upperValue)) {
             return true;
         }
         return false;
@@ -1067,7 +1073,7 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
      */
     private String normalizeDefaultValue(String defaultValue) {
         if (defaultValue == null) {
-            return "NULL";
+            return MetadataDefaultValueKeywordEnum.NULL.getKeyword();
         }
         String value = defaultValue.trim();
         // 移除可能存在的外层引号
@@ -1080,8 +1086,9 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
     //todo metadata_field_type_mapping 表中有存字段类型和数据库类型的映射关系，可以改为从该表中读取映射关系，而不是写死在代码中
     private String mapFieldTypeToDbType(String fieldType, Integer dataLength, Integer decimalPlaces, String datasourceType, java.util.List<FieldTypeMappingDO> typeMappings) {
         if (fieldType == null) {
-            return "VARCHAR(255)";
+            return buildVarcharDbType(null);
         }
+        MetadataDataTypeCodeEnum fieldTypeCode = MetadataDataTypeCodeEnum.fromCode(fieldType);
 
         // 1. 优先从映射表中查找
         if (CollectionUtils.isNotEmpty(typeMappings)) {
@@ -1094,18 +1101,17 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
 
             if (dbType != null) {
                 // 特殊处理需要长度和精度的类型
-                if (("STRING".equalsIgnoreCase(fieldType) || "TEXT".equalsIgnoreCase(fieldType))
+                if (isTextFieldType(fieldTypeCode)
                         && !dbType.contains("(")
-                        && (dbType.toUpperCase().contains("CHAR") || dbType.toUpperCase().contains("VARCHAR"))) {
-                    int len = (dataLength != null && dataLength > 0) ? dataLength : 255;
-                    return dbType + "(" + len + ")";
+                        && (MetadataDataTypeCodeEnum.CHAR.matches(dbType) || MetadataDataTypeCodeEnum.VARCHAR.matches(dbType)
+                        || dbType.toUpperCase().contains(MetadataDataTypeCodeEnum.CHAR.getCode())
+                        || dbType.toUpperCase().contains(MetadataDataTypeCodeEnum.VARCHAR.getCode()))) {
+                    return dbType + "(" + resolveLength(dataLength, 255) + ")";
                 }
 
-                if (("DECIMAL".equalsIgnoreCase(fieldType) || "NUMBER".equalsIgnoreCase(fieldType))
+                if (isDecimalFieldType(fieldTypeCode)
                         && !dbType.contains("(")) {
-                    int precision = (dataLength != null && dataLength > 0) ? dataLength : 18;
-                    int scale = (decimalPlaces != null && decimalPlaces >= 0) ? decimalPlaces : 2;
-                    return dbType + "(" + precision + "," + scale + ")";
+                    return dbType + "(" + resolveLength(dataLength, 18) + "," + resolveScale(decimalPlaces, 2) + ")";
                 }
 
                 return dbType;
@@ -1113,26 +1119,47 @@ public class MetadataDatasourceApiImpl implements MetadataDatasourceApi {
         }
 
         // 2. 默认兜底逻辑
-        boolean isPostgres = "POSTGRESQL".equalsIgnoreCase(datasourceType) || "KINGBASE".equalsIgnoreCase(datasourceType);
+        boolean isPostgres = MetadataDatasourceTypeEnum.isPostgresFamily(datasourceType);
 
-        return switch (fieldType.toUpperCase()) {
-            case "STRING", "TEXT" -> {
-                int len = (dataLength != null && dataLength > 0) ? dataLength : 255;
-                yield "VARCHAR(" + len + ")";
-            }
-            case "INTEGER", "INT" -> isPostgres ? "INTEGER" : "INT";
-            case "LONG", "BIGINT" -> "BIGINT";
-            case "DECIMAL", "NUMBER" -> {
-                int precision = (dataLength != null && dataLength > 0) ? dataLength : 18;
-                int scale = (decimalPlaces != null && decimalPlaces >= 0) ? decimalPlaces : 2;
-                yield "DECIMAL(" + precision + "," + scale + ")";
-            }
-            case "BOOLEAN", "BOOL" -> isPostgres ? "BOOLEAN" : "TINYINT(1)";
-            case "DATE" -> "DATE";
-            case "DATETIME", "TIMESTAMP" -> isPostgres ? "TIMESTAMP" : "DATETIME";
-            case "JSON" -> isPostgres ? "JSONB" : "JSON";
-            default -> "VARCHAR(255)";
+        if (fieldTypeCode == null) {
+            return buildVarcharDbType(null);
+        }
+
+        return switch (fieldTypeCode) {
+            case STRING, TEXT -> buildVarcharDbType(dataLength);
+            case INTEGER, INT -> isPostgres ? MetadataDataTypeCodeEnum.INTEGER.getCode() : MetadataDataTypeCodeEnum.INT.getCode();
+            case LONG, BIGINT -> MetadataDataTypeCodeEnum.BIGINT.getCode();
+            case DECIMAL, NUMBER -> buildDecimalDbType(dataLength, decimalPlaces);
+            case BOOLEAN, BOOL -> isPostgres ? MetadataDataTypeCodeEnum.BOOLEAN.getCode() : "TINYINT(1)";
+            case DATE -> MetadataDataTypeCodeEnum.DATE.getCode();
+            case DATETIME, TIMESTAMP -> isPostgres ? MetadataDataTypeCodeEnum.TIMESTAMP.getCode() : MetadataDataTypeCodeEnum.DATETIME.getCode();
+            case JSON -> isPostgres ? MetadataDataTypeCodeEnum.JSONB.getCode() : MetadataDataTypeCodeEnum.JSON.getCode();
+            default -> buildVarcharDbType(null);
         };
+    }
+
+    private boolean isTextFieldType(MetadataDataTypeCodeEnum fieldTypeCode) {
+        return fieldTypeCode == MetadataDataTypeCodeEnum.STRING || fieldTypeCode == MetadataDataTypeCodeEnum.TEXT;
+    }
+
+    private boolean isDecimalFieldType(MetadataDataTypeCodeEnum fieldTypeCode) {
+        return fieldTypeCode == MetadataDataTypeCodeEnum.DECIMAL || fieldTypeCode == MetadataDataTypeCodeEnum.NUMBER;
+    }
+
+    private String buildVarcharDbType(Integer dataLength) {
+        return MetadataDataTypeCodeEnum.VARCHAR.getCode() + "(" + resolveLength(dataLength, 255) + ")";
+    }
+
+    private String buildDecimalDbType(Integer dataLength, Integer decimalPlaces) {
+        return MetadataDataTypeCodeEnum.DECIMAL.getCode() + "(" + resolveLength(dataLength, 18) + "," + resolveScale(decimalPlaces, 2) + ")";
+    }
+
+    private int resolveLength(Integer value, int defaultValue) {
+        return (value != null && value > 0) ? value : defaultValue;
+    }
+
+    private int resolveScale(Integer value, int defaultValue) {
+        return (value != null && value >= 0) ? value : defaultValue;
     }
 
     //@Override

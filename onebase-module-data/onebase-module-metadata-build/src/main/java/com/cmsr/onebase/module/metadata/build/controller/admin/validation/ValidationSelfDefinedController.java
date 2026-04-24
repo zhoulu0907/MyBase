@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
 import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
 import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupRespVO;
 import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationRuleGroupSaveReqVO;
@@ -52,7 +53,7 @@ public class ValidationSelfDefinedController {
     @PostMapping("/create")
     @Operation(summary = "创建自定义校验规则组")
     public CommonResult<Long> create(@Valid @RequestBody ValidationRuleGroupSaveReqVO createReqVO) {
-        createReqVO.setValidationType("SELF_DEFINED");
+        createReqVO.setValidationType(MetadataValidationRuleTypeEnum.SELF_DEFINED.getCode());
         // 修复：正确处理 entityId 和 entityUuid 的转换
         String entityUuid = idUuidConverter.resolveEntityUuid(createReqVO.getEntityUuid(), createReqVO.getEntityId());
         createReqVO.setEntityUuid(entityUuid);
@@ -68,7 +69,7 @@ public class ValidationSelfDefinedController {
     @PostMapping("/update")
     @Operation(summary = "更新自定义校验规则组")
     public CommonResult<Boolean> update(@Valid @RequestBody ValidationRuleGroupSaveReqVO updateReqVO) {
-        updateReqVO.setValidationType("SELF_DEFINED");
+        updateReqVO.setValidationType(MetadataValidationRuleTypeEnum.SELF_DEFINED.getCode());
         // 修复：正确处理 entityId 和 entityUuid 的转换
         String entityUuid = idUuidConverter.resolveEntityUuidOptional(updateReqVO.getEntityUuid(), updateReqVO.getEntityId());
         if (entityUuid != null) {

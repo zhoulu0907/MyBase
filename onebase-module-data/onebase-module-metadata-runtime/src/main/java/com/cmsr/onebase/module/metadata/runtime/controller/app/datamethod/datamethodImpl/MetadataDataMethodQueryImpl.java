@@ -8,6 +8,7 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.relationship.MetadataEntityRelationshipDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
+import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.AbstractMetadataDataMethodCoreService;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueTransformMode;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
@@ -251,7 +252,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
                         Map<String, Object> cond = (Map<String, Object>) rawVal;
                         String fieldName = (String) cond.getOrDefault("fieldName", rawKey);
                         Object value = cond.get("value");
-                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
+                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : OpEnum.CONTAINS.name();
                         if (value == null || !names.contains(fieldName)) {
                             continue;
                         }
@@ -298,7 +299,7 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
                         @SuppressWarnings("unchecked") Map<String, Object> cond = (Map<String, Object>) rawVal;
                         String fieldName = (String) cond.getOrDefault("fieldName", rawKey);
                         Object value = cond.get("value");
-                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : "CONTAINS";
+                        String operator = cond.get("operator") != null ? String.valueOf(cond.get("operator")) : OpEnum.CONTAINS.name();
                         if (value == null || !existingFieldNames.contains(fieldName)) {
                             continue;
                         }
@@ -348,50 +349,45 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
      * 其他或未识别操作符默认 LIKE
      */
     private void applyOperatorCondition(ConfigStore configs, String fieldName, String operator, Object value) {
-        if (operator == null) {
-            log.debug("[FILTER] field={} op=LIKE(default) value={}", fieldName, value);
-            configs.and(Compare.LIKE, fieldName, value);
-            return;
-        }
-        String op = operator.trim().toUpperCase();
-        switch (op) {
-            case "EQUALS":
+        OpEnum opEnum = OpEnum.parseOrDefault(operator, OpEnum.CONTAINS);
+        switch (opEnum) {
+            case EQUALS:
                 log.debug("[FILTER] field={} op=EQUAL value={}", fieldName, value);
                 configs.and(Compare.EQUAL, fieldName, value); break;
-            case "NOT_EQUALS":
+            case NOT_EQUALS:
                 log.debug("[FILTER] field={} op=NOT_EQUAL value={}", fieldName, value);
                 configs.and(Compare.NOT_EQUAL, fieldName, value); break;
-            case "GREATER_THAN":
+            case GREATER_THAN:
                 log.debug("[FILTER] field={} op> value={}", fieldName, value);
                 configs.and(Compare.GREAT, fieldName, value); break;
-            case "GREATER_EQUALS":
+            case GREATER_EQUALS:
                 log.debug("[FILTER] field={} op>= value={}", fieldName, value);
                 configs.and(Compare.GREAT_EQUAL, fieldName, value); break;
-            case "LESS_THAN":
+            case LESS_THAN:
                 log.debug("[FILTER] field={} op< value={}", fieldName, value);
                 configs.and(Compare.LESS, fieldName, value); break;
-            case "LESS_EQUALS":
+            case LESS_EQUALS:
                 log.debug("[FILTER] field={} op<= value={}", fieldName, value);
                 configs.and(Compare.LESS_EQUAL, fieldName, value); break;
-            case "CONTAINS":
+            case CONTAINS:
                 log.debug("[FILTER] field={} op LIKE value=%{}%", fieldName, value);
                 configs.and(Compare.LIKE, fieldName, value); break;
-            case "NOT_CONTAINS":
+            case NOT_CONTAINS:
                 log.debug("[FILTER] field={} op NOT LIKE value=%{}%", fieldName, value);
                 configs.and(Compare.NOT_LIKE, fieldName, value); break;
-            case "EARLIER_THAN":
+            case EARLIER_THAN:
                 log.debug("[FILTER] field={} op EARLIER(<) value={}", fieldName, value);
                 configs.and(Compare.LESS, fieldName, value); break;
-            case "LATER_THAN":
+            case LATER_THAN:
                 log.debug("[FILTER] field={} op LATER(>) value={}", fieldName, value);
                 configs.and(Compare.GREAT, fieldName, value); break;
-            case "EXISTS_IN":
+            case EXISTS_IN:
                 log.debug("[FILTER] field={} op IN value={}", fieldName, value);
                 configs.and(Compare.IN, fieldName, value); break;
-            case "NOT_EXISTS_IN":
+            case NOT_EXISTS_IN:
                 log.debug("[FILTER] field={} op NOT IN value={}", fieldName, value);
                 configs.and(Compare.NOT_IN, fieldName, value); break;
-            case "RANGE":
+            case RANGE:
                 // 如果 value 是 Map {start,end} 结构，分别添加 >= 与 <=
                 if (value instanceof Map) {
                     @SuppressWarnings("unchecked") Map<String,Object> range = (Map<String,Object>) value;
@@ -405,10 +401,10 @@ public class MetadataDataMethodQueryImpl extends AbstractMetadataDataMethodCoreS
                     log.debug("[FILTER] field={} op RANGE(start only) >= {}", fieldName, value);
                 }
                 break;
-            case "IS_EMPTY":
+            case IS_EMPTY:
                 log.debug("[FILTER] field={} op =''", fieldName);
                 configs.and(Compare.EQUAL, fieldName, ""); break;
-            case "IS_NOT_EMPTY":
+            case IS_NOT_EMPTY:
                 log.debug("[FILTER] field={} op !=''", fieldName);
                 configs.and(Compare.NOT_EQUAL, fieldName, ""); break;
             default:

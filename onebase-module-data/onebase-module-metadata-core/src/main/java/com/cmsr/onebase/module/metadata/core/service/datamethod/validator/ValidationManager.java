@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.core.service.datamethod.validator;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
 import com.cmsr.onebase.module.metadata.core.enums.MetadataDataMethodOpEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequiredRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
@@ -77,7 +78,7 @@ public class ValidationManager {
         // 遍历所有校验服务，执行支持的校验
         for (ValidationService service : validationServices) {
             try {
-                if("CHILD_NOT_EMPTY".equals(service.getValidationType())){
+                if (MetadataValidationRuleTypeEnum.CHILD_NOT_EMPTY.getCode().equals(service.getValidationType())) {
                     continue;
                 }
                 // 检查是否支持该字段类型
@@ -108,15 +109,20 @@ public class ValidationManager {
         if (validationType == null) {
             return "未知";
         }
-        
-        return switch (validationType.toUpperCase()) {
-            case "REQUIRED" -> "必填";
-            case "LENGTH" -> "长度";
-            case "FORMAT" -> "格式";
-            case "UNIQUE" -> "唯一性";
-            case "RANGE" -> "范围";
-            case "REGEX" -> "正则表达式";
-            case "CUSTOM" -> "自定义";
+
+        MetadataValidationRuleTypeEnum typeEnum = MetadataValidationRuleTypeEnum.getByCode(validationType);
+        if (typeEnum == null) {
+            return validationType;
+        }
+
+        return switch (typeEnum) {
+            case REQUIRED -> "必填";
+            case LENGTH, LENGTH_RANGE -> "长度";
+            case FORMAT -> "格式";
+            case UNIQUE -> "唯一性";
+            case RANGE -> "范围";
+            case REGEX -> "正则表达式";
+            case CUSTOM, SELF_DEFINED -> "自定义";
             default -> validationType;
         };
     }
@@ -147,35 +153,35 @@ public class ValidationManager {
                 Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO>> requiredMap = requiredList.stream().filter(r -> r.getFieldUuid() != null)
                         .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO::getFieldUuid,
                                 Collectors.mapping(r -> r, Collectors.toList())));
-                rulesByType.put("REQUIRED", requiredMap);
+                rulesByType.put(MetadataValidationRuleTypeEnum.REQUIRED.getCode(), requiredMap);
             } catch (Exception ignore) {}
             try {
                 var uniqueList = uniqueRepository.findByFieldUuids(fieldUuids);
                 Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO>> uniqueMap = uniqueList.stream().filter(r -> r.getFieldUuid() != null)
                         .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO::getFieldUuid,
                                 Collectors.mapping(r -> r, Collectors.toList())));
-                rulesByType.put("UNIQUE", uniqueMap);
+                rulesByType.put(MetadataValidationRuleTypeEnum.UNIQUE.getCode(), uniqueMap);
             } catch (Exception ignore) {}
             try {
                 var lengthList = lengthRepository.findByFieldUuids(fieldUuids);
                 Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO>> lengthMap = lengthList.stream().filter(r -> r.getFieldUuid() != null)
                         .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO::getFieldUuid,
                                 Collectors.mapping(r -> r, Collectors.toList())));
-                rulesByType.put("LENGTH", lengthMap);
+                rulesByType.put(MetadataValidationRuleTypeEnum.LENGTH.getCode(), lengthMap);
             } catch (Exception ignore) {}
             try {
                 var formatList = formatRepository.findByFieldUuids(fieldUuids);
                 Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO>> formatMap = formatList.stream().filter(r -> r.getFieldUuid() != null)
                         .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO::getFieldUuid,
                                 Collectors.mapping(r -> r, Collectors.toList())));
-                rulesByType.put("FORMAT", formatMap);
+                rulesByType.put(MetadataValidationRuleTypeEnum.FORMAT.getCode(), formatMap);
             } catch (Exception ignore) {}
             try {
                 var rangeList = rangeRepository.findByFieldUuids(fieldUuids);
                 Map<String, java.util.List<com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO>> rangeMap = rangeList.stream().filter(r -> r.getFieldUuid() != null)
                         .collect(Collectors.groupingBy(com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO::getFieldUuid,
                                 Collectors.mapping(r -> r, Collectors.toList())));
-                rulesByType.put("RANGE", rangeMap);
+                rulesByType.put(MetadataValidationRuleTypeEnum.RANGE.getCode(), rangeMap);
             } catch (Exception ignore) {}
         }
         for (ValidationService service : validationServices) {
@@ -190,7 +196,7 @@ public class ValidationManager {
 
         for (ValidationService service : validationServices){
             try{
-                if("CHILD_NOT_EMPTY".equals(service.getValidationType())){
+                if (MetadataValidationRuleTypeEnum.CHILD_NOT_EMPTY.getCode().equals(service.getValidationType())) {
                     log.fine("执行" + service.getValidationType() + "校验：entityUuid=" + entityUuid);
                     service.validate(entityUuid, null, null, null, data, subEntities);
                 }

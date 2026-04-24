@@ -5,6 +5,8 @@ import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataBusin
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataPermissionContext;
 import com.cmsr.onebase.module.metadata.core.domain.query.ProcessContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataTypeCodeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.permission.filter.FieldPermissionFilter;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueStorageStrategy;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.strategy.FieldValueStorageStrategyFactory;
@@ -114,7 +116,7 @@ public class SemanticDataFetcher {
                     } catch (Exception e) {
                         resultMap.put(fieldName, value);
                     }
-                } else if ("DATETIME".equals(fieldType) && value instanceof Timestamp timestamp) {
+                } else if (SemanticFieldTypeEnum.DATETIME.getCode().equals(fieldType) && value instanceof Timestamp timestamp) {
                     Instant instant = timestamp.toInstant();
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
                     String timeStr = dateTimeFormatter.format(instant);
@@ -135,7 +137,7 @@ public class SemanticDataFetcher {
                 upperFieldType.contains("ADDRESS") || upperFieldType.contains("FILE") || upperFieldType.contains("ATTACHMENT") ||
                 upperFieldType.contains("IMAGE") || upperFieldType.contains("USER") || upperFieldType.contains("DEPARTMENT") ||
                 upperFieldType.contains("DATA") || upperFieldType.contains("GEOGRAPHY") || upperFieldType.contains("GEO") ||
-                upperFieldType.equals("JSONB") || upperFieldType.equals("JSON");
+                upperFieldType.equals(MetadataDataTypeCodeEnum.JSONB.getCode()) || upperFieldType.equals(MetadataDataTypeCodeEnum.JSON.getCode());
         String strValue = fieldValue.toString().trim();
         boolean looksLikeJson = strValue.startsWith("{") || strValue.startsWith("[");
         return isComplexType && looksLikeJson;

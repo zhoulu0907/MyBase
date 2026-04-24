@@ -1,16 +1,16 @@
 package com.cmsr.onebase.module.app.core.dal.database.custombutton;
 
 import com.cmsr.onebase.framework.orm.repo.BaseBizRepository;
-import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonActionFlowDO;
-import com.cmsr.onebase.module.app.core.dal.mapper.AppCustomButtonActionFlowMapper;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonActionConfigDO;
+import com.cmsr.onebase.module.app.core.dal.mapper.AppCustomButtonActionConfigMapper;
 import com.mybatisflex.core.query.QueryColumn;
 import com.mybatisflex.core.query.QueryWrapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AppCustomButtonActionFlowRepository extends BaseBizRepository<AppCustomButtonActionFlowMapper, AppCustomButtonActionFlowDO> {
+public class AppCustomButtonActionConfigRepository extends BaseBizRepository<AppCustomButtonActionConfigMapper, AppCustomButtonActionConfigDO> {
 
-    public AppCustomButtonActionFlowDO findByButtonUuid(String buttonUuid) {
+    public AppCustomButtonActionConfigDO findByButtonUuid(String buttonUuid) {
         QueryWrapper queryWrapper = QueryWrapper.create()
                 .where(new QueryColumn("button_uuid").eq(buttonUuid));
         return getOne(queryWrapper);

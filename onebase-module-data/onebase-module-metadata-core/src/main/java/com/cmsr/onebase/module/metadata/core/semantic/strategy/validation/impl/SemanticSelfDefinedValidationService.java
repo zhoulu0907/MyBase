@@ -3,6 +3,7 @@ package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
@@ -220,7 +221,7 @@ public class SemanticSelfDefinedValidationService implements SemanticValidationS
     }
 
     @Override
-    public String getValidationType() { return "SELF_DEFINED"; }
+    public String getValidationType() { return MetadataValidationRuleTypeEnum.SELF_DEFINED.getCode(); }
 
         @Override
     public boolean supports(String fieldType) {

@@ -3,6 +3,8 @@ package com.cmsr.onebase.module.metadata.runtime.controller.app.datamethod.execu
 import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.module.metadata.core.config.ApplicationDataSourceManager;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataCardCompareModeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataCardCompareTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticConditionDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticEntitySchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
@@ -149,9 +151,11 @@ public class DashMetaDataCardExecutor {
                             : baseNumber);
                     out.put("compareDelta", delta);
                     out.put("compareRate", rate);
-                    out.put("compareType", delta.signum() > 0 ? "up" : (delta.signum() < 0 ? "down" : "equal"));
+                    out.put("compareType", MetadataCardCompareTypeEnum.fromSignum(delta.signum()).getCode());
                     out.put("compareDescribe", safeToString(card.get("compareDescribe")));
-                    out.put("compareMode", yoy ? "yoy" : "mom");
+                    out.put("compareMode", yoy
+                            ? MetadataCardCompareModeEnum.YOY.getCode()
+                            : MetadataCardCompareModeEnum.MOM.getCode());
                     if ("rate".equalsIgnoreCase(compareCalculateType)) {
                         out.put("compareDisplay", rate == null ? null : formatPercent(rate));
                     } else {
@@ -287,7 +291,9 @@ public class DashMetaDataCardExecutor {
         String desc = safeToString(card.get("compareDescribe"));
         if (StringUtils.isBlank(desc)) return false;
         String s = desc.toLowerCase();
-        return s.contains("同比") || s.contains("去年") || s.contains("yoy");
+        return s.contains("同比")
+                || s.contains("去年")
+                || s.contains(MetadataCardCompareModeEnum.YOY.getCode());
     }
 
     private LocalDateTime[] currentRange(String dimension) {

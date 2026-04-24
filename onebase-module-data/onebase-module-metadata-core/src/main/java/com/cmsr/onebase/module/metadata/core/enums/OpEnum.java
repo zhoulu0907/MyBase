@@ -179,4 +179,15 @@ public enum OpEnum {
         }
         throw new IllegalArgumentException("Invalid OpEnum code: " + code);
     }
+
+    public static OpEnum parseOrDefault(String code, OpEnum defaultValue) {
+        if (StringUtils.isEmpty(code)) {
+            return defaultValue;
+        }
+        try {
+            return getByName(code);
+        } catch (IllegalArgumentException ex) {
+            return defaultValue;
+        }
+    }
 }

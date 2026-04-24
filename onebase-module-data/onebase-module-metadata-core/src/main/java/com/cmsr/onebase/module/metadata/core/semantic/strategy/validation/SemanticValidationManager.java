@@ -17,6 +17,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRequ
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleDefinitionRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRuleGroupRepository;
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniqueRepository;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datasource.MetadataDatasourceCoreService;
 import com.cmsr.onebase.module.metadata.core.service.entity.MetadataBusinessEntityCoreService;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticRecordDTO;
@@ -224,7 +225,7 @@ public class SemanticValidationManager {
     private List<MetadataValidationRuleGroupDO> findActiveRuleGroups(String entityUuid) {
         QueryWrapper qw = ruleGroupRepository.query()
                 .eq(MetadataValidationRuleGroupDO::getEntityUuid, entityUuid)
-                .eq(MetadataValidationRuleGroupDO::getValidationType, "SELF_DEFINED")
+                .eq(MetadataValidationRuleGroupDO::getValidationType, MetadataValidationRuleTypeEnum.SELF_DEFINED.getCode())
                 .eq(MetadataValidationRuleGroupDO::getRgStatus, 1);
         return ruleGroupRepository.list(qw);
     }

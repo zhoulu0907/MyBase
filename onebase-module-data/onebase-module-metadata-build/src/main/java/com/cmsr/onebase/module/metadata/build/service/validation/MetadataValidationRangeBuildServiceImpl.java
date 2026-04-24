@@ -8,6 +8,8 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRangeRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRangeDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRangeTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
@@ -104,7 +106,7 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
-            groupVO.setValidationType("RANGE");
+            groupVO.setValidationType(MetadataValidationRuleTypeEnum.RANGE.getCode());
             // 修复：同步entityUuid到规则组
             groupVO.setEntityUuid(field.getEntityUuid());
             Long groupId = ruleGroupService.createValidationRuleGroup(groupVO);
@@ -133,12 +135,12 @@ public class MetadataValidationRangeBuildServiceImpl implements MetadataValidati
         // 根据传入的值自动判断范围类型
         if (data.getRangeType() == null) {
             if (data.getMinValue() != null || data.getMaxValue() != null) {
-                data.setRangeType("NUMBER");
+                data.setRangeType(MetadataValidationRangeTypeEnum.NUMBER.getCode());
             } else if (data.getMinDate() != null || data.getMaxDate() != null) {
-                data.setRangeType("DATE");
+                data.setRangeType(MetadataValidationRangeTypeEnum.DATE.getCode());
             } else {
                 // 默认为数值类型
-                data.setRangeType("NUMBER");
+                data.setRangeType(MetadataValidationRangeTypeEnum.NUMBER.getCode());
             }
         }
 

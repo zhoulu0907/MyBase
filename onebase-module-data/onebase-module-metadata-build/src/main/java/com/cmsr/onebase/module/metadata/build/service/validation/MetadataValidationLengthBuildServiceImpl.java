@@ -11,6 +11,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationRule
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
@@ -109,7 +110,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
-            groupVO.setValidationType("LENGTH");
+            groupVO.setValidationType(MetadataValidationRuleTypeEnum.LENGTH.getCode());
             // 修复：同步entityUuid到规则组
             groupVO.setEntityUuid(field.getEntityUuid());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
@@ -234,7 +235,7 @@ public class MetadataValidationLengthBuildServiceImpl implements MetadataValidat
                 groupVO.setValMethod(reqVO.getValMethod());
                 groupVO.setPopPrompt(reqVO.getPopPrompt());
                 groupVO.setPopType(reqVO.getPopType());
-                groupVO.setValidationType("LENGTH");
+                groupVO.setValidationType(MetadataValidationRuleTypeEnum.LENGTH.getCode());
                 groupVO.setEntityUuid(entityFieldDO.getEntityUuid());
                 Long groupId = ruleGroupService.createValidationRuleGroup(groupVO);
                 MetadataValidationRuleGroupDO newGroup = ruleGroupService.getValidationRuleGroup(groupId);

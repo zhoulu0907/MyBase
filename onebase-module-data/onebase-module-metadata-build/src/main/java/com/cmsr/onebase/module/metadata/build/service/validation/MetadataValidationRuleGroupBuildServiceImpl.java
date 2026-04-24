@@ -16,6 +16,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChil
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleDefinitionDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRuleGroupDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -590,8 +591,14 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
         String groupIdStr = String.valueOf(groupId);
         
         try {
-            switch (validationType) {
-                case "REQUIRED":
+            MetadataValidationRuleTypeEnum validationRuleType = MetadataValidationRuleTypeEnum.getByCode(validationType);
+            if (validationRuleType == null) {
+                log.warn("未知的校验类型: {}", validationType);
+                return fieldNames;
+            }
+
+            switch (validationRuleType) {
+                case REQUIRED:
                     // 查询必填校验关联的字段（同时用 groupId 和 groupUuid 查询）
                     var requiredFields = requiredRepository.findByGroupUuid(groupIdStr);
                     if ((requiredFields == null || requiredFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
@@ -610,7 +617,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     }
                     break;
 
-                case "LENGTH":
+                case LENGTH:
+                case LENGTH_RANGE:
                     // 查询长度校验关联的字段
                     var lengthFields = lengthRepository.findByGroupUuid(groupIdStr);
                     if ((lengthFields == null || lengthFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
@@ -629,7 +637,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     }
                     break;
 
-                case "UNIQUE":
+                case UNIQUE:
                     // 查询唯一性校验关联的字段
                     var uniqueFields = uniqueRepository.findByGroupUuid(groupIdStr);
                     if ((uniqueFields == null || uniqueFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
@@ -648,7 +656,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     }
                     break;
 
-                case "RANGE":
+                case RANGE:
                     // 查询范围校验关联的字段
                     var rangeFields = rangeRepository.findByGroupUuid(groupIdStr);
                     if ((rangeFields == null || rangeFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
@@ -667,7 +675,8 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     }
                     break;
 
-                case "FORMAT":
+                case FORMAT:
+                case REGEX:
                     // 查询格式校验关联的字段
                     var formatFields = formatRepository.findByGroupUuid(groupIdStr);
                     if ((formatFields == null || formatFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
@@ -686,7 +695,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     }
                     break;
 
-                case "CHILD_NOT_EMPTY":
+                case CHILD_NOT_EMPTY:
                     // 查询子表非空校验关联的字段
                     var childNotEmptyFields = childNotEmptyRepository.findByGroupUuid(groupIdStr);
                     if ((childNotEmptyFields == null || childNotEmptyFields.isEmpty()) && groupUuid != null && !groupUuid.equals(groupIdStr)) {
@@ -706,7 +715,7 @@ public class MetadataValidationRuleGroupBuildServiceImpl implements MetadataVali
                     break;
 
                 default:
-                    log.warn("未知的校验类型: {}", validationType);
+                    log.warn("未支持的校验类型: {}", validationType);
             }
         } catch (Exception e) {
             log.error("获取字段名称时发生错误，groupId: {}, validationType: {}", groupId, validationType, e);

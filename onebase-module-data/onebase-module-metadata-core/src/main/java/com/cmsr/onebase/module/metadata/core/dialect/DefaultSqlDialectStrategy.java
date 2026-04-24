@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.dialect;
 
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataTypeCodeEnum;
 import com.mybatisflex.core.dialect.DbType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -19,7 +20,7 @@ public class DefaultSqlDialectStrategy implements SqlDialectStrategy {
      * 默认 CAST 目标类型
      * 大部分数据库使用 DECIMAL
      */
-    protected static final String DEFAULT_CAST_TYPE = "DECIMAL";
+    protected static final String DEFAULT_CAST_TYPE = MetadataDataTypeCodeEnum.DECIMAL.getCode();
 
     @Override
     public DbType getSupportedDbType() {

@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataTextStorageTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticDataMethodOpEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
@@ -51,12 +53,10 @@ public class SemanticLengthValidationService implements SemanticValidationServic
     }
 
     @Override
-    public String getValidationType() { return "LENGTH"; }
+    public String getValidationType() { return MetadataValidationRuleTypeEnum.LENGTH.getCode(); }
 
     @Override
     public boolean supports(String fieldType) {
-        return "VARCHAR".equalsIgnoreCase(fieldType) || 
-               "TEXT".equalsIgnoreCase(fieldType) ||
-               "CHAR".equalsIgnoreCase(fieldType);
+        return MetadataTextStorageTypeEnum.isTextType(fieldType);
     }
 }

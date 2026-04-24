@@ -8,6 +8,8 @@ import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.Val
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationFormatRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationFormatDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationFormatCodeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
@@ -159,7 +161,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
-            groupVO.setValidationType("FORMAT");
+            groupVO.setValidationType(MetadataValidationRuleTypeEnum.FORMAT.getCode());
             // 修复：同步entityUuid到规则组
             groupVO.setEntityUuid(field.getEntityUuid());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);
@@ -186,39 +188,30 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         if (data.getFormatCode() == null || data.getFormatCode().trim().isEmpty()) {
             if (data.getRegexPattern() != null && !data.getRegexPattern().trim().isEmpty()) {
                 // 有正则表达式，设置为REGEX类型
-                data.setFormatCode("REGEX");
+                data.setFormatCode(MetadataValidationFormatCodeEnum.REGEX.getCode());
             } else {
                 // 没有正则表达式，使用通用格式类型
-                data.setFormatCode("TEXT");
+                data.setFormatCode(MetadataValidationFormatCodeEnum.TEXT.getCode());
             }
         } else {
             // 标准化格式代码
             String formatCode = data.getFormatCode().trim().toUpperCase();
-            
-            // 支持的标准格式类型
-            switch (formatCode) {
-                case "EMAIL":
-                case "MOBILE":
-                case "ID_CARD":
-                case "URL":
-                case "IP":
-                case "TEXT":
-                    data.setFormatCode(formatCode);
-                    break;
-                case "REGEX":
-                    if (data.getRegexPattern() == null || data.getRegexPattern().trim().isEmpty()) {
-                        throw new IllegalArgumentException("当格式类型为REGEX时，必须提供正则表达式");
-                    }
-                    data.setFormatCode("REGEX");
-                    break;
-                default:
-                    // 不识别的格式类型，如果有正则表达式就当作REGEX，否则当作TEXT
-                    if (data.getRegexPattern() != null && !data.getRegexPattern().trim().isEmpty()) {
-                        data.setFormatCode("REGEX");
-                    } else {
-                        data.setFormatCode("TEXT");
-                    }
-                    break;
+
+            MetadataValidationFormatCodeEnum formatCodeEnum = MetadataValidationFormatCodeEnum.getByCode(formatCode);
+            if (formatCodeEnum == null) {
+                // 不识别的格式类型，如果有正则表达式就当作REGEX，否则当作TEXT
+                if (data.getRegexPattern() != null && !data.getRegexPattern().trim().isEmpty()) {
+                    data.setFormatCode(MetadataValidationFormatCodeEnum.REGEX.getCode());
+                } else {
+                    data.setFormatCode(MetadataValidationFormatCodeEnum.TEXT.getCode());
+                }
+            } else if (MetadataValidationFormatCodeEnum.REGEX == formatCodeEnum) {
+                if (data.getRegexPattern() == null || data.getRegexPattern().trim().isEmpty()) {
+                    throw new IllegalArgumentException("当格式类型为REGEX时，必须提供正则表达式");
+                }
+                data.setFormatCode(MetadataValidationFormatCodeEnum.REGEX.getCode());
+            } else {
+                data.setFormatCode(formatCodeEnum.getCode());
             }
         }
 

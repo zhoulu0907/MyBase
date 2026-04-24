@@ -9,6 +9,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationUniq
 import com.cmsr.onebase.module.metadata.core.dal.database.MetadataEntityFieldRepository;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationUniqueDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.build.service.entity.MetadataEntityFieldBuildService;
 import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
 import com.cmsr.onebase.module.metadata.core.util.StatusEnumUtil;
@@ -107,7 +108,7 @@ public class MetadataValidationUniqueBuildServiceImpl implements MetadataValidat
             groupVO.setValMethod(vo.getValMethod());
             groupVO.setPopPrompt(vo.getPopPrompt());
             groupVO.setPopType(vo.getPopType());
-            groupVO.setValidationType("UNIQUE");
+            groupVO.setValidationType(MetadataValidationRuleTypeEnum.UNIQUE.getCode());
             // 修复：同步entityUuid到规则组
             groupVO.setEntityUuid(field.getEntityUuid());
             groupId = ruleGroupService.createValidationRuleGroup(groupVO);

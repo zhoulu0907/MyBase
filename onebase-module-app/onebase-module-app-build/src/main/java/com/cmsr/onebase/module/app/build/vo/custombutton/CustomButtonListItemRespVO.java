@@ -16,13 +16,13 @@ public class CustomButtonListItemRespVO {
     @Schema(description = "按钮名称")
     private String buttonName;
 
-    @Schema(description = "操作范围")
+    @Schema(description = "操作范围：SINGLE 单条记录、BATCH 批量记录、FORM 表单视图")
     private String operationScope;
 
-    @Schema(description = "动作类型")
+    @Schema(description = "动作类型：UPDATE_FORM、CREATE_RELATED_RECORD、TRIGGER_FLOW、OPEN_PAGE")
     private String actionType;
 
-    @Schema(description = "状态")
+    @Schema(description = "状态：ENABLE 启用、DISABLE 停用")
     private String status;
 
     @Schema(description = "排序号")

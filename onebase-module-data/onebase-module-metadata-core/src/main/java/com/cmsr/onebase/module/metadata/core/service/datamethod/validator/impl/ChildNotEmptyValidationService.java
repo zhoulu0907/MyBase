@@ -4,6 +4,7 @@ import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationChil
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationChildNotEmptyDO;
 import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.ValidationService;
 import com.mybatisflex.core.query.QueryWrapper;
 import jakarta.annotation.Resource;
@@ -56,7 +57,7 @@ public class ChildNotEmptyValidationService implements ValidationService {
 
     @Override
     public String getValidationType() {
-        return "CHILD_NOT_EMPTY";
+        return MetadataValidationRuleTypeEnum.CHILD_NOT_EMPTY.getCode();
     }
 
     @Override

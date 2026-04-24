@@ -26,4 +26,8 @@ public interface AppCustomButtonErrorCodeConstants {
     ErrorCode CUSTOM_BUTTON_FLOW_CONFIG_REQUIRED = new ErrorCode(21009, "执行自动化流动作必须配置流程信息");
 
     ErrorCode CUSTOM_BUTTON_BATCH_RECORDS_EMPTY = new ErrorCode(21010, "批量执行记录不能为空");
+
+    ErrorCode CUSTOM_BUTTON_ACTION_CONFIG_REQUIRED = new ErrorCode(21011, "按钮动作配置不完整");
+
+    ErrorCode CUSTOM_BUTTON_DISPLAY_POSITION_INVALID = new ErrorCode(21012, "按钮显示位置配置不合法");
 }

@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.dialect.impl;
 
 import com.cmsr.onebase.module.metadata.core.dialect.DefaultSqlDialectStrategy;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataTypeCodeEnum;
 import com.mybatisflex.core.dialect.DbType;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ public class OracleSqlDialectStrategy extends DefaultSqlDialectStrategy {
     /**
      * Oracle 的 CAST 目标类型
      */
-    private static final String ORACLE_CAST_TYPE = "NUMBER";
+    private static final String ORACLE_CAST_TYPE = MetadataDataTypeCodeEnum.NUMBER.getCode();
 
     @Override
     public DbType getSupportedDbType() {

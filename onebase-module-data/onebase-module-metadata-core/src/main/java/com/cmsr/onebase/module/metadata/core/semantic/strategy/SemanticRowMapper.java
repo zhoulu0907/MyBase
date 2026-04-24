@@ -1,6 +1,8 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataTypeCodeEnum;
+import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import org.anyline.entity.DataRow;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +31,7 @@ public class SemanticRowMapper {
                     } catch (Exception e) {
                         resultMap.put(fieldName, value);
                     }
-                } else if ("DATETIME".equals(fieldType) && value instanceof Timestamp timestamp) {
+                } else if (SemanticFieldTypeEnum.DATETIME.getCode().equals(fieldType) && value instanceof Timestamp timestamp) {
                     Instant instant = timestamp.toInstant();
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
                     String timeStr = dateTimeFormatter.format(instant);
@@ -50,7 +52,7 @@ public class SemanticRowMapper {
                 upperFieldType.contains("ADDRESS") || upperFieldType.contains("FILE") || upperFieldType.contains("ATTACHMENT") ||
                 upperFieldType.contains("IMAGE") || upperFieldType.contains("USER") || upperFieldType.contains("DEPARTMENT") ||
                 upperFieldType.contains("DATA") || upperFieldType.contains("GEOGRAPHY") || upperFieldType.contains("GEO") ||
-                upperFieldType.equals("JSONB") || upperFieldType.equals("JSON");
+                upperFieldType.equals(MetadataDataTypeCodeEnum.JSONB.getCode()) || upperFieldType.equals(MetadataDataTypeCodeEnum.JSON.getCode());
         String strValue = fieldValue.toString().trim();
         boolean looksLikeJson = strValue.startsWith("{") || strValue.startsWith("[");
         return isComplexType && looksLikeJson;

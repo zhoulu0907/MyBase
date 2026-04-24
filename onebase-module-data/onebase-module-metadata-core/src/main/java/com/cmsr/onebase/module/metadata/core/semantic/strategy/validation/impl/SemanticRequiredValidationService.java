@@ -1,6 +1,7 @@
 package com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.impl;
 
 import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationRequiredDO;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.SemanticFieldSchemaDTO;
 import com.cmsr.onebase.module.metadata.core.semantic.dto.enums.SemanticFieldTypeEnum;
 import com.cmsr.onebase.module.metadata.core.semantic.strategy.validation.SemanticValidationContext;
@@ -42,7 +43,7 @@ public class SemanticRequiredValidationService implements SemanticValidationServ
     }
 
     @Override
-    public String getValidationType() { return "REQUIRED"; }
+    public String getValidationType() { return MetadataValidationRuleTypeEnum.REQUIRED.getCode(); }
 
     @Override
     public boolean supports(String fieldType) { return true; }
