@@ -11,7 +11,10 @@ import java.util.zip.ZipOutputStream;
 
 import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
 import com.cmsr.onebase.module.system.api.config.SystemConfigApi;
+import com.cmsr.onebase.module.system.api.project.ProjectAppRelationApi;
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Async;
@@ -141,6 +144,10 @@ public class AppVersionServiceImpl implements AppVersionService {
 
     @Autowired
     private SystemConfigApi systemConfigApi;
+
+    @Resource
+    private ProjectAppRelationApi projectAppRelationApi;
+
 
     @Override
     public PageResult<VersionPageRespVO> getApplicationVersionPage(VersionPageReqVo listReqVo) {
@@ -301,6 +308,9 @@ public class AppVersionServiceImpl implements AppVersionService {
                 // 导入配置数据到开发版本
                 appDataManager.saveApplicationVersionConfigData(applicationId, existingApp.getAppUid(),
                         existingApp.getTenantId(), VersionTagEnum.BUILD.getValue(), importPackage.getConfigData());
+                if (StringUtils.isNotBlank(versionImportReq.getProjectId())) {
+                    projectAppRelationApi.createProjectAppRelation(versionImportReq.getProjectId(), applicationId);
+                }
             });
         } else {
             // 创建全新的应用
@@ -315,6 +325,10 @@ public class AppVersionServiceImpl implements AppVersionService {
                 appDataManager.saveApplicationVersionConfigData(newApplicationId, appUid, newApp.getTenantId(),
                         VersionTagEnum.BUILD.getValue(), importPackage.getConfigData());
                 log.info("创建新应用，newApplicationId: {}", newApplicationId);
+
+                if (versionImportReq.getProjectId() != null) {
+                    projectAppRelationApi.createProjectAppRelation(versionImportReq.getProjectId(), newApplicationId);
+                }
             });
         }
     }

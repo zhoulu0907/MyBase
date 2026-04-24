@@ -34,4 +34,7 @@ public class ApplicationPageReqVO extends PageParam {
     @Schema(description = "项目编码")
     private String projectCode;
 
+    @Schema(description = "项目ID")
+    private String projectId;
+
 }

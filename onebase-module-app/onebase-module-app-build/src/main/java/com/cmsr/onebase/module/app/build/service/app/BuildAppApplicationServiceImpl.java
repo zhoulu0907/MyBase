@@ -3,9 +3,11 @@ package com.cmsr.onebase.module.app.build.service.app;
 import com.cmsr.onebase.framework.common.enums.CommonPublishModelEnum;
 import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
 import com.cmsr.onebase.framework.common.pojo.PageResult;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
 import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
 import com.cmsr.onebase.framework.common.util.object.BeanUtils;
 import com.cmsr.onebase.framework.uid.UidGenerator;
 import com.cmsr.onebase.module.app.build.service.AppCommonService;
@@ -43,6 +45,7 @@ import com.cmsr.onebase.module.metadata.api.datasource.dto.DatasourceSaveReqDTO;
 import com.cmsr.onebase.module.metadata.api.version.MetadataDataManagerApi;
 import com.cmsr.onebase.module.screen.api.DashboardProjectApi;
 import com.cmsr.onebase.module.system.api.dict.DictDataApi;
+import com.cmsr.onebase.module.system.api.project.ProjectAppRelationApi;
 import jakarta.annotation.Resource;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -55,10 +58,13 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -130,10 +136,28 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
     @Resource
     private DictDataApi dictDataApi;
 
+    @Resource
+    private ProjectAppRelationApi projectAppRelationApi;
+
     @Override
     public PageResult<ApplicationRespVO> getApplicationPage(ApplicationPageReqVO pageReqVO) {
         Long userId = SecurityFrameworkUtils.getLoginUserId();
-        PageResult<AppApplicationDO> pageResult = applicationRepository.selectPage(pageReqVO, userId);
+        PageResult<AppApplicationDO> pageResult;
+        
+        // 如果传入了projectId，先查询当前项目下的所有应用ID
+        if (StringUtils.isNotBlank(pageReqVO.getProjectId())) {
+            CommonResult<List<Long>> projectResult = projectAppRelationApi.listApplicationIdsByProjectId(pageReqVO.getProjectId());
+            if (projectResult == null || !projectResult.isSuccess() || CollectionUtils.isEmpty(projectResult.getData())) {
+                return PageResult.empty();
+            }
+            List<Long> appIds = projectResult.getData();
+            // 根据应用ID和其他过滤条件进行分页查询
+            pageResult = applicationRepository.getApplicationPageByAppIds(appIds, pageReqVO);
+        } else {
+            // 没有projectId，使用原有的查询逻辑
+            pageResult = applicationRepository.selectPage(pageReqVO, userId);
+        }
+        
         if (CollectionUtils.isEmpty(pageResult.getList())) {
             return PageResult.empty();
         }
@@ -282,6 +306,11 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
                     createReqVO.getPublishModel() == null ? CommonPublishModelEnum.InnerModel.getValue()
                             : createReqVO.getPublishModel());
             applicationRepository.save(applicationDO);
+
+            if (StringUtils.isNotBlank(createReqVO.getProjectId())) {
+                //插入项目应用关联表
+                projectAppRelationApi.createProjectAppRelation(createReqVO.getProjectId(), applicationDO.getId());
+            }
             // 保存导航配置
             AppNavigationDO appNavigationDO = new AppNavigationDO();
             BeanUtils.copyProperties(createReqVO, appNavigationDO);
@@ -391,6 +420,8 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
             dashboardProjectApi.removeDashboardByAppId(id);
             // 删除应用级别字典Dict
             dictDataApi.deleteDictDataByDictOwner(APP, id);
+
+            projectAppRelationApi.removeProjectAppRelation(id);
         });
     }
 
@@ -464,6 +495,71 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
         appNavigationDO.setAppUserForgetPwdShow(updateReqVO.getAppUserForgetPwdShow());
         appNavigationDO.setAppUserRegisterShow(updateReqVO.getAppUserRegisterShow());
         appNavigationRepository.saveOrUpdate(appNavigationDO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteApplicationsByProjectId(String projectId) {
+        LocalDateTime startTime = LocalDateTime.now();
+        String startTimeStr = startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        log.info("开始删除项目ID: {} 下的应用，开始时间: {}", projectId, startTimeStr);
+        
+        // 根据项目ID获取所有应用ID
+        CommonResult<List<Long>> projectResult = projectAppRelationApi.listApplicationIdsByProjectId(projectId);
+        if (projectResult == null || !projectResult.isSuccess() || CollectionUtils.isEmpty(projectResult.getData())) {
+            log.warn("项目ID: {} 下没有找到任何应用", projectId);
+            return;
+        }
+        
+        List<Long> appIds = projectResult.getData();
+        int totalApps = appIds.size();
+        log.info("项目ID: {} 下共有 {} 个应用需要删除", projectId, totalApps);
+        
+        // 同步串行删除应用
+        int deletedCount = 0;
+        for (Long appId : appIds) {
+            try {
+                AppApplicationDO applicationDO = applicationRepository.getById(appId);
+                if (applicationDO == null) {
+                    log.warn("应用ID: {} 不存在，跳过", appId);
+                    continue;
+                }
+
+                // 检查应用是否在线
+                if (AppStatusEnum.isOnline(applicationDO.getAppStatus())) {
+                    log.warn("应用ID: {} 处于在线状态，无法删除，先将其下线", appId);
+                    throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_ONLINE_ERROR);
+                }
+
+                // 执行删除逻辑（复用现有的deleteApplication方法的核心逻辑）
+                etlDataManager.offlineAllByApplication(appId);
+                flowDataManager.deleteRuntimeData(appId);
+
+                bpmDataManager.removeApplication(appId);
+                metadataDataManagerApi.deleteAllApplicationData(appId);
+                etlDataManager.deleteAllApplicationData(appId);
+                flowDataManager.deleteAllApplicationData(appId);
+                appDataManager.deleteAllApplicationData(appId);
+                versionRepository.deleteByApplicationId(appId);
+                applicationTagRepository.deleteByApplicationId(appId);
+                applicationRepository.removeById(appId);
+                dashboardProjectApi.removeDashboardByAppId(appId);
+                dictDataApi.deleteDictDataByDictOwner(APP, appId);
+                projectAppRelationApi.removeProjectAppRelation(appId);
+
+                log.info("成功删除应用ID: {}, 名称: {}", appId, applicationDO.getAppName());
+                deletedCount++;
+            } catch (Exception e) {
+                log.error("删除应用ID: {} 时发生错误", appId, e);
+                throw new RuntimeException("删除应用ID: " + appId + " 失败", e);
+            }
+        }
+
+        LocalDateTime endTime = LocalDateTime.now();
+        String endTimeStr = endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        long durationSeconds = ChronoUnit.SECONDS.between(startTime, endTime);
+        log.info("项目ID: {} 下的应用删除完成，开始时间: {}, 结束时间: {}, 总应用数: {}, 成功删除: {}, 耗时: {} 秒",
+                projectId, startTimeStr, endTimeStr, totalApps, deletedCount, durationSeconds);
     }
 
 }
