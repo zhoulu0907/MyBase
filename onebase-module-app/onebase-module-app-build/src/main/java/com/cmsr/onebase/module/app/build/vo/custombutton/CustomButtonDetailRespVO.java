@@ -63,12 +63,30 @@ public class CustomButtonDetailRespVO {
     @Schema(description = "状态：ENABLE 启用、DISABLE 停用")
     private String status;
 
-    @Schema(description = "统一动作配置")
+    @Schema(description = "修改当前表单动作配置。仅 actionType=UPDATE_FORM 时返回")
+    private CustomButtonUpdateFormActionReqVO updateFormAction;
+
+    @Schema(description = "新建关联表单动作配置。仅 actionType=CREATE_RELATED_RECORD 时返回")
+    private CustomButtonCreateRelatedActionReqVO createRelatedAction;
+
+    @Schema(description = "执行自动化流动作配置。仅 actionType=TRIGGER_FLOW 时返回")
+    private CustomButtonTriggerFlowActionReqVO triggerFlowAction;
+
+    @Schema(description = "打开页面动作配置。仅 actionType=OPEN_PAGE 时返回")
+    private CustomButtonOpenPageActionReqVO openPageAction;
+
+    @Schema(description = "可用条件配置。外层 OR，内层 AND")
+    private CustomButtonAvailableConditionReqVO availableCondition;
+
+    @Deprecated
+    @Schema(description = "已废弃：统一动作配置", deprecated = true)
     private CustomButtonActionConfigReqVO actionConfig;
 
-    @Schema(description = "修改当前表单字段配置。仅 actionType=UPDATE_FORM 时返回")
+    @Deprecated
+    @Schema(description = "已废弃：修改当前表单字段配置。请读取 updateFormAction.updateFields", deprecated = true)
     private List<CustomButtonUpdateFieldReqVO> updateFields;
 
-    @Schema(description = "自动化流动作配置。兼容旧字段")
+    @Deprecated
+    @Schema(description = "已废弃：自动化流动作配置。请读取 triggerFlowAction", deprecated = true)
     private CustomButtonFlowActionReqVO flowAction;
 }

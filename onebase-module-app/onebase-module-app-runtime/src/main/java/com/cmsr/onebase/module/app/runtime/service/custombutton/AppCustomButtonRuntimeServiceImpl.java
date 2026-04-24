@@ -8,6 +8,8 @@ import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.core.dal.database.auth.AppAuthPermissionRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonActionConfigRepository;
+import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonConditionGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonConditionItemRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonExecDetailRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonExecLogRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonRepository;
@@ -29,8 +31,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -52,6 +56,12 @@ public class AppCustomButtonRuntimeServiceImpl implements AppCustomButtonRuntime
     private AppCustomButtonExecDetailRepository execDetailRepository;
 
     @Resource
+    private AppCustomButtonConditionGroupRepository conditionGroupRepository;
+
+    @Resource
+    private AppCustomButtonConditionItemRepository conditionItemRepository;
+
+    @Resource
     private AppAuthSecurityRoleProvider authSecurityRoleProvider;
 
     @Resource
@@ -66,7 +76,8 @@ public class AppCustomButtonRuntimeServiceImpl implements AppCustomButtonRuntime
         if (pageSetDO == null) {
             throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_PAGESET_NOT_EXISTS);
         }
-        String operationScope = Boolean.TRUE.equals(reqVO.getBatch())
+        String displayPosition = resolveDisplayPosition(reqVO);
+        String operationScope = "BATCH_ACTION".equalsIgnoreCase(displayPosition)
                 ? CustomButtonOperationScopeEnum.BATCH.getCode()
                 : CustomButtonOperationScopeEnum.SINGLE.getCode();
         List<AppCustomButtonDO> buttonDOS = customButtonRepository
@@ -75,6 +86,12 @@ public class AppCustomButtonRuntimeServiceImpl implements AppCustomButtonRuntime
         List<RuntimeCustomButtonRespVO> result = new ArrayList<>();
         for (AppCustomButtonDO buttonDO : buttonDOS) {
             if (allowedCodes != null && !allowedCodes.contains(buttonDO.getButtonCode())) {
+                continue;
+            }
+            if (!matchDisplayPosition(buttonDO, displayPosition)) {
+                continue;
+            }
+            if (!matchAvailableCondition(buttonDO.getButtonUuid(), reqVO.getConditionContext())) {
                 continue;
             }
             RuntimeCustomButtonRespVO item = new RuntimeCustomButtonRespVO();
@@ -89,6 +106,129 @@ public class AppCustomButtonRuntimeServiceImpl implements AppCustomButtonRuntime
             result.add(item);
         }
         return result;
+    }
+
+    private String resolveDisplayPosition(RuntimeCustomButtonListReqVO reqVO) {
+        if (StringUtils.isNotBlank(reqVO.getDisplayPosition())) {
+            return reqVO.getDisplayPosition();
+        }
+        return Boolean.TRUE.equals(reqVO.getBatch()) ? "BATCH_ACTION" : "FORM";
+    }
+
+    private boolean matchDisplayPosition(AppCustomButtonDO buttonDO, String displayPosition) {
+        if ("FORM".equalsIgnoreCase(displayPosition)) {
+            return Integer.valueOf(1).equals(buttonDO.getShowInForm());
+        }
+        if ("ROW_ACTION".equalsIgnoreCase(displayPosition)) {
+            return Integer.valueOf(1).equals(buttonDO.getShowInRowAction());
+        }
+        if ("BATCH_ACTION".equalsIgnoreCase(displayPosition)) {
+            return Integer.valueOf(1).equals(buttonDO.getShowInBatchAction());
+        }
+        return true;
+    }
+
+    private boolean matchAvailableCondition(String buttonUuid, Map<String, Object> conditionContext) {
+        List<AppCustomButtonConditionGroupDO> groups = conditionGroupRepository.findByButtonUuid(buttonUuid);
+        if (CollectionUtils.isEmpty(groups)) {
+            return true;
+        }
+        if (conditionContext == null || conditionContext.isEmpty()) {
+            return false;
+        }
+        List<Long> groupIds = groups.stream().map(AppCustomButtonConditionGroupDO::getId).collect(Collectors.toList());
+        List<AppCustomButtonConditionItemDO> items = conditionItemRepository.findByGroupIds(groupIds);
+        Map<Long, List<AppCustomButtonConditionItemDO>> itemMap = items.stream()
+                .collect(Collectors.groupingBy(AppCustomButtonConditionItemDO::getGroupId));
+        for (AppCustomButtonConditionGroupDO group : groups) {
+            List<AppCustomButtonConditionItemDO> groupItems = itemMap.get(group.getId());
+            if (CollectionUtils.isEmpty(groupItems)) {
+                continue;
+            }
+            boolean andMatched = true;
+            for (AppCustomButtonConditionItemDO item : groupItems) {
+                if (!matchConditionItem(item, conditionContext)) {
+                    andMatched = false;
+                    break;
+                }
+            }
+            if (andMatched) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean matchConditionItem(AppCustomButtonConditionItemDO item, Map<String, Object> context) {
+        Object left = resolveContextValue(context, item.getFieldCode(), item.getFieldUuid());
+        Object right = resolveCompareValue(item, context);
+        String operator = item.getOperator() == null ? "" : item.getOperator().trim().toUpperCase(Locale.ROOT);
+        Integer numberCompare = compareAsNumber(left, right);
+        return switch (operator) {
+            case "EQ", "=", "==" -> compareAsString(left, right) == 0;
+            case "NE", "!=", "<>" -> compareAsString(left, right) != 0;
+            case "GT", ">" -> numberCompare != null && numberCompare > 0;
+            case "GE", ">=" -> numberCompare != null && numberCompare >= 0;
+            case "LT", "<" -> numberCompare != null && numberCompare < 0;
+            case "LE", "<=" -> numberCompare != null && numberCompare <= 0;
+            case "IN" -> inValues(left, right, false);
+            case "NOT_IN" -> inValues(left, right, true);
+            case "CONTAINS" -> left != null && right != null && String.valueOf(left).contains(String.valueOf(right));
+            case "EMPTY" -> isEmptyValue(left);
+            case "NOT_EMPTY" -> !isEmptyValue(left);
+            default -> false;
+        };
+    }
+
+    private Object resolveCompareValue(AppCustomButtonConditionItemDO item, Map<String, Object> context) {
+        if ("VARIABLE".equalsIgnoreCase(item.getValueType())) {
+            return resolveContextValue(context, item.getCompareValue(), item.getCompareValue());
+        }
+        return item.getCompareValue();
+    }
+
+    private Object resolveContextValue(Map<String, Object> context, String fieldCode, String fieldUuid) {
+        if (StringUtils.isNotBlank(fieldCode) && context.containsKey(fieldCode)) {
+            return context.get(fieldCode);
+        }
+        if (StringUtils.isNotBlank(fieldUuid) && context.containsKey(fieldUuid)) {
+            return context.get(fieldUuid);
+        }
+        return null;
+    }
+
+    private int compareAsString(Object left, Object right) {
+        return Objects.toString(left, "").compareTo(Objects.toString(right, ""));
+    }
+
+    private Integer compareAsNumber(Object left, Object right) {
+        try {
+            return new BigDecimal(String.valueOf(left)).compareTo(new BigDecimal(String.valueOf(right)));
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private boolean inValues(Object left, Object right, boolean negate) {
+        if (left == null || right == null) {
+            return negate;
+        }
+        List<String> values = Arrays.stream(String.valueOf(right).split(","))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .toList();
+        boolean contains = values.contains(String.valueOf(left));
+        return negate != contains;
+    }
+
+    private boolean isEmptyValue(Object value) {
+        if (value == null) {
+            return true;
+        }
+        if (value instanceof Collection<?> collection) {
+            return collection.isEmpty();
+        }
+        return StringUtils.isBlank(String.valueOf(value));
     }
 
     @Override

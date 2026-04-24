@@ -2,13 +2,18 @@ package com.cmsr.onebase.module.app.build.service.custombutton;
 
 import com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil;
 import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
 import com.cmsr.onebase.framework.common.util.string.UuidUtils;
 import com.cmsr.onebase.module.app.build.vo.custombutton.*;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonActionConfigRepository;
+import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonConditionGroupRepository;
+import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonConditionItemRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonRepository;
 import com.cmsr.onebase.module.app.core.dal.database.custombutton.AppCustomButtonUpdateFieldRepository;
 import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonActionConfigDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonConditionGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonConditionItemDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppCustomButtonUpdateFieldDO;
 import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
@@ -19,12 +24,13 @@ import com.cmsr.onebase.module.app.core.enums.custombutton.CustomButtonStatusEnu
 import jakarta.annotation.Resource;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Validated
@@ -38,6 +44,12 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
 
     @Resource
     private AppCustomButtonUpdateFieldRepository updateFieldRepository;
+
+    @Resource
+    private AppCustomButtonConditionGroupRepository conditionGroupRepository;
+
+    @Resource
+    private AppCustomButtonConditionItemRepository conditionItemRepository;
 
     @Resource
     private AppPageSetRepository pageSetRepository;
@@ -98,12 +110,23 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
             respVO.setActionConfig(actionConfigVO);
             respVO.setFlowAction(toFlowActionReqVO(actionConfigDO));
         }
+        List<CustomButtonUpdateFieldReqVO> updateFields = toUpdateFieldReqVOList(
+                updateFieldRepository.findByButtonUuid(buttonDO.getButtonUuid()));
         if (CustomButtonActionTypeEnum.TRIGGER_FLOW.getCode().equalsIgnoreCase(buttonDO.getActionType())) {
+            respVO.setTriggerFlowAction(toTriggerFlowActionReqVO(actionConfigDO));
             respVO.setFlowAction(toFlowActionReqVO(actionConfigDO));
         }
         if (CustomButtonActionTypeEnum.UPDATE_FORM.getCode().equalsIgnoreCase(buttonDO.getActionType())) {
-            respVO.setUpdateFields(toUpdateFieldReqVOList(updateFieldRepository.findByButtonUuid(buttonDO.getButtonUuid())));
+            respVO.setUpdateFormAction(toUpdateFormActionReqVO(actionConfigDO, updateFields));
+            respVO.setUpdateFields(updateFields);
         }
+        if (CustomButtonActionTypeEnum.CREATE_RELATED_RECORD.getCode().equalsIgnoreCase(buttonDO.getActionType())) {
+            respVO.setCreateRelatedAction(toCreateRelatedActionReqVO(actionConfigDO));
+        }
+        if (CustomButtonActionTypeEnum.OPEN_PAGE.getCode().equalsIgnoreCase(buttonDO.getActionType())) {
+            respVO.setOpenPageAction(toOpenPageActionReqVO(actionConfigDO));
+        }
+        respVO.setAvailableCondition(toAvailableConditionReqVO(buttonDO.getButtonUuid()));
         return respVO;
     }
 
@@ -126,6 +149,7 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         customButtonRepository.save(buttonDO);
         upsertActionConfig(buttonDO, reqVO);
         replaceUpdateFields(buttonDO, reqVO);
+        replaceConditions(buttonDO, reqVO);
         return buttonDO.getId();
     }
 
@@ -148,6 +172,7 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         customButtonRepository.updateById(buttonDO);
         upsertActionConfig(buttonDO, reqVO);
         replaceUpdateFields(buttonDO, reqVO);
+        replaceConditions(buttonDO, reqVO);
         return true;
     }
 
@@ -160,6 +185,8 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         }
         actionConfigRepository.removeByButtonUuid(buttonDO.getButtonUuid());
         updateFieldRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        conditionItemRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        conditionGroupRepository.removeByButtonUuid(buttonDO.getButtonUuid());
         customButtonRepository.removeById(id);
         return true;
     }
@@ -204,10 +231,58 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         if (customButtonRepository.existsByPageSetUuidAndButtonName(pageSetUuid, reqVO.getButtonName(), excludeId)) {
             throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_NAME_DUPLICATE);
         }
+        validateDisplayPosition(reqVO);
+        validateActionConfig(reqVO);
+    }
+
+    private void validateActionConfig(CustomButtonSaveReqVO reqVO) {
         if (CustomButtonActionTypeEnum.TRIGGER_FLOW.getCode().equalsIgnoreCase(reqVO.getActionType())) {
             if (resolveFlowProcessId(reqVO) == null) {
                 throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_FLOW_CONFIG_REQUIRED);
             }
+        }
+        if (CustomButtonActionTypeEnum.CREATE_RELATED_RECORD.getCode().equalsIgnoreCase(reqVO.getActionType())) {
+            CustomButtonCreateRelatedActionReqVO action = resolveCreateRelatedAction(reqVO);
+            if (action == null || StringUtils.isAnyBlank(action.getTargetPageSetUuid(), action.getTargetPageUuid(),
+                    action.getTargetRelationFieldUuid())) {
+                throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_ACTION_CONFIG_REQUIRED);
+            }
+        }
+        if (CustomButtonActionTypeEnum.OPEN_PAGE.getCode().equalsIgnoreCase(reqVO.getActionType())) {
+            CustomButtonOpenPageActionReqVO action = resolveOpenPageAction(reqVO);
+            if (action == null || StringUtils.isBlank(action.getTargetType())) {
+                throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_ACTION_CONFIG_REQUIRED);
+            }
+            if ("INNER_PAGE".equalsIgnoreCase(action.getTargetType())
+                    && StringUtils.isAnyBlank(action.getTargetPageSetUuid(), action.getTargetPageUuid())) {
+                throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_ACTION_CONFIG_REQUIRED);
+            }
+            if ("OUTER_URL".equalsIgnoreCase(action.getTargetType()) && StringUtils.isBlank(action.getTargetUrl())) {
+                throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_ACTION_CONFIG_REQUIRED);
+            }
+        }
+    }
+
+    private void validateDisplayPosition(CustomButtonSaveReqVO reqVO) {
+        boolean batch = CustomButtonOperationScopeEnum.BATCH.getCode().equalsIgnoreCase(reqVO.getOperationScope());
+        if (batch && (CustomButtonActionTypeEnum.UPDATE_FORM.getCode().equalsIgnoreCase(reqVO.getActionType())
+                || CustomButtonActionTypeEnum.OPEN_PAGE.getCode().equalsIgnoreCase(reqVO.getActionType()))) {
+            throw ServiceExceptionUtil.exception(AppCustomButtonErrorCodeConstants.CUSTOM_BUTTON_DISPLAY_POSITION_INVALID);
+        }
+        if (batch) {
+            reqVO.setShowInForm(0);
+            reqVO.setShowInRowAction(0);
+            reqVO.setShowInBatchAction(1);
+            return;
+        }
+        if (reqVO.getShowInForm() == null) {
+            reqVO.setShowInForm(1);
+        }
+        if (reqVO.getShowInRowAction() == null) {
+            reqVO.setShowInRowAction(0);
+        }
+        if (reqVO.getShowInBatchAction() == null) {
+            reqVO.setShowInBatchAction(0);
         }
     }
 
@@ -236,6 +311,7 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
             configDO.setApplicationId(buttonDO.getApplicationId());
         }
         configDO.setActionType(buttonDO.getActionType());
+        clearActionConfigFields(configDO);
         applyActionConfigFields(configDO, reqVO);
         if (configDO.getId() == null) {
             actionConfigRepository.save(configDO);
@@ -246,12 +322,13 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
 
     private void replaceUpdateFields(AppCustomButtonDO buttonDO, CustomButtonSaveReqVO reqVO) {
         updateFieldRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        List<CustomButtonUpdateFieldReqVO> updateFields = resolveUpdateFields(reqVO);
         if (!CustomButtonActionTypeEnum.UPDATE_FORM.getCode().equalsIgnoreCase(buttonDO.getActionType())
-                || CollectionUtils.isEmpty(reqVO.getUpdateFields())) {
+                || CollectionUtils.isEmpty(updateFields)) {
             return;
         }
         List<AppCustomButtonUpdateFieldDO> fieldDOS = new ArrayList<>();
-        for (CustomButtonUpdateFieldReqVO fieldReqVO : reqVO.getUpdateFields()) {
+        for (CustomButtonUpdateFieldReqVO fieldReqVO : updateFields) {
             AppCustomButtonUpdateFieldDO fieldDO = new AppCustomButtonUpdateFieldDO();
             fieldDO.setApplicationId(buttonDO.getApplicationId());
             fieldDO.setButtonUuid(buttonDO.getButtonUuid());
@@ -268,6 +345,38 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
     }
 
     private void applyActionConfigFields(AppCustomButtonActionConfigDO configDO, CustomButtonSaveReqVO reqVO) {
+        CustomButtonUpdateFormActionReqVO updateFormActionReqVO = reqVO.getUpdateFormAction();
+        if (updateFormActionReqVO != null) {
+            configDO.setOpenMode(updateFormActionReqVO.getOpenMode());
+            configDO.setSubmitSuccessText(updateFormActionReqVO.getSubmitSuccessText());
+        }
+        CustomButtonCreateRelatedActionReqVO createRelatedReqVO = reqVO.getCreateRelatedAction();
+        if (createRelatedReqVO != null) {
+            configDO.setOpenMode(createRelatedReqVO.getOpenMode());
+            configDO.setTargetPageSetUuid(createRelatedReqVO.getTargetPageSetUuid());
+            configDO.setTargetPageUuid(createRelatedReqVO.getTargetPageUuid());
+            configDO.setTargetEntityUuid(createRelatedReqVO.getTargetEntityUuid());
+            configDO.setTargetRelationFieldUuid(createRelatedReqVO.getTargetRelationFieldUuid());
+            configDO.setTargetRelationScope(createRelatedReqVO.getTargetRelationScope());
+        }
+        CustomButtonTriggerFlowActionReqVO triggerFlowReqVO = reqVO.getTriggerFlowAction();
+        if (triggerFlowReqVO != null) {
+            configDO.setFlowProcessId(triggerFlowReqVO.getFlowProcessId());
+            configDO.setFlowProcessUuid(triggerFlowReqVO.getFlowProcessUuid());
+            configDO.setConfirmRequired(triggerFlowReqVO.getConfirmRequired());
+            configDO.setConfirmText(triggerFlowReqVO.getConfirmText());
+        }
+        CustomButtonOpenPageActionReqVO openPageReqVO = reqVO.getOpenPageAction();
+        if (openPageReqVO != null) {
+            configDO.setOpenMode(openPageReqVO.getOpenMode());
+            configDO.setTargetType(openPageReqVO.getTargetType());
+            configDO.setTargetPageSetUuid(openPageReqVO.getTargetPageSetUuid());
+            configDO.setTargetPageUuid(openPageReqVO.getTargetPageUuid());
+            configDO.setTargetUrl(openPageReqVO.getTargetUrl());
+            if (CollectionUtils.isNotEmpty(openPageReqVO.getParams())) {
+                configDO.setConfigJson(JsonUtils.toJsonString(openPageReqVO.getParams()));
+            }
+        }
         CustomButtonActionConfigReqVO actionConfigReqVO = reqVO.getActionConfig();
         if (actionConfigReqVO != null) {
             configDO.setOpenMode(actionConfigReqVO.getOpenMode());
@@ -298,11 +407,71 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         }
     }
 
+    private void clearActionConfigFields(AppCustomButtonActionConfigDO configDO) {
+        configDO.setOpenMode(null);
+        configDO.setSubmitSuccessText(null);
+        configDO.setTargetType(null);
+        configDO.setTargetPageSetUuid(null);
+        configDO.setTargetPageUuid(null);
+        configDO.setTargetUrl(null);
+        configDO.setTargetEntityUuid(null);
+        configDO.setTargetRelationFieldUuid(null);
+        configDO.setTargetRelationScope(null);
+        configDO.setFlowProcessId(null);
+        configDO.setFlowProcessUuid(null);
+        configDO.setConfirmRequired(null);
+        configDO.setConfirmText(null);
+        configDO.setConfigJson(null);
+    }
+
     private Long resolveFlowProcessId(CustomButtonSaveReqVO reqVO) {
+        if (reqVO.getTriggerFlowAction() != null && reqVO.getTriggerFlowAction().getFlowProcessId() != null) {
+            return reqVO.getTriggerFlowAction().getFlowProcessId();
+        }
         if (reqVO.getActionConfig() != null && reqVO.getActionConfig().getFlowProcessId() != null) {
             return reqVO.getActionConfig().getFlowProcessId();
         }
         return reqVO.getFlowAction() == null ? null : reqVO.getFlowAction().getFlowProcessId();
+    }
+
+    private List<CustomButtonUpdateFieldReqVO> resolveUpdateFields(CustomButtonSaveReqVO reqVO) {
+        if (reqVO.getUpdateFormAction() != null && reqVO.getUpdateFormAction().getUpdateFields() != null) {
+            return reqVO.getUpdateFormAction().getUpdateFields();
+        }
+        return reqVO.getUpdateFields();
+    }
+
+    private CustomButtonCreateRelatedActionReqVO resolveCreateRelatedAction(CustomButtonSaveReqVO reqVO) {
+        if (reqVO.getCreateRelatedAction() != null) {
+            return reqVO.getCreateRelatedAction();
+        }
+        if (reqVO.getActionConfig() == null) {
+            return null;
+        }
+        CustomButtonCreateRelatedActionReqVO action = new CustomButtonCreateRelatedActionReqVO();
+        action.setOpenMode(reqVO.getActionConfig().getOpenMode());
+        action.setTargetPageSetUuid(reqVO.getActionConfig().getTargetPageSetUuid());
+        action.setTargetPageUuid(reqVO.getActionConfig().getTargetPageUuid());
+        action.setTargetEntityUuid(reqVO.getActionConfig().getTargetEntityUuid());
+        action.setTargetRelationFieldUuid(reqVO.getActionConfig().getTargetRelationFieldUuid());
+        action.setTargetRelationScope(reqVO.getActionConfig().getTargetRelationScope());
+        return action;
+    }
+
+    private CustomButtonOpenPageActionReqVO resolveOpenPageAction(CustomButtonSaveReqVO reqVO) {
+        if (reqVO.getOpenPageAction() != null) {
+            return reqVO.getOpenPageAction();
+        }
+        if (reqVO.getActionConfig() == null) {
+            return null;
+        }
+        CustomButtonOpenPageActionReqVO action = new CustomButtonOpenPageActionReqVO();
+        action.setOpenMode(reqVO.getActionConfig().getOpenMode());
+        action.setTargetType(reqVO.getActionConfig().getTargetType());
+        action.setTargetPageSetUuid(reqVO.getActionConfig().getTargetPageSetUuid());
+        action.setTargetPageUuid(reqVO.getActionConfig().getTargetPageUuid());
+        action.setTargetUrl(reqVO.getActionConfig().getTargetUrl());
+        return action;
     }
 
     private CustomButtonActionConfigReqVO toActionConfigReqVO(AppCustomButtonActionConfigDO configDO) {
@@ -339,6 +508,60 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
         return flowReqVO;
     }
 
+    private CustomButtonTriggerFlowActionReqVO toTriggerFlowActionReqVO(AppCustomButtonActionConfigDO configDO) {
+        if (configDO == null || configDO.getFlowProcessId() == null) {
+            return null;
+        }
+        CustomButtonTriggerFlowActionReqVO reqVO = new CustomButtonTriggerFlowActionReqVO();
+        reqVO.setFlowProcessId(configDO.getFlowProcessId());
+        reqVO.setFlowProcessUuid(configDO.getFlowProcessUuid());
+        reqVO.setConfirmRequired(configDO.getConfirmRequired());
+        reqVO.setConfirmText(configDO.getConfirmText());
+        return reqVO;
+    }
+
+    private CustomButtonUpdateFormActionReqVO toUpdateFormActionReqVO(AppCustomButtonActionConfigDO configDO,
+                                                                       List<CustomButtonUpdateFieldReqVO> updateFields) {
+        CustomButtonUpdateFormActionReqVO reqVO = new CustomButtonUpdateFormActionReqVO();
+        if (configDO != null) {
+            reqVO.setOpenMode(configDO.getOpenMode());
+            reqVO.setSubmitSuccessText(configDO.getSubmitSuccessText());
+        }
+        reqVO.setUpdateFields(updateFields);
+        return reqVO;
+    }
+
+    private CustomButtonCreateRelatedActionReqVO toCreateRelatedActionReqVO(AppCustomButtonActionConfigDO configDO) {
+        if (configDO == null) {
+            return null;
+        }
+        CustomButtonCreateRelatedActionReqVO reqVO = new CustomButtonCreateRelatedActionReqVO();
+        reqVO.setOpenMode(configDO.getOpenMode());
+        reqVO.setTargetPageSetUuid(configDO.getTargetPageSetUuid());
+        reqVO.setTargetPageUuid(configDO.getTargetPageUuid());
+        reqVO.setTargetEntityUuid(configDO.getTargetEntityUuid());
+        reqVO.setTargetRelationFieldUuid(configDO.getTargetRelationFieldUuid());
+        reqVO.setTargetRelationScope(configDO.getTargetRelationScope());
+        return reqVO;
+    }
+
+    private CustomButtonOpenPageActionReqVO toOpenPageActionReqVO(AppCustomButtonActionConfigDO configDO) {
+        if (configDO == null) {
+            return null;
+        }
+        CustomButtonOpenPageActionReqVO reqVO = new CustomButtonOpenPageActionReqVO();
+        reqVO.setOpenMode(configDO.getOpenMode());
+        reqVO.setTargetType(configDO.getTargetType());
+        reqVO.setTargetPageSetUuid(configDO.getTargetPageSetUuid());
+        reqVO.setTargetPageUuid(configDO.getTargetPageUuid());
+        reqVO.setTargetUrl(configDO.getTargetUrl());
+        if (StringUtils.isNotBlank(configDO.getConfigJson())) {
+            reqVO.setParams(JsonUtils.parseObject(configDO.getConfigJson(),
+                    new TypeReference<List<CustomButtonOpenPageParamReqVO>>() {}));
+        }
+        return reqVO;
+    }
+
     private List<CustomButtonUpdateFieldReqVO> toUpdateFieldReqVOList(List<AppCustomButtonUpdateFieldDO> fieldDOS) {
         List<CustomButtonUpdateFieldReqVO> result = new ArrayList<>();
         for (AppCustomButtonUpdateFieldDO fieldDO : fieldDOS) {
@@ -353,6 +576,80 @@ public class AppCustomButtonServiceImpl implements AppCustomButtonService {
             result.add(reqVO);
         }
         return result;
+    }
+
+    private void replaceConditions(AppCustomButtonDO buttonDO, CustomButtonSaveReqVO reqVO) {
+        conditionItemRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        conditionGroupRepository.removeByButtonUuid(buttonDO.getButtonUuid());
+        CustomButtonAvailableConditionReqVO conditionReqVO = reqVO.getAvailableCondition();
+        if (conditionReqVO == null || CollectionUtils.isEmpty(conditionReqVO.getValueRules())) {
+            return;
+        }
+        int groupNo = 0;
+        for (List<CustomButtonConditionItemReqVO> group : conditionReqVO.getValueRules()) {
+            if (CollectionUtils.isEmpty(group)) {
+                continue;
+            }
+            AppCustomButtonConditionGroupDO groupDO = new AppCustomButtonConditionGroupDO();
+            groupDO.setApplicationId(buttonDO.getApplicationId());
+            groupDO.setButtonUuid(buttonDO.getButtonUuid());
+            groupDO.setGroupNo(groupNo);
+            groupDO.setLogicType("AND");
+            groupDO.setSortNo(groupNo);
+            conditionGroupRepository.save(groupDO);
+
+            List<AppCustomButtonConditionItemDO> itemDOS = new ArrayList<>();
+            int sortNo = 0;
+            for (CustomButtonConditionItemReqVO itemReqVO : group) {
+                AppCustomButtonConditionItemDO itemDO = new AppCustomButtonConditionItemDO();
+                itemDO.setApplicationId(buttonDO.getApplicationId());
+                itemDO.setButtonUuid(buttonDO.getButtonUuid());
+                itemDO.setGroupId(groupDO.getId());
+                itemDO.setFieldUuid(itemReqVO.getFieldUuid());
+                itemDO.setFieldCode(itemReqVO.getFieldCode());
+                itemDO.setOperator(itemReqVO.getOperator());
+                itemDO.setValueType(itemReqVO.getValueType());
+                itemDO.setCompareValue(itemReqVO.getCompareValue());
+                itemDO.setSortNo(itemReqVO.getSortNo() == null ? sortNo : itemReqVO.getSortNo());
+                itemDOS.add(itemDO);
+                sortNo++;
+            }
+            if (CollectionUtils.isNotEmpty(itemDOS)) {
+                conditionItemRepository.saveBatch(itemDOS);
+            }
+            groupNo++;
+        }
+    }
+
+    private CustomButtonAvailableConditionReqVO toAvailableConditionReqVO(String buttonUuid) {
+        List<AppCustomButtonConditionGroupDO> groupDOS = conditionGroupRepository.findByButtonUuid(buttonUuid);
+        if (CollectionUtils.isEmpty(groupDOS)) {
+            return null;
+        }
+        List<Long> groupIds = groupDOS.stream().map(AppCustomButtonConditionGroupDO::getId).collect(Collectors.toList());
+        List<AppCustomButtonConditionItemDO> itemDOS = conditionItemRepository.findByGroupIds(groupIds);
+        Map<Long, List<AppCustomButtonConditionItemDO>> itemMap = itemDOS.stream()
+                .collect(Collectors.groupingBy(AppCustomButtonConditionItemDO::getGroupId, LinkedHashMap::new, Collectors.toList()));
+        List<List<CustomButtonConditionItemReqVO>> valueRules = new ArrayList<>();
+        for (AppCustomButtonConditionGroupDO groupDO : groupDOS) {
+            List<CustomButtonConditionItemReqVO> groupItems = new ArrayList<>();
+            for (AppCustomButtonConditionItemDO itemDO : itemMap.getOrDefault(groupDO.getId(), Collections.emptyList())) {
+                CustomButtonConditionItemReqVO itemReqVO = new CustomButtonConditionItemReqVO();
+                itemReqVO.setFieldUuid(itemDO.getFieldUuid());
+                itemReqVO.setFieldCode(itemDO.getFieldCode());
+                itemReqVO.setOperator(itemDO.getOperator());
+                itemReqVO.setValueType(itemDO.getValueType());
+                itemReqVO.setCompareValue(itemDO.getCompareValue());
+                itemReqVO.setSortNo(itemDO.getSortNo());
+                groupItems.add(itemReqVO);
+            }
+            if (CollectionUtils.isNotEmpty(groupItems)) {
+                valueRules.add(groupItems);
+            }
+        }
+        CustomButtonAvailableConditionReqVO conditionReqVO = new CustomButtonAvailableConditionReqVO();
+        conditionReqVO.setValueRules(valueRules);
+        return conditionReqVO;
     }
 
     private AppResourcePagesetDO getAndValidatePageSet(Long pageSetId) {

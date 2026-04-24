@@ -68,14 +68,37 @@ public class CustomButtonSaveReqVO {
     private String status;
 
     @Valid
-    @Schema(description = "统一动作配置。推荐使用该字段承载所有动作类型的配置")
+    @Schema(description = "修改当前表单动作配置。仅 actionType=UPDATE_FORM 时使用")
+    private CustomButtonUpdateFormActionReqVO updateFormAction;
+
+    @Valid
+    @Schema(description = "新建关联表单动作配置。仅 actionType=CREATE_RELATED_RECORD 时使用")
+    private CustomButtonCreateRelatedActionReqVO createRelatedAction;
+
+    @Valid
+    @Schema(description = "执行自动化流动作配置。仅 actionType=TRIGGER_FLOW 时使用")
+    private CustomButtonTriggerFlowActionReqVO triggerFlowAction;
+
+    @Valid
+    @Schema(description = "打开页面动作配置。仅 actionType=OPEN_PAGE 时使用")
+    private CustomButtonOpenPageActionReqVO openPageAction;
+
+    @Valid
+    @Schema(description = "可用条件。外层数组为 OR，内层数组为 AND；不满足条件时运行态隐藏按钮")
+    private CustomButtonAvailableConditionReqVO availableCondition;
+
+    @Deprecated
+    @Valid
+    @Schema(description = "已废弃：统一动作配置。请改用 updateFormAction/createRelatedAction/triggerFlowAction/openPageAction", deprecated = true)
     private CustomButtonActionConfigReqVO actionConfig;
 
+    @Deprecated
     @Valid
-    @Schema(description = "修改当前表单字段配置。仅 actionType=UPDATE_FORM 时使用，可同时包含 EDIT 和 AUTO 两类字段")
+    @Schema(description = "已废弃：修改当前表单字段配置。请改用 updateFormAction.updateFields", deprecated = true)
     private List<CustomButtonUpdateFieldReqVO> updateFields;
 
+    @Deprecated
     @Valid
-    @Schema(description = "自动化流动作配置。兼容旧参数；新接入建议使用 actionConfig")
+    @Schema(description = "已废弃：自动化流动作配置。请改用 triggerFlowAction", deprecated = true)
     private CustomButtonFlowActionReqVO flowAction;
 }

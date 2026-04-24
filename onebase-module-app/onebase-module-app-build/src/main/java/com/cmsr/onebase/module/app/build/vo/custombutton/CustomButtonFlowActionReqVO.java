@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-@Schema(description = "自定义按钮-执行自动化流配置。兼容旧参数；新接入建议使用 CustomButtonActionConfigReqVO")
+@Schema(description = "自定义按钮-执行自动化流配置。已废弃；新接入请使用 CustomButtonTriggerFlowActionReqVO")
 public class CustomButtonFlowActionReqVO {
 
     @Schema(description = "自动化流流程ID")
