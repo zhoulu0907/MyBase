@@ -76,7 +76,7 @@ public class ProjectInfoServiceImpl implements ProjectInfoService {
     }
 
     @Override
-    public ProjectInfoDO getProjectByIdAndSource(String externalId) {
+    public ProjectInfoDO getProjectByExternalId(String externalId) {
         if (sourcePlatform == null) {
             throw exception(PROJECT_SOURCE_PLATFORM_NOT_CONFIG);
         }

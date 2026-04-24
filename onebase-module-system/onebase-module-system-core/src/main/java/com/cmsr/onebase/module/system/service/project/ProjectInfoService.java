@@ -54,7 +54,7 @@ public interface ProjectInfoService {
      * @param externalId 外部项目编号
      * @return 项目
      */
-    ProjectInfoDO getProjectByIdAndSource(String externalId);
+    ProjectInfoDO getProjectByExternalId(String externalId);
 
     /**
      * 根据项目编码获得项目
