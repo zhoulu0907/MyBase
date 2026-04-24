@@ -1,5 +1,6 @@
 package com.cmsr.onebase.module.metadata.core.util;
 
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataTypeCodeEnum;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,22 +53,27 @@ public class JdbcTypeConvertor {
             throw new IllegalArgumentException("jdbcType 不能为空");
         }
 
-        switch (jdbcType.toUpperCase()) {
-            case "TIMESTAMP":
+        MetadataDataTypeCodeEnum jdbcTypeCode = MetadataDataTypeCodeEnum.fromCode(jdbcType);
+        if (jdbcTypeCode == null) {
+            throw new UnsupportedOperationException("不支持的数据库类型: " + jdbcType);
+        }
+
+        switch (jdbcTypeCode) {
+            case TIMESTAMP:
                 return convertTimestamp(value);
-            case "VARCHAR":
+            case VARCHAR:
                 return convertVarchar(value);
-            case "BIGINT":
+            case BIGINT:
                 return convertBigInt(value);
-            case "BOOLEAN":
+            case BOOLEAN:
                 return convertBoolean(value);
-            case "DATE":
+            case DATE:
                 return convertDate(value);
-            case "DECIMAL":
+            case DECIMAL:
                 return convertDecimal(value);
-            case "LONGVARCHAR":
+            case LONGVARCHAR:
                 return convertLongVarchar(value);
-            case "NUMERIC":
+            case NUMERIC:
                 return convertNumeric(value);
             default:
                 throw new UnsupportedOperationException("不支持的数据库类型: " + jdbcType);

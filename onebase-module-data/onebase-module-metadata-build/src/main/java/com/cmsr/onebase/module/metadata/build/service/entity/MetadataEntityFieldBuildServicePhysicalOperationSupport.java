@@ -65,6 +65,20 @@ import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.*;
 @Slf4j
 public abstract class MetadataEntityFieldBuildServicePhysicalOperationSupport extends MetadataEntityFieldBuildServiceRelatedSupport {
 
+    private static final EnumSet<MetadataDataTypeCodeEnum> UNQUOTED_DEFAULT_TYPES = EnumSet.of(
+            MetadataDataTypeCodeEnum.NUMBER,
+            MetadataDataTypeCodeEnum.INTEGER,
+            MetadataDataTypeCodeEnum.INT,
+            MetadataDataTypeCodeEnum.DECIMAL,
+            MetadataDataTypeCodeEnum.FLOAT,
+            MetadataDataTypeCodeEnum.DOUBLE,
+            MetadataDataTypeCodeEnum.BIGINT,
+            MetadataDataTypeCodeEnum.SMALLINT,
+            MetadataDataTypeCodeEnum.TINYINT,
+            MetadataDataTypeCodeEnum.BOOLEAN,
+            MetadataDataTypeCodeEnum.BOOL
+    );
+
     protected abstract void dropColumnFromTable(MetadataDatasourceDO datasource, String tableName, String fieldName,
             Set<String> existingColumns);
 
@@ -754,20 +768,13 @@ public abstract class MetadataEntityFieldBuildServicePhysicalOperationSupport ex
             return null;
         }
 
-        // 数值类型：不需要单引号
-        // NUMBER, INTEGER, DECIMAL, FLOAT, DOUBLE, BIGINT, SMALLINT, TINYINT 等
-        if (fieldType.contains("NUMBER") || fieldType.contains("INTEGER") ||
-                fieldType.contains("DECIMAL") || fieldType.contains("FLOAT") ||
-                fieldType.contains("DOUBLE") || fieldType.contains("BIGINT") ||
-                fieldType.contains("SMALLINT") || fieldType.contains("TINYINT") ||
-                fieldType.contains("BOOLEAN") || fieldType.contains("BOOL")) {
+        // 数值/布尔类型：不需要单引号
+        if (isUnquotedDefaultType(fieldType)) {
             return defaultValue;
         }
 
         // 特殊函数或表达式（如CURRENT_TIMESTAMP、NOW()等）：不需要单引号
-        String upperValue = defaultValue.toUpperCase();
-        if (upperValue.contains("CURRENT_") || upperValue.contains("NOW(") ||
-                upperValue.contains("UUID") || upperValue.contains("NULL")) {
+        if (isSpecialDefaultExpression(defaultValue)) {
             return defaultValue;
         }
 
@@ -780,6 +787,27 @@ public abstract class MetadataEntityFieldBuildServicePhysicalOperationSupport ex
         // 对单引号进行转义处理（PostgreSQL使用两个单引号表示一个单引号）
         String escapedValue = defaultValue.replace("'", "''");
         return "'" + escapedValue + "'";
+    }
+
+    private boolean isUnquotedDefaultType(String fieldType) {
+        if (!StringUtils.hasText(fieldType)) {
+            return false;
+        }
+        String upperFieldType = fieldType.toUpperCase();
+        for (MetadataDataTypeCodeEnum dataTypeCode : UNQUOTED_DEFAULT_TYPES) {
+            if (dataTypeCode.containsIn(upperFieldType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSpecialDefaultExpression(String defaultValue) {
+        String upperValue = defaultValue.toUpperCase();
+        return MetadataDefaultValueKeywordEnum.CURRENT_PREFIX.containsIn(upperValue)
+                || MetadataDefaultValueKeywordEnum.NOW_PREFIX.containsIn(upperValue)
+                || MetadataDefaultValueKeywordEnum.UUID.containsIn(upperValue)
+                || MetadataDefaultValueKeywordEnum.NULL.containsIn(upperValue);
     }
 
     /**

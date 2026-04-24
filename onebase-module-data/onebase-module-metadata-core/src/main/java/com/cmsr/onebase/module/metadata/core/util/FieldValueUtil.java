@@ -5,8 +5,9 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.stream.Collectors;
 
+import com.cmsr.onebase.module.metadata.core.enums.MetadataBooleanLiteralEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataDataTypeCodeEnum;
 import com.cmsr.onebase.module.metadata.core.enums.OpEnum;
-import com.cmsr.onebase.module.metadata.core.util.JdbcTypeConvertor;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -131,32 +132,40 @@ public class FieldValueUtil {
      */
     public static String inferJdbcType(String fieldType) {
         if (!StringUtils.hasText(fieldType)) {
-            return "VARCHAR";
+            return MetadataDataTypeCodeEnum.VARCHAR.getCode();
         }
 
-        switch (fieldType.toUpperCase()) {
-            case "STRING":
-            case "TEXT":
-                return "VARCHAR";
-            case "INTEGER":
-            case "INT":
-                return "BIGINT";
-            case "DECIMAL":
-            case "DOUBLE":
-            case "FLOAT":
-                return "DECIMAL";
-            case "BOOLEAN":
-            case "BOOL":
-                return "BOOLEAN";
-            case "DATE":
-                return "DATE";
-            case "DATETIME":
-            case "TIMESTAMP":
-                return "TIMESTAMP";
-            case "ARRAY":
-                return "ARRAY";
+        MetadataDataTypeCodeEnum typeCode = MetadataDataTypeCodeEnum.fromCode(fieldType);
+        if (typeCode == null) {
+            return MetadataDataTypeCodeEnum.VARCHAR.getCode();
+        }
+
+        switch (typeCode) {
+            case STRING:
+            case TEXT:
+            case LONG_TEXT:
+                return MetadataDataTypeCodeEnum.VARCHAR.getCode();
+            case INTEGER:
+            case INT:
+                return MetadataDataTypeCodeEnum.BIGINT.getCode();
+            case DECIMAL:
+            case DOUBLE:
+            case FLOAT:
+            case NUMBER:
+            case NUMERIC:
+                return MetadataDataTypeCodeEnum.DECIMAL.getCode();
+            case BOOLEAN:
+            case BOOL:
+                return MetadataDataTypeCodeEnum.BOOLEAN.getCode();
+            case DATE:
+                return MetadataDataTypeCodeEnum.DATE.getCode();
+            case DATETIME:
+            case TIMESTAMP:
+                return MetadataDataTypeCodeEnum.TIMESTAMP.getCode();
+            case ARRAY:
+                return MetadataDataTypeCodeEnum.ARRAY.getCode();
             default:
-                return "VARCHAR";
+                return MetadataDataTypeCodeEnum.VARCHAR.getCode();
         }
     }
 
@@ -194,21 +203,28 @@ public class FieldValueUtil {
             return true; // 未知类型，默认有效
         }
 
+        MetadataDataTypeCodeEnum typeCode = MetadataDataTypeCodeEnum.fromCode(fieldType);
+        if (typeCode == null) {
+            return true;
+        }
+
         // 根据字段类型进行基本验证
-        switch (fieldType.toUpperCase()) {
-            case "INTEGER":
-            case "INT":
+        switch (typeCode) {
+            case INTEGER:
+            case INT:
                 return isValidInteger(fieldValue);
-            case "DECIMAL":
-            case "DOUBLE":
-            case "FLOAT":
+            case DECIMAL:
+            case DOUBLE:
+            case FLOAT:
+            case NUMBER:
+            case NUMERIC:
                 return isValidNumber(fieldValue);
-            case "BOOLEAN":
-            case "BOOL":
+            case BOOLEAN:
+            case BOOL:
                 return isValidBoolean(fieldValue);
-            case "DATE":
-            case "DATETIME":
-            case "TIMESTAMP":
+            case DATE:
+            case DATETIME:
+            case TIMESTAMP:
                 return isValidDate(fieldValue);
             default:
                 return true; // 其他类型默认有效
@@ -259,10 +275,7 @@ public class FieldValueUtil {
             return true;
         }
         if (value instanceof String) {
-            String str = ((String) value).toLowerCase();
-            return "true".equals(str) || "false".equals(str) ||
-                   "1".equals(str) || "0".equals(str) ||
-                   "yes".equals(str) || "no".equals(str);
+            return MetadataBooleanLiteralEnum.isBooleanLiteral((String) value);
         }
         return false;
     }
