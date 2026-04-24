@@ -70,6 +70,15 @@ public class ProjectInfoController {
         return success(BeanUtils.toBean(project, ProjectInfoRespVO.class));
     }
 
+    @GetMapping("/get-by-external-id")
+    @Operation(summary = "通过外部系统ID获得项目详情")
+    @Parameter(name = "externalId", description = "外部系统项目编号", required = true, example = "1")
+    @PreAuthorize("@ss.hasPermission('system:project:query')")
+    public CommonResult<ProjectInfoRespVO> getProjectByExternalId(@RequestParam("externalId") String externalId) {
+        ProjectInfoDO project = projectInfoService.getProjectByExternalId(externalId);
+        return success(BeanUtils.toBean(project, ProjectInfoRespVO.class));
+    }
+
     @GetMapping("/page")
     @Operation(summary = "获得项目分页")
     @PreAuthorize("@ss.hasPermission('system:project:query')")

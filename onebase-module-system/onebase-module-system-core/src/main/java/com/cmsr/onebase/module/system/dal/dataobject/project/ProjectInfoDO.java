@@ -24,6 +24,8 @@ public class ProjectInfoDO extends BaseTenantEntity {
     public static final String EXTERNAL_PROJECT_ID = "external_project_id";
     public static final String STATUS = "status";
     public static final String DESCRIPTION = "description";
+    public static final String INDUSTRY_TAG = "industry_tag";
+    public static final String PROJECT_COVER = "project_cover";
 
     /**
      * 项目编码（租户内唯一，来自URL参数code）
@@ -62,5 +64,18 @@ public class ProjectInfoDO extends BaseTenantEntity {
      */
     @Column(value = DESCRIPTION)
     private String description;
+
+    /**
+     * 行业标签
+     */
+    @Column(value = INDUSTRY_TAG)
+    private String industryTag;
+
+    /**
+     * 项目封面
+     */
+    @Column(value = PROJECT_COVER)
+    private String projectCover;
+
 
 }

@@ -23,6 +23,11 @@ public enum ProjectSourceEnum implements ArrayValuable<String> {
     LINGJI("lingji", "灵畿平台"),
 
     /**
+     * 天工平台
+     */
+    TIANGONG("tiangong", "天工平台"),
+
+    /**
      * 系统内部创建
      */
     INTERNAL("internal", "系统内部创建");
