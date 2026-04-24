@@ -67,7 +67,16 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         var group = ruleGroupService.resolveRuleGroup(id, null, null);
         if (group == null) { return null; }
         var list = findByRuleGroup(group);
-        if (list.isEmpty()) { return null; }
+        if (list.isEmpty()) {
+            ValidationFormatRespVO fallbackVO = new ValidationFormatRespVO();
+            fallbackVO.setRgName(group.getRgName());
+            fallbackVO.setEntityUuid(group.getEntityUuid());
+            fallbackVO.setGroupUuid(group.getGroupUuid());
+            fallbackVO.setApplicationId(group.getApplicationId() == null ? null : String.valueOf(group.getApplicationId()));
+            fallbackVO.setPromptMessage(group.getPopPrompt());
+            fallbackVO.setIsEnabled(1);
+            return fallbackVO;
+        }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组UUID=" + group.getGroupUuid() + ")"); }
         MetadataValidationFormatDO formatDO = list.get(0);
         ValidationFormatRespVO respVO = BeanUtils.toBean(formatDO, ValidationFormatRespVO.class);
@@ -166,6 +175,7 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         data.setEntityUuid(field.getEntityUuid());
         data.setApplicationId(field.getApplicationId() != null ? Long.valueOf(field.getApplicationId()) : null);
         data.setGroupUuid(groupUuid);
+        data.setPromptMessage(resolvePrompt(vo.getPopPrompt(), vo.getPromptMessage(), null, null));
         
         // 设置默认值
         if (data.getIsEnabled() == null) {
@@ -229,23 +239,57 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         }
         String groupUuidParam = group.getGroupUuid();
         var list = findByRuleGroup(group);
-        Assert.notEmpty(list, "当前格式校验规则不存在(组UUID=" + groupUuidParam + ")");
+        if (list.isEmpty()) {
+            Assert.hasText(vo.getFieldUuid(), "当前格式校验规则缺失，请传入fieldUuid进行补建");
+            MetadataEntityFieldDO fallbackFieldDO = entityFieldService.getEntityFieldByUuid(vo.getFieldUuid());
+            Assert.notNull(fallbackFieldDO, "字段不存在");
+            String mergedPrompt = resolvePrompt(vo.getPopPrompt(), vo.getPromptMessage(), group.getPopPrompt(), null);
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(group.getId());
+            String targetRgName = StringUtils.hasText(vo.getRgName()) ? vo.getRgName() : group.getRgName();
+            updateGroupVO.setRgName(targetRgName);
+            updateGroupVO.setRgDesc(group.getRgDesc());
+            updateGroupVO.setRgStatus(group.getRgStatus());
+            updateGroupVO.setValidationType(group.getValidationType());
+            updateGroupVO.setEntityUuid(group.getEntityUuid());
+            if (!targetRgName.equals(group.getRgName())) { needGroupUpdate = true; }
+            if (mergedPrompt != null && !mergedPrompt.equals(group.getPopPrompt())) { updateGroupVO.setPopPrompt(mergedPrompt); needGroupUpdate = true; }
+            if (vo.getValMethod() != null && !vo.getValMethod().equals(group.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
+            if (vo.getPopType() != null && !vo.getPopType().equals(group.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
+            if (needGroupUpdate) {
+                ruleGroupService.updateValidationRuleGroup(updateGroupVO);
+            }
+            MetadataValidationFormatDO rebuildDO = BeanUtils.toBean(vo, MetadataValidationFormatDO.class);
+            rebuildDO.setId(null);
+            rebuildDO.setFieldUuid(fallbackFieldDO.getFieldUuid());
+            rebuildDO.setEntityUuid(fallbackFieldDO.getEntityUuid());
+            rebuildDO.setApplicationId(fallbackFieldDO.getApplicationId());
+            rebuildDO.setGroupUuid(groupUuidParam);
+            rebuildDO.setPromptMessage(mergedPrompt);
+            rebuildDO.setIsEnabled(resolveIsEnabledForRebuild(vo.getIsEnabled()));
+            formatRepository.saveOrUpdate(rebuildDO);
+            return;
+        }
         if (list.size() > 1) { throw new IllegalStateException("数据异常：同一组存在多条格式校验规则(组UUID=" + groupUuidParam + ")"); }
         MetadataValidationFormatDO existing = list.get(0);
         MetadataEntityFieldDO field = entityFieldService.getEntityFieldByUuid(existing.getFieldUuid());
         Assert.notNull(field, "字段不存在");
         String targetGroupUuid = groupUuidParam;
         var groupDO = group;
+        String mergedPrompt = resolvePrompt(vo.getPopPrompt(), vo.getPromptMessage(), groupDO.getPopPrompt(), existing.getPromptMessage());
         if (groupDO != null) {
             boolean needGroupUpdate = false;
             ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
             updateGroupVO.setId(groupDO.getId());
-            updateGroupVO.setRgName(groupDO.getRgName());
+            String targetRgName = StringUtils.hasText(vo.getRgName()) ? vo.getRgName() : groupDO.getRgName();
+            updateGroupVO.setRgName(targetRgName);
             updateGroupVO.setRgDesc(groupDO.getRgDesc());
             updateGroupVO.setRgStatus(groupDO.getRgStatus());
             updateGroupVO.setValidationType(groupDO.getValidationType());
             updateGroupVO.setEntityUuid(groupDO.getEntityUuid());
-            if (vo.getPopPrompt() != null && !vo.getPopPrompt().equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(vo.getPopPrompt()); needGroupUpdate = true; }
+            if (!targetRgName.equals(groupDO.getRgName())) { needGroupUpdate = true; }
+            if (mergedPrompt != null && !mergedPrompt.equals(groupDO.getPopPrompt())) { updateGroupVO.setPopPrompt(mergedPrompt); needGroupUpdate = true; }
             if (vo.getValMethod() != null && !vo.getValMethod().equals(groupDO.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
             if (vo.getPopType() != null && !vo.getPopType().equals(groupDO.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
             if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
@@ -256,6 +300,8 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
         updateObj.setEntityUuid(existing.getEntityUuid());
         updateObj.setApplicationId(existing.getApplicationId());
         updateObj.setGroupUuid(targetGroupUuid);
+        updateObj.setPromptMessage(mergedPrompt);
+        updateObj.setIsEnabled(resolveIsEnabledForUpdate(vo.getIsEnabled(), existing.getIsEnabled()));
         
         formatRepository.updateById(updateObj);
     }
@@ -304,5 +350,37 @@ public class MetadataValidationFormatBuildServiceImpl implements MetadataValidat
             record.setGroupUuid(targetGroupUuid);
             formatRepository.updateById(record);
         }
+    }
+
+    private String resolvePrompt(String popPrompt, String promptMessage, String fallbackGroupPrompt, String fallbackRulePrompt) {
+        if (StringUtils.hasText(popPrompt)) {
+            return popPrompt;
+        }
+        if (StringUtils.hasText(promptMessage)) {
+            return promptMessage;
+        }
+        if (StringUtils.hasText(fallbackGroupPrompt)) {
+            return fallbackGroupPrompt;
+        }
+        return fallbackRulePrompt;
+    }
+
+    private Integer resolveIsEnabledForUpdate(Integer requested, Integer existing) {
+        if (requested == null) {
+            return existing == null ? 1 : existing;
+        }
+        // 兼容旧前端编辑接口误传 isEnabled=0，统一按启用处理，避免规则被误关
+        if (requested == 0) {
+            return 1;
+        }
+        return requested;
+    }
+
+    private Integer resolveIsEnabledForRebuild(Integer requested) {
+        // 缺失记录补建场景默认启用，避免被旧前端误传 0 导致规则失效
+        if (requested == null || requested == 0) {
+            return 1;
+        }
+        return requested;
     }
 }

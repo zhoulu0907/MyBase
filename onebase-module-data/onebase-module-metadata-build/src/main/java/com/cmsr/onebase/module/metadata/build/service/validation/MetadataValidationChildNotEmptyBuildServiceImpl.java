@@ -43,6 +43,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
 
         // 转换为 VO
         ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
+        respVO.setChildEntityId(respVO.getChildEntityUuid());
 
         // 获取规则组信息，包括提示语等字段
         if (validationDO.getGroupUuid() != null) {
@@ -64,7 +65,14 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         }
         var list = findByRuleGroup(group);
         if (list.isEmpty()) {
-            return null;
+            ValidationChildNotEmptyRespVO fallbackVO = new ValidationChildNotEmptyRespVO();
+            fallbackVO.setRgName(group.getRgName());
+            fallbackVO.setEntityUuid(group.getEntityUuid());
+            fallbackVO.setGroupUuid(group.getGroupUuid());
+            fallbackVO.setApplicationId(group.getApplicationId() == null ? null : String.valueOf(group.getApplicationId()));
+            fallbackVO.setPromptMessage(group.getPopPrompt());
+            fallbackVO.setIsEnabled(1);
+            return fallbackVO;
         }
         if (list.size() > 1) {
             throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组UUID=" + group.getGroupUuid() + ")");
@@ -73,6 +81,7 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
 
         // 转换为 VO
         ValidationChildNotEmptyRespVO respVO = BeanUtils.toBean(validationDO, ValidationChildNotEmptyRespVO.class);
+        respVO.setChildEntityId(respVO.getChildEntityUuid());
 
         // 获取规则组信息，包括提示语等字段
         if (validationDO.getGroupUuid() != null) {
@@ -188,29 +197,65 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
     public void update(ValidationChildNotEmptyUpdateReqVO vo) {
         Assert.notNull(vo, "vo不能为空");
         Assert.notNull(vo.getId(), "规则组ID不能为空");
-        Assert.notNull(vo.getEntityUuid(), "父实体UUID不能为空");
-        Assert.notNull(vo.getChildEntityUuid(), "子实体UUID不能为空");
+        vo.setEntityUuid(idUuidConverter.resolveEntityUuid(vo.getEntityUuid(), vo.getEntityId()));
+        vo.setChildEntityUuid(idUuidConverter.resolveEntityUuid(vo.getChildEntityUuid(), vo.getChildEntityId()));
+        Assert.hasText(vo.getEntityUuid(), "父实体UUID不能为空");
+        Assert.hasText(vo.getChildEntityUuid(), "子实体UUID不能为空");
         
         Long groupIdParam = vo.getId();
         var group = ruleGroupService.resolveRuleGroup(groupIdParam, null, null);
         Assert.notNull(group, "当前子表非空校验规则不存在(组ID=" + groupIdParam + ")");
         var list = findByRuleGroup(group);
-        Assert.notEmpty(list, "当前子表非空校验规则不存在(组UUID=" + group.getGroupUuid() + ")");
+        if (list.isEmpty()) {
+            String mergedPrompt = resolvePrompt(vo.getPopPrompt(), vo.getPromptMessage(), group.getPopPrompt(), null);
+            boolean needGroupUpdate = false;
+            ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
+            updateGroupVO.setId(group.getId());
+            String targetRgName = StringUtils.hasText(vo.getRgName()) ? vo.getRgName() : group.getRgName();
+            updateGroupVO.setRgName(targetRgName);
+            updateGroupVO.setRgDesc(group.getRgDesc());
+            updateGroupVO.setRgStatus(group.getRgStatus());
+            updateGroupVO.setValidationType(group.getValidationType());
+            updateGroupVO.setEntityUuid(group.getEntityUuid());
+            if (!targetRgName.equals(group.getRgName())) { needGroupUpdate = true; }
+            if (mergedPrompt != null && !mergedPrompt.equals(group.getPopPrompt())) { updateGroupVO.setPopPrompt(mergedPrompt); needGroupUpdate = true; }
+            if (vo.getValMethod() != null && !vo.getValMethod().equals(group.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
+            if (vo.getPopType() != null && !vo.getPopType().equals(group.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
+            if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
+
+            MetadataValidationChildNotEmptyDO rebuildDO = BeanUtils.toBean(vo, MetadataValidationChildNotEmptyDO.class);
+            rebuildDO.setId(null);
+            rebuildDO.setEntityUuid(vo.getEntityUuid());
+            rebuildDO.setChildEntityUuid(vo.getChildEntityUuid());
+            rebuildDO.setApplicationId(group.getApplicationId());
+            rebuildDO.setGroupUuid(group.getGroupUuid());
+            rebuildDO.setFieldUuid(null);
+            rebuildDO.setPromptMessage(mergedPrompt);
+            rebuildDO.setIsEnabled(resolveIsEnabledForRebuild(vo.getIsEnabled()));
+            if (rebuildDO.getMinRows() == null) {
+                rebuildDO.setMinRows(1);
+            }
+            childNotEmptyRepository.saveOrUpdate(rebuildDO);
+            return;
+        }
         if (list.size() > 1) { 
             throw new IllegalStateException("数据异常：同一组存在多条子表非空校验规则(组UUID=" + group.getGroupUuid() + ")"); 
         }
         MetadataValidationChildNotEmptyDO existing = list.get(0);
         String targetGroupUuid = group.getGroupUuid();
+        String mergedPrompt = resolvePrompt(vo.getPopPrompt(), vo.getPromptMessage(), group.getPopPrompt(), existing.getPromptMessage());
         if (group != null) {
             boolean needGroupUpdate = false;
             ValidationRuleGroupSaveReqVO updateGroupVO = new ValidationRuleGroupSaveReqVO();
             updateGroupVO.setId(group.getId());
-            updateGroupVO.setRgName(group.getRgName());
+            String targetRgName = StringUtils.hasText(vo.getRgName()) ? vo.getRgName() : group.getRgName();
+            updateGroupVO.setRgName(targetRgName);
             updateGroupVO.setRgDesc(group.getRgDesc());
             updateGroupVO.setRgStatus(group.getRgStatus());
             updateGroupVO.setValidationType(group.getValidationType());
             updateGroupVO.setEntityUuid(group.getEntityUuid());
-            if (vo.getPopPrompt() != null && !vo.getPopPrompt().equals(group.getPopPrompt())) { updateGroupVO.setPopPrompt(vo.getPopPrompt()); needGroupUpdate = true; }
+            if (!targetRgName.equals(group.getRgName())) { needGroupUpdate = true; }
+            if (mergedPrompt != null && !mergedPrompt.equals(group.getPopPrompt())) { updateGroupVO.setPopPrompt(mergedPrompt); needGroupUpdate = true; }
             if (vo.getValMethod() != null && !vo.getValMethod().equals(group.getValMethod())) { updateGroupVO.setValMethod(vo.getValMethod()); needGroupUpdate = true; }
             if (vo.getPopType() != null && !vo.getPopType().equals(group.getPopType())) { updateGroupVO.setPopType(vo.getPopType()); needGroupUpdate = true; }
             if (needGroupUpdate) { ruleGroupService.updateValidationRuleGroup(updateGroupVO); }
@@ -224,7 +269,8 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
         // fieldUuid保持不变，设置为null或保留原值
         updateObj.setFieldUuid(null);
         // 提示信息
-        updateObj.setPromptMessage(vo.getPopPrompt());
+        updateObj.setPromptMessage(mergedPrompt);
+        updateObj.setIsEnabled(resolveIsEnabledForUpdate(vo.getIsEnabled(), existing.getIsEnabled()));
         childNotEmptyRepository.updateById(updateObj);
     }
 
@@ -271,5 +317,37 @@ public class MetadataValidationChildNotEmptyBuildServiceImpl implements Metadata
             record.setGroupUuid(targetGroupUuid);
             childNotEmptyRepository.updateById(record);
         }
+    }
+
+    private String resolvePrompt(String popPrompt, String promptMessage, String fallbackGroupPrompt, String fallbackRulePrompt) {
+        if (StringUtils.hasText(popPrompt)) {
+            return popPrompt;
+        }
+        if (StringUtils.hasText(promptMessage)) {
+            return promptMessage;
+        }
+        if (StringUtils.hasText(fallbackGroupPrompt)) {
+            return fallbackGroupPrompt;
+        }
+        return fallbackRulePrompt;
+    }
+
+    private Integer resolveIsEnabledForUpdate(Integer requested, Integer existing) {
+        if (requested == null) {
+            return existing == null ? 1 : existing;
+        }
+        // 兼容旧前端编辑接口误传 isEnabled=0，统一按启用处理，避免规则被误关
+        if (requested == 0) {
+            return 1;
+        }
+        return requested;
+    }
+
+    private Integer resolveIsEnabledForRebuild(Integer requested) {
+        // 缺失记录补建场景默认启用，避免被旧前端误传 0 导致规则失效
+        if (requested == null || requested == 0) {
+            return 1;
+        }
+        return requested;
     }
 }
