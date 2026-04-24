@@ -524,29 +524,7 @@ public class BuildAppApplicationServiceImpl implements AppApplicationService {
                     log.warn("应用ID: {} 不存在，跳过", appId);
                     continue;
                 }
-
-                // 检查应用是否在线
-                if (AppStatusEnum.isOnline(applicationDO.getAppStatus())) {
-                    log.warn("应用ID: {} 处于在线状态，无法删除，先将其下线", appId);
-                    throw ServiceExceptionUtil.exception(AppErrorCodeConstants.APP_ONLINE_ERROR);
-                }
-
-                // 执行删除逻辑（复用现有的deleteApplication方法的核心逻辑）
-                etlDataManager.offlineAllByApplication(appId);
-                flowDataManager.deleteRuntimeData(appId);
-
-                bpmDataManager.removeApplication(appId);
-                metadataDataManagerApi.deleteAllApplicationData(appId);
-                etlDataManager.deleteAllApplicationData(appId);
-                flowDataManager.deleteAllApplicationData(appId);
-                appDataManager.deleteAllApplicationData(appId);
-                versionRepository.deleteByApplicationId(appId);
-                applicationTagRepository.deleteByApplicationId(appId);
-                applicationRepository.removeById(appId);
-                dashboardProjectApi.removeDashboardByAppId(appId);
-                dictDataApi.deleteDictDataByDictOwner(APP, appId);
-                projectAppRelationApi.removeProjectAppRelation(appId);
-
+                deleteApplication(applicationDO.getId(),applicationDO.getAppName());
                 log.info("成功删除应用ID: {}, 名称: {}", appId, applicationDO.getAppName());
                 deletedCount++;
             } catch (Exception e) {
