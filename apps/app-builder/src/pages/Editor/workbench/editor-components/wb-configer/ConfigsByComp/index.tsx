@@ -11,6 +11,7 @@ import TodoListConfig from './TodoListConfig';
 import InformationListConfig from './InformationListConfig';
 import DataListConfig from './DataListConfig';
 import ImageWorkbenchConfig from './ImageWorkbenchConfig';
+import ChatbotAgentConfig from './ChatbotAgentConfig';
 
 export {
   PageConfig,
@@ -23,5 +24,6 @@ export {
   TodoListConfig,
   InformationListConfig,
   DataListConfig,
-  ImageWorkbenchConfig
+  ImageWorkbenchConfig,
+  ChatbotAgentConfig
 };

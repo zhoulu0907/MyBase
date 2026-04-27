@@ -115,7 +115,8 @@ const COMPONENT_TYPE = {
   INFORMATION_LIST: 'XInformationList',
   DATA_LIST: 'XDataList',
   IMAGE_WORKBENCH: 'XImageWorkbench',
-  CHATBOT: 'XChatbot'
+  CHATBOT: 'XChatbot',
+  CHATBOT_AGENT: 'XChatbotAgent'
 } as const
 
 /**
@@ -644,6 +645,13 @@ const WORKBENCH_COMPONENT_REGISTRY: Partial<Record<ComponentType, ComponentDescr
     type: COMPONENT_TYPE.CHATBOT,
     schema: cloneDeep(workbenchSchema.XChatbot),
     template: { h: 80, w: 80, displayName: '智能体对话', icon: 'chatbot_cp.svg', category: 'workbench' },
+    fieldMap: [],
+    entityMap: []
+  },
+  [COMPONENT_TYPE.CHATBOT_AGENT]: {
+    type: COMPONENT_TYPE.CHATBOT_AGENT,
+    schema: cloneDeep(workbenchSchema.XChatbotAgent),
+    template: { h: 80, w: 80, displayName: 'AI 对话助手', icon: 'chatbot_cp.svg', category: 'workbench' },
     fieldMap: [],
     entityMap: []
   }

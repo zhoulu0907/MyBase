@@ -59,6 +59,13 @@ export interface ISelectConfigType<KeyType> extends ICommonConfigType {
   }>;
 }
 
+// 密码输入框配置
+export interface IPasswordConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: 'PasswordInput';
+}
+
 export interface IDynamicSelectConfigType extends ICommonConfigType {
   key: string;
   name: string;

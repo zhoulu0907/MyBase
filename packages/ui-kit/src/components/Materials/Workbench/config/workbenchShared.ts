@@ -26,6 +26,8 @@ export type {
   ITextConfigType,
   ITooltipConfigType,
   IWidthConfigType,
+  ISelectConfigType,
+  IPasswordConfigType,
   TBooleanDefaultType,
   TNumberDefaultType,
   TRadioDefaultType,

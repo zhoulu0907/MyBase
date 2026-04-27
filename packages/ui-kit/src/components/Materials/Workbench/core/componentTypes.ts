@@ -103,6 +103,14 @@ const WORKBENCH_COMPONENT_DEFINITIONS: ReadonlyArray<WorkbenchComponentDefinitio
     icon: 'chatbot_cp.svg',
     category: 'basic',
     size: { h: 80, w: 80 }
+  },
+  {
+    key: 'CHATBOT_AGENT',
+    type: 'XChatbotAgent',
+    displayName: 'AI 对话助手',
+    icon: 'chatbot_cp.svg',
+    category: 'basic',
+    size: { h: 80, w: 80 }
   }
 ] as const;
 

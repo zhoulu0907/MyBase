@@ -33,7 +33,8 @@ export type {
   IDefaultValueConfigType,
   IVerifyConfigType,
   IColorConfigType,
-  IAlignConfigType
+  IAlignConfigType,
+  IPasswordConfigType
 } from '../../types';
 
 import type { IBooleanConfigType, TRadioDefaultType, TTextDefaultType } from '../../types';

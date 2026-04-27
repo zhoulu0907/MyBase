@@ -7,6 +7,7 @@ import XWelcomeCard from './WelcomeCard/schema';
 import XButtonWorkbench from './ButtonWorkbench/schema';
 import XImageWorkbench from './ImageWorkbench/schema';
 import XChatbot from './Chatbot/schema';
+import XChatbotAgent from './ChatbotAgent/schema';
 
 const WorkbenchSchemaBasic = {
   XQuickEntry,
@@ -17,7 +18,8 @@ const WorkbenchSchemaBasic = {
   XWelcomeCard,
   XButtonWorkbench,
   XImageWorkbench,
-  XChatbot
+  XChatbot,
+  XChatbotAgent
 };
 
 export default WorkbenchSchemaBasic;
