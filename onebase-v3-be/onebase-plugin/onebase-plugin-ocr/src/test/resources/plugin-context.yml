@@ -1,0 +1,43 @@
+# 插件开发模拟器配置
+tenant:
+  tenant-id: 1
+  application-id: 100
+
+plugins:
+  # ===== OneBase OCR 插件配置 =====
+  # 提供身份证、港澳台通行证、护照的 OCR 识别功能
+  # 支持多种服务商: 百度/阿里/腾讯等
+  onebase-plugin-ocr:
+    # 插件元数据
+    plugin-id: "onebase-plugin-ocr"
+    version: "1.0.0"
+    description: "OneBase OCR 插件 - 提供身份证、港澳台通行证及护照的 OCR 识别功能"
+    plugin-class: "com.cmsr.onebase.plugin.ocr.GeneratedPlugin"
+    plugin-provider: "OneBase Team"
+    category: "artificial-intelligence"
+
+    # 服务商选择：baidu / aliyun / tencent
+    provider: "baidu"
+    
+    # 通用配置 (所有厂商通用)
+    client-id: "YOUR_API_KEY_OR_ACCESS_KEY"
+    client-secret: "YOUR_SECRET_KEY"
+    
+    # 厂商特定配置
+    # 1. 百度 OCR (provider: baidu)
+    # endpoint: "https://aip.baidubce.com" (可选, 默认值)
+    
+    # 2. 阿里云 OCR (provider: aliyun)
+    # endpoint: "ocr.cn-shanghai.aliyuncs.com" (可选, 默认值)
+    # region-id: "cn-shanghai" (可选, 默认值)
+    
+    # 3. 腾讯云 OCR (provider: tencent)
+    # endpoint: "ocr.tencentcloudapi.com" (可选, 默认值)
+    # region-id: "ap-guangzhou" (可选, 但目前实现中主要依赖 endpoint)
+
+    # 示例：阿里云配置
+    # provider: aliyun
+    # client-id: "LTAI5txxxxxx"
+    # client-secret: "abcdefxxxxxx"
+    # endpoint: "ocr.cn-shanghai.aliyuncs.com"
+    # region-id: "cn-shanghai"

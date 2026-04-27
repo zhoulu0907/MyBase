@@ -1,0 +1,25 @@
+
+
+
+### 请求 /get-tenant-items 接口 => 成功
+POST {{baseUrl}}/infra/security-config/get-tenant-items
+Content-Type: application/json
+#Authorization: Bearer {{token}}
+
+{
+  "appId": 171603906732228608,
+  "categoryCode": ["MFA"]
+}
+
+### 请求 /batch-update 接口 => 成功
+POST {{baseUrl}}/infra/security-config/batch-update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+{"configs": [{"configKey": "desensitizedField", "configValue": ""}]}
+
+### 请求 /items 接口 => 成功
+GET {{baseUrl}}/infra/security-config/items?categoryId=8
+Content-Type: application/json
+Authorization: Bearer {{token}}

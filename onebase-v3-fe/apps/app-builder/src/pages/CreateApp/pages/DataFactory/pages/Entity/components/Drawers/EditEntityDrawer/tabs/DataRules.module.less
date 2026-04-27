@@ -1,0 +1,88 @@
+@import '../../../../../../styles/variables.less';
+
+.data-rules {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    .form-header-style();
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--color-text-3);
+
+      span {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  .rule-item {
+    margin-bottom: 8px;
+    border: 1px solid var(--color-border-2);
+    border-radius: 6px;
+    overflow: hidden;
+
+    :global(.pc-collapse-item-header) {
+      padding: 12px 16px;
+      background-color: var(--color-fill-1);
+      border-bottom: 1px solid var(--color-border-2);
+    }
+
+    :global(.pc-collapse-item-content) {
+      padding: 16px;
+      background-color: var(--color-bg-1);
+    }
+  }
+
+  .rule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .rule-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-text-1);
+    }
+  }
+
+  .rule-content {
+    .condition-section,
+    .hint-section {
+      display: flex;
+      margin-bottom: 12px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .label {
+        min-width: 80px;
+        font-size: 13px;
+        color: var(--color-text-2);
+        margin-right: 8px;
+      }
+
+      .condition,
+      .hint {
+        flex: 1;
+        font-size: 13px;
+        color: var(--color-text-1);
+        line-height: 1.5;
+      }
+    }
+  }
+} 

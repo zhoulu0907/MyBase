@@ -1,0 +1,244 @@
+import {
+  alignConfig,
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  defaultNumberValueConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  verifyConfig,
+  securityConfig,
+  numberFormatConfig,
+  stepConfig,
+  type ICommonBaseType,
+  type TAlignSelectKeyType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TWidthSelectKeyType
+} from '../../../common';
+import {
+  ALIGN_OPTIONS,
+  ALIGN_VALUES,
+  CONFIG_TYPES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  DEFAULT_VALUE_TYPES
+} from '../../../constants';
+import type {
+  IAlignConfigType,
+  IDataFieldConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  INumberConfigType,
+  INumberFormatConfigType,
+  IPlaceholderConfigType,
+  ISecurityConfigType,
+  IStatusConfigType,
+  ITooltipConfigType,
+  IVerifyConfigType,
+  IWidthConfigType,
+  ICommonConfigType,
+  TBooleanDefaultType,
+  TNumberDefaultType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType,
+  TRadioDefaultType,
+  IDefaultValueConfigType,
+  ITextConfigType
+} from '../../../types';
+
+export interface XInputNumberSchema {
+  editData: TXInputNumberEditData;
+  config: XInputNumberConfig;
+}
+
+export type TXInputNumberEditData = Array<
+  | ITextConfigType
+  | ILabelConfigType
+  | IPlaceholderConfigType
+  | ITooltipConfigType
+  | IDataFieldConfigType
+  | IDefaultValueConfigType
+  | INumberFormatConfigType
+  | INumberConfigType
+  | IVerifyConfigType
+  | IStatusConfigType<TStatusSelectKeyType>
+  | IAlignConfigType<TAlignSelectKeyType>
+  | ILayoutConfigType<TLayoutSelectKeyType>
+  | ISecurityConfigType
+  | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
+>;
+
+export interface XInputNumberConfig extends ICommonBaseType {
+  /**
+   * 输入框标题
+   * text：标题
+   * display：是否显示
+   */
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
+
+  /**
+   * 占位符
+   */
+  placeholder: TTextDefaultType;
+
+  /**
+   * 描述信息（鼠标悬浮时显示）
+   */
+  tooltip?: TTextAreaDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
+
+  /**
+   * 默认值
+   */
+  defaultValueConfig?: any;
+
+  numberFormat: {
+    showUnit: TBooleanDefaultType;
+    unitValue: TTextDefaultType;
+    // 保留小数点位数
+    showPrecision: TBooleanDefaultType;
+    // 小数点位数
+    precision: TNumberDefaultType;
+    // 是否显示为百分比
+    showPercent: TBooleanDefaultType;
+    // 是否应用千分位分隔符
+    useThousandsSeparator: TBooleanDefaultType;
+  };
+
+  /**
+   * 数字步长：默认1
+   */
+  step?: TNumberDefaultType;
+
+  /**
+  * required：是否必填，未填写时提交报错
+  * noRepeat：是否不允许重复
+  * numberLimit 数值范围
+  * min 最小
+  * max 最大
+  */
+  verify: {
+    required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
+    numberLimit?: boolean;
+    min?: number;
+    max?: number;
+  };
+
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
+
+  /**
+   * 内容对齐方式：左、中、右
+   * 可选值: 'left' | 'center' | 'right'
+   */
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
+
+  /**
+   * 表单的布局：水平、垂直（默认）
+   * 可选值: 'vertical' | 'horizontal'
+   */
+  layout?: TLayoutSelectKeyType;
+
+  /**
+   * 安全
+   * display：开启
+   * type：掩码类型
+   */
+  security: {
+    display: TBooleanDefaultType;
+    type?: TTextDefaultType;
+  };
+
+  /**
+   * 字段宽度
+   */
+  width: TRadioDefaultType<TWidthSelectKeyType>;
+}
+
+const XInputNumber: XInputNumberSchema = {
+  editData: [
+    ...baseConfig,
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
+    //  数据绑定
+    ...dataFieldConfig,
+    // 默认值
+    defaultNumberValueConfig,
+    numberFormatConfig,
+    stepConfig,
+    verifyConfig,
+    // 显示状态
+    statusConfig,
+    // 对齐方式
+    alignConfig,
+    // 布局方式
+    layoutConfig,
+    securityConfig,
+    // 字段宽度
+    widthConfig
+  ],
+  config: {
+    ...baseDefault,
+    label: {
+      text: '数字录入',
+      display: true
+    },
+    placeholder: '请输入数字',
+    tooltip: '',
+    dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: '',
+      formulaValue: ''
+    },
+    numberFormat: {
+      showUnit: false,
+      unitValue: '',
+      showPrecision: false,
+      precision: 0,
+      showPercent: false,
+      useThousandsSeparator: false
+    },
+    step: 1,
+    verify: {
+      required: false,
+      noRepeat: false,
+      numberLimit: false,
+      min: 0,
+      max: Infinity
+    },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    security: {
+      display: false,
+      type: ''
+    },
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+  },
+};
+
+export default XInputNumber;

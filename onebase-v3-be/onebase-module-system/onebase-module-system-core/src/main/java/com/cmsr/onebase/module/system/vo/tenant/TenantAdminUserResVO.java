@@ -1,0 +1,43 @@
+package com.cmsr.onebase.module.system.vo.tenant;
+
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.NicknameDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.UsernameDesensitize;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+@Data
+public class TenantAdminUserResVO {
+    @Schema(description = "管理员昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminNickName")
+    @NicknameDesensitize
+    private String adminNickName;
+
+    @Schema(description = "管理员账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminUserName")
+    @UsernameDesensitize
+    private String adminUserName;
+
+    @Schema(description = "管理员手机", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminMobile")
+    @MobileDesensitize
+    private String adminMobile;
+
+    @Schema(description = "管理员邮箱", example = "user@abc.com")
+    @EMailDesensitize
+    private String adminEmail;
+
+    @Schema(description = "管理员id", requiredMode = Schema.RequiredMode.REQUIRED, example = "adminUserId")
+    private Long adminUserId;
+
+    @Schema(description = "来自平台克隆的用户id", requiredMode = Schema.RequiredMode.REQUIRED, example = "platformUserId")
+    private Long platformUserId;
+
+    @Schema(description = "管理员头像", example = "")
+    private String adminAvatar;
+
+    @Schema(description = "所属部门名称", example = "")
+    private String deptName;
+
+
+
+
+}

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneBase 3.0</title>
+    <script src="./config.js"></script>
+    <script>
+      const currentDomain = window.location.hostname;
+
+      if (currentDomain.includes('artifex')) {
+        document.title = '天工使能引擎';
+      }
+
+      const favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      if (currentDomain.includes('artifex-cmcc')) {
+        favicon.type = 'image/x-icon';
+        favicon.href = './tiangong-logo.ico';
+      } else {
+        favicon.type = 'image/svg+xml';
+        favicon.href = './logo.svg';
+      }
+      document.head.appendChild(favicon);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>

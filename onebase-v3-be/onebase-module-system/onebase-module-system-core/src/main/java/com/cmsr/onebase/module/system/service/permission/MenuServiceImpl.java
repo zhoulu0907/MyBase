@@ -1,0 +1,329 @@
+package com.cmsr.onebase.module.system.service.permission;
+
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.system.dal.database.MenuDataRepository;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO;
+import com.cmsr.onebase.module.system.dal.redis.RedisKeyConstants;
+import com.cmsr.onebase.module.system.enums.permission.MenuTypeEnum;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuListReqVO;
+import com.cmsr.onebase.module.system.vo.menu.SystemMenuSaveVO;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertMap;
+import static com.cmsr.onebase.module.system.dal.dataobject.permission.MenuDO.ID_ROOT;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
+
+
+/**
+ * 菜单 Service 实现
+ *
+ */
+@Service
+@Slf4j
+public class MenuServiceImpl implements MenuService {
+    @Resource
+    private PermissionService permissionService;
+    @Resource
+    @Lazy // 延迟，避免循环依赖报错
+    private TenantService tenantService;
+
+    @Resource
+    private MenuDataRepository menuDataRepository;
+
+    @Override
+    @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, key = "#createReqVO.permission",
+            condition = "#createReqVO.permission != null")
+    @LogRecord(type = SYSTEM_MENU_TYPE, subType = SYSTEM_MENU_CREATE_SUB_TYPE, bizNo = "{{#menu.id}}",
+            success = SYSTEM_MENU_CREATE_SUCCESS)
+    public Long createMenu(SystemMenuSaveVO createReqVO) {
+        // 校验父菜单存在
+        validateParentMenu(createReqVO.getParentId(), null);
+        // 校验菜单（自己）
+        validateMenuName(createReqVO.getParentId(), createReqVO.getName(), null);
+        validateMenuComponentName(createReqVO.getComponentName(), null);
+
+        // 插入数据库
+        MenuDO menu = BeanUtils.toBean(createReqVO, MenuDO.class);
+        initMenuProperty(menu);
+        menuDataRepository.insert(menu);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("menu", menu);
+        // 返回
+        return menu.getId();
+    }
+
+    @Override
+    @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
+            allEntries = true) // allEntries 清空所有缓存，因为 permission 如果变更，涉及到新老两个 permission。直接清理，简单有效
+    @LogRecord(type = SYSTEM_MENU_TYPE, subType = SYSTEM_MENU_UPDATE_SUB_TYPE, bizNo = "{{#menu.id}}",
+            success = SYSTEM_MENU_UPDATE_SUCCESS)
+    public void updateMenu(SystemMenuSaveVO updateReqVO) {
+        // 校验更新的菜单是否存在
+        MenuDO menu = menuDataRepository.findById(updateReqVO.getId());
+        if (menu== null) {
+            throw exception(MENU_NOT_EXISTS);
+        }
+        // 校验父菜单存在
+        validateParentMenu(updateReqVO.getParentId(), updateReqVO.getId());
+        // 校验菜单（自己）
+        validateMenuName(updateReqVO.getParentId(), updateReqVO.getName(), updateReqVO.getId());
+        validateMenuComponentName(updateReqVO.getComponentName(), updateReqVO.getId());
+
+        // 更新到数据库
+        MenuDO updateObj = BeanUtils.toBean(updateReqVO, MenuDO.class);
+        initMenuProperty(updateObj);
+        menuDataRepository.update(updateObj);
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("menu", menu);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST,
+            allEntries = true) // allEntries 清空所有缓存，因为此时不知道 id 对应的 permission 是多少。直接清理，简单有效
+    @LogRecord(type = SYSTEM_MENU_TYPE, subType = SYSTEM_MENU_DELETE_SUB_TYPE, bizNo = "{{#menu.id}}",
+            success = SYSTEM_MENU_DELETE_SUCCESS)
+    public void deleteMenu(Long id) {
+        MenuDO menu = menuDataRepository.findById(id);
+        // 校验是否还有子菜单
+        if (menuDataRepository.countByParentId(id) > 0) {
+            throw exception(MENU_EXISTS_CHILDREN);
+        }
+        // 校验删除的菜单是否存在
+        if (menu == null) {
+            throw exception(MENU_NOT_EXISTS);
+        }
+        // 标记删除
+        menuDataRepository.deleteById(id);
+        // 删除授予给角色的权限
+        permissionService.processMenuDeleted(id);
+
+        // 记录操作日志上下文
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+
+        LogRecordContext.putVariable("loginUser", loginUser);
+        LogRecordContext.putVariable("menu", menu);
+    }
+
+    @Override
+    public List<MenuDO> getAllEnableMenuList() {
+        return menuDataRepository.list(menuDataRepository.query().eq(MenuDO.STATUS, CommonStatusEnum.ENABLE.getStatus()));
+    }
+
+    @Override
+    public List<MenuDO> getMenuListByTenant(SystemMenuListReqVO reqVO) {
+        // 查询所有菜单，并过滤掉关闭的节点
+        List<MenuDO> menus = getAllActiveMenuList(reqVO);
+        // 开启多租户的情况下，需要过滤掉未开通的菜单
+        tenantService.handleTenantMenu(menuIds -> menus.removeIf(menu -> !CollUtil.contains(menuIds, menu.getId())));
+        return menus;
+    }
+
+    @Override
+    public List<MenuDO> filterDisableMenus(List<MenuDO> menuList) {
+        if (CollUtil.isEmpty(menuList)) {
+            return Collections.emptyList();
+        }
+        Map<Long, MenuDO> menuMap = convertMap(menuList, MenuDO::getId);
+
+        // 遍历 menu 菜单，查找不是禁用的菜单，添加到 enabledMenus 结果
+        List<MenuDO> enabledMenus = new ArrayList<>();
+        Set<Long> disabledMenuCache = new HashSet<>(); // 存下递归搜索过被禁用的菜单，防止重复的搜索
+        for (MenuDO menu : menuList) {
+            if (isMenuDisabled(menu, menuMap, disabledMenuCache)) {
+                continue;
+            }
+            enabledMenus.add(menu);
+        }
+        return enabledMenus;
+    }
+
+    private boolean isMenuDisabled(MenuDO node, Map<Long, MenuDO> menuMap, Set<Long> disabledMenuCache) {
+        // 如果已经判定是禁用的节点，直接结束
+        if (disabledMenuCache.contains(node.getId())) {
+            return true;
+        }
+
+        // 1. 先判断自身是否禁用
+        if (CommonStatusEnum.isDisable(node.getStatus())) {
+            disabledMenuCache.add(node.getId());
+            return true;
+        }
+
+        // 2. 遍历到 parentId 为根节点，则无需判断
+        Long parentId = node.getParentId();
+        if (ObjUtil.equal(parentId, ID_ROOT)) {
+            return false;
+        }
+
+        // 3. 继续遍历 parent 节点
+        MenuDO parent = menuMap.get(parentId);
+        if (parent == null || isMenuDisabled(parent, menuMap, disabledMenuCache)) {
+            disabledMenuCache.add(node.getId());
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public List<MenuDO> getAllActiveMenuList(SystemMenuListReqVO reqVO) {
+        return menuDataRepository.findList(reqVO);
+    }
+
+    @Override
+    @Cacheable(value = RedisKeyConstants.PERMISSION_MENU_ID_LIST, key = "#permission")
+    public List<Long> getMenuIdListByPermissionFromCache(String permission) {
+        List<MenuDO> menus = menuDataRepository.findListByPermission(permission);
+        return convertList(menus, MenuDO::getId);
+    }
+
+    @Override
+    public MenuDO getMenu(Long id) {
+        return menuDataRepository.findById(id);
+    }
+
+    @Override
+    public List<MenuDO> getAllActiveMenuList(Collection<Long> ids) {
+        // 当 ids 为空时，返回一个空的实例对象
+        if (CollUtil.isEmpty(ids)) {
+            return Lists.newArrayList();
+        }
+        return menuDataRepository.findAllByIds(ids);
+    }
+
+    @Override
+    public List<MenuDO> getAllActiveMenuListByCodes(Set<String> codes) {
+        // 当 codes 为空时，返回一个空的实例对象
+        if (CollUtil.isEmpty(codes)) {
+            return Lists.newArrayList();
+        }
+        return menuDataRepository.findAllEnableByCodes(codes);
+    }
+
+    /**
+     * 校验父菜单是否合法
+     * <p>
+     * 1. 不能设置自己为父菜单
+     * 2. 父菜单不存在
+     * 3. 父菜单必须是 {@link MenuTypeEnum#Menu} 菜单类型
+     *
+     * @param parentId 父菜单编号
+     * @param childId  当前菜单编号
+     */
+    @VisibleForTesting
+    void validateParentMenu(Long parentId, Long childId) {
+        if (parentId == null || ID_ROOT.equals(parentId)) {
+            return;
+        }
+        // 不能设置自己为父菜单
+        if (parentId.equals(childId)) {
+            throw exception(MENU_PARENT_ERROR);
+        }
+        MenuDO menu = menuDataRepository.findById(parentId);
+        // 父菜单不存在
+        if (menu == null) {
+            throw exception(MENU_PARENT_NOT_EXISTS);
+        }
+        // 父菜单必须是目录或者菜单类型
+        if (!MenuTypeEnum.Module.getType().equals(menu.getType())
+                && !MenuTypeEnum.Menu.getType().equals(menu.getType())) {
+            throw exception(MENU_PARENT_NOT_DIR_OR_MENU);
+        }
+    }
+
+    /**
+     * 校验菜单是否合法
+     * <p>
+     * 1. 校验相同父菜单编号下，是否存在相同的菜单名
+     *
+     * @param name     菜单名字
+     * @param parentId 父菜单编号
+     * @param id       菜单编号
+     */
+    @VisibleForTesting
+    void validateMenuName(Long parentId, String name, Long id) {
+        MenuDO menu = menuDataRepository.findOneByParentIdAndName(parentId, name);
+        if (menu == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同 id 的菜单
+        if (id == null) {
+            throw exception(MENU_NAME_DUPLICATE);
+        }
+        if (!menu.getId().equals(id)) {
+            throw exception(MENU_NAME_DUPLICATE);
+        }
+    }
+
+    /**
+     * 校验菜单组件名是否合法
+     *
+     * @param componentName 组件名
+     * @param id            菜单编号
+     */
+    @VisibleForTesting
+    void validateMenuComponentName(String componentName, Long id) {
+        if (StrUtil.isBlank(componentName)) {
+            return;
+        }
+
+        MenuDO menu = menuDataRepository.findOneByComponentName(componentName);
+        if (menu == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同 id 的菜单
+        if (id == null) {
+            return;
+        }
+        if (!menu.getId().equals(id)) {
+            throw exception(MENU_COMPONENT_NAME_DUPLICATE);
+        }
+    }
+
+    /**
+     * 初始化菜单的通用属性。
+     * <p>
+     * 例如说，只有目录或者菜单类型的菜单，才设置 icon
+     *
+     * @param menu 菜单
+     */
+    private void initMenuProperty(MenuDO menu) {
+        // 菜单为按钮类型时，无需 component、icon、path 属性，进行置空
+        if (MenuTypeEnum.Action.getType().equals(menu.getType())) {
+            menu.setComponent("");
+            menu.setComponentName("");
+            menu.setIcon("");
+            menu.setPath("");
+        }
+    }
+
+}

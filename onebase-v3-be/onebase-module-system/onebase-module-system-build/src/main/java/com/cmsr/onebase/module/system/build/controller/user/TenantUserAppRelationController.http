@@ -1,0 +1,5 @@
+### 创建用户 /admin-api/system/third/update
+POST {{baseUrl}}/user/user-app-relation/user-no-relation-app-list?userId=177787182197833728
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

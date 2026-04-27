@@ -1,0 +1,154 @@
+import BuildingLine from '@/assets/images/building-line.svg';
+// import LogoAvatarSVG from '@/assets/images/ob_logo.svg';
+// import { DynamicIcon } from '@/components/DynamicIcon';
+import UserProfileAvatar from '@/components/UserProfileAvatar';
+
+import { useI18n } from '@/hooks/useI18n';
+import { appInfoSignal } from '@/store/app';
+import { getTenantInfoFromSession, logout, setTenantInfoFromSession } from '@/utils/session';
+import { Divider, Dropdown, Layout, Menu, Typography } from '@arco-design/web-react';
+import { IconExport } from '@arco-design/web-react/icon';
+import { getApplication, type GetApplicationReq } from '@onebase/app';
+import { TokenManager, UserPermissionManager } from '@onebase/common';
+import { CodeType, getCorpDetailByIdApiInCorp, getPermissionInfo, type CorpDetailResponse } from '@onebase/platform-center';
+// import { appIconMap } from '@onebase/ui-kit';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import styles from './header.module.less';
+import TenantLogo from '../TenantLogo';
+import { useSignals } from '@preact/signals-react/runtime';
+
+const { Header } = Layout;
+
+interface HeaderProps {
+  className?: string;
+}
+
+const AppHeader: React.FC<HeaderProps> = ({ className }) => {
+  useSignals();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useI18n();
+  const { curAppInfo, setCurAppInfo } = appInfoSignal;
+
+  const [mobile, setMobile] = useState<string>('');
+  const [userInfo, setUserInfo] = useState<any>(null);
+  // 获取用户信息
+  const tokenInfo = TokenManager.getTokenInfo();
+
+  const { tenantId } = useParams();
+
+  useEffect(() => {
+    if (tokenInfo?.accessToken) {
+      getInfo();
+    }
+  }, [tokenInfo?.accessToken]);
+
+  useEffect(() => {
+    // 正则匹配 /onebase/runtime/ 后面的两个数字（appId 和 tenantId）
+    // 例子: /onebase/123944716126027776/141778708868268032/runtime
+    // match[1] 是 tenantId, match[2] 是appId
+    const match = location.pathname.match(/\/onebase\/(\d+)\/(\d+)\/runtime/);
+    if (match && match[2]) {
+      handleGetApplication(match[2]);
+    }
+  }, []);
+
+  const handleGetApplication = async (appId: string) => {
+    const appReq: GetApplicationReq = {
+      id: appId
+    };
+    const appResp = await getApplication(appReq);
+    if (appResp) {
+      setCurAppInfo(appResp);
+    }
+  };
+
+  const maskMobile = (value: string) => {
+    const reg = /(\d{3})\d{4}(\d{4})/;
+    const formatMobile = value.replace(reg, '$1****$2');
+    return formatMobile;
+  };
+
+  const getInfo = async () => {
+    const res = await getPermissionInfo(CodeType.CORP);
+    if (tokenInfo?.corpId) {
+      const tenantInfoRes = await getCorpDetailByIdApiInCorp(tokenInfo?.corpId);
+      setTenantInfoFromSession(tenantInfoRes);
+    } else if (curAppInfo.value) {
+      const tenantInfo = {
+        iconColor: curAppInfo.value.iconColor,
+        iconName: curAppInfo.value.iconName,
+        appName: curAppInfo.value.appName,
+        appCode: curAppInfo.value.appCode
+      };
+      setTenantInfoFromSession(tenantInfo as CorpDetailResponse);
+    }
+    UserPermissionManager.setUserPermissionInfo(res);
+    const mobile = res.user?.mobile;
+    const formatMobile = maskMobile(mobile);
+    setMobile(formatMobile);
+    setUserInfo(res.user);
+  };
+
+  // 登出处理
+  const handleLogout = async () => {
+    // await runtimeLogout();
+    logout(navigate);
+  };
+
+  // 用户菜单
+  const userMenu = (
+    <Menu style={{ marginRight: '10px' }}>
+      <Menu.Item key="info" style={{ height: 'auto' }}>
+        <div className={styles.adminInformation}>
+          <UserProfileAvatar adminInfo={userInfo} />
+          <Typography.Text>{userInfo?.nickname}</Typography.Text>
+          <Typography.Text type="secondary">{maskMobile(mobile)}</Typography.Text>
+        </div>
+      </Menu.Item>
+      <Divider style={{ margin: '4px 0' }} />
+      {(tokenInfo?.loginSource === 'app-login-mobile' || tokenInfo?.loginSource === 'corp-login') && (
+        <Menu.Item
+          key="setting"
+          onClick={() => {
+            navigate(`/onebase/${tenantId}/setting`);
+          }}
+        >
+          <div className={styles.headerContent}>
+            <img src={BuildingLine} />
+            <span>企业管理后台</span>
+          </div>
+        </Menu.Item>
+      )}
+      <Menu.Item key="logout" onClick={handleLogout}>
+        <IconExport style={{ color: '#F53F3F' }} />
+        <Typography.Text type="error">{t('header.logout')}</Typography.Text>
+      </Menu.Item>
+    </Menu>
+  );
+
+  const tenantInfo = getTenantInfoFromSession();
+
+  return (
+    <Header className={`${styles.header} ${className || ''}`}>
+      <div className={styles.headerContent}>
+        <div className={styles.logo}>
+          <TenantLogo tenantInfo={tenantInfo} />
+        </div>
+
+        <div className={styles.userInfo}>
+          {userInfo?.nickname ? '你好，' + userInfo?.nickname : '未登录'}
+
+          <Dropdown droplist={userMenu} position="bottom">
+            <div className={styles.userDropdown}>
+              <UserProfileAvatar adminInfo={userInfo} />
+            </div>
+          </Dropdown>
+        </div>
+      </div>
+    </Header>
+  );
+};
+
+export { AppHeader };

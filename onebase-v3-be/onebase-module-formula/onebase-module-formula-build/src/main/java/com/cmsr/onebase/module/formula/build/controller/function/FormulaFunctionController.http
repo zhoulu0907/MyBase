@@ -1,0 +1,111 @@
+### 环境配置说明
+# 上面已设置默认的local环境变量，可直接运行
+# 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
+# 或者手动修改上面的@变量值
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/function/create
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "type": "TEXT",
+  "name": "CONCATENATEGspTest",
+  "expression": "CONCATENATE(文本1,文本2,...)",
+  "summary": "合并文本",
+  "usage": "将多个文本合并成一个文本；字符串 1：初始文本字符串；字符串 2：要串联的其他文本字符串",
+  "example": "CONCATENATE(\"One\", \"Base\")=OneBase",
+  "returnType": "TEXT",
+  "version": "1.0.0"
+}
+
+### 请求 /get 接口 => 获取函数信息
+GET {{baseUrl}}/formula/function/get?id=204021976370216960
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /update 接口 => 更新函数
+POST {{baseUrl}}/formula/function/update
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "id": 204021976370216960,
+  "type": "TEXT",
+  "name": "CONCATENATE123Gsp",
+  "expression": "CONCATENATE(文本1,文本2,...)",
+  "summary": "合并文本函数",
+  "usage": "将多个文本合并成一个文本；字符串 1：初始文本字符串；字符串 2：要串联的其他文本字符串",
+  "example": "CONCATENATE(\"One\", \"Base\")=OneBase",
+  "returnType": "TEXT",
+  "version": "1.0.1",
+  "status": 1
+}
+
+### 请求 /list 接口 => 获取函数列表
+GET {{baseUrl}}/formula/function/list?type=TEXT&status=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /page 接口 => 获取函数分页
+GET {{baseUrl}}/formula/function/page?pageNo=1&pageSize=10&type=&name=
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /simple-list 接口 => 获取函数精简信息列表
+GET {{baseUrl}}/formula/function/simple-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /delete 接口 => 删除函数
+POST {{baseUrl}}/formula/function/delete?id=204021976370216960
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 创建更多测试函数 - SUM函数示例
+POST {{baseUrl}}/formula/function/create
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "type": "NUMBER",
+  "name": "SUM",
+  "expression": "SUM({0})",
+  "summary": "求和函数",
+  "usage": "用于计算数值的总和",
+  "example": "SUM(1,2,3) = 6",
+  "returnType": "NUMBER",
+  "version": "1.0.0",
+  "status": 1
+}
+
+### 创建更多测试函数 - AVERAGE函数示例
+POST {{baseUrl}}/formula/function/create
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "type": "NUMBER",
+  "name": "AVERAGE",
+  "expression": "AVERAGE({0})",
+  "summary": "平均值函数",
+  "usage": "计算一组数值的平均值",
+  "example": "AVERAGE(1,2,3,4,5) = 3",
+  "returnType": "NUMBER",
+  "version": "1.0.0",
+  "status": 1
+}
+
+### 请求 /group-by-type 接口 => 根据类型获取函数分组列表
+GET {{baseUrl}}/formula/function/list-group-by-type
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 带参数请求 /group-by-type 接口 => 根据类型获取函数分组列表
+GET {{baseUrl}}/formula/function/list-group-by-type?type=NUMBER&status=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

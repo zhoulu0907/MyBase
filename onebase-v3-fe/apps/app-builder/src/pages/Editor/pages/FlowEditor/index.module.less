@@ -1,0 +1,94 @@
+.flowEditorPage {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .header {
+    width: 100%;
+    height: 64px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 16px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  .leftNav {
+    z-index: 999;
+    width: 112px;
+    height: 100%;
+    background-color: #ffffff;
+    padding: 22px 11px 0px 11px;
+    box-sizing: border-box;
+    .processNodeTitle {
+      font-family: PingFang SC;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 22px;
+      letter-spacing: 0px;
+      vertical-align: middle;
+      color: #1d2129;
+      margin-bottom: 20px;
+      .navTitleColor {
+        color: #86909c;
+        scale: 0.8;
+        margin-bottom: 8px;
+      }
+      .nodeContent {
+        opacity: 1;
+        border: 1px solid #e5e6eb;
+        border-radius: 4px;
+        color: #4e5969;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        padding-left: 7px;
+        box-sizing: border-box;
+        background-color: #fff;
+        width: 90px;
+        .nodeTitle {
+          scale: 0.8;
+        }
+        img {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+    .line {
+      width: 88px;
+      height: 1px;
+      background-color: #f2f3f5;
+      margin-bottom: 15px;
+    }
+    .remark {
+      margin-left: 10px;
+      width: 45px;
+      height: 45px;
+      font: size 12px;
+      scale: 0.8;
+      color: #4e5969;
+      .copy {
+        margin-bottom: 13px;
+      }
+      .delete {
+        color: #f53f3f;
+      }
+    }
+  }
+}

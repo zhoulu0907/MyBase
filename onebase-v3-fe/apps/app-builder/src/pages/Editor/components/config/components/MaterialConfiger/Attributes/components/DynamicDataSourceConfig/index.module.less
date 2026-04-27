@@ -1,0 +1,355 @@
+@IconColor: #838892;
+@DelIconHoverColor: red;
+
+.dataSourceContainer {
+  .noMarginBottom {
+    margin-bottom: 0;
+  }
+
+  .dropdownRender {
+    .dropdownRenderCommon;
+  }
+}
+
+.drawerContainer {
+  .container {
+    display: flex;
+    height: 100%;
+    background: #f2f3f5;
+    overflow-x: hidden;
+  }
+
+  .leftColumn {
+    flex: 1;
+    background: #fff;
+    margin: 20px;
+    border-radius: 4px;
+    padding: 16px;
+    display: flex;
+    min-width: 0;
+
+    .leftTree {
+      min-width: 200px;
+      max-width: 200px;
+      overflow-x: auto;
+      border-right: 1px solid #e5e6eb;
+    }
+
+    .rightFlexTable {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      margin-left: 12px;
+    }
+
+    .dropdownPreview {
+      flex: 1;
+      min-width: 0;
+      margin-left: 12px;
+
+      .previewTitle {
+        display: block;
+        margin-bottom: 8px;
+        color: #4e5969;
+        font-size: 13px;
+      }
+
+      .previewFieldRow {
+        background: #f7f8fa;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+
+        .previewLabel {
+          display: block;
+          color: #4e5969;
+          font-size: 12px;
+          margin-bottom: 6px;
+        }
+        .previewSelect {
+          height: 32px;
+          border: 1px solid #e5e6eb;
+          border-radius: 6px;
+          background: #fff;
+          display: flex;
+          align-items: center;
+          padding: 0 10px;
+          color: #86909c;
+        }
+      }
+
+      .previewCard {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(31,35,41,0.08);
+        padding: 12px;
+
+        .cardHeader {
+          font-size: 14px;
+          color: #1d2129;
+          margin-bottom: 6px;
+        }
+        .cardSubTitle {
+          font-size: 12px;
+          color: #4e5969;
+          margin-bottom: 8px;
+        }
+        .cardLines {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          margin-bottom: 8px;
+        }
+        .cardLine {
+          height: 14px;
+          border-radius: 4px;
+          background: #f2f3f5;
+        }
+        .cardFooter {
+          color: #22ae7b;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .rightColumn {
+    min-width: 300px;
+    max-width: 300px;
+    background: #fff;
+    padding: 10px 20px 20px;
+    max-height: calc(100vh - 40px - 40px);
+    overflow-x: hidden;
+    .hideScrollbarCommon;
+
+    .iconQuestionCircleFill {
+      margin: 0 8px;
+      color: #b5b8be;
+    }
+
+    .switchLabel {
+      margin-bottom: 8px;
+
+      :global(.pc-form-label-item) {
+        padding-right: 0;
+      }
+
+      .switchButton {
+        float: right;
+      }
+    }
+
+    .tip {
+      background-color: #eaf2fd;
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .fastFilterDiv {
+      margin-bottom: 8px;
+      padding: 4px;
+
+      .fastFilterContent {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+
+        .filterLabel {
+          flex: 1;
+        }
+
+        .deleteBtn {
+          cursor: pointer;
+          color: @IconColor;
+
+          :hover {
+            color: @DelIconHoverColor;
+          }
+        }
+      }
+    }
+    .fastFilterDiv:hover {
+      background-color: #eaedf4;
+      border-radius: 6px;
+    }
+  }
+
+  .popoverContainer {
+    padding: 8px;
+
+    .popoverContent {
+      margin-bottom: 12px;
+
+      .contentLabel {
+        margin-right: 12px;
+      }
+    }
+  }
+
+  .fieldDisplaySpan {
+    margin-left: 8px;
+  }
+
+  .dropdownRender {
+    .dropdownRenderCommon;
+  }
+}
+
+.dropdownRenderCommon {
+  padding: 8px;
+  max-height: 250px;
+  .hideScrollbarCommon;
+
+  .headerCheckbox {
+    margin-bottom: 8px;
+  }
+
+  .displayFieldOptions {
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+
+  .childCheckbox {
+    margin-right: 8px;
+  }
+
+  .optionSpan {
+    color: '#3573f7';
+  }
+
+  .operationDiv {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+
+    .iconEdit {
+      cursor: pointer;
+    }
+  }
+}
+
+.hideScrollbarCommon {
+  overflow-y: auto;
+
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}
+
+.titleSpanCommon {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.fillingRuleSettingsModal {
+  .modalTitleLeft {
+    display: block;
+    text-align: left;
+  }
+
+  .popupContainer {
+    display: flex;
+    min-height: 320px;
+
+    .modalLeftContainer {
+      flex: 1;
+      border-right: 1px solid #f0f0f0;
+
+      .titleSpan {
+        .titleSpanCommon;
+      }
+
+      .checkAll {
+        margin-bottom: 12px;
+      }
+    }
+
+    .modalRightContainer {
+      flex: 1;
+      padding-left: 18px;
+
+      .titleSpan {
+        .titleSpanCommon;
+      }
+
+      .tipSpan {
+        font-size: 12px;
+        color: @IconColor;
+      }
+    }
+  }
+
+  .nextStepContainer {
+    min-height: 320px;
+
+    .titleSpan {
+      .titleSpanCommon;
+      color: @IconColor;
+    }
+
+    .fieldItemDiv {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+
+      .fieldInput {
+        flex: 1;
+      }
+
+      .fieldInput[disabled] {
+        -webkit-text-fill-color: #000;
+      }
+
+      .fieldSpan {
+        margin: 0 8px;
+        color: #1d2129;
+        white-space: nowrap;
+      }
+
+      .fieldSelect {
+        flex: 1;
+        margin-right: 8px;
+      }
+    }
+
+    .deleteBtn {
+      color: #165dff;
+
+      :hover {
+        color: @DelIconHoverColor;
+      }
+    }
+  }
+
+  .checkboxGroup {
+    max-height: 320px;
+
+    .hideScrollbarCommon;
+  }
+}
+
+.filterDataModal {
+  .modalTitleLeft {
+    display: block;
+    text-align: left;
+  }
+
+  .popupContainer {
+    height: 400px;
+    .hideScrollbarCommon;
+
+    .titleSpan {
+      .titleSpanCommon;
+      color: @IconColor;
+      font-size: 16px;
+    }
+  }
+}

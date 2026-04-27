@@ -1,0 +1,25 @@
+{
+  "name": "@onebase/app",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "jest"
+  },
+  "dependencies": {
+    "axios": "^1.10.0",
+    "@preact/signals-react": "^3.2.1",
+    "@onebase/common": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "~5.8.3"
+  },
+  "peerDependencies": {
+    "axios": "^1.10.0"
+  }
+}

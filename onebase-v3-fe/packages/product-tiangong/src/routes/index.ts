@@ -1,0 +1,1 @@
+export { PlatformRoutes } from './PlatformRoutes';

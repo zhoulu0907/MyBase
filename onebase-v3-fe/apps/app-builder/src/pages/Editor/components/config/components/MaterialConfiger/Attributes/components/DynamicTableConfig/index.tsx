@@ -1,0 +1,574 @@
+import { Button, Checkbox, Dropdown, Form, Input, InputNumber, Menu, Message, Select } from '@arco-design/web-react';
+import { IconDelete, IconDragDotVertical } from '@arco-design/web-react/icon';
+import {
+  FilterEntityFields,
+  getEntityFields,
+  type MetadataEntityField,
+  type MetadataEntityPair,
+  menuSignal,
+  PageType
+} from '@onebase/app';
+import {
+  CONFIG_TYPES,
+  ENTITY_FIELD_TYPE,
+  getPopupContainer,
+  useAppEntityStore,
+  SELECT_OPTIONS_BPM,
+  usePageSettingSignal
+} from '@onebase/ui-kit';
+import React, { useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import styles from '../../index.module.less';
+import { registerConfigRenderer } from '../../registry';
+
+const FormItem = Form.Item;
+export interface DynamicTableConfigProps {
+  handleMultiPropsChange: (updates: { key: string; value: string | number | boolean | any[] }[]) => void;
+  handlePropsChange: (key: string, value: string | number | boolean | any[]) => void;
+  item: any;
+  configs: any;
+  id: string;
+}
+
+// 暂时不能在表格展示的数据类型
+export const hiddenFieldTypes = [
+  ENTITY_FIELD_TYPE.RELATION.VALUE,
+  ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+  ENTITY_FIELD_TYPE.ARRAY.VALUE,
+  ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+  ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+  ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+  ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE
+];
+
+export const hiddenSearchFieldTypes = [
+  ENTITY_FIELD_TYPE.RELATION.VALUE,
+  ENTITY_FIELD_TYPE.STRUCTURE.VALUE,
+  ENTITY_FIELD_TYPE.ARRAY.VALUE,
+  ENTITY_FIELD_TYPE.GEOGRAPHY.VALUE,
+  ENTITY_FIELD_TYPE.PASSWORD.VALUE,
+  ENTITY_FIELD_TYPE.ENCRYPTED.VALUE,
+  ENTITY_FIELD_TYPE.AGGREGATE.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_USER.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DEPARTMENT.VALUE,
+  ENTITY_FIELD_TYPE.MULTI_DATA_SELECTION.VALUE,
+  ENTITY_FIELD_TYPE.FILE.VALUE,
+  ENTITY_FIELD_TYPE.IMAGE.VALUE
+];
+
+/**
+ * 对实体字段进行排序：系统字段排在后面，非系统字段排在前面
+ * 数据标题排在表单字段前面
+ */
+const sortEntityFields = (a: MetadataEntityField, b: MetadataEntityField): number => {
+  if (a.isSystemField !== b.isSystemField) {
+    return a.isSystemField ? 1 : -1;
+  }
+  return 0;
+};
+
+const DynamicTableConfig: React.FC<DynamicTableConfigProps> = ({
+  handleMultiPropsChange,
+  handlePropsChange,
+  item,
+  configs,
+  id
+}) => {
+  const { mainEntity, subEntities } = useAppEntityStore();
+  const { dataTitleType, dataTitle } = usePageSettingSignal;
+
+  const [entityList, setEntityList] = useState<MetadataEntityPair[]>([]);
+  const [entityUuid, setEntityUuid] = useState<string>('');
+  const [fieldList, setFieldList] = useState<MetadataEntityField[]>([]);
+
+  const columnsKey = 'columns';
+  const searchItemsKey = 'searchItems';
+  const tableNameKey = 'tableName';
+  const sortByObject = 'sortByObject';
+
+  const { form } = Form.useFormContext();
+
+  const [columnsConfig, setColumnsConfig] = useState<any[]>(configs[columnsKey] || []);
+  const [searchItemsConfig, setSearchItemsConfig] = useState<any[]>(configs[searchItemsKey] || []);
+  const [searchItems, setSearchItems] = useState<string[]>([]);
+
+  const [enableAddColumn, setEnableAddColumn] = useState<boolean>(false);
+  const [enableAddSearchItem, setEnableAddSearchItem] = useState<boolean>(false);
+
+  const { curMenu } = menuSignal;
+
+  // 获取当前表格关联的实体id
+  useEffect(() => {
+    if (id != configs.id) {
+      return;
+    }
+
+    if (configs[item.key]) {
+      setEntityUuid(configs[item.key]);
+    }
+  }, []);
+
+  // 如果实体id变化，重新获取字段列表
+  useEffect(() => {
+    if (entityUuid) {
+      getFieldList();
+    }
+  }, [entityUuid]);
+
+  // 获取实体列表
+  useEffect(() => {
+    const newEntityList = [];
+    if (mainEntity) {
+      newEntityList.push({
+        entityId: mainEntity.entityId,
+        entityUuid: mainEntity.entityUuid,
+        tableName: mainEntity.tableName,
+        entityName: mainEntity.entityName
+      });
+    }
+    if (subEntities) {
+      newEntityList.push(
+        ...subEntities.entities.map((entity: any) => ({
+          entityId: entity.entityId,
+          entityUuid: entity.entityUuid,
+          tableName: entity.tableName,
+          entityName: entity.entityName
+        }))
+      );
+    }
+
+    console.log('newEntityList: ', newEntityList);
+
+    setEntityList(newEntityList);
+  }, [mainEntity, subEntities]);
+
+  // 设置允许的列
+  useEffect(() => {
+    const res = fieldList.some(
+      (item: MetadataEntityField) => !columnsConfig.some((col: any) => col.dataIndex == item.fieldName)
+    );
+
+    setEnableAddColumn(res);
+  }, [fieldList, columnsConfig]);
+
+  // 设置允许的搜索项
+  useEffect(() => {
+    const res = fieldList.some(
+      (item: MetadataEntityField) => !searchItemsConfig.some((col: any) => col.value == item.fieldName)
+    );
+
+    setEnableAddSearchItem(res);
+  }, [fieldList, searchItemsConfig]);
+
+  useEffect(() => {
+    console.log('searchItemsKey', configs[searchItemsKey]);
+    setSearchItems(configs[searchItemsKey]?.map((ele: any) => ele.value));
+  }, [configs[searchItemsKey]]);
+
+  // 获取字段列表
+  const getFieldList = async () => {
+    const res = await getEntityFields({ entityUuid });
+
+    res.forEach((item: MetadataEntityField) => {
+      if (item.fieldType && hiddenFieldTypes.includes(item.fieldType)) {
+        item.disabled = true;
+      }
+    });
+
+    const newFieldList = res
+      .filter((item: MetadataEntityField) => !FilterEntityFields.includes(item.fieldName))
+      .concat(curMenu?.value?.pagesetType === PageType.BPM ? SELECT_OPTIONS_BPM : []);
+
+    const newFieldListNotSystemField = res.filter(
+      (item: MetadataEntityField) => item.isSystemField !== 1 && !item.disabled
+    );
+
+    // 数据标题
+    const DATA_TITLE = {
+      id: '1',
+      entityId: '1',
+      entityUuid: '1',
+      fieldName: `${dataTitleType.value}-${dataTitle.value}`,
+      displayName: '数据标题',
+      fieldType: 'TEXT',
+      dataLength: 0,
+      defaultValue: null,
+      description: '',
+      isSystemField: 0,
+      isPrimaryKey: false,
+      isRequired: false,
+      isUnique: 1,
+      allowNull: false,
+      sortOrder: 1,
+      runMode: 1,
+      appId: '',
+      status: 1
+    };
+
+    setFieldList([DATA_TITLE, ...newFieldList]);
+
+    if (configs.metaData === entityUuid) {
+      return;
+    }
+
+    const newColumns = newFieldListNotSystemField.map((item: MetadataEntityField) => ({
+      // 保留已有的命名，如果没有则使用字段展示名称
+      title:
+        configs[columnsKey].find((col: any) => col.dataIndex === item.fieldName && configs.metaData === entityUuid)
+          ?.title || item.displayName,
+      dataIndex: item.fieldName,
+      disabled: item.disabled,
+      id: item.id
+    }));
+
+    if (curMenu?.value?.pagesetType === PageType.BPM) {
+      const bpmColumn = SELECT_OPTIONS_BPM.map((item: any) => {
+        return {
+          title: item.displayName,
+          dataIndex: item.fieldName,
+          disabled: false,
+          id: ''
+        };
+      });
+      const bpmNewColumns = bpmColumn.concat(newColumns);
+      setColumnsConfig(bpmNewColumns);
+      handlePropsChange(columnsKey, bpmNewColumns);
+    } else {
+      setColumnsConfig(newColumns);
+      handlePropsChange(columnsKey, newColumns);
+    }
+  };
+
+  return (
+    <>
+      <FormItem layout="vertical" labelAlign="left" label="数据" required className={styles.formItem}>
+        <Select
+          placeholder={`请选择${item.name}`}
+          value={configs[item.key]}
+          getPopupContainer={getPopupContainer}
+          onChange={(value) => {
+            handleMultiPropsChange([
+              { key: item.key, value: value },
+              { key: tableNameKey, value: entityList.find((item) => item.entityUuid === value)?.tableName || '' },
+              { key: searchItemsKey, value: [] },
+              { key: columnsKey, value: [] },
+              { key: sortByObject, value: [] }
+            ]);
+
+            setEntityUuid(value);
+            setSearchItemsConfig([]);
+            setColumnsConfig([]);
+          }}
+        >
+          {entityList.map((item) => (
+            <Select.Option key={item.entityUuid} value={item.entityUuid}>
+              {item.entityName}
+            </Select.Option>
+          ))}
+        </Select>
+      </FormItem>
+
+      {/* 表头配置 */}
+      <FormItem layout="vertical" labelAlign="left" label={'表头配置'} required className={styles.formItem}>
+        <Form.List field={`${id}-${columnsKey}`}>
+          {(_fields, { remove }) => (
+            <div className={styles.tableColumnList}>
+              <ReactSortable
+                list={columnsConfig}
+                setList={setColumnsConfig}
+                group={{
+                  name: 'table-col-item'
+                }}
+                swap
+                sort={true}
+                handle=".table-col-item-handle"
+                className={styles.componentCollapseContent}
+                forceFallback={true}
+                animation={150}
+                onAdd={(e) => {
+                  console.log('onAdd: ', e);
+                }}
+                onSort={(e) => {
+                  console.log(e);
+                  const newList = [...configs[columnsKey]];
+                  console.log('configs[columnsKey]', configs[columnsKey]);
+                  // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
+                  const { oldIndex, newIndex } = e;
+                  if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+                    // 复制一份新数组
+                    const movedList = [...newList];
+                    // 取出被移动的元素
+                    const [movedItem] = movedList.splice(oldIndex, 1);
+                    // 插入到新位置
+                    movedList.splice(newIndex, 0, movedItem);
+                    // 更新属性
+                    handlePropsChange(columnsKey, movedList);
+                  }
+                }}
+              >
+                {columnsConfig.map((_col: any, idx: number) => (
+                  <div key={idx} className={styles.tableColumnItem}>
+                    <IconDragDotVertical
+                      // 支持拖拽的图标，别误删了：）
+                      className="table-col-item-handle"
+                      style={{
+                        cursor: 'move',
+                        color: '#555'
+                      }}
+                    />
+                    <Input
+                      size="small"
+                      value={_col.title}
+                      onChange={(e) => {
+                        const newList = columnsConfig;
+                        newList[idx] = {
+                          ...newList[idx],
+                          title: e
+                          //   dataIndex: e
+                        };
+                        setColumnsConfig(newList);
+                        handlePropsChange(columnsKey, [...newList]);
+                      }}
+                      className={styles.tableColumnItemInput}
+                      placeholder={`请输入第${idx + 1}项`}
+                    />
+                    <InputNumber
+                      size="small"
+                      max={500}
+                      min={50}
+                      value={_col.width}
+                      className={styles.tableColumnItemInput}
+                      onChange={(e) => {
+                        const newList = columnsConfig;
+                        newList[idx] = {
+                          ...newList[idx],
+                          width: e
+                        };
+                        setColumnsConfig(newList);
+                        handlePropsChange(columnsKey, [...newList]);
+                      }}
+                      placeholder="宽度"
+                    />
+                    <Checkbox
+                      checked={_col.fixed || false}
+                      onChange={(e) => {
+                        const newList = columnsConfig;
+                        if (newList[idx].width === undefined) {
+                          Message.error('请先设置宽度');
+                          return;
+                        }
+                        newList[idx] = {
+                          ...newList[idx],
+                          fixed: e ? 'left' : false
+                        };
+                        setColumnsConfig(newList);
+                        handlePropsChange(columnsKey, [...newList]);
+                      }}
+                    >
+                      固定
+                    </Checkbox>
+                    <Button
+                      icon={<IconDelete />}
+                      shape="circle"
+                      size="mini"
+                      status="danger"
+                      className={styles.tableColumnItemButton}
+                      onClick={() => {
+                        const newList = [...columnsConfig];
+                        newList.splice(idx, 1);
+                        setColumnsConfig(newList);
+                        handlePropsChange(columnsKey, newList);
+                        remove(idx);
+                      }}
+                    ></Button>
+                  </div>
+                ))}
+              </ReactSortable>
+
+              <Dropdown
+                position={'tl'}
+                trigger="click"
+                droplist={
+                  <Menu>
+                    {fieldList
+                      .sort(sortEntityFields)
+                      .filter(
+                        (item: MetadataEntityField) =>
+                          !columnsConfig.some((col: any) => col.dataIndex === item.fieldName)
+                      )
+                      .map((item: MetadataEntityField) => (
+                        <Menu.Item
+                          key={item.fieldName}
+                          disabled={item?.disabled}
+                          onClick={() => {
+                            const newList = [...columnsConfig, { title: item.displayName, dataIndex: item.fieldName }];
+                            setColumnsConfig(newList);
+                            handlePropsChange(columnsKey, newList);
+                          }}
+                        >
+                          {item.displayName}
+                        </Menu.Item>
+                      ))}
+                  </Menu>
+                }
+                getPopupContainer={getPopupContainer}
+              >
+                <Button type={enableAddColumn ? 'outline' : 'secondary'} disabled={!enableAddColumn}>
+                  新增列
+                </Button>
+              </Dropdown>
+            </div>
+          )}
+        </Form.List>
+      </FormItem>
+
+      {/* 搜索项 */}
+      <FormItem layout="vertical" labelAlign="left" label={'搜索项'} className={styles.formItem}>
+        <Form.List initialValue={configs[searchItemsKey]} field={`${id}-${searchItemsKey}`}>
+          {(_fields, { add, remove }) => (
+            <div className={styles.tableColumnList}>
+              <ReactSortable
+                list={searchItemsConfig}
+                setList={setSearchItemsConfig}
+                group={{
+                  name: 'table-col-item'
+                }}
+                swap
+                sort={true}
+                handle=".table-col-item-handle"
+                className={styles.componentCollapseContent}
+                forceFallback={true}
+                animation={150}
+                onSort={(e) => {
+                  console.log(e);
+                  const newList = [...searchItemsConfig];
+                  // 根据 onSort 事件中的 oldIndex 和 newIndex 交换数组元素
+                  const { oldIndex, newIndex } = e;
+                  console.log(oldIndex, newIndex);
+                  if (oldIndex !== undefined && newIndex !== undefined && oldIndex !== newIndex) {
+                    // 复制一份新数组
+                    const movedList = [...newList];
+                    // 取出被移动的元素
+                    const [movedItem] = movedList.splice(oldIndex, 1);
+                    // 插入到新位置
+                    movedList.splice(newIndex, 0, movedItem);
+                    // 更新属性
+                    handlePropsChange(searchItemsKey, movedList);
+                  }
+                }}
+              >
+                {configs[searchItemsKey].map((_col: any, idx: number) => (
+                  <div key={idx} className={styles.tableColumnItem}>
+                    <IconDragDotVertical
+                      // 支持拖拽的图标，别误删了：）
+                      className="table-col-item-handle"
+                      style={{
+                        cursor: 'move',
+                        color: '#555'
+                      }}
+                    />
+                    <Select
+                      size="small"
+                      value={configs[searchItemsKey][idx].label}
+                      getPopupContainer={getPopupContainer}
+                      onChange={(e, option: any) => {
+                        const newList = [...searchItemsConfig];
+                        newList[idx] = {
+                          ...newList[idx],
+                          label: option.children,
+                          value: e
+                        };
+                        setSearchItemsConfig(newList);
+                        handlePropsChange(searchItemsKey, newList);
+                      }}
+                      className={styles.tableColumnItemInput}
+                      options={configs['columns'].map((item: any) => {
+                        return {
+                          label: item.title,
+                          value: item.dataIndex,
+                          disabled: searchItemsConfig.some((selected: any) => selected.value === item.dataIndex)
+                        };
+                      })}
+                    />
+                    <Button
+                      icon={<IconDelete />}
+                      shape="circle"
+                      size="mini"
+                      status="danger"
+                      className={styles.tableColumnItemButton}
+                      onClick={() => {
+                        const newList = [...searchItemsConfig];
+
+                        newList.splice(idx, 1);
+
+                        remove(idx);
+                        setSearchItemsConfig(newList);
+                        handlePropsChange(searchItemsKey, newList);
+                      }}
+                    ></Button>
+                  </div>
+                ))}
+              </ReactSortable>
+
+              <Select
+                getPopupContainer={getPopupContainer}
+                value={searchItems}
+                mode="multiple"
+                triggerElement={
+                  <Button type={enableAddSearchItem ? 'outline' : 'secondary'} disabled={!enableAddSearchItem}>
+                    新增搜索项
+                  </Button>
+                }
+                onChange={(value) => {
+                  setSearchItems(value);
+                }}
+                triggerProps={{
+                  autoAlignPopupWidth: false,
+                  autoAlignPopupMinWidth: true
+                }}
+                onVisibleChange={(visible) => {
+                  if (!visible) {
+                    // 下拉框收起时 回显数据
+                    const newList = searchItems.map((ele: string) => {
+                      const currentField = fieldList.find((e) => e.fieldName === ele);
+                      return { label: currentField?.displayName, value: ele };
+                    });
+                    form.setFieldValue(`${id}-${searchItemsKey}`, newList);
+                    setSearchItemsConfig(newList);
+                    handlePropsChange(searchItemsKey, newList);
+                  }
+                }}
+              >
+                {fieldList
+                  .sort(sortEntityFields)
+                  .filter((item: MetadataEntityField) => {
+                    return !hiddenSearchFieldTypes.includes(item.fieldType) && item.entityId !== '1';
+                  })
+                  .map((item: MetadataEntityField) => (
+                    <Select.Option key={item.fieldName} value={item.fieldName}>
+                      {item.displayName}
+                    </Select.Option>
+                  ))}
+              </Select>
+            </div>
+          )}
+        </Form.List>
+      </FormItem>
+    </>
+  );
+};
+
+export default DynamicTableConfig;
+
+registerConfigRenderer(CONFIG_TYPES.TABLE_DATA, ({ id, handleMultiPropsChange, handlePropsChange, item, configs }) => (
+  <DynamicTableConfig
+    id={id}
+    handleMultiPropsChange={handleMultiPropsChange}
+    handlePropsChange={handlePropsChange}
+    item={item}
+    configs={configs}
+  />
+));

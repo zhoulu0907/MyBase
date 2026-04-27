@@ -1,0 +1,222 @@
+import { Ellipsis, Form, ImagePicker, ImagePreview, Popover, Toast } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
+import { ITypeRules, ValidatorType } from '@arco-design/mobile-utils';
+import { attachmentDownload, attachmentUpload, menuSignal } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
+import { FORM_COMPONENT_TYPES, FormSchema, STATUS_OPTIONS, STATUS_VALUES, UPLOAD_OPTIONS, UPLOAD_VALUES } from '@onebase/ui-kit';
+import { nanoid } from 'nanoid';
+import { memo, useEffect, useRef } from 'react';
+import './index.css';
+
+type XImgUploadConfig = typeof FormSchema.XImgUploadSchema.config;
+
+const XImgUpload = memo((props: XImgUploadConfig & { runtime?: boolean; detailMode?: boolean; form?: any }) => {
+  const { label, dataField, status, verify, runtime = true, form, uploadType, detailMode } = props;
+  const { curMenu } = menuSignal;
+  const { rowDataId } = pagesRuntimeSignal;
+
+  const fieldId =
+    dataField.length > 0 ? dataField[dataField.length - 1] : `${FORM_COMPONENT_TYPES.IMG_UPLOAD}_${nanoid()}`;
+
+  const [tableName, fieldName] = dataField;
+  const localUrls = useRef<string[]>([]);
+
+  const getRealUrl = async (fileId: string) => {
+    try {
+      const lastIndexOf = fieldName.lastIndexOf('.');
+      const curFieldName = lastIndexOf === -1 ? fieldName : fieldName.slice(lastIndexOf + 1);
+      const param = {
+        menuId: curMenu.value.id,
+        id: rowDataId.value,
+        fieldName: curFieldName,
+        fileId
+      };
+
+      const url = await attachmentDownload(tableName, param);
+      return url;
+    } catch (error) {
+      return '';
+    }
+  };
+
+  const initUrl = async () => {
+    if (!form || !fieldId) return;
+
+    const array = form.getFieldValue(fieldId) || [];
+    const urls = [] as string[];
+
+    const updatedArray = await Promise.all(
+      array.map(async (item: any) => {
+        if (item.id && !item.url) {
+          try {
+            const resTmp = await getRealUrl(item.id);
+            urls.push(resTmp);
+            return { ...item, url: resTmp, status: 'loaded' };
+          } catch (error) {
+            return { ...item, status: 'error' };
+          }
+        }
+        return item;
+      })
+    );
+    localUrls.current = urls;
+    if (updatedArray.length > 0) {
+      form.setFieldValue(fieldId, updatedArray);
+    }
+  };
+
+  useEffect(() => {
+    initUrl();
+  }, [fieldId]);
+
+  useEffect(() => {
+    return () => {
+      localUrls.current.forEach((url) => {
+        if (url && url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, []);
+
+  const handleUpload = async (files: any): Promise<any | null> => {
+    if (verify?.fileFormatLimit && verify?.fileFormat) {
+      const lastIndexOf = files.file.name.lastIndexOf('.');
+      const type = files.file.name.slice(lastIndexOf + 1);
+      if (!verify.fileFormat.toLocaleLowerCase().split(',').includes(type.toLocaleLowerCase())) {
+        Toast.toast({
+            type: 'warn',
+            content: `不支持该格式，仅支持 ${verify.fileFormat}`,
+            duration: 2000
+          });
+        return null;
+      }
+    }
+
+    if (!files.file) {
+      return null;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', files.file);
+
+      if (runtime) {
+        const res = await attachmentUpload(tableName, formData);
+        return {
+          id: res,
+          url: files.url || '',
+          name: files.file.name || ''
+        } as any;
+      }
+
+      return null;
+    } catch (error) {
+      Toast.toast({
+        type: 'error',
+        content: '上传失败，请重试',
+        duration: 2000
+      });
+      return null;
+    }
+  };
+
+  const onClick = (e: React.MouseEvent, image: any, index: number) => {
+    (globalThis as any).modalInstance = ImagePreview.open({
+      showLoading: true,
+      openIndex: index,
+      loop: true,
+      onImageDoubleClick: (index) => console.log('dbl click', index),
+      onImageLongTap: (index, image) => console.log('long tap', index, image),
+      images: (form.getFieldValue(fieldId) || []).map((item: any) => ({ src: item.url }))
+    });
+  };
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`
+    }
+  ];
+
+  const formatAccept = (verify: any) => {
+    if (!verify?.fileFormatLimit) return 'image/*';
+    return verify?.fileFormat
+      .split(',')
+      .map((i: any) => i.trim().replace(/^\./, '').toLowerCase())
+      .map((ext: any) => `.${ext}`)
+      .join(',')
+  };
+
+  return (
+    <Form.Item
+      className="inputTextWrapperOBMobile ImgUploadWrapperOBMobile"
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
+      layout="vertical"
+      field={fieldId}
+      rules={rules}
+      trigger="fileList"
+      style={{
+        pointerEvents: status === STATUS_VALUES[STATUS_OPTIONS.DEFAULT] && runtime ? 'unset' : 'none',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+      extra={
+        <div className="imgUploadBottomTips">
+          {!detailMode && (uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.TEXT] || uploadType == UPLOAD_VALUES[UPLOAD_OPTIONS.CARD]) ? <>
+            {verify?.fileFormatLimit && (
+              <span>支持{verify?.fileFormat}格式{verify?.maxCountLimit || verify?.maxSizeLimit ? '，' : ''}</span>
+            )}
+            <span>
+              {verify?.maxCountLimit && (
+                <span>
+                  最多上传{verify?.maxCount && verify?.maxCount > 0 ? verify?.maxCount : 1}个文件
+                  {verify?.maxSizeLimit ? '，' : ''}
+                </span>
+              )}
+              {verify?.maxSizeLimit && <span>单个文件不超过{verify?.maxSize || 10}MB</span>}
+            </span>
+          </> : undefined}
+        </div>
+      }
+    >
+      <ImagePicker
+        accept={formatAccept(verify)}
+        limit={verify?.maxCountLimit ? verify?.maxCount : 0}
+        maxSize={verify?.maxSizeLimit ? verify?.maxSize * 1024 : undefined}
+        onClick={onClick}
+        upload={handleUpload}
+        images={(form?.getFieldValue(fieldId) || []).map((item: any) => ({ url: item.url }))}
+        disabled={status !== STATUS_VALUES[STATUS_OPTIONS.DEFAULT] || detailMode}
+        onMaxSizeExceed={() => {
+          Toast.toast({
+            type: 'warn',
+            content: '文件大小超出限制',
+            duration: 2000
+          });
+        }}
+        onLimitExceed={() =>
+          Toast.toast({
+            type: 'warn',
+            content: '文件数量超出限制',
+            duration: 2000
+          })
+        }
+        style={{
+          width: '100%'
+        }}
+      />
+    </Form.Item>
+  );
+});
+
+export default XImgUpload;

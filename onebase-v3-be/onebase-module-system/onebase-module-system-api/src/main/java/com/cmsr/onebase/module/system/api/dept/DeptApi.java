@@ -1,0 +1,79 @@
+package com.cmsr.onebase.module.system.api.dept;
+
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.framework.common.util.collection.CollectionUtils;
+import com.cmsr.onebase.module.system.api.dept.dto.*;
+import com.cmsr.onebase.module.system.enums.ApiConstants;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+@FeignClient(name = ApiConstants.NAME) // TODO 开发者：fallbackFactory =
+@Tag(name = "RPC 服务 - 部门")
+public interface DeptApi {
+
+    String PREFIX = ApiConstants.PREFIX + "/dept";
+
+    @GetMapping(PREFIX + "/get")
+    @Operation(summary = "获得部门信息")
+    @Parameter(name = "id", description = "部门编号", example = "1024", required = true)
+    CommonResult<DeptRespDTO> getDept(@RequestParam("id") Long id);
+
+    @GetMapping(PREFIX + "/list")
+    @Operation(summary = "获得部门信息数组")
+    @Parameter(name = "ids", description = "部门编号数组", example = "1,2", required = true)
+    CommonResult<List<DeptRespDTO>> getDeptList(@RequestParam("ids") Collection<Long> ids);
+
+    @GetMapping(PREFIX + "/valid")
+    @Operation(summary = "校验部门是否合法")
+    @Parameter(name = "ids", description = "部门编号数组", example = "1,2", required = true)
+    CommonResult<Boolean> validateDeptList(@RequestParam("ids") Collection<Long> ids);
+
+
+    @GetMapping(PREFIX + "/get-dept-users")
+    @Operation(summary = "指定/搜索获取部门和用户信息")
+    CommonResult<DeptAndUsersRespDTO> getDeptAndUsers(@Valid @RequestParam DeptAndUsersReqDTO reqVO);
+
+    /**
+     * 获得指定编号的部门 Map
+     *
+     * @param ids 部门编号数组
+     * @return 部门 Map
+     */
+    default Map<Long, DeptRespDTO> getDeptMap(Collection<Long> ids) {
+        List<DeptRespDTO> list = getDeptList(ids).getCheckedData();
+        return CollectionUtils.convertMap(list, DeptRespDTO::getId);
+    }
+
+    @GetMapping(PREFIX + "/list-child")
+    @Operation(summary = "获得指定部门的所有子部门")
+    @Parameter(name = "id", description = "部门编号", example = "1024", required = true)
+    CommonResult<List<DeptRespDTO>> getChildDeptList(@RequestParam("id") Long id);
+
+    @GetMapping(PREFIX + "/get-dept-by-user-id")
+    @Operation(summary = "根据用户ID获取其所属部门及其父部门列表")
+    @Parameter(name = "ids", description = "根据用户ID获取其所属部门及其父部门列表", example = "1", required = true)
+    CommonResult<List<DeptRespDTO>> getParentDeptsListByUserId(@RequestParam("userId") Long userId);
+
+
+    /**
+     * 获得排除指定部门编号的部门列表
+     *
+     * @param reqVO 请求参数
+     * @return 部门列表
+     */
+    @GetMapping(PREFIX + "/get-dept-page")
+    @Operation(summary = "获取部门列表")
+    CommonResult<PageResult<DeptRespDTO>> getDeptPage(@Valid @RequestParam DeptPageApiReqVO reqVO);
+
+
+}

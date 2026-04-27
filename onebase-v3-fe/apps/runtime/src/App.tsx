@@ -1,0 +1,48 @@
+import { Message } from '@arco-design/web-react';
+import '@icon-park/react/styles/index.css';
+import { NotFoundPage } from '@onebase/common';
+import { Navigate, Route, HashRouter as Router, Routes } from 'react-router-dom';
+import Login from './pages/Login';
+import MyAppPage from './pages/MyApp';
+import IotInfo from './pages/IotInfo';
+import Runtime from './pages/Runtime';
+import SettingPage from './pages/Setting';
+import ThirdLogin from './pages/thirdLogin';
+
+function AppContent() {
+  Message.config({
+    duration: 3000,
+    maxCount: 1,
+    getContainer: () => document.body
+  });
+
+  return (
+    <Routes>
+      {/* 登录页面不需要认证 */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/third/login" element={<ThirdLogin />} />
+      <Route path="/third/iot/info" element={<IotInfo />} />
+
+      <Route path="/onebase/:tenantId/:appId/runtime/" element={<Runtime />} />
+      <Route path="/onebase/:tenantId/:appId/runtime-dev/" element={<Runtime />} />
+
+      <Route path="/onebase/:tenantId/runtime/my-app" element={<MyAppPage />} />
+      <Route path="/onebase/:tenantId/setting/*" element={<SettingPage />} />
+      {/* 默认重定向到登录页 */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
+
+      {/* 404页面 */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}
+
+export default App;

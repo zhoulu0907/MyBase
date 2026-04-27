@@ -1,0 +1,663 @@
+import type { CONFIG_TYPES } from './constants';
+
+// TODO(mickey): 后续扩展配置
+export type EditConfig = any;
+
+export type TTextDefaultType = string;
+export type TNumberDefaultType = number;
+export type TTextAreaDefaultType = string;
+export type TSelectDefaultType<KeyType> = KeyType;
+export type TRadioDefaultType<KeyType> = KeyType;
+export type TBooleanDefaultType = boolean;
+
+/**
+ * 默认基础配置
+ * */
+
+export interface ICommonConfigType {
+   key: string;
+   name: string;
+   type: string;
+   /** 配置通用 key value类型 */
+   [key: string]: any;
+}
+
+// 文本输入框配置
+export interface ITextConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TEXT_INPUT;
+  placeholder?: string;
+  maxLength?: number;
+}
+
+// 数字输入框配置
+export interface INumberConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.NUMBER_INPUT;
+  range?: [number, number];
+  step?: number;
+}
+
+// 文本区域输入框配置
+export interface ITextAreaConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TEXT_AREA_INPUT;
+}
+
+// 下拉框配置
+export interface ISelectConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SELECT_INPUT;
+  range?: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 密码输入框配置
+export interface IPasswordConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: 'PasswordInput';
+}
+
+export interface IDynamicSelectConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DYNAMIC_SELECT_INPUT;
+}
+
+export interface IDataFieldConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.FIELD_DATA;
+}
+
+export interface IRelatedFormDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.RELATED_FORM_DATA;
+}
+
+export interface ITableDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_DATA;
+  advanced?: boolean;
+}
+
+export interface ITreeDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TREE_DATA;
+  advanced?: boolean;
+}
+
+export interface IWebViewParamsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.WEB_VIEW_PARAMS;
+  advanced?: boolean;
+}
+
+export interface ICardDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CARD_DATA;
+}
+
+export interface ICanvasCardConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CANVAS_CARD_CONFIG;
+  advanced?: boolean;
+}
+
+export interface IDataSortByConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATA_SORT_BY;
+}
+
+export interface IDataFilterConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATA_FILTER;
+}
+export interface ICoverImageConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COVER_IMAGE;
+  range: Array<{
+    label: string;
+    value: string;
+  }>;
+}
+export interface IGroupFilterConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.GROUP_FILTER;
+}
+
+export interface IPaginationConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.PAGINATION_CONFIG;
+}
+
+
+export interface IIndicatorCardStyleConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.INDICATOR_CARD_STYLE;
+}
+
+export interface IIndicatorCardConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.INDICATOR_CARD_CONFIG;
+}
+
+export interface IRadioDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.RADIO_DATA;
+}
+
+export interface ICheckboxDataConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CHECKBOX_DATA;
+}
+
+// TODO(mickey): remove
+// export interface ISearchItemListConfigType {
+//   key: string;
+//   name: string;
+//   type: typeof CONFIG_TYPES.SEARCH_ITEM_LIST;
+// }
+
+export interface IBooleanConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SWITCH_INPUT;
+  advanced?: boolean;
+}
+
+/**
+ * 自定义配置
+ * */
+
+// Label配置
+export interface ILabelConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.LABEL_INPUT;
+  placeholder?: string;
+}
+
+// 内容配置
+export interface IAlertContentConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.ALERT_CONTENT_INPUT;
+}
+
+export interface IAlertTypeConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.ALERT_TYPE;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 占位符配置
+export interface IPlaceholderConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.PLACEHOLDER_INPUT;
+  placeholder?: string;
+}
+
+// 提示配置
+export interface ITooltipConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TOOLTIP_INPUT;
+  placeholder?: string;
+}
+
+// 状态配置
+export interface IStatusConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.STATUS_RADIO;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 数据选择方式配置（下拉框/弹窗）
+export interface IDataSelectModeConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATA_SELECT_MODE;
+  range: Array<any>;
+}
+
+export interface IImageConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.IMAGE;
+}
+export interface IFileConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.FILE;
+}
+
+// 宽度配置
+export interface IWidthConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.WIDTH_RADIO;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 是否必填配置
+export interface IRequiredCheckboxConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.REQUIRED_CHECKBOX;
+}
+
+// 布局列数配置
+export interface IColumnCountConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLUMN_COUNT_RADIO;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 分栏布局列间距
+export interface IColumnGapConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLUMN_GAP_SELECT;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// TODO(mickey): remove
+// export interface ITableColumnConfigType {
+//   key: string;
+//   name: string;
+//   type: typeof CONFIG_TYPES.TABLE_COLUMN_LIST;
+// }
+
+// 状态配置
+export interface ITablePagePositionConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_PAGE_POSITION_RADIO;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 表格分页
+export interface ITablePageSizeConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_PAGE_SIZE;
+}
+
+// 文件上传大小限制
+export interface IUploadSizeConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.UPLOAD_SIZE;
+}
+
+// 文件上传数量限制
+export interface IUploadLimitConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.UPLOAD_LIMIT;
+}
+
+// 文件上传按钮配置
+export interface IUploadButtonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.UPLOAD_BUTTON;
+}
+
+// 图片压缩率
+export interface IUploadCompressConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.UPLOAD_COMPRESS;
+}
+
+// 日期格式
+export interface IDateTypeConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_TYPE;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 表单布局方式
+export interface ILayoutConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.FORM_LAYOUT;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 文本对齐方式
+export interface IAlignConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TEXT_ALIGN;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 颜色配置
+export interface IColorConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLOR;
+  placeholder?: string;
+}
+
+// 日期
+export interface IDateConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_INPUT;
+}
+
+// 轮播图配置
+export interface ICarouselConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.CAROUSEL;
+}
+
+// 安全配置
+export interface ISecurityConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SECURITY;
+}
+
+// 校验配置
+export interface IVerifyConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.VERIFY;
+}
+
+export interface INumberFormatConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.NUMBER_FORMAT;
+}
+
+// 文本输入框配置
+// export interface ISupportFileTypeConfigType {
+//   key: string;
+//   name: string;
+//   type: typeof CONFIG_TYPES.SUPPORT_FILE_TYPE;
+//   placeholder?: string;
+// }
+
+export interface ISelectOptionsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SELECT_OPTIONS_INPUT;
+  placeholder?: string;
+}
+export interface IMutipleSelectOptionsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.MUTIPLE_SELECT_OPTIONS_INPUT;
+  placeholder?: string;
+}
+
+// 数据选择 数据源
+export interface ISelectDataSourceConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SELECT_DATA_SOURCE;
+}
+
+// 子表子组件配置
+export interface ISubTableConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SUB_TABLE;
+}
+
+// 页签组件配置
+export interface ITabsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS;
+}
+
+// 页签组件类型
+export interface ITabsTypeConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_TYPE;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 页签组件位置
+export interface ITabsPositionConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_POSITION;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 步骤条组件类型
+export interface IStepsConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.STEPS;
+}
+
+// 页签组件类型
+export interface ITabsTypeConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_TYPE;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 步骤条标签位置
+export interface IStepsLabelPlacementConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABS_POSITION;
+  range: Array<{
+    key: string;
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 折叠配置
+export interface ICollapsedConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLLAPSED;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+export interface ICollapsedStyleConfig extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.COLLAPSED_STYLE;
+}
+
+export interface ITableOperationConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_OPERATION;
+  advanced?: boolean;
+}
+
+// 按钮权限配置
+export interface ITableButtonConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TABLE_BUTTON;
+  advanced: boolean;
+  range: Array<{
+    key: string;
+    text: string;
+    value: KeyType;
+  }>;
+}
+
+// 自动编号规则配置
+export interface IAutoCodeConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.AUTO_CODE_RULES;
+}
+
+export interface IImageHandleConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.IMAGE_HANDLE;
+}
+
+// 日期格式
+export interface IDateFormatConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+
+// 日期可选范围
+export interface IDateRangeConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DATE_RANGE;
+}
+
+// 时间格式
+export interface ITimeFormatConfigType<KeyType> extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_FORMAT;
+  range?: Array<{
+    label: string;
+    value: KeyType;
+  }>;
+}
+// 时间可选范围
+export interface ITimeRangeConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.TIME_RANGE;
+}
+
+
+// 填充文本 switch
+export interface ISwitchFillTextConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.SWITCH_FILL_TEXT;
+}
+
+// 默认值
+export interface IDefaultValueConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DEFAULT_VALUE;
+}
+// 电话类型
+export interface IPhoneType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.PHONE_TYPE;
+  range?: Array<{
+    label: string;
+    value: string;
+  }>;
+}
+
+// 分割线字段描述
+export interface IDividerTooltipConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DIVIDER_TOOLTIP_INPUT;
+}
+
+// 分割线样式
+export interface IDividerStyleTypeConfigType extends ICommonConfigType {
+  key: string;
+  name: string;
+  type: typeof CONFIG_TYPES.DIVIDER_STYLE_TYPE;
+}

@@ -1,0 +1,87 @@
+.dataPermissionModal {
+  .dataPermissionModalTitle {
+    text-align: left;
+  }
+  .dataPermissionForm {
+    box-sizing: border-box;
+    padding: 0 65px;
+    .dataPermissionScope {
+      .scopeRow {
+        display: flex;
+        align-items: center;
+        margin-top: 12px;
+        height: 32px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        .selfRow {
+          display: flex;
+          flex: 1;
+          margin-left: 12px;
+          align-items: center;
+          gap: 12px;
+        }
+      }
+      .scopeRoles {
+        width: 120px;
+        margin-bottom: 0;
+      }
+      .scopePerson {
+        width: 160px;
+        margin-bottom: 0;
+      }
+      .scopeAssign {
+        width: 100%;
+        flex: 1;
+        margin-bottom: 0;
+        border-radius: 4px;
+        .assignIdTag {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 8px 0 4px;
+          height: 32px;
+          border-radius: 4px;
+          border: 1px solid var(--light-line-color-border-2, #E5E6EB);
+          .tagContainer {
+            box-sizing: border-box;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            .tag {
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              // 图片和文字中线对齐
+              vertical-align: middle;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 80px;
+            }
+          }
+          .tagBtn {
+            cursor: pointer;
+            &:hover {
+              color: #4FAE7B;
+            }
+          }
+        }
+      }
+    }
+    .dataPermissionFilters {
+      box-sizing: border-box;
+        border: 1px solid #E5E6EB;
+        border-radius: 4px;
+        padding: 10px 0;
+    }
+    .dataPermissionOperableBox {
+      margin-bottom: 20px;
+    }
+    .dataPermissionOperable {
+      margin-right: 14px;
+    }
+  }
+}

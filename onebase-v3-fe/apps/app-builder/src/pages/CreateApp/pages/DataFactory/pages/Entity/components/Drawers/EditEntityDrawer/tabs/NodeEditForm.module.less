@@ -1,0 +1,76 @@
+// 表单样式变量
+@import '../../../../../../styles/variables.less';
+
+.nodeEditForm {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  
+  .header {
+    .form-header-style();
+  }
+
+  .editForm {
+    width: 100%;
+    max-height: calc(100% - 100px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-grow: 1;
+  }
+
+  .formSection {
+    .form-section-style();
+  }
+
+  .formSectionTitle {
+    .form-section-title();
+  }
+
+  .formActions {
+    .form-footer-style();
+    .flex-between();
+  }
+
+  .switchItem {
+    .flex-between();
+
+    span {
+      font-size: @fontSizeBase;
+      color: @textColorSecondary;
+    }
+  }
+
+  .iconCheck {
+    color: rgb(var(--success-5));
+    margin-right: 8px;
+  }
+
+  .checkboxItem {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+
+    .systemFieldCheckbox {
+      width: 100%;
+      
+      .pc-checkbox-label {
+        font-size: @fontSizeBase;
+        color: @textColorSecondary;
+        margin-left: 8px;
+      }
+
+      &.pc-checkbox-checked {
+        .pc-checkbox-icon {
+          color: rgb(var(--success-5));
+          border-color: rgb(var(--success-5));
+        }
+      }
+
+      &.pc-checkbox-disabled {
+        .pc-checkbox-label {
+          color: @textColorSecondary;
+        }
+      }
+    }
+  }
+}

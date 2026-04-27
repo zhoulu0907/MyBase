@@ -1,0 +1,41 @@
+.triggerEditor {
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  :global(.gedit-flow-lines-layer) {
+    pointer-events: none; // 支持点击事件穿透
+  }
+
+  //
+  .container {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+
+    .layout {
+      display: flex;
+      flex-direction: row;
+      flex-grow: 1;
+    }
+
+    .editor {
+      flex-grow: 1;
+      position: relative;
+      height: 100%;
+    }
+
+    .sidebarContainer {
+      position: fixed;
+      right: 0;
+      height: 100%;
+      background-color: transparent;
+      z-index: 1000;
+      overflow: hidden;
+      transition: width 0.2s ease;
+    }
+  }
+}

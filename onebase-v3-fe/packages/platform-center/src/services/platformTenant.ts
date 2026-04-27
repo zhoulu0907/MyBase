@@ -1,0 +1,54 @@
+import { CreateTenantParams, PlatformTenantSort } from '../types/platformTenant';
+import { platformService } from './clients';
+
+// 可分配数量接口 /admin-api/system/tenant/get-allocatable-count
+export const getCreateTenantCountApi = () => platformService.get('/tenant/get-allocatable-count');
+
+// 获取其他租户分配数量
+export const getOtherTenantCountApi = (id?: string) =>
+  platformService.get('/tenant/get-other-exist-user-count', { id });
+
+// 获取租户用户数量
+export const getTenantUserCountApi = (id: string) => platformService.get('/tenant/get-tenant-exist-user-count', { id });
+
+// 获取平台租户列表信息
+export const getPlatformTenantListApi = (params: {
+  pageNo: number;
+  pageSize?: number;
+  keywords?: string;
+  status?: number | null;
+  sortType?: PlatformTenantSort;
+}) => {
+  const { pageNo, pageSize = 10, keywords, status, sortType } = params;
+
+  let url = `/tenant/page?pageNo=${pageNo}&pageSize=${pageSize}`;
+
+  if (keywords) {
+    url += `&keyword=${encodeURIComponent(keywords)}`;
+  }
+
+  if (status !== null) {
+    url += `&status=${status}`;
+  }
+
+  if (sortType !== null) {
+    url += `&sortType=${sortType}`;
+  }
+
+  return platformService.get(url);
+};
+
+// 添加平台租户
+export const addPlatformTenantApi = (data: CreateTenantParams) => platformService.post('/tenant/create', data);
+
+// 修改平台租户
+export const updatePlatformTenantApi = (data: any) => platformService.post('/tenant/update', data);
+
+// 删除平台租户
+export const deletePlatformTenantApi = (id: string) => platformService.post(`/tenant/delete?id=${id}`);
+
+// 获取租户管理员列表
+export const getPlatformTenantAdminListApi = (keyword?: string) => platformService.get(`/platform/admin/list?keyword=${keyword ? keyword : ''}`);
+
+// 获得租户(安全考虑仅获取用户所属租户)
+export const getPlatformTenantAdminInfoApi = (id: string) => platformService.get(`/tenant/get?id=${id}`);

@@ -1,0 +1,17 @@
+ ### 请求 /login 接口 => 成功   ##verifycode/password
+POST {{baseUrl}}/system/third-user/register
+Content-Type: application/json
+Authorization: Bearer {{token}}
+X-Tenant-Id: 156421901678804992
+
+{
+  "appId":"177228595925417984",
+  "password":"ae61b79d21e870717365d944806e340e36f8480f5ac095c7d3c2afe67ad1dc4fa420b316383f3c8cd43e94a47fc7c752fd51e44b4637b9ce658653761fbc9335627562b18b4cbe89dc13d9b005ca660f87ebc9e8ff6dcd12682fea75ed38e6a58dadd7e95f830dc78580ca48be544e",
+  "nickName": "nickName1219",
+  "mobile": "15996669973",
+  "email": "469999@13.com",
+  "deviceId": "88888888"
+}
+
+
+

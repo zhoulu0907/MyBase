@@ -1,0 +1,55 @@
+.formulaEditor {
+  :global(.pc-modal-header) {
+    .formulaHeader {
+      text-align: left;
+      .goBack {
+        cursor: pointer;
+      }
+
+      .title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #1d2129;
+      }
+
+      .subtitle {
+        font-size: 14px;
+        color: #86909c;
+        margin-left: 16px;
+      }
+
+      .closeButton {
+        padding: 4px;
+        color: #86909c;
+
+        &:hover {
+          color: #1d2129;
+          background-color: #f2f3f5;
+        }
+      }
+    }
+  }
+  :global(.pc-modal-content) {
+    padding: 0;
+    .contentWrapper {
+      padding: 20px 24px;
+      :global(.pc-row){
+        border: 1px solid #e5e6eb;
+        border-top: none;
+        :global(.pc-col){
+          border-right: 1px solid #e5e6eb;
+          :global(.pc-input-group-wrapper) {
+            border-bottom: 1px solid #e5e6eb;
+            :global(.pc-input-inner-wrapper){
+              background-color: #fff;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  :global(.pc-modal-body) {
+    padding: 0;
+  }
+}

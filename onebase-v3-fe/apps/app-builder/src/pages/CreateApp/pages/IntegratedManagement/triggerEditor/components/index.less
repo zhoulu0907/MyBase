@@ -1,0 +1,56 @@
+.nodeList {
+  .search {
+    padding: 16px 16px 12px;
+    height: 36px;
+    .searchWrapper {
+      .pc-input-inner-wrapper {
+        border-radius: 16px;
+      }
+    }
+  }
+}
+
+.allItem {
+  .label {
+    padding: 4px 16px 8px;
+    color: #6b7785;
+    line-height: 20px;
+    font-size: 12px;
+    font-weight: 400;
+  }
+}
+
+.nodePanel {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-sizing: border-box;
+
+  .nodeWrap {
+    width: calc(50% - 6px);
+    margin-bottom: 12px;
+    height: 30px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 22px;
+    padding: 4px 12px;
+    border: 1px solid #e5e6eb;
+    box-sizing: border-box;
+    &:hover {
+      background-color: hsl(252deg 62% 55% / 9%);
+      color: hsl(252 62% 54.9%);
+    }
+  }
+
+  .nodeLabel {
+    font-size: 14px;
+    margin-left: 8px;
+  }
+}

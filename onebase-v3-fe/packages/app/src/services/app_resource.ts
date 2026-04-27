@@ -1,0 +1,69 @@
+import { isRuntimeEnv } from '@onebase/common';
+import {
+  CreatePageSetReq,
+  CreatePageViewParams,
+  DeletePageSetReq,
+  GetAppIdByPageSetIdReq,
+  GetComponentListByPageIdReq,
+  GetPageListByAppIdReq,
+  GetTablesByAppIdReq,
+  GetPageMetadataReq,
+  GetPageSetIdReq,
+  GetPageSetMainMetaDataReq,
+  ListPageViewParams,
+  LoadPageSetReq,
+  SavePageSetReq
+} from '../types';
+import { appService, runtimeAppService } from './clients';
+
+export const getPageSetId = (params: GetPageSetIdReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/resource/page_set/id', params);
+};
+
+export const savePageSet = (params: SavePageSetReq) => {
+  return appService.post('/resource/page_set/save', params);
+};
+
+export const loadPageSet = (params: LoadPageSetReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).post('/resource/page_set/load', params);
+};
+
+export const createPageSet = (params: CreatePageSetReq) => {
+  return appService.post('/resource/page_set/create', params);
+};
+
+export const deletePageSet = (params: DeletePageSetReq) => {
+  return appService.post('/resource/page_set/delete', params);
+};
+
+export const getAppIdByPageSetId = (params: GetAppIdByPageSetIdReq) => {
+  return appService.get('/resource/page_set/app_id', params);
+};
+
+export const getPageSetMetaData = (params: GetPageSetMainMetaDataReq) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).get('/resource/page_set/main_metadata', params);
+};
+
+export const getPageListByAppId = (params: GetPageListByAppIdReq) => {
+  return appService.post('/resource/page/app_id', params);
+};
+
+export const getPageMetadata = (params: GetPageMetadataReq) => {
+  return appService.post('/resource/page/metadata', params);
+};
+
+export const getComponentListByPageId = (params: GetComponentListByPageIdReq) => {
+  return appService.post('/resource/component/list', params);
+};
+
+export const getTablesByAppId = (params: GetTablesByAppIdReq) => {
+  return appService.get('/resource/component/list/list_page_components', params);
+};
+
+export const createPageView = (params: CreatePageViewParams) => {
+  return appService.post('/resource/page/view/create', params);
+};
+
+export const listPageView = (params: ListPageViewParams) => {
+  return (isRuntimeEnv() ? runtimeAppService : appService).post('/resource/page/view/list', params);
+};

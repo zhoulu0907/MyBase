@@ -1,0 +1,19 @@
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+
+/**
+ * Copyright (c) 2025 Bytedance Ltd. and/or its affiliates
+ * SPDX-License-Identifier: MIT
+ */
+import type { FlowNodeJSON } from '@flowgram.ai/free-layout-editor';
+import type { AssignValueType, IFlowValue, IJsonSchema } from '@flowgram.ai/form-materials';
+
+export interface VariableNodeJSON extends FlowNodeJSON {
+  data: {
+    title: string;
+    assign: AssignValueType[];
+    outputs: IJsonSchema<'object'>;
+  };
+}

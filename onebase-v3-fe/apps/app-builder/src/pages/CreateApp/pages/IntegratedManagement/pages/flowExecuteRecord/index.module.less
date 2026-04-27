@@ -1,0 +1,74 @@
+.flowExecuteRecordPage {
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  .content {
+    padding: 20px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    overflow-y: auto;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #e5e6eb;
+    padding-bottom: 8px;
+    font-size: 14px;
+
+    .headerContent {
+      flex: 1;
+      .headerContentTitle {
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        color: #1d2129;
+      }
+      .headerContentDescribe {
+        font-size: 14px;
+        line-height: 22px;
+        color: #86909c;
+      }
+    }
+  }
+  .card {
+    padding: 16px 0;
+    .cardItem {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      background-color: #f7f8fa;
+      border-radius: 8px;
+      .cardItemImage {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background-color: rgb(var(--primary-1));
+        margin-right: 12px;
+      }
+      .cardItemContent {
+        flex: 1;
+        font-size: 14px;
+        line-height: 22px;
+        color: #4e5969;
+        .cardItemContentFrequ {
+          margin: 4px 0;
+          font-weight: 500;
+          font-size: 24px;
+          line-height: 32px;
+          color: #1d2129;
+        }
+        .cardItemContentValue {
+          color: #6b7785;
+        }
+      }
+    }
+  }
+  .table{
+    padding-top: 16px;
+  }
+}

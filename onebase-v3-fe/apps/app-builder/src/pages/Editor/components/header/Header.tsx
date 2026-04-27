@@ -1,0 +1,954 @@
+import editPageNameSVG from '@/assets/images/edit_page_name_icon.svg';
+import activeFlowDesignSVG from '@/assets/images/flow-active-icon.svg';
+import defaultFlowDesignSVG from '@/assets/images/flow-default-icon.svg';
+import activeFormDesignSVG from '@/assets/images/form_design_active_icon.svg';
+import defaultFormDesignSVG from '@/assets/images/form_design_default_icon.svg';
+import activeListDesignSVG from '@/assets/images/list_design_active_icon.svg';
+import defaultListDesignSVG from '@/assets/images/list_design_default_icon.svg';
+import activePageSettingSVG from '@/assets/images/page_setting_active_icon.svg';
+import defaultPageSettingSVG from '@/assets/images/page_setting_default_icon.svg';
+import previewSVG from '@/assets/images/preview_icon.svg';
+import activeWorkbenchDesignSVG from '@/assets/images/workbench_design_active_icon.svg';
+import defaultWorkbenchDesignSVG from '@/assets/images/workbench_design_default_icon.svg';
+import DynamicIcon from '@/components/DynamicIcon';
+import { useI18n } from '@/hooks/useI18n';
+import RenameModal from '@/pages/CreateApp/pages/PageManager/components/Modals/RenameModal';
+import VersionModal from '@/pages/CreateApp/pages/PageManager/components/Modals/VersionModal';
+import { useBasicEditorStore } from '@/store';
+import { useFlowEditorStor } from '@/store/index';
+import { useAppStore } from '@/store/store_app';
+import { useResourceStore } from '@/store/store_resource';
+import { Breadcrumb, Button, Form, Message, Modal, Tabs } from '@arco-design/web-react';
+import { IconArrowLeft, IconInfoCircleFill } from '@arco-design/web-react/icon';
+import {
+  AppStatus,
+  fetchPublish,
+  getAppIdByPageSetId,
+  getApplication,
+  getDatasourceList,
+  getEntityListWithFields,
+  getPageSetMetaData,
+  listApplicationMenu,
+  menuSignal,
+  PageType,
+  save,
+  updateApplicationMenu,
+  type GetApplicationReq,
+  type ListApplicationMenuReq,
+  type UpdateApplicationMenuNameReq
+} from '@onebase/app';
+import { getHashQueryParam } from '@onebase/common';
+import {
+  appIconMap,
+  EDITOR_TYPES,
+  menuDictSignal,
+  setMainMetaData,
+  startLoadPageSet,
+  startLoadWorkbenchPageSet,
+  startSavePageSet,
+  startSaveWorkbenchPageSet,
+  getComponentValidate,
+  useAppEntityStore,
+  useFlowPageEditorSignal,
+  useFormEditorSignal,
+  useListEditorSignal,
+  usePageEditorSignal,
+  usePageViewEditorSignal,
+  useWorkbenchEditorSignal,
+  usePageSettingSignal,
+  usePageComponentValidateSignal,
+  type SavePageSetParams,
+  type SaveWorkbenchPageSetParams
+} from '@onebase/ui-kit';
+import { cloneDeep } from 'lodash-es';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { VersionStatus } from '../constants';
+import FlowView from '../flowView';
+import PartPreview from '../partPreview';
+import type { WorkflowJSON } from './headerType';
+import styles from './index.module.less';
+import { VersionListSelect } from './versionList';
+
+const BreadcrumbItem = Breadcrumb.Item;
+const sourceNodeIDMap = new Map();
+const baseTabData = [
+  {
+    key: EDITOR_TYPES.FORM_EDITOR,
+    title: '表单设计',
+    alt: 'Form Design',
+    defaultIcon: defaultFormDesignSVG,
+    activeIcon: activeFormDesignSVG
+  },
+  {
+    key: EDITOR_TYPES.LIST_EDITOR,
+    title: '列表设计',
+    alt: 'List Design',
+    defaultIcon: defaultListDesignSVG,
+    activeIcon: activeListDesignSVG
+  },
+  {
+    key: EDITOR_TYPES.FLOW_EDITOR,
+    title: '流程设计',
+    alt: 'flow Design',
+    defaultIcon: defaultFlowDesignSVG,
+    activeIcon: activeFlowDesignSVG
+  },
+  {
+    key: EDITOR_TYPES.WORKBENCH_EDITOR,
+    title: '工作台设计',
+    alt: 'workbench Setting',
+    defaultIcon: defaultWorkbenchDesignSVG,
+    activeIcon: activeWorkbenchDesignSVG
+  },
+  {
+    key: EDITOR_TYPES.PAGE_SETTING,
+    title: '页面设置',
+    alt: 'Page Setting',
+    defaultIcon: defaultPageSettingSVG,
+    activeIcon: activePageSettingSVG
+  }
+  // {
+  //     key: EDITOR_TYPES.METADATA_MANAGE,
+  //     title: "元数据管理",
+  //     alt: "Source Data",
+  //     defaultIcon: defaultSourceDataSVG,
+  //     activeIcon: activeSourceDataSVG,
+  // },
+];
+
+interface VersionListSelectRef {
+  getVersionMgmtData: () => void;
+}
+
+export default function EditorHeader() {
+  const location = useLocation();
+  const selectRef = useRef<VersionListSelectRef>(null);
+  const { t } = useI18n();
+  const [renameForm] = Form.useForm();
+  const { clearCurComponentID } = usePageEditorSignal();
+  const { curViewId } = usePageViewEditorSignal;
+  const { flowId, setFlowId } = useFlowPageEditorSignal;
+  const { isEditMode, setIsEditMode } = useBasicEditorStore();
+
+  const [exitModalVisible, setExitModalVisible] = useState(false);
+
+  const { tenantId } = useParams();
+
+  const {
+    components: formComponents,
+    pageComponentSchemas: formPageComponentSchemas,
+    clearComponents: clearFormComponents,
+    clearPageComponentSchemas: clearFromPageComponentSchemas,
+    layoutSubComponents: fromLayoutSubComponents,
+    clearLayoutSubComponents: clearFromLayoutSubComponents,
+    subTableComponents: fromSubTableComponents,
+    clearSubTableComponents: clearFromSubTableComponents
+  } = useFormEditorSignal;
+
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    clearComponents: clearListComponents,
+    clearPageComponentSchemas: clearListPageComponentSchemas,
+    layoutSubComponents: listLayoutSubComponents,
+    clearLayoutSubComponents: clearListLayoutSubComponents
+  } = useListEditorSignal;
+
+  const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
+    useWorkbenchEditorSignal;
+
+  const { loadPageComponentValidate } = usePageComponentValidateSignal;
+
+  const { batchSetAppDict } = menuDictSignal;
+
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
+  const { curMenu, setCurMenu } = menuSignal;
+  const { curAppId, setCurAppId, setCurAppInfo } = useAppStore();
+
+  const { setCurDataSourceId } = useResourceStore();
+
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('');
+  const [pageSetId, setPageSetId] = useState('');
+
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const [appName, setAppName] = useState('未命名应用');
+  const [appIcon, setAppIcon] = useState('');
+  const [iconColor, setIconColor] = useState('');
+  const [appStatus, setAppStatus] = useState(0);
+  const [tabData, setTabData] = useState(baseTabData);
+  // 重命名弹窗
+  const [visibleRenameForm, setVisibleRenameForm] = useState(false);
+  const [partPreviewVisible, setPartPreviewVisible] = useState(false);
+  const [manageVisible, setManageVisible] = useState(false);
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
+  const [preViewData, setPreviewData] = useState<any>({});
+
+  const sessionData = sessionStorage.getItem('EDITOR_PAGE_INFO') || '{}';
+  const pageInfo = JSON.parse(sessionData);
+  const { currentFlowId, setCurrnetFlowId, editorRef, flowData, configData } = useFlowEditorStor();
+
+  const showConfirm = (errorMsgList: any) => {
+    Modal.confirm({
+      title: '保存失败',
+      className: styles.errorMsgModal,
+      content: (
+        <div className={styles.errorMsgContainer}>
+          <div className={styles.errorMsgTitle}>以下内容不完善，请修改后保存</div>
+          <div className={styles.errorMsgContent}>
+            {errorMsgList.map((item: any, index: number) => (
+              <div key={index} className={styles.errorMsgItem}>
+                <span className={styles.errorMsgNodeName}>{item.nodeName}:</span>
+                <span>{item.errorMsg}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+      footer: (
+        <Button onClick={() => Modal.destroyAll()} type="primary">
+          确定
+        </Button>
+      ),
+      okButtonProps: {
+        status: 'danger'
+      },
+      onOk: () => {
+        return new Promise((resolve, reject) => {
+          setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+        }).catch((e) => {
+          Message.error({
+            content: 'Error occurs!'
+          });
+          throw e;
+        });
+      }
+    });
+  };
+  const onFlowSave = async (isCreate?: boolean) => {
+    const data = editorRef?.document.toJSON();
+    const errorMsgList: any = [];
+    const conditionalBranch: any = []; // 条件节点
+    let endNodeId: string = '';
+    data?.nodes.forEach((item) => {
+      if (item?.type === 'end') {
+        endNodeId = item.id;
+      }
+      if (item.type === 'approver') {
+        if (
+          (item.data.approverConfig.handlerType === 'user' &&
+            (!item.data.approverConfig.users || item.data.approverConfig.users.length === 0)) ||
+          (item.data.approverConfig.handlerType === 'role' &&
+            (!item.data.approverConfig.roles || item.data.approverConfig.roles.length === 0))
+        ) {
+          errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少审批人' });
+        }
+        let flag = false;
+        item.data.buttonConfigs?.forEach((button: any) => {
+          if (button.enabled) {
+            flag = true;
+          }
+        });
+        if (!flag) {
+          errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少按钮配置' });
+        }
+      }
+      if (item.type === 'cc') {
+        if (
+          (item.data.copyReceiverConfig.handlerType === 'user' &&
+            (!item.data.copyReceiverConfig.users || item.data.copyReceiverConfig.users.length === 0)) ||
+          (item.data.copyReceiverConfig.handlerType === 'role' &&
+            (!item.data.copyReceiverConfig.roles || item.data.copyReceiverConfig.roles.length === 0))
+        ) {
+          errorMsgList.push({ nodeName: item.data.name, errorMsg: '节点缺少抄送人' });
+        }
+      }
+      if (item.id.startsWith('conditional_branch')) {
+        conditionalBranch.push(item.id);
+      }
+    });
+
+    let haveDefault = false;
+    conditionalBranch.forEach((conditionalId: any) => {
+      let innerHaveDefault = false;
+      data?.edges.forEach((item) => {
+        if (item.sourceNodeID === conditionalId && item?.data?.isDefault) {
+          innerHaveDefault = true;
+        }
+      });
+      haveDefault = innerHaveDefault;
+    });
+
+    if (!haveDefault && conditionalBranch.length) {
+      errorMsgList.push({ nodeName: '条件分支', errorMsg: '未设置默认分支' });
+    }
+
+    if (errorMsgList.length) {
+      showConfirm(errorMsgList);
+      return;
+    }
+
+    let endNodeHasEdge: boolean = false;
+    const currentJsonData = normalizeNodes(data);
+    currentJsonData.edges?.forEach((item) => {
+      if (item.data) {
+        item.name = item.data.name;
+      }
+      if (item?.targetNodeID === endNodeId) {
+        endNodeHasEdge = true;
+      }
+    });
+    if (!endNodeHasEdge) {
+      Message.error({ id: 'end-node-err', content: '流程存在循环触发，运行时可能导致错误' });
+      return;
+    }
+    const { id, flowCode, flowName, bpmVersionAlias, businessUuid } = flowData;
+    const params = {
+      id: isCreate ? '' : id || '',
+      flowCode: flowCode || '',
+      flowName: flowName || '',
+      bpmVersionAlias: bpmVersionAlias || '',
+      businessUuid: businessUuid || curMenu.value.menuUuid,
+      bpmDefJson: JSON.stringify(currentJsonData),
+      globalConfig: configData
+    };
+    return save(params).then((res: any) => {
+      setFlowId(res);
+      Message.success(isCreate ? '创建成功' : '保存成功');
+      if (isCreate) {
+        setCurrnetFlowId(res);
+      }
+      return true;
+    });
+  };
+
+  const getMenuList = async (keywords?: string) => {
+    const searchParams = new URLSearchParams(location.search);
+    const appId = searchParams.get('appId') || '';
+    const req: ListApplicationMenuReq = {
+      applicationId: appId,
+      name: keywords
+    };
+    const res = await listApplicationMenu(req);
+    res.forEach((item: any) => {
+      if (item.menuName === pageInfo?.name) {
+        setCurMenu(item);
+      }
+    });
+  };
+
+  const getVersonList = () => {
+    selectRef.current && selectRef.current.getVersionMgmtData();
+  };
+
+  const normalizeNodes = (obj: WorkflowJSON | undefined) => {
+    obj?.edges.forEach((item) => {
+      if (item?.type) {
+        sourceNodeIDMap.set(item.sourceNodeID + item.targetNodeID, item.type);
+      } else {
+        item.type = sourceNodeIDMap.get(item.sourceNodeID + item.targetNodeID) || 'PASS';
+      }
+    });
+    const newNodes = obj?.nodes.map((node) => {
+      if ('name' in node) {
+        return { ...node, data: { ...(node.data || {}), name: node.name } };
+      } else if (node.data && 'name' in node.data) {
+        return { ...node, name: node.data.name };
+      }
+      return node;
+    });
+    return { ...obj, nodes: newNodes };
+  };
+
+  useEffect(() => {
+    // 根据当前 URL 动态设置 activeTab
+    const hash = window.location.hash;
+    if (hash.includes(EDITOR_TYPES.FORM_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.FORM_EDITOR);
+    } else if (hash.includes(EDITOR_TYPES.LIST_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.LIST_EDITOR);
+    } else if (hash.includes(EDITOR_TYPES.PAGE_SETTING)) {
+      setActiveTab(EDITOR_TYPES.PAGE_SETTING);
+    } else if (hash.includes(EDITOR_TYPES.METADATA_MANAGE)) {
+      setActiveTab(EDITOR_TYPES.METADATA_MANAGE);
+    } else if (hash.includes(EDITOR_TYPES.FLOW_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.FLOW_EDITOR);
+    } else if (hash.includes(EDITOR_TYPES.WORKBENCH_EDITOR)) {
+      setActiveTab(EDITOR_TYPES.WORKBENCH_EDITOR);
+    }
+  }, []);
+
+  useEffect(() => {
+    const pageSetId = getHashQueryParam('pageSetId');
+    if (pageSetId) {
+      setPageSetId(pageSetId);
+    }
+    getMenuList();
+  }, []);
+
+  useEffect(() => {
+    if (pageInfo) {
+      renameForm.setFieldsValue({
+        menuId: pageInfo.id,
+        menuName: pageInfo.name,
+        menuIcon: pageInfo.icon
+      });
+    }
+  }, [pageInfo]);
+
+  useEffect(() => {
+    if (pageSetId != '') {
+      handleGetAppInfo(pageSetId);
+      // 工作台设计页不获取主表数据
+      if (activeTab !== EDITOR_TYPES.WORKBENCH_EDITOR) {
+        loadMainMetaData(pageSetId);
+      }
+
+      loadPageSetInfo(pageSetId);
+
+      if (!isEditMode) {
+        setIsEditMode(true);
+      }
+    }
+  }, [pageSetId]);
+
+  const loadMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+    const [entityWithChildren] = entityListWithFields;
+    console.log('entityWithChildren: ', entityWithChildren);
+    setMainMetaData(entityWithChildren, setMainEntity, setSubEntities, batchSetAppDict);
+  };
+
+  const loadPageSetInfo = async (pagesetId: string) => {
+    // 工作台使用独立加载逻辑
+    if (activeTab === EDITOR_TYPES.WORKBENCH_EDITOR) {
+      await startLoadWorkbenchPageSet({ pageSetId: pagesetId });
+      return;
+    }
+
+    // 表单和列表使用原有加载逻辑
+    await startLoadPageSet({ pageSetId: pagesetId });
+  };
+
+  const handleGetAppInfo = async (pdId: string) => {
+    const appId = await getAppIdByPageSetId({ pageSetId: pdId });
+    setCurAppId(appId);
+
+    const appReq: GetApplicationReq = {
+      id: appId
+    };
+
+    const appResp = await getApplication(appReq);
+    const curAppInfo = {
+      id: appResp.id,
+      appCode: appResp.appCode,
+      iconName: appResp.iconName,
+      iconColor: appResp.iconColor,
+      appName: appResp.appName,
+      appStatus: appResp.appStatus,
+      publishModel: appResp.publishModel
+    };
+    setCurAppInfo(curAppInfo);
+    if (appResp) {
+      if (appResp.iconName) {
+        setAppIcon(appResp.iconName);
+      }
+      if (appResp.iconColor) {
+        setIconColor(appResp.iconColor);
+      }
+      if (appResp.appName) {
+        setAppName(appResp.appName);
+      }
+      setAppStatus(AppStatus.DEVELOPING);
+    }
+
+    // 获取数据源ID
+    const res = await getDatasourceList({
+      applicationId: appId
+    });
+    if (res?.length > 0) {
+      const dataSource = res?.[0];
+      // 将数据源ID存储到store中
+      setCurDataSourceId(dataSource.id.toString());
+    } else {
+      console.warn('getAppResources - 未获取到数据源列表');
+    }
+  };
+  //   const getMainMetaData = async (pageSetId: string) => {
+  //     const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+
+  //     const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+  //     const [entityWithChildren] = entityListWithFields;
+  //     console.log('entityWithChildren: ', entityWithChildren);
+
+  //     // 主表数据
+  //     if (entityWithChildren) {
+  //       setMainEntity({
+  //         entityId: entityWithChildren.entityId,
+  //         entityUuid: entityWithChildren.entityUuid,
+  //         tableName: entityWithChildren.tableName,
+  //         entityName: entityWithChildren.entityName,
+  //         entityType: ENTITY_TYPE.MAIN,
+  //         fields: entityWithChildren.fields
+  //       });
+
+  //       if (entityWithChildren.childEntities && entityWithChildren.childEntities.length > 0) {
+  //         // 返回新Promise对象，当所有输入Promise成功时返回结果数组（顺序与输入一致）
+  //         const allChildFields = await Promise.all(
+  //           entityWithChildren.childEntities.map(async (entity: ChildEntity) => {
+  //             return entity.childFields;
+  //           })
+  //         );
+  //         const subEntities = entityWithChildren.childEntities.map((entity: ChildEntity, index: number) => ({
+  //           entityId: entity.childEntityId,
+  //           entityUuid: entity.childEntityUuid,
+  //           tableName: entity.childTableName,
+  //           entityName: entity.childEntityName,
+  //           entityType: ENTITY_TYPE.SUB,
+  //           fields: allChildFields[index]
+  //         }));
+
+  //         setSubEntities({
+  //           entities: subEntities
+  //         });
+  //       }
+  //     }
+  //   };
+
+  const handleSavePageSet = async (exit?: boolean) => {
+    setSaveLoading(true);
+    if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
+      try {
+        await onFlowSave();
+        return;
+      } catch (error) {
+        console.info('保存失败:', error);
+        return;
+      } finally {
+        setSaveLoading(false);
+      }
+    }
+
+    const { dataTitleType, redirectType, dataTitle } = usePageSettingSignal;
+
+    // 工作台使用独立保存逻辑
+    if (activeTab === EDITOR_TYPES.WORKBENCH_EDITOR) {
+      const saveWorkbenchParams: SaveWorkbenchPageSetParams = {
+        pageSetId: pageSetId,
+        workbenchComponents: workbenchComponents.value,
+        wbComponentSchemas: cloneDeep(wbComponentSchemas.value || {})
+      };
+
+      try {
+        await startSaveWorkbenchPageSet(saveWorkbenchParams, () => setAppStatus(AppStatus.PUBLISHED));
+      } catch (error) {
+        console.error('保存失败:', error);
+        Message.error('保存失败');
+      } finally {
+        setSaveLoading(false);
+      }
+
+      if (exit) {
+        backToPageManager();
+      }
+
+      return;
+    }
+
+    // 表单和列表使用原有保存逻辑
+    console.log(`save appid: ${curAppId}, pageSetId: ${pageSetId} curViewId: ${curViewId.value}`);
+
+    // 表单、列表进行schema数据校验
+    let newValidate: { [key: string]: boolean } = {};
+    let flag = false;
+
+    const formKeys = Object.keys(formPageComponentSchemas.value);
+    formKeys.forEach((ele) => {
+      const type = formPageComponentSchemas.value[ele]?.type;
+      const config = formPageComponentSchemas.value[ele]?.config;
+      if (config && type) {
+        const result = getComponentValidate(type, config);
+        newValidate[ele] = result;
+        if (result === false && !flag) {
+          flag = true;
+        }
+      }
+    });
+    const listKeys = Object.keys(listPageComponentSchemas.value);
+    listKeys.forEach((ele) => {
+      const type = listPageComponentSchemas.value[ele]?.type;
+      const config = listPageComponentSchemas.value[ele]?.config;
+      if (config && type) {
+        const result = getComponentValidate(type, config);
+        newValidate[ele] = result;
+        if (result === false && !flag) {
+          flag = true;
+        }
+      }
+    });
+    // 组件校验状态
+    loadPageComponentValidate(newValidate);
+
+    const savePageSetParams: SavePageSetParams = {
+      pageSetId: pageSetId,
+      formComponents: formComponents.value,
+      formPageComponentSchemas: cloneDeep(formPageComponentSchemas.value),
+      fromColComponentsMap: cloneDeep(fromLayoutSubComponents.value),
+      fromSubTableComponentsMap: cloneDeep(fromSubTableComponents.value),
+      listComponents: listComponents.value,
+      listPageComponentSchemas: new Map(Object.entries(cloneDeep(listPageComponentSchemas.value))),
+      listColComponentsMap: { colComponents: new Map(Object.entries(cloneDeep(listLayoutSubComponents.value))) },
+      dataTitleType: dataTitleType.value,
+      redirectType: redirectType.value,
+      dataTitle: dataTitle.value
+    };
+
+    console.log('savePageSetParams: ', savePageSetParams);
+
+    const message = flag ? '保存成功，有组件的必填配置未完成，请检查' : undefined;
+    startSavePageSet(savePageSetParams, () => setAppStatus(AppStatus.PUBLISHED), message);
+    setSaveLoading(false);
+    if (exit) {
+      backToPageManager();
+    }
+  };
+  const handleExecTask = async () => {
+    try {
+      if (activeTab === EDITOR_TYPES.FLOW_EDITOR) {
+        const res = await onFlowSave();
+        if (!res) {
+          return;
+        }
+      }
+      await fetchPublish({ id: flowId });
+      getVersonList();
+      Message.success('发布成功');
+    } catch (error) {
+      Message.error('发布失败');
+    }
+  };
+  const clearAllData = () => {
+    clearFromLayoutSubComponents();
+    clearListLayoutSubComponents();
+    clearFormComponents();
+    clearListComponents();
+    clearWorkbenchComponents();
+    clearFromPageComponentSchemas();
+    clearListPageComponentSchemas();
+    clearWbComponentSchemas();
+  };
+
+  const backToPageManager = async () => {
+    const appId = await getAppIdByPageSetId({ pageSetId: pageSetId });
+    if (!appId) {
+      Message.error('获取应用ID失败');
+      return;
+    }
+
+    clearAllData();
+
+    // 如果当前有选中的菜单，将菜单ID作为URL参数传递，以便返回时恢复选中状态
+    const menuId = curMenu.value?.id;
+    const menuIdParam = menuId ? `&menuId=${menuId}` : '';
+    navigate(`/onebase/${tenantId}/home/create-app/page-manager?appId=${appId}${menuIdParam}`);
+  };
+  const handleExit = () => {
+    if (appStatus === AppStatus.DEVELOPING) {
+      setExitModalVisible(true);
+    } else {
+      backToPageManager();
+    }
+  };
+
+  const toPreview = () => {
+    setPartPreviewVisible(true);
+  };
+
+  const handleRename = async () => {
+    if (!renameForm.getFieldValue('menuId')) {
+      Message.error('请选择要重命名的菜单');
+      return;
+    }
+    const id = renameForm.getFieldValue('menuID');
+    const menuName = renameForm.getFieldValue('menuName');
+    const menuIcon = renameForm.getFieldValue('menuIcon');
+
+    const req: UpdateApplicationMenuNameReq = {
+      id,
+      menuName,
+      menuIcon
+    };
+    const res = await updateApplicationMenu(req);
+    if (res) {
+      Message.success('重命名成功');
+      sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ ...pageInfo, name: menuName, icon: menuIcon }));
+    }
+    setVisibleRenameForm(false);
+  };
+
+  const changeCurrentFlow = (value: string) => {
+    if (value !== VersionStatus.MANAGE) {
+      setCurrnetFlowId(value);
+    } else {
+      setManageVisible(true);
+    }
+  };
+  const flowPreview = () => {
+    setFlowViewVisible(true);
+  };
+
+  useEffect(() => {
+    const pageType = curMenu?.value?.pagesetType;
+
+    const shouldKeepTab = (key: string) => {
+      if (pageType === PageType.NORMAL) {
+        return key !== EDITOR_TYPES.FLOW_EDITOR && key !== EDITOR_TYPES.WORKBENCH_EDITOR;
+      }
+      if (pageType === PageType.WORKBENCH) {
+        return key === EDITOR_TYPES.WORKBENCH_EDITOR || key === EDITOR_TYPES.PAGE_SETTING;
+      }
+      return key !== EDITOR_TYPES.WORKBENCH_EDITOR;
+    };
+
+    setTabData(baseTabData.filter((tab) => shouldKeepTab(tab.key)));
+  }, [curMenu?.value?.pagesetType]);
+
+  return (
+    <div className={styles.editorHeader}>
+      {/* 左侧 */}
+      <div className={styles.left}>
+        <Button shape="square" type="default" size="small" onClick={handleExit} icon={<IconArrowLeft />} />
+
+        <div className={styles.myAppIcon} style={{ backgroundColor: iconColor }}>
+          <DynamicIcon
+            IconComponent={appIconMap[appIcon as keyof typeof appIconMap]}
+            theme="outline"
+            size="14"
+            fill="#F2F3F5"
+          />
+        </div>
+
+        <Breadcrumb>
+          <BreadcrumbItem className={styles.appName}>{appName}</BreadcrumbItem>
+          <BreadcrumbItem className={styles.pageName}>
+            {pageInfo?.name || '未命名页面'}
+            <div className={styles.editIcon} onClick={() => setVisibleRenameForm(true)}>
+              <img src={editPageNameSVG} alt="edit page name" />
+            </div>
+          </BreadcrumbItem>
+        </Breadcrumb>
+      </div>
+
+      {/* 中间 */}
+      <div className={styles.center}>
+        <Tabs
+          type="line"
+          activeTab={activeTab}
+          onChange={(key) => {
+            setActiveTab(key);
+            clearCurComponentID();
+            switch (key) {
+              case EDITOR_TYPES.FORM_EDITOR:
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.FORM_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
+                break;
+              case EDITOR_TYPES.LIST_EDITOR:
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.LIST_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
+                break;
+              case EDITOR_TYPES.PAGE_SETTING:
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.PAGE_SETTING}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
+                break;
+              case EDITOR_TYPES.METADATA_MANAGE:
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.METADATA_MANAGE}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
+                break;
+              case EDITOR_TYPES.FLOW_EDITOR:
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.FLOW_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
+                break;
+              case EDITOR_TYPES.WORKBENCH_EDITOR:
+                navigate(
+                  `/onebase/${tenantId}/editor/${EDITOR_TYPES.WORKBENCH_EDITOR}?pageSetId=${pageSetId}&appId=${curAppId}`
+                );
+                break;
+              default:
+                break;
+            }
+          }}
+          size="large"
+        >
+          {tabData.map((tab) => (
+            <Tabs.TabPane
+              key={tab.key}
+              title={
+                <div className={styles.tabIcon}>
+                  <img src={tab.key === activeTab ? tab.activeIcon : tab.defaultIcon} alt={tab.alt} />
+                  {tab.title}
+                </div>
+              }
+            />
+          ))}
+        </Tabs>
+      </div>
+
+      <div className={styles.right}>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <VersionListSelect menuUuid={curMenu.value.menuUuid} ref={selectRef} setManageVisible={setManageVisible} />
+        )}
+
+        {appStatus === AppStatus.DEVELOPING && <div className={styles.editorStatusDeveloping}>未保存</div>}
+        {appStatus === AppStatus.PUBLISHED && <div className={styles.editorStatusPublished}>已保存</div>}
+        {appStatus === AppStatus.EDITING_AFTER_PUBLISH && (
+          <div className={styles.editorStatusEditAfterPublished}>未保存</div>
+        )}
+        {/* 预览 */}
+        <Button onClick={toPreview} className={styles.previewButton}>
+          <img src={previewSVG} />
+          {t('editor.preview')}
+        </Button>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button type="primary" onClick={flowPreview}>
+            测试
+          </Button>
+        )}
+        <Button
+          type="primary"
+          loading={saveLoading}
+          onClick={() => {
+            handleSavePageSet();
+          }}
+        >
+          保存
+        </Button>
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button
+            type="primary"
+            onClick={() => {
+              handleExecTask();
+            }}
+          >
+            发布
+          </Button>
+        )}
+        {activeTab === EDITOR_TYPES.FLOW_EDITOR && (
+          <Button
+            type="primary"
+            onClick={() => {
+              onFlowSave(true);
+            }}
+          >
+            创建流程
+          </Button>
+        )}
+        <PartPreview
+          pageType={activeTab}
+          visible={partPreviewVisible}
+          setVisible={() => setPartPreviewVisible(false)}
+        />
+      </div>
+
+      {/* 重命名弹窗 */}
+      <RenameModal
+        title={'重命名'}
+        visible={visibleRenameForm}
+        handleRename={handleRename}
+        setVisible={setVisibleRenameForm}
+        form={renameForm}
+      />
+      <FlowView visible={flowViewVisible} setVisible={setFlowViewVisible} businessUuid={flowData?.businessUuid} />
+      <VersionModal
+        visible={manageVisible}
+        setVisible={setManageVisible}
+        changeCurrentFlow={changeCurrentFlow}
+        currentFlowId={currentFlowId}
+        getVersonList={getVersonList}
+        businessUuid={flowData?.businessUuid}
+      />
+
+      <Modal
+        title={null}
+        okText="退出"
+        cancelText="取消"
+        visible={exitModalVisible}
+        onCancel={() => {
+          setExitModalVisible(false);
+        }}
+        onOk={() => {
+          setExitModalVisible(false);
+        }}
+        style={{
+          width: 350
+        }}
+        footer={
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <Button
+                type="default"
+                status="danger"
+                onClick={() => {
+                  backToPageManager();
+                }}
+              >
+                不保存
+              </Button>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10
+              }}
+            >
+              <Button
+                type="default"
+                onClick={() => {
+                  setExitModalVisible(false);
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                type="primary"
+                loading={saveLoading}
+                onClick={() => {
+                  handleSavePageSet(true);
+                }}
+              >
+                保存并离开
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+            fontWeight: 500,
+            height: 50,
+            paddingTop: 20
+          }}
+        >
+          <IconInfoCircleFill style={{ fontSize: 24, marginRight: 8, color: '#ff7d00' }} />
+          <span>即将离开当前页面，是否保存更改</span>
+        </div>
+      </Modal>
+    </div>
+  );
+}

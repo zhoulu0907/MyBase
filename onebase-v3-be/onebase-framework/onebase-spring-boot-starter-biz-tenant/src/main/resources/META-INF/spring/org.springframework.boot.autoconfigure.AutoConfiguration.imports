@@ -1,0 +1,2 @@
+com.cmsr.onebase.framework.tenant.config.OneBaseTenantRpcAutoConfiguration
+com.cmsr.onebase.framework.tenant.config.OneBaseTenantAutoConfiguration

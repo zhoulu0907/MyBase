@@ -1,0 +1,60 @@
+import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { Ellipsis, Form, Input, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, FormSchema } from '@onebase/ui-kit';
+type XautoCodeConfig = typeof FormSchema.XAutoCodeSchema.config;
+import '../index.css';
+
+const XautoCode = memo((props: XautoCodeConfig & { runtime?: boolean; detailMode?: boolean; form?: any; }) => {
+  const {
+    form,
+    label,
+    dataField,
+    placeholder,
+    status,
+    layout,
+    runtime = true,
+    detailMode
+  } = props;
+
+  const textAlign = layout === 'vertical' ? 'left' : 'right';
+
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.AUTO_CODE}_${nanoid()}`;
+
+  return (
+    <Form.Item
+      className="inputTextWrapperOBMobile inputAutoWrapperOBMobile"
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
+      field={fieldId}
+      layout={layout}
+      style={{
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ?
+        <div className="readonlyText" style={{ textAlign }}>{form?.getFieldValue(fieldId) || '--'}</div> :
+        <Input
+          readOnly={true}
+          placeholder={placeholder}
+          inputStyle={{ textAlign }}
+        />
+      }
+    </Form.Item>
+  );
+});
+
+export default XautoCode;

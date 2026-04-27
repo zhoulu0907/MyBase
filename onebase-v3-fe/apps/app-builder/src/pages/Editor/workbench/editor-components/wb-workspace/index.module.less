@@ -1,0 +1,314 @@
+@import '../../../../Editor/variables.module.less';
+
+// 定义工作台工作区头部高度变量
+@workspace-header-height: 32px;
+@workspace-padding: 20px;
+
+// 工作台工作区容器
+.workbenchWorkspace {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background-color: #f2f3f5;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+// 工作区头部
+.workspaceHeader {
+  height: @workspace-header-height;
+  background-color: white;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 1px;
+  padding: 0 20px;
+
+  .workspaceHeaderLeft {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .workspaceHeaderRight {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .editorStepCtrl,
+  .pageModeCtrl {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+
+    .pageModeIcon {
+      width: 16px;
+      height: 16px;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+  }
+}
+
+// 工作台工作区样式
+.workspaceBody {
+  height: calc(100vh - var(--editor-header-height) - @workspace-header-height - @workspace-padding);
+  display: block;
+  padding: @workspace-padding;
+  box-sizing: border-box;
+  position: relative;
+  overflow-y: auto;
+
+  /* 自定义滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #e0e0e0;
+    border-radius: 0px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .workspaceContent {
+    background-color: #F7F8FA;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.10);
+    min-width: 348px;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    padding: 16px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    display: grid;
+    align-content: start;
+    grid-template-columns: repeat(12, 1fr);
+    // 行高固定 32px，组件通过 rowSpan 反推填满内容高度
+    grid-auto-rows: auto;
+    grid-auto-flow: row dense;
+    gap: 16px;
+
+    /* 自定义滚动条样式 */
+    &::-webkit-scrollbar {
+      width: 0px;
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #e0e0e0;
+      border-radius: 0px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  }
+
+  .formEmpty {
+    width: 100%;
+    height: 100%;
+    display: block;
+    padding: 40px;
+    box-sizing: border-box;
+    pointer-events: none;
+    user-select: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    .formEmptyContent {
+      width: 100%;
+      height: 100%;
+      color: #a2a3a5;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 22px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 4px,
+        rgba(0, 0, 0, 0.08) 0
+      );
+      background-position: 50%;
+      background-size: cover;
+      border-radius: 4px;
+      border: 1px dashed rgba(17, 31, 44, 0.2);
+    }
+  }
+
+  // 工作台组件可调整大小相关样式
+  .resizableWorkbenchItemWrapper {
+    position: relative;
+    display: block;
+    align-self: start;
+    height: fit-content;
+  }
+
+  .resizableWorkbenchItem {
+    cursor: move;
+    box-sizing: border-box;
+    border: 1px dashed transparent;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+    position: relative;
+    min-height: 40px;
+
+    &:hover {
+      border-color: rgb(var(--primary-6));
+    }
+
+    & .operationArea, & .nameArea {
+      pointer-events: auto !important;
+    }
+  }
+
+  // 调整手柄样式
+  .resizeHandle {
+    position: absolute;
+    background-color: transparent;
+    z-index: 100;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 158, 158, 0.1);
+    }
+
+    &:active {
+      background-color: rgba(0, 158, 158, 0.2);
+    }
+  }
+
+  .resizeHandleRight {
+    right: -4px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+
+    &::after {
+      content: '';
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2px;
+      height: 20px;
+      background-color: rgb(var(--primary-6));
+      border-radius: 1px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover::after {
+      opacity: 1;
+    }
+  }
+
+  // 操作区域样式
+  .operationArea {
+    position: absolute;
+    top: -18px;
+    right: 16px;
+    height: 24px;
+    padding: 4px;
+    border: 1px solid #e5e6eb;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 2px -2px rgba(0, 0, 0, 0.16);
+
+    .divider {
+      margin: 0 4px;
+    }
+
+    // 删除按钮样式
+    .copyButton,
+    .deleteButton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: #4e5969;
+      background-color: #fff;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .deleteButton {
+      color: #f53f3f;
+    }
+  }
+
+  // 名称区域样式
+  .nameArea {
+    position: absolute;
+    top: -18px;
+    right: 78px;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 4px;
+    border: 1px solid #e5e6eb;
+    border-radius: 8px;
+    background-color: #fff;
+    font-size: 12px;
+    color: #4E5969;
+    box-sizing: border-box;
+    box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 2px -2px rgba(0, 0, 0, 0.16);
+  }
+}
+
+// 编辑器切换容器
+.editorSwitchContainer {
+  flex: 1 1 0%;
+  width: auto;
+  height: calc(100vh - var(--editor-header-height));
+  position: relative;
+  overflow: hidden;
+}
+
+.mobileeditordraglist {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+

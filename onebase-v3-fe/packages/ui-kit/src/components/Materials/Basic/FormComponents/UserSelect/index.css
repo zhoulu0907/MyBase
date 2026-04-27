@@ -1,0 +1,152 @@
+    .dropdownRender{
+        display: flex;
+        align-items: center;
+        background: #fff;
+        padding: 0 8px;
+        border-bottom: 1px solid #eee;
+        height: 36px;
+
+        .searchInput{
+            border: none;
+            outline: none;
+            box-shadow: none;
+            flex: 1;
+            font-size: 16px;
+            background: transparent;
+        }
+
+        .searchIcon {
+            font-size: 18px;
+            color: #999;
+            margin-right: 4px;
+            cursor: pointer;
+        }
+
+        .advanceBtn {
+            color: #888;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+    }
+
+    .renderFormat {
+        display: inline-flex;
+        align-items: center;
+        background: #f5f6fa;
+        border-radius: 16px;
+        padding: 2px 4px;
+        font-size: 16px;
+        color: #333;
+        vertical-align: middle;
+        max-width: 260px;
+        line-height: 16px;
+        margin-bottom: 2px;
+
+        .avatar{
+            background-color: rgb(var(--primary-6));
+            margin-right: 6px;
+            font-family: Arial, Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            text-transform: uppercase;
+        }
+
+        .displayName{
+            margin-right: 2px;
+            white-space: nowrap;
+        }
+
+        .closeBtn{
+            color: #aaa;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    }
+
+    .optionDiv{
+        display: flex;
+        align-items: center;
+        padding: 8px;
+
+        .optionAvatar{
+            background-color: rgb(var(--primary-6));
+            margin-right: 12px;
+            text-transform: uppercase;
+            font-family: Arial, Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        }
+
+        .optionName{
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 20px;
+        }
+
+        .optionInfo{
+            color: #999;
+            font-size: 12px;
+            line-height: 16px;
+        }
+    }
+
+.advanceSelectModel {
+    width: 800px;
+
+    .modalTitle {
+        display: block;
+        text-align: left;
+    }
+
+    .modalSearch{
+        margin-bottom: 10px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .tabContent{
+        height: 500px;
+        overflow-y: auto;
+        border: 1px solid #f0f0f0;
+        border-radius: 4px;
+
+        .itemGroup{
+            width: 100%;
+            overflow-x: hidden;
+
+            .userItem{
+                margin-bottom: 8px;
+                padding: 4px 0 2px 14px;
+
+                .avatar{
+                    background-color: rgb(var(--primary-6));
+                    margin-right: 12px;
+                    text-transform: uppercase;
+                    font-family: Arial, Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+                }
+
+                .userName{
+                    font-size: 16px;
+                    font-weight: 500;
+                    line-height: 20px;
+                }
+
+                .userPhone{
+                    font-size: 16px;
+                    color: #999;
+                    line-height: 20px;
+                    display: inline-block;
+                    margin: 0px 10px 12px;
+                }
+            }
+
+            .userItem:hover{
+                background-color: #eaedf4;
+                border-radius: 4px;
+            }
+        }
+    }
+
+    .footerSpan{
+        float: left;
+        color: #999;
+    }
+}

@@ -1,0 +1,1148 @@
+import { FormulaEditor } from '@/components/FormulaEditor';
+import AsyncDeptSelectField from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/asyncField/AsyncDeptSelectField';
+import AsyncSelectField from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/asyncField/AsyncSelectField';
+import AsyncUserSelectField from '@/pages/CreateApp/pages/IntegratedManagement/triggerEditor/components/asyncField/AsyncUserSelectField';
+import {
+  Button,
+  DatePicker,
+  Divider,
+  Dropdown,
+  Form,
+  Grid,
+  Input,
+  InputNumber,
+  Menu,
+  Message,
+  Modal,
+  Select,
+  Switch,
+  Tag,
+  TreeSelect
+} from '@arco-design/web-react';
+import { IconDelete, IconLaunch, IconMoreVertical, IconPlus } from '@arco-design/web-react/icon';
+import { FieldType, InteractionActionType, VALIDATION_TYPE } from '@onebase/app';
+import { listToTree } from '@onebase/common';
+import { getDeptList, getSimpleUserPage, type DictData } from '@onebase/platform-center';
+import {
+  FORM_COMPONENT_TYPES,
+  getFieldOptionsConfig,
+  useAppEntityStore,
+  useFormEditorSignal,
+  usePageViewEditorSignal
+} from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import styles from './index.module.less';
+import { getOperatorOptions } from './ruleMap';
+
+const Row = Grid.Row;
+const Col = Grid.Col;
+
+const opCodeOptions = [
+  {
+    label: '公式',
+    value: FieldType.FORMULA
+  },
+  {
+    label: '静态值',
+    value: FieldType.VALUE
+  }
+];
+
+const formActionOptions = [
+  {
+    label: '显示',
+    value: InteractionActionType.Show
+  },
+  {
+    label: '隐藏',
+    value: InteractionActionType.Hide
+  },
+  {
+    label: '可编辑',
+    value: InteractionActionType.Editable
+  },
+  {
+    label: '只读',
+    value: InteractionActionType.Readonly
+  },
+  {
+    label: '必填',
+    value: InteractionActionType.Required
+  },
+  {
+    label: '非必填',
+    value: InteractionActionType.NoRequired
+  },
+  {
+    label: '设置字段值',
+    value: InteractionActionType.SetFieldValue
+  }
+];
+
+interface InteractionRuleModalProps {
+  visible: boolean;
+  onCancel: () => void;
+  onOk: () => void;
+}
+
+interface Rule {
+  id: string;
+  name: string;
+  enabled: number;
+  description?: string;
+  interactionCondition: any[];
+  formAction: any[];
+}
+
+const InteractionRuleModal: React.FC<InteractionRuleModalProps> = ({ visible, onCancel, onOk }) => {
+  useSignals();
+  const { mainEntity, subEntities } = useAppEntityStore();
+  const { components, pageComponentSchemas } = useFormEditorSignal;
+  const { curViewId, pageViews, updatePageView } = usePageViewEditorSignal;
+
+  const [cpOptions, setCpOptions] = useState<{ label: string; value: string }[]>([]);
+
+  const [deptTree, setDeptTree] = useState<any[]>([]);
+
+  const [userOptions, setUserOptions] = useState<any[]>([]);
+  const [userPageNo, setUserPageNo] = useState<number>(1);
+  const [userTotal, setUserTotal] = useState<number | string>(0);
+  const [fetching, setFetching] = useState<boolean>(false);
+
+  // 存储每个 cpId 对应的选项
+  const [fieldOptionsMap, setFieldOptionsMap] = useState<Record<string, DictData[]>>({});
+
+  // 公式
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [formulaFieldKey, setFormulaFieldKey] = useState<string>('');
+  const [formulaData, setFormulaData] = useState<string>('');
+
+  // 获取组件下拉列表
+  const getComponentOptions = () => {
+    const cpOptions = Object.values(pageComponentSchemas.value)
+      // 过滤图片、文件、子表
+      .filter((item: any) => {
+        return ![
+          //   FORM_COMPONENT_TYPES.IMG_UPLOAD,
+          //   FORM_COMPONENT_TYPES.FILE_UPLOAD,
+          FORM_COMPONENT_TYPES.SUB_TABLE
+        ].includes(item?.type);
+      })
+      .map((item: any) => ({
+        label: item.config?.label?.text || item.config?.cpName || '',
+        value: item.config?.id
+      }));
+
+    setCpOptions(cpOptions);
+  };
+
+  useEffect(() => {
+    visible && getComponentOptions();
+  }, [visible, pageComponentSchemas]);
+
+  const [form] = Form.useForm();
+
+  // 使用 ref 来标记是否正在初始化表单，避免触发 onValuesChange
+  const isInitializingRef = React.useRef(false);
+  // 使用 ref 存储上一次设置的 rule id，避免重复设置相同的值
+  const lastSetRuleIdRef = React.useRef<string>('');
+  // 使用 ref 存储原始数据，用于取消时恢复
+  const originalRulesRef = React.useRef<Rule[]>([]);
+
+  const [rules, setRules] = useState<Rule[]>([]);
+  const [curRule, setCurRule] = useState<string>('');
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+
+  // 根据搜索关键词过滤规则（支持模糊搜索，多个关键词用空格分隔）
+  const filteredRules = React.useMemo(() => {
+    if (!searchKeyword.trim()) {
+      return rules;
+    }
+    // 将搜索关键词按空格分割，支持多个关键词
+    const keywords = searchKeyword
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((k) => k.length > 0);
+
+    return rules.filter((rule) => {
+      const ruleName = rule.name?.toLowerCase() || '';
+      const ruleDescription = rule.description?.toLowerCase() || '';
+
+      // 所有关键词都要在规则名称或描述中匹配（模糊搜索）
+      return keywords.every((keyword) => {
+        return ruleName.includes(keyword) || ruleDescription.includes(keyword);
+      });
+    });
+  }, [rules, searchKeyword]);
+
+  // 当过滤结果变化时，如果当前选中的规则不在过滤结果中，清空选中状态
+  useEffect(() => {
+    if (curRule && filteredRules.length > 0) {
+      const isCurrentRuleInFiltered = filteredRules.some((rule) => rule.id === curRule);
+      if (!isCurrentRuleInFiltered) {
+        // 如果当前选中的规则不在过滤结果中，自动选中过滤结果中的第一个规则
+        setCurRule(filteredRules[0].id);
+        lastSetRuleIdRef.current = '';
+      }
+    } else if (curRule && filteredRules.length === 0) {
+      // 如果过滤结果为空，清空选中状态
+      setCurRule('');
+      lastSetRuleIdRef.current = '';
+    }
+  }, [filteredRules, curRule]);
+
+  // 当 modal 打开时，重新加载 rules
+  useEffect(() => {
+    if (visible) {
+      const initialRules = pageViews.value[curViewId.value]?.interactionRules;
+      // 深拷贝原始数据，避免引用问题
+      // 如果 initialRules 是 undefined 或 null，使用空数组
+      const clonedRules = initialRules ? JSON.parse(JSON.stringify(initialRules)) : [];
+      originalRulesRef.current = clonedRules;
+      setRules(clonedRules);
+      if (clonedRules.length > 0) {
+        setCurRule(clonedRules[0].id);
+        lastSetRuleIdRef.current = ''; // 重置，确保会设置表单
+      } else {
+        setCurRule('');
+        lastSetRuleIdRef.current = '';
+      }
+      handleGetUsers();
+      hadleGetDept();
+    } else {
+      // 弹窗关闭时，重置状态
+      setRules([]);
+      setCurRule('');
+      setSearchKeyword('');
+      lastSetRuleIdRef.current = '';
+      form.resetFields();
+    }
+  }, [visible, curViewId.value]);
+
+  useEffect(() => {
+    if (curRule && lastSetRuleIdRef.current !== curRule) {
+      const rule = rules.find((rule) => rule.id === curRule);
+      if (rule) {
+        isInitializingRef.current = true;
+        form.setFieldsValue(rule);
+        lastSetRuleIdRef.current = curRule;
+        // 使用 requestAnimationFrame 确保在下一个渲染周期重置标志
+        requestAnimationFrame(() => {
+          isInitializingRef.current = false;
+        });
+      } else {
+        // 如果规则不存在，清空表单
+        isInitializingRef.current = true;
+        form.resetFields();
+        lastSetRuleIdRef.current = '';
+        requestAnimationFrame(() => {
+          isInitializingRef.current = false;
+        });
+      }
+    } else if (!curRule && lastSetRuleIdRef.current !== '') {
+      // 如果 curRule 被清空，清空表单
+      isInitializingRef.current = true;
+      form.resetFields();
+      lastSetRuleIdRef.current = '';
+      requestAnimationFrame(() => {
+        isInitializingRef.current = false;
+      });
+    }
+  }, [curRule, form]);
+
+  const handleOk = () => {
+    let curPageView = pageViews.value[curViewId.value];
+    if (curPageView && curPageView.id) {
+      const newPageView = {
+        ...curPageView,
+        interactionRules: rules
+      };
+
+      updatePageView(newPageView);
+
+      console.log('newPageView: ', newPageView);
+    }
+
+    onOk();
+  };
+
+  const handleCancel = () => {
+    // 不需要恢复 pageViews.value，因为 onValuesChange 只更新了 rules state，没有更新 pageViews.value
+    // 关闭弹窗后，下次打开时会从 pageViews.value 重新读取数据
+    onCancel();
+  };
+
+  const handleAddRule = () => {
+    setRules((prevRules) => [
+      ...prevRules,
+      {
+        id: uuidv4().replaceAll('-', ''),
+        name: '新规则',
+        enabled: 0,
+        description: '',
+        interactionCondition: [],
+        formAction: []
+      }
+    ]);
+  };
+
+  const handleDeleteRule = (ruleId: string) => {
+    setRules((prevRules) => {
+      const newRules = prevRules.filter((rule) => rule.id !== ruleId);
+      // 如果删除的是当前选中的规则，需要更新 curRule
+      if (curRule === ruleId) {
+        // 如果还有规则，选中第一个；否则清空
+        if (newRules.length > 0) {
+          setCurRule(newRules[0].id);
+        } else {
+          setCurRule('');
+        }
+      }
+      return newRules;
+    });
+  };
+
+  const handleMoveRule = (ruleId: string, direction: 'up' | 'down') => {
+    setRules((prevRules) => {
+      const currentIndex = prevRules.findIndex((rule) => rule.id === ruleId);
+      if (currentIndex === -1) {
+        return prevRules;
+      }
+
+      const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+      if (targetIndex < 0 || targetIndex >= prevRules.length) {
+        return prevRules;
+      }
+
+      const nextRules = [...prevRules];
+      const [currentRule] = nextRules.splice(currentIndex, 1);
+      nextRules.splice(targetIndex, 0, currentRule);
+      return nextRules;
+    });
+  };
+
+  const handleCopyRule = (ruleId: string) => {
+    setRules((prevRules) => {
+      const ruleToCopy = prevRules.find((rule) => rule.id === ruleId);
+      if (!ruleToCopy) {
+        return prevRules;
+      }
+
+      // 深拷贝规则
+      const copiedRule: Rule = JSON.parse(JSON.stringify(ruleToCopy));
+
+      // 生成新的 id
+      copiedRule.id = uuidv4().replaceAll('-', '');
+
+      // 设置启用状态为禁用
+      copiedRule.enabled = 0;
+
+      // 修改名称，添加"副本"后缀
+      copiedRule.name = `${copiedRule.name} 副本`;
+
+      // 将新规则添加到列表末尾
+      const newRules = [...prevRules, copiedRule];
+
+      // 选中新复制的规则
+      setCurRule(copiedRule.id);
+
+      return newRules;
+    });
+  };
+
+  // 异步加载字段选项
+  const loadFieldOptions = async (cpId: string) => {
+    if (!cpId || fieldOptionsMap[cpId]) {
+      return; // 已经加载过或 cpId 为空
+    }
+    const componentSchema = pageComponentSchemas.value[cpId];
+
+    if (componentSchema?.type) {
+      switch (componentSchema.type) {
+        case FORM_COMPONENT_TYPES.SELECT_ONE:
+        case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
+        case FORM_COMPONENT_TYPES.RADIO:
+        case FORM_COMPONENT_TYPES.CHECKBOX:
+          const dataField = pageComponentSchemas.value[cpId]?.config.dataField;
+          if (dataField) {
+            const [, fieldName] = dataField;
+            let options: DictData[] = [];
+            const index = fieldName?.indexOf('.');
+            const lastIndex = fieldName?.lastIndexOf('.');
+            if (index !== -1) {
+              const subTableName = fieldName.slice(0, index);
+              const subFieldName = lastIndex === -1 ? fieldName : fieldName.slice(lastIndex + 1);
+              options = await getFieldOptionsConfig([subTableName, subFieldName], mainEntity, subEntities);
+            } else {
+              options = await getFieldOptionsConfig(dataField, mainEntity, subEntities);
+            }
+
+            setFieldOptionsMap((prev) => ({ ...prev, [cpId]: options }));
+          }
+          break;
+      }
+    }
+  };
+
+  // 同步渲染表单项组件
+  const renderValueFormItem = (cpId: string) => {
+    const componentSchema = pageComponentSchemas.value[cpId];
+    if (componentSchema?.type) {
+      switch (componentSchema.type) {
+        case FORM_COMPONENT_TYPES.SELECT_ONE:
+        case FORM_COMPONENT_TYPES.SELECT_MUTIPLE:
+        case FORM_COMPONENT_TYPES.RADIO:
+        case FORM_COMPONENT_TYPES.CHECKBOX:
+          const fieldOptions = fieldOptionsMap[cpId] || [];
+          // 如果选项还未加载，触发加载
+          if (cpId && !fieldOptionsMap[cpId]) {
+            loadFieldOptions(cpId);
+          }
+
+          return <Select options={fieldOptions} placeholder="请选择静态值" />;
+        case FORM_COMPONENT_TYPES.USER_SELECT:
+          return (
+            <Select placeholder="请选择人员" allowClear showSearch={true} onPopupScroll={scrollHandler}>
+              {userOptions.map((option) => (
+                <Select.Option key={option.id} value={option.id}>
+                  {option.nickname}
+                </Select.Option>
+              ))}
+            </Select>
+          );
+        case FORM_COMPONENT_TYPES.DEPT_SELECT:
+          return <TreeSelect placeholder="请选择部门" allowClear showSearch={true} treeData={deptTree} />;
+
+        default:
+          return <Input placeholder="请输入静态值" />;
+      }
+    }
+
+    return <Input placeholder="请输入静态值" />;
+  };
+
+  const handleGetUsers = async () => {
+    const param = {
+      pageNo: 1,
+      pageSize: 20
+    };
+    const { list, total } = await getSimpleUserPage(param);
+    setUserOptions(list || []);
+    setUserTotal(total);
+  };
+
+  // 滚动加载
+  const scrollHandler = async (element: HTMLDivElement) => {
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const scrollBottom = scrollHeight - (scrollTop + clientHeight);
+
+    if (scrollBottom < 10 && !fetching && Number(userTotal) > userOptions.length) {
+      setFetching(true);
+      const param = {
+        pageNo: userPageNo + 1,
+        pageSize: 20
+      };
+      const { list, total } = await getSimpleUserPage(param);
+      setUserPageNo(userPageNo + 1);
+      setUserTotal(total);
+      setUserOptions((prev) => [...prev, ...list]);
+      setFetching(false);
+    }
+  };
+
+  const hadleGetDept = async () => {
+    const res = await getDeptList({});
+    const treeData = listToTree(res, {}, true);
+    setDeptTree(treeData);
+  };
+
+  // 公式
+  const openFormulaEditor = (fieldKey: string) => {
+    setFormulaVisible(true);
+    setFormulaData(form.getFieldValue(fieldKey)?.formulaData);
+    setFormulaFieldKey(fieldKey);
+  };
+
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string, params: any) => {
+    setFormulaVisible(false);
+    form.setFieldValue(formulaFieldKey, { formulaData: formulaData, formula: formattedFormula, parameters: params });
+    setFormulaData('');
+    setFormulaFieldKey('');
+  };
+
+  const StaticValueComponent = (fieldName: string, cpId: string, op: string) => {
+    const cpConfig = Object.values(pageComponentSchemas.value).find((cp: any) => cp.id == cpId) as any;
+
+    const cpType = cpConfig?.type;
+
+    if (
+      cpType == FORM_COMPONENT_TYPES.SELECT_ONE ||
+      cpType == FORM_COMPONENT_TYPES.SELECT_MUTIPLE ||
+      cpType == FORM_COMPONENT_TYPES.RADIO ||
+      cpType == FORM_COMPONENT_TYPES.CHECKBOX
+    ) {
+      return <AsyncSelectField fieldName={fieldName} curDataField={cpConfig?.config.dataField} />;
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.INPUT_NUMBER) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <Form.Item style={{ height: '12px' }}>
+            <Form.List
+              field={fieldName}
+              rules={[
+                {
+                  validator: (list: any[] | undefined, callback: (msg?: string) => void) => {
+                    if (Array.isArray(list) && list.length === 2) {
+                      const [first, second] = list;
+                      // 只校验有值的情况
+                      if (
+                        first !== undefined &&
+                        second !== undefined &&
+                        first !== null &&
+                        second !== null &&
+                        second <= first
+                      ) {
+                        callback();
+                        return;
+                      }
+                    }
+                    callback();
+                  }
+                }
+              ]}
+            >
+              {(list) => {
+                return (
+                  <div className={styles.inputNumberWrapper}>
+                    {list.map((item) => {
+                      return (
+                        <Form.Item key={item.key} field={item.field}>
+                          <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                      );
+                    })}
+                  </div>
+                );
+              }}
+            </Form.List>
+          </Form.Item>
+        );
+      }
+
+      if (cpType == FORM_COMPONENT_TYPES.DATE_PICKER) {
+        return (
+          <Form.Item field={fieldName}>
+            <Input placeholder="请输入静态值" />
+          </Form.Item>
+        );
+      }
+
+      return (
+        <Form.Item field={fieldName}>
+          <Input placeholder="请输入静态值" />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.SWITCH) {
+      return (
+        <Form.Item field={fieldName} triggerPropName="checked">
+          <Switch />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.DATE_PICKER) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <Form.Item
+            field={fieldName}
+            normalize={(value) => {
+              return {
+                begin: value && value[0],
+                end: value && value[1]
+              };
+            }}
+            formatter={(value) => {
+              return value && value.begin ? [value.begin, value.end] : [];
+            }}
+          >
+            <DatePicker.RangePicker />
+          </Form.Item>
+        );
+      }
+      return (
+        <Form.Item field={fieldName}>
+          <DatePicker placeholder="请输入静态值" />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.DATE_TIME_PICKER) {
+      if (op == VALIDATION_TYPE.RANGE) {
+        return (
+          <Form.Item
+            field={fieldName}
+            normalize={(value) => {
+              return {
+                begin: value && value[0],
+                end: value && value[1]
+              };
+            }}
+            formatter={(value) => {
+              return value && value.begin ? [value.begin, value.end] : [];
+            }}
+          >
+            <DatePicker.RangePicker showTime />
+          </Form.Item>
+        );
+      }
+
+      return (
+        <Form.Item field={fieldName}>
+          <DatePicker showTime placeholder="请输入静态值" />
+        </Form.Item>
+      );
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.USER_SELECT) {
+      return <AsyncUserSelectField fieldName={fieldName} />;
+    }
+
+    if (cpType == FORM_COMPONENT_TYPES.DEPT_SELECT) {
+      return <AsyncDeptSelectField fieldName={fieldName} />;
+    }
+
+    return (
+      <Form.Item field={fieldName}>
+        <Input placeholder="请输入静态值" />
+      </Form.Item>
+    );
+  };
+
+  return (
+    <Modal
+      style={{ width: 1200, height: 800 }}
+      title={<div style={{ textAlign: 'left' }}>交互规则管理</div>}
+      visible={visible}
+      onCancel={handleCancel}
+      onOk={handleOk}
+    >
+      <div className={styles.interactionRuleModal}>
+        <div className={styles.left}>
+          <div className={styles.leftHeader}>
+            <Input.Search
+              placeholder="搜索"
+              value={searchKeyword}
+              onChange={(value) => setSearchKeyword(value)}
+              onSearch={(value) => setSearchKeyword(value)}
+              allowClear
+            />
+            <Button type="text" icon={<IconPlus />} onClick={handleAddRule}>
+              新建
+            </Button>
+          </div>
+          <div className={styles.leftContent}>
+            {filteredRules.map((rule) => (
+              <div
+                key={rule.id}
+                className={styles.ruleItem}
+                style={{ backgroundColor: curRule === rule.id ? '#f7f8fa' : 'transparent' }}
+                onClick={() => {
+                  setCurRule(rule.id);
+                }}
+              >
+                <div className={styles.ruleItemName}>{rule.name}</div>
+                <div className={styles.ruleItemEnabled}>
+                  {rule.enabled ? <Tag color="green">启用</Tag> : <Tag color="gray">禁用</Tag>}
+
+                  <Dropdown
+                    droplist={
+                      <Menu>
+                        <Menu.Item
+                          key="copy"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleCopyRule(rule.id);
+                          }}
+                        >
+                          复制
+                        </Menu.Item>
+                        <Menu.Item
+                          key="move-up"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveRule(rule.id, 'up');
+                          }}
+                        >
+                          优先级上移
+                        </Menu.Item>
+                        <Menu.Item
+                          key="move-down"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleMoveRule(rule.id, 'down');
+                          }}
+                        >
+                          优先级下移
+                        </Menu.Item>
+                        <Menu.Item
+                          key="delete"
+                          style={{ color: 'red' }}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleDeleteRule(rule.id);
+                          }}
+                        >
+                          删除
+                        </Menu.Item>
+                      </Menu>
+                    }
+                    position="bl"
+                  >
+                    <Button type="text">
+                      <IconMoreVertical />
+                    </Button>
+                  </Dropdown>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className={styles.right}>
+          {curRule && filteredRules.find((rule) => rule.id === curRule) && (
+            <Form
+              layout="vertical"
+              form={form}
+              onValuesChange={(_changeValue: any, values: any) => {
+                // 如果正在初始化表单，跳过更新 rules，避免无限循环
+                if (isInitializingRef.current) {
+                  return;
+                }
+                // 从values中获取当前rule的id
+                const curRuleId = values.id;
+                if (curRuleId) {
+                  // 查找并更新rules列表
+                  setRules((prevRules: any[]) =>
+                    prevRules.map((rule) => (rule.id === curRuleId ? { ...rule, ...values } : rule))
+                  );
+                }
+              }}
+            >
+              <Form.Item field="id" hidden={true}>
+                <Input />
+              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  <Form.Item
+                    label="规则名称"
+                    field="name"
+                    rules={[
+                      {
+                        maxLength: 30,
+                        message: '规则名称不能超过30个字符'
+                      }
+                    ]}
+                  >
+                    <Input maxLength={30} showWordLimit />
+                  </Form.Item>
+                </Col>
+                <Col span={12}>
+                  <Form.Item
+                    label="启用状态"
+                    field="enabled"
+                    triggerPropName="checked"
+                    normalize={(value) => {
+                      // 如果已经有10个启用的规则，则阻止并提示，返回当前值
+                      const maxEnabledCount = 10;
+                      if (value) {
+                        const currentRuleId = form.getFieldValue('id');
+                        const enabledCount = rules.filter((rule) => rule.id !== currentRuleId && rule.enabled).length;
+
+                        if (enabledCount >= maxEnabledCount) {
+                          Message.warning(`最多只能启用${maxEnabledCount}个规则`);
+                          // 返回当前值，阻止切换
+                          return form.getFieldValue('enabled') || false;
+                        }
+                      }
+
+                      return value;
+                    }}
+                  >
+                    <Switch />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item label="规则描述" field="description">
+                    <Input.TextArea />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row gutter={16}>
+                <div className={styles.ruleCondition}>
+                  <div>当满足以下条件时</div>
+                  <div style={{ width: '100%' }}>
+                    <Form.List field={'interactionCondition'}>
+                      {(conditions, { add: addCondition, remove: removeCondition }) => {
+                        return (
+                          <div>
+                            {conditions.map((item, index) => {
+                              return (
+                                <div key={item.key}>
+                                  <div className={styles.items}>
+                                    <div className={styles.tag}>且</div>
+                                    <Form.List field={item.field + '.conditions'}>
+                                      {(condition, { add: childAdd, remove: childRemove }) => {
+                                        return (
+                                          <div style={{ width: '100%' }}>
+                                            {condition.map((item: any, childIndex) => {
+                                              return (
+                                                // 字段id
+                                                <Grid.Row key={item.key} gutter={8} align="center">
+                                                  <Grid.Col span={8}>
+                                                    <Form.Item field={item.field + '.cpId'}>
+                                                      <Select
+                                                        className={styles.itemSelect}
+                                                        options={cpOptions}
+                                                        onChange={(_value) => {
+                                                          form.setFieldValue(item.field + '.op', undefined);
+                                                          form.setFieldValue(item.field + '.operatorType', undefined);
+                                                          form.setFieldValue(item.field + '.value', undefined);
+                                                          // 加载字段选项
+                                                          if (_value) {
+                                                            loadFieldOptions(_value);
+                                                          }
+                                                        }}
+                                                      />
+                                                    </Form.Item>
+                                                  </Grid.Col>
+
+                                                  {/* 操作符 */}
+                                                  <Grid.Col span={4}>
+                                                    <Form.Item field={item.field + '.op'}>
+                                                      <Select
+                                                        className={styles.itemSelect}
+                                                        disabled={form.getFieldValue(item.field + '.cpId') == undefined}
+                                                        onChange={(_value) => {
+                                                          form.setFieldValue(item.field + '.operatorType', undefined);
+                                                          form.setFieldValue(item.field + '.value', undefined);
+                                                        }}
+                                                        options={getOperatorOptions(
+                                                          components.value,
+                                                          form.getFieldValue(item.field + '.cpId')
+                                                        )}
+                                                      />
+                                                    </Form.Item>
+                                                  </Grid.Col>
+
+                                                  {/* 不为空和为空不需要选择操作类型 */}
+                                                  {form.getFieldValue(item.field + '.op') != VALIDATION_TYPE.IS_EMPTY &&
+                                                    form.getFieldValue(item.field + '.op') !=
+                                                      VALIDATION_TYPE.IS_NOT_EMPTY && (
+                                                      <>
+                                                        <Grid.Col span={3}>
+                                                          <Form.Item field={item.field + '.operatorType'}>
+                                                            <Select
+                                                              className={styles.itemSelect}
+                                                              disabled={
+                                                                form.getFieldValue(item.field + '.op') == undefined
+                                                              }
+                                                              options={opCodeOptions}
+                                                              onChange={() => {
+                                                                form.setFieldValue(item.field + '.value', undefined);
+                                                                // 如果是范围类型 需要用数组兜底
+                                                                if (
+                                                                  form.getFieldValue(item.field + '.op') ==
+                                                                  VALIDATION_TYPE.RANGE
+                                                                ) {
+                                                                  form.setFieldValue(item.field + '.value', [
+                                                                    undefined,
+                                                                    undefined
+                                                                  ]);
+                                                                }
+                                                              }}
+                                                            ></Select>
+                                                          </Form.Item>
+                                                        </Grid.Col>
+
+                                                        <Grid.Col span={8}>
+                                                          {form.getFieldValue(item.field + '.operatorType') ==
+                                                            undefined && (
+                                                            <Form.Item field={item.field + '.value'}>
+                                                              <Input placeholder="请输入" disabled />
+                                                            </Form.Item>
+                                                          )}
+                                                          {/* 静态值 */}
+                                                          {form.getFieldValue(item.field + '.operatorType') ==
+                                                            FieldType.VALUE &&
+                                                            StaticValueComponent(
+                                                              item.field + '.value',
+                                                              form.getFieldValue(item.field + '.cpId'),
+                                                              form.getFieldValue(item.field + '.op')
+                                                            )}
+                                                          {/* 变量 */}
+                                                          {form.getFieldValue(item.field + '.operatorType') ==
+                                                            FieldType.VARIABLES && (
+                                                            <Form.Item field={item.field + '.value'}>
+                                                              <Select />
+                                                            </Form.Item>
+                                                          )}
+                                                          {/* 公式 */}
+                                                          {form.getFieldValue(item.field + '.operatorType') ==
+                                                            FieldType.FORMULA && (
+                                                            <Form.Item field={item.field + '.value'}>
+                                                              <Button
+                                                                onClick={() => openFormulaEditor(item.field + '.value')}
+                                                                long
+                                                                className={styles.formulaBtn}
+                                                              >
+                                                                {form.getFieldValue(item.field + '.value')
+                                                                  ? form.getFieldValue(item.field + '.value.formula')
+                                                                  : 'ƒx 编辑公式'}
+                                                                {form.getFieldValue(item.field + '.value') ? (
+                                                                  <IconLaunch />
+                                                                ) : (
+                                                                  ''
+                                                                )}
+                                                              </Button>
+                                                            </Form.Item>
+                                                          )}
+                                                        </Grid.Col>
+                                                      </>
+                                                    )}
+
+                                                  <Grid.Col span={1}>
+                                                    <IconDelete
+                                                      style={{
+                                                        fontSize: '15px',
+                                                        color: '#4E5969',
+                                                        marginBottom: '15px'
+                                                      }}
+                                                      onClick={() => {
+                                                        childRemove(childIndex);
+                                                        if (condition.length === 1) {
+                                                          removeCondition(index);
+                                                        }
+                                                      }}
+                                                    />
+                                                  </Grid.Col>
+                                                </Grid.Row>
+                                              );
+                                            })}
+
+                                            <Button type="text" size="small" onClick={() => childAdd()}>
+                                              + 添加且条件
+                                            </Button>
+                                          </div>
+                                        );
+                                      }}
+                                    </Form.List>
+                                  </div>
+
+                                  {index !== (conditions || [])?.length - 1 && (
+                                    <Divider
+                                      orientation="center"
+                                      style={{
+                                        marginTop: '10px',
+                                        marginBottom: '10px',
+                                        marginLeft: '10px',
+                                        marginRight: '10px'
+                                      }}
+                                    >
+                                      <div className={styles.dividerText}>或</div>
+                                    </Divider>
+                                  )}
+                                </div>
+                              );
+                            })}
+                            <Button
+                              type="text"
+                              onClick={() => {
+                                addCondition({
+                                  conditions: [undefined]
+                                });
+                              }}
+                            >
+                              + 添加或条件
+                            </Button>
+                          </div>
+                        );
+                      }}
+                    </Form.List>
+                  </div>
+                </div>
+              </Row>
+              <Row gutter={16}>
+                <div className={styles.ruleAction}>
+                  <div>则执行动作</div>
+                  <div style={{ width: '100%' }}>
+                    <Form.List field={'formAction'}>
+                      {(actions, { add: addAction, remove: removeAction }) => {
+                        return (
+                          <div>
+                            {actions.map((item, index) => {
+                              return (
+                                <div key={item.key}>
+                                  <div className={styles.items}>
+                                    <Grid.Row key={item.key} gutter={8} align="center">
+                                      <Grid.Col span={4}>
+                                        <Form.Item field={item.field + '.action'}>
+                                          <Select
+                                            className={styles.itemSelect}
+                                            options={formActionOptions}
+                                            onChange={(_value) => {
+                                              form.resetFields([item.field + '.cpId']);
+                                            }}
+                                          />
+                                        </Form.Item>
+                                      </Grid.Col>
+
+                                      {![InteractionActionType.SetFieldValue].includes(
+                                        form.getFieldValue(item.field + '.action')
+                                      ) && (
+                                        <>
+                                          <Grid.Col span={19}>
+                                            <Form.Item field={item.field + '.cpIds'}>
+                                              <Select
+                                                mode="multiple"
+                                                className={styles.itemSelect}
+                                                options={cpOptions}
+                                                onChange={(_value) => {}}
+                                              />
+                                            </Form.Item>
+                                          </Grid.Col>
+                                        </>
+                                      )}
+
+                                      {[InteractionActionType.SetFieldValue].includes(
+                                        form.getFieldValue(item.field + '.action')
+                                      ) && (
+                                        <>
+                                          <Grid.Col span={8}>
+                                            <Form.Item field={item.field + '.cpId'}>
+                                              <Select
+                                                className={styles.itemSelect}
+                                                options={cpOptions}
+                                                onChange={(_value) => {
+                                                  // 加载字段选项
+                                                  if (_value) {
+                                                    loadFieldOptions(_value);
+                                                  }
+                                                }}
+                                              />
+                                            </Form.Item>
+                                          </Grid.Col>
+
+                                          <Grid.Col span={2} style={{ textAlign: 'center', marginBottom: '16px' }}>
+                                            <div>的值设为</div>
+                                          </Grid.Col>
+
+                                          <Grid.Col span={3}>
+                                            <Form.Item field={item.field + '.operatorType'}>
+                                              <Select
+                                                className={styles.itemSelect}
+                                                disabled={form.getFieldValue(item.field + '.cpId') == undefined}
+                                                options={opCodeOptions}
+                                                onChange={() => {
+                                                  form.setFieldValue(item.field + '.value', undefined);
+                                                  // 如果是范围类型 需要用数组兜底
+                                                  if (form.getFieldValue(item.field + '.op') == VALIDATION_TYPE.RANGE) {
+                                                    form.setFieldValue(item.field + '.value', [undefined, undefined]);
+                                                  }
+                                                }}
+                                              ></Select>
+                                            </Form.Item>
+                                          </Grid.Col>
+
+                                          <Grid.Col span={6}>
+                                            {form.getFieldValue(item.field + '.operatorType') == undefined && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Input placeholder="请输入" disabled />
+                                              </Form.Item>
+                                            )}
+                                            {form.getFieldValue(item.field + '.operatorType') == FieldType.VALUE && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Input placeholder="请输入静态值" />
+                                              </Form.Item>
+                                            )}
+
+                                            {form.getFieldValue(item.field + '.operatorType') ==
+                                              FieldType.VARIABLES && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Select />
+                                              </Form.Item>
+                                            )}
+
+                                            {form.getFieldValue(item.field + '.operatorType') == FieldType.FORMULA && (
+                                              <Form.Item field={item.field + '.value'}>
+                                                <Button
+                                                  onClick={() => openFormulaEditor(item.field + '.value')}
+                                                  long
+                                                  className={styles.formulaBtn}
+                                                >
+                                                  {form.getFieldValue(item.field + '.value')
+                                                    ? form.getFieldValue(item.field + '.value.formula')
+                                                    : 'ƒx 编辑公式'}
+                                                  {form.getFieldValue(item.field + '.value') ? <IconLaunch /> : ''}
+                                                </Button>
+                                              </Form.Item>
+                                            )}
+                                          </Grid.Col>
+                                        </>
+                                      )}
+
+                                      <Grid.Col span={1}>
+                                        <IconDelete
+                                          style={{
+                                            fontSize: '15px',
+                                            color: '#4E5969',
+                                            marginBottom: '15px'
+                                          }}
+                                          onClick={() => {
+                                            removeAction(index);
+                                          }}
+                                        />
+                                      </Grid.Col>
+                                    </Grid.Row>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <Button
+                              type="text"
+                              onClick={() => {
+                                addAction({});
+                              }}
+                            >
+                              + 添加动作
+                            </Button>
+                          </div>
+                        );
+                      }}
+                    </Form.List>
+                  </div>
+                </div>
+              </Row>
+            </Form>
+          )}
+        </div>
+      </div>
+
+      <FormulaEditor
+        initialFormula={formulaData}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
+    </Modal>
+  );
+};
+
+export default InteractionRuleModal;

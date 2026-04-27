@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-module-data</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>onebase-module-metadata-runtime</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+
+        <!-- Web & 安全 & RPC & 注册发现（沿用原 server 的能力，仅在需要时用） -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-security-runtime</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-rpc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-api</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- 临时加onebase-module-flow-component 后续看如何解耦-->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-flow-component</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-core</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+                <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-metadata-common</artifactId>
+            <version>${revision}</version>
+            <scope>compile</scope>
+        </dependency>
+        
+        <!--        <dependency>-->
+        <!--            <groupId>com.cmsr.onebase</groupId>-->
+        <!--            <artifactId>onebase-module-flow-core</artifactId>-->
+        <!--            <version>${revision}</version>-->
+        <!--        </dependency>-->
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <!-- 说明：runtime 模块作为被 onebase-server 聚合引用的普通业务模块，
+             不需要再次使用 spring-boot-maven-plugin 生成可执行 fat jar；
+             否则其产物为嵌套 Boot Jar(类位于内层 BOOT-INF/classes)，
+             被主应用打包后无法直接通过类路径扫描到 Controller，
+             导致 /admin-api/metadata/data-method/data/page 等接口在运行时缺失。
+             因此移除 repackage，仅输出普通依赖 jar。 -->
+    </build>
+</project>

@@ -1,0 +1,119 @@
+@baseUrl = http://localhost:48080
+@token = {{token}}
+@tenantId = 1
+@userId = 1
+
+### 新增用户
+POST {{baseUrl}}/corp/user/create
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "test.user01",
+  "nickname": "测试用户01",
+  "password": "Passw0rd!",
+  "deptId": 1,
+  "postIds": [1],
+  "roleIds": [1],
+  "email": "test01@example.com",
+  "mobile": "13800000001",
+  "sex": 1,
+  "status": 1,
+  "remark": "用于接口联调的测试账户"
+}
+
+### 修改用户
+POST {{baseUrl}}/corp/user/update
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": {{userId}},
+  "username": "test.user01",
+  "nickname": "测试用户01-更新",
+  "deptId": 1,
+  "postIds": [1],
+  "roleIds": [1],
+  "email": "test01_updated@example.com",
+  "mobile": "13800000002",
+  "sex": 1,
+  "status": 1,
+  "remark": "更新后的备注"
+}
+
+### 删除用户
+POST {{baseUrl}}/corp/user/delete?id={{userId}}
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### 重置用户密码
+POST {{baseUrl}}/corp/user/update-password
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": {{userId}},
+  "password": "N3wPassw0rd!"
+}
+
+### 修改用户状态
+POST {{baseUrl}}/corp/user/update-status
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "id": {{userId}},
+  "status": 1
+}
+
+### 用户分页列表
+GET {{baseUrl}}/corp/user/page?pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### 简要用户分页列表(启用)
+GET {{baseUrl}}/corp/user/simple-page?pageNo=1&pageSize=10&nickname=测
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### 获取用户精简信息列表(启用)
+GET {{baseUrl}}/corp/user/simple-list
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### 通过昵称获取用户精简信息列表(启用)
+GET {{baseUrl}}/corp/user/simple-list-by-name?userNickName=测
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### 获得用户详情
+GET {{baseUrl}}/corp/user/get?id={{userId}}
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### 导出用户（Excel）
+GET {{baseUrl}}/corp/user/export?pageNo=1&pageSize=20
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/vnd.ms-excel
+
+### 指定部门的用户简要分页列表
+GET {{baseUrl}}/corp/user/get-user-page-by-dept?pageNo=1&pageSize=10&deptId=1&isRecurseSub=true
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+

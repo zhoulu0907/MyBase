@@ -1,0 +1,69 @@
+.fileUploadWrapperOBMobile {
+  margin-bottom: 0.24rem;
+  .arco-form-label-item {
+    margin-top: 0.24rem;
+  }
+  .arco-image-picker-error {
+    font-size: 0.14rem;
+    line-height: 0.24rem;
+    color: #ff4d4f;
+  }
+  .arco-uploader-container {
+    display: block;
+  }
+  .arco-uploader-add {
+    width: 2rem;
+  }
+  .uploadTextWrapper {
+    display: flex;
+    align-items: center;
+  }
+  .uploadText {
+    font-size: 0.24rem;
+    white-space: nowrap;
+    margin-left: 0.08rem;
+  }
+  .arco-button.arco-button-type-default {
+    background-color: #f2f3f5;
+    color: #4e5969;
+    border: 1px solid transparent;
+  }
+  .arco-button.arco-button-type-ghost {
+    color: rgb(var(--primary-6));
+    border-color: currentColor;
+  }
+  .arco-button.arco-button-size-large {
+    padding: 0;
+  }
+  .uplaodList-text-item {
+    display: flex;
+    justify-content: space-between;
+    min-height: 0.5rem;
+    margin-top: 0.2rem;
+    padding: 0 0.12rem;
+    border-radius: 4px;
+    .arco-icon {
+      font-size: var(--fontSize) !important;
+    }
+    .uplaodList-text-item-name {
+      margin: 0 0.12rem;
+      font-size: 0.26rem;
+      flex: 1 1 auto;
+      width: 0;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .uplaodList-text-item-opera, .uplaodList-text-item-process {
+      margin-left: 0;
+      height: 0.5rem;
+      display: flex;
+      align-items: center;
+      flex: unset;
+    }
+  }
+  .fileUploadBottomTips {
+    font-size: 0.28rem;
+  }
+}

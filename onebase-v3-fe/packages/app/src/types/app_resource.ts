@@ -1,0 +1,105 @@
+import { ComponentConfig } from './app_component';
+import { InteractionRule } from './view';
+
+export interface GetPageSetIdReq {
+  menuId: string;
+  isDev?: boolean;
+}
+
+export interface PageSet {
+  id: string;
+  pageName: string;
+  pageType: string;
+  components: ComponentConfig[];
+  pageUuid: string;
+}
+
+export interface SavePageSetReq {
+  id: string;
+  pageSetName: string;
+  pages: PageSet[];
+  dataTitleType?: number;
+  redirectType?: number;
+  dataTitle?: string;
+}
+
+export interface LoadPageSetReq {
+  id: string;
+  isDev?: boolean;
+}
+
+export interface CreatePageSetReq {
+  pageSetName: string;
+  menuId: string;
+  displayName: string;
+  description: string;
+}
+
+export interface DeletePageSetReq {
+  menuId: string;
+}
+
+export interface GetAppIdByPageSetIdReq {
+  pageSetId: string;
+}
+
+export interface GetPageSetMainMetaDataReq {
+  pageSetId: string;
+  isDev?: boolean;
+}
+
+export interface GetPageListByAppIdReq {
+  appId: string;
+}
+
+export interface GetTablesByAppIdReq {
+  applicationId: string;
+}
+
+export interface GetPageMetadataReq {
+  pageUuid: string;
+}
+
+export interface GetComponentListByPageIdReq {
+  pageUuid: string;
+}
+
+export interface CreatePageViewParams {
+  pageSetId: string;
+
+  viewType: string;
+
+  viewName: string;
+}
+
+export interface ListPageViewParams {
+  pageSetId: string;
+  isDev?: boolean;
+}
+export enum ViewType {
+  MIX = 'mix',
+  EDIT = 'edit',
+  DETAIL = 'detail',
+  UNKNOWN = 'unknown'
+}
+
+export interface PageView {
+  id: string;
+  pageName: string;
+  pageType: string;
+  editViewMode: number;
+  detailViewMode: number;
+  isDefaultEditViewMode: number;
+  isDefaultDetailViewMode: number;
+
+  // 是否是新增的视图
+  created?: boolean;
+  //   是否最新更新的视图
+  isLatestUpdated?: number;
+
+  interactionRules?: InteractionRule[];
+
+  pageSetUuid?: string;
+  pageUuid: string;
+  iframeUrl?: string; // iframe 嵌入 URL
+}

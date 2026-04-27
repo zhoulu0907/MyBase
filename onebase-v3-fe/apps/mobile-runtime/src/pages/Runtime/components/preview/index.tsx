@@ -1,0 +1,742 @@
+// import ExecuteFlows from '@/utils/flow';
+import { Button, Dialog, Form, Loading, PopupSwiper, Toast } from '@arco-design/mobile-react';
+import { useForm } from '@arco-design/mobile-react/esm/form';
+import {
+  CATEGORY_TYPE,
+  createDraft,
+  dataMethodCreateV2,
+  dataMethodDetailV2,
+  dataMethodUpdateV2,
+  getEntityFieldsWithChildren,
+  getPageSetId,
+  getPageSetMetaData,
+  PageType,
+  queryFlowExecForm,
+  TRIGGER_EVENTS,
+  updateDraft,
+  type AppEntities,
+  type AppEntity,
+  type AppEntityField,
+  type DetailMethodV2Params,
+  type GetPageSetIdReq,
+  type InsertMethodV2Params,
+  type UpdateMethodV2Params
+} from '@onebase/app';
+import { menuPermissionSignal, pagesRuntimeSignal } from '@onebase/common';
+import { getSimpleUserList } from '@onebase/platform-center';
+import dayjs from 'dayjs';
+
+import {
+  EDITOR_TYPES,
+  ENTITY_FIELD_TYPE,
+  getComponentWidth,
+  startLoadWorkbenchPageSet,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  useFormEditorSignal,
+  usePageViewEditorSignal,
+  useWorkbenchEditorSignal,
+  type GridItem
+} from '@onebase/ui-kit';
+
+import { fetchSubmitInstance } from '@onebase/app/src/services/app_runtime';
+import { startLoadPageSet, useEditorSignalMap, useListEditorSignal } from '@onebase/ui-kit';
+import { PreviewRender, CustomNav } from '@onebase/ui-kit-mobile';
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
+import styles from './index.module.less';
+import EditRuntime from './EditRuntime';
+import { normalizeFormValues } from '@/utils';
+import FlowPredict from './flowPredict';
+import EmptySVG from '@/assets/images/empty.svg';
+
+interface PreviewProps {
+  menuId: string;
+  menuName: string;
+  runtime: boolean;
+  menuUuid: string;
+  mainEntity: AppEntity;
+  subEntities: AppEntities;
+  pageSetType?: PageType;
+}
+
+const PreviewContainer: React.FC<PreviewProps> = ({
+  menuId,
+  menuName,
+  runtime,
+  menuUuid,
+  mainEntity,
+  subEntities: subEntitiesValues,
+  pageSetType
+}) => {
+  useSignals();
+
+  const [form] = useForm();
+
+  const {
+    clearComponents: clearFormComponents,
+    clearPageComponentSchemas: clearFormPageComponentSchemas,
+    clearLayoutSubComponents: clearFormLayoutSubComponents,
+    clearSubTableComponents: clearFormSubTableComponents
+  } = useFormEditorSignal;
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    clearComponents: clearListComponents,
+    clearPageComponentSchemas: clearListPageComponentSchemas,
+    clearLayoutSubComponents: clearListLayoutSubComponents,
+    clearSubTableComponents: clearListSubTableComponents
+  } = useListEditorSignal;
+  const { clearPageViews, clearCurViewId } = usePageViewEditorSignal;
+  const { workbenchComponents, wbComponentSchemas } = useWorkbenchEditorSignal;
+  const { menuPermission } = menuPermissionSignal;
+
+  const {
+    curPage,
+    drawerVisible,
+    setDrawerVisible,
+    editPageViewId,
+    detailPageViewId,
+    mainMetaDataFields,
+    setMainMetaDataFields,
+    subEntities,
+    setSubEntities,
+    setCurPage,
+    setEditPageViewId,
+    flows,
+    setFlows,
+    resetFlows
+  } = pagesRuntimeSignal;
+  const [pageSetId, setPageSetId] = useState('');
+  const [pageType, setPageType] = useState('');
+  const [mainMetaData, setMainMetaData] = useState<string>('');
+  const [tableName, setTableName] = useState<string>('');
+  const [editTargetId, setEditTargetId] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+  const [draftLoading, setDraftLoading] = useState<boolean>(false);
+
+  const [listLoading, setListLoading] = useState(false);
+  const listLoadSeqRef = useRef(0);
+
+  // 当前时间戳
+  const [detailMode, setDetailMode] = useState(true);
+  const [userSelectData, setUserSelectData] = useState<any[]>([]); // 人员选择数据
+  const [refresh, setRefresh] = useState(Date.now());
+  const [isAdd, setAdd] = useState(false); // 是否新增数据
+
+  const [isPredictVisible, setPredictVisible] = useState(false);
+
+  /* 数据初始化，解决二次进入旧数据闪烁问题 */
+  useEffect(() => {
+    clearPageViews();
+    clearCurViewId();
+
+    setCurPage('');
+    setEditPageViewId('');
+
+    clearFormComponents();
+    clearFormPageComponentSchemas();
+    clearFormLayoutSubComponents();
+    clearFormSubTableComponents();
+
+    clearListComponents();
+    clearListPageComponentSchemas();
+    clearListLayoutSubComponents();
+    clearListSubTableComponents();
+
+    return () => {
+      setPredictVisible(false);
+      setTimeout(() => setRefresh(Date.now()), 150);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (drawerVisible.value) {
+      setDetailMode(true);
+    }
+  }, [drawerVisible.value]);
+
+  // 获取主表字段和子表字段
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaDataId = await getPageSetMetaData({ pageSetId: pageSetId });
+    console.log('mainMetaDataId: ', mainMetaDataId);
+    setMainMetaData(mainMetaData);
+
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaDataId);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
+
+    setTableName(entityWithChildren.tableName);
+
+    setMainMetaDataFields(entityWithChildren.parentFields);
+    setSubEntities(entityWithChildren.childEntities);
+  };
+
+  useEffect(() => {
+    if (menuId) {
+      // 切换 menuId 时先进入加载态，避免空态/旧数据闪烁
+      setListLoading(true);
+      listLoadSeqRef.current += 1;
+      handleGetPageSetId(menuId);
+      setEditTargetId('');
+      resetFlows();
+    }
+  }, [menuId]);
+
+  useEffect(() => {
+    if (editTargetId && tableName && mainMetaDataFields.value.length > 0) {
+      // TODO: mainMetaData 换成 entityName
+      //   handleGetData(mainMetaData, editTargetId);
+    }
+  }, [tableName, mainMetaDataFields.value]);
+
+  useEffect(() => {
+    if (pageSetId) {
+      const currentSeq = listLoadSeqRef.current;
+      const loadData = async () => {
+        setListLoading(true);
+        try {
+          // 工作台页面使用专门的加载方法，不获取主表数据
+          if (pageSetType === PageType.WORKBENCH) {
+            await startLoadWorkbenchPageSet({ pageSetId });
+          } else {
+            await Promise.all([loadPageSetInfo(pageSetId), getMainMetaData(pageSetId)]);
+          }
+        } catch (e) {
+          console.error('加载页面集失败: ', e);
+        } finally {
+          // 避免并发/快速切换时旧请求覆盖新状态
+          if (currentSeq !== listLoadSeqRef.current) return;
+          // signals 更新可能是异步批量更新，延迟一小段时间避免瞬间空态闪烁
+          setTimeout(() => {
+            if (currentSeq === listLoadSeqRef.current) {
+              setListLoading(false);
+            }
+          }, 100);
+        }
+      };
+      loadData();
+    }
+    // 优先切换到列表页
+    setPageType(pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.LIST_EDITOR);
+  }, [pageSetId]);
+
+  const handleGetPageSetId = async (menuId: string) => {
+    const req: GetPageSetIdReq = { menuId: menuId };
+    const res = await getPageSetId(req);
+    setPageSetId(res);
+  };
+
+  const loadPageSetInfo = async (pageSetId: string) => {
+    await startLoadPageSet({ pageSetId: pageSetId, allowViewUuids: menuPermission.value?.viewUuids || [] });
+  };
+
+  // 信息收集弹窗
+  const [inputParams, setInputParams] = useState<any>({});
+  const [entityParam, setEntityParam] = useState<any>();
+
+  const resetImageFile = (formData: any, field: { fieldType: string; fieldName: string }, value: any) => {
+    const filterByUpload = ['IMAGE', 'FILE'];
+    if (filterByUpload.includes(field.fieldType) && Array.isArray(value)) {
+      formData[field.fieldName] = value.map((item: any) => {
+        if (item.id && item.name) {
+          return {
+            name: item.name,
+            id: item.id
+          };
+        }
+        return item;
+      });
+      return true;
+    }
+  };
+  // 提交表单
+  /**
+   * 提交表单
+   * @param isSave 是否保存
+   * @param isDraft 是否是草稿
+   */
+  const submitForm = async (isSave = false, isDraft?: boolean) => {
+    if (!isDraft) {
+      await form.validateFields();
+    }
+
+    const draftId = form.getFieldValue('draftId');
+
+    !isSave && setSubmitLoading(true);
+    const fields = form.getFieldsValue();
+
+    console.log('fields: ', fields);
+    console.log('mainMetaDataFields: ', mainMetaDataFields.value);
+    console.log('menuId: ', menuId);
+
+    const formData = {} as any;
+    const subFormData = {} as any;
+    const groups = [] as any;
+    let subEntityUuid: string = '';
+    for (const [key, value] of Object.entries(fields)) {
+      console.log('key: ', key, '   value: ', value);
+      // 处理主表逻辑
+      const field = (mainMetaDataFields.value || [])
+        .filter((f) => f.isSystemField !== 1)
+        .find((f: AppEntityField) => f.fieldName == key);
+      if (field) {
+        console.log('field: ', field);
+
+        if (resetImageFile(formData, field, value)) {
+          // do nothing
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
+          formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD') : '';
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
+          formData[field.fieldName] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
+          formData[field.fieldName] = typeof value === 'object' ? value[0] : value;
+        } else if (field.fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
+          let userTempData = userSelectData;
+          if (userTempData.length === 0) {
+            const userList = await getSimpleUserList();
+            userTempData = userList;
+            setUserSelectData(userList);
+          }
+          const userData = userTempData.find((item) => item.nickname === value[0]);
+          formData[field.fieldName] = {
+            id: userData?.id,
+            name: userData?.nickname
+          };
+        } else {
+          formData[field.fieldName] = value;
+        }
+      }
+
+      !(typeof value === 'object') &&
+        Object.values(listPageComponentSchemas.value).forEach((item) => {
+          if (!item.config.columns || item.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) {
+            return;
+          }
+          const indexTmp = item.config.columns.findIndex((col: any) => col.id === field?.fieldId);
+
+          if (indexTmp === -1) {
+            delete formData[field?.fieldId];
+          }
+        });
+
+      // 处理子表逻辑
+      const subEntity = subEntities.value.find((v: any) => key.startsWith(v.childTableName));
+      if (subEntity) {
+        const parts = key.split('.');
+        subEntityUuid = parts[0];
+        // const groupIndex = parts[parts.length - 2];
+        const fieldName = parts[parts.length - 1];
+
+        const fieldType = subEntity.childFields.find((v) => v.fieldName === fieldName)?.fieldType;
+
+        if (fieldType === ENTITY_FIELD_TYPE.DATE.VALUE) {
+          subFormData[key] = value ? dayjs(value).format('YYYY-MM-DD') : '';
+        } else if (fieldType === ENTITY_FIELD_TYPE.DATETIME.VALUE) {
+          subFormData[key] = value ? dayjs(value).format('YYYY-MM-DD hh:mm:ss') : '';
+        } else if (fieldType === ENTITY_FIELD_TYPE.SELECT.VALUE) {
+          subFormData[key] = typeof value === 'object' ? value[0] : value;
+        } else if (fieldType === ENTITY_FIELD_TYPE.USER.VALUE && Array.isArray(value)) {
+          let userTempData = userSelectData;
+          if (userTempData.length === 0) {
+            const userList = await getSimpleUserList();
+            userTempData = userList;
+            setUserSelectData(userList);
+          }
+          const userData = userTempData.find((item) => item.nickname === value[0]);
+          subFormData[key] = {
+            id: userData?.id,
+            name: userData?.nickname
+          };
+        } else {
+          subFormData[key] = value;
+        }
+      }
+    }
+
+    const result = Object.entries(subFormData).reduce((acc, [key, val]) => {
+      const [, i, field] = key.split('.');
+      acc[i] ??= {};
+      acc[i][field] = val;
+      return acc;
+    }, []);
+
+    if (subEntityUuid) {
+      groups[subEntityUuid] = result;
+    }
+
+    console.log('formData:   ', formData);
+    console.log('subFormData:   ', subFormData);
+
+    // 接口判断 页面触发
+    const curFormPage = curPage.value?.pages?.find((ele: any) => ele.pageType === CATEGORY_TYPE.FORM);
+    const pageId = curFormPage?.id;
+    const flowRes = pageId ? await queryFlowExecForm(pageId) : [];
+    setInputParams({ ...formData, ...groups });
+
+    // console.log('editTargetId: ', editTargetId, formData);
+
+    if (editTargetId) {
+      const req: UpdateMethodV2Params = {
+        id: editTargetId,
+        ...formData,
+        ...groups
+      };
+      console.log('req: ', req);
+      const res = await dataMethodUpdateV2(tableName, menuId, req);
+      console.log(res);
+
+      const updateFlows = (flowRes || []).filter(
+        (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.UPDATE)
+      );
+      setFlows(updateFlows);
+      if (res) {
+        Toast.success('更新成功');
+      }
+      setEditTargetId('');
+      setDrawerVisible(false);
+      setTimeout(() => setRefresh(Date.now()), 150);
+
+      setSubmitLoading(false);
+
+      if (curPage?.value?.pageSetType === PageType.BPM) {
+        setPageType(EDITOR_TYPES.FORM_EDITOR);
+      } else {
+        setPageType(EDITOR_TYPES.LIST_EDITOR);
+      }
+    } else {
+      try {
+        let res = null;
+        const req: InsertMethodV2Params = { ...formData, ...groups };
+
+        if (isDraft) {
+          setDraftLoading(true);
+          res = draftId
+            ? await updateDraft(tableName, menuId, { ...req, id: draftId })
+            : await createDraft(tableName, menuId, req);
+          Toast.success('保存草稿成功');
+        } else {
+          if (curPage?.value?.pageSetType === PageType.BPM) {
+            const reqFlow = {
+              isDraft: isSave,
+              formName:
+                curPage?.value?.pages?.find((page: any) => page.pageType === CATEGORY_TYPE.FORM)?.pageName || '',
+              businessId: menuUuid,
+              entity: {
+                entityId: tableName,
+                data: { ...formData, ...groups }
+              }
+            };
+            res = await fetchSubmitInstance(reqFlow);
+            setPageType(EDITOR_TYPES.FORM_EDITOR);
+          } else {
+            res = await dataMethodCreateV2(tableName, menuId, req, draftId);
+            setPageType(EDITOR_TYPES.LIST_EDITOR);
+          }
+        }
+
+        const createFlows = (flowRes || []).filter(
+          (ele: any) => ele.recordTriggerEvents && ele.recordTriggerEvents.includes(TRIGGER_EVENTS.CREATE)
+        );
+        setFlows(createFlows);
+        setPredictVisible(false);
+
+        if (res) {
+          if (isDraft) {
+            Toast.success('保存草稿成功');
+          } else {
+            Toast.success('创建成功');
+          }
+          cancelSubmitForm();
+        }
+        setTimeout(() => setRefresh(Date.now()), 150);
+        setSubmitLoading(false);
+        setDraftLoading(false);
+      } catch (error) {
+        Toast.error('创建失败');
+        console.error('创建失败', error);
+        setPredictVisible(false);
+        setSubmitLoading(false);
+        setDraftLoading(false);
+      }
+    }
+
+    setPredictVisible(false);
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
+  };
+
+  const onSubmit = () => {
+    if (curPage?.value?.pageSetType === PageType.BPM) {
+      const fields = form.getFieldsValue();
+      const formData: any = {};
+      Object.entries(fields).forEach(([key, value]) => {
+        // 处理主表逻辑
+        const field = (mainMetaDataFields.value || []).find((f: AppEntityField) => f.fieldId == key);
+        if (field) {
+          formData[field.fieldId] = value || '';
+        }
+      });
+
+      setEntityParam({
+        tableName,
+        data: formData
+      });
+      setPredictVisible(true);
+    } else {
+      submitForm();
+    }
+  };
+
+  const onSaveSubmit = () => {
+    submitForm(true);
+  };
+
+  const onSaveDraft = () => {
+    submitForm(true, true);
+  };
+
+  const cancelSubmitForm = () => {
+    console.log('取消提交');
+
+    setPageType(EDITOR_TYPES.LIST_EDITOR);
+    setDetailMode(true);
+    form.resetFields();
+    // 关闭页面后子表清空
+    pagesRuntimeSignal.resetSubTableDataLength();
+  };
+
+  const showFromPageData = (id: string, toFormPage: boolean = false) => {
+    setAdd(!id);
+    form.resetFields();
+
+    if (id && id !== '') {
+      // console.log('edit row id: ', id);
+      setEditTargetId(id);
+
+      if (tableName) {
+        handleGetData(id);
+      }
+    } else {
+      // id为空，属于新增，需要重置子表数据长度为0
+      setEditTargetId('');
+      pagesRuntimeSignal.resetSubTableDataLength();
+    }
+
+    if (toFormPage) {
+      setPageType(EDITOR_TYPES.FORM_EDITOR);
+    }
+  };
+
+  const handleGetData = async (id: string) => {
+    setEditLoading(true);
+    const req: DetailMethodV2Params = {
+      id: id
+    };
+    const res = await dataMethodDetailV2(tableName, menuId, req);
+
+    // 遍历 res.data，将数据回填到表单
+    let formValues: Record<string, any> = {};
+
+    if (res) {
+      const componentSchemas = useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value;
+      const subTableComponents = useEditorSignalMap.get(editPageViewId.value)?.subTableComponents.value;
+
+      formValues = normalizeFormValues({
+        dataItem: res,
+        componentSchemas,
+        subEntities: subEntities.value,
+        subTableComponents,
+        setSubTableDataLength: pagesRuntimeSignal.setSubTableDataLength
+      });
+    }
+
+    console.log('formValues: ', formValues);
+    setTimeout(() => {
+      form.setFieldsValue(formValues);
+    }, 100);
+    setTimeout(() => {
+      setEditLoading(false);
+    }, 200);
+    return res;
+  };
+
+  return (
+    <div className={styles.previewPage}>
+      <CustomNav
+        title={menuName}
+        style={{ background: '#fff' }}
+        toBack={
+          pageType === EDITOR_TYPES.LIST_EDITOR || pageType === EDITOR_TYPES.WORKBENCH_EDITOR
+            ? undefined
+            : () => setPageType(EDITOR_TYPES.LIST_EDITOR)
+        }
+      />
+
+      <div className={styles.content}>
+        {/* 工作台页面渲染 */}
+        {pageSetType === PageType.WORKBENCH && (
+          <>
+            {workbenchComponents.value.map((cp: GridItem) => {
+              const schema = wbComponentSchemas.value[cp.id];
+              return (
+                <Fragment key={cp.id}>
+                  <div
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(100% - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender cpId={cp.id} cpType={cp.type} pageComponentSchema={schema} runtime={runtime} />
+                  </div>
+                </Fragment>
+              );
+            })}
+          </>
+        )}
+
+        {/* 列表页面渲染 */}
+        {pageSetType !== PageType.WORKBENCH &&
+          pageType === EDITOR_TYPES.LIST_EDITOR &&
+          (listLoading ? (
+            <div className={styles.noData}>
+              <Loading type="circle" color="rgb(var(--primary-6))" />
+            </div>
+          ) : listComponents.value?.length ? (
+            listComponents.value.map((cp: GridItem, index: number) => (
+              <Fragment key={cp.id}>
+                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: '100%'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                      runtime={runtime}
+                      showFromPageData={showFromPageData}
+                      refresh={refresh}
+                      lastOne={index === listComponents.value.length - 1}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))
+          ) : (
+            <div className={styles.noData}>
+              <img src={EmptySVG} alt='暂无数据' />
+            </div>
+          ))}
+
+        {pageSetType !== PageType.WORKBENCH && pageType == EDITOR_TYPES.FORM_EDITOR && (
+          <EditRuntime
+            form={form}
+            isAdd={isAdd}
+            editLoading={editLoading}
+            submitLoading={submitLoading}
+            draftLoading={draftLoading}
+            onSubmit={onSubmit}
+            onSaveSubmit={onSaveSubmit}
+            onSaveDraft={onSaveDraft}
+            onCancel={cancelSubmitForm}
+            menuId={menuId}
+            tableName={tableName}
+            mainEntity={mainEntity}
+            subEntitiesValues={subEntitiesValues}
+            setDraftLoading={setDraftLoading}
+            showFromPageData={showFromPageData}
+          />
+        )}
+
+        {/* 右侧详情抽屉 */}
+        <PopupSwiper
+          // title={
+          //   <div className={styles.drawerTitle}>
+          //     <div>详情</div>
+          //     {/* {detailMode && (
+          //       <Button type="primary" onClick={() => toEditMode()}>
+          //         编辑
+          //       </Button>
+          //     )} */}
+          //   </div>
+          // }
+          visible={drawerVisible.value}
+          close={() => {
+            setDrawerVisible(false);
+          }}
+        >
+          <div className={styles.content}>
+            <Form layout="inline" form={form}>
+              {useEditorSignalMap.get(detailPageViewId.value)?.components.value.map((cp: GridItem) => (
+                <Fragment key={cp.id}>
+                  {useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                    STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                    <div
+                      key={cp.id}
+                      className={styles.componentItem}
+                      style={{
+                        width: getComponentWidth(
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                          cp.type
+                        )
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={
+                          useEditorSignalMap.get(detailPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                        }
+                        runtime={true}
+                        detailMode={detailMode}
+                        showFromPageData={() => {}}
+                      />
+                    </div>
+                  )}
+                </Fragment>
+              ))}
+
+              {!detailMode && (
+                <div className={styles.footer}>
+                  <Button type="primary" onClick={() => submitForm()}>
+                    更新
+                  </Button>
+                  <Button type="default" onClick={onSaveDraft}>
+                    暂存
+                  </Button>
+                </div>
+              )}
+            </Form>
+          </div>
+        </PopupSwiper>
+      </div>
+
+      {/* 信息收集弹窗 */}
+      {/* <ExecuteFlows flows={flows} inputParams={inputParams}></ExecuteFlows> */}
+      {isPredictVisible && (
+        <Dialog
+          title=""
+          visible={isPredictVisible}
+          close={() => setPredictVisible(false)}
+          platform="ios"
+          footer={[
+            { content: <div style={{ color: '#1d2129' }}>取消</div> },
+            {
+              content: <div style={{ color: 'rgb(var(--primary-6))' }}>确定</div>,
+              onClick: (() => submitForm()) as any
+            }
+          ]}
+        >
+          <FlowPredict businessId={curPage?.value?.id} entityParam={entityParam} businessUuid={menuUuid} />
+        </Dialog>
+      )}
+    </div>
+  );
+};
+
+export default PreviewContainer;

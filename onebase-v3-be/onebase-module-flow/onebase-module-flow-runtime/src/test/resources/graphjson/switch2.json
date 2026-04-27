@@ -1,0 +1,178 @@
+{
+  "nodes": [
+    {
+      "id": "start_0",
+      "type": "start",
+      "data": {
+        "title": "触发节点",
+        "outputs": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      "blocks": []
+    },
+    {
+      "id": "switch_JSl-Y",
+      "type": "switch",
+      "data": {
+        "title": "分支节点"
+      },
+      "blocks": [
+        {
+          "id": "LLk1g",
+          "type": "case",
+          "data": {
+            "title": "分支_0",
+            "inputsValues": {
+              "condition": {
+                "type": "constant",
+                "content": ""
+              }
+            },
+            "inputs": {
+              "type": "object",
+              "required": [
+                "condition"
+              ],
+              "properties": {
+                "condition": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "blocks": [
+            {
+              "id": "dataAdd_FI0CfCGEEr4u8zCKT9HGm",
+              "type": "dataAdd",
+              "data": {
+                "title": "数据新增节点"
+              },
+              "blocks": []
+            },
+            {
+              "id": "switch_rYgob",
+              "type": "switch",
+              "data": {
+                "title": "分支节点"
+              },
+              "blocks": [
+                {
+                  "id": "BAC5A",
+                  "type": "case",
+                  "data": {
+                    "title": "分支_0",
+                    "inputsValues": {
+                      "condition": {
+                        "type": "constant",
+                        "content": ""
+                      }
+                    },
+                    "inputs": {
+                      "type": "object",
+                      "required": [
+                        "condition"
+                      ],
+                      "properties": {
+                        "condition": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  },
+                  "blocks": [
+                    {
+                      "id": "dataAdd_ivUql7eaN03HlbaZTc7Mg",
+                      "type": "dataAdd",
+                      "data": {
+                        "title": "数据新增节点"
+                      },
+                      "blocks": []
+                    }
+                  ]
+                },
+                {
+                  "id": "CYnJ-",
+                  "type": "caseDefault",
+                  "data": {
+                    "title": "默认分支"
+                  },
+                  "blocks": [
+                    {
+                      "id": "dataDelete_JVA4TBmYlZKf0Tsx_6jyp",
+                      "type": "dataDelete",
+                      "data": {
+                        "title": "数据删除节点"
+                      },
+                      "blocks": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ICrFs",
+          "type": "case",
+          "data": {
+            "title": "分支_1",
+            "inputsValues": {
+              "condition": {
+                "type": "constant",
+                "content": ""
+              }
+            },
+            "inputs": {
+              "type": "object",
+              "required": [
+                "condition"
+              ],
+              "properties": {
+                "condition": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "blocks": [
+            {
+              "id": "dataDelete_UqROaEJyx3VWN4D0_K9cx",
+              "type": "dataDelete",
+              "data": {
+                "title": "数据删除节点"
+              },
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "id": "-Cz21",
+          "type": "caseDefault",
+          "data": {
+            "title": "默认分支"
+          },
+          "blocks": [
+            {
+              "id": "dataDelete_N7j3HIdp4veHFUO7ukvy4",
+              "type": "dataDelete",
+              "data": {
+                "title": "数据删除节点"
+              },
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_0",
+      "type": "end",
+      "data": {
+        "title": "结束"
+      },
+      "blocks": []
+    }
+  ]
+}

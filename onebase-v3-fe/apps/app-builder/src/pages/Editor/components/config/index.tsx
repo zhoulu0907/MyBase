@@ -1,0 +1,38 @@
+import { EDITOR_TYPES, usePageEditorSignal } from '@onebase/ui-kit';
+import { useSignals } from '@preact/signals-react/runtime';
+import { useEffect, useState } from 'react';
+import MaterialConfiger from './components/MaterialConfiger';
+import ViewConfiger from './components/ViewConfiger';
+import styles from './index.module.less';
+
+interface EditorConfigProps {}
+
+export default function EditorConfig({}: EditorConfigProps) {
+  useSignals();
+
+  const { curComponentID } = usePageEditorSignal();
+
+  const [isFormEditor, setIsFormEditor] = useState(false);
+
+  const hash = window.location.hash;
+  useEffect(() => {
+    setIsFormEditor(hash.includes(EDITOR_TYPES.FORM_EDITOR));
+  }, [hash]);
+
+  return (
+    <div
+      className={styles.editorConfig}
+      style={{
+        // width: showDrawer ? '310px' : '0px',
+        transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+      }}
+    >
+      {curComponentID ? (
+        <MaterialConfiger cpID={curComponentID} />
+      ) : (
+        //   只有表单设计时允许显示视图配置
+        isFormEditor && <ViewConfiger />
+      )}
+    </div>
+  );
+}

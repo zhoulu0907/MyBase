@@ -1,0 +1,678 @@
+import CompDeleteIcon from '@/assets/images/app_delete.svg';
+import CompCopyIcon from '@/assets/images/copy_comp_icon.svg';
+import CompShowIcon from '@/assets/images/eye_off_icon.svg';
+import { Button, Divider, Form, Input, Layout, Table, Tooltip } from '@arco-design/web-react';
+import { IconDelete, IconEdit, IconPlus, IconQuestionCircle } from '@arco-design/web-react/icon';
+import { ENTITY_TYPE_VALUE } from '@onebase/app';
+import { pagesRuntimeSignal } from '@onebase/common';
+import { useSignals } from '@preact/signals-react/runtime';
+import { nanoid } from 'nanoid';
+import { useEffect, useState } from 'react';
+import { ReactSortable } from 'react-sortablejs';
+import { getComponentConfig } from 'src/components/Materials/schema';
+import EditRender from 'src/components/render/EditRender';
+import PreviewRender from 'src/components/render/PreviewRender';
+import { usePageEditorSignal } from 'src/hooks/useSignal';
+import { useAppEntityStore } from 'src/signals/store_entity';
+import { usePageComponentValidateSignal } from 'src/signals'
+import { COMPONENT_GROUP_NAME, EDITOR_TYPES, type GridItem } from 'src/utils/const';
+import { v4 as uuidv4 } from 'uuid';
+import { ENTITY_COMPONENT_TYPES, FORM_COMPONENT_TYPES } from '../../../componentTypes';
+import {
+  DEFAULT_VALUE_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES
+} from '../../../constants';
+import { getComponentSchema, hasComponentSchema } from '../../../schema';
+import { getComponentDescriptor } from '../../../registry';
+import './index.css';
+import { type XSubTableConfig } from './schema';
+
+const XSubTable = (props: XSubTableConfig & { runtime?: boolean; detailMode?: boolean; tooltipPosition: any }) => {
+  useSignals();
+
+  const {
+    id,
+    label,
+    tooltip,
+    tooltipPosition,
+    status,
+    subTableConfig,
+    verify,
+    runtime = true,
+    detailMode,
+    pageType
+  } = props;
+  const { mainEntity, subEntities } = useAppEntityStore();
+
+  const {
+    curComponentID,
+    setCurComponentID,
+    clearCurComponentID,
+    setCurComponentSchema,
+    pageComponentSchemas,
+    setPageComponentSchemas,
+    delPageComponentSchemas,
+    showDeleteButton,
+    setShowDeleteButton,
+    subTableComponents,
+    setSubTableComponents
+  } = usePageEditorSignal(pageType || EDITOR_TYPES.FORM_EDITOR);
+  const { subTableDataLength } = pagesRuntimeSignal;
+    const { pageComponentValidate } = usePageComponentValidateSignal;
+
+  // 判断拖拽的组件是否是表单组件（动态注册兼容插件）
+  const isFormComponent = (type: string): boolean => {
+    if (!type) return false;
+    if (!hasComponentSchema(type)) return false;
+    try {
+      const descriptor = getComponentDescriptor(type as any);
+      return descriptor?.template?.category === 'form';
+    } catch {
+      return false;
+    }
+  };
+
+  // 取消隐藏组件
+  const handleShowComponent = (componentId: string) => {
+    const schema = pageComponentSchemas[componentId];
+    schema.config.status = STATUS_VALUES[STATUS_OPTIONS.DEFAULT];
+
+    setPageComponentSchemas(componentId, schema);
+    // setTimeout(() => {
+    setCurComponentID(componentId);
+    setCurComponentSchema(schema);
+    setShowDeleteButton(false);
+    // }, 0);
+  };
+  // 复制组件
+  const handleCopyComponent = (comp: any, originId: string, index: number) => {
+    // ID 映射表，记录旧 ID 到新 ID 的映射
+  };
+  // 删除组件
+  const handleDeleteComponent = (componentId: string) => {
+    // 从组件列表中移除 遍历，过滤掉 id 匹配的组件
+    const updatedColumns = subTableComponents[id].filter((cp) => cp.id !== componentId);
+    setSubTableComponents(id, updatedColumns);
+    delPageComponentSchemas(componentId);
+
+    // 如果删除的是当前选中的组件，清除选中状态
+    if (curComponentID === componentId) {
+      delPageComponentSchemas(componentId);
+      clearCurComponentID();
+    }
+  };
+
+  // 拖拽添加
+  const onSubAdd = async (e: any) => {
+    const cpID = e.item.getAttribute('data-cp-id') || e.item.getAttribute('data-id') || e.item.id;
+    const itemType = e.item.getAttribute('data-cp-type');
+    const fieldName = e.item.getAttribute('data-field-name');
+    let tableName = e.item.getAttribute('data-table-name');
+
+    // 不允许拖拽主、子表嵌套、主表字段
+    if (
+      itemType === ENTITY_TYPE_VALUE.MAIN ||
+      itemType === ENTITY_TYPE_VALUE.SUB ||
+      itemType == ENTITY_COMPONENT_TYPES.MAIN_ENTITY ||
+      itemType == ENTITY_COMPONENT_TYPES.SUB_ENTITY ||
+      (tableName && tableName === mainEntity.tableName)
+    ) {
+      return;
+    }
+    // 只能拖拽表单 && 不能是子表单
+    const isForm = isFormComponent(itemType);
+    if (!itemType || !isForm || itemType === FORM_COMPONENT_TYPES.SUB_TABLE) {
+      if (cpID) {
+        const updatedColumns = subTableComponents[cpID]?.filter((cp) => cp.id !== cpID);
+        if (updatedColumns) {
+          setSubTableComponents(id, updatedColumns);
+        }
+        delPageComponentSchemas(cpID);
+        clearCurComponentID();
+      }
+      return;
+    }
+
+    // 拖拽的子表项必须是同一个子表
+    if (tableName) {
+      const sameField = subTableComponents[id]?.every((ele) => {
+        const dataField = pageComponentSchemas?.[ele.id]?.config?.dataField;
+        return !dataField || dataField?.[0] === tableName;
+      });
+      if (!sameField) {
+        return;
+      }
+    }
+
+    // 表单项配置
+    const schemaConfig = getComponentConfig(pageComponentSchemas[cpID!], itemType!);
+    const schema = getComponentSchema(itemType as any);
+    const itemDisplayName = e.item.getAttribute('data-label') || e.item.getAttribute('data-cp-displayname');
+    schema.config = schemaConfig;
+
+    // 当前实体
+    const currentEntity = subEntities.entities?.find((ele: any) => ele.tableName === tableName);
+    // 当前字段
+    const currentField = currentEntity?.fields?.find((ele: any) => ele.fieldName === fieldName);
+    if (currentField) {
+      // 数据长度 dataLength
+      // 小数位数 decimalPlaces
+      // 默认值 defaultValue => defaultValueConfig
+      if (schema.config.defaultValueConfig) {
+        const defaultValueConfig = {
+          ...schema.config.defaultValueConfig,
+          type: DEFAULT_VALUE_TYPES.CUSTOM,
+          customValue: currentField.defaultValue
+        };
+        schema.config.defaultValueConfig = defaultValueConfig;
+      }
+      // 字段描述 description
+      schema.config.tooltip = currentField.description;
+      // 是否必填：1-是，0-不是 isRequired
+      // 是否唯一：1-是，0-不是 isUnique
+      const noRepeat =
+        currentField.isUnique === 1 ? true : (typeof schema.config?.verify?.noRepeat === 'boolean' ? false : undefined);
+      schema.config.verify = {
+        ...schema.config.verify,
+        required: currentField.isRequired,
+        noRepeat
+      };
+
+      // 字段约束配置（长度/正则） constraints
+      schema.config.constraints = currentField.constraints;
+      // 数据选择
+      if (itemType === FORM_COMPONENT_TYPES.DATA_SELECT) {
+        // 数据源
+        schema.config.selectedDataSource = {
+          ...schema.config.selectedDataSource,
+          entityUuid: currentField.dataSelectionConfig?.targetEntityUuid,
+          tableName: currentField.dataSelectionConfig?.targetTableName,
+          entityName: currentField.dataSelectionConfig?.targetFieldName
+        };
+        // 回显字段  name
+        schema.config.displayFields = currentField.dataSelectionConfig?.targetFieldName
+          ? [
+              {
+                value: currentField.dataSelectionConfig?.targetFieldName
+              }
+            ]
+          : [];
+      }
+    }
+
+    // 兜底：当未提供表名（如插件表单组件），尝试从已存在的同子表组件推断子表表名
+    if (!tableName) {
+      const existed = subTableComponents[id]?.find((ele) => pageComponentSchemas?.[ele.id]?.config?.dataField?.[0]);
+      const inferred = pageComponentSchemas?.[existed?.id]?.config?.dataField?.[0];
+      tableName = inferred || tableName;
+    }
+
+    schema.config.cpName = itemDisplayName;
+    schema.config.label.text = itemDisplayName;
+    schema.config.label.display = false;
+    schema.config.dataField = tableName ? (fieldName ? [tableName, fieldName] : [tableName]) : [];
+    schema.config.id = cpID;
+    const props = {
+      id: cpID,
+      type: itemType,
+      ...schema
+    };
+    const newSub = { id: cpID, type: itemType, displayName: itemDisplayName };
+    setSubTableComponents(id, [...subTableComponents[id], newSub]);
+    setPageComponentSchemas(cpID!, props);
+    // setTimeout(() => {
+    setCurComponentID(cpID!);
+    setCurComponentSchema(props);
+    setShowDeleteButton(false);
+    // }, 0);
+  };
+
+  // 子表单内排序 拖拽选中
+  const onSubStart = (e: any) => {
+    const cpID = e.item.getAttribute('data-id') || '';
+    const curComponentSchema = pageComponentSchemas[cpID] || {};
+    // setTimeout(() => {
+    setCurComponentID(cpID);
+    setCurComponentSchema(curComponentSchema);
+    setShowDeleteButton(true);
+    // }, 0);
+  };
+  // 子表单里的元素 点击事件
+  const onSubComponentClick = (e: React.MouseEvent<HTMLDivElement>, cp: GridItem) => {
+    e.stopPropagation();
+    const curComponentSchema = pageComponentSchemas[cp.id];
+    // setTimeout(() => {
+    setCurComponentID(cp.id);
+    setCurComponentSchema(curComponentSchema);
+    setShowDeleteButton(true);
+    // }, 0);
+  };
+
+  /**
+   * 预览
+   */
+  const [subTableData, setSubTableData] = useState<any[]>([]);
+  const [subTableColumns, setSubTableColumns] = useState<any[]>([]);
+
+  // 表单
+  const { form } = Form.useFormContext();
+
+  /**
+   * 子表单元格配置覆盖
+   */
+  const applySubTableCellOverrides = (cfg: any, type: string) => {
+    if (type === FORM_COMPONENT_TYPES.INPUT_TEXT_AREA) {
+      return { ...cfg, minRows: 1 };
+    }
+    return cfg;
+  };
+
+  const refreshSubTableData = () => {
+    const len = subTableDataLength.value[id] || 0;
+    const newData: any[] = [];
+    for (let i = 0; i < len; i++) {
+      newData.push({ key: `${i}` });
+    }
+    setSubTableData(newData);
+  };
+
+  useEffect(() => {
+    getTableColumns();
+  }, []);
+
+  useEffect(() => {
+    let newSubTableData: any[] = [];
+    for (let i = 0; i < subTableDataLength.value[id]; i++) {
+      newSubTableData.push({ key: `${i}` });
+    }
+
+    setSubTableData(newSubTableData);
+  }, [subTableDataLength.value]);
+
+  // 获取表格配置 columns
+  const getTableColumns = () => {
+    let tableColumns = [];
+    if (subTableConfig?.showIndex) {
+      const indexColumn = {
+        title: '序号',
+        dataIndex: 'index',
+        width: '62px',
+        align: 'center',
+        fixed: undefined as any,
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        render: (_: any, __: any, index: number) => index + 1
+      };
+      tableColumns.push(indexColumn);
+    }
+    for (let [colIdx, column] of (subTableComponents[id] || []).entries()) {
+      const config = pageComponentSchemas[column.id].config;
+      const displayName = config.label.text || column.displayName;
+      const required = config?.verify?.required;
+      const [subTableName, fieldName] = config.dataField;
+
+      const tableColumn = {
+        title: (
+          <>
+            {required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
+            {displayName}
+            {config?.tooltip && (
+              <Tooltip content={config.tooltip}>
+                <IconQuestionCircle style={{ marginLeft: '4px', color: 'var(--color-text-4)' }} />
+              </Tooltip>
+            )}
+          </>
+        ),
+        dataIndex: fieldName,
+        key: fieldName,
+        width: undefined as any,
+        fixed: undefined as any,
+        headerCellStyle: {
+          minWidth: '200px'
+        },
+        bodyCellStyle: {
+          padding: '4px'
+        },
+        render: (_text: string, _record: any, index: number) => {
+          const newConfig = {
+            ...pageComponentSchemas[column.id].config,
+            dataField: [mainEntity.tableName, `${subTableName}.${index}.${fieldName}`]
+          };
+          const finalConfig = applySubTableCellOverrides(newConfig, column.type);
+          const pageSchema = { ...pageComponentSchemas[column.id], config: finalConfig };
+          const value = form.getFieldValue(subTableName)
+          const record = value?.[index];
+          const editDisabled = record?.id && !subTableConfig?.editRow;
+
+          return (
+            <>
+              <PreviewRender
+                cpId={column.id}
+                cpType={column.type}
+                detailMode={detailMode || editDisabled}
+                pageComponentSchema={pageSchema}
+                runtime={true}
+              />
+
+              {/* 补充id字段，默认隐藏，TODO(mickey): 完善逻辑，如果子表中有id字段，则不显示 */}
+              {colIdx === 0 && (
+                <Form.Item field={`${id}.${index}.id`} hidden>
+                  <Input />
+                </Form.Item>
+              )}
+            </>
+          );
+        }
+      };
+      tableColumns.push(tableColumn);
+    }
+
+    // 左侧列冻结
+    if (subTableConfig?.columnFixed) {
+      tableColumns.forEach((ele, index) => {
+        if (index < subTableConfig.columnFixed) {
+          ele.fixed = 'left';
+          if (index !== 0 || ele.dataIndex !== 'index') {
+            ele.width = '200px';
+          }
+        }
+      });
+    }
+
+    // 操作列
+    if (runtime && !detailMode && subTableConfig?.showOperate) {
+      tableColumns.push({
+        title: '操作',
+        dataIndex: 'action',
+        width: 64,
+        align: 'center',
+        headerCellStyle: { textAlign: 'center' },
+        bodyCellStyle: { padding: '0 4px', textAlign: 'center' },
+        fixed: subTableConfig?.operateFixed ? 'right' : '',
+        render: (_col: any, _record: any, index: number) => {
+          const configId = subTableComponents[id]?.[0]?.id;
+          const config = configId ? pageComponentSchemas[configId]?.config : null;
+          const subTableName = config?.dataField?.[0];
+          const value = subTableName ? form.getFieldValue(subTableName) : null
+          const record = value?.[index];
+          
+          const delDisabled =
+            status === STATUS_VALUES[STATUS_OPTIONS.READONLY] ||
+            (record?.id && !subTableConfig?.deleteRow);
+          //status的readonly优先级最高
+          return (
+            <Button
+              type="text"
+              size="small"
+              status="danger"
+              style={{ padding: '0 4px' }}
+              icon={<IconDelete />}
+              disabled={delDisabled}
+              onClick={() => handleDelete(index)}
+            ></Button>
+          );
+        }
+      });
+    }
+
+    setSubTableColumns(tableColumns);
+  };
+
+  // 新增
+  const handleAdd = () => {
+    const keys = subTableComponents[id].map((ele) => ele.id);
+    let newData: any = {};
+    keys.forEach((key) => {
+      newData[key] = undefined;
+    });
+    setSubTableData((prevData) => [...prevData, { key: nanoid(), ...newData }]);
+  };
+  // 删除
+  const handleDelete = (index: number) => {
+    setSubTableData((prevData) => prevData.filter((_, i) => i !== index));
+
+    const formData = form.getFieldsValue();
+
+    const filterFormData = formData[id].filter((_: any, i: number) => i !== index);
+
+    const updateFormData = {
+      ...formData,
+      [id]: filterFormData
+    };
+
+    form.setFieldsValue(updateFormData);
+  };
+
+  return (
+    <Layout className="XSubTable" style={runtime ? { border: 'none' } : {}}>
+      <Form.Item
+        label={
+          <div
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+          >
+            {label.display && label.text && (
+              <span className={tooltip ? 'tooltipLabelText' : 'labelText'}>
+                {verify?.required ? <span style={{ color: 'red', paddingRight: '4px' }}>*</span> : null}
+                {label.text}
+              </span>
+            )}
+
+            {!detailMode && (
+              <Button
+                type="outline"
+                size="small"
+                icon={<IconPlus />}
+                onClick={handleAdd}
+                disabled={status === STATUS_VALUES[STATUS_OPTIONS.READONLY]}
+              >
+                新增一项
+              </Button>
+            )}
+          </div>
+        }
+        labelCol={{ span: 24 }}
+        layout="vertical"
+        tooltip={
+          tooltip && {
+            content: tooltip,
+            position: tooltipPosition
+          }
+        }
+        hidden={runtime && status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]}
+        style={{
+          width: '100%',
+          margin: 0,
+          opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+        }}
+      >
+        {runtime ? (
+          <>
+            <div className="subTableContent">
+              <Table
+                columns={subTableColumns}
+                data={subTableData}
+                size="small"
+                scroll={{ x: 'max-content' }}
+                style={{ width: '100%' }}
+                border={{
+                  headerCell: true,
+                  wrapper: true
+                }}
+                rowKey={(record: any) => record.key}
+                pagination={false}
+              />
+            </div>
+          </>
+        ) : (
+          <div style={{ width: '100%', display: 'flex' }}>
+            {subTableConfig?.showIndex && (
+              <div className="subComponentItem2" style={{ width: '62px', paddingTop: '18px' }}>
+                <div className="simulate-header-item">序号</div>
+                <div style={{ textAlign: 'center', padding: '6px 0' }}>1</div>
+              </div>
+            )}
+
+            <ReactSortable
+              id={`workspace-content-subtable-${id}`}
+              list={subTableComponents[id] || []}
+              setList={(newList) => {
+                const dataFieldPage = subTableComponents[id]?.find(
+                  (ele) => pageComponentSchemas?.[ele.id]?.config?.dataField?.[0]
+                );
+                // 已有的数据源子表id
+                const dataField = pageComponentSchemas?.[dataFieldPage?.id]?.config?.dataField?.[0];
+                /**
+                 * 不允许拖拽主、子表嵌套
+                 * 拖拽的子表项必须是同一个子表
+                 */
+                const newSubList = (newList || []).filter((ele) => {
+                  // 主表、子表
+                  const isTable =
+                    ele.type === ENTITY_TYPE_VALUE.MAIN ||
+                    ele.type === ENTITY_TYPE_VALUE.SUB ||
+                    ele.type === 'XSubTable';
+                  // 主表数据
+                  const isMain = ele.tableName && ele.tableName === mainEntity.tableName;
+                  // 同一个子表
+                  const isSameSub = !ele.tableName || !dataField || ele.tableName === dataField;
+                  const isForm = isFormComponent(ele.type);
+                  return !isTable && !isMain && isSameSub && isForm;
+                });
+
+                // setTimeout(() => {
+                setSubTableComponents(id, newSubList);
+                // }, 0);
+              }}
+              onAdd={onSubAdd}
+              group={{ name: COMPONENT_GROUP_NAME }}
+              sort={true}
+              forceFallback={true}
+              animation={150}
+              fallbackOnBody={true}
+              swapThreshold={0.65}
+              className="XSubTable-content"
+              onStart={onSubStart}
+              style={{
+                backgroundImage: subTableComponents[id]?.length
+                  ? 'none'
+                  : 'linear-gradient(180deg, #f2f3f5 0%, #f2f3f5 100%)'
+              }}
+            >
+              {subTableComponents &&
+                subTableComponents[id] &&
+                subTableComponents[id].map((cp: GridItem, index: number) => (
+                  <div
+                    key={cp.id}
+                    data-cp-type={cp.type}
+                    data-cp-displayname={cp.displayName}
+                    data-cp-id={cp.id}
+                    className="subComponentItem"
+                    style={{
+                      borderColor: pageComponentValidate.value?.[cp.id] === false ? 'rgb(var(--red-6))' : curComponentID === cp.id ? 'rgb(var(--primary-6))' : 'transparent',
+                    }}
+                    onClick={(e) => {
+                      onSubComponentClick(e, cp);
+                    }}
+                  >
+                    <div className="simulate-header-item">
+                      {pageComponentSchemas[cp.id]?.config?.verify?.required ? (
+                        <span style={{ color: 'red', paddingRight: '4px' }}>*</span>
+                      ) : null}
+                      {pageComponentSchemas[cp.id]?.config.label.text ||
+                        pageComponentSchemas[cp.id]?.config.displayName}
+                      {pageComponentSchemas[cp.id]?.config?.tooltip && (
+                        <Tooltip content={pageComponentSchemas[cp.id]?.config.tooltip}>
+                          <IconQuestionCircle style={{ marginLeft: '4px', color: 'var(--color-text-4)' }} />
+                        </Tooltip>
+                      )}
+                    </div>
+                    <EditRender
+                      runtime={runtime}
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={pageComponentSchemas[cp.id]}
+                    />
+
+                    {/* 操作按钮 */}
+                    {curComponentID === cp.id && showDeleteButton && (
+                      <div className="operationArea">
+                        {pageComponentSchemas[cp.id]?.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                          <>
+                            <div
+                              className="copyButton"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                console.debug('取消隐藏组件: ', cp);
+                                handleShowComponent(cp.id);
+                              }}
+                            >
+                              <img src={CompShowIcon} alt="component show" />
+                            </div>
+                            <Divider className="divider" type="vertical" />
+                          </>
+                        )}
+
+                        <div
+                          className="copyButton"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('复制组件: ', cp);
+                            handleCopyComponent({ ...cp, id: `${cp.type}-${uuidv4()}` }, cp.id, index);
+                          }}
+                        >
+                          <img src={CompCopyIcon} alt="component copy" />
+                        </div>
+                        <Divider className="divider" type="vertical" />
+
+                        <div
+                          className="deleteButton"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            console.log('删除组件: ', cp.id);
+                            handleDeleteComponent(cp.id);
+                          }}
+                        >
+                          <img src={CompDeleteIcon} alt="component delete" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </ReactSortable>
+            {subTableConfig?.showOperate && (
+              <div className="subComponentItem2" style={{ width: '64px', paddingTop: '18px' }}>
+                <div className="simulate-header-item">操作</div>
+                <div style={{padding: '6px 0'}}>
+                  {subTableConfig?.editRow && (
+                    <Button
+                      type="text"
+                      size="small"
+                      style={{ padding: '0 4px' }}
+                      icon={<IconEdit />}
+                    ></Button>
+                  )}
+                  {subTableConfig?.deleteRow && (
+                    <Button
+                      type="text"
+                      size="small"
+                      status="danger"
+                      style={{ padding: '0 4px' }}
+                      icon={<IconDelete />}
+                    ></Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </Form.Item>
+    </Layout>
+  );
+};
+
+export default XSubTable;

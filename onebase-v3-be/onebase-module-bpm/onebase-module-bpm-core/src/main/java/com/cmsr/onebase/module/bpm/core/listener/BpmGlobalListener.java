@@ -1,0 +1,362 @@
+package com.cmsr.onebase.module.bpm.core.listener;
+
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentInsRepository;
+import com.cmsr.onebase.module.bpm.core.dal.database.BpmFlowAgentRepository;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentDO;
+import com.cmsr.onebase.module.bpm.core.dal.dataobject.BpmFlowAgentInsDO;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.*;
+import com.cmsr.onebase.module.bpm.core.utils.BpmUtil;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.dromara.warm.flow.core.dto.FlowParams;
+import org.dromara.warm.flow.core.entity.Instance;
+import org.dromara.warm.flow.core.entity.Node;
+import org.dromara.warm.flow.core.entity.Task;
+import org.dromara.warm.flow.core.entity.User;
+import org.dromara.warm.flow.core.enums.CooperateType;
+import org.dromara.warm.flow.core.enums.NodeType;
+import org.dromara.warm.flow.core.listener.GlobalListener;
+import org.dromara.warm.flow.core.listener.ListenerVariable;
+import org.dromara.warm.flow.core.service.InsService;
+import org.dromara.warm.flow.core.service.NodeService;
+import org.dromara.warm.flow.core.service.TaskService;
+import org.dromara.warm.flow.core.service.UserService;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * @author liyang
+ */
+@Slf4j
+@Component
+public class BpmGlobalListener implements GlobalListener {
+    @Resource(name = "bpmTaskService")
+    private TaskService taskService;
+
+    @Resource(name = "bpmInsService")
+    private InsService insService;
+
+    @Resource(name = "bpmNodeService")
+    private NodeService nodeService;
+
+    @Resource(name = "bpmUserService")
+    private UserService userService;
+
+    @Resource
+    private BpmFlowAgentRepository agentRepository;
+
+    @Resource
+    private BpmCcNodeListener ccNodeListener;
+
+    @Resource
+    private BpmFlowAgentInsRepository agentInsRepository;
+
+    /**
+     * 判断是否为审批类操作（含会签/票签），非转交/委派/加签/减签
+     *
+     * @param flowParams 流程参数
+     * @return 是否为审批类
+     */
+    private boolean isApprovalLikeType(FlowParams flowParams) {
+        if (flowParams == null) {
+            return false;
+        }
+
+        Integer cooperateType = flowParams.getCooperateType();
+
+        if (cooperateType == null
+                || Objects.equals(CooperateType.APPROVAL.getKey(), cooperateType)
+                || Objects.equals(CooperateType.COUNTERSIGN.getKey(), cooperateType)
+                || Objects.equals(CooperateType.VOTE.getKey(), cooperateType)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void start(ListenerVariable listenerVariable) {
+        Node node = listenerVariable.getNode();
+
+        // 刚发起流程，节点类型为开始节点
+        if (NodeType.isStart(node.getNodeType())) {
+            log.info("开始启动流程，节点nodeCode：{}", node.getNodeCode());
+            return;
+        }
+
+        // 获取节点ext信息
+        String ext = listenerVariable.getNode().getExt();
+        log.info("任务开始，节点ext信息：{}", ext);
+        BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(listenerVariable.getNode().getNodeCode(), listenerVariable.getInstance().getDefJson());
+
+        // 处理未操作的用户
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+                || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode()))
+        {
+            handleUnOperatorUsersOnStart(listenerVariable);
+        }
+    }
+
+    public void assignment(ListenerVariable listenerVariable) {
+        // 获取节点ext信息
+        String ext = listenerVariable.getNode().getExt();
+        List<Task> nextTasks = listenerVariable.getNextTasks();
+        Instance instance = listenerVariable.getInstance();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+
+        log.info("开始分派任务，节点ext信息：{}", ext);
+
+        // 防御性检查：flowVariable 可能为空
+        if (flowVariable == null) {
+            log.warn("flowVariable 为空，跳过分派任务处理");
+            return;
+        }
+
+        for (Task nextTask : nextTasks) {
+            BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(nextTask.getNodeCode(), listenerVariable.getInstance().getDefJson());
+
+            if (nodeExtDTO == null) {
+                log.warn("节点ext信息为空 nodeCode: {} nodeName: {}", nextTask.getNodeCode(), nextTask.getNodeName());
+                continue;
+            }
+
+            // todo：需要指定办理人，则直接覆盖办理人
+
+            // 如果是发起节点，则把发起人添加到办理人
+            if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.INITIATION.getCode())) {
+                nextTask.setPermissionList(List.of(instance.getCreateBy()));
+                continue;
+            }
+
+            // 处理下一个抄送节点，只保留系统用户权限
+            if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
+                List<String> ccPermissionList = nextTask.getPermissionList();
+
+                // 存入当前节点的变量值里
+                flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + nextTask.getNodeCode(),
+                        JsonUtils.toJsonString(ccPermissionList));
+
+                // 清空权限人，使用系统用户执行
+                nextTask.setPermissionList(new ArrayList<>());
+            }
+        }
+
+    }
+
+    public void finish(ListenerVariable listenerVariable) {
+        Node currNode = listenerVariable.getNode();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+
+        // 获取节点ext信息
+        String ext = currNode.getExt();
+        log.info("完成任务，节点ext信息：{}", ext);
+
+        // 防御性检查：flowVariable 可能为空
+        if (flowVariable == null) {
+            log.warn("flowVariable 为空，跳过完成任务处理");
+            return;
+        }
+
+        // 判断下，如果是最后一个节点就直接结束
+        Instance instance = listenerVariable.getInstance();
+
+        if (CollectionUtils.isEmpty(taskService.getByInsId(instance.getId()))) {
+            // 结束流程
+            String status = BpmBusinessStatusEnum.APPROVED.getCode();
+            // 更新流程状态为已通过
+            instance.setFlowStatus(status);
+            insService.updateById(instance);
+        }
+
+        BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(currNode.getNodeCode(), listenerVariable.getInstance().getDefJson());
+
+        if (nodeExtDTO == null) {
+            return;
+        }
+
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
+            ccNodeListener.handleFinish(listenerVariable);
+        }
+
+        // 抄送给未处理的用户
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+                || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
+            handleUnOperatorUsersOnFinish(listenerVariable);
+        }
+    }
+
+    /**
+     * 创建监听器，任务创建时执行
+     *
+     * @param listenerVariable 监听器变量
+     */
+    public void create(ListenerVariable listenerVariable) {
+        // 获取节点ext信息
+        String ext = listenerVariable.getNode().getExt();
+        Task currTask = listenerVariable.getTask();
+
+        log.info("开始创建任务，节点ext信息：{}", ext);
+
+        // 防御性检查：currTask 可能为空
+        if (currTask == null) {
+            log.warn("currTask 为空，跳过创建任务处理");
+            return;
+        }
+
+        BaseNodeExtDTO nodeExtDTO = BpmUtil.getNodeExtDTOByNodeCode(currTask.getNodeCode(), listenerVariable.getInstance().getDefJson());
+
+        if (nodeExtDTO == null) {
+            log.warn("节点ext信息为空 nodeCode: {} nodeName: {}", currTask.getNodeCode(), currTask.getNodeName());
+            return;
+        }
+
+        // 只处理审批节点和执行节点，增加代理人的信息
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.APPROVER.getCode())
+                || Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.EXECUTOR.getCode())) {
+            // 此处为nextTask创建的地方，加上代理人的信息
+            handleAgentOnCreate(listenerVariable);
+        }
+
+        if (Objects.equals(nodeExtDTO.getNodeType(), BpmNodeTypeEnum.CC.getCode())) {
+            ccNodeListener.handleCreate(listenerVariable);
+        }
+    }
+
+    /**
+     * 处理代理人的业务逻辑
+     */
+    private void handleAgentOnCreate(ListenerVariable listenerVariable) {
+        Task task = listenerVariable.getTask();
+
+        // 防御性检查：task 可能为空
+        if (task == null) {
+            log.warn("task 为空，跳过处理代理人逻辑");
+            return;
+        }
+
+        Set<String> approvalUserIds = new HashSet<>();
+
+        for (User user : task.getUserList()) {
+            // 只处理审批人类型的用户
+            if (!Objects.equals(user.getType(), BpmUserTypeEnum.APPROVAL.getCode())) {
+                continue;
+            }
+
+            approvalUserIds.add(user.getProcessedBy());
+        }
+
+        // 如果没有审批人类型的用户，则直接返回
+        if (CollectionUtils.isEmpty(approvalUserIds)) {
+            return;
+        }
+
+        // todo：确保appId不为空
+        Long appId = listenerVariable.getDefinition().getApplicationId();
+
+        List<BpmFlowAgentDO> activeAgents = agentRepository.findAllActiveAgent(appId, approvalUserIds);
+
+        if (CollectionUtils.isEmpty(activeAgents)) {
+            return;
+        }
+
+        List<BpmFlowAgentInsDO> agentInsList = new ArrayList<>();
+
+        // 增加代理人信息
+        for (BpmFlowAgentDO agent : activeAgents) {
+            BpmFlowAgentInsDO agentIns = new BpmFlowAgentInsDO();
+            agentIns.setTaskId(task.getId());
+            agentIns.setInstanceId(task.getInstanceId());
+            agentIns.setAgentId(agent.getAgentId());
+            agentIns.setPrincipalId(agent.getPrincipalId());
+            agentIns.setAgentName(agent.getAgentName());
+            agentIns.setPrincipalName(agent.getPrincipalName());
+            agentIns.setIsExecutor(BooleanUtils.toInteger(false));
+            agentInsList.add(agentIns);
+        }
+
+        // 保存代理用户
+        agentInsRepository.saveBatch(agentInsList);
+    }
+
+    private void handleUnOperatorUsersOnStart(ListenerVariable listenerVariable) {
+        Task currTask = listenerVariable.getTask();
+        FlowParams flowParams = listenerVariable.getFlowParams();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+
+        // 不一定有待办
+        if (currTask == null) {
+            log.warn("当前待办任务为空，跳过处理未操作用户");
+            return;
+        }
+
+        // flowParams 空值检查
+        if (flowParams == null) {
+            log.warn("flowParams 为空，跳过处理未操作用户，taskId: {}", currTask.getId());
+            return;
+        }
+
+        // 防御性检查：flowVariable 可能为空
+        if (flowVariable == null) {
+            log.warn("flowVariable 为空，跳过处理未操作用户，taskId: {}", currTask.getId());
+            return;
+        }
+
+        if (!isApprovalLikeType(flowParams)) {
+            log.debug("操作非审批类（转交/委派/加签/减签），跳过处理未操作用户，taskId: {}", currTask.getId());
+            return;
+        }
+
+        // 查找剩余未操作的用户
+        List<User> unOperatorUsers = userService.listByAssociatedAndTypes(currTask.getId());
+
+        if (CollectionUtils.isNotEmpty(unOperatorUsers)) {
+            String currHandler = flowParams.getHandler();
+
+            Set<String> ccPermissionList = unOperatorUsers.stream()
+                .filter(item -> {
+                    // 排除自己
+                    if (Objects.equals(item.getProcessedBy(), currHandler)) {
+                        return false;
+                    }
+
+                    // 排除系统用户
+                    if (Objects.equals(item.getProcessedBy(), BpmConstants.SYS_USER_ID)) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                .map(User::getProcessedBy)
+                .collect(Collectors.toSet());
+
+            // todo：同一个节点，是否会同时有抄送和未操作的用户，确认是否会覆盖
+            if (CollectionUtils.isNotEmpty(ccPermissionList)) {
+                flowVariable.put(BpmConstants.VAR_CC_USERS_KEY + "_" + currTask.getNodeCode(),
+                        JsonUtils.toJsonString(ccPermissionList));
+            }
+        }
+    }
+
+    private void handleUnOperatorUsersOnFinish(ListenerVariable listenerVariable) {
+        Task currTask = listenerVariable.getTask();
+        FlowParams flowParams = listenerVariable.getFlowParams();
+        Map<String, Object> flowVariable = listenerVariable.getVariable();
+
+        if (currTask == null) {
+            log.warn("currTask 为空，跳过处理未操作用户");
+            return;
+        }
+
+        if (!isApprovalLikeType(listenerVariable.getFlowParams())) {
+            log.info("操作非审批类（转交/委派/加签/减签），跳过处理未操作用户，taskId: {}", currTask.getId());
+        } else {
+            ccNodeListener.handleCcUsers(currTask, flowVariable);
+        }
+    }
+}

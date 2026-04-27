@@ -1,0 +1,910 @@
+import CreateGroupIcon from '@/assets/images/create_group_icon.svg';
+import CreateNormalPageIcon from '@/assets/images/create_normal_page_icon.svg';
+import CreateBpmPageIcon from '@/assets/images/create_bpm_page_icon.svg';
+import CreateWorkbenchIcon from '@/assets/images/create_workbench_icon.svg';
+import CreateScreenIcon from '@/assets/images/create_screen_icon.svg';
+import EditIcon from '@/assets/images/edit_menu_icon.svg';
+import PageManagerGuide from '@/assets/images/page_manaager_guide.svg';
+import CreateScreenModal from '@/components/CreatePageDashboardModal';
+import DeleteConfirmModal from '@/components/DeleteConfirmModal';
+import { useI18n } from '@/hooks/useI18n';
+import PreviewContainer from '@/pages/Runtime/components/preview';
+import { useAppStore } from '@/store/store_app';
+import { addParentIdToChildren } from '@/utils/menu';
+import { Button, Dropdown, Form, Input, Layout, Menu, Message, Tree } from '@arco-design/web-react';
+import { IconDown, IconEmpty, IconPlus, IconSearch } from '@arco-design/web-react/icon';
+import {
+  copyApplicationMenu,
+  createApplicationMenu,
+  CREATE_MENU_CATEGORIES,
+  CreateMenuCategoryLabelMap,
+  DashBoardCreateType,
+  deleteApplicationMenu,
+  getEntityListByApp,
+  getEntityListWithFields,
+  getPageSetId,
+  getPageSetMetaData,
+  listApplicationMenu,
+  listPageView,
+  menuSignal,
+  MenuType,
+  PageType,
+  RELATION_TYPE,
+  RootParentPage,
+  updateApplicationMenu,
+  updateApplicationMenuOrder,
+  VisibleType,
+  type ApplicationMenu,
+  type CopyApplicationMenuReq,
+  type CreateApplicationMenuReq,
+  type CreateMenuCategory,
+  type DeleteApplicationMenuReq,
+  type GetPageSetIdReq,
+  type ListApplicationMenuReq,
+  type MetadataEntityPair,
+  type UpdateApplicationMenuNameReq,
+  type UpdateApplicationMenuOrderReq,
+  type UpdateApplicationMenuVisibleReq
+} from '@onebase/app';
+import { updateApplicationMenuVisibleMobile, updateApplicationMenuVisiblePC } from '@onebase/app/src/services';
+import { getDashBoardURL, pagesRuntimeSignal, TokenManager } from '@onebase/common';
+import { EDITOR_TYPES, menuDictSignal, setMainMetaData, useAppEntityStore } from '@onebase/ui-kit';
+import { currentEditorSignal } from '@onebase/ui-kit/src/signals/current_editor';
+import { useSignals } from '@preact/signals-react/runtime';
+import { debounce } from 'lodash-es';
+import { useCallback, useEffect, useState, type FC } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ReactSVG } from 'react-svg';
+import { RELATIONSHIP_TYPE } from '../DataFactory/utils/relation';
+import CopyModal from './components/Modals/CopyModal';
+import CreateModal from './components/Modals/CreateModal';
+import RenameModal from './components/Modals/RenameModal';
+import MyMenuItem from './components/MyMenuItem';
+import TaskCenterPage from './components/TaskCenter/TaskCenterPage';
+import TaskCenterSide from './components/TaskCenter/taskTreeSide';
+import styles from './index.module.less';
+
+const TreeNode = Tree.Node;
+const MenuItem = Menu.Item;
+const Sider = Layout.Sider;
+const Content = Layout.Content;
+
+/**
+ * 树形数据节点接口
+ */
+interface TreeNode {
+  key: string;
+  value: string;
+  title: string;
+  menuType?: MenuType;
+  children?: TreeNode[];
+}
+
+interface Options {
+  label: string;
+  value: string;
+}
+
+const menuStyles = {
+  height: '32px'
+};
+
+// 创建菜单分类列表
+const createMenuItems: Array<{ category: CreateMenuCategory; icon: string }> = [
+  { category: CREATE_MENU_CATEGORIES.NORMAL_FORM, icon: CreateNormalPageIcon },
+  { category: CREATE_MENU_CATEGORIES.BPM_FORM, icon: CreateBpmPageIcon },
+  { category: CREATE_MENU_CATEGORIES.WORKBENCH, icon: CreateWorkbenchIcon },
+  { category: CREATE_MENU_CATEGORIES.SCREEN, icon: CreateScreenIcon },
+  { category: CREATE_MENU_CATEGORIES.GROUP, icon: CreateGroupIcon }
+];
+
+// 菜单分类对应的页面类型
+const pageTypeMap: Record<CreateMenuCategory, PageType | undefined> = {
+  [CREATE_MENU_CATEGORIES.NORMAL_FORM]: PageType.NORMAL,
+  [CREATE_MENU_CATEGORIES.BPM_FORM]: PageType.BPM,
+  [CREATE_MENU_CATEGORIES.WORKBENCH]: PageType.WORKBENCH,
+  [CREATE_MENU_CATEGORIES.SCREEN]: PageType.DASHBOARD,
+  [CREATE_MENU_CATEGORIES.GROUP]: undefined
+};
+
+// 菜单分类队形的菜单类型
+const menuTypeMap: Record<CreateMenuCategory, MenuType> = {
+  [CREATE_MENU_CATEGORIES.NORMAL_FORM]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.BPM_FORM]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.WORKBENCH]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.SCREEN]: MenuType.PAGE,
+  [CREATE_MENU_CATEGORIES.GROUP]: MenuType.GROUP
+};
+
+const needsEntityMap = new Set([CREATE_MENU_CATEGORIES.NORMAL_FORM, CREATE_MENU_CATEGORIES.BPM_FORM]);
+
+const PageManagerPage: FC = () => {
+  useSignals();
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
+
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const appId = searchParams.get('appId');
+
+  const dashboardType = 'dashboard';
+
+  const { tenantId } = useParams();
+  const curTenantId = TokenManager.getCurIdentifyId();
+
+  const { curAppId } = useAppStore();
+
+  const [createForm] = Form.useForm();
+  const [renameForm] = Form.useForm();
+  const [copyForm] = Form.useForm();
+  const resourceUrl = getDashBoardURL();
+  // 创建弹窗
+  const [visibleCreateForm, setVisibleCreateForm] = useState<CreateMenuCategory | ''>('');
+  // 创建大屏弹窗
+  const [visibleCreateScreenForm, setVisibleCreateScreenForm] = useState<CreateMenuCategory | ''>('');
+  // 重命名弹窗
+  const [visibleRenameForm, setVisibleRenameForm] = useState(false);
+  // 复制弹窗
+  const [visibleCopyForm, setVisibleCopyForm] = useState(false);
+
+  const [title, setTitle] = useState('');
+  const [showGuide, setShowGuide] = useState<boolean>(false);
+
+  const [treeData, setTreeData] = useState<TreeNode[]>();
+  const [entityListOptions, setEntityListOptions] = useState<Options[]>([]);
+
+  const { curMenu, setCurMenu } = menuSignal;
+  const { curPage } = pagesRuntimeSignal;
+  const [parentPageOptions, setParentPageOptions] = useState<ApplicationMenu[]>([RootParentPage]);
+
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+  const [searchResult, setSearchResult] = useState<boolean>(false); // 菜单搜索结果
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const dashboardPageType = 4;
+
+  const initTreeItemWidth = 110;
+  const cutTreeItemWidth = 25;
+
+  const { clearEditMode } = currentEditorSignal;
+  const { batchSetAppDict } = menuDictSignal;
+
+  const findFirstPage: any = (nodes: ApplicationMenu[]) =>
+    nodes.reduce((found, node) => {
+      if (found) return found;
+      if (Number(node.menuType) === MenuType.PAGE) return node;
+      if (node.id) {
+        setExpandedKeys((prev) => [...prev, node.id!]);
+      }
+      return node.children ? findFirstPage(node.children) : undefined;
+    }, undefined);
+
+  // 查找菜单及其所有父节点ID
+  const findMenuWithParents = (
+    nodes: ApplicationMenu[],
+    targetId: string,
+    parentIds: string[] = []
+  ): { node: ApplicationMenu; parentIds: string[] } | null => {
+    for (const node of nodes) {
+      if (node.id === targetId) {
+        return { node, parentIds };
+      }
+      if (node.children && node.children.length > 0 && node.id) {
+        const result = findMenuWithParents(node.children, targetId, [...parentIds, node.id]);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    setCurMenu({} as ApplicationMenu);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (curAppId !== '') {
+      // 从URL参数中读取菜单ID
+      const menuIdFromUrl = searchParams.get('menuId');
+      getMenuList(undefined, menuIdFromUrl || undefined);
+      getEntityList();
+    }
+    clearEditMode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [curAppId, searchParams.get('menuId')]);
+
+  useEffect(() => {
+    if (searchResult) return;
+    setShowGuide(treeData?.length === 0);
+  }, [treeData, searchResult]);
+
+  useEffect(() => {
+    console.log('curMenu.value: ', curMenu.value);
+    if (curMenu.value?.id && curMenu.value?.pagesetType === PageType.NORMAL) {
+      loadMainMetaData();
+    }
+  }, [curMenu.value?.id]);
+
+  const loadMainMetaData = async () => {
+    const req: GetPageSetIdReq = {
+      menuId: curMenu.value?.id
+    };
+    const pageSetId = await getPageSetId(req);
+    console.log('载入页面集对应实体信息, 页面集ID: ', pageSetId);
+
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+
+    const entityListWithFields = await getEntityListWithFields({ entityUuids: [mainMetaData] });
+    const [entityWithChildren] = entityListWithFields;
+    console.log('entityWithChildren: ', entityWithChildren);
+    setMainMetaData(entityWithChildren, setMainEntity, setSubEntities, batchSetAppDict);
+  };
+
+  // 将接口返回的菜单数据（res）转换为 Tree 组件可用的 treeData 格式
+  // TODO(mickey): showOption重构
+  const convertMenuToTreeData = (
+    menus: ApplicationMenu[],
+    maxWidth: number,
+    showOption: boolean = false,
+    style: React.CSSProperties = menuStyles
+  ): any[] => {
+    return menus.map((menu) => ({
+      key: menu.id,
+      title: (
+        <MyMenuItem
+          menuInfo={menu}
+          showOption={showOption}
+          menuID={menu.id || ''}
+          isVisiblePc={menu.isVisiblePc}
+          isVisibleMobile={menu.isVisibleMobile}
+          menuCode={menu.menuCode}
+          menuName={menu.menuName}
+          menuIcon={menu.menuIcon}
+          pagesetType={menu.pagesetType}
+          isGroup={menu.menuType == MenuType.GROUP}
+          maxWidth={maxWidth}
+          label={menu.menuName}
+          onClick={() => {
+            if (menu.menuType == MenuType.PAGE) {
+              setCurMenu(menu);
+            }
+          }}
+          triggerCreate={triggerCreate}
+          triggerRename={triggerRename}
+          triggerCopy={triggerCopy}
+          triggerHide={triggerHide}
+          triggerDelete={triggerDelete}
+          renameForm={renameForm}
+          copyForm={copyForm}
+          createForm={createForm}
+          style={style}
+        />
+      ),
+      menuType: menu.menuType,
+      props: {
+        // ✅ 显式传入 props 让 dragNode.props.menuType 能取到
+        menuType: menu.menuType
+      },
+      children: menu.children ? convertMenuToTreeData(menu.children, maxWidth - cutTreeItemWidth, showOption) : []
+    }));
+  };
+
+  const getMenuList = async (keywords?: string, menuId?: string) => {
+    const req: ListApplicationMenuReq = {
+      applicationId: curAppId,
+      name: keywords
+    };
+    const res = await listApplicationMenu(req);
+    // 为每个children元素补充parentId字段
+    const processedRes = addParentIdToChildren(res, RootParentPage.id);
+    setParentPageOptions([{ ...RootParentPage, children: processedRes }]);
+
+    const treeData = convertMenuToTreeData(res, initTreeItemWidth, true, menuStyles);
+    setTreeData(treeData);
+    if (menuId) {
+      // 查找菜单及其所有父节点
+      const menuWithParents = findMenuWithParents(res, menuId);
+      if (menuWithParents) {
+        setCurMenu(menuWithParents.node);
+        // 展开所有父节点，以便菜单可见
+        setExpandedKeys(menuWithParents.parentIds);
+        setSearchResult(false);
+      } else {
+        // 如果找不到菜单，回退到默认行为
+        if (res && res.length > 0) {
+          setCurMenu(findFirstPage(res));
+          setSearchResult(false);
+        }
+      }
+    } else if (res && res.length > 0) {
+      setCurMenu(findFirstPage(res));
+      setSearchResult(false);
+    }
+
+    if (keywords) {
+      setSearchResult(res.length === 0);
+    } else {
+      setShowGuide(res.length === 0);
+    }
+  };
+
+  const getEntityList = async () => {
+    const appId: string = curAppId;
+    const res: MetadataEntityPair[] = await getEntityListByApp(appId);
+
+    console.log('xxxx: ', res);
+    const entityOptions = res
+      .filter(
+        (entity) =>
+          // 过滤子表
+          entity.relationType == RELATION_TYPE.MASTER ||
+          entity.relationType == RELATION_TYPE.NONE ||
+          (entity.relationType === RELATION_TYPE.SLAVE &&
+            !entity.relationshipTypes?.includes(RELATIONSHIP_TYPE.SUBTABLE_ONE_TO_MANY))
+      )
+      .map((entity) => ({
+        label: entity.entityName,
+        value: entity.entityUuid
+      }));
+    setEntityListOptions(entityOptions);
+  };
+
+  const openCreateMenu = (category: CreateMenuCategory) => {
+    if (category === CREATE_MENU_CATEGORIES.SCREEN) {
+      setVisibleCreateScreenForm(category);
+    } else {
+      setVisibleCreateForm(category);
+    }
+    createForm.resetFields();
+    setTitle(CreateMenuCategoryLabelMap[category]);
+  };
+
+  const createMenuDropList = (
+    <Menu style={{ padding: '10px 5px' }}>
+      {createMenuItems.map(({ category, icon }) => (
+        <MenuItem
+          key={category}
+          onClick={() => {
+            openCreateMenu(category);
+          }}
+        >
+          <div className={styles.createItem}>
+            <ReactSVG className={styles.customSvg} src={icon} />
+            {CreateMenuCategoryLabelMap[category]}
+          </div>
+        </MenuItem>
+      ))}
+    </Menu>
+  );
+
+  const triggerRename = () => {
+    setVisibleRenameForm(true);
+    setTitle(t('createApp.rename'));
+  };
+
+  const triggerCreate = (formType: CreateMenuCategory) => {
+    openCreateMenu(formType);
+  };
+
+  const triggerCopy = () => {
+    setVisibleCopyForm(true);
+    copyForm.resetFields();
+    setTitle(t('createApp.copyPage'));
+  };
+
+  // 更新应用菜单可见性  显示/隐藏
+  const triggerHide = async (menuID: string, isVisible: number, platform: 'pc' | 'mobile') => {
+    const req: UpdateApplicationMenuVisibleReq = {
+      id: menuID,
+      visible: isVisible === VisibleType.HIDDEN ? VisibleType.SHOW : VisibleType.HIDDEN
+    };
+    const res =
+      platform === 'pc' ? await updateApplicationMenuVisiblePC(req) : await updateApplicationMenuVisibleMobile(req);
+    if (res) {
+      Message.success(`${isVisible === VisibleType.HIDDEN ? '取消隐藏' : '隐藏'}成功`);
+    }
+    getMenuList();
+  };
+
+  const triggerDelete = (menuID: string, menuName: string) => {
+    setDeleteTarget({ id: menuID, name: menuName });
+    setDeleteModalVisible(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await handleDelete(deleteTarget.id);
+    setDeleteModalVisible(false);
+  };
+
+  //页面设计新建大屏创建
+  const handleScreenCreate = async (id?: string, screenMethod?: string, iframeUrl?: string) => {
+    console.log('创建大屏参数 id、screenMethod：', id, screenMethod);
+
+    if (screenMethod === DashBoardCreateType.DashboardTemplate && !id) {
+      // 通过模板创建，模板ID不可为空
+      Message.error('请选择一个模板');
+      return;
+    } else if (screenMethod === DashBoardCreateType.DashboardLink && !id) {
+      // 关联大屏创建，关联大屏ID不可为空
+      Message.error('请选择一个大屏');
+      return;
+    } else if (screenMethod === DashBoardCreateType.DashboardIframe && !iframeUrl) {
+      // iframe 嵌入，URL 不可为空
+      Message.error('请输入 iframe URL');
+      return;
+    }
+    // 产品需求：当新建大屏且选择了模板时，更新为通过模板创建。
+    if (screenMethod === DashBoardCreateType.DashboardNew && id) {
+      screenMethod = DashBoardCreateType.DashboardTemplate;
+    }
+
+    createForm.validate(async (error) => {
+      if (error !== null) return;
+      // iframe 类型使用 PageType.IFRAME = 5，其他大屏类型使用 PageType.DASHBOARD = 4
+      const pageSetTypeValue = screenMethod === DashBoardCreateType.DashboardIframe ? PageType.IFRAME : dashboardPageType;
+      const req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentId:
+          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: pageSetTypeValue,
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: MenuType.PAGE,
+        menuIcon: createForm.getFieldValue('menuIcon'),
+        entityUuid: '',
+        createDashboardType: screenMethod,
+        dashboardId: screenMethod === DashBoardCreateType.DashboardIframe ? undefined : id,
+        iframeUrl: screenMethod === DashBoardCreateType.DashboardIframe ? iframeUrl : undefined
+      };
+      const menuResp = await createApplicationMenu(req);
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateScreenForm('');
+      getMenuList(undefined, menuResp.id);
+      // iframe 类型不需要打开大屏编辑器
+      if (screenMethod === DashBoardCreateType.DashboardIframe) {
+        return;
+      }
+      const pageSetId = await getPageSetId({
+        menuId: menuResp.id
+      });
+      const dashboardInfo = await listPageView({ pageSetId, isDev: true });
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+      if (screenMethod !== DashBoardCreateType.DashboardLink) {
+        window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${curTenantId}`, '_blank');
+      }
+    });
+  };
+
+  const handleCreate = async () => {
+    createForm.validate(async (error) => {
+      if (error !== null) return;
+      if (!visibleCreateForm) return;
+
+      const req: CreateApplicationMenuReq = {
+        applicationId: curAppId,
+        parentId:
+          createForm.getFieldValue('parentId') === RootParentPage.id ? '' : createForm.getFieldValue('parentId'),
+        pageSetType: pageTypeMap[visibleCreateForm],
+        menuName: createForm.getFieldValue('menuName'),
+        menuType: menuTypeMap[visibleCreateForm],
+        menuIcon: createForm.getFieldValue('menuIcon'),
+        entityUuid: needsEntityMap.has(visibleCreateForm) ? createForm.getFieldValue('entityUuid') : ''
+      };
+
+      if (visibleCreateForm === CREATE_MENU_CATEGORIES.WORKBENCH) {
+        req.pageType = CREATE_MENU_CATEGORIES.WORKBENCH;
+      }
+
+      const menuResp = await createApplicationMenu(req);
+
+      if (menuResp) {
+        Message.success('创建成功');
+      }
+      setVisibleCreateForm('');
+
+      getMenuList(undefined, menuResp.id);
+
+      const pageSetId = await getPageSetId({
+        menuId: menuResp.id
+      });
+
+      if (pageSetId && menuResp.menuType === MenuType.PAGE) {
+        sessionStorage.setItem(
+          'EDITOR_PAGE_INFO',
+          JSON.stringify({ id: curMenu.value?.id, name: menuResp.menuName, icon: createForm.getFieldValue('menuIcon') })
+        );
+
+        // 根据页面类型跳转到对应的编辑器
+        let editorType: string = EDITOR_TYPES.FORM_EDITOR;
+        if (visibleCreateForm === CREATE_MENU_CATEGORIES.WORKBENCH) {
+          editorType = EDITOR_TYPES.WORKBENCH_EDITOR;
+          setCurMenu({ ...menuResp, pagesetType: PageType.WORKBENCH });
+        } else {
+          editorType = EDITOR_TYPES.FORM_EDITOR;
+          setCurMenu(menuResp);
+        }
+
+        navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
+      }
+    });
+  };
+
+  const handleRename = async () => {
+    if (!renameForm.getFieldValue('menuId')) {
+      Message.error('请选择要重命名的菜单');
+      return;
+    }
+    const req: UpdateApplicationMenuNameReq = {
+      id: renameForm.getFieldValue('menuId'),
+      menuName: renameForm.getFieldValue('menuName'),
+      menuIcon: renameForm.getFieldValue('menuIcon')
+    };
+    const res = await updateApplicationMenu(req);
+    if (res) {
+      Message.success('重命名成功');
+    }
+    setVisibleRenameForm(false);
+    getMenuList();
+  };
+
+  const handleCopy = async () => {
+    if (!copyForm.getFieldValue('menuId')) {
+      Message.error('请选择要复制的菜单');
+      return;
+    }
+
+    const req: CopyApplicationMenuReq = {
+      id: copyForm.getFieldValue('menuId'),
+      menuName: copyForm.getFieldValue('menuName'),
+      parentId: copyForm.getFieldValue('parentId') === RootParentPage.id ? '' : copyForm.getFieldValue('parentId')
+    };
+
+    const res = await copyApplicationMenu(req);
+    if (res) {
+      Message.success('复制成功');
+    }
+    setVisibleCopyForm(false);
+    getMenuList();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      Message.error('请选择要删除的菜单');
+      return;
+    }
+    const req: DeleteApplicationMenuReq = {
+      id: id
+    };
+    const res = await deleteApplicationMenu(req);
+    if (res) {
+      Message.success('删除成功');
+      setCurMenu({} as ApplicationMenu);
+    }
+
+    getMenuList();
+  };
+
+  const handleEditPageSet = async (name: string, icon: string) => {
+    if (!curMenu.value?.id) {
+      Message.error('请选择菜单');
+      return;
+    }
+    console.log('name', name, 'icon', icon);
+    console.log('curMenu:', curMenu.value);
+    const req: GetPageSetIdReq = {
+      menuId: curMenu.value?.id
+    };
+    const pageSetId = await getPageSetId(req);
+    if (!pageSetId) {
+      Message.error('请先创建页面集');
+      return;
+    }
+    if (curMenu.value?.pagesetType === dashboardPageType) {
+      const dashboardInfo = await listPageView({ pageSetId, isDev: true });
+
+      const dashboardId = dashboardInfo.pages && dashboardInfo.pages.length > 0 ? dashboardInfo.pages[0].id : null;
+      window.open(`${resourceUrl}chart/home/${dashboardId}/${appId}/${dashboardType}?tenantId=${curTenantId}`, '_blank');
+    } else {
+      const editorType =
+        curPage.value?.pageSetType === PageType.WORKBENCH ? EDITOR_TYPES.WORKBENCH_EDITOR : EDITOR_TYPES.FORM_EDITOR;
+      // 把编辑页菜单数据保存起来；
+      sessionStorage.setItem('EDITOR_PAGE_INFO', JSON.stringify({ id: curMenu.value?.id, name, icon }));
+      navigate(`/onebase/${tenantId}/editor/${editorType}?pageSetId=${pageSetId}&appId=${curAppId}`);
+    }
+  };
+
+  // 菜单搜索
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      getMenuList(value);
+    }, 500),
+    [curAppId]
+  );
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
+
+  const buildMenuTree = (nodes: TreeNode[]): { id: string; children: any[] }[] =>
+    nodes.map((node) => ({
+      id: node.key,
+      children: node.children ? buildMenuTree(node.children) : []
+    }));
+
+  const findParentKey = (data: TreeNode[], childKey: string, parentKey: string | null = null): string | null => {
+    for (const item of data) {
+      if (item.key === childKey) {
+        return parentKey;
+      }
+      if (item.children) {
+        const result = findParentKey(item.children, childKey, item.key);
+        if (result) return result;
+      }
+    }
+    return null;
+  };
+
+  // 遍历工具函数
+  const loop = (
+    data: TreeNode[],
+    key: string,
+    callback: (item: TreeNode, index: number, arr: TreeNode[]) => void
+  ): boolean => {
+    return data.some((item, index, arr) => {
+      if (item.key === key) {
+        callback(item, index, arr);
+        return true;
+      }
+      if (item.children) {
+        return loop(item.children, key, callback);
+      }
+      return false;
+    });
+  };
+
+  const handleDrop = async ({ dragNode, dropNode, dropPosition }: any) => {
+    const data = [...treeData!];
+    const dragType = dragNode.props.menuType;
+    const dropType = dropNode.props.menuType;
+
+    // ✅ 规则校验：只允许 PAGE → GROUP
+    if (dropPosition === 0 && !(dragType === MenuType.PAGE && dropType === MenuType.GROUP)) {
+      console.warn('❌ 只能将页面拖入分组下');
+      return;
+    }
+    if (dropType === MenuType.PAGE && dropPosition === 0) {
+      console.warn('❌ 分组不能拖入页面');
+      return;
+    }
+
+    let dragItem: TreeNode | undefined;
+
+    // 从原位置移除
+    loop(data, dragNode.key, (item, index, arr) => {
+      arr.splice(index, 1);
+      dragItem = item;
+    });
+
+    if (!dragItem) return;
+
+    // 新的 parentId（默认 null = 根节点）
+    let newParentId: string | null = null;
+
+    if (dropPosition === 0) {
+      // 拖入节点内部
+      loop(data, dropNode.key, (item) => {
+        item.children = item.children || [];
+        item.children.push(dragItem!);
+      });
+      newParentId = dropNode.key; // ✅ 设置新父节点 id
+      setExpandedKeys([newParentId!]);
+    } else {
+      // 拖入节点前后
+      loop(data, dropNode.key, (_item, index, arr) => {
+        arr.splice(dropPosition < 0 ? index : index + 1, 0, dragItem!);
+      });
+      // 前后拖拽，父节点等于 dropNode 的父节点
+      newParentId = findParentKey(treeData!, dropNode.key);
+    }
+
+    setTreeData([...data]);
+
+    // 生成接口参数
+    const payload: UpdateApplicationMenuOrderReq = {
+      id: dragNode.key,
+      parentId: newParentId ?? '0',
+      menuTree: buildMenuTree(data)
+    };
+
+    console.debug('✅ 更新后的参数:', payload, data);
+    await updateApplicationMenuOrder(payload);
+  };
+
+  return (
+    <div className={styles.pageManagerPage}>
+      <Layout style={{ height: '100%' }}>
+        <Sider className={styles.sider} style={{ width: 220 }}>
+          <div className={styles.siderTitle}>
+            所有页面
+            <Dropdown droplist={createMenuDropList} trigger="click" position="bl">
+              <Button type="text" icon={<IconPlus />} style={{ padding: 6 }}>
+                新建
+              </Button>
+            </Dropdown>
+          </div>
+          <div className={styles.siderHeader}>
+            <div className={styles.siderHeaderInput}>
+              <Input
+                allowClear
+                suffix={<IconSearch />}
+                placeholder={t('createApp.searchPlaceHolder')}
+                onChange={debouncedSearch}
+              />
+            </div>
+          </div>
+          <TaskCenterSide
+            curMenu={curMenu}
+            setCurMenu={setCurMenu}
+            styles_tree={styles.tree}
+            curAppId={curAppId}
+            triggerHide={triggerHide}
+            setSearchResult={setSearchResult}
+            searchResult={searchResult}
+            setShowGuide={setShowGuide}
+          />
+          <Tree
+            blockNode
+            draggable
+            selectedKeys={[curMenu.value?.id!]}
+            treeData={treeData}
+            className={`menuTree ${styles.tree}`}
+            showLine={false}
+            icons={{
+              switcherIcon: <IconDown />,
+              dragIcon: null
+            }}
+            expandedKeys={expandedKeys}
+            onExpand={setExpandedKeys}
+            actionOnClick={'expand'}
+            style={{
+              width: '220px',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              padding: '4px 8px',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+            allowDrop={(info: any) => {
+              const dragNode = info.dragNode;
+              const dropNode = info.dropNode;
+              const dropPosition = info.dropPosition;
+              const dragType = dragNode?.props?.menuType;
+              const dropType = dropNode.props?.menuType;
+
+              if (dropPosition === 0) {
+                return dragType === MenuType.PAGE && dropType === MenuType.GROUP;
+              }
+              return true;
+            }}
+            onDrop={handleDrop}
+          />
+        </Sider>
+        <Content className={styles.content}>
+          {showGuide ? (
+            <div className={styles.guide}>
+              <div
+                className={styles.guideImg}
+                style={{ background: `url(${PageManagerGuide})no-repeat center / cover` }}
+              >
+                <div
+                  className={styles.guideButton}
+                  onClick={() => {
+                    openCreateMenu(CREATE_MENU_CATEGORIES.NORMAL_FORM);
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              {searchResult ? (
+                <div className={styles.contentEmpty}>
+                  <IconEmpty fontSize={56} />
+                  暂无数据
+                </div>
+              ) : (
+                <>
+                  {curMenu.value?.menuCode &&
+                    curMenu.value?.menuCode?.indexOf('TASK-') < 0 &&
+                    curMenu.value?.menuType !== MenuType.GROUP && (
+                    <>
+                      <div className={styles.contentHeader}>
+                        <div className={styles.contentTitle}>{curMenu.value?.menuName}</div>
+                        <Button
+                          className={styles.editButton}
+                          type="primary"
+                          icon={<img src={EditIcon} alt="编辑页面" />}
+                          onClick={() => handleEditPageSet(curMenu.value?.menuName, curMenu.value?.menuIcon)}
+                        >
+                          {t('createApp.editPage')}
+                        </Button>
+                      </div>
+
+                      <div className={styles.contentBody}>
+                        <PreviewContainer
+                          menuId={curMenu.value?.id}
+                          runtime={true}
+                          pagesetType={curMenu.value?.pagesetType}
+                        />
+                      </div>
+                    </>
+                  )}
+                  {curMenu?.value?.menuCode && curMenu?.value?.menuCode?.indexOf('TASK-') >= 0 && (
+                    <TaskCenterPage curMenuId={curMenu.value?.menuCode} />
+                  )}
+                </>
+              )}
+            </>
+          )}
+        </Content>
+      </Layout>
+
+      {/* 重命名弹窗 */}
+      <RenameModal
+        title={title}
+        visible={visibleRenameForm}
+        handleRename={handleRename}
+        setVisible={setVisibleRenameForm}
+        form={renameForm}
+      />
+
+      {/* 复制弹窗 */}
+      <CopyModal
+        title={title}
+        visible={visibleCopyForm}
+        handleCopy={handleCopy}
+        setVisible={setVisibleCopyForm}
+        form={copyForm}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
+      />
+
+      {/* 创建弹窗 */}
+      <CreateModal
+        title={title}
+        handleCreate={handleCreate}
+        onCancel={() => {
+          setVisibleCreateForm('');
+        }}
+        form={createForm}
+        entityListOptions={entityListOptions}
+        visibleCreateForm={visibleCreateForm}
+        initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
+      />
+      <CreateScreenModal
+        title={title}
+        type={'page'}
+        handleCreate={handleScreenCreate}
+        onCancel={() => {
+          setVisibleCreateScreenForm('');
+        }}
+        form={createForm}
+        visibleCreateForm={visibleCreateScreenForm}
+        entityListOptions={entityListOptions}
+        initValue={{ pageType: PageType.NORMAL, menuName: '', parentId: RootParentPage.id }}
+        treeData={convertMenuToTreeData(parentPageOptions, initTreeItemWidth, false, { height: '32px' })}
+      />
+      <DeleteConfirmModal
+        visible={deleteModalVisible}
+        onVisibleChange={setDeleteModalVisible}
+        onConfirm={handleDeleteConfirm}
+        title={deleteTarget ? `你确定要删除${deleteTarget.name}吗？` : '确认删除'}
+        content="删除页面将同时删除页面设计与权限配置等，且无法还原，请谨慎操作。"
+      />
+    </div>
+  );
+};
+
+export default PageManagerPage;

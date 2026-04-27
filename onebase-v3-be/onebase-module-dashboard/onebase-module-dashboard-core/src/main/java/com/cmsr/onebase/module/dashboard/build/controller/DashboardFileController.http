@@ -1,0 +1,71 @@
+## 默认环境变量配置（直接使用local环境配置）
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 327a71784fa14847867c95e2f5bab8cd
+#@tag = OneBase.local
+
+### 请求 /api/file/upload 接口 => 上传文件
+POST {{baseUrl}}/dashboard/file/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="object"; filename="example.png"
+Content-Type: image/png
+
+< ./example.png
+--WebAppBoundary--
+
+### 请求 /api/file/uploadbase64 接口 => 上传Base64字符串转图片
+POST {{baseUrl}}/dashboard/file/uploadbase64
+Content-Type: application/x-www-form-urlencoded
+
+base64str=iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==
+
+### 请求 /api/file/coverupload 接口 => 覆盖上传文件
+POST {{baseUrl}}/dashboard/file/coverupload?key=default&relativePath=images/example.png
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="object"; filename="example.png"
+Content-Type: image/png
+
+< ./example.png
+--WebAppBoundary--
+
+### 请求 /api/file/remove 接口 => 删除文件
+POST {{baseUrl}}/dashboard/file/remove
+Content-Type: application/x-www-form-urlencoded
+
+ids=1
+
+### 请求 /api/file/update 接口 => 修改文件
+POST {{baseUrl}}/dashboard/file/update?id=1
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="object"; filename="example.png"
+Content-Type: image/png
+
+< ./example.png
+--WebAppBoundary--
+
+### 请求 /api/file/getFileText 接口 => 获取文件内容
+POST {{baseUrl}}/dashboard/file/getFileText
+Content-Type: application/x-www-form-urlencoded
+
+key=default&relativePath=images/example.png
+
+### 请求 /api/file/getFileText302 接口 => 302跳转获取文件内容
+POST {{baseUrl}}/dashboard/file/getFileText302
+Content-Type: application/x-www-form-urlencoded
+
+key=default&relativePath=images/example.png
+
+### 请求 /api/file/getFileid/{id} 接口 => 根据ID获取文件信息
+GET {{baseUrl}}/dashboard/file/getFileid/1
+
+### 请求 /api/file/getFileid/302/{id} 接口 => 根据ID 302跳转到绝对地址
+GET {{baseUrl}}/dashboard/file/getFileid/302/1
+
+### 请求 /api/file/list 接口 => 分页查询文件列表
+GET {{baseUrl}}/dashboard/file/list?current=1&size=10

@@ -1,0 +1,186 @@
+@import '../../variables.module.less';
+
+.editorHeader {
+  /* 编辑器头部样式 */
+  height: var(--editor-header-height);
+  width: 100%;
+  min-width: 940px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #ffffff;
+  border-bottom: 1px solid #e8e8e8;
+
+  box-sizing: border-box;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  .left {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+
+    .myAppIcon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      margin: 0 4px 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 16px;
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    .appName {
+      color: #86909c;
+      text-align: center;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 22px;
+    }
+
+    .pageName {
+      color: #1d2129;
+      text-align: center;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 600;
+      line-height: 22px;
+
+      .editIcon {
+        width: 16px;
+        height: 16px;
+        margin-left: 4px;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+    .tabIcon {
+      img {
+        margin-right: 4px;
+        vertical-align: text-bottom;
+      }
+    }
+  }
+
+  .right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+
+    .editorStatusEditAfterPublished {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0px;
+      line-height: 32px;
+      color: rgba(255, 141, 26, 1);
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .editorStatusPublished {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0px;
+      line-height: 32px;
+      color: #6b7785;
+      white-space: nowrap;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -10px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background-color: rgb(var(--primary-6));
+        border: 1px solid rgb(var(--primary-2));
+        transform: translateY(-50%);
+      }
+    }
+
+    .editorStatusDeveloping {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0px;
+      line-height: 32px;
+      color: #6b7785;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .previewButton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+  }
+}
+.versionOption {
+  .versionStatus {
+    border-radius: 4px;
+    margin-left: 8px;
+    padding: 2px 4px;
+    font-size: 12px;
+  }
+  .designing {
+    background: #e8f5ff;
+    color: #1979ff;
+  }
+  .published {
+    background: #e8ffea;
+    color: #00b42a;
+  }
+  .history {
+    background: #e5e6eb;
+    color: #86909c;
+  }
+}
+
+.errorMsgModal {
+  :global(.pc-modal-title) {
+    text-align: left;
+  }
+  :global(.pc-modal-footer) {
+    text-align: right;
+  }
+
+  .errorMsgContainer {
+    .errorMsgTitle {
+      color: rgba(0, 0, 0, 0.6);
+      margin-bottom: 8px;
+    }
+    .errorMsgContent {
+      border-radius: 4px;
+      background: #f7f8fa;
+      color: rgba(0, 0, 0, 0.6);
+      padding: 12px 16px;
+      .errorMsgItem{
+        margin-bottom: 8px;
+      }
+      .errorMsgNodeName {
+        margin-right: 4px;
+      }
+    }
+  }
+}

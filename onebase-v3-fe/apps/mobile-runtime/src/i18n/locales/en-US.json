@@ -1,0 +1,61 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous"
+  },
+  "header": {
+    "title": "ONE BASE",
+    "profile": "Profile",
+    "tenantManagement": "Tenant Management",
+    "logout": "Logout",
+    "user": "User",
+    "theme": "Theme",
+    "lightTheme": "Light Theme",
+    "darkTheme": "Dark Theme",
+    "autoTheme": "Follow System",
+    "developing": "developing"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "username": "Username",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "accountRegistration": "Account Registration",
+    "forgotPassword": "Forgot password?",
+    "loginSuccess": "Login successful",
+    "loginFailed": "Login failed",
+    "invalidCredentials": "Invalid username or password",
+    "accountLogin": "Account Login",
+    "smsLogin": "SMS Login",
+    "userAccount": "User Account",
+    "smsCode": "SMS Code",
+    "getSmsCode": "Get Code",
+    "loginButton": "Login",
+    "loginTitle": "Welcome",
+    "loginSubtitle": "Please enter your account information",
+    "mobile": "Mobile"
+  },
+  "errors": {
+    "networkError": "Network error",
+    "serverError": "Server error",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "notFound": "Page not found",
+    "unknownError": "Unknown error"
+  },
+  "app": {
+    "searchPlaceHolder": "Search Page Or Group"
+  }
+}

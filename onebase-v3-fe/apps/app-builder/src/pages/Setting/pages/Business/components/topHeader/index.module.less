@@ -1,0 +1,41 @@
+.topHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  .createBusiness {
+    display: flex;
+    align-items: center;
+    .linkContent {
+      margin-right: 24px;
+      font-size: 12px;
+      color: #24515D;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      .linkText {
+        margin-left: 10px;
+        color: rgb(var(--primary-6));
+        margin-bottom: 0;
+        cursor: pointer;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    .copyIcon {
+      cursor: pointer;
+    }
+  }
+  .searchContent {
+    display: flex;
+    align-items: center;
+
+    .searchInput {
+      margin-right: 12px;
+      min-width: 218px;
+    }
+  }
+}

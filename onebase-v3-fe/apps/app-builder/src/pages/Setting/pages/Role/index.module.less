@@ -1,0 +1,104 @@
+@panel-background-color: #fff;
+@panel-padding: 16px;
+.rolePage {
+  height: calc(100% - 1px);
+  .pageLayout {
+    height: 100%;
+    background-color: transparent;
+  }
+  .leftPanel {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    box-shadow: none;
+    background-color: @panel-background-color;
+
+    :global(.pc-layout-sider-children) {
+      padding: @panel-padding;
+    }
+
+    .roleList {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      .deptTreeNode {
+        :global(.pc-tree-node) {
+          height: 36px;
+          padding-left: 0;
+          margin-bottom: 4px;
+
+          :global(.pc-tree-node-switcher) {
+            width: 4px;
+            height: 100%;
+            margin-right: 20px;
+            background: transparent;
+          }
+
+          &-selected {
+            background: rgb(var(--primary-6), 0.15);
+            :global(.pc-tree-node-switcher) {
+              width: 4px;
+              height: 100%;
+              margin-right: 20px;
+              background: rgb(var(--primary-6));
+            }
+          }
+          :global(.pc-tree-node-title) {
+            padding: 6px 6px 6px 0;
+
+            &:hover {
+              background-color: transparent;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .rightPanel {
+    display: flex;
+    flex-direction: column;
+    padding: @panel-padding;
+    background-color: @panel-background-color;
+    .tableHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex: 0;
+      .searchInput {
+        margin-bottom: 16px;
+      }
+      .pc-input-search {
+        margin-right: 8px;
+      }
+    }
+    .tableContainer {
+      flex: 1;
+      margin-bottom: 16px;
+      .paginationContainer {
+        margin-top: 12px;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .active {
+        color: rgb(var(--primary-6));
+      }
+      .inactive {
+        color: #8c8c8c;
+      }
+    }
+  }
+
+  .userListInput {
+    width: 220px;
+    margin-right: 12px;
+  }
+}
+
+.permissionInput {
+  width: 200px;
+  margin-right: 32px;
+  margin-bottom: 12px;
+}

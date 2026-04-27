@@ -1,0 +1,80 @@
+.createExternalModal {
+  height: 100%;
+
+  .createExternalModalHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 16px;
+  }
+
+  .createExternalModalContent {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 32px;
+    margin-top: 16px;
+    padding-bottom: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    .datasourceItem {
+      width: 20%;
+      height: 136px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(22, 24, 28, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid transparent;
+      padding: 4px;
+
+      &:hover {
+        border: 2px solid rgb(var(--primary-6));
+        box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+      }
+
+      .datasourceIcon {
+        width: 150px;
+        height: 100px;
+      }
+
+      .datasourceName {
+        margin-top: 8px;
+        padding: 0 8px;
+        width: 100%;
+        box-sizing: border-box;
+        font-weight: 400;
+        font-size: 14px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        color: #272e3b;
+      }
+    }
+  }
+}
+
+.createExternalModalFooter {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+
+  .createExternalModalFooterButtons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+  }
+}

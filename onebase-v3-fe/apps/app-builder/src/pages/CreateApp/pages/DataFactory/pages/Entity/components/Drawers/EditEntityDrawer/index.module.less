@@ -1,0 +1,97 @@
+@import '../../../../../styles/variables.less';
+
+.edit-entity-drawer {
+  .drawer-style();
+}
+
+.drawerHandleButton {
+  position: fixed !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  z-index: 1000 !important;
+  transition: @transitionSlow !important;
+  box-shadow: @boxShadowHover !important;
+  border: none !important;
+  width: 8px !important;
+  height: 48px !important;
+  .flex-center();
+  cursor: pointer;
+  background-color: @white !important;
+  color: @textColorSecondary !important;
+  border-radius: 70% 0 0 70% !important;
+
+  &:hover {
+    background-color: @textColorQuaternary !important;
+    color: @white !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-50%) scale(1.05) !important;
+  }
+
+  &.collapsed {
+    right: 0;
+  }
+
+  &.expanded {
+    right: 500px;
+  }
+}
+
+.icon {
+  transition: @transitionSlow;
+
+  &.collapsed {
+    transform: rotate(180deg);
+  }
+
+  &.expanded {
+    transform: rotate(0deg);
+  }
+}
+
+.tab-sidebar {
+  width: 40px;
+  border-right: 1px solid #e5e6eb;
+  background-color: transparent;
+  border-radius: 4px 0 0 4px;
+  position: absolute;
+  right: 500px;
+  top: 0;
+}
+
+// 标签页
+.tab-sidebar {
+  :global(.pc-tabs-header-title) {
+    padding: 0 !important;
+    width: 40px;
+    height: 91px;
+    writing-mode: vertical-lr;
+    margin-top: 0 !important;
+    background-size: contain !important;
+    background-position: center !important;
+    .flex-center() !important;
+  }
+
+  :global(.pc-tabs-header-title-text::before) {
+    display: none !important;
+  }
+
+  :global(.pc-tabs-header-title-text) {
+    z-index: 10;
+  }
+
+  :global(.pc-tabs-header-nav-vertical .pc-tabs-header-ink) {
+    display: none !important;
+  }
+}
+
+.drawer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+}

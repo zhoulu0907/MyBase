@@ -1,0 +1,32 @@
+# 公式引擎配置
+onebase:
+  formula:
+    # 是否启用公式引擎
+    enabled: true
+    # JavaScript引擎超时时间（毫秒）
+    timeout-ms: 5000
+    # 是否启用安全模式（限制JavaScript功能）
+    security-mode: true
+    # 最大公式长度
+    max-formula-length: 1024
+    # 缓存配置
+    cache:
+      # 是否启用缓存
+      enabled: true
+      # 缓存最大大小
+      max-size: 1000
+      # 缓存过期时间（分钟）
+      expire-minutes: 30
+
+# Spring缓存配置
+spring:
+  cache:
+    type: simple
+    cache-names:
+      - formulaResults
+
+# 日志配置
+logging:
+  level:
+    com.cmsr.onebase.module.formula: INFO
+    org.graalvm: WARN

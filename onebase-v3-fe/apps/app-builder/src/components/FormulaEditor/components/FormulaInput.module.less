@@ -1,0 +1,73 @@
+.formulaInput {
+  .editor {
+    border: 1px solid #e5e6eb;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    overflow: hidden;
+    
+    :global(.cm-editor) {
+      height: 200px;
+      
+      .cm-matchingBracket {
+        border-bottom: 2px solid rgb(var(--primary-6));
+        color: rgb(var(--primary-6));
+      }
+      
+      .cm-nonmatchingBracket {
+        border-bottom: 2px solid #f53f3f;
+        color: #f53f3f;
+      }
+
+      // 字段标签样式 - 绿色
+      .cm-field-tag {
+        background-color: #e8f5e8;
+        color: rgb(var(--primary-6));
+        border: 1px solid rgb(var(--primary-6));
+        border-radius: 4px;
+        padding: 2px 6px;
+        margin: 0 2px;
+        font-weight: 500;
+        display: inline-block;
+      }
+
+      // 公式文字样式 - 粉色
+      .cm-formula-text {
+        color: #f53f3f;
+        font-weight: 500;
+        background-color: rgba(245, 63, 63, 0.1);
+        padding: 1px 3px;
+        border-radius: 3px;
+      }
+    }
+  }
+
+  .actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+  }
+
+  .actionButton {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    
+    &:hover {
+      background-color: #f2f3f5;
+    }
+  }
+
+  .errorSection {
+    margin-top: 12px;
+    
+    .errorAlert {
+      margin-bottom: 8px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

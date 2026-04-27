@@ -1,0 +1,199 @@
+package com.cmsr.onebase.module.bpm.core.service.instance.predict.impl;
+
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.module.app.api.appresource.AppResourceApi;
+import com.cmsr.onebase.module.app.api.appresource.dto.AppMenuRespDTO;
+import com.cmsr.onebase.module.bpm.api.enums.ErrorCodeConstants;
+import com.cmsr.onebase.module.bpm.core.dal.database.ext.BpmFlowDefinitionRepositoryExt;
+import com.cmsr.onebase.module.bpm.core.dto.node.base.BaseNodeExtDTO;
+import com.cmsr.onebase.module.bpm.core.enums.BpmConstants;
+import com.cmsr.onebase.module.bpm.core.enums.BpmNodeTypeEnum;
+import com.cmsr.onebase.module.bpm.core.service.common.permission.BpmPermissionResolver;
+import com.cmsr.onebase.module.bpm.core.service.instance.predict.BpmPredictService;
+import com.cmsr.onebase.module.bpm.core.validator.BpmAppResourceValidator;
+import com.cmsr.onebase.module.bpm.core.vo.instance.BpmPredictReqVO;
+import com.cmsr.onebase.module.bpm.core.vo.instance.BpmPredictRespVO;
+import com.cmsr.onebase.module.system.api.user.AdminUserApi;
+import com.cmsr.onebase.module.system.api.user.dto.AdminUserRespDTO;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.dromara.warm.flow.core.entity.Definition;
+import org.dromara.warm.flow.core.entity.Node;
+import org.dromara.warm.flow.core.enums.NodeType;
+import org.dromara.warm.flow.core.enums.PublishStatus;
+import org.dromara.warm.flow.core.enums.SkipType;
+import org.dromara.warm.flow.core.service.NodeService;
+import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+
+/**
+ * 流程预测服务实现类
+ *
+ * @author liyang
+ * @date 2025-11-21
+ */
+@Slf4j
+@Service
+public class BpmPredictServiceImpl implements BpmPredictService {
+    @Resource
+    private BpmFlowDefinitionRepositoryExt defExtService;
+
+    @Resource
+    private NodeService nodeService;
+
+    @Resource
+    private BpmPermissionResolver permissionResolver;
+
+    @Resource
+    private AdminUserApi adminUserApi;
+
+    @Resource
+    private AppResourceApi appResourceApi;
+
+    @Resource
+    private BpmAppResourceValidator bpmAppResourceValidator;
+
+    @Override
+    public List<BpmPredictRespVO.NodeInfo> flowPredict(BpmPredictReqVO reqVO) {
+        String businessUuid = reqVO.getBusinessUuid();
+        Long loginUserId = WebFrameworkUtils.getLoginUserId();
+        List<BpmPredictRespVO.NodeInfo> nodes = new ArrayList<>();
+
+        Long applicationId = ApplicationManager.getApplicationId();
+
+        if (applicationId == null) {
+            throw exception(ErrorCodeConstants.MISSING_APPLICATION_ID);
+        }
+
+        // 校验菜单
+        AppMenuRespDTO appMenuRespDTO = appResourceApi.getAppMenuByUuidAndAppId(businessUuid, applicationId);
+        bpmAppResourceValidator.validateMenuAndPageset(appMenuRespDTO, applicationId);
+
+        String menuUuid = appMenuRespDTO.getMenuUuid();
+
+        Definition definition = defExtService.getByFormPathAndStatus(menuUuid, PublishStatus.PUBLISHED.getKey());
+        if (definition == null) {
+            log.error(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS.getMsg());
+            throw exception(ErrorCodeConstants.PUBLISHED_FLOW_NOT_EXISTS);
+        }
+
+        Node startNode = nodeService.getStartNode(definition.getId());
+
+        if (startNode == null) {
+            log.error("流程定义缺少开始节点");
+            throw exception(ErrorCodeConstants.FLOW_NODE_NOT_EXISTS.getCode(), "获取开始节点失败");
+        }
+
+        Node currentNode = startNode;
+        Set<Long> allUserIds = new HashSet<>();
+
+        // 从请求中获取流程变量（用于条件分支判断），包装成 predict_data 结构避免冲突
+        Map<String, Object> variable = new HashMap<>();
+        if (reqVO.getEntity() != null) {
+            variable.put("predictEntityData", reqVO.getEntity().getData());
+        }
+
+        while (true) {
+            // 获取下一节点列表，支持条件分支和并行网关
+            List<Node> nextNodes = nodeService.getNextNodeList(definition.getId(), currentNode.getNodeCode(), null,
+                    SkipType.PASS.getKey(), variable);
+
+            if (CollectionUtils.isEmpty(nextNodes)) {
+                // 找不到下一个节点，结束
+                log.warn("没找到下一个节点");
+                break;
+            }
+
+            // 并行网关可能返回多个，条件分支只会返回一个；预测场景取第一个继续
+            Node nextNode = nextNodes.get(0);
+
+            if (NodeType.isEnd(nextNode.getNodeType())) {
+                break;
+            }
+
+            currentNode = nextNode;
+
+            // 设置预测节点信息
+            BpmPredictRespVO.NodeInfo nodeInfo = new BpmPredictRespVO.NodeInfo();
+            nodeInfo.setHandlers(new ArrayList<>());
+            nodeInfo.setNodeCode(nextNode.getNodeCode());
+            nodeInfo.setNodeName(nextNode.getNodeName());
+
+            // 设置节点信息
+            BaseNodeExtDTO nodeExtDTO = JsonUtils.parseObject(nextNode.getExt(), BaseNodeExtDTO.class);
+
+            // 获取业务节点类型
+            String bizNodeType = nodeExtDTO.getNodeType();
+            Set<String> handlerIds = new HashSet<>();
+
+            if (Objects.equals(bizNodeType, BpmNodeTypeEnum.INITIATION.getCode())) {
+                // 发起节点的处理人是当前登录用户
+                handlerIds.add(String.valueOf(loginUserId));
+            } else if (Objects.equals(bizNodeType, BpmNodeTypeEnum.APPROVER.getCode())) {
+                // 解析权限标志
+                Set<String> approverUserIds = permissionResolver.resolveUserIds(currentNode.getPermissionFlag(), BpmConstants.MAX_NODE_APPROVER_USERS);
+
+                if (CollectionUtils.isNotEmpty(approverUserIds)) {
+                    handlerIds.addAll(approverUserIds);
+                }
+            } else if (Objects.equals(bizNodeType, BpmNodeTypeEnum.CC.getCode())) {
+                // 解析权限标志
+                Set<String> ccUserIds = permissionResolver.resolveUserIds(currentNode.getPermissionFlag(), BpmConstants.MAX_NODE_CC_USERS);
+
+                if (CollectionUtils.isNotEmpty(ccUserIds)) {
+                    handlerIds.addAll(ccUserIds);
+                }
+            } else {
+                // todo: 支持更多类型的节点
+                log.warn("未知节点类型，bizNodeType: {}", bizNodeType);
+                continue;
+            }
+
+            allUserIds.addAll(handlerIds.stream().map(Long::valueOf).collect(Collectors.toSet()));
+
+            for (String userId : handlerIds) {
+                BpmPredictRespVO.HandlerInfo handlerInfo = new BpmPredictRespVO.HandlerInfo();
+                handlerInfo.setHandlerId(userId);
+                nodeInfo.getHandlers().add(handlerInfo);
+            }
+
+            nodes.add(nodeInfo);
+        }
+
+        // 获取用户的名称和头像
+        CommonResult<List<AdminUserRespDTO>> userResult = adminUserApi.getUserList(allUserIds);
+
+        if (userResult.isSuccess()) {
+            // 构建用户ID到用户信息的映射（key 使用 String）
+            Map<String, AdminUserRespDTO> userMap = userResult.getData().stream()
+                    .collect(Collectors.toMap(user -> String.valueOf(user.getId()), v -> v));
+
+            for (BpmPredictRespVO.NodeInfo node : nodes) {
+                for (BpmPredictRespVO.HandlerInfo handler : node.getHandlers()) {
+                    AdminUserRespDTO user = userMap.get(handler.getHandlerId());
+                    if (user != null) {
+                        handler.setHandlerName(user.getNickname());
+                        handler.setAvatar(user.getAvatar());
+                    } else {
+                        // todo：处理用户不存在的情况，名称先设置成 "-"
+                        handler.setHandlerName("-");
+                        log.warn("用户不存在，userId: {}", handler.getHandlerId());
+                    }
+                }
+            }
+        } else {
+            log.warn("获取用户信息失败，userIds: {}", allUserIds);
+            throw exception(ErrorCodeConstants.USER_API_CALL_FAILED);
+        }
+
+        return nodes;
+    }
+}

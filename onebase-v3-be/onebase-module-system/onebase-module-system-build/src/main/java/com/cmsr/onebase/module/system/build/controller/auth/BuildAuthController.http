@@ -1,0 +1,100 @@
+## 默认环境变量配置（直接使用local环境配置）
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 登录成功后会自动更新token到环境变量中
+
+### 超管登录 => 成功
+POST {{baseUrl}}/system/auth/tenant-login
+Content-Type: application/json
+X-Tenant-Id: 184717008866115584
+
+{"username":"zhuchunhui","password":"a1495fcfc6eeed115ff8e73aad07e7c2c223b207f8dd6f240ae80dc61ccc0180af24af5e99e81988699488cad581bb1dd57e8c1f45966e321d87fe3098d55641d8ec87f30b065ff72b1d1c5c574bb93fa7deebda4b56e015af2c94e1906dda853bcd767464ea296f5ecd89b66aa8f6","captchaVerification":"GSjRjRGx9ntfsGkLLaPtInfuB+hcDREbT9fKKNkSGl923GpAJfCQRIJgbXbuJteCk94rvCI93Bczj1kmBhGoB0etQe4MoEwSS0PzfzJZg1Q=","deviceId":"60c78cdd38ca3836b7176be580f57e4c"}
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
+### 请求 /login 接口 => 成功
+POST {{baseUrl}}/system/auth/tenant-login
+Content-Type: application/json
+X-Tenant-Id: 158088726951460864
+tag: {{tag}}
+
+{"username":"gaoguoqing","password":"ae61b79d21e870717365d944806e340e36f8480f5ac095c7d3c2afe67ad1dc4fa420b316383f3c8cd43e94a47fc7c752fd51e44b4637b9ce658653761fbc9335627562b18b4cbe89dc13d9b005ca660f87ebc9e8ff6dcd12682fea75ed38e6a58dadd7e95f830dc78580ca48be544e","captchaVerification":"n89lvlHjSOsQQ5kGXjNNtdnkfPnK2Y3YbPwvAEXoVyL0TqzrDumdg8MONVs+z5VaSPf4ni6QKFhhx0GcaXBF4pWVx9hsSsBZ8mysqU8u45E=",
+  "deviceId":666}
+
+
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
+### 请求 /get-permission-info 接口 => 成功
+GET {{baseUrl}}/system/auth/get-permission-info
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{adminTenantId}}
+timestamp:1765293651000
+nonce:1765293314000
+sign:888
+
+### 请求 /get-permission-info 接口+code => 成功
+GET {{baseUrl}}/system/auth/get-permission-info?code=tenant
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{adminTenantId}}
+
+
+### 请求 /reset-password 接口 => 失败
+POST {{baseUrl}}/system/auth/reset-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+X-Tenant-Id: {{adminTenantId}}
+tag: {{tag}}
+
+{
+  "userId": "544417214451814400",
+  "password": "admin125"
+}
+
+
+
+### 所租户login 接口 => 成功
+POST {{baseUrl}}/system/auth/login
+Content-Type: application/json
+tenant-id: 140488242990448640
+tag: {{tag}}
+
+{
+  "username": "test003",
+  "password": "AdminChina2025!"
+}
+
+> {%
+    // 登录成功后自动更新token到环境变量
+    if (response.status === 200) {
+        const responseData = response.body;
+        if (responseData.code === 0 && responseData.data && responseData.data.accessToken) {
+            client.global.set("token", responseData.data.accessToken);
+            console.log("Token已更新: " + responseData.data.accessToken);
+        }
+    }
+%}
+
+### 请求 /logout 接口 => 成功
+POST {{baseUrl}}/system/auth/logout
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+

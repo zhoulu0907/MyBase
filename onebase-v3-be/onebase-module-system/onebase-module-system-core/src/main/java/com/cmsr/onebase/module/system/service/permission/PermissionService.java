@@ -1,0 +1,223 @@
+package com.cmsr.onebase.module.system.service.permission;
+
+import com.cmsr.onebase.framework.common.biz.system.permission.dto.DeptDataPermissionRespDTO;
+import com.cmsr.onebase.module.system.dal.dataobject.permission.UserRoleDO;
+import com.cmsr.onebase.module.system.vo.auth.AuthPermissionInfoRespVO;
+import com.cmsr.onebase.module.system.vo.permission.PermissionMenuRespVO;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import static java.util.Collections.singleton;
+
+/**
+ * 权限 Service 接口
+ * <p>
+ * 提供用户-角色、角色-菜单、角色-部门的关联权限处理
+ *
+ */
+public interface PermissionService {
+    /**
+     * 判断用户是否是平台管理员
+     *
+     * @param id 用户编号
+     * @return 是否是平台管理员
+     */
+    boolean isPlatformSuperAdmin(Long id);
+    /**
+     * 判断是否有权限，任一一个即可
+     *
+     * @param userId      用户编号
+     * @param permissions 权限
+     * @return 是否
+     */
+    boolean hasAnyPermissions(Long userId, String... permissions);
+
+    /**
+     * 判断是否有角色，任一一个即可
+     *
+     * @param roles 角色数组
+     * @return 是否
+     */
+    boolean hasAnyRoles(Long userId, String... roles);
+
+    // ========== 角色-菜单的相关方法  ==========
+
+    /**
+     * 设置角色菜单
+     *
+     * @param roleId  角色编号
+     * @param menuIds 菜单编号集合
+     */
+    void assignRoleMenu(Long roleId, Set<Long> menuIds);
+
+    /**
+     * 处理角色删除时，删除关联授权数据
+     *
+     * @param roleId 角色编号
+     */
+    void processRoleDeleted(Long roleId);
+
+    /**
+     * 处理角色删除时，批量删除关联授权数据
+     *
+     * @param roleIds 角色编号
+     */
+    void processRolesDeleted(Collection<Long> roleIds);
+
+    /**
+     * 处理菜单删除时，删除关联授权数据
+     *
+     * @param menuId 菜单编号
+     */
+    void processMenuDeleted(Long menuId);
+
+    /**
+     * 获得角色拥有的菜单编号集合
+     *
+     * @param roleId 角色编号
+     * @return 菜单编号集合
+     */
+    default Set<Long> getRoleMenuListByRoleId(Long roleId) {
+        return getRoleMenuListByRoleId(singleton(roleId));
+    }
+
+    /**
+     * 获得角色们拥有的菜单编号集合
+     *
+     * @param roleIds 角色编号数组
+     * @return 菜单编号集合
+     */
+    Set<Long> getRoleMenuListByRoleId(Collection<Long> roleIds);
+
+    Set<Long> getAllCorpActiveMenuIds();
+
+    /**
+     * 获得所有激活的菜单编号集合
+     *
+     * @return 菜单编号集合
+     */
+    Set<Long> getAllValidActiveMenuIds();
+
+    /**
+     * 获得拥有指定菜单的角色编号数组，从缓存中获取
+     *
+     * @param menuId 菜单编号
+     * @return 角色编号数组
+     */
+    Set<Long> getMenuRoleIdListByMenuIdFromCache(Long menuId);
+
+    /**
+     * 根据菜单ID集合获取菜单详细信息列表
+     *
+     * @param menuIds 菜单ID集合
+     * @return 菜单详细信息列表
+     */
+    List<PermissionMenuRespVO> getMenuDetailListByIds(Set<Long> menuIds);
+
+    // ========== 用户-角色的相关方法  ==========
+
+    /**
+     * 设置用户角色
+     *
+     * @param userId  角色编号
+     * @param roleIds 角色编号集合
+     */
+    void assignUserRoles(Long userId, Set<Long> roleIds);
+
+    /**
+     * 处理用户删除时，删除关联授权数据
+     *
+     * @param userId 用户编号
+     */
+    void processUserDeleted(Long userId);
+
+    /**
+     * 获得拥有多个角色的用户编号集合
+     *
+     * @param roleIds 角色编号集合
+     * @return 用户编号集合
+     */
+    Set<Long> getUserIdsListByRoleIds(Collection<Long> roleIds);
+
+    /**
+     * 获得用户拥有的角色编号集合
+     *
+     * @param userId 用户编号
+     * @return 角色编号集合
+     */
+    Set<Long> getRoleIdsListByUserId(Long userId);
+
+    /**
+     * 获得用户拥有的角色编号集合，从缓存中获取
+     *
+     * @param userId 用户编号
+     * @return 角色编号集合
+     */
+    Set<Long> getUserRoleIdListByUserIdFromCache(Long userId);
+
+    // ========== 用户-部门的相关方法  ==========
+
+    /**
+     * 设置角色的数据权限
+     *
+     * @param roleId           角色编号
+     * @param dataScope        数据范围
+     * @param dataScopeDeptIds 部门编号数组
+     */
+    void assignRoleDataScope(Long roleId, Integer dataScope, Set<Long> dataScopeDeptIds);
+
+    /**
+     * 获得登陆用户的部门数据权限
+     *
+     * @param userId 用户编号
+     * @return 部门数据权限
+     */
+    DeptDataPermissionRespDTO getDeptDataPermission(Long userId);
+
+    /**
+     * 为角色分配用户（全量分配）
+     *
+     * @param roleId 角色编号
+     * @param userIds 用户编号列表
+     * @return 变动影响的行数
+     */
+    long addRoleUsers(Long roleId, Set<Long> userIds);
+
+    /**
+     * 从角色中移除用户
+     *
+     * @param roleId  角色编号
+     * @param userIds 用户编号列表
+     * @return 删除的行数
+     */
+    boolean deleteRoleUsers(Long roleId, Set<Long> userIds);
+
+    UserRoleDO getUserRoleByUserAndRoleId(Long userId, Long roleId);
+
+    /**
+     * 为角色分配菜单
+     *
+     * @param roleId 角色编号
+     * @param menuIds 菜单编号列表
+     * @return 变动影响的行数
+     */
+    long addRoleMenus(Long roleId, Set<Long> menuIds);
+
+    /**
+     * 从角色中移除菜单
+     *
+     * @param roleId 角色编号
+     * @param menuIds 菜单编号列表
+     * @return 删除的行数
+     */
+    long deleteRoleMenus(Long roleId, Set<Long> menuIds);
+    /**
+     * 获取权限
+     *
+     * @param code 场景编码
+     * @return  AuthPermissionInfoRespVO
+     */
+    AuthPermissionInfoRespVO getPermissionInfo(String code);
+}

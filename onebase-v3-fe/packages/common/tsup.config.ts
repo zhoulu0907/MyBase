@@ -1,0 +1,17 @@
+
+import { defineConfig } from 'tsup';
+
+export default defineConfig(()=>{
+    return {
+        entry: ['src/index.ts'],
+        outDir: 'dist',
+        format: 'esm',
+        dts: true,
+        splitting: true,
+        sourcemap: true,
+        clean: true,
+        loader: {
+          '.css': 'copy',
+        },
+      }
+});

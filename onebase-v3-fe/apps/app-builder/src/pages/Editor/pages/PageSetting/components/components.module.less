@@ -1,0 +1,197 @@
+.settingsPage {
+  padding: 20px;
+}
+
+.section {
+  margin-bottom: 30px;
+}
+
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form {
+  max-width: 600px;
+}
+
+.defaultTitleInfo {
+  margin-top: 10px;
+  background-color: #F2F3F5;
+  padding: 4px 12px;
+  border-radius: 4px;
+  color: #A7AFB7;
+}
+
+.defaultTitleInfo p {
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.defaultTitleInfo p:last-child {
+  margin-bottom: 0;
+}
+
+.title {
+  margin-right: 10px;
+}
+
+.label {
+  background-color: #E8FFFE;
+  color: rgb(var(--primary-6));
+  padding: 2px 8px;
+  border-radius: 2px;
+  margin-right: 4px;
+}
+
+.customTitle {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.customTitle textarea {
+  resize: none;
+}
+
+.textareaWrapper {
+  position: relative;
+}
+
+.fieldTags {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px;
+  pointer-events: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.fieldSelector {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  margin-top: 4px;
+  width: 300px;
+}
+
+.fieldSelector .arco-list-item {
+  cursor: pointer;
+  padding: 8px;
+}
+
+.fieldSelector .arco-list-item:hover {
+  background-color: #f5f5f5;
+}
+
+.fieldSelector :global(.pc-list) {
+  border: none;
+}
+
+.fieldSelector :global(.pc-list-item) {
+  border-bottom: none;
+}
+
+.fieldSelector :global(.pc-list-item:hover) {
+  background-color: var(--color-fill-2);
+  cursor: pointer;
+}
+
+.fieldItemContent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tagInputWrapper {
+  position: relative;
+  width: 100%;
+  height: 100px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  background: white;
+  transition: all 0.2s;
+}
+
+.tagInputWrapper :global(.cm-editor.cm-focused) {
+  border-color: rgb(var(--primary-6));
+  box-shadow: 0 0 0 1px rgba(var(--primary-6), 1);
+}
+
+.tagInputWrapper :global(.cm-scroller) {
+  overflow: auto;
+}
+
+.tagInputWrapper :global(.cm-line) {
+  padding: 0;
+  min-height: 32px;
+  line-height: 32px;
+}
+
+.tagInputContent {
+  min-height: 80px;
+  outline: none;
+}
+
+.tagInputContent:empty::before {
+  content: attr(data-placeholder);
+  color: #999;
+  pointer-events: none;
+}
+
+.tagInputContent:focus {
+  outline: none;
+}
+
+.editor {
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+.tagItem {
+  background-color: #e8fffe;
+  color: rgb(var(--primary-6));
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.inputTag {
+  margin: 0;
+}
+
+.tagInput {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  padding: 4px 0;
+  min-width: 100px;
+  flex: 1;
+  background: transparent;
+}
+
+.tagInput:focus {
+  outline: none;
+}
+
+.buttonWrapper {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}

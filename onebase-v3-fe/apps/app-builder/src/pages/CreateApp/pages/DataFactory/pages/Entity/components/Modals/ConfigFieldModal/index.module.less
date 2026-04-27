@@ -1,0 +1,431 @@
+@import '../../../../../styles/variables.less';
+
+/* 字段配置列表 */
+.fieldConfigContainer {
+  .fieldConfigTable {
+    margin-bottom: 16px;
+
+    .pc-table-tbody .pc-table-tr {
+      cursor: pointer;
+
+      &.systemFieldRow {
+        background-color: #f5f5f5;
+
+        .systemField {
+          color: #999;
+          font-style: italic;
+        }
+      }
+
+      &.customFieldRow {
+        &:hover {
+          background-color: #f0f9ff;
+        }
+      }
+    }
+
+    td {
+      padding: 6px 0 !important;
+    }
+  }
+
+  .requiredDot {
+    color: rgb(var(--danger-5));
+    margin-right: 2px;
+  }
+
+  .dragHandle {
+    cursor: move;
+    color: #999;
+
+    &:hover {
+      color: #666;
+    }
+  }
+
+  // 拖拽时的样式
+  .sortableHelper {
+    display: table;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    opacity: 0.9;
+
+    tr {
+      display: table-row;
+    }
+
+    td {
+      display: table-cell;
+      padding: 8px 12px;
+      border-right: 1px solid #e5e5e5;
+    }
+  }
+
+  .addFieldSection {
+    text-align: center;
+    padding: 16px 0;
+
+    .addFieldButton {
+      width: 100%;
+      height: 40px;
+      border-style: dashed;
+      border-color: #d9d9d9;
+      color: #666;
+
+      &:hover {
+        border-color: @primaryColor;
+        color: @primaryColor;
+      }
+    }
+  }
+}
+
+/* 字段配置弹窗内容 */
+.fieldConfigPopover {
+  padding: 0;
+  min-width: 300px;
+  width: 100%;
+
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  p {
+    margin: 0;
+    color: #666;
+    font-size: 12px;
+  }
+}
+
+/* 字段表单项样式 */
+.fieldFormItem {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  min-height: 52px;
+  margin-bottom: 0;
+  .pc-form-item-wrapper > .pc-form-message {
+    white-space: nowrap;
+  }
+}
+
+/* 字段类型配置组件样式 */
+.fieldTypeConfig {
+  width: 318px;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .optionsContainer {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .optionItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+
+    .optionInput {
+      width: 278px !important;
+      // flex: 1;
+    }
+
+    .deleteBtn {
+      color: #ff4d4f;
+
+      &:hover {
+        background-color: #fff2f0;
+      }
+    }
+  }
+
+  .addOptionBtn {
+    width: 110px;
+    margin-top: 8px;
+    border-style: dashed;
+    border-color: #d9d9d9;
+    color: #666;
+
+    &:hover {
+      border-color: @primaryColor;
+      color: @primaryColor;
+    }
+  }
+
+  .selectDictBtn {
+    width: 100%;
+  }
+
+  // 字典选择相关样式
+  .dictSelectWrapper {
+    margin-bottom: 6px;
+
+    .dictNameInput {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .editIcon {
+      color: #999;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  }
+
+  // 字典选项列表样式
+  .dictOptionsList {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-fill-2);
+    border-radius: 4px;
+    padding: 4px 12px;
+    max-height: 154px;
+    overflow-y: auto;
+
+    .dictOptionItem {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .optionDot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+    }
+
+    .moreButtonWrapper {
+      margin-top: 4px;
+
+      .moreButton {
+        padding: 0;
+        height: auto;
+      }
+    }
+  }
+
+  .ruleContent {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    .dragHandle {
+      cursor: move;
+      color: #999;
+    }
+
+    .dragHandle:hover {
+      color: #666;
+    }
+
+    .ruleLabel {
+      min-width: 65px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .ruleInput {
+      // flex: 1;
+      width: 186px;
+    }
+
+    .editBtn {
+      color: #999;
+      cursor: pointer;
+    }
+
+    .ruleActionBtn {
+      color: #ff4d4f;
+
+      &:hover {
+        background-color: #fff2f0;
+      }
+    }
+  }
+
+  .addRuleDropdown {
+    width: 100%;
+    margin-top: 16px;
+
+    .addRuleBtn {
+      .addOptionBtn;
+    }
+  }
+}
+
+.ruleConfigItems {
+  max-height: 132px;
+  overflow-y: auto;
+}
+
+.fieldTypeConfigFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* 字段约束配置样式 */
+.fieldConstraintConfig {
+  width: 100%;
+
+  h4 {
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .fieldConstraintForm {
+    max-height: 196px;
+    overflow-y: auto;
+  }
+
+  .constraintSection {
+    margin-bottom: 20px;
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    background-color: #fafafa;
+
+    .constraintHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      font-weight: 500;
+      color: #333;
+
+      span {
+        width: 100px;
+      }
+    }
+
+    .constraintContent {
+      .constraintRow {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+
+        label {
+          width: 90px;
+          margin-right: 12px;
+          font-size: 14px;
+          color: #333;
+
+          &.requiredLabel {
+            color: #ff4d4f;
+          }
+        }
+      }
+    }
+  }
+
+  .fieldConstraintFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e5e5;
+  }
+}
+
+/* 自动编号配置弹窗样式 */
+.autoNumberConfigForm {
+  padding: 16px 0;
+
+  .checkboxWithHelp {
+    padding-left: 92px;
+    box-sizing: border-box;
+    margin-top: -16px;
+  }
+
+  .helpIcon {
+    margin-left: 8px;
+    color: #999;
+    cursor: help;
+  }
+
+  .pc-radio-group {
+    .pc-radio {
+      margin-right: 24px;
+    }
+  }
+
+  .pc-select {
+    width: 100%;
+  }
+
+  .digitsSection,
+  .startValueSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .checkboxWithHelp {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .helpIcon {
+        color: #999;
+        cursor: help;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+.ruleInputError {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+// 约束状态样式
+.constraintStatus {
+  display: flex;
+  align-items: center;
+
+  .constraintInfo {
+    flex: 1;
+    font-size: 12px;
+    line-height: 1.4;
+
+    div {
+      margin-bottom: 2px;
+      color: #666;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .editConstraintBtn {
+    padding: 2px 6px;
+    height: 24px;
+    font-size: 12px;
+  }
+}
+
+.regexText {
+  color: #4E5969;
+  margin-left: 8px;
+}

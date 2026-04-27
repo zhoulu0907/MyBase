@@ -1,0 +1,66 @@
+package com.cmsr.onebase.module.bpm.api.datamanager;
+
+import io.swagger.v3.oas.annotations.Operation;
+
+/**
+ *
+ * 数据管理API
+ *
+ * @author liyang
+ * @date 2025-12-08
+ */
+public interface BpmDataManager {
+    /**
+     *  备份运行态数据为历史版本
+     *  实现备份逻辑 执行update动作。
+     *  1、update：把varsionTag为1的数据update为新值（参数`versionTag`）
+     *  @param applicationId
+     *  @param versionTag
+     */
+    void moveRuntimeToHistory(Long applicationId, Long versionTag);
+
+    /**
+     *  编辑态数据变成运行态数据
+     *  执行select 和 insert 动作。
+     *   1、select： varsionTag为0的数据
+     *   2、insert：把第一步查询出来的数据插入为varsionTag为1
+     *   @param applicationId
+     *
+      */
+    void copyEditToRuntime(Long applicationId);
+
+    /**
+     *  删除历史版本数据
+     *  执行delete动作。
+     *  1、delete：删除varsionTag为参数`versionTag`的数据
+     *  @param applicationId
+     *  @param versionTag
+     */
+    void removeApplicationVersion(Long applicationId, Long versionTag);
+
+    /**
+     *  删除运行态数据
+     *  执行delete动作。
+     *  1、delete：删除varsionTag为1的数据
+     *  @param applicationId
+     */
+    void removeApplication(Long applicationId);
+
+    /**
+     * TODO(liyang): 实现导入导出接口
+     * */
+
+    /**
+     *  导出数据
+     *  @param applicationId
+     *  @param versionTag
+     */
+    Object exportApplication(Long applicationId, Long versionTag);
+
+    /**
+     *  导入数据
+     *  @param newApplicationId
+     *  @param bpmConfig
+     */
+    void importApplication(Long newApplicationId, Long tenantId, Long versionTag, Object bpmConfig);
+}

@@ -1,0 +1,130 @@
+server:
+  port: 48080
+
+--- #################### 数据库相关配置 ####################
+spring:
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.ai.autoconfigure.dashscope.DashScopeAutoConfiguration
+  ai:
+    openai:
+      api-key: placeholder
+      base-url: https://api.openai.com
+  # 数据源配置项
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3?ssl=false&connectTimeout=30&socketTimeout=30
+    username: postgres
+    password: onebase@2025
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 20
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://10.0.104.38:6379"
+          subscriptionConnectionMinimumIdleSize: 1
+          subscriptionConnectionPoolSize: 5
+          connectionMinimumIdleSize: 2
+          connectionPoolSize: 5
+          database: 0
+
+--- #################### 服务保障相关配置 ####################
+# Lock4j 配置项
+lock4j:
+  acquire-timeout: 3000 # 获取分布式锁超时时间，默认为 3000 毫秒
+  expire: 30000 # 分布式锁的超时时间，默认为 30 毫秒
+
+debug: false
+
+--- #################### OneBase相关配置 ####################
+
+# OneBase配置项，设置当前项目所有自定义的配置
+onebase:
+  # 脱敏配置 - 配置文件优先模式
+  desensitize:
+    # 需要脱敏的字段（逗号分隔），可选值：mobile,email,nickname,username
+    fields: mobile,email,nickname,username
+    # 是否启用配置文件优先模式，默认true
+    config-first: true
+  plugin:
+    enabled: false # 编辑态(onebase-server)禁用插件系统，避免加载 plugins 目录的插件
+    plugins-dir: /opt/plugins # 插件目录路径
+  captcha:
+    enable: false # 本地环境，暂时关闭图片验证码，方便登录等接口的测试；
+  platform-tenant:
+    enable-create-app: true # 测试环境，暂时允许平台租户创建应用，方便登录接口测试；
+  security:
+    mock-enable: true
+    mock-secret: inner-
+    login-user-header-enable: true
+  ai:
+    bridge:
+      enabled: true
+      sm3-key: ONEBASE_AI_BRIDGE_SM3_KEY
+      proxy-base-url: http://10.0.104.69:16000/obai/
+      path-patterns:
+        - /admin-api/**
+        - /platform/**
+  access-log: # 访问日志的配置项
+    enable: false
+  web:
+    return-exception-stack-trace: true # 本地开发：接口错误时返回堆栈，便于调试
+  scheduler:
+    address: http://10.0.104.33:12345/dolphinscheduler
+    token: 85806d2d33502cef3036fb30b320e5f5
+    env: 154612656767296
+    flow-project: 154702155517248
+    flow-url: http://10.0.104.41:24476/runtime/flow/remote-call/trigger
+    etl-project: 155572154738048
+    tenant: root
+  flink:
+    address: http://10.0.104.41:30692
+#    address: http://localhost:48082
+  auth:
+    tiangong:
+      tenant-code: tenant_tiangong
+      client-id: onebase
+      client-secret: onebasekey
+      access-token-url: https://sso.sit.artifex-cmcc.com.cn/api/auth/oauth2/token
+      user-info-url: https://sso.sit.artifex-cmcc.com.cn/api/portal/oauth2/userinfo
+      redirect-uri: http://s25029301301.sit.internal.virtueit.net:81/v1-snapshot/onebaseserver/admin-api/system/auth/tiangong-login
+      scope: server
+      device-id: tianGong
+  lingji-sso:
+    enabled: true
+    source-id: "5570132830"
+    source-key: "JhxsQ3whI26YTMvt"
+    tenant-website: "http://onebase.4c-uat.hq.cmcc:20011/appbuilder/"
+    user-info-url: "http://rdcloud.4c-uat.hq.cmcc/moss/web/auth/v1/user/oauth/userInfo"
+    tenant-detail-url: "http://rdcloud.4c-uat.hq.cmcc/moss/manage/openapi/tenant/detail"
+    http-debug-log-enabled: true
+justauth:
+  enabled: true
+  cache:
+    type: REDIS
+    prefix: 'social_auth_state:' # 缓存前缀，目前只对 Redis 缓存生效，默认 JUSTAUTH::STATE::
+    timeout: 24h # 超时时长，目前只对 Redis 缓存生效，默认 3 分钟
+
+liteflow:
+  enable: false
+  version-tag: 0
+  js-server-address: http://10.0.104.41:28392
+
+# Flow流程跟踪配置
+flow:
+  trace:
+    # 设置为需要跟踪的流程ID后，该流程的所有详细日志都会输出
+    # 设置为 0 或留空则不进行特定流程跟踪
+    process-id: 195502410512138240
+
+# Goview配置 开发环境特定的文件存储配置
+v2:
+  xnljmap:
+    oss: file:/data/backend/fileserver_ft/
+  fileurl: /data/backend/fileserver_ft
+  httpurl: http://10.0.104.38:8083/

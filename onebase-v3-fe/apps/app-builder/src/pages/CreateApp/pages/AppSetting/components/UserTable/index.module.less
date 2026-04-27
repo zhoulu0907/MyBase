@@ -1,0 +1,51 @@
+.adminWrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+
+    .searchSelect {
+      width: 120px;
+      background-color: rgb(var(--primary-6));
+
+      :global(.pc-select-view:hover) {
+        background-color: rgb(var(--primary-5));
+      }
+
+      :global(.pc-select-view:hover .renderFormat) {
+        background-color: rgb(var(--primary-5));
+      }
+
+      :global(.pc-select-view-value) {
+        color: white;
+      }
+
+      :global(.pc-select-arrow-icon) {
+        color: white;
+      }
+
+      :global(.pc-select-view) {
+        background-color: unset;
+      }
+    }
+
+    .appInput {
+      width: 240px;
+      height: 32px;
+      margin-bottom: 10px;
+      & span {
+        border-radius: 16px;
+      }
+    }
+  }
+
+  .table {
+    flex: 1;
+  }
+}

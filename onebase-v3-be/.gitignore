@@ -1,0 +1,152 @@
+
+# 查看更多 .gitignore 配置 -> https://help.github.com/articles/ignoring-files/
+logs
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+.flattened-pom.xml
+
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+*.class
+target/*
+.run
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+/build/
+
+
+
+### admin-web ###
+
+# dependencies
+**/node_modules
+dependency-reduced-pom.xml
+
+# roadhog-api-doc ignore
+/src/utils/request-temp.js
+_roadhog-api-doc
+
+# production
+/dist
+/.vscode
+
+# misc
+.DS_Store
+npm-debug.log*
+yarn-error.log
+
+/coverage
+.idea
+yarn.lock
+package-lock.json
+*bak
+.vscode
+
+# visual studio code
+.history
+*.log
+
+functions/mock
+.temp/**
+
+# umi
+.umi
+.umi-production
+
+# screenshot
+screenshot
+.firebase
+sessionStore
+
+# cursor editor
+/.cursor
+
+# AI assistant configs
+/.claude
+/.promptx
+
+# documentation (local only)
+docs/
+
+# http debug (local only)
+/http-debug/
+
+# requirements documentation
+/需求文档
+/requirements
+/.github/copilot-instructions.md
+/元数据管理接口实现情况检查报告.md
+/元数据管理接口单元测试报告.md
+/datasource_api_test_improved.sh
+/datasource_api_test.sh
+/test_concurrent.py
+/test_concurrent.sh
+/test_concurrent_bg.sh
+/test_stress.sh
+/onebase-module-data/数据源appId查询问题修复.md
+/死锁优化建议.md
+/动态数据源连接失败重试限制优化.md
+/实体字段批量保存isSystemField字段更新问题修复.md
+/test_validation_modifications.md
+/MetadataEntityFieldServiceImpl高并发优化说明.md
+/table_name_enhancement_summary.md
+/onebase-module-data/onebase-module-metadata-api/README.md
+/sql/postgresql/patch/2025-08-18-metadata-auto-number.sql
+/sql/patch/update_status_fields.sql
+/sql/patch/update_status_fields_mysql.sql
+/docs/多表CRUD后续待办.md
+/sql/postgresql/patch/2025-08-27-metadata-validation-migration.sql
+/sql/postgresql/patch/2025-08-27-metadata-validation-ddl.sql
+/sql/patch/fix_system_uid_worker_node_emergency.sql
+/docs/IDENTITY列序列冲突解决方案.md
+/docs/PostgreSQL序列冲突修复指南.md
+/sql/patch/fix_all_sequence_conflicts.sql
+/sql/patch/fix_uid_worker_node_sequence.sql
+/sql/patch/fix_uid_worker_node_sequence_force.sql
+/sql/patch/fix_uid_worker_node_sequence_rebuild.sql
+/sql/patch/fix_uid_worker_node_sequence_simple.sql
+/sql/patch/update_parent_id_flags.sql
+/sql/patch/20250908_add_validation_type_to_rule_group.sql
+LOG_FILE_IS_UNDEFINED
+/sql/postgresql/patch/2025-11-01-metadata-auto-number-reset-on-initial-change.sql
+/docs/人大金仓数据库适配方案.md
+/docs/达梦数据库适配方案.md
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizDataResult.java
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizData使用指南.md
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizField.java
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/BizRecord.java
+/onebase-module-data/onebase-module-metadata-api/src/main/java/com/cmsr/onebase/module/metadata/api/datamethod/entity/FieldTypeEnum.java
+/sql/metadata_field_comparison_rules.sql
+/docs/空字符串转Null处理方案.md
+/plugins/*
+/onebase-framework/AGENTS.md
+/onebase-module-data/AGENTS.md
+/onebase-module-flow/AGENTS.md
+/onebase-module-system/AGENTS.md
+/onebase-plugin/AGENTS.md
+/AGENTS.md
+
+### docs ###
+docs/
+/cursor_mac_id_modifier.sh
+/temp_bloomberg_scraper.py
+.omx/

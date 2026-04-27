@@ -1,0 +1,101 @@
+import { memo } from 'react';
+import { nanoid } from 'nanoid';
+import { DatePicker, Ellipsis, Form, Popover } from '@arco-design/mobile-react';
+import { IconQuestionCircle } from '@arco-design/mobile-react/esm/icon';
+import { ValidatorType, ITypeRules } from '@arco-design/mobile-utils';
+
+import { FORM_COMPONENT_TYPES, STATUS_OPTIONS, STATUS_VALUES, DEFAULT_VALUE_TYPES, FormSchema } from '@onebase/ui-kit';
+type XDateRangePickerConfig = typeof FormSchema.XDateRangePickerSchema.config;
+
+import '../index.css';
+
+const XDateRangePicker = memo((props: XDateRangePickerConfig & { runtime?: boolean; detailMode?: boolean }) => {
+  const {
+    label,
+    align,
+    dataField,
+    dateRange,
+    status,
+    verify,
+    layout,
+    startDefaultValueConfig,
+    endDefaultValueConfig,
+    dateType,
+    runtime = true,
+    detailMode
+  } = props;
+
+  // 生成唯一的字段ID
+  const fieldId = dataField && dataField.length > 0
+    ? dataField[dataField.length - 1]
+    : `${FORM_COMPONENT_TYPES.DATE_RANGE_PICKER}_${nanoid()}`;
+
+  // 根据是否为只读模式确定内容
+  const renderContent = () => {
+    // 非只读模式，渲染Input组件
+    return (
+      <DatePicker
+        mode="date"
+        title={label.text}
+        maskClosable
+        minTs={new Date(1900, 0, 1).getTime()}
+        maxTs={new Date(2099, 11, 31).getTime()}
+        formatter={(value, type) => {
+          const map = {
+            year: '年',
+            month: '月',
+            date: '日',
+            hour: '时',
+            minute: '分',
+            second: '秒',
+          };
+          return `${value}${map[type] || ''}`;
+        }}
+      />
+    );
+  };
+
+  const rules: ITypeRules<ValidatorType.Custom>[] = [
+    {
+      required: verify?.required,
+      type: ValidatorType.Custom,
+      message: `${label.text}是必填项`
+    }
+  ];
+
+  return (
+    <Form.Item
+      className="inputTextWrapperOBMobile"
+      label={
+        <>
+          {label.display && <Ellipsis text={label.text} maxLine={2} />}
+          {props?.tooltip && (
+            <Popover content={props?.tooltip} direction='bottomCenter' >
+              <IconQuestionCircle width={12} height={12} style={{ marginLeft: 6 }} />
+            </Popover>
+          )}
+        </>
+      }
+      field={fieldId}
+      rules={rules}
+      layout={layout}
+      initialValue={[
+        startDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? startDefaultValueConfig?.customValue : '',
+        endDefaultValueConfig?.type === DEFAULT_VALUE_TYPES.CUSTOM ? endDefaultValueConfig?.customValue : ''
+      ]}
+      style={{
+        textAlign: layout === 'vertical' ? 'left' : 'right',
+        pointerEvents: (!runtime || detailMode) ? 'none' : 'unset',
+        opacity: status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN] ? 0.4 : 1
+      }}
+    >
+      {status === STATUS_VALUES[STATUS_OPTIONS.READONLY] || detailMode ? (
+        <div className="readonlyText" style={{ textAlign: layout === 'vertical' ? 'left' : 'right' }}>--</div>
+      ) : (
+        renderContent()
+      )}
+    </Form.Item>
+  );
+});
+
+export default XDateRangePicker;

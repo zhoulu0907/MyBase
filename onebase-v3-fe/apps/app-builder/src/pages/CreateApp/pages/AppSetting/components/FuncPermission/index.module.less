@@ -1,0 +1,57 @@
+.formItem {
+  width: 100%;
+  min-height: 120px;
+  border-radius: 4px;
+  border: 2px solid #e5e6eb;
+  box-sizing: border-box;
+  margin-bottom: 24px;
+
+  .itemHeader {
+    width: 100%;
+    padding: 9px 12px;
+    box-sizing: border-box;
+    background-color: #f2f3f5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .left {
+      color: #1d2129;
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .right {
+      color: #86909c;
+      font-size: 12px;
+      font-weight: 400;
+    }
+  }
+
+  .itemContent {
+    padding: 19px 22px;
+    box-sizing: border-box;
+    background-color: #fff;
+    display: flex;
+  }
+  .viewItemContent {
+    padding: 19px 22px;
+    box-sizing: border-box;
+    background-color: #fff;
+    display: flex;
+    // 切换主轴
+    flex-direction: column;
+    .checkboxGroup {
+      margin-left: 22px;
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+.permissionEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+  gap: 10px;
+}

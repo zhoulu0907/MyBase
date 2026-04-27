@@ -1,0 +1,549 @@
+import EditorEmpty from '@/assets/images/edit_empty.svg';
+import { pluginBridge } from '@/plugin/bridge';
+import { Button, Form, Spin } from '@arco-design/web-react';
+import {
+  getEntityFieldsWithChildren,
+  getPageSetId,
+  getPageSetMetaData,
+  listPageView,
+  PageType,
+  type AppEntityField,
+  type GetPageSetIdReq
+} from '@onebase/app';
+import { getHashQueryParam, pagesRuntimeSignal, TokenManager } from '@onebase/common';
+import { getFileUrlById } from '@onebase/platform-center';
+import {
+  EDITOR_TYPES,
+  getComponentWidth,
+  getWorkbenchComponentWidth,
+  PreviewRender,
+  startLoadPageSet,
+  startLoadWorkbenchPageSet,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  useAppEntityStore,
+  useEditorSignalMap,
+  useListEditorSignal,
+  useWorkbenchEditorSignal,
+  getOrCreatePageConfig,
+  PAGE_CONFIG_DEFAULT,
+  type GridItem,
+  type WorkbenchComponentType
+} from '@onebase/ui-kit';
+import { percentageToColSpan } from '@/pages/Editor/workbench/utils/grid-layout';
+import { WB_GRID_CONFIG } from '@/pages/Editor/workbench/utils/constants';
+
+const FLOATING_COMPONENT_TYPES = ['XChatbot'];
+
+const isFloatingComponent = (type: string): boolean => {
+  return FLOATING_COMPONENT_TYPES.includes(type);
+};
+import { useSignals } from '@preact/signals-react/runtime';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import styles from './index.module.less';
+
+interface PreviewProps {
+  menuId: string;
+  runtime: boolean;
+  pagesetType?: number;
+}
+
+const PreviewContainer: React.FC<PreviewProps> = ({ menuId, runtime, pagesetType }) => {
+  useSignals();
+  const [form] = Form.useForm();
+
+  const {
+    components: listComponents,
+    pageComponentSchemas: listPageComponentSchemas,
+    clearComponents,
+    clearPageComponentSchemas
+  } = useListEditorSignal;
+
+  const { workbenchComponents, wbComponentSchemas, clearWorkbenchComponents, clearWbComponentSchemas } =
+    useWorkbenchEditorSignal;
+
+  const { setMainEntity, setSubEntities } = useAppEntityStore();
+
+  const { editPageViewId } = pagesRuntimeSignal;
+
+  const [appId, setAppId] = useState('');
+  const [pageSetId, setPageSetId] = useState('');
+  const [pageType, setPageType] = useState('');
+  const [mainMetaData, setMainMetaData] = useState<string>('');
+  const [tableName, setTableName] = useState<string>('');
+  const [mainMetaDataFields, setMainMetaDataFields] = useState<AppEntityField[]>([]);
+  const [editTargetId, setEditTargetId] = useState('');
+  const [loading, setLoading] = useState(false);
+  const preview = true;
+  const [dashboardImgUrl, setDashboardImgUrl] = useState<string>('');
+  const [iframeUrl, setIframeUrl] = useState<string>('');
+
+  // 获取页面配置
+  const getPageConfig = () => {
+    if (pagesetType === PageType.WORKBENCH && wbComponentSchemas.value) {
+      const [, pageConfigSchema] = getOrCreatePageConfig(wbComponentSchemas.value);
+      return pageConfigSchema.config;
+    }
+    return PAGE_CONFIG_DEFAULT;
+  };
+
+  const pageConfig = getPageConfig();
+
+  useEffect(() => {
+    const appId = getHashQueryParam('appId');
+    if (appId) {
+      setAppId(appId);
+    }
+  }, [window.location.hash]);
+
+  const getMainMetaData = async (pageSetId: string) => {
+    const mainMetaData = await getPageSetMetaData({ pageSetId: pageSetId });
+    console.log('mainMetaData: ', mainMetaData);
+    setMainMetaData(mainMetaData);
+
+    // 防御性检查：如果没有 mainMetaData，不继续获取实体数据
+    if (!mainMetaData) {
+      console.log('无主表元数据，跳过实体数据加载');
+      return;
+    }
+
+    const entityWithChildren = await getEntityFieldsWithChildren(mainMetaData);
+    console.log('当前主表及所有子表数据: ', entityWithChildren);
+
+    setTableName(entityWithChildren.tableName);
+    setMainMetaDataFields(entityWithChildren.parentFields);
+
+    // Update entity store for plugins
+    if (entityWithChildren) {
+      setMainEntity({
+        entityId: entityWithChildren.entityId,
+        entityName: entityWithChildren.entityName,
+        tableName: entityWithChildren.tableName,
+        fields: entityWithChildren.parentFields,
+        entityUuid: (entityWithChildren as any).entityUuid || '',
+        entityType: 'main'
+      } as any);
+      setSubEntities({ entities: entityWithChildren.childEntities || [] });
+    }
+  };
+
+  const handleGetPageSetId = useCallback(async (menuId: string) => {
+    const req: GetPageSetIdReq = { menuId: menuId };
+    const res = await getPageSetId(req);
+    setPageSetId(res);
+  }, []);
+
+  useEffect(() => {
+    if (menuId) {
+      // 重置所有状态，避免显示上一次的数据
+      setPageSetId('');
+      setPageType('');
+      setMainMetaData('');
+      setMainMetaDataFields([]);
+      setEditTargetId('');
+      form.resetFields();
+
+      // 清空全局 signals 中的组件和 schemas
+      clearComponents();
+      clearPageComponentSchemas();
+      clearWorkbenchComponents();
+      clearWbComponentSchemas();
+
+      // 设置加载状态
+      setLoading(true);
+
+      // 然后加载新的数据
+      handleGetPageSetId(menuId);
+    }
+  }, [menuId, handleGetPageSetId, clearComponents, clearPageComponentSchemas, form]);
+
+  // 仅在 mainMetaData 或 mainMetaDataFields 变化且存在 editTargetId 时重新获取数据
+  useEffect(() => {
+    if (editTargetId && tableName && mainMetaDataFields) {
+      handleGetData(editTargetId);
+    }
+  }, [tableName, mainMetaData]);
+
+  useEffect(() => {
+    if (pageSetId) {
+      const loadData = async () => {
+        try {
+          await Promise.all([loadPageSetInfo(pageSetId), getMainMetaData(pageSetId)]);
+        } finally {
+          // 数据加载完成后，延迟一小段时间确保组件已更新
+          setTimeout(() => {
+            setLoading(false);
+          }, 100);
+        }
+      };
+
+      // 工作台、大屏、iframe 页面不获取主表数据
+      if (pagesetType === PageType.WORKBENCH || pagesetType === PageType.DASHBOARD || pagesetType === PageType.IFRAME) {
+        loadPageSetInfo(pageSetId).finally(() => {
+          setLoading(false);
+        });
+      } else {
+        loadData();
+      }
+    }
+
+    if (pageSetId && pagesetType === PageType.DASHBOARD) {
+      getDashboardId(pageSetId);
+      setPageType(EDITOR_TYPES.DASHBOARD_PREVIEW);
+    } else if (pageSetId && pagesetType === PageType.IFRAME) {
+      getDashboardId(pageSetId);
+      setPageType(EDITOR_TYPES.IFRAME_PREVIEW);
+    } else if (pagesetType === PageType.WORKBENCH) {
+      setPageType(EDITOR_TYPES.WORKBENCH_EDITOR);
+    } else {
+      setPageType(EDITOR_TYPES.LIST_EDITOR);
+    }
+  }, [pageSetId]);
+
+  const getDashboardId = async (pageSetId: string) => {
+    try {
+      const res = await listPageView({
+        pageSetId: pageSetId,
+        isDev: true
+      });
+      if (res && res.pages && res.pages.length > 0) {
+        const imgRes = getFileUrlById(res.pages[0].indexImage);
+        setDashboardImgUrl(imgRes);
+        // 如果是 iframe 类型，获取 iframeUrl
+        if (res.pages[0].iframeUrl) {
+          setIframeUrl(res.pages[0].iframeUrl);
+        }
+      }
+    } catch (error) {
+      console.error('获取页面视图失败:', error);
+    }
+  };
+
+  const loadPageSetInfo = async (pageSetId: string) => {
+    // 工作台使用独立加载逻辑
+    if (pagesetType === PageType.WORKBENCH) {
+      await startLoadWorkbenchPageSet({ pageSetId: pageSetId });
+      return;
+    }
+
+    // 表单和列表使用原有加载逻辑
+    await startLoadPageSet({ pageSetId: pageSetId });
+  };
+
+  const submitForm = async () => {
+    // const fields = form.getFieldsValue();
+    if (editTargetId) {
+      setEditTargetId('');
+    }
+
+    setPageType(EDITOR_TYPES.LIST_EDITOR);
+  };
+
+  const cancelSubmitForm = () => {
+    console.log('取消提交');
+    form.resetFields();
+
+    setPageType(EDITOR_TYPES.LIST_EDITOR);
+  };
+
+  const showFromPageData = (id: string) => {
+    setPageType(EDITOR_TYPES.FORM_EDITOR);
+    form.resetFields();
+
+    if (id && id !== '') {
+      console.log('edit row id: ', id);
+      setEditTargetId(id);
+      // 直接获取数据，避免依赖状态变化触发
+      if (tableName) {
+        handleGetData(id);
+      }
+    }
+  };
+
+  const handleGetData = async (_id: string) => {
+    // const req: DetailMethodV2Params = {
+    //   id: id
+    // };
+    // const res = await dataMethodDetailV2(tableName, menuId, req);
+    // console.log(res);
+    // // 遍历 res, 将数据回填到表单
+    // const formValues: Record<string, any> = {};
+    // if (res) {
+    //   const dataItem = res;
+    //   if (dataItem && typeof dataItem === 'object') {
+    //     Object.entries(dataItem).forEach(([fieldName, value]) => {
+    //       formValues[fieldName] = value;
+    //     });
+    //   }
+    // }
+    // return res;
+  };
+
+  React.useEffect(() => {
+    pluginBridge.registerContext({ form, appId, pageSetId, menuId });
+    console.log('[Preview] Form instance registered in bridge context', { appId, pageSetId, menuId });
+    return () => {
+      pluginBridge.registerContext({ form: undefined });
+      console.log('[Preview] Form instance unregistered from bridge context');
+    };
+  }, [form, appId, pageSetId, menuId]);
+
+  // 判断是否为工作台页面
+  const isWorkbenchPage = pageType === EDITOR_TYPES.WORKBENCH_EDITOR;
+
+  // 替换 iframe URL 中的动态参数
+  const replaceIframeUrlParams = (url: string) => {
+    const tenantId = TokenManager.getTokenInfo()?.tenantId || '';
+    const userId = TokenManager.getTokenInfo()?.userId || '';
+    return url
+      .replace(/\$\{tenantId\}/g, tenantId)
+      .replace(/\$\{appId\}/g, appId)
+      .replace(/\$\{userId\}/g, userId)
+      .replace(/\$\{menuId\}/g, menuId);
+  };
+
+  // 获取工作台页面的样式
+  const getWbPageStyle = () => {
+    if (isWorkbenchPage) {
+      return {
+        backgroundColor: pageConfig.pageBgColor || 'transparent',
+        backgroundImage: pageConfig.pageBgImg ? `url(${pageConfig.pageBgImg})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        '--wb-row-height': `${WB_GRID_CONFIG.rowHeight}px`
+      };
+    }
+    return { backgroundColor: '#fff' };
+  };
+
+  // iframe 类型需要去掉 padding，铺满屏幕
+  const getIframeStyle = () => {
+    if (pageType === EDITOR_TYPES.IFRAME_PREVIEW) {
+      return {
+        backgroundColor: '#fff',
+        padding: 0,
+        height: '100%'
+      };
+    }
+    return getWbPageStyle();
+  };
+
+  return (
+    <div className={styles.previewPage}>
+      <div
+        className={`${styles.content} ${isWorkbenchPage ? styles.workbenchContent : ''}`}
+        style={{
+          ...getIframeStyle()
+        }}
+      >
+        {loading ? (
+          <div className={styles.loading}>
+            <Spin size={40} tip="加载中..." />
+          </div>
+        ) : pageType === EDITOR_TYPES.LIST_EDITOR && listComponents.value.length > 0 ? (
+          listComponents.value
+            .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+            .map((cp: GridItem) => (
+              <Fragment key={cp.id}>
+                {listPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(${getComponentWidth(listPageComponentSchemas.value[cp.id], cp.type)} - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                      runtime={runtime}
+                      preview={preview}
+                      showFromPageData={showFromPageData}
+                      pageSetType={pagesetType}
+                      pageType={pageType}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))
+        ) : (
+          pageType === EDITOR_TYPES.LIST_EDITOR && (
+            <div className={styles.noData}>
+              <img src={EditorEmpty} alt="暂无数据" />
+            </div>
+          )
+        )}
+
+        {/* 浮动组件 - 在 LIST_EDITOR 模式下也渲染 */}
+        {pageType === EDITOR_TYPES.LIST_EDITOR &&
+          listComponents.value.some((cp: GridItem) => isFloatingComponent(cp.type)) && (
+            <div>
+              {listComponents.value
+                .filter((cp: GridItem) => isFloatingComponent(cp.type))
+                .map((cp: GridItem) => {
+                  const floatingConfig = listPageComponentSchemas.value[cp.id]?.config?.floatingConfig;
+                  const right = floatingConfig?.right ?? 80;
+                  const bottom = floatingConfig?.bottom ?? 80;
+                  const width = floatingConfig?.width ?? 80;
+                  const height = floatingConfig?.height ?? 80;
+
+                  return (
+                    <div
+                      key={cp.id}
+                      style={{
+                        position: 'fixed',
+                        right,
+                        bottom,
+                        width,
+                        height,
+                        zIndex: 100
+                      }}
+                    >
+                      <PreviewRender
+                        cpId={cp.id}
+                        cpType={cp.type}
+                        pageComponentSchema={listPageComponentSchemas.value[cp.id]}
+                        runtime={true}
+                        preview={preview}
+                      />
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+
+        {pageType == EDITOR_TYPES.FORM_EDITOR && (
+          <Form layout="inline" form={form}>
+            {useEditorSignalMap.get(editPageViewId.value)?.components.value.map((cp: GridItem) => (
+              // {formComponents.value.map((cp: GridItem) => (
+              <Fragment key={cp.id}>
+                {/* {formPageComponentSchemas.value[cp.id].config.status !== STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && ( */}
+                {useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id].config.status !==
+                  STATUS_VALUES[STATUS_OPTIONS.HIDDEN] && (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{
+                      width: `calc(${getComponentWidth(
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id],
+                        cp.type
+                      )} - 8px)`,
+                      margin: '4px'
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={
+                        useEditorSignalMap.get(editPageViewId.value)?.pageComponentSchemas.value[cp.id]
+                      }
+                      runtime={runtime}
+                      preview={preview}
+                      showFromPageData={() => {
+                        setPageType(EDITOR_TYPES.FORM_EDITOR);
+                      }}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))}
+
+            <div className={styles.footer}>
+              <Button type="primary" disabled={preview} onClick={submitForm}>
+                提交
+              </Button>
+              <Button type="default" onClick={cancelSubmitForm}>
+                取消
+              </Button>
+            </div>
+          </Form>
+        )}
+
+        {pageType == EDITOR_TYPES.WORKBENCH_EDITOR && (
+          <>
+            {/* 浮动组件 */}
+            {workbenchComponents.value
+              .filter((cp: GridItem) => isFloatingComponent(cp.type))
+              .map((cp: GridItem) => {
+                const floatingConfig = wbComponentSchemas.value[cp.id]?.config?.floatingConfig;
+                const right = floatingConfig?.right ?? 80;
+                const bottom = floatingConfig?.bottom ?? 80;
+                const width = floatingConfig?.width ?? 80;
+                const height = floatingConfig?.height ?? 80;
+
+                return (
+                  <div
+                    key={cp.id}
+                    style={{
+                      position: 'fixed',
+                      right,
+                      bottom,
+                      width,
+                      height,
+                      zIndex: 100
+                    }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={wbComponentSchemas.value[cp.id]}
+                      runtime={true}
+                      preview={preview}
+                    />
+                  </div>
+                );
+              })}
+
+            {/* 普通组件 */}
+            {workbenchComponents.value
+              .filter((cp: GridItem) => !isFloatingComponent(cp.type))
+              .map((cp: GridItem) => {
+                const schema = wbComponentSchemas.value[cp.id];
+                if (!schema) return null;
+                if (schema.config.status === STATUS_VALUES[STATUS_OPTIONS.HIDDEN]) return null;
+                const widthStr = getWorkbenchComponentWidth(schema, cp.type as WorkbenchComponentType);
+                const colSpan = percentageToColSpan(widthStr);
+                const rowSpan = schema?.config?.gridLayout?.rowSpan ?? 1;
+                return (
+                  <div
+                    key={cp.id}
+                    className={styles.componentItem}
+                    style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
+                  >
+                    <PreviewRender
+                      cpId={cp.id}
+                      cpType={cp.type}
+                      pageComponentSchema={schema}
+                      runtime={false}
+                      preview={preview}
+                    />
+                  </div>
+                );
+              })}
+          </>
+        )}
+
+        {pageType === EDITOR_TYPES.DASHBOARD_PREVIEW && dashboardImgUrl && (
+          <div className={styles.dashboardPreview}>
+            <img src={dashboardImgUrl} alt="大屏预览" />
+          </div>
+        )}
+
+        {pageType === EDITOR_TYPES.IFRAME_PREVIEW && iframeUrl && (
+          <div className={styles.iframePreview}>
+            <iframe
+              key={`iframe-${menuId}`}
+              src={replaceIframeUrlParams(iframeUrl)}
+              title="iframe Preview"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PreviewContainer;

@@ -1,0 +1,61 @@
+# 后端 API Location 配置
+# 定义 API 代理路径规则
+#
+# API 路径说明：
+# - /build-api/    编辑态 API（App Builder 使用）
+# - /runtime-api/  运行态 API（Runtime 使用）
+# - /flink-api/    Flink API
+#
+# 使用方式：
+# 1. 复制此文件为 onebase-location.conf（去掉 .example 后缀）
+# 2. 如需修改路径前缀，请同步修改前端配置中的 BASE_URL
+# 3. 前端网关会自动通过 include 引用此配置
+
+# 编辑态 API（App Builder 使用）
+location /build-api/ {
+    proxy_pass http://onebase-backend/build-api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # WebSocket 支持（编辑器实时预览等功能）
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+}
+
+# 运行态 API（Runtime 使用）
+location /runtime-api/ {
+    proxy_pass http://onebase-backend/runtime-api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 60s;
+}
+
+# Flink API
+location /flink-api/ {
+    proxy_pass http://onebase-flink/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Flink Web UI WebSocket 支持
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    proxy_connect_timeout 60s;
+    proxy_send_timeout 60s;
+    proxy_read_timeout 300s;  # Flink 任务执行时间较长
+}

@@ -1,0 +1,50 @@
+.uplaodTrigger {
+  color: #4e5969;
+}
+.uplaodList-text {
+  width: 100%;
+}
+.uplaodList-text-item {
+  background-color: transparent;
+  padding: 8px 12px;
+  border-radius: 2px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+.uplaodList-text-item-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+  object-fit: cover;
+}
+.uplaodList-text-item-name {
+  max-width: calc(100% - 54px);
+}
+.uplaodList-text-item-name-hover {
+  max-width: calc(100% - 82px);
+}
+
+.uplaodList-text-item-name-hover:hover {
+  text-decoration: underline;
+}
+
+.uplaodList-text-item-process {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+.uplaodList-text-item-process-close {
+  margin-left: 4px;
+}
+.uplaodList-text-item-opera {
+  color: #86909c;
+  display: flex;
+  align-items: center;
+}
+.uplaodList-text-item-opera svg {
+  margin-left: 8px;
+  cursor: pointer;
+}

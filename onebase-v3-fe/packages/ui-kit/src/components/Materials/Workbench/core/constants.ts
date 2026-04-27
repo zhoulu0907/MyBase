@@ -1,0 +1,143 @@
+/**
+ * Workbench 常量定义
+ * 只包含 Workbench 特有的常量，通用常量从 Materials 引用
+ */
+import type { IBooleanConfigType } from './types';
+
+// ========== 从 Materials/constants 引用通用常量 ==========
+import {
+  CONFIG_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  DEFAULT_VALUE_TYPES
+} from '../../constants';
+
+// 重新导出通用常量
+export {
+  CONFIG_TYPES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  DEFAULT_VALUE_TYPES
+};
+
+// ========== Workbench 专属配置类型 ==========
+
+/**
+ * Workbench 专属配置类型
+ * 优先复用 Materials 的通用定义，只添加 Workbench 特有的配置类型
+ */
+
+export const WORKBENCH_CONFIG_TYPES = {
+  TEXT_INPUT: CONFIG_TYPES.TEXT_INPUT,
+  SWITCH_INPUT: CONFIG_TYPES.SWITCH_INPUT,
+  LABEL_INPUT: CONFIG_TYPES.LABEL_INPUT,
+  TOOLTIP_INPUT: CONFIG_TYPES.TOOLTIP_INPUT,
+  STATUS_RADIO: CONFIG_TYPES.STATUS_RADIO,
+  WIDTH_RADIO: CONFIG_TYPES.WIDTH_RADIO,
+  FORM_LAYOUT: CONFIG_TYPES.FORM_LAYOUT,
+  NUMBER_INPUT: CONFIG_TYPES.NUMBER_INPUT,
+  TEXT_ALIGN: CONFIG_TYPES.TEXT_ALIGN,
+  COLOR: CONFIG_TYPES.COLOR,
+  RADIO_DATA: CONFIG_TYPES.RADIO_DATA,
+  SELECT_INPUT: CONFIG_TYPES.SELECT_INPUT,
+  PASSWORD_INPUT: 'PasswordInput',
+  // 工作台专属配置类型（以WB_开头）
+  // 公共
+  WB_SLIDER: 'Wb_Slider' as const,
+  WB_COLOR: 'Wb_Color' as const,
+  WB_TEXT_ALIGN: 'Wb_TextAlign' as const,
+  WB_MENU_SELECTOR: 'Wb_MenuSelector' as const,
+  // 快捷入口
+  WB_ENTRY_GROUP: 'Wb_EntryGroup' as const,
+  WB_ENTRY_STYLE: 'Wb_EntryStyle' as const,
+  WB_ENTRY_TITLE: 'Wb_EntryTitle' as const,
+  // 轮播图
+  WB_CAROUSEL_CONTENT: 'Wb_CarouselContent' as const,
+  WB_RICH_TEXT_CONTENT: 'Wb_RichTextContent' as const,
+  WB_DATA_CONFIG: 'Wb_DataConfig' as const,
+  // 按钮组件
+  WB_JUMP_CONFIG: 'Wb_JumpConfig' as const,
+  // 欢迎卡片
+  WB_THEME_SELECTOR: 'Wb_ThemeSelector' as const,
+  WB_CHECK_INPUT: 'Wb_CheckInput' as const,
+  // 资讯列表
+  WB_INFORMATION_LIST_CONTENT: 'Wb_InformationListContent' as const,
+  // 数据列表
+  WB_TABLE_CONFIG: 'Wb_TableConfig' as const,
+  // 智能体选择器
+  WB_AGENT_SELECTOR: 'Wb_AgentSelector' as const,
+} as const;
+
+/**
+ * 直接复用 Materials 通用常量，避免重复维护
+ * 使用别名导出，保持命名一致性
+ */
+export {
+  STATUS_OPTIONS as WORKBENCH_STATUS_OPTIONS,
+  STATUS_VALUES as WORKBENCH_STATUS_VALUES,
+  WIDTH_OPTIONS as WORKBENCH_WIDTH_OPTIONS,
+  WIDTH_VALUES as WORKBENCH_WIDTH_VALUES,
+  LAYOUT_OPTIONS as WORKBENCH_LAYOUT_OPTIONS,
+  LAYOUT_VALUES as WORKBENCH_LAYOUT_VALUES
+};
+
+/**
+ * 样式选项
+ */
+export const WORKBENCH_THEME_OPTIONS = {
+  THEME_1: 'theme-one',
+  THEME_2: 'theme-two',
+  THEME_3: 'theme-three'
+} as const;
+
+/**
+ * 待办中心-数据内容配置选项
+ */
+export const DATA_CONFIG_RANGE: IBooleanConfigType[] = [
+  {
+    key: 'showPending',
+    name: '待我处理',
+    type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
+  },
+  {
+    key: 'showCreated',
+    name: '我创建的',
+    type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
+  },
+  {
+    key: 'showHandled',
+    name: '我已处理',
+    type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
+  },
+  {
+    key: 'showCc',
+    name: '抄送我的',
+    type: WORKBENCH_CONFIG_TYPES.SWITCH_INPUT
+  }
+];
+
+/**
+ * 待办中心-数据配置字段名到中文名称的映射
+ */
+export const DATA_CONFIG_NAME_MAP: Record<string, string> = DATA_CONFIG_RANGE.reduce(
+  (acc, item) => {
+    acc[item.key] = item.name;
+    return acc;
+  },
+  {} as Record<string, string>
+);
+
+// 垂直对齐方式
+export const VERTICAL_ALIGN_OPTIONS = {
+  TOP: 'top',
+  MIDDLE: 'middle',
+  BOTTOM: 'bottom'
+} as const;

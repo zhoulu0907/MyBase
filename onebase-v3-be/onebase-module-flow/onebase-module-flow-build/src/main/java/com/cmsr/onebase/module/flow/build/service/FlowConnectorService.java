@@ -1,0 +1,342 @@
+package com.cmsr.onebase.module.flow.build.service;
+
+import com.cmsr.onebase.framework.common.pojo.PageParam;
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.module.flow.build.vo.*;
+import com.cmsr.onebase.module.flow.core.util.ActionConfigHelper;
+import com.cmsr.onebase.module.flow.core.util.ConnectorConfigHelper;
+import com.cmsr.onebase.module.flow.core.vo.PageConnectorReqVO;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.util.List;
+
+public interface FlowConnectorService {
+
+    /**
+     * 分页查询连接器实例（精简版，用于列表展示）
+     * <p>
+     * 返回 FlowConnectorLiteVO，不包含完整的 config 配置信息
+     * 包含：实例名称、类型、环境信息、配置状态、启用状态、创建时间等
+     *
+     * @param pageReqVO 分页查询参数（支持按名称、类型、状态筛选）
+     * @return 分页结果（FlowConnectorLiteVO）
+     */
+    PageResult<FlowConnectorLiteVO> pageConnectors(PageConnectorReqVO pageReqVO);
+
+    FlowConnectorVO getConnectorDetail(Long connectorId);
+
+    CreateFlowConnectorRespVO createConnector(CreateFlowConnectorReqVO createVO);
+
+    void updateConnector(UpdateFlowConnectorReqVO updateVO);
+
+    /**
+     * 更新连接器基本信息
+     * <p>
+     * 只更新描述信息，自动检测变化。如果未发生变化则不执行数据库更新。
+     *
+     * @param connectorId 连接器ID
+     * @param updateVO    更新请求VO
+     * @return true=实际更新了，false=没有变化
+     */
+    Boolean updateBaseInfo(Long connectorId, UpdateFlowConnectorReqVO updateVO);
+
+    void deleteById(Long connectorId);
+
+    /**
+     * List connector instances by type code
+     */
+    List<FlowConnectorVO> listByType(String typeCode);
+
+    /**
+     * List all connector instances with pagination (lite version without config)
+     */
+    PageResult<FlowConnectorLiteVO> listAll(PageParam pageParam);
+
+    /**
+     * Get action list by connector ID
+     *
+     * @param id the connector ID
+     * @return list of action keys
+     */
+    List<String> getActionsById(Long id);
+
+    /**
+     * 启用/禁用连接器实例
+     *
+     * @param id           连接器实例ID
+     * @param activeStatus 启用状态（0-禁用，1-启用）
+     */
+    void updateActiveStatus(Long id, Integer activeStatus);
+
+    /**
+     * 查询连接器的环境配置列表
+     * <p>
+     * 从 flow_connector.config 字段解析环境配置信息
+     *
+     * @param connectorId 连接器ID
+     * @return 环境配置列表
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnvironments(Long)}
+     */
+    @Deprecated
+    List<FlowConnectorEnvLiteVO> getEnvironments(Long connectorId);
+
+    /**
+     * 查询连接器的指定环境配置信息
+     * <p>
+     * 从 flow_connector.config 的 properties 中解析指定环境的 Formily Schema
+     *
+     * @param connectorId 连接器实例ID（主键）
+     * @param envName     环境名称（如 DEV环境配置）
+     * @return 环境配置 VO
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnvironmentConfig(Long, String)}
+     */
+    @Deprecated
+    EnvironmentConfigVO getEnvironmentConfig(Long connectorId, String envName);
+
+    /**
+     * 获取环境配置模板
+     * <p>
+     * 根据连接器实例获取其类型对应的环境配置 Formily Schema 模板
+     *
+     * @param connectorId 连接器实例ID
+     * @return 环境配置模板 VO
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnvConfigTemplate(Long)}
+     */
+    @Deprecated
+    EnvConfigTemplateVO getEnvConfigTemplate(Long connectorId);
+
+    /**
+     * 获取动作配置模板
+     * <p>
+     * 根据连接器实例获取其类型对应的动作配置 Formily Schema 模板
+     *
+     * @param connectorId 连接器实例ID
+     * @return 动作配置模板 VO
+     * @deprecated 已废弃，动作配置模板已迁移到统一动作表
+     */
+    @Deprecated
+    ActionConfigTemplateVO getActionConfigTemplate(Long connectorId);
+
+    /**
+     * 保存连接器环境配置
+     * <p>
+     * 将新的环境配置添加到 flow_connector.config.properties 中
+     * 如果环境已存在则拒绝保存
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO 环境配置请求
+     * @return 保存是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#saveEnvironmentConfig(Long, SaveEnvironmentConfigReqVO)}
+     */
+    @Deprecated
+    Boolean saveEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
+    /**
+     * 更新连接器环境配置
+     * <p>
+     * 更新已存在的环境配置，环境必须存在
+     * 如果环境不存在则拒绝更新
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO 环境配置请求
+     * @return 更新是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#updateEnvironmentConfig(Long, SaveEnvironmentConfigReqVO)}
+     */
+    @Deprecated
+    Boolean updateEnvironmentConfig(Long connectorId, SaveEnvironmentConfigReqVO reqVO);
+
+    /**
+     * 设置启用环境
+     * <p>
+     * 在连接器配置中设置当前启用的环境名称
+     * 环境必须存在才能启用
+     *
+     * @param connectorId 连接器实例ID
+     * @param envName     环境名称（传空或null表示取消启用）
+     * @return 设置是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#enableEnvironment(Long, String)}
+     */
+    @Deprecated
+    Boolean enableEnvironment(Long connectorId, String envName);
+
+    /**
+     * 获取启用环境
+     * <p>
+     * 获取连接器当前启用的环境完整信息
+     *
+     * @param connectorId 连接器实例ID
+     * @return 启用的环境信息，未设置则返回null
+     * @deprecated 已废弃，请使用 {@link FlowConnectorEnvService#getEnabledEnv(Long)}
+     */
+    @Deprecated
+    FlowConnectorEnvLiteVO getEnabledEnv(Long connectorId);
+
+    /**
+     * 保存连接器动作配置
+     * <p>
+     * 将新的动作配置添加到 flow_connector.action_config.properties 中
+     * 如果动作已存在则拒绝保存
+     *
+     * @param connectorId 连接器实例ID
+     * @param reqVO      动作配置请求
+     * @return 保存是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#createAction(com.cmsr.onebase.module.flow.build.vo.CreateActionReqVO)}
+     */
+    @Deprecated
+    Boolean saveActionConfig(Long connectorId, SaveActionConfigReqVO reqVO);
+
+    /**
+     * 更新连接器动作配置
+     * <p>
+     * 更新指定动作名称的配置信息
+     *
+     * @param connectorId 连接器实例ID
+     * @param actionName  动作名称（作为properties的key）
+     * @param reqVO       动作配置请求
+     * @return 更新是否成功
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#updateAction(com.cmsr.onebase.module.flow.build.vo.UpdateActionReqVO)}
+     */
+    @Deprecated
+    Boolean updateActionConfig(Long connectorId, String actionName, SaveActionConfigReqVO reqVO);
+
+    // ==================== 动作管理接口（已废弃，请使用 FlowConnectorActionService） ====================
+
+    /**
+     * 获取连接器的动作列表
+     *
+     * @param connectorId 连接器ID
+     * @return 动作列表
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#getActionsByConnectorUuid(String)}
+     */
+    @Deprecated
+    List<ConnectorActionVO> getActionList(Long connectorId);
+
+    /**
+     * 获取连接器的动作配置列表
+     * <p>
+     * 返回精简版信息，只包含列表页必需的字段
+     *
+     * @param connectorId 连接器ID
+     * @return 动作配置列表（精简版）
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#getActionsByConnectorUuid(String)}
+     */
+    @Deprecated
+    List<ConnectorActionLiteVO> getActionInfos(Long id);
+
+    /**
+     * 获取动作详情
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @return 动作详情
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#getActionByUuid(String)}
+     */
+    @Deprecated
+    ConnectorActionVO getActionDetail(Long connectorId, String actionName);
+
+    /**
+     * 保存动作草稿
+     *
+     * @param connectorId 连接器ID
+     * @param createVO    创建请求
+     * @return 创建的动作名称
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#createAction(com.cmsr.onebase.module.flow.build.vo.CreateActionReqVO)}
+     */
+    @Deprecated
+    String saveActionDraft(Long connectorId, CreateConnectorActionReqVO createVO);
+
+    /**
+     * 更新动作草稿
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @param updateVO    更新请求
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#updateAction(com.cmsr.onebase.module.flow.build.vo.UpdateActionReqVO)}
+     */
+    @Deprecated
+    void updateActionDraft(Long connectorId, String actionName, UpdateConnectorActionReqVO updateVO);
+
+    /**
+     * 发布动作
+     * <p>
+     * 业务规则：
+     * - 校验所有步骤配置是否完整
+     * - 完整性校验通过后更新状态为 published
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @deprecated 已废弃，请直接更新动作的 activeStatus 字段
+     */
+    @Deprecated
+    void publishAction(Long connectorId, String actionName);
+
+    /**
+     * 下架动作
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @deprecated 已废弃，请直接更新动作的 activeStatus 字段
+     */
+    @Deprecated
+    void offlineAction(Long connectorId, String actionName);
+
+    /**
+     * 重新上线动作
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @deprecated 已废弃，请直接更新动作的 activeStatus 字段
+     */
+    @Deprecated
+    void republishAction(Long connectorId, String actionName);
+
+    /**
+     * 复制动作
+     * <p>
+     * 业务规则：
+     * - 自动生成唯一名称：原名称_copy序号
+     * - 复制的动作状态为 draft
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @return 新复制的动作名称
+     * @deprecated 已废弃
+     */
+    @Deprecated
+    String copyAction(Long connectorId, String actionName);
+
+    /**
+     * 删除动作
+     * <p>
+     * 业务规则：
+     * - 检查是否被逻辑流引用
+     * - 如被引用则抛出异常并返回引用信息
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @deprecated 已废弃，请使用 {@link FlowConnectorActionService#deleteAction(Long)}
+     */
+    @Deprecated
+    void deleteAction(Long connectorId, String actionName);
+
+    /**
+     * 校验动作是否可发布
+     *
+     * @param connectorId 连接器ID
+     * @param actionName  动作名称
+     * @return 校验结果
+     * @deprecated 已废弃
+     */
+    @Deprecated
+    ActionConfigHelper.ValidationResult validateActionForPublish(Long connectorId, String actionName);
+
+    /**
+     * 调试HTTP连接器动作
+     * <p>
+     * 接收debug配置信息并执行HTTP请求
+     *
+     * @param reqVO 调试请求VO（包含url、method、headers等调试信息）
+     * @return 执行响应结果
+     */
+    ExecuteHttpActionRespVO debugHttpAction(DebugHttpActionReqVO reqVO);
+}

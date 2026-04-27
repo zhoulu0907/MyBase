@@ -1,0 +1,11 @@
+.richTextWrapper {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d2129;
+}

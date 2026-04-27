@@ -1,0 +1,25 @@
+package com.cmsr.onebase.framework.tenant.core.rpc;
+
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+
+import static com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils.HEADER_TENANT_ID;
+import static com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils.HEADER_X_TENANT_ID;
+
+/**
+ * Tenant 的 RequestInterceptor 实现类：Feign 请求时，将 {@link TenantContextHolder} 设置到 header 中，继续透传给被调用的服务
+ *
+ */
+public class TenantRequestInterceptor implements RequestInterceptor {
+
+    @Override
+    public void apply(RequestTemplate requestTemplate) {
+        Long tenantId = TenantContextHolder.getTenantId();
+        if (tenantId != null) {
+            requestTemplate.header(HEADER_TENANT_ID, String.valueOf(tenantId));
+            requestTemplate.header(HEADER_X_TENANT_ID, String.valueOf(tenantId));
+        }
+    }
+
+}

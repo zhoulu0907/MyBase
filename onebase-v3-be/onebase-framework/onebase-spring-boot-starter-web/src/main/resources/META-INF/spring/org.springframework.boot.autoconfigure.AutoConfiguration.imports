@@ -1,0 +1,3 @@
+com.cmsr.onebase.framework.jackson.OneBaseJacksonAutoConfiguration
+com.cmsr.onebase.framework.web.config.OneBaseWebAutoConfiguration
+com.cmsr.onebase.framework.banner.config.OneBaseBannerAutoConfiguration

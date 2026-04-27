@@ -1,0 +1,147 @@
+package com.cmsr.onebase.module.system.runtime.controller.auth;
+
+
+import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.enums.UserTypeEnum;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.tenant.core.aop.TenantIgnore;
+import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
+import com.cmsr.onebase.module.system.runtime.service.auth.RuntimeAuthService;
+import com.cmsr.onebase.module.system.service.permission.PermissionService;
+import com.cmsr.onebase.module.system.vo.auth.*;
+import com.cmsr.onebase.module.system.vo.user.UserForgetPasswordReqVO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.annotation.security.PermitAll;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+
+/**
+ * 运行态登录认证相关服务
+ * 1. AppLogin 应用登录-内部用户登录（内部模式，账密登录）
+ * 2. AppLogin 应用登录-外部用户登录（SaaS模式，手机号登录）
+ *
+ * @author matianyu
+ * @date 2025-11
+ */
+@Tag(name = "Runtime - 登录&认证")
+@RestController
+@RequestMapping("/system/auth")
+@Validated
+@Slf4j
+public class RuntimeAuthController {
+
+    @Resource
+    private RuntimeAuthService runtimeAuthService;
+
+    @Resource
+    private SecurityProperties securityProperties;
+
+    @Resource
+    private PermissionService permissionService;
+
+    @PostMapping("/app-login")
+    @PermitAll
+    @Operation(summary = "内部用户登录（Inner模式，账密登录）")
+    public CommonResult<AuthLoginRespVO> appUsernameLogin(@RequestBody @Valid AppUserNameLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.appUsernameLogin(reqVO);
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
+    }
+
+
+    @PostMapping("/app-login-mobile")
+    @PermitAll
+    @Operation(summary = "外部用户登录（SaaS模式，手机号登录）")
+    public CommonResult<AuthLoginRespVO> appMobileLogin(@RequestBody @Valid AppMobileLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.appMobileLogin(reqVO, UserTypeEnum.CORP.getValue());
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
+    }
+
+
+    @PostMapping("/corp-login")
+    @PermitAll
+    @Operation(summary = "企业登录（手机号）")
+    public CommonResult<AuthLoginRespVO> corpLogin(@RequestBody @Valid CorpAuthLoginReqVO reqVO, HttpServletResponse response) {
+        AuthLoginRespVO loginRespVO = runtimeAuthService.corpLogin(reqVO, UserTypeEnum.CORP.getValue());
+        // 设置Cookie
+        response.addHeader("Set-Cookie", String.format("%s=%s; HttpOnly",
+                securityProperties.getTokenHeader(), loginRespVO.getAccessToken()));
+        return success(loginRespVO);
+    }
+
+
+    @PostMapping("/third-login")
+    @PermitAll
+    @Operation(summary = "第三方用户登录（手机号）")
+    public CommonResult<ThirdAuthLoginRespVO> thirdLogin(@RequestBody @Valid ThirdAuthLoginReqVO reqVO) {
+        return success(runtimeAuthService.thirdLogin(reqVO, UserTypeEnum.THIRD.getValue()));
+    }
+
+    @PostMapping("/logout")
+    @PermitAll
+    @Operation(summary = "登出系统")
+    public CommonResult<Boolean> logout(HttpServletRequest request) {
+        String token = SecurityFrameworkUtils.obtainAuthorization(request,
+                securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+        if (StrUtil.isNotBlank(token)) {
+            runtimeAuthService.logout(token, LoginLogTypeEnum.LOGOUT_SELF.getType());
+        }
+        return success(true);
+    }
+
+    @PostMapping("/send-verify-code")
+    @PermitAll
+    @TenantIgnore
+    @Operation(summary = "发送邮箱/手机验证码")
+    public CommonResult<Boolean> sendVerifyCode(@RequestBody @Valid VerifyCodeSendReqVO reqVO) {
+        runtimeAuthService.sendSmsCode(reqVO);
+        return success(true);
+    }
+
+    // @PostMapping("/refresh-token")
+    // @Operation(summary = "刷新令牌")
+    // @Parameter(name = "refreshToken", description = "刷新令牌", required = true)
+    // @PermitAll
+    // public CommonResult<AuthLoginRespVO> refreshToken(@RequestParam("refreshToken") String refreshToken) {
+    //     return success(runtimeAuthService.refreshToken(refreshToken));
+    // }
+
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "重置密码")
+    @PermitAll
+    public CommonResult<Boolean> resetPassword(@RequestBody @Valid AuthResetPasswordReqVO reqVO) {
+        runtimeAuthService.resetPassword(reqVO);
+        return success(true);
+    }
+
+    @GetMapping("/get-permission-info")
+    @Operation(summary = "获取登录用户的权限信息")
+    public CommonResult<AuthPermissionInfoRespVO> getPermissionInfo(@RequestParam(value = "code", required = false) String code) {
+        return success(permissionService.getPermissionInfo(code));
+    }
+
+
+    @PostMapping("/forget-password")
+    @Operation(summary = "忘记密码")
+    @PermitAll
+    public CommonResult<Boolean> updateUserPassword(@Valid @RequestBody UserForgetPasswordReqVO reqVO) {
+        runtimeAuthService.thirdUserForgetPassword(reqVO);
+        return success(true);
+    }
+}

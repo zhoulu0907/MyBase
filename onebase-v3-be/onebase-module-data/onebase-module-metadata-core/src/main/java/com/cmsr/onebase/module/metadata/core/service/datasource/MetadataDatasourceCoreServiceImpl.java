@@ -1,0 +1,186 @@
+package com.cmsr.onebase.module.metadata.core.service.datasource;
+
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.util.string.UuidUtils;
+import com.cmsr.onebase.module.metadata.core.config.MetadataConfig;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataDatasourceRepository;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.datasource.MetadataDatasourceDO;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.metadata.core.enums.ErrorCodeConstants.DATASOURCE_NOT_EXISTS;
+
+/**
+ * 数据源核心基础服务实现类 - 提供核心业务逻辑
+ *
+ * @author matianyu
+ * @date 2025-09-12
+ */
+@Service
+@Slf4j
+public class MetadataDatasourceCoreServiceImpl implements MetadataDatasourceCoreService {
+
+    @Resource
+    private MetadataDatasourceRepository metadataDatasourceRepository;
+
+    @Resource
+    private MetadataConfig metadataConfig;
+
+    @Resource
+    private MetadataAppAndDatasourceCoreService appAndDatasourceService;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createDatasource(@Valid MetadataDatasourceDO datasource) {
+        datasource.setDatasourceType(resolveDatasourceType(datasource.getDatasourceType()));
+
+        // 生成 UUID
+        if (datasource.getDatasourceUuid() == null || datasource.getDatasourceUuid().isEmpty()) {
+            datasource.setDatasourceUuid(UuidUtils.getUuid());
+        }
+
+        // 设置创建人和时间
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        LocalDateTime now = LocalDateTime.now();
+        datasource.setCreator(currentUserId);
+        datasource.setUpdater(currentUserId);
+        datasource.setCreateTime(now);
+        datasource.setUpdateTime(now);
+
+        // 插入数据源
+        metadataDatasourceRepository.save(datasource);
+
+        log.info("创建数据源成功，ID: {}，UUID: {}，创建人: {}，创建时间: {}",
+                datasource.getId(), datasource.getDatasourceUuid(), currentUserId, now);
+        return datasource.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createDefaultDatasource(Long appId, String appUid, String datasourceType, String configJson) {
+        String resolvedDatasourceType = resolveDatasourceType(datasourceType);
+
+        // 构建默认数据源DO
+        MetadataDatasourceDO datasource = new MetadataDatasourceDO();
+        datasource.setDatasourceName("默认数据源");
+        datasource.setCode("default_" + System.currentTimeMillis());
+        datasource.setDatasourceType(resolvedDatasourceType);
+        datasource.setConfig(configJson);
+        datasource.setDescription("系统默认数据源");
+        datasource.setDatasourceOrigin(0);
+        datasource.setApplicationId(appId);
+
+        // 创建数据源
+        Long datasourceId = createDatasource(datasource);
+
+        // 创建关联关系（使用数据源UUID）
+        createAppDatasourceRelation(appId, datasource.getDatasourceUuid(), resolvedDatasourceType, appUid);
+
+        log.info("创建默认数据源成功，数据源ID: {}，应用ID: {}", datasourceId, appId);
+        return datasourceId;
+    }
+
+    @Override
+    public MetadataDatasourceDO getDatasource(Long id) {
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.getDatasourceById(id);
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        return datasource;
+    }
+
+    /**
+     * 根据数据源ID（String）获取数据源（兼容旧代码）
+     * @deprecated 请使用 getDatasourceByUuid(String)
+     * @param id 数据源ID（可能是Long字符串或UUID）
+     * @return 数据源DO
+     */
+    @Deprecated
+    public MetadataDatasourceDO getDatasource(String id) {
+        if (id == null || id.trim().isEmpty()) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        // 尝试按UUID查询
+        return getDatasourceByUuid(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateDatasource(@Valid MetadataDatasourceDO datasource) {
+        // 校验存在
+        validateDatasourceExists(datasource.getId());
+
+        // 设置更新人和时间
+        Long currentUserId = SecurityFrameworkUtils.getLoginUserId();
+        datasource.setUpdater(currentUserId);
+        datasource.setUpdateTime(LocalDateTime.now());
+
+        // 更新数据源
+        metadataDatasourceRepository.updateById(datasource);
+
+        log.info("更新数据源成功，ID: {}，更新人: {}", datasource.getId(), currentUserId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteDatasource(Long id) {
+        // 校验存在
+        validateDatasourceExists(id);
+
+        // 删除数据源
+        metadataDatasourceRepository.removeById(id);
+
+        log.info("删除数据源成功，ID: {}", id);
+    }
+
+    @Override
+    public MetadataDatasourceDO getDatasourceByCode(String code) {
+        return metadataDatasourceRepository.getDatasourceByCode(code);
+    }
+
+    @Override
+    public MetadataDatasourceDO getDatasourceByUuid(String datasourceUuid) {
+        MetadataDatasourceDO datasource = metadataDatasourceRepository.getDatasourceByUuid(datasourceUuid);
+        if (datasource == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+        return datasource;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createAppDatasourceRelation(Long appId, String datasourceUuid, String datasourceType, String appUid) {
+        String resolvedDatasourceType = resolveDatasourceType(datasourceType);
+
+        // 创建应用与数据源的关联关系
+        appAndDatasourceService.createRelation(appId, datasourceUuid, resolvedDatasourceType, appUid);
+        log.info("创建应用数据源关联成功，应用ID: {}，数据源UUID: {}", appId, datasourceUuid);
+    }
+
+    private String resolveDatasourceType(String datasourceType) {
+        if (MetadataConfig.isValidDatabaseType(datasourceType)) {
+            return MetadataConfig.toDatabaseType(datasourceType).name();
+        }
+
+        String fallbackType = metadataConfig.getDefaultDatasourceType();
+        log.warn("数据源类型为空或非法，使用默认类型: {}，原始值: {}", fallbackType, datasourceType);
+        return fallbackType;
+    }
+
+    /**
+     * 校验数据源是否存在
+     *
+     * @param id 数据源ID
+     */
+    private void validateDatasourceExists(Long id) {
+        if (metadataDatasourceRepository.getDatasourceById(id) == null) {
+            throw exception(DATASOURCE_NOT_EXISTS);
+        }
+    }
+}

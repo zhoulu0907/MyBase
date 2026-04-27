@@ -1,0 +1,127 @@
+.indicatorCard {
+    box-sizing: border-box;
+    padding: 16px 20px;
+    color: #1D2129;
+    font-size: 14px;
+
+    .card {
+        display: flex;
+        align-items: center;
+
+        .cardContent {
+            box-sizing: border-box;
+            position: relative;
+            padding: 16px;
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+
+            .cardMain {
+                flex: 2;
+                overflow: hidden;
+            }
+
+            .cardRight {
+                flex: 1;
+                overflow: hidden;
+                margin-left: 8px;
+
+                .cardCompareValue4 {
+                    font-weight: 500;
+                    font-size: 14px;
+                    line-height: 22px;
+                    display: flex;
+                    align-items: center;
+                }
+
+                .cardCompareImg4 {
+                    margin-right: 8px;
+                    height: 20px;
+                    width: auto;
+                }
+
+                .cardCompare4 {
+                    margin-top: 12px;
+                    border: 1px solid #E5E6EB;
+                    box-sizing: border-box;
+                    text-align: center;
+                    color: #6B7785;
+                    font-family: PingFang SC;
+                    font-size: 12px;
+                    line-height: 20px;
+                    padding: 0 4px;
+                    display: inline-block;
+                }
+            }
+
+            .cardTitle {
+                font-size: 14px;
+                line-height: 22px;
+            }
+
+            .cardValue {
+                padding: 4px 0;
+                font-weight: 600;
+                font-size: 24px;
+                line-height: 32px;
+            }
+
+            .cardCompare {
+                color: #86909C;
+                font-size: 12px;
+                line-height: 20px;
+
+                .cardCompareValue {
+                    padding: 0 6px;
+                }
+
+                .cardCompareImg {
+                    height: 12px;
+                    width: auto;
+                }
+            }
+
+            .cardIcon1 {
+                position: absolute;
+                top: 16px;
+                right: 26px;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .cardIcon2 {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 16px;
+            }
+
+            .cardIcon3 {
+                position: absolute;
+                bottom: 16px;
+                right: 16px;
+                width: 42px;
+                height: 42px;
+            }
+
+            .cardCompareImg5 {
+                height: 36px;
+                width: auto;
+                margin-left: 8px;
+            }
+        }
+
+        .cardDivider {
+            margin: 0;
+            height: 56px;
+        }
+    }
+}

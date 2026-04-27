@@ -1,0 +1,53 @@
+## 默认环境变量配置（直接使用local环境配置）
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 327a71784fa14847867c95e2f5bab8cd
+#@tag = OneBase.local
+
+### 请求 /infra/file/upload 接口 => 成功
+POST {{baseUrl}}/infra/file/upload
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+tenant-id: {{adminTenantId}}
+Authorization: Bearer {{token}}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="p1.jpg"
+Content-Type: image/jpeg
+
+< ./p6.jpg
+--WebAppBoundary--
+
+### 请求 /infra/file/presigned-url 接口 => 成功
+GET {{baseUrl}}/infra/file/presigned-url?name=test.txt&directory=test
+tenant-id: {{adminTenantId}}
+Authorization: Bearer {{token}}
+
+### 请求 /infra/file/create 接口 => 成功
+POST {{baseUrl}}/infra/file/create
+Content-Type: application/json
+tenant-id: {{adminTenantId}}
+Authorization: Bearer {{token}}
+
+{
+  "configId": 1,
+  "path": "test/test.txt",
+  "name": "test.txt",
+  "url": "http://test.aa.cn",
+  "type": "text/plain",
+  "size": 1024
+}
+
+### 请求 /infra/file/delete 接口 => 成功
+POST {{baseUrl}}/infra/file/delete?id=1
+tenant-id: {{adminTenantId}}
+Authorization: Bearer {{token}}
+
+### 请求 /infra/file/page 接口 => 成功
+GET {{baseUrl}}/infra/file/page?pageNo=1&pageSize=10
+tenant-id: {{adminTenantId}}
+Authorization: Bearer {{token}}
+
+### 请求 /infra/file/page 接口 => 成功
+GET {{baseUrl}}/infra/file/download/195527475941507072
+#tenant-id: {{adminTenantId}}
+#Authorization: Bearer {{token}}

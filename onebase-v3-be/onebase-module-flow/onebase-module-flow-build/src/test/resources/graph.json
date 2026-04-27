@@ -1,0 +1,279 @@
+{
+  "nodes":
+  [
+    {
+      "id": "start_entity_0",
+      "type": "startEntity",
+      "data":
+      {
+        "id": "start_entity_0",
+        "entityId": "46999363287089152",
+        "triggerType": "before",
+        "triggerEvents":
+        [
+          "beforeCreate",
+          "beforeUpdate",
+          "beforeDelete"
+        ],
+        "title": "表单(实体)触发节点"
+      },
+      "output":
+      {
+        "conditionFields":
+        [
+          {
+            "label": "班级名称",
+            "value": "46999569445519360",
+            "fieldType": "TEXT"
+          },
+          {
+            "label": "入学时间",
+            "value": "50026937276661762",
+            "fieldType": "DATE"
+          },
+          {
+            "label": "主键ID",
+            "value": "46999363287089153",
+            "fieldType": "ID"
+          },
+          {
+            "label": "拥有者ID",
+            "value": "46999363287089154",
+            "fieldType": "USER"
+          },
+          {
+            "label": "学生人数",
+            "value": "50028191407505411",
+            "fieldType": "NUMBER"
+          },
+          {
+            "label": "拥有部门ID",
+            "value": "46999363287089155",
+            "fieldType": "DEPARTMENT"
+          },
+          {
+            "label": "创建人ID",
+            "value": "46999363287089156",
+            "fieldType": "USER"
+          },
+          {
+            "label": "更新人ID",
+            "value": "46999363287089157",
+            "fieldType": "USER"
+          },
+          {
+            "label": "创建时间",
+            "value": "46999363287089158",
+            "fieldType": "DATETIME"
+          },
+          {
+            "label": "更新时间",
+            "value": "46999363287089159",
+            "fieldType": "DATETIME"
+          },
+          {
+            "label": "乐观锁",
+            "value": "46999363287089160",
+            "fieldType": "NUMBER"
+          },
+          {
+            "label": "删除标识",
+            "value": "46999363287089161",
+            "fieldType": "NUMBER"
+          },
+          {
+            "label": "关联主表ID",
+            "value": "46999363287089162",
+            "fieldType": "NUMBER"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dataQuery_62799659365648dcb74ecfdb729f6b1c",
+      "type": "dataQuery",
+      "data":
+      {
+        "id": "dataQuery_62799659365648dcb74ecfdb729f6b1c",
+        "dataType": "mainEntity",
+        "mainEntityId": "46999363287089152",
+        "filterType": "all",
+        "title": "数据查询节点(单条)"
+      },
+      "output":
+      {
+        "conditionFields":
+        [
+          {
+            "label": "班级名称",
+            "value": "46999569445519360",
+            "fieldType": "TEXT"
+          },
+          {
+            "label": "入学时间",
+            "value": "50026937276661762",
+            "fieldType": "DATE"
+          },
+          {
+            "label": "主键ID",
+            "value": "46999363287089153",
+            "fieldType": "ID"
+          },
+          {
+            "label": "拥有者ID",
+            "value": "46999363287089154",
+            "fieldType": "USER"
+          },
+          {
+            "label": "学生人数",
+            "value": "50028191407505411",
+            "fieldType": "NUMBER"
+          },
+          {
+            "label": "拥有部门ID",
+            "value": "46999363287089155",
+            "fieldType": "DEPARTMENT"
+          },
+          {
+            "label": "创建人ID",
+            "value": "46999363287089156",
+            "fieldType": "USER"
+          },
+          {
+            "label": "更新人ID",
+            "value": "46999363287089157",
+            "fieldType": "USER"
+          },
+          {
+            "label": "创建时间",
+            "value": "46999363287089158",
+            "fieldType": "DATETIME"
+          },
+          {
+            "label": "更新时间",
+            "value": "46999363287089159",
+            "fieldType": "DATETIME"
+          },
+          {
+            "label": "乐观锁",
+            "value": "46999363287089160",
+            "fieldType": "NUMBER"
+          },
+          {
+            "label": "删除标识",
+            "value": "46999363287089161",
+            "fieldType": "NUMBER"
+          },
+          {
+            "label": "关联主表ID",
+            "value": "46999363287089162",
+            "fieldType": "NUMBER"
+          }
+        ]
+      }
+    },
+    {
+      "id": "ifCase_01c28bbdc17946c3a6a43277d3fc0943",
+      "type": "ifCase",
+      "blocks":
+      [
+        {
+          "id": "ifBlock_5673051fa8274b5982b5b273a09e5fd9",
+          "type": "ifBlock",
+          "blocks":
+          [
+            {
+              "id": "log_1dbcdf82f1e044fcb5d276ead52f58fd",
+              "type": "log",
+              "data":
+              {
+                "title": "日志节点"
+              },
+              "output":
+              {}
+            }
+          ],
+          "data":
+          {
+            "value": true,
+            "title": "通过"
+          },
+          "output":
+          {}
+        },
+        {
+          "id": "ifBlock_c6c4a87ee62b4888bd27c8a54e3cb075",
+          "type": "ifBlock",
+          "blocks":
+          [
+            {
+              "id": "log_d201239ea8de4a86a3ed0bf6011d78e7",
+              "type": "log",
+              "data":
+              {
+                "title": "日志节点"
+              },
+              "output":
+              {}
+            }
+          ],
+          "data":
+          {
+            "value": false,
+            "title": "不通过"
+          },
+          "output":
+          {}
+        }
+      ],
+      "data":
+      {
+        "id": "ifCase_01c28bbdc17946c3a6a43277d3fc0943",
+        "filterCondition":
+        [
+          {
+            "conditions":
+            [
+              {
+                "fieldId": "dataQuery_62799659365648dcb74ecfdb729f6b1c.46999569445519360",
+                "op": "CONTAINS",
+                "operatorType": "value",
+                "value": "年级"
+              },
+              {
+                "fieldId": "dataQuery_62799659365648dcb74ecfdb729f6b1c.50026937276661762",
+                "op": "EARLIER_THAN",
+                "operatorType": "value",
+                "value": "2028-09-01"
+              }
+            ]
+          },
+          {
+            "conditions":
+            [
+              {
+                "fieldId": "dataQuery_62799659365648dcb74ecfdb729f6b1c.50028191407505411",
+                "op": "GREATER_EQUALS",
+                "operatorType": "value",
+                "value": 0
+              }
+            ]
+          }
+        ],
+        "title": "条件节点"
+      },
+      "output":
+      {}
+    },
+    {
+      "id": "end_0",
+      "type": "end",
+      "data":
+      {
+        "title": "结束"
+      },
+      "output":
+      {}
+    }
+  ]
+}

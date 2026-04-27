@@ -1,0 +1,137 @@
+{
+    "nodes": [
+        {
+            "id": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2",
+            "title": "金仓船只信息",
+            "description": "",
+            "type": "jdbc_input",
+            "config": {
+                "fields": [
+                    {
+                        "fieldFqn": "019af154-20a6-7127-ad43-03174a7addc0.shipowner.shipowner.t_ship_info.fix_id",
+                        "fieldName": "fix_id",
+                        "displayName": "fix_id",
+                        "fieldType": "string",
+                        "key": "fix_id"
+                    },
+                    {
+                        "fieldFqn": "019af154-20a6-7127-ad43-03174a7addc0.shipowner.shipowner.t_ship_info.ship_name_eng",
+                        "fieldName": "ship_name_eng",
+                        "displayName": "ship_name_eng",
+                        "fieldType": "string",
+                        "key": "ship_name_eng"
+                    },
+                    {
+                        "fieldFqn": "019af154-20a6-7127-ad43-03174a7addc0.shipowner.shipowner.t_ship_info.ship_name_chn",
+                        "fieldName": "ship_name_chn",
+                        "displayName": "ship_name_chn",
+                        "fieldType": "string",
+                        "key": "ship_name_chn"
+                    },
+                    {
+                        "fieldFqn": "019af154-20a6-7127-ad43-03174a7addc0.shipowner.shipowner.t_ship_info.business_representative",
+                        "fieldName": "business_representative",
+                        "displayName": "business_representative",
+                        "fieldType": "string",
+                        "key": "business_representative"
+                    },
+                    {
+                        "fieldFqn": "019af154-20a6-7127-ad43-03174a7addc0.shipowner.shipowner.t_ship_info.prog_manager",
+                        "fieldName": "prog_manager",
+                        "displayName": "prog_manager",
+                        "fieldType": "string",
+                        "key": "prog_manager"
+                    },
+                    {
+                        "fieldFqn": "019af154-20a6-7127-ad43-03174a7addc0.shipowner.shipowner.t_ship_info.status",
+                        "fieldName": "status",
+                        "displayName": "status",
+                        "fieldType": "string",
+                        "key": "status"
+                    }
+                ],
+                "datasourceUuid": "019af154-20a6-7127-ad43-03174a7addc0",
+                "tableUuid": "019af154-27df-753e-a23c-c06c1ab325df"
+            },
+            "output": {
+                "verified": true,
+                "fields": [
+                    {
+                        "fieldFqn": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2.fix_id",
+                        "fieldName": "fix_id",
+                        "fieldType": "string"
+                    },
+                    {
+                        "fieldFqn": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2.ship_name_eng",
+                        "fieldName": "ship_name_eng",
+                        "fieldType": "string"
+                    },
+                    {
+                        "fieldFqn": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2.ship_name_chn",
+                        "fieldName": "ship_name_chn",
+                        "fieldType": "string"
+                    },
+                    {
+                        "fieldFqn": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2.business_representative",
+                        "fieldName": "business_representative",
+                        "fieldType": "string"
+                    },
+                    {
+                        "fieldFqn": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2.prog_manager",
+                        "fieldName": "prog_manager",
+                        "fieldType": "string"
+                    },
+                    {
+                        "fieldFqn": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2.status",
+                        "fieldName": "status",
+                        "fieldType": "string"
+                    }
+                ]
+            },
+            "meta": {
+                "position": {
+                    "x": -583.5,
+                    "y": -230
+                }
+            }
+        },
+        {
+            "id": "sql_d28bd961f4a54d12a5b66db2aa78eabf",
+            "title": "SQL节点",
+            "description": "",
+            "type": "sql",
+            "config": {},
+            "output": {},
+            "meta": {
+                "position": {
+                    "x": -282.5,
+                    "y": -230
+                }
+            }
+        },
+        {
+            "id": "jdbc_output_e1f91b89de3040d2ba42a5ae5a1d366a",
+            "title": "输出节点",
+            "description": "",
+            "type": "jdbc_output",
+            "config": {},
+            "output": {},
+            "meta": {
+                "position": {
+                    "x": 3.5,
+                    "y": -230
+                }
+            }
+        }
+    ],
+    "edges": [
+        {
+            "sourceNodeId": "jdbc_input_22284d1c09ce49fa9a6ce8cf4223eff2",
+            "targetNodeId": "sql_d28bd961f4a54d12a5b66db2aa78eabf"
+        },
+        {
+            "sourceNodeId": "sql_d28bd961f4a54d12a5b66db2aa78eabf",
+            "targetNodeId": "jdbc_output_e1f91b89de3040d2ba42a5ae5a1d366a"
+        }
+    ]
+}

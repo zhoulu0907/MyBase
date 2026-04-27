@@ -1,0 +1,2 @@
+com.cmsr.onebase.framework.redis.config.OneBaseRedisAutoConfiguration
+com.cmsr.onebase.framework.redis.config.OneBaseCacheAutoConfiguration

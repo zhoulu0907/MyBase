@@ -1,0 +1,56 @@
+.XPreviewTabsLayout {
+  max-width: 100%;
+  min-height: 1rem;
+  border: 0;
+  overflow: visible;
+
+  .arco-tab-cell-container-wrap {
+    border-radius: 0.16rem;
+  }
+
+  .arco-tab-cell-container {
+    .arco-tab-cell.active {
+      color: rgb(var(--primary-6)) !important;
+    }
+
+    .arco-tab-cell-underline-inner {
+      background-color: rgb(var(--primary-6));
+    }
+  }
+
+  .item {
+    min-height: 1rem;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-top: 0.36rem;
+
+    .content {
+      height: 100%;
+      min-height: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+    }
+
+    .componentItem {
+      width: calc(100% - 0.16rem);
+      cursor: move;
+      box-sizing: border-box;
+      border: 1px dashed transparent;
+      border-radius: 0.16rem;
+      transition: border-color 0.2s ease;
+      position: relative;
+      margin: 0.08rem;
+    }
+
+    .componentItem:last-of-type .arco-form-item {
+      border: 0 !important;
+    }
+  }
+}

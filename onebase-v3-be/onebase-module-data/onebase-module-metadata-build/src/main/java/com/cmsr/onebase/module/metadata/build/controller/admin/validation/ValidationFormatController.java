@@ -1,0 +1,101 @@
+package com.cmsr.onebase.module.metadata.build.controller.admin.validation;
+
+import com.cmsr.onebase.framework.common.event.AppEntityChangeEvent;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.module.metadata.core.util.MetadataIdUuidConverter;
+import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationFormatRespVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationFormatSaveReqVO;
+import com.cmsr.onebase.module.metadata.build.controller.admin.validation.vo.ValidationFormatUpdateReqVO;
+import com.cmsr.onebase.module.metadata.build.service.validation.MetadataValidationFormatBuildService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import static com.cmsr.onebase.framework.common.pojo.CommonResult.success;
+
+@Tag(name = "管理后台 - 校验规则：格式/正则")
+@RestController
+@RequestMapping("/metadata/validation/format")
+@Validated
+public class ValidationFormatController {
+
+    @Resource
+    private MetadataIdUuidConverter idUuidConverter;
+
+    @Resource private MetadataValidationFormatBuildService formatService;
+
+    @Resource
+    ApplicationEventPublisher applicationEventPublisher;
+
+    @PostMapping("/get-regex-by-field")
+    @Operation(summary = "根据字段UUID获取正则格式校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<ValidationFormatRespVO> getRegexByField(@RequestParam("id") String fieldUuid) {
+        return success(formatService.getRegexByFieldIdWithRgName(fieldUuid));
+    }
+
+    @GetMapping("/get")
+    @Operation(summary = "根据主键ID获取格式校验")
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
+    public CommonResult<ValidationFormatRespVO> get(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        return success(formatService.getById(resolvedId));
+    }
+
+    @PostMapping("/create")
+    @Operation(summary = "创建格式校验")
+    public CommonResult<Long> create(@Valid @RequestBody ValidationFormatSaveReqVO vo) {
+        Long id = formatService.create(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(id);
+    }
+
+    @PostMapping("/update")
+    @Operation(summary = "更新格式校验")
+    public CommonResult<Boolean> update(@Valid @RequestBody ValidationFormatUpdateReqVO vo) {
+        formatService.update(vo);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(true);
+    }
+
+    @PostMapping("/delete-by-field")
+    @Operation(summary = "按字段UUID删除格式校验")
+    @Parameter(name = "id", description = "字段UUID", required = true)
+    public CommonResult<Boolean> deleteByField(@RequestParam("id") String fieldUuid) {
+        formatService.deleteByFieldId(fieldUuid);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(true);
+    }
+
+    @PostMapping("/delete")
+    @Operation(summary = "根据主键ID删除格式校验")
+    @Parameter(name = "id", description = "校验规则ID（支持ID或UUID）", required = true)
+    public CommonResult<Boolean> delete(@RequestParam("id") String id) {
+        Long resolvedId = idUuidConverter.resolveRuleGroupId(id);
+        formatService.deleteById(resolvedId);
+        applicationEventPublisher.publishEvent(
+                AppEntityChangeEvent.builder()
+                        .applicationId(ApplicationManager.getApplicationId())
+                        .build()
+        );
+        return success(true);
+    }
+}

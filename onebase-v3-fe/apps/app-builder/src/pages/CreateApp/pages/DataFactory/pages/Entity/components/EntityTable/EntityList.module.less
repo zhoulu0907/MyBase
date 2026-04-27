@@ -1,0 +1,51 @@
+@import '../../../../styles/variables.less';
+
+.entityList {
+  .flex-column();
+  height: 100%;
+
+  .header {
+    padding: @spacingMd;
+    .border-bottom-light();
+    .flex-between();
+
+    h3 {
+      margin: 0;
+      font-size: @fontSizeLg;
+      font-weight: @fontWeightSemibold;
+    }
+  }
+
+  .list {
+    flex: 1;
+    overflow: auto;
+    border: none !important;
+
+    .listItem {
+      cursor: pointer;
+      padding: @spacingSm @spacingMd;
+      // .border-bottom-light();
+      transition: @transitionBase;
+    
+      &:hover, &.selected {
+        background-color: @backgroundColorLight;
+        color: @primaryColor;
+        // border-right: 2px solid @primaryColor !important;
+      }
+
+      .itemContent {
+        .flex-between();
+        gap: @spacingSm;
+
+        .entityName {
+          .text-ellipsis();
+        }
+
+        .fieldCount {
+          font-size: @fontSizeSm;
+          color: @textColorSecondary;
+        }
+      }
+    }
+  }
+}

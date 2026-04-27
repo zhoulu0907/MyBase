@@ -1,0 +1,40 @@
+{
+  "name": "onebase-plugin-ocr",
+  "private": true,
+  "version": "1.0.6",
+  "type": "module",
+  "scripts": {
+    "dev": "vite serve src/dev --config vite.config.ts",
+    "build": "tsc && vite build",
+    "copy:umd": "cp -f dist/ob-plugin-template.umd.js public/ob-plugin-template.umd.js && cp -f dist/ob-plugin-template.css public/ob-plugin-template.css",
+    "build:umd": "npm run build && npm run copy:umd",
+    "dev:umd": "npm run build && npm run copy:umd && vite serve src/dev --config vite.config.ts",
+    "lint": "eslint .",
+    "preview": "vite build && vite preview --port 3001"
+  },
+  "dependencies": {
+    "@arco-design/web-react": "^2.66.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.21.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "@ob/plugin": "workspace:*",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "npm:rolldown-vite@7.2.5"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.2.5"
+  }
+}

@@ -1,0 +1,81 @@
+import TablePagination from '@/components/TablePagination';
+import { PermissionButton as Button } from '@/components/PermissionControl';
+import StatusTag from '@/components/StatusTag';
+import ResizableTable from '@/components/ResizableTable';
+import { Input } from '@arco-design/web-react';
+import { TENANT_DICT_PERMISSION as ACTIONS } from '@onebase/common';
+import { type DictData } from '@onebase/platform-center';
+import s from '../../index.module.less';
+
+interface DictionaryTableProps {
+  data: DictData[];
+  currentPage: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onBatchConfig: () => void;
+  loading?: boolean;
+}
+
+export default function DictionaryTable({
+  data,
+  currentPage,
+  pageSize,
+  total,
+  onPageChange,
+  onPageSizeChange,
+  searchValue,
+  onSearchChange,
+  onBatchConfig,
+  loading
+}: DictionaryTableProps) {
+  const columns = [
+    {
+      title: '颜色标识',
+      dataIndex: 'colorType',
+      width: 80,
+      render: (val: string) => <div style={{ width: 16, height: 16, borderRadius: 50, backgroundColor: val }} />
+    },
+    { title: '字典值', dataIndex: 'label', width: 160 },
+    { title: '字典值编码', dataIndex: 'value', width: 200 },
+    { title: '显示顺序', dataIndex: 'sort', width: 120 },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 100,
+      render: (val: number) => <StatusTag status={val} />
+    }
+  ];
+
+  return (
+    <>
+      <div className={s.tableHeader}>
+        <Input.Search
+          value={searchValue}
+          onChange={onSearchChange}
+          placeholder="输入字典值"
+          style={{ width: 200 }}
+          allowClear
+        />
+        <Button permission={ACTIONS.UPDATE} type="primary" onClick={onBatchConfig}>
+          字典值配置
+        </Button>
+      </div>
+      <div className={s.tableContainer}>
+        <ResizableTable rowKey="id" columns={columns} data={data} pagination={false} scroll={{ y: 510 }} loading={loading} stripe />
+        <div className={s.paginationContainer}>
+          <TablePagination
+            total={total}
+            pageSize={pageSize}
+            current={currentPage}
+            onChange={onPageChange}
+            onPageSizeChange={onPageSizeChange}
+          />
+        </div>
+      </div>
+    </>
+  );
+}

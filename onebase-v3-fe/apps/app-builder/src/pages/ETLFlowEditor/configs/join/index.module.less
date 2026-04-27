@@ -1,0 +1,105 @@
+.joinDataConfigContainer {
+  padding: 4px;
+
+  .joinHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    color: var(--color-text-2);
+    width: 75%;
+  }
+
+  .content {
+    .addConnectionBox {
+      margin-top: 8px;
+      border: 1px dashed rgb(var(--primary-6));
+      border-radius: 4px;
+      padding: 3px;
+      text-align: center;
+    }
+
+    .row {
+      align-items: center;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+
+    .fieldRow {
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .center {
+      justify-items: center;
+    }
+
+    .switchWrap {
+      padding: 2px 4px;
+      .wrap {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+      }
+
+      .iconBox {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .label {
+        line-height: 22px;
+        color: var(--color-text-2);
+      }
+    }
+
+    .switchWrap:hover {
+      background-color: rgb(var(--gray-2));
+      border-radius: 4px;
+    }
+
+    .equals {
+      font-size: 16px;
+      color: var(--color-text-2);
+    }
+  }
+}
+
+.switchPopover {
+  .switchDiv {
+    display: grid;
+    grid-template-columns: repeat(2, 78px);
+    gap: 11px;
+    padding: 2px 0;
+
+    .joinDiv {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0px 16px;
+      border: 1px solid rgb(var(--gray-3));
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+
+      img {
+        margin: 6px 0 0;
+      }
+
+      span {
+        line-height: 22px;
+        color: var(--color-text-2);
+      }
+    }
+
+    .joinDiv:not(.joinDivSelct):hover {
+      border: 1px solid rgb(var(--primary-3));
+    }
+
+    .joinDivSelct {
+      border: 2px solid rgb(var(--primary-6));
+    }
+  }
+}

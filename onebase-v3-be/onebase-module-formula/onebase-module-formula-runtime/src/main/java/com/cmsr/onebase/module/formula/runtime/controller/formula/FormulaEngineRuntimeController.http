@@ -1,0 +1,84 @@
+### 环境配置说明
+# 上面已设置默认的local环境变量，可直接运行
+# 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
+# 或者手动修改上面的@变量值
+
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/excute/engine/executeFormula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+##
+{
+    "formula": "LEFT(paramA, length)",
+    "parameters": {
+        "paramA": "HELLO",
+        "length": 5
+    }
+}
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/excute/engine/executeFormula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "formula": "CEILING(订单编号，AVERAGEA(发货地址，联系电话))",
+    "parameters": {"订单编号":"001","发货地址":"003","联系电话":"005"}
+}
+
+### 请求 /execute 接口 => 执行函数函数 获取人员信息
+POST {{baseUrl}}/formula/excute/engine/execute-formula1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula": "GETUSER(id,name,'id')",
+  "parameters": {}
+}
+
+### 请求 /execute 接口 => 执行函数函数 获取人员信息
+POST {{baseUrl}}/formula/excute/engine/execute-formula1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula": "LEFT(text,length)",
+  "parameters": {"text": "name", "length": 2}
+}
+
+### 请求 /create 接口 => 创建函数
+POST {{baseUrl}}/formula/excute/engine/executeFormula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "formula": "SUMIF(#X.A, >10, #X.B)"
+}
+
+### 执行公式计算
+POST {{baseUrl}}/formula/excute/engine/execute-formula1
+Content-Type: application/json
+
+{
+  "formula": "=SUM(A1:A10)",
+  "parameters": {
+    "A1": 10,
+    "A2": 20,
+    "A3": 30
+  }
+}
+
+### 验证公式语法
+POST {{baseUrl}}/formula/excute/engine/validate
+Content-Type: application/json
+
+{
+  "formula": "=SUM(A1:A10)"
+}

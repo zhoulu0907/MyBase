@@ -1,0 +1,114 @@
+package com.cmsr.onebase.module.etl.build.service.collector;
+
+import com.cmsr.onebase.module.etl.common.entity.CatalogData;
+import com.cmsr.onebase.module.etl.common.entity.ColumnData;
+import com.cmsr.onebase.module.etl.common.entity.SchemaData;
+import com.cmsr.onebase.module.etl.common.entity.TableData;
+import lombok.extern.slf4j.Slf4j;
+import org.anyline.data.datasource.DataSourceHolder;
+import org.anyline.metadata.Catalog;
+import org.anyline.metadata.Column;
+import org.anyline.metadata.Schema;
+import org.anyline.metadata.Table;
+import org.anyline.proxy.ServiceProxy;
+import org.anyline.service.AnylineService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import javax.sql.DataSource;
+import java.util.*;
+
+@Slf4j
+@Service
+public class MetadataCollector {
+
+    public CatalogData collectCatalog(Long datasourceId, DataSource datasource) throws Exception {
+        String runnerKey = "metadata-collect-" + datasourceId;
+        try {
+            DataSourceHolder.reg(runnerKey, datasource);
+            AnylineService<?> temporary = ServiceProxy.service(runnerKey);
+            CatalogData catalogData = new CatalogData();
+            // 1. collect catalog（某些数据库如MySQL可能返回null）
+            Catalog catalog = temporary.metadata().catalog();
+            String catalogName = catalog != null ? catalog.getName() : null;
+            // 2. collect schema（某些数据库可能返回null）
+            Schema schema = temporary.metadata().schema();
+            String schemaName = schema != null ? schema.getName() : null;
+            // 3. 对于MySQL等数据库，catalog为null时使用schema名称作为catalog名称
+            if (catalogName == null && schemaName != null) {
+                catalogName = schemaName;
+            }
+            catalogData.setName(catalogName);
+            SchemaData schemaData = new SchemaData();
+            schemaData.setCatalogName(catalogName);
+            schemaData.setName(schemaName);
+            catalogData.getSchemas().add(schemaData);
+            // 4. collect tables - 采集所有类型的表（包括普通表和视图）
+            LinkedHashMap<String, Table<?>> tables = temporary.metadata().tables();
+            for (Table<?> table : tables.values()) {
+                TableData tableData = new TableData();
+                tableData.setCatalogName(catalogName);
+                tableData.setSchemaName(schemaName);
+                tableData.setName(table.getName());
+                tableData.setType(table.keyword().toLowerCase());
+                tableData.setComment(table.getComment());
+                Collection<Column> tableColumn = temporary.metadata().columns(table).values();
+                List<ColumnData> columns = toColumnData(tableColumn);
+                tableData.setColumns(columns);
+                schemaData.getTables().add(tableData);
+            }
+            return catalogData;
+        } finally {
+            unregisterDataSource(runnerKey);
+        }
+    }
+
+    private List<ColumnData> toColumnData(Collection<Column> tableColumn) {
+        List<ColumnData> columnList = new ArrayList<>(tableColumn.size());
+        for (Column column : tableColumn) {
+            ColumnData columnData = new ColumnData();
+            int position = column.getPosition();
+            String columnName = column.getName();
+            columnData.setName(columnName);
+            columnData.setDisplayName(columnName);
+            String comment = column.getComment();
+            columnData.setComment(comment);
+            if (StringUtils.isNotBlank(comment)) {
+                columnData.setDisplayName(comment);
+            }
+            columnData.setDeclaration(comment);
+            columnData.setType(column.getOriginType().toLowerCase());
+            columnData.setPosition(position);
+            columnData.setNullable(column.getNullable());
+            if (column.ignoreLength() != 1) {
+                columnData.setLength(column.getLength());
+            }
+            if (column.ignorePrecision() != 1) {
+                columnData.setPrecision(column.getPrecision());
+            }
+            if (column.ignoreScale() != 1) {
+                columnData.setScale(column.getScale());
+            }
+            Object defaultValue = column.getDefaultValue();
+            if (defaultValue != null) {
+                columnData.setDefaultValue(defaultValue.toString());
+            }
+            boolean isPrimaryKey = column.getPrimaryKey();
+            columnData.setPrimaryKey(isPrimaryKey);
+            if (isPrimaryKey) {
+                columnData.setAutoIncrement(column.getAutoIncrement());
+            }
+            columnList.add(columnData);
+        }
+        columnList.sort(Comparator.comparingInt(ColumnData::getPosition));
+        return columnList;
+    }
+
+    private void unregisterDataSource(String datasourceKey) {
+        try {
+            DataSourceHolder.destroy(datasourceKey);
+        } catch (Exception ex) {
+            log.error("注销数据源失败，数据源标识：{}", datasourceKey, ex);
+        }
+    }
+}

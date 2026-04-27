@@ -1,0 +1,88 @@
+package com.cmsr.onebase.plugin.build.service;
+
+import com.cmsr.onebase.framework.common.pojo.PageResult;
+import com.cmsr.onebase.plugin.build.vo.req.PluginInfoPageReqVO;
+import com.cmsr.onebase.plugin.build.vo.req.PluginInfoUpdateReqVO;
+import com.cmsr.onebase.plugin.build.vo.req.PluginUploadReqVO;
+import com.cmsr.onebase.plugin.build.vo.req.PluginVersionStatusReqVO;
+import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoDetailRespVO;
+import com.cmsr.onebase.plugin.build.vo.resp.PluginInfoRespVO;
+import com.cmsr.onebase.plugin.core.dal.dataobject.PluginInfoDO;
+import jakarta.validation.Valid;
+
+/**
+ * 插件信息服务接口
+ *
+ * @author matianyu
+ * @date 2026-01-06
+ */
+public interface PluginInfoService {
+
+    /**
+     * 准备插件前端资源
+     * <p>
+     * 检查并解压插件前端资源
+     * </p>
+     *
+     * @param plugin 插件信息
+     */
+    void preparePluginFrontend(PluginInfoDO plugin);
+
+    /**
+     * 准备所有已启用插件的前端资源
+     */
+    void prepareAllPluginFrontends();
+
+    /**
+     * 新增插件（首次上传）
+     *
+     * @param uploadReqVO 上传请求
+     * @return 插件ID
+     */
+    String createPlugin(@Valid PluginUploadReqVO uploadReqVO);
+
+    /**
+     * 获取插件详情（含版本列表）
+     *
+     * @param id 版本记录ID
+     * @return 插件详情
+     */
+    PluginInfoDetailRespVO getPluginDetail(Long id);
+
+    /**
+     * 分页查询插件列表
+     *
+     * @param pageReqVO 分页查询条件
+     * @return 分页结果
+     */
+    PageResult<PluginInfoRespVO> getPluginPage(PluginInfoPageReqVO pageReqVO);
+
+    /**
+     * 更新插件基础信息（对所有版本生效）
+     *
+     * @param updateReqVO 更新请求
+     */
+    void updatePluginInfo(@Valid PluginInfoUpdateReqVO updateReqVO);
+
+    /**
+     * 删除插件及其所有版本
+     *
+     * @param pluginId 插件ID
+     */
+    void deletePlugin(String pluginId);
+
+    /**
+     * 启用插件版本
+     *
+     * @param statusReqVO 版本状态变更请求
+     */
+    void enablePlugin(@Valid PluginVersionStatusReqVO statusReqVO);
+
+    /**
+     * 禁用插件版本
+     *
+     * @param statusReqVO 版本状态变更请求
+     */
+    void disablePlugin(@Valid PluginVersionStatusReqVO statusReqVO);
+
+}

@@ -1,0 +1,98 @@
+.modalContent {
+  position: relative;
+  background: var(--color-bg-popup);
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  margin: -24px -20px;
+  min-width: 200px;
+  max-width: 400px;
+  overflow: visible;
+  
+  // 添加过渡动画
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.content {
+  padding: 12px;
+  position: relative;
+  z-index: 1;
+  overflow: auto;
+  max-height: 80vh;
+}
+
+.arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  z-index: 10;
+  pointer-events: none;
+
+  // 箭头伪元素基础样式
+  &::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border: 6px solid transparent;
+    pointer-events: none;
+  }
+
+  // 顶部箭头（top, topLeft, topRight）
+  &.arrow-top,
+  &.arrow-topLeft,
+  &.arrow-topRight {
+    border-top-color: var(--color-border-2, #d9d9d9);
+    border-bottom: none;
+
+    &::after {
+      top: -5px;
+      left: -6px;
+      border-top-color: var(--color-bg-popup, #ffffff);
+      border-bottom: none;
+    }
+  }
+
+  // 底部箭头（bottom, bottomLeft, bottomRight）
+  &.arrow-bottom,
+  &.arrow-bottomLeft,
+  &.arrow-bottomRight {
+    border-bottom-color: var(--color-border-2, #d9d9d9);
+    border-top: none;
+
+    &::after {
+      top: 1px;
+      left: -6px;
+      border-bottom-color: var(--color-bg-popup, #ffffff);
+      border-top: none;
+    }
+  }
+
+  // 左侧箭头
+  &.arrow-left {
+    border-left-color: var(--color-border-2, #d9d9d9);
+    border-right: none;
+
+    &::after {
+      top: -6px;
+      left: -5px;
+      border-left-color: var(--color-bg-popup, #ffffff);
+      border-right: none;
+    }
+  }
+
+  // 右侧箭头
+  &.arrow-right {
+    border-right-color: var(--color-border-2, #d9d9d9);
+    border-left: none;
+
+    &::after {
+      top: -6px;
+      left: 1px;
+      border-right-color: var(--color-bg-popup, #ffffff);
+      border-left: none;
+    }
+  }
+}

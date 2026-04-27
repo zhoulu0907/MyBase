@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.cmsr.onebase</groupId>
+        <artifactId>onebase-cloud</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <modules>
+        <module>onebase-module-flow-api</module>
+        <module>onebase-module-flow-core</module>
+        <module>onebase-module-flow-build</module>
+        <module>onebase-module-flow-runtime</module>
+        <module>onebase-module-flow-component</module>
+        <module>onebase-module-flow-context</module>
+    </modules>
+    <artifactId>onebase-module-flow</artifactId>
+    <packaging>pom</packaging>
+
+    <name>${project.artifactId}</name>
+    <description>
+        flow 模块，自动化工作流管理
+    </description>
+
+</project>

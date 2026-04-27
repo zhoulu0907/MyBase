@@ -1,0 +1,23 @@
+### 环境配置说明
+# 上面已设置默认的local环境变量，可直接运行
+# 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
+# 或者手动修改上面的@变量值
+
+### 请求 BpmEngineController /bpm/engine/execute 接口 => 流程引擎执行
+POST {{baseUrl}}/bpm/engine/execute
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+    "processId": "my-process:1",
+    "variables": {
+        "input1": 10,
+        "input2": 20
+    }
+}
+
+### 请求 BpmEngineController /bpm/engine/test 接口 => 流程引擎测试
+GET {{baseUrl}}/bpm/engine/test
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

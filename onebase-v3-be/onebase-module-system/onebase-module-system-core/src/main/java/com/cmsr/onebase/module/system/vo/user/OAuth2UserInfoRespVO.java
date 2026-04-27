@@ -1,0 +1,67 @@
+package com.cmsr.onebase.module.system.vo.user;
+
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.MobileDesensitize;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Schema(description = "管理后台 - OAuth2 获得用户基本信息 Response VO")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OAuth2UserInfoRespVO {
+
+    @Schema(description = "用户编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private Long id;
+
+    @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    private String username;
+
+    @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    private String nickname;
+
+    @Schema(description = "用户邮箱", example = "onebase@aaa.com")
+    @EMailDesensitize
+    private String email;
+    @Schema(description = "手机号码", example = "15601691300")
+    @MobileDesensitize
+    private String mobile;
+
+    @Schema(description = "用户性别，参见 SexEnum 枚举类", example = "1")
+    private Integer sex;
+
+    @Schema(description = "用户头像", example = "https://www.cmsr.com")
+    private String avatar;
+
+    @Schema(description = "租户id")
+    private Long tenantId;
+
+    @Schema(description = "租户名称")
+    private String tenantName;
+
+    @Schema(description = "应用id")
+    private Long applicationId;
+
+    @Schema(description = "对应的天工用户id")
+    private Long tiangongID;
+
+    /**
+     * 所在部门
+     */
+    private Dept dept;
+
+    @Schema(description = "部门")
+    @Data
+    public static class Dept {
+
+        @Schema(description = "部门编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+        private Long id;
+
+        @Schema(description = "部门名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "研发部")
+        private String name;
+
+    }
+
+}

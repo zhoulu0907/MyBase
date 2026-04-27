@@ -1,0 +1,539 @@
+package com.cmsr.onebase.framework.security.build.filter;
+
+import cn.hutool.core.util.StrUtil;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
+import com.cmsr.onebase.framework.common.biz.system.oauth2.dto.OAuth2AccessTokenCheckRespDTO;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.exception.ServiceException;
+import com.cmsr.onebase.framework.common.pojo.CommonResult;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.TenantContextHolder;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
+import com.cmsr.onebase.framework.security.config.SecurityProperties;
+import com.cmsr.onebase.framework.web.config.WebProperties;
+import com.cmsr.onebase.framework.web.core.handler.GlobalExceptionHandler;
+import com.cmsr.onebase.framework.web.core.util.WebFrameworkUtils;
+import com.cmsr.onebase.framework.web.core.util.StaticResourceUtil;
+import org.apache.commons.lang3.StringUtils;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.SEESION_TIMEOUT;
+import static com.cmsr.onebase.framework.common.exception.enums.GlobalErrorCodeConstants.UNAUTHORIZED;
+import static com.cmsr.onebase.framework.common.util.collection.CollectionUtils.convertList;
+
+/**
+ * Token 过滤器，验证 token 的有效性
+ * 验证通过后，获得 {@link LoginUser} 信息，并加入到 Spring Security 上下文
+ *
+ */
+@RequiredArgsConstructor
+@Slf4j
+public class BuildAuthenticationFilter extends OncePerRequestFilter implements ApplicationContextAware {
+
+    private final SecurityProperties securityProperties;
+
+    private final GlobalExceptionHandler globalExceptionHandler;
+
+    private final OAuth2TokenCommonApi oauth2TokenApi;
+
+    private final SecurityConfigApi securityConfigApi;
+
+    private ApplicationContext applicationContext;
+
+    private List<String> permitAllUrls;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    private String collapseSlashes(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+        int len = path.length();
+        StringBuilder sb = new StringBuilder(len);
+        char prev = 0;
+        for (int i = 0; i < len; i++) {
+            char c = path.charAt(i);
+            if (c == '/' && prev == '/') {
+                continue;
+            }
+            sb.append(c);
+            prev = c;
+        }
+        return sb.toString();
+    }
+
+    private String normalizeApiPath(String path) {
+        if (path == null || path.isEmpty()) {
+            return path;
+        }
+        int idx = Integer.MAX_VALUE;
+        int buildIdx = path.indexOf(WebProperties.BUILD);
+        if (buildIdx >= 0) {
+            idx = Math.min(idx, buildIdx);
+        }
+        int platformIdx = path.indexOf(WebProperties.PLATFORM);
+        if (platformIdx >= 0) {
+            idx = Math.min(idx, platformIdx);
+        }
+        int runtimeIdx = path.indexOf(WebProperties.RUNTIME);
+        if (runtimeIdx >= 0) {
+            idx = Math.min(idx, runtimeIdx);
+        }
+        if (idx == Integer.MAX_VALUE) {
+            return path;
+        }
+        return path.substring(idx);
+    }
+
+    private String requestPath(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String path = requestUri;
+        if (contextPath != null && !contextPath.isEmpty() && requestUri != null && requestUri.startsWith(contextPath)) {
+            path = requestUri.substring(contextPath.length());
+        }
+        return normalizeApiPath(collapseSlashes(path));
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+        // 初始化时调用getPermitAllUrls方法并保存结果
+        try {
+            this.permitAllUrls = getPermitAllUrls();
+        } catch (Exception e) {
+            log.error("初始化免登录URL列表失败", e);
+            this.permitAllUrls = new ArrayList<>();
+        }
+    }
+
+    @Override
+    @SuppressWarnings("NullableProblems")
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        String requestPath = requestPath(request);
+
+        if (StaticResourceUtil.isStaticResource(request)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        if (isLoginOrLogoutRequest(request)) {
+            // 如果是登录、登出、注册，那么从header中获取租户信息
+            TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+            log.info("[BuildAuthenticationFilter][登录链路放行] path={}, tenantHeader={}, legacyTenantHeader={}, referer={}, userAgent={}",
+                    requestPath,
+                    getHeaderValue(request, WebFrameworkUtils.HEADER_X_TENANT_ID),
+                    getHeaderValue(request, WebFrameworkUtils.HEADER_TENANT_ID),
+                    getHeaderValue(request, "Referer"),
+                    getHeaderValue(request, "User-Agent"));
+            // 无需获取token和登录用户信息
+        } else if (isPermitAllRequest(request)) {
+            // 如果是其他免登接口，暂保持和登录登出一致的逻辑，从header中获取租户信息
+            TenantContextHolder.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+        } else {
+            // 其他接口，需要获取token和登录用户信息
+            if (hasAiHeaders(request)) {
+                chain.doFilter(request, response);
+                return;
+            }
+            // 情况一，基于 header[login-user] 获得用户，例如说来自 Gateway 或者其它服务透传
+            // LoginUser loginUser = buildLoginUserByHeader(request);
+            LoginUser loginUser = null;
+            if (Boolean.TRUE.equals(securityProperties.getLoginUserHeaderEnable())) {
+                try {
+                    loginUser = buildLoginUserByHeader(request);
+                    if (loginUser != null && loginUser.getTenantId() == null) {
+                        loginUser.setTenantId(WebFrameworkUtils.getTenantIdFromHeader(request));
+                    }
+                    if (loginUser != null && (loginUser.getId() == null || loginUser.getTenantId() == null)) {
+                        loginUser = null;
+                    }
+                } catch (Throwable ex) {
+                    CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                    ServletUtils.writeJSON(response, result);
+                    return;
+                }
+            }
+            // 情况二，基于 Token 获得用户
+            // 注意，这里主要满足直接使用 Nginx 直接转发到 Spring Cloud 服务的场景。
+            String token = null;
+            if (loginUser == null) {
+                token = SecurityFrameworkUtils.obtainAuthorization(request,
+                        securityProperties.getTokenHeader(), securityProperties.getTokenParameter());
+                if (StrUtil.isNotEmpty(token)) {
+                    try {
+                        // 1.1 基于 token 构建登录用户
+                        String runMode = getRunModeByUri(request);
+
+                        loginUser = buildLoginUserByToken(runMode, token);
+                        // 1.2 模拟 Login 功能，方便日常开发调试
+                        if (loginUser == null && isTokenMockable(token)) {
+                            loginUser = mockLoginUser(request, token);
+                        }
+                    } catch (Throwable ex) {
+                        CommonResult<?> result = globalExceptionHandler.allExceptionHandler(request, ex);
+                        ServletUtils.writeJSON(response, result);
+                        return;
+                    }
+                }
+            }
+            // 设置当前用户
+            if (loginUser != null) {
+                SecurityFrameworkUtils.setLoginUser(loginUser, request);
+                TenantContextHolder.setTenantId(loginUser.getTenantId());
+                log.info("[BuildAuthenticationFilter][认证成功] path={}, userId={}, tenantId={}, runMode={}, tokenSource={}",
+                        requestPath, loginUser.getId(), loginUser.getTenantId(), loginUser.getRunMode(),
+                        resolveTokenSource(request));
+                if (isTokenMockable(token)) {
+                    // mock模式不检查会话空闲
+                    log.info("[BuildAuthenticationFilter][TOKEN MOCK开启，用户ID：{}, prefix:{}, token:{}]", loginUser.getId(), securityProperties.getMockSecret(), token);
+                } else {
+                    // 会话空闲检查：排除登录和登出请求
+                    boolean checkSuc = checkAndUpdateSessionIdle(loginUser, token);
+                    if (!checkSuc) {
+                        log.error("[BuildAuthenticationFilter][长时间内无操作，自动登出, 401 会话超时, userID={}]", loginUser.getId());
+                        CommonResult<?> result = CommonResult.error(SEESION_TIMEOUT);
+                        ServletUtils.writeJSON(response, result);
+                        return; // 中断
+                    }
+                }
+            } else {
+                log.error("[BuildAuthenticationFilter][无效的Token，401 登录已过期] {}",
+                        buildTokenDiagnostics(request, requestPath, token));
+                CommonResult<?> result = CommonResult.error(UNAUTHORIZED);
+                ServletUtils.writeJSON(response, result);
+                return; // 中断
+            }
+        }
+
+        // 继续过滤链
+        try {
+            chain.doFilter(request, response);
+        } finally {
+            // 清理租户信息
+            TenantContextHolder.clear();
+        }
+    }
+
+    private boolean hasAiHeaders(HttpServletRequest request) {
+        return StringUtils.isNotBlank(request.getHeader("X-AI-KeyId")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Signature")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Request-Id")) ||
+                StringUtils.isNotBlank(request.getHeader("X-AI-Tenant-Id"));
+    }
+
+    private LoginUser buildLoginUserByToken(String runMode, String token) {
+        try {
+            // 校验访问令牌
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.checkAccessToken(runMode, token).getCheckedData();
+            if (accessToken == null) {
+                return null;
+            }
+            // 构建登录用户
+            return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setRunMode(accessToken.getRunMode())
+                    .setCorpId(accessToken.getCorpId())
+                    .setInfo(accessToken.getUserInfo()) // 额外的用户信息
+                    .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
+                    .setExpiresTime(accessToken.getExpiresTime())
+                    .setLoginPlatform(accessToken.getLoginPlatform());
+        } catch (ServiceException serviceException) {
+            // 校验 Token 不通过时，考虑到一些接口是无需登录的，所以直接返回 null 即可
+            return null;
+        }
+    }
+
+    /**
+     * 模拟登录用户，方便日常开发调试
+     * <p>
+     * 注意，在线上环境下，一定要关闭该功能！！！
+     *
+     * @param request 请求
+     * @param token   模拟的 token，格式为 {@link SecurityProperties#getMockSecret()} + 用户编号
+     * @return 模拟的 LoginUser
+     */
+    private LoginUser mockLoginUser(HttpServletRequest request, String token) {
+        if (!isTokenMockable(token)) {
+            return null;
+        }
+        // 构建模拟用户
+        // Long userId = Long.valueOf(token.substring(securityProperties.getMockSecret().length()));
+        token = token.substring(securityProperties.getMockSecret().length());
+        // 4d8fd6314da943f496b14f29b8f50000 -> 4d8fd6314da943f496b14f29b8f5d4f4
+        return buildLoginUserByInnerToken(token);
+    }
+
+    public boolean isTokenMockable(String token){
+        // 必须开启且token以“mock-secret”配置项的值为开头
+        if (StrUtil.isBlank(token)) {
+            return false;
+        }
+        return securityProperties.getMockEnable() && token.startsWith(securityProperties.getMockSecret());
+    }
+
+    private String buildTokenDiagnostics(HttpServletRequest request, String requestPath, String token) {
+        return String.format("path=%s, runMode=%s, tokenSource=%s, authHeader=%s, tokenParam=%s, tokenCookie=%s, xTenantId=%s, tenantId=%s, referer=%s, userAgent=%s, token=%s",
+                requestPath,
+                getRunModeByUri(request),
+                resolveTokenSource(request),
+                hasText(request.getHeader(securityProperties.getTokenHeader())),
+                hasText(request.getParameter(securityProperties.getTokenParameter())),
+                hasText(getCookieValue(request, securityProperties.getTokenHeader())),
+                getHeaderValue(request, WebFrameworkUtils.HEADER_X_TENANT_ID),
+                getHeaderValue(request, WebFrameworkUtils.HEADER_TENANT_ID),
+                getHeaderValue(request, "Referer"),
+                getHeaderValue(request, "User-Agent"),
+                maskToken(token));
+    }
+
+    private String resolveTokenSource(HttpServletRequest request) {
+        if (hasText(request.getHeader(securityProperties.getTokenHeader()))) {
+            return "header";
+        }
+        if (hasText(request.getParameter(securityProperties.getTokenParameter()))) {
+            return "parameter";
+        }
+        if (hasText(getCookieValue(request, securityProperties.getTokenHeader()))) {
+            return "cookie";
+        }
+        return "none";
+    }
+
+    private String getCookieValue(HttpServletRequest request, String cookieName) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (StringUtils.equals(cookieName, cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private boolean hasText(String value) {
+        return StringUtils.isNotBlank(value);
+    }
+
+    private String getHeaderValue(HttpServletRequest request, String headerName) {
+        return StringUtils.defaultIfBlank(request.getHeader(headerName), "-");
+    }
+
+    private String maskToken(String token) {
+        if (StringUtils.isBlank(token)) {
+            return "-";
+        }
+        int visibleLength = Math.min(8, token.length());
+        return token.substring(0, visibleLength) + "...(len=" + token.length() + ")";
+    }
+
+    private LoginUser buildLoginUserByInnerToken(String token) {
+        try {
+            // 校验访问令牌
+            OAuth2AccessTokenCheckRespDTO accessToken = oauth2TokenApi.getAccessToken(token).getCheckedData();
+            if (accessToken == null) {
+                return null;
+            }
+            // 构建登录用户
+            return new LoginUser().setId(accessToken.getUserId()).setUserType(accessToken.getUserType())
+                    .setRunMode(accessToken.getRunMode())
+                    .setCorpId(accessToken.getCorpId())
+                    .setInfo(accessToken.getUserInfo()) // 额外的用户信息
+                    .setTenantId(accessToken.getTenantId()).setScopes(accessToken.getScopes())
+                    .setExpiresTime(accessToken.getExpiresTime());
+        } catch (ServiceException serviceException) {
+            // 校验 Token 不通过时，考虑到一些接口是无需登录的，所以直接返回 null 即可
+            return null;
+        }
+    }
+
+    private LoginUser buildLoginUserByHeader(HttpServletRequest request) {
+        String loginUserStr = request.getHeader(SecurityFrameworkUtils.LOGIN_USER_HEADER);
+        if (StrUtil.isEmpty(loginUserStr)) {
+            return null;
+        }
+        try {
+            loginUserStr = URLDecoder.decode(loginUserStr, StandardCharsets.UTF_8); // 解码，解决中文乱码问题
+            LoginUser loginUser = JsonUtils.parseObject(loginUserStr, LoginUser.class);
+            return loginUser;
+        } catch (Exception ex) {
+            log.error("[buildLoginUserByHeader][解析 LoginUser({}) 发生异常]", loginUserStr, ex);
+            ;
+            throw ex;
+        }
+    }
+
+    /**
+     * 根据请求 URI 判断运行模式
+     *
+     * @param request
+     * @return
+     */
+    private String getRunModeByUri(HttpServletRequest request) {
+        String uri = requestPath(request);
+        if (uri == null) {
+            return null;
+        }
+        if (uri.startsWith(WebProperties.PLATFORM)) {
+            return RunModeEnum.PLATFORM.getValue();
+        } else if (uri.startsWith(WebProperties.BUILD)) {
+            return RunModeEnum.BUILD.getValue();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 判断是否为登录或登出请求
+     *
+     * @param request HTTP请求
+     * @return 是否为登录/登出请求
+     */
+    private boolean isLoginOrLogoutRequest(HttpServletRequest request) {
+        String uri = requestPath(request);
+        if (uri == null) {
+            return false;
+        }
+        // 获取路径的最后一段
+        String lastSegment = uri.substring(uri.lastIndexOf('/') + 1);
+        // 检查是否包含login或logout或register（不区分大小写）
+        return lastSegment.toLowerCase().contains("login")
+                || lastSegment.toLowerCase().contains("logout")
+                || lastSegment.toLowerCase().contains("register")
+                ;
+    }
+
+    /**
+     * 检查并更新会话空闲状态
+     * <p>
+     * 实现逻辑：
+     * 1. 从token中反查deviceId
+     * 2. 调用updateSessionIdleKey更新Redis key的TTL和value
+     * 3. 如果更新返回false（Redis key已过期），则调用登出接口并抛出会话超时异常
+     *
+     * @param loginUser 登录用户
+     * @param token     访问令牌
+     */
+    private boolean checkAndUpdateSessionIdle(LoginUser loginUser, String token) {
+        if (loginUser == null || StrUtil.isBlank(token)) {
+            return true;
+        }
+
+        // 步骤1：通过token反查deviceId
+        CommonResult<String> deviceIdResult = securityConfigApi.findDeviceIdByToken(loginUser.getTenantId(), loginUser.getId(), token);
+
+        if (deviceIdResult == null || StrUtil.isBlank(deviceIdResult.getData())) {
+            log.debug("[checkAndUpdateSessionIdle][无法反查deviceId，跳过会话空闲检查] userId={}, token={}", loginUser.getId(), token);
+            return true;
+        }
+
+        String deviceId = deviceIdResult.getData();
+
+        // 步骤2：更新会话空闲Redis key的TTL和value
+        CommonResult<Boolean> updateResult = securityConfigApi.updateSessionIdleKey(loginUser.getTenantId(), loginUser.getId(), deviceId);
+
+        // 步骤3：如果更新失败（返回false），表示Redis key已过期，执行登出操作
+        if (updateResult == null || updateResult.getData() == null || !updateResult.getData()) {
+            log.info("[checkAndUpdateSessionIdle][会话已超时，执行强制登出] userId={}, deviceId={}", loginUser.getId(), deviceId);
+
+            // 删除accessToken
+            oauth2TokenApi.removeAccessToken(token);
+            // 删除在线设备记录
+            securityConfigApi.removeOnlineDevice(loginUser.getTenantId(), loginUser.getId(), token);
+
+            return false;
+        }
+
+        log.debug("[checkAndUpdateSessionIdle][会话空闲key更新成功] userId={}, deviceId={}", loginUser.getId(), deviceId);
+        return true;
+    }
+
+    /**
+     * 判断请求路径是否在免登录URL列表中
+     * 支持Ant风格路径匹配，如：/runtime/system/auth/**
+     *
+     * @param request HTTP请求
+     * @return 是否为免登录请求
+     */
+    private boolean isPermitAllRequest(HttpServletRequest request) {
+        String requestUri = requestPath(request);
+        if (permitAllUrls != null) {
+            for (String pattern : permitAllUrls) {
+                if (pathMatcher.match(pattern, requestUri)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
+     * 解析和获取免登接口
+     * 获取所有标注 @PermitAll 注解的Controller接口路径，以及 yaml 配置的免登录 URL 列表(securityProperties.getPermitAllUrls())
+     *
+     * @return
+     */
+    private List<String> getPermitAllUrls() {
+        List<String> result = new ArrayList<>();
+
+        // 添加配置文件中的免登录URL列表
+        if (securityProperties.getPermitAllUrls() != null) {
+            result.addAll(securityProperties.getPermitAllUrls());
+        }
+
+        // 获取带有@PermitAll注解的接口URL
+        if (applicationContext != null) {
+            RequestMappingHandlerMapping requestMappingHandlerMapping =
+                    applicationContext.getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class);
+            if (requestMappingHandlerMapping != null) {
+                Map<RequestMappingInfo, HandlerMethod> handlerMethodMap = requestMappingHandlerMapping.getHandlerMethods();
+                for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : handlerMethodMap.entrySet()) {
+                    HandlerMethod handlerMethod = entry.getValue();
+                    if (handlerMethod.hasMethodAnnotation(jakarta.annotation.security.PermitAll.class)) {
+                        RequestMappingInfo requestMappingInfo = entry.getKey();
+
+                        Set<String> urls = new HashSet<>();
+                        if (requestMappingInfo.getPatternsCondition() != null) {
+                            urls.addAll(requestMappingInfo.getPatternsCondition().getPatterns());
+                        }
+                        if (requestMappingInfo.getPathPatternsCondition() != null) {
+                            urls.addAll(convertList(requestMappingInfo.getPathPatternsCondition().getPatterns(),
+                                    pathPattern -> pathPattern.getPatternString()));
+                        }
+
+                        if (!urls.isEmpty()) {
+                            result.addAll(urls);
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+}

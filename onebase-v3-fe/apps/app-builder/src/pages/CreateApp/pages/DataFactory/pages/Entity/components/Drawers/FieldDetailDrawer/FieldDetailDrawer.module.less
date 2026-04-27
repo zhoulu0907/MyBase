@@ -1,0 +1,146 @@
+@import '../../../../../styles/variables.less';
+
+.field-detail-drawer {
+  .pc-drawer-header {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 16px 24px;
+
+    .pc-drawer-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1d2129;
+    }
+  }
+
+  .pc-drawer-body {
+    padding: 24px;
+  }
+}
+
+.field-detail-content {
+  .section {
+    margin-bottom: 32px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1d2129;
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f2f3f5;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      background: #1890ff;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+  }
+
+  .pc-descriptions {
+    .pc-descriptions-item-label {
+      font-weight: 500;
+      color: #4e5969;
+      background-color: #fafafa;
+    }
+
+    .pc-descriptions-item-value {
+      color: #1d2129;
+    }
+  }
+
+  .action-section {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e5e5;
+    text-align: center;
+
+    .pc-space {
+      justify-content: center;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+
+  p {
+    margin-top: 16px;
+    color: #86909c;
+    font-size: 14px;
+  }
+}
+
+.empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+
+  .pc-empty {
+    .pc-empty-description {
+      color: #86909c;
+    }
+  }
+}
+
+// 标签样式优化
+.pc-tag {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+
+  &.pc-tag-red {
+    background-color: #fff2f0;
+    border-color: #ffccc7;
+    color: #cf1322;
+  }
+
+  &.pc-tag-green {
+    background-color: #f6ffed;
+    border-color: #b7eb8f;
+    color: #389e0d;
+  }
+
+  &.pc-tag-blue {
+    background-color: #f0f9ff;
+    border-color: #91d5ff;
+    color: #1890ff;
+  }
+
+  &.pc-tag-orange {
+    background-color: #fff7e6;
+    border-color: #ffd591;
+    color: #d46b08;
+  }
+
+  &.pc-tag-purple {
+    background-color: #f9f0ff;
+    border-color: #d3adf7;
+    color: #722ed1;
+  }
+
+  &.pc-tag-cyan {
+    background-color: #e6fffb;
+    border-color: #87e8de;
+    color: #08979c;
+  }
+
+  &.pc-tag-gray {
+    background-color: #fafafa;
+    border-color: #d9d9d9;
+    color: #8c8c8c;
+  }
+}

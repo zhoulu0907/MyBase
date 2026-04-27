@@ -1,0 +1,376 @@
+import { useRef, useEffect, useState, type FC } from 'react';
+import { Drawer, Grid, Tag, Button, Popconfirm, Tooltip, Modal, Message } from '@arco-design/web-react';
+import { IconFullscreen, IconLink, IconDoubleRight, IconFullscreenExit } from '@arco-design/web-react/icon';
+import ExpendSp from '@/assets/images/task_center/expend-sp.svg';
+import ProPreviewImg from '@/assets/images/task_center/process-preview.svg';
+import { LISTTYPE, FlowStatusMap, BPMConfigButtonType, FLOWSTATUS_TYPE } from '@onebase/app';
+import DetailStep from './DetailStep';
+import DetailOKConfirm from './DetailOKConfirm';
+import { getFormDetail, getOperatorRecord, fetchExecTask } from '@onebase/app/src/services/app_runtime';
+import PreviewContainer from './DetailForm';
+import FlowView from '../../../../../../../app-builder/src/pages/Editor/components/flowView';
+import { type FetchExecTaskReq } from '@onebase/app';
+import { getCorpResourceById } from '@onebase/common';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import FlowPredict from '../../../../Runtime/components/preview/flowPredict';
+import copy from 'copy-to-clipboard';
+const Row = Grid.Row;
+const Col = Grid.Col;
+
+enum PageTypeMap {
+  willdo = 'todo',
+  idone = 'done',
+  icreated = 'created',
+  icopied = 'cc',
+  list = 'list'
+}
+
+interface PageProps {
+  detailPopVisible: boolean;
+  setPopVisible: (visible: boolean) => void;
+  onBack?: () => void;
+  rowData?: any;
+  listType?: string;
+}
+
+const DetailPage: React.FC<PageProps> = ({ detailPopVisible = false, setPopVisible, onBack, rowData, listType }) => {
+  let [drawWidth, setDrawWidth] = useState<string>('66.66%');
+  let [isShowRight, setIsShowRight] = useState(true);
+  const [stepData, setStepData] = useState();
+  const [detailData, setDetailData] = useState<any>();
+  const [flowViewVisible, setFlowViewVisible] = useState(false);
+  const [isPredictVisible, setPredictVisible] = useState(false);
+  const [entityParam, setEntityParam] = useState<any>();
+  const [businessUuid, setBusinessUuid] = useState<any>();
+  const [defaultApprovalComment, setDefaultApprovalComment] = useState<any>();
+  let confirmRef = useRef<any>(null);
+  const formRef = useRef<any>(null);
+  const [popupVisibleMap, setPopupVisibleMap] = useState<any>({});
+  const [search] = useSearchParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const setPopupVisibleByIndex = (index: number, visible: boolean, item?: any) => {
+    if (item?.buttonName && detailData?.buttonConfigs) {
+      detailData?.buttonConfigs?.forEach((element: any) => {
+        if (element.buttonName === item.buttonName) {
+          setDefaultApprovalComment(element.defaultApprovalComment);
+        }
+      });
+    }
+    setPopupVisibleMap((prev: any) => {
+      if (visible) {
+        const newState: any = {};
+        Object.keys(prev).forEach((key) => {
+          newState[key] = false;
+        });
+        newState[index] = true;
+        return newState;
+      } else {
+        return {
+          ...prev,
+          [index]: false
+        };
+      }
+    });
+  };
+  function toggleFullScreen(type: string) {
+    if (type === 'FULLSCREEN') {
+      setDrawWidth('100%');
+    } else {
+      setDrawWidth('66.66%');
+    }
+  }
+  function renderTitle() {
+    return (
+      <>
+        <span>{detailData?.processTitle}</span>
+        <div>
+          {drawWidth !== '100%' ? (
+            <IconFullscreen onClick={() => toggleFullScreen('FULLSCREEN')} />
+          ) : (
+            <IconFullscreenExit onClick={() => toggleFullScreen('INITSCREEN')} />
+          )}
+          <IconLink onClick={copyLink} />
+        </div>
+      </>
+    );
+  }
+
+  const copyLink = async () => {
+    const [hashPath, queryString] = window.location.hash.split('?');
+    const searchParams = new URLSearchParams(queryString);
+    searchParams.set('viewDetail', search.get('curMenu') || '');
+    searchParams.set('businessUuid', rowData.businessUuid || '');
+    searchParams.set('instanceId', rowData.instanceId || '');
+    searchParams.set('taskId', rowData.taskId || '');
+    searchParams.set('pageSetId', rowData.pageSetId || '');
+
+    const newUrl = `${window.location.origin}${window.location.pathname}${hashPath}?${searchParams.toString()}`;
+    copy(newUrl);
+    Message.success('复制成功');
+  };
+
+  const fetchExec = async (value: any) => {
+    const buttonType = value?.buttonType;
+    const fieldData = await formRef.current.getFormData();
+
+    if (buttonType === BPMConfigButtonType.SUBMIT && !isPredictVisible) {
+      setEntityParam({
+        tableName: detailData?.formData?.tableName,
+        data: fieldData
+      });
+      setBusinessUuid(rowData?.businessUuid);
+      setPredictVisible(true);
+      return;
+    }
+    try {
+      const req: FetchExecTaskReq = {
+        buttonType,
+        taskId: detailData?.taskId,
+        instanceId: rowData?.instanceId,
+        entity: {
+          tableName: detailData?.formData?.tableName,
+          data: fieldData
+        }
+      };
+      const res = await fetchExecTask(req);
+      if (res) {
+        Message.success(res?.msg || '操作成功');
+        setPredictVisible(false);
+        onBack && onBack();
+      } else {
+        Message.error(res?.msg || '操作失败');
+      }
+    } catch (error: any) {
+      Message.error(error?.msg || '操作失败');
+    }
+  };
+
+  const handleConfirmOK = async (value: any) => {
+    const fieldData = await formRef.current.getFormData();
+    const entityData = {
+      tableName: detailData?.formData?.tableName,
+      data: fieldData
+    };
+    if (confirmRef?.current?.childMethod) {
+      confirmRef.current.childMethod({ value, entityData });
+    }
+  };
+
+  function handlePreview() {
+    setFlowViewVisible(true);
+  }
+  function renderDrawerFooter() {
+    return (
+      <>
+        <Button type="text" onClick={handlePreview}>
+          <img src={ProPreviewImg} style={{ marginRight: '3px' }} />
+          流程预览
+        </Button>
+        {detailData?.buttonConfigs &&
+          detailData?.buttonConfigs?.map((item: any, index: number) => {
+            if (
+              item?.buttonType === BPMConfigButtonType.SAVE ||
+              item?.buttonType === BPMConfigButtonType.SUBMIT ||
+              item?.buttonType === BPMConfigButtonType.WITHDRAW
+            ) {
+              return (
+                <Button
+                  key={index}
+                  type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
+                  onClick={() => fetchExec(item)}
+                >
+                  {item?.displayName}
+                </Button>
+              );
+            } else {
+              return (
+                <Popconfirm
+                  title=""
+                  key={index}
+                  style={{ maxWidth: '420px', width: '420px' }}
+                  className="dt-ok-confirm"
+                  content={
+                    <DetailOKConfirm
+                      ref={confirmRef}
+                      onSetPopupVisible={(visible: any) => setPopupVisibleByIndex(index, visible)}
+                      onBack={onBack}
+                      taskId={detailData?.taskId}
+                      instanceId={rowData?.instanceId}
+                      itemData={item}
+                      isRequired={item?.approvalCommentRequired}
+                      defaultApprovalComment={defaultApprovalComment}
+                    />
+                  }
+                  onOk={() => {
+                    handleConfirmOK(item);
+                  }}
+                  popupVisible={!!popupVisibleMap[index]}
+                  onCancel={() => setPopupVisibleByIndex(index, false)}
+                >
+                  <Button
+                    type={item?.buttonType === BPMConfigButtonType.APPROVE ? 'primary' : 'outline'}
+                    onClick={() => setPopupVisibleByIndex(index, true, item)}
+                  >
+                    {item?.displayName}
+                  </Button>
+                </Popconfirm>
+              );
+            }
+          })}
+      </>
+    );
+  }
+
+  const fetchStepData = async () => {
+    const res = await getOperatorRecord({ instanceId: rowData?.instanceId });
+    setStepData(res);
+  };
+  const fetchDetailData = async () => {
+    const res = await getFormDetail({
+      instanceId: rowData?.instanceId,
+      taskId: rowData?.taskId,
+      from: PageTypeMap[listType as keyof typeof PageTypeMap]
+    });
+    setDetailData(res);
+  };
+
+  const getColor = (status: string) => {
+    switch (status) {
+      case FLOWSTATUS_TYPE.IN_APPROVAL:
+        return 'blue';
+      case FLOWSTATUS_TYPE.APPROVED:
+        return 'green';
+      case FLOWSTATUS_TYPE.DRAFT:
+        return 'gray';
+      case FLOWSTATUS_TYPE.REJECTED:
+      case FLOWSTATUS_TYPE.WITHDRAWN:
+      case FLOWSTATUS_TYPE.TERMINATED:
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
+
+  useEffect(() => {
+    if (!detailPopVisible) return;
+    if (
+      listType === LISTTYPE.WILLDO ||
+      listType === LISTTYPE.IDONE ||
+      listType === LISTTYPE.ICREATED ||
+      listType === LISTTYPE.ICOPIED ||
+      listType === LISTTYPE.LIST
+    ) {
+      fetchStepData();
+      fetchDetailData();
+    } else {
+      //根据列表类型请求对应的详情
+    }
+  }, [listType, detailPopVisible]);
+
+  const closeDrawer = () => {
+    setPopVisible(false);
+    const sp = new URLSearchParams(location.search);
+    sp.delete('businessUuid');
+    sp.delete('instanceId');
+    sp.delete('taskId');
+    sp.delete('pageSetId');
+    sp.delete('viewDetail');
+
+    const to = `${location.pathname}?${sp.toString()}`;
+    navigate(to, { replace: true });
+  };
+
+  return (
+    <section>
+      <Drawer
+        className="draw-detail-pop"
+        width={drawWidth}
+        title={renderTitle()}
+        visible={detailPopVisible}
+        footer={renderDrawerFooter()}
+        onOk={closeDrawer}
+        onCancel={closeDrawer}
+      >
+        <div className="draw-wrap-box">
+          <Row className="header-row" style={{ marginBottom: 16 }}>
+            <Col span={6}>
+              <p className="gray-color">当前状态</p>
+              <div style={{ padding: '4px 0' }}>
+                <Tag color={getColor(detailData?.currentStatus)} defaultChecked checkable={false}>
+                  {detailData?.currentStatus && FlowStatusMap[detailData?.currentStatus]}
+                </Tag>
+              </div>
+            </Col>
+            <Col span={6}>
+              <p className="gray-color">发起人</p>
+              <div className="photo-box">
+                <p className="photo-img">
+                  {detailData?.initiator?.avatar ? (
+                    <img src={getCorpResourceById(detailData?.initiator?.avatar)} alt="" />
+                  ) : (
+                    detailData?.initiatorName?.charAt(0)
+                  )}
+                </p>
+                {detailData?.initiatorName}
+              </div>
+            </Col>
+            <Col span={6}>
+              <p className="gray-color">发起部门</p>
+              <div className="photo-box">{detailData?.initiatorDeptName}</div>
+            </Col>
+            <Col span={6}>
+              <p className="gray-color">流程版本号</p>
+              <div className="photo-box">{detailData?.bpmVersion}</div>
+            </Col>
+          </Row>
+          <div className="draw-content">
+            <div className="draw-left">
+              <PreviewContainer ref={formRef} pageSetId={rowData?.pageSetId} detailData={detailData} />
+            </div>
+            {isShowRight ? (
+              <div className="draw-right">
+                <div className="arco-drawer-header">
+                  <div className="arco-drawer-header-title">
+                    <span>审批记录</span>
+                    <IconDoubleRight onClick={() => setIsShowRight(false)} />
+                  </div>
+                </div>
+                <DetailStep stepData={stepData} />
+              </div>
+            ) : (
+              <Tooltip position="lt" trigger="hover" content="展开审批记录">
+                <div className="expend-sp-box" onClick={() => setIsShowRight(true)}>
+                  <img src={ExpendSp} alt="" />
+                </div>
+              </Tooltip>
+            )}
+          </div>
+        </div>
+      </Drawer>
+      <FlowView
+        visible={flowViewVisible}
+        setVisible={setFlowViewVisible}
+        instanceId={rowData?.instanceId}
+        businessUuid={rowData?.businessUuid}
+        title={detailData?.processTitle}
+      />
+
+      {isPredictVisible && (
+        <Modal
+          title=""
+          visible={isPredictVisible}
+          onOk={() => fetchExec({ buttonType: BPMConfigButtonType.SUBMIT })}
+          onCancel={() => setPredictVisible(false)}
+          autoFocus={false}
+          focusLock={true}
+        >
+          <FlowPredict entityParam={entityParam} businessUuid={businessUuid} />
+        </Modal>
+      )}
+    </section>
+  );
+};
+
+export default DetailPage;

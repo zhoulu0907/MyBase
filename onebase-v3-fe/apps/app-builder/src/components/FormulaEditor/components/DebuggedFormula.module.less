@@ -1,0 +1,61 @@
+.debugModeContainer {
+    .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        .rightTitle {
+            width: 30%;
+        }
+    }
+
+    .content {
+        display: flex;
+        justify-content: space-between;
+        min-height: 250px;
+
+        .title {
+            margin-top: 0;
+        }
+        
+        .variablesDisplay {
+            border: 1px solid #e5e6eb;
+            padding: 24px;
+            width: 56%;
+
+            .bodycellFormItem {
+                margin-bottom: 0;
+                :global(.pc-form-item-wrapper) {
+                    flex: 1;
+                    border-right: none;
+                }
+            }
+
+            :global(.pc-row.pc-form-item) {
+                border: none;
+                :global(.pc-col-5){
+                    flex-basis: 18%;
+                    border-right: none;
+                }
+            }
+        }
+        .iconPlus {
+            margin: 8px auto;
+            cursor: pointer;
+        }
+        .calculateIcon {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            margin-top: 24px;
+            align-items: center;
+        }
+
+        .rightContent {
+            border: 1px solid #e5e6eb;
+            padding: 24px;
+            width: 25%;
+            word-break: break-all;
+        }
+    }
+}

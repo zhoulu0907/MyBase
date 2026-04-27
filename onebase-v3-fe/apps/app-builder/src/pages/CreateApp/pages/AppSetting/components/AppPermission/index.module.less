@@ -1,0 +1,119 @@
+.AppPermission {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px 8px 0 0;
+  box-sizing: border-box;
+  display: flex;
+
+  .left {
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 16px;
+    width: 248px;
+
+    .roleTabs {
+      :global(.pc-tabs-header-title) {
+        margin-left: 0px;
+      }
+      :global(.pc-tabs-header-title:first-of-type) {
+        margin-left: 0px;
+      }
+      :global(.pc-tabs-header) {
+        border-bottom: 1px solid #e5e6eb;
+      }
+
+      .roleLabel {
+        font-weight: 500;
+        line-height: 22px;
+      }
+    }
+
+    .menu {
+      margin-top: 16px;
+
+      :global(.pc-menu-inner) {
+        padding: 0;
+      }
+      .user {
+        margin-bottom: 12px;
+        padding-bottom: 24px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #e5e6eb;
+      }
+
+      .userIcon .deleteIcon {
+        font-size: 16px;
+        margin-right: 4px;
+      }
+
+      .deleteIcon {
+        opacity: 0;
+      }
+
+      .menuItem {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &:hover {
+          .deleteIcon {
+            font-size: 16px;
+            margin-right: 0;
+            opacity: 1;
+          }
+        }
+      }
+
+      .custom {
+        display: flex;
+        align-items: center;
+      }
+      .editIcon {
+        margin-left: 4px;
+        margin-right: 0;
+        transition: 'opacity 0.2s';
+      }
+
+      label {
+        color: #86909c;
+        font-weight: 400;
+        font-size: 12px;
+        line-height: 28px;
+        display: block;
+        margin-bottom: 7px;
+      }
+
+      .add {
+        font-weight: 500;
+        color: rgb(var(--primary-6));
+        background-color: transparent;
+        &:hover {
+          background-color: transparent;
+        }
+      }
+    }
+
+    .userHeader {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .addRoleBox {
+      padding: 0 8px;
+      color: rgb(var(--primary-6));
+      cursor: pointer;
+    }
+    .addRole {
+      color: rgb(var(--primary-6));
+      margin-right: 4px;
+    }
+  }
+
+  .right {
+    flex: 1;
+    margin-left: 16px;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 16px;
+  }
+}

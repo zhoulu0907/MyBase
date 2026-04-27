@@ -1,0 +1,762 @@
+## 环境配置说明
+# 上面已设置默认的local环境变量，可直接运行
+# 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
+# 或者手动修改上面的@变量值
+### CONCATENATE
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula":"CONCATENATE('22',$界面交互触发节点.资产)",
+  "parameters":{
+    "$界面交互触发节点.资产":"\\nihao"
+  }
+}
+
+
+
+### LEFT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "LEFT1()" }
+
+### LOWER
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "LOWER('1234')" }
+
+### RIGHT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "RIGHT('abcdef',2)" }
+
+### LEN
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "LEN('onebase')" }
+
+### VALUE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "VALUE('$1,234.56')" }
+
+### REPLACE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "REPLACE('abcdef',2,3,'X')" }
+
+### MID
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "MID('HelloWorld',6,5)" }
+
+### TEXT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TEXT(TODAY(), 'MM/DD HH:MM')" }
+
+### UPPER
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "UPPER(LEFT('Hello World',5))" }
+
+### TRIM
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TRIM('  a   b  c  ')" }
+
+### SEARCH
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "SEARCH('lo','Hello',1)" }
+
+### TEXTJOIN
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TEXTJOIN('-',true,'a','', 'b','c')" }
+
+### EXACT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "EXACT('abc','ABC')" }
+
+### RMBCAP
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "RMBCAP(1.05)" }
+
+### UUID
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "UUID()" }
+
+### REGEXREPLACE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "REGEXREPLACE('abc12312345678','^\\\\d{11}','X')" }
+
+### REGEXMATCH
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "REGEXMATCH('13812345679', '\\\\d{11}' )"}
+
+
+### AND
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "AND(1=1, 2=2)"}
+
+### IF
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "IF(1==1, 41,23)"}
+
+### CHAR
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "CHAR(100)"}
+
+### REGEXEXTRACT
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "REGEXEXTRACT('我的电话号码是13655587478','\\\\d{11}')"}
+
+### REGEXEXTRACTALL
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "REGEXEXTRACTALL('小明的电话号码是 13812345678, 小红的电话号码是13987654321','\\\\d{11}')",
+  "parameters": {
+    "text": "小明的电话号码是 13812345678, 小红的电话号码是13987654321",
+    "reg": "\\d{11}"
+  }
+}
+
+### ENCODEURL
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ENCODEURL('数智化底座')" }
+
+### CHAR
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "CHAR(34)" }
+
+### TEXTSPLIT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TEXTSPLIT('a#b#c','#')" }
+
+### GETUSER
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "GETUSER(id,name)",
+  "parameters": {}
+}
+
+### GETUSERNAME
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "GETUSERNAME(name)",
+  "parameters": {}
+}
+
+### GETDEPT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "GETDEPT(id,name)",
+  "parameters": {}
+}
+
+### GETUPDEPT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "GETUPDEPT(id,name)",
+  "parameters": {}
+}
+
+### GETROLE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "GETROLE(id, roleList)",
+  "parameters": {"id":114}
+}
+
+### GETSUPERVISOR
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "GETSUPERVISOR(id,name)",
+  "parameters": {}
+}
+
+### ISINROLE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ISINROLE(id,roleId,isInRole)",
+  "parameters": {"id":114,"roleId": 8728438702112768}
+}
+
+### ISINDEPT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula": "ISINDEPT(id,isInDept)",
+  "parameters": {
+    "id": 103
+  }
+}
+
+### SUM
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{"formula":"SUM(数学成绩, 语文成绩)","parameters":{"数学成绩":68,"语文成绩":70}}
+
+### ABS
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ABS(-5)" }
+
+### INT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "INT(3.9)" }
+
+### MAX
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "MAX(1,5,3)" }
+
+### MOD
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "MOD(10,3)" }
+
+### ROUNDUP
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ROUND(SQRT(POWER(3,2)+POWER(4,'a','c')),'abc')" }
+
+### ROUNDDOWN
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ROUNDDOWN(2.987,2)" }
+
+### COUNTA
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "COUNTA('张三','李四','王五','下单')" }
+
+### COS
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "COS(0)" }
+
+### FLOOR
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "FLOOR(7.8,2)" }
+
+### ROUND
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ROUND(3.14159,2)" }
+
+### POWER
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "POWER(2,8)" }
+
+### SUMIF
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "SUMIF(['A','A','B','A'],'=A',[1,3,5,7])"}
+
+### TAN
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TAN(0)" }
+
+### COUNT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+ { "formula": "COUNT(1,2,\"苹果\",3)" }
+
+### LOG
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "LOG(100,10)" }
+
+### PRODUCT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "PRODUCT(2,3,4)" }
+
+### FIXED
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "FIXED(1234.567,2,false)" }
+
+### LARGE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "LARGE([1,3,2,5],2)" }
+
+### SMALL
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "SMALL([1,3,2,5],1)" }
+
+### SQRT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "SQRT(16)" }
+
+### SUMPRODUCT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "SUMPRODUCT([1,2,3],[4,5,6])" }
+
+### AVERAGE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "AVERAGE(1,2,3,4)" }
+
+### CEILING
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "CEILING(10.3,2)" }
+
+### MIN
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "MIN(5,2,9)" }
+
+### SIN
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "SIN(0)" }
+
+### COUNTIF
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "COUNTIF([1,1,2,3,4],'<>3')" }
+
+### DAY
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "DAY('2025-10-27')" }
+
+### MINUTE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "MINUTE('2025-10-27T12:34:56')" }
+
+### MONTH
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "MONTH('2025-10-27')" }
+
+### DAYS
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "DAYS('2025-10-27','2025-10-01')" }
+
+### WEEKDAY
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "WEEKDAY('2025-11-18')" }
+
+### SECOND
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "SECOND('2025-10-27T12:34:56')" }
+
+### NOW
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "NOW()" }
+
+### DATE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "DATE(2025,10,27)" }
+
+### YEAR
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "YEAR('2025-10-27')" }
+
+### NETWORKDAYS
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "NETWORKDAYS('2025-10-01','2025-10-31')" }
+
+### ISOWEEKNUM
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ISOWEEKNUM('2025-10-27')" }
+
+### TIME
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TIME(30,0)" }
+
+### TIMESTAMP
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TIMESTAMP('2021-03-24')" }
+
+### EDATE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "EDATE('2025-12-31',-1)" }
+
+### WORKDAY
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "WORKDAY('2025-10-27',5)" }
+
+### HOUR
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "HOUR('2025-10-27 14:30:00')" }
+
+### TODAY
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TODAY()" }
+
+### WEEKNUM
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "WEEKNUM('2025-10-27')" }
+
+### DATEDIF
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "DATEDIF('2024-11-18 09:23:50','2025-11-18 09:23:55','n')" }
+
+### NOT
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "NOT(true)" }
+
+### OR
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "OR(false,true,false)" }
+
+### FALSE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "FALSE()" }
+
+### TRUE
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "TRUE()" }
+
+### IFS
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "IFS(1>2,'no',1<2,'yes')" }
+
+### XOR
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "XOR(false,true)" }
+
+### AND
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "AND(1==1,1!=2)" }
+
+### IF
+POST {{baseUrl}}/formula/engine/debug-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "formula":"LOWER(CONCATENATE(RIGHT(LEFT(IF(AND(英语成绩>90,数学成绩>90,语文成绩>90),'A[B（）()C】',\"其，（）{}他\"),6),1),\"E，F\"))",
+  "parameters":{
+    "英语成绩":"302285656641273858",
+    "数学成绩":"302285656641273857",
+    "语文成绩":"302285656641273856"
+  }
+}
+
+### RANDOMBETWEEN
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "RANDBETWEEN(1,10)" }
+
+### ISBLANK
+POST {{baseUrl}}/formula/engine/execute-formula
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{ "formula": "ISBLANK('')" }

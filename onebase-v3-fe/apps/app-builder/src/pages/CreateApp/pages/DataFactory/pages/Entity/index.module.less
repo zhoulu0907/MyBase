@@ -1,0 +1,41 @@
+@import '../../styles/variables.less';
+
+/* 资产页面样式 */
+.entityPage {
+  .entityPageContent {
+    height: calc(100% - @headerHeight);
+    width: 100%;
+    position: absolute;
+  }
+
+  .entityPageHeader {
+    .flex-between();
+    padding: @spacingSm @spacingMd;
+    height: @headerHeight;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid #e5e6eb;
+    background-color: white;
+
+    .entityPageHeaderLeft {
+      .flex-center();
+
+      .entityPageHeaderLeftName,
+      .entityPageHeaderLeftTag {
+        margin-right: @spacingSm;
+      }
+
+      .copyIcon {
+        cursor: pointer;
+        color: #4e5969;
+      }
+    }
+  }
+
+  .entityPageCreateButton {
+    position: absolute;
+    left: @spacingMd;
+    top: 16px;
+    z-index: 10;
+  }
+}

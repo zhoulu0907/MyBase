@@ -1,0 +1,133 @@
+@import '../../../../../styles/variables.less';
+
+.edit-field-drawer {
+  .drawer-style();
+  .pc-drawer-header {
+    border-bottom: 1px solid #e5e5e5;
+    padding: 16px 24px;
+
+    .pc-drawer-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #1d2129;
+    }
+  }
+
+  .pc-drawer-body {
+    padding: 24px;
+  }
+
+  :global(.pc-drawer-footer) {
+    .form-footer-style();
+    .flex-between();
+  }
+}
+
+.edit-form {
+  .section {
+    margin-bottom: 32px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .form-section-title {
+    .form-section-title();
+  }
+
+  .pc-form-item {
+    margin-bottom: 16px;
+
+    .pc-form-item-label > label {
+      color: rgb(29, 33, 41) !important;
+    }
+
+    .pc-form-item-control {
+      .pc-input,
+      .pc-textarea,
+      .pc-select {
+        border-radius: 4px;
+      }
+
+      .pc-checkbox {
+        .pc-checkbox-label {
+          color: #4e5969;
+        }
+      }
+    }
+  }
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+
+  .info-label {
+    font-weight: 500;
+    color: #4e5969;
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .info-value {
+    color: #1d2129;
+    flex: 1;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+
+  p {
+    margin-top: 16px;
+    color: #86909c;
+    font-size: 14px;
+  }
+}
+
+.empty-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+
+  p {
+    color: #86909c;
+    font-size: 14px;
+  }
+}
+
+// 表单验证样式
+.pc-form-item-error {
+  .pc-input,
+  .pc-textarea,
+  .pc-select {
+    border-color: #f53f3f;
+
+    &:focus {
+      border-color: #f53f3f;
+      box-shadow: 0 0 0 2px rgba(245, 63, 63, 0.1);
+    }
+  }
+}
+
+.pc-form-item-error-tip {
+  color: #f53f3f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+// 禁用状态样式
+.pc-input[disabled],
+.pc-textarea[disabled],
+.pc-select[disabled] {
+  background-color: #f5f5f5;
+  color: #8c8c8c;
+  cursor: not-allowed;
+}

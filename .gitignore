@@ -1,0 +1,20 @@
+# 通用
+.DS_Store
+*.log
+*.class
+
+# 前端
+onebase-v3-fe/node_modules/
+onebase-v3-fe/dist/
+onebase-v3-fe/packages/*/node_modules/
+onebase-v3-fe/apps/*/node_modules/
+onebase-v3-fe/apps/*/dist/
+
+# 后端
+onebase-v3-be/target/
+onebase-v3-be/logs/
+onebase-v3-be/*/target/
+onebase-v3-be/*/*/target/
+
+# 文档
+MyBaseDoc/logs/

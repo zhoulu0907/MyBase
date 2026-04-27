@@ -1,0 +1,35 @@
+package com.cmsr.onebase.module.system.vo.auth;
+
+
+import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+import lombok.Data;
+
+@Schema(description = "管理后台 - Register Request VO")
+@Data
+public class AuthRegisterReqVO extends CaptchaVerificationReqVO {
+
+    @Schema(description = "用户账号", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @NotBlank(message = "用户账号不能为空")
+    @Pattern(regexp = "^[a-zA-Z0-9]{4,30}$", message = "用户账号由 数字、字母 组成")
+    @Size(min = 4, max = 30, message = "用户账号长度为 4-30 个字符")
+    private String username;
+
+    @Schema(description = "用户昵称", requiredMode = Schema.RequiredMode.REQUIRED, example = "onebase")
+    @NotBlank(message = "用户昵称不能为空")
+    @Size(max = 30, message = "用户昵称长度不能超过 30 个字符")
+    private String nickname;
+
+    @Schema(description = "密码", requiredMode = Schema.RequiredMode.REQUIRED, example = "123456")
+    @NotEmpty(message = "密码不能为空")
+    private String password;
+
+    @Schema(description = "AppId", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @NotNull(message = "AppId不能为空")
+    private Long appId;
+
+    @Schema(description = "UserType", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @NotNull(message = "UserType 不能为空")
+    private Integer userType;
+}

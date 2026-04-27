@@ -1,0 +1,600 @@
+openapi: 3.0.3
+info:
+  title: 连接器动作API
+  description: |
+    统一动作表API文档，用于管理所有连接器类型的动作配置。
+
+    ## 概述
+    动作就像方法一样，有自己的 code、名称、输入、输出定义。
+
+    ## 连接器类型
+    - HTTP: HTTP请求连接器
+    - SCRIPT: 脚本连接器
+    - DATABASE: 数据库连接器
+    - EMAIL: 邮件连接器
+
+    ## actionConfig 结构（混合模式）
+    ```json
+    {
+      "timeout": 30000,
+      "retryCount": 3,
+      "mockResponse": "...",
+      "http": {
+        "requestMethod": "GET",
+        "requestPath": "/api/v1/users/${userId}",
+        "requestQuery": [],
+        "requestHeaders": [],
+        "requestBodyType": "JSON",
+        "authType": "NONE"
+      },
+      "script": {
+        "scriptType": "JAVASCRIPT",
+        "rawScript": "return input.userId;"
+      }
+    }
+    ```
+  version: 1.0.0
+  contact:
+    name: onebase
+
+servers:
+  - url: http://localhost:8080
+    description: 本地开发环境
+
+tags:
+  - name: 连接器动作
+    description: 统一动作表接口
+
+paths:
+  /flow/connector-action/create:
+    post:
+      tags:
+        - 连接器动作
+      summary: 创建动作
+      description: 创建新的连接器动作
+      operationId: createAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateActionReqVO'
+            examples:
+              httpAction:
+                summary: HTTP动作示例
+                value:
+                  connectorUuid: "conn-abc12345"
+                  connectorType: "HTTP"
+                  actionCode: "GET_USER_INFO"
+                  actionName: "获取用户信息"
+                  description: "根据用户ID获取用户详细信息"
+                  inputSchema: '{"type":"object","properties":{"userId":{"type":"string","title":"用户ID"}}}'
+                  outputSchema: '{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"email":{"type":"string"}}}'
+                  actionConfig: '{"timeout":30000,"http":{"requestMethod":"GET","requestPath":"/api/users/${userId}"}}'
+                  activeStatus: 1
+                  sortOrder: 0
+              scriptAction:
+                summary: 脚本动作示例
+                value:
+                  connectorUuid: "conn-def67890"
+                  connectorType: "SCRIPT"
+                  actionCode: "DATA_TRANSFORM"
+                  actionName: "数据转换"
+                  description: "数据格式转换脚本"
+                  inputSchema: '{"type":"object","properties":{"data":{"type":"array"}}}'
+                  outputSchema: '{"type":"object","properties":{"result":{"type":"object"}}}'
+                  actionConfig: '{"script":{"scriptType":"JAVASCRIPT","rawScript":"return data.map(x => x.id);"}}'
+                  activeStatus: 1
+                  sortOrder: 0
+      responses:
+        '200':
+          description: 成功返回动作ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultLong'
+              example:
+                code: 0
+                data: 1
+                msg: "success"
+
+  /flow/connector-action/update:
+    post:
+      tags:
+        - 连接器动作
+      summary: 更新动作
+      description: 更新已存在的动作配置
+      operationId: updateAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateActionReqVO'
+            example:
+              id: 1
+              actionName: "获取用户信息(更新版)"
+              description: "更新后的描述"
+              inputSchema: '{"type":"object","properties":{"userId":{"type":"string"},"includeDetails":{"type":"boolean"}}}'
+              activeStatus: 1
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultBoolean'
+              example:
+                code: 0
+                data: true
+                msg: "success"
+
+  /flow/connector-action/delete:
+    post:
+      tags:
+        - 连接器动作
+      summary: 删除动作
+      description: 软删除动作（设置 activeStatus=0）
+      operationId: deleteAction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionIdReqVO'
+            example:
+              id: 1
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultBoolean'
+              example:
+                code: 0
+                data: true
+                msg: "success"
+
+  /flow/connector-action/detail:
+    get:
+      tags:
+        - 连接器动作
+      summary: 获取动作详情
+      description: 根据动作ID获取详情
+      operationId: getAction
+      parameters:
+        - name: id
+          in: query
+          description: 动作ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 1
+      responses:
+        '200':
+          description: 成功返回动作详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultActionDO'
+              example:
+                code: 0
+                data:
+                  id: 1
+                  connectorUuid: "conn-abc12345"
+                  connectorType: "HTTP"
+                  actionUuid: "action-abc12345"
+                  actionCode: "GET_USER_INFO"
+                  actionName: "获取用户信息"
+                  description: "根据用户ID获取用户详细信息"
+                  inputSchema: '{"type":"object","properties":{"userId":{"type":"string"}}}'
+                  outputSchema: '{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"}}}'
+                  actionConfig: '{"timeout":30000}'
+                  activeStatus: 1
+                  sortOrder: 0
+                msg: "success"
+
+  /flow/connector-action/detail-by-uuid:
+    get:
+      tags:
+        - 连接器动作
+      summary: 根据动作UUID获取详情
+      description: 通过 actionUuid 获取动作详情
+      operationId: getActionByUuid
+      parameters:
+        - name: actionUuid
+          in: query
+          description: 动作UUID
+          required: true
+          schema:
+            type: string
+          example: "action-abc12345"
+      responses:
+        '200':
+          description: 成功返回动作详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultActionDO'
+
+  /flow/connector-action/list:
+    get:
+      tags:
+        - 连接器动作
+      summary: 根据连接器UUID获取动作列表
+      description: 获取指定连接器的所有动作
+      operationId: getActionsByConnectorUuid
+      parameters:
+        - name: connectorUuid
+          in: query
+          description: 连接器UUID
+          required: true
+          schema:
+            type: string
+          example: "conn-abc123"
+      responses:
+        '200':
+          description: 成功返回动作列表
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultActionList'
+              example:
+                code: 0
+                data:
+                  - id: 1
+                    connectorUuid: "conn-abc123"
+                    actionCode: "GET_USER_INFO"
+                    actionName: "获取用户信息"
+                    activeStatus: 1
+                  - id: 2
+                    connectorUuid: "conn-abc123"
+                    actionCode: "CREATE_USER"
+                    actionName: "创建用户"
+                    activeStatus: 1
+                msg: "success"
+
+  /flow/connector-action/detail-by-code:
+    get:
+      tags:
+        - 连接器动作
+      summary: 根据连接器UUID和动作编码获取动作
+      description: 精确查找指定连接器下的特定动作
+      operationId: getActionByConnectorUuidAndCode
+      parameters:
+        - name: connectorUuid
+          in: query
+          description: 连接器UUID
+          required: true
+          schema:
+            type: string
+          example: "conn-abc123"
+        - name: actionCode
+          in: query
+          description: 动作编码
+          required: true
+          schema:
+            type: string
+          example: "GET_USER_INFO"
+      responses:
+        '200':
+          description: 成功返回动作详情
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultActionDO'
+
+  /flow/connector-action/page:
+    get:
+      tags:
+        - 连接器动作
+      summary: 分页查询动作列表
+      description: 分页获取动作列表，可按连接器UUID筛选
+      operationId: getActionPage
+      parameters:
+        - name: connectorUuid
+          in: query
+          description: 连接器UUID（可选）
+          required: false
+          schema:
+            type: string
+          example: "conn-abc123"
+        - name: pageNo
+          in: query
+          description: 页码
+          required: false
+          schema:
+            type: integer
+            default: 1
+          example: 1
+        - name: pageSize
+          in: query
+          description: 每页大小
+          required: false
+          schema:
+            type: integer
+            default: 10
+          example: 10
+      responses:
+        '200':
+          description: 成功返回分页结果
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultPageAction'
+              example:
+                code: 0
+                data:
+                  records:
+                    - id: 1
+                      connectorUuid: "conn-abc123"
+                      actionCode: "GET_USER_INFO"
+                      actionName: "获取用户信息"
+                      activeStatus: 1
+                  total: 1
+                msg: "success"
+
+  /flow/connector-action/update-status:
+    post:
+      tags:
+        - 连接器动作
+      summary: 启用/禁用动作
+      description: 更新动作的启用状态
+      operationId: updateActionStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateActionStatusReqVO'
+            example:
+              id: 1
+              activeStatus: 1
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultBoolean'
+              example:
+                code: 0
+                data: true
+                msg: "success"
+
+components:
+  schemas:
+    CreateActionReqVO:
+      type: object
+      required:
+        - connectorUuid
+        - connectorType
+        - actionName
+      properties:
+        connectorUuid:
+          type: string
+          description: 所属连接器UUID
+          example: "conn-abc12345"
+        connectorType:
+          type: string
+          description: 连接器类型(HTTP/SCRIPT/DATABASE/EMAIL...)
+          enum: [HTTP, SCRIPT, DATABASE, DATABASE_MYSQL, DATABASE_POSTGRESQL, DATABASE_ORACLE, EMAIL, EMAIL_163, EMAIL_QQ, SMS, SMS_ALI]
+          example: "HTTP"
+        actionCode:
+          type: string
+          description: 动作编码（唯一标识，如GET_USER_INFO）
+          example: "GET_USER_INFO"
+        actionName:
+          type: string
+          description: 动作名称（显示名称）
+          example: "获取用户信息"
+        description:
+          type: string
+          description: 动作描述
+          example: "根据用户ID获取用户详细信息"
+        inputSchema:
+          type: string
+          description: 输入参数Schema(JSON格式)
+          example: '{"type":"object","properties":{"userId":{"type":"string","title":"用户ID"}}}'
+        outputSchema:
+          type: string
+          description: 输出参数Schema(JSON格式)
+          example: '{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"}}}'
+        actionConfig:
+          type: string
+          description: |
+            扩展配置(JSON格式)，混合模式：
+            - 标准化字段: timeout, retryCount, mockResponse
+            - 类型特有配置: http, script 等
+          example: '{"timeout":30000,"http":{"requestMethod":"GET","requestPath":"/api/users/${userId}"}}'
+        activeStatus:
+          type: integer
+          description: 启用状态(0-禁用,1-启用)，默认为1（启用）
+          default: 1
+          enum: [0, 1]
+        sortOrder:
+          type: integer
+          description: 排序
+          default: 0
+
+    UpdateActionReqVO:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 动作ID
+          example: 1
+        actionCode:
+          type: string
+          description: 动作编码
+          example: "GET_USER_INFO"
+        actionName:
+          type: string
+          description: 动作名称
+          example: "获取用户信息"
+        description:
+          type: string
+          description: 动作描述
+          example: "更新后的描述"
+        inputSchema:
+          type: string
+          description: 输入参数Schema(JSON格式)
+        outputSchema:
+          type: string
+          description: 输出参数Schema(JSON格式)
+        actionConfig:
+          type: string
+          description: 扩展配置(JSON格式)
+        activeStatus:
+          type: integer
+          description: 启用状态(0-禁用,1-启用)
+          enum: [0, 1]
+        sortOrder:
+          type: integer
+          description: 排序
+
+    ActionIdReqVO:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 动作ID
+          example: 1
+
+    UpdateActionStatusReqVO:
+      type: object
+      required:
+        - id
+        - activeStatus
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 动作ID
+          example: 1
+        activeStatus:
+          type: integer
+          description: 启用状态（0-禁用，1-启用）
+          enum: [0, 1]
+          example: 1
+
+    FlowConnectorActionDO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 主键ID
+        connectorUuid:
+          type: string
+          description: 所属连接器UUID
+        connectorType:
+          type: string
+          description: 连接器类型
+        actionUuid:
+          type: string
+          description: 动作唯一标识
+        actionCode:
+          type: string
+          description: 动作编码
+        actionName:
+          type: string
+          description: 动作名称
+        description:
+          type: string
+          description: 动作描述
+        inputSchema:
+          type: string
+          description: 输入参数Schema(JSON)
+        outputSchema:
+          type: string
+          description: 输出参数Schema(JSON)
+        actionConfig:
+          type: string
+          description: 扩展配置(JSON)
+        activeStatus:
+          type: integer
+          description: 启用状态(0-禁用,1-启用)
+        sortOrder:
+          type: integer
+          description: 排序
+        createTime:
+          type: string
+          format: date-time
+          description: 创建时间
+        updateTime:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    CommonResultLong:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 状态码，0表示成功
+        data:
+          type: integer
+          format: int64
+          description: 返回数据（动作ID）
+        msg:
+          type: string
+          description: 消息
+
+    CommonResultBoolean:
+      type: object
+      properties:
+        code:
+          type: integer
+        data:
+          type: boolean
+        msg:
+          type: string
+
+    CommonResultActionDO:
+      type: object
+      properties:
+        code:
+          type: integer
+        data:
+          $ref: '#/components/schemas/FlowConnectorActionDO'
+        msg:
+          type: string
+
+    CommonResultActionList:
+      type: object
+      properties:
+        code:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowConnectorActionDO'
+        msg:
+          type: string
+
+    CommonResultPageAction:
+      type: object
+      properties:
+        code:
+          type: integer
+        data:
+          type: object
+          properties:
+            records:
+              type: array
+              items:
+                $ref: '#/components/schemas/FlowConnectorActionDO'
+            total:
+              type: integer
+              description: 总记录数
+        msg:
+          type: string

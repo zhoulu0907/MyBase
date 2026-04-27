@@ -1,0 +1,228 @@
+@import '../../../../styles/variables.less';
+
+.entityERContainer {
+  width: 100%;
+  height: calc(100vh - 112px); // 重要：该容器须有明确高度，否则会导致画布居中计算不一致问题
+  .flex-column();
+}
+
+.toolbar {
+  padding: @spacingSm @spacingMd;
+  .border-bottom-light();
+  display: flex;
+  gap: @spacingSm;
+  background: @white;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.25));
+  .zoomInput{
+    width: 100px;
+  }
+}
+
+.graphContainer {
+  flex: 1;
+  position: relative;
+  background: @backgroundColorLight;
+  width: 100% !important;
+  min-height: 0;
+}
+
+// 节点样式
+.node-content {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  .node-style();
+}
+
+.node-header {
+  background: @primaryColor;
+  color: @white;
+  padding: @spacingSm @spacingMd;
+  .flex-between();
+  font-size: @fontSizeBase;
+  font-weight: @fontWeightMedium;
+}
+
+.node-title {
+  font-weight: @fontWeightMedium;
+  font-size: @fontSizeBase;
+  color: @white;
+}
+
+.customize-btn {
+  background: transparent;
+  color: @white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: @borderRadiusBase;
+  padding: @spacingXs @spacingSm;
+  font-size: @fontSizeSm;
+  cursor: pointer;
+  transition: @transitionBase;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.node-body {
+  background: @white;
+  padding: 0;
+}
+
+.field-section {
+  .border-bottom-light();
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.field-section-header {
+  .flex-center();
+  padding: @spacingSm @spacingMd;
+  cursor: pointer;
+  transition: @transitionBase;
+  user-select: none;
+
+  &:hover {
+    background-color: @backgroundColorLight;
+  }
+}
+
+.section-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: @fontWeightMedium;
+  color: @textColorPrimary;
+}
+
+.section-count {
+  color: @textColorTertiary;
+  font-size: @fontSizeSm;
+  margin-left: @spacingXs;
+}
+
+.collapse-icon {
+  width: @spacingMd;
+  height: @spacingMd;
+  margin-left: @spacingSm;
+  transition: @transitionSlow;
+  .flex-center();
+
+  &.collapsed {
+    transform: rotate(-90deg);
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: @textColorTertiary;
+  }
+}
+
+.field-section-content {
+  max-height: 200px;
+  overflow-y: auto;
+  transition: max-height 0.3s ease;
+
+  &.collapsed {
+    max-height: 0;
+    overflow: hidden;
+  }
+}
+
+.field-item {
+  .flex-between();
+  padding: @spacingSm @spacingMd;
+  font-size: @fontSizeSm;
+  .border-bottom-light();
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.system-field {
+    color: @textColorTertiary;
+  }
+
+  &.custom-field {
+    color: @textColorPrimary;
+  }
+}
+
+.field-name {
+  flex: 1;
+  margin-right: @spacingSm;
+  .text-ellipsis();
+}
+
+.field-type {
+  color: @textColorTertiary;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+// 抽屉内容样式
+.node-details {
+  .detail-item {
+    margin-bottom: @spacingMd;
+
+    label {
+      display: block;
+      font-weight: @fontWeightMedium;
+      color: @textColorPrimary;
+      margin-bottom: @spacingXs;
+    }
+
+    span {
+      color: @textColorSecondary;
+    }
+  }
+
+  .fields-list {
+    h4 {
+      margin: @spacingMd 0 @spacingSm 0;
+      color: @textColorPrimary;
+    }
+
+    .field-item {
+      .flex-center();
+      padding: @spacingSm 0;
+      .border-bottom-light();
+
+      .field-name {
+        flex: 1;
+        color: @textColorPrimary;
+      }
+
+      .field-type {
+        color: @textColorQuaternary;
+        font-size: @fontSizeSm;
+        margin-right: @spacingSm;
+      }
+
+      .system-tag {
+        background: @backgroundColorLighter;
+        color: @textColorQuaternary;
+        padding: 2px @spacingXs;
+        border-radius: 2px;
+        font-size: 10px;
+      }
+    }
+  }
+}
+
+// 编辑表单样式
+.node-edit-form {
+  .form-item {
+    .form-section-style();
+  }
+
+  .form-actions {
+    .form-actions-style();
+  }
+}

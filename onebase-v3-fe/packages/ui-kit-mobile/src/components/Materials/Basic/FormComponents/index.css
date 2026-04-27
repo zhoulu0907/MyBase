@@ -1,0 +1,130 @@
+:root {
+  --fontSize: 0.28rem;
+}
+
+.inputTextWrapperOBMobile {
+  width: 100%;
+  margin-bottom: 0;
+  padding: 0 0.28rem;
+  box-sizing: border-box;
+  border-bottom: 0.5px solid #e5e6eb !important;
+  align-items: center !important;
+  overflow: hidden;
+
+  .readonlyText {
+    font-size: var(--fontSize);
+    color: #1d2129;
+
+    .textarea {
+      padding-right: 0;
+
+      .arco-textarea {
+        text-align: right;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
+  }
+
+  /* 彻底隐藏数字输入框右侧上下箭头 */
+  .no-spin {
+    /* Chrome / Edge / Safari */
+    input[type='number']::-webkit-outer-spin-button,
+    input[type='number']::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Firefox */
+    input[type='number'] {
+      -moz-appearance: textfield;
+    }
+  }
+
+  .arco-input-wrap,
+  .arco-form-label-item {
+    height: 100%;
+    border-top: none !important;
+    padding: 0;
+    box-sizing: border-box;
+    margin-bottom: 0;
+    border-bottom: 0 !important;
+  }
+
+  .arco-form-item-control-wrapper .arco-input-wrap.single-line {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+
+  .arco-form-item-message {
+    margin: 0.08rem 0;
+    width: 100%;
+  }
+
+  .arco-input {
+    padding: 0;
+    font-size: var(--fontSize);
+    border: none;
+
+    &:hover,
+    &:focus {
+      border: none;
+      background-color: transparent !important;
+    }
+  }
+
+  .arco-input-prefix {
+    padding-right: 0.32rem;
+    font-size: var(--fontSize);
+  }
+
+  .arco-input-container .arco-input-label {
+    min-width: 1.76rem;
+  }
+
+  .arco-cell.without-group {
+    padding: 0;
+  }
+
+  .arco-cell-inner {
+    height: auto;
+  }
+}
+
+.arco-cell.without-group {
+  background-color: transparent !important;
+}
+
+/* 插入符颜色 */
+.arco-input,
+.arco-textarea {
+  caret-color: rgb(var(--primary-6)) !important;
+}
+
+/* 按钮主题色 */
+.arco-switch.type-android.checked,
+.arco-button.arco-button-type-primary {
+  background-color: rgb(var(--primary-6)) !important;
+}
+
+/* popup左右按钮颜色 */
+.arco-radio .radio-icon.checked,
+.arco-checkbox .checkbox-icon.checked,
+.arco-picker-header-btn.left,
+.arco-picker-header-btn.right {
+  color: rgb(var(--primary-6)) !important;
+}
+
+.arco-cell.without-group.bordered::before,
+.arco-cell.without-group.bordered::after {
+  border: none !important;
+}
+
+.arco-form-picker-link-container {
+  font-size: var(--fontSize);
+}
+
+.arco-switch.type-ios.checked {
+  background-color: rgb(var(--primary-6));
+}

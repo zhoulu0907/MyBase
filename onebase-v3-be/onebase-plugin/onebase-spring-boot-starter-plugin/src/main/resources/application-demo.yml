@@ -1,0 +1,31 @@
+# =========================================
+# OneBase 插件系统配置示例（YAML）
+# =========================================
+
+# 插件系统配置
+onebase:
+  plugin:
+    # 是否启用插件系统
+    enabled: true
+
+    # 插件目录路径（相对路径或绝对路径）：staging或prod 环境下生效，dev模式下忽略该配置，始终从 classpath 加载插件。
+    plugins-dir: plugins
+
+    # 运行模式，可选：dev、staging、prod；默认 prod
+    mode: prod
+
+    # 是否自动加载插件（应用启动时加载 plugins 目录下的所有插件）；默认 true
+    auto-load: true
+
+    # 是否自动启动插件（插件加载后自动启动）；默认 true
+    auto-start: true
+
+    # 开发模式下额外指定的类目录（绝对路径列表），仅在 mode=dev 时生效；默认空列表。
+    # 支持多个目录，按顺序加载。
+    # 仅从目录加载 class 文件，不会从 jar/zip 中加载class文件。即使指定路径下存在 jar/zip也不会从中加载class文件。
+    # 示例：
+    # dev-class-paths:
+    #   - 'D:/cmsr/10_cmsr/CodingSpace/Java/onebase-v3-be/onebase-plugin/onebase-plugin-demo/plugin-demo-hello/target/classes'
+    #   - 'D:/cmsr/10_cmsr/CodingSpace/Java/onebase-v3-be/onebase-plugin/onebase-plugin-demo/plugin-demo-test/target//classes'
+    dev-class-paths: []
+

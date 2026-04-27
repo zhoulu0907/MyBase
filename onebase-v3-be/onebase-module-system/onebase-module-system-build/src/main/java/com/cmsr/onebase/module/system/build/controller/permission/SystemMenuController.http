@@ -1,0 +1,67 @@
+### 默认环境变量配置（直接使用local环境配置）
+#@baseUrl = http://localhost:48080/admin-api
+#@adminTenantId = 1
+#@token = 8f91f9b7fee64ea08c08d59561b7dbff
+#@tag = OneBase.local
+
+
+### 请求 /menu/create 接口 => 成功
+POST {{baseUrl}}/system/menu/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "name": "测试菜单Gsp23",
+  "permission": "system:test23:create",
+  "type": 2,
+  "sort": 1,
+  "parentId": 0,
+  "path": "test23",
+  "icon": "ep:guide23",
+  "component": "system/test23/index",
+  "componentName": "Test23",
+  "status": 1,
+  "visible": true,
+  "keepAlive": true,
+  "alwaysShow": false
+}
+
+### 请求 /menu/update 接口 => 成功
+POST {{baseUrl}}/system/menu/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "id": 153758764245745664,
+  "name": "测试菜单Gsp233",
+  "permission": "system:test33:update",
+  "type": 2,
+  "sort": 2,
+  "parentId": 0,
+  "path": "test33-update",
+  "icon": "ep:guide",
+  "component": "system/test33/update",
+  "componentName": "TestUpdate33",
+  "status": 1,
+  "visible": true,
+  "keepAlive": true,
+  "alwaysShow": false
+}
+
+### 请求 /menu/delete 接口 => 成功
+POST {{baseUrl}}/system/menu/delete?id=153758764245745664
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /menu/list 接口 => 成功
+GET {{baseUrl}}/system/menu/list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /simple-list 接口 => 成功
+GET {{baseUrl}}/system/menu/simple-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+

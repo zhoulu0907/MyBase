@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OneBase 3.0</title>
+    <style>
+      /* 移动端基准设置 */
+      html {
+        -webkit-text-size-adjust: 100%;
+        background-color: #f0f0f0;
+      }
+
+      body {
+        color: #333;
+        background: #fff;
+        margin: 0 auto !important;
+        overflow-x: hidden;
+      }
+
+      @media (min-width: 900px) {
+        body {
+          max-width: 450px;
+          min-height: 100dvh;
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+          position: relative;
+        }
+      }
+      #root {
+        padding: 0;
+        overflow: auto visible;
+        min-height: 100dvh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- <script>
+      (function() {
+        const baseSize = 100;
+        const baseWidth = 750;
+        const pcBreakpoint = 900; // PC端断点
+
+        function setRem() {
+          const width = document.documentElement.clientWidth;
+          let scale;
+
+          if (width > pcBreakpoint) {
+            scale = pcBreakpoint / baseWidth; // PC端限制最大计算基准
+          } else {
+            scale = width / baseWidth;
+          }
+          document.documentElement.style.fontSize = baseSize * Math.min(scale, 2) + 'px';
+        }
+
+        setRem();
+        window.addEventListener('resize', setRem);
+        window.addEventListener('orientationchange', setRem);
+      })();
+    </script> -->
+    <script src="./config.js"></script>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>

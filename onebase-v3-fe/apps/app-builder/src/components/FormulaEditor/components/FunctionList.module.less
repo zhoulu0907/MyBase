@@ -1,0 +1,52 @@
+.functionList {
+  .searchInput {
+    :global(.pc-input) {
+      border-radius: 6px;
+    }
+  }
+  
+  .listSection {
+    height: 290px;
+    margin-bottom: 16px;
+    overflow-y: auto;
+    .loadingFunction {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 290px;
+    }
+    .collapseItem {
+      :global(.pc-collapse-item-content-box) {
+        padding: 0;
+      }
+    }
+    .functionInfo {
+      width: 100%;
+      .functionName {
+        font-size: 14px;
+        color: #1d2129;
+        font-weight: 500;
+        margin-bottom: 4px;
+        line-height: 24px;
+      }
+
+      .functionDesc {
+        font-size: 12px;
+        color: #86909c;
+        line-height: 16px;
+      }
+    }
+
+    .functionItem {
+      &.selected {
+        background-color: #e8fff2;
+        .functionInfo .functionName {
+          color: rgb(var(--primary-6));
+        }
+      }
+    }
+  }
+}
+
+
+

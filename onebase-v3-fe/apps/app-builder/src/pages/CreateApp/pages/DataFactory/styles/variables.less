@@ -1,0 +1,236 @@
+// 数据源表单相关变量
+@dataSourceFormPrefix: ~'dataSourceForm';
+
+// 表单布局变量
+@formItemMarginBottom: 16px;
+@formItemMarginRight: 8px;
+
+// 输入框相关变量
+@inputMaxWidth: 200px;
+@inputMinWidth: 120px;
+@inputHeight: 32px;
+
+// 按钮相关变量
+@buttonMarginRight: 8px;
+@buttonHeight: 32px;
+
+// 抽屉相关变量
+@drawerWidth: 600px;
+@drawerPadding: 24px;
+
+// 表格相关变量
+@tableHeaderHeight: 40px;
+@tableRowHeight: 48px;
+
+// 操作按钮相关变量
+@operationButtonSize: 'mini';
+@operationButtonMargin: 8px;
+
+// 颜色变量
+@primaryColor: rgba(var(--primary-6), 1);
+@textColor: #333333;
+@borderColor: #d9d9d9;
+@backgroundColor: #f5f5f5;
+
+// 扩展颜色变量
+@textColorPrimary: #262626;
+@textColorSecondary: #595959;
+@textColorTertiary: #8c8c8c;
+@textColorQuaternary: #bfbfbf;
+@borderColorLight: #e5e5e5;
+@borderColorLighter: #f0f0f0;
+@backgroundColorLight: #fafafa;
+@backgroundColorLighter: #f7f8fa;
+@primaryColorLight: #e6f7ff;
+@white: #ffffff;
+
+// 字体相关变量
+@fontSizeBase: 14px;
+@fontSizeSm: 12px;
+@fontSizeLg: 16px;
+@fontSizeXl: 20px;
+@fontWeightNormal: 400;
+@fontWeightMedium: 500;
+@fontWeightSemibold: 600;
+
+// 间距变量
+@spacingXs: 4px;
+@spacingSm: 8px;
+@spacingMd: 16px;
+@spacingLg: 24px;
+@spacingXl: 32px;
+
+// 布局相关变量
+@headerHeight: 48px;
+@sidebarWidth: 280px;
+@borderRadiusBase: 6px;
+@borderRadiusSm: 4px;
+@borderRadiusLg: 8px;
+
+// 阴影变量
+@boxShadowBase: 0 2px 8px rgba(0, 0, 0, 0.15);
+@boxShadowCard: 0 1px 2px rgba(0, 0, 0, 0.03);
+@boxShadowHover: 0 4px 12px rgba(0, 0, 0, 0.15);
+@boxShadowDrawer: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+// 过渡动画变量
+@transitionBase: all 0.2s ease;
+@transitionSlow: all 0.3s ease;
+
+// ===== Mixins =====
+
+// 弹性布局 mixin
+.flex-center() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between() {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column() {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-end() {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+// 文本省略 mixin
+.text-ellipsis() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 边框 mixin
+.border-bottom-light() {
+  border-bottom: 1px solid @borderColorLight;
+}
+
+.border-right-light() {
+  border-right: 1px solid @borderColorLight;
+}
+
+// 卡片样式 mixin
+.card-style() {
+  background: @white;
+  border-radius: @borderRadiusBase;
+  box-shadow: @boxShadowCard;
+}
+
+// 表格容器样式 mixin
+.table-container-style() {
+  .flex-column();
+  height: calc(100vh - 220px);
+
+  .header {
+    padding: 0 0 @spacingMd @spacingLg;
+    background: @white;
+    .flex-end();
+
+    h3 {
+      margin: 0;
+      font-size: @fontSizeLg;
+      font-weight: @fontWeightSemibold;
+    }
+  }
+
+  .table {
+    flex: 1;
+    overflow: auto;
+    :global(.pc-table-container) {
+      max-height: calc(100vh - 300px) !important;
+    }
+  }
+}
+
+// 抽屉样式 mixin
+.drawer-style() {
+  box-shadow: @boxShadowDrawer !important;
+  border-left: 1px solid @borderColorLighter !important;
+  top: 112px !important;
+  transition: transform 0.3s ease;
+  height: calc(100% - 112px) !important;
+}
+
+// 按钮样式 mixin
+.button-style() {
+  height: @buttonHeight;
+  border-radius: @borderRadiusBase;
+  transition: @transitionBase;
+  cursor: pointer;
+}
+
+// 节点样式 mixin
+.node-style() {
+  border-radius: @borderRadiusBase;
+  overflow: hidden;
+  box-shadow: @boxShadowBase;
+}
+
+// 表单样式 mixin
+.form-section-style() {
+  margin-bottom: @formItemMarginBottom;
+}
+
+.form-actions-style() {
+  display: flex;
+  justify-content: center;
+  gap: @spacingMd;
+  // margin-top: @spacingLg;
+  // padding-top: @spacingMd;
+  border-top: 1px solid @borderColorLighter;
+}
+
+.form-section-title() {
+  font-size: @fontSizeLg;
+  font-weight: @fontWeightMedium;
+  color: @textColorPrimary;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid @borderColorLighter;
+
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 14px;
+    background: @primaryColor;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+}
+
+.form-header-style()  {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid @borderColorLighter;
+
+  h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: @textColorPrimary;
+  }
+}
+
+.form-footer-style() {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 16px;
+  box-sizing: border-box;
+  border-top: 1px solid @borderColorLighter;
+}

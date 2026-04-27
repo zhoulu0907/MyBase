@@ -1,0 +1,117 @@
+.XSubTable {
+  width: 100%;
+  min-height: 200px;
+  height: 100%;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  box-sizing: border-box;
+  padding: 10px 5px;
+}
+
+.XSubTable .XSubTable-content {
+  background-size: 100% 32px;
+  background-position: 0 22px;
+  background-repeat: no-repeat;
+  min-height: 150px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-top: 18px;
+  flex: 1;
+}
+
+.subComponentItem {
+  overflow: visible;
+  flex: 1 0 auto;
+  cursor: move;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+  min-width: 200px;
+}
+/* 序号 操作 */
+.subComponentItem2 {
+  overflow: visible;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  position: relative;
+  min-width: 60px;
+}
+
+/* 操作 */
+.operationArea {
+  position: absolute;
+  top: -18px;
+  right: 16px;
+  height: 24px;
+  padding: 4px;
+  border: 1px solid #e5e6eb;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background-color: #fff;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+
+  .divider {
+    margin: 0 4px;
+  }
+
+  .copyButton,
+  .deleteButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: #4e5969;
+    background-color: #fff;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .deleteButton {
+    color: #f53f3f;
+  }
+}
+
+.simulate-header-item {
+  box-sizing: border-box;
+  padding: 0 16px;
+  border-right: 1px solid #e5e6eb;
+  background-color: #f2f3f5;
+  line-height: 32px;
+  height: 32px;
+  margin: 4px 0 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subTableContent {
+  width: 100%;
+  min-height: 80px;
+}
+
+.subTableFooter {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  /* justify-content: center; */
+}
+
+/* select 层级无法覆盖问题 */
+.pc-table-col-fixed-left {
+  z-index: 2;
+}

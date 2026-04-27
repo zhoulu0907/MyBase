@@ -1,0 +1,249 @@
+.appStatusHeader {
+  width: 100%;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.appInfo {
+  width: 100%;
+  height: 60px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  .left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+
+    .appIcon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        width: 16px;
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    .appNameWrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+
+      .appName {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+
+        font-weight: 500;
+        font-size: 20px;
+        line-height: 28px;
+        letter-spacing: 0%;
+        vertical-align: middle;
+        gap: 8px;
+
+        .appPublishModel {
+          font-size: 12px;
+          padding: 0px 8px;
+          height: 20px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .saasAppPublishModel {
+          .appPublishModel();
+          color: #3491fa;
+          background: #e8f7ff;
+        }
+        .innerAppPublishModel {
+          .appPublishModel();
+          color: rgb(var(--primary-6));
+          background: rgb(var(--primary-1));
+        }
+      }
+
+      .appId {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 22px;
+        vertical-align: middle;
+      }
+    }
+  }
+
+  .right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+
+    .releaseBtnIcon {
+      width: 14px;
+      height: 14px;
+      margin-right: 10px;
+    }
+  }
+}
+
+.releaseStatus {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  .statusInfo {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+
+    .statusKey {
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0%;
+    }
+
+    .statusDescription {
+      color: #86909c;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .statusValue {
+      font-weight: 500;
+      font-size: 14px;
+      line-height: 22px;
+      letter-spacing: 0%;
+
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+
+      // 状态标签基础样式
+      .appStatusBase {
+        font-size: 12px;
+        font-weight: 400;
+        width: 44px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+
+      .appStatusDeveloping {
+        .appStatusBase();
+        color: #ff7d00;
+        background: #ffead5;
+      }
+
+      .appStatusPublished {
+        .appStatusBase();
+        color: rgb(var(--primary-6));
+        background: rgb(var(--primary-1));
+      }
+
+      .appStatusEditAfterPublished {
+        .appStatusBase();
+        color: #1979ff;
+        background: #e8f5ff;
+      }
+    }
+
+    .releaseUrlWrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 24px;
+
+      .releaseUrlItem {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 4px;
+
+        .linkText {
+          margin-left: 10px;
+          color: rgb(var(--primary-6));
+          margin-bottom: 0;
+          cursor: pointer;
+          max-width: 200px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}
+
+.statusContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statusInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.statusIcon {
+  .iconWrapper {
+    width: 96px;
+    height: 96px;
+    margin-top: 20px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.statusActions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  .versionInfo {
+    .versionLabel {
+      color: #86909c;
+      font-size: 14px;
+    }
+  }
+
+  .releaseBtnIcon {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+  }
+}

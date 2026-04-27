@@ -1,0 +1,52 @@
+
+### 创建参数配置
+POST {{baseUrl}}/system/config/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "category": "corp",
+  "name": "企业变量",
+  "configKey": "simple-corp",
+  "configValue": "simple-corp",
+  "exclusiveItem": "all-corp",
+  "status": 0,
+  "remark": "企业变量"
+}
+
+### 修改参数配置
+POST {{baseUrl}}/system/config/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "configKey": "appThirdUserRegisterShow",
+  "configValue": "false",
+  "appId": "5454545454"
+}
+
+### 修改参数配置
+POST {{baseUrl}}/system/config/update-status?id=185306742241329152&status=0
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+### 删除参数配置
+POST {{baseUrl}}/system/config/delete?id=444
+Authorization: Bearer {{token}}
+
+### 获取参数配置详情
+GET {{baseUrl}}/system/config/get?id=444
+Authorization: Bearer {{token}}
+
+### 根据参数键名查询参数值
+GET {{baseUrl}}/system/config/get-config-by-key?key=thirdUser
+Authorization: Bearer {{token}}
+
+### 获取分页列表
+GET {{baseUrl}}/system/config/list
+Authorization: Bearer {{token}}
+
+### 获取分页列表
+GET {{baseUrl}}/system/config/list-by-keys?configType=app&appId=5454545454&configKeys=appThirdUserEnable,appThirdUserRegisterShow,appThirdUserForgetPwdShow
+Authorization: Bearer {{token}}

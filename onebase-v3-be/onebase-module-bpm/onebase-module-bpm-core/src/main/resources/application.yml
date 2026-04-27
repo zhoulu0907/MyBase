@@ -1,0 +1,5 @@
+# 公式引擎配置
+onebase:
+  bpm:
+    # 是否启用bpm（示例）
+    enabled: true

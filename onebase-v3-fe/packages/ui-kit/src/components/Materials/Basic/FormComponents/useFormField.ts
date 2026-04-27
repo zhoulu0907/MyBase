@@ -1,0 +1,15 @@
+import { Form } from '@arco-design/web-react'
+
+export const useFormField = (dataField: string[], id: string, type: string) => {
+  const { form } = Form.useFormContext()
+  const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : `${type}_${id}`
+  const fieldValue = Form.useWatch(fieldName, form)
+  return { form, fieldName, fieldValue }
+}
+
+export const useFormFieldWatch = (dataField: string[]) => {
+    const { form } = Form.useFormContext();
+    const fieldName = dataField.length > 0 ? dataField[dataField.length - 1] : ''
+    const fieldValue = Form.useWatch(fieldName, form);
+  return { form, fieldValue }
+}

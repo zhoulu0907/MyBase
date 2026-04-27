@@ -1,0 +1,36 @@
+@import '../../../../../styles/variables.less';
+
+.edit-relation-drawer {
+  .drawer-style();
+
+  .content {
+    padding: 16px 0;
+    height: calc(100% - 32px);
+    overflow-y: auto;
+  }
+
+  .formSectionTitle {
+    .form-section-title();
+  }
+
+  .loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    span {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--color-text-3);
+    }
+  }
+} 

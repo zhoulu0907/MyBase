@@ -1,0 +1,85 @@
+## 环境配置说明
+# 上面已设置默认的local环境变量，可直接运行
+# 如需切换环境，请在IntelliJ IDEA中选择对应环境: local/gateway
+# 或者手动修改上面的@变量值
+
+### 请求 /create 接口 => 成功
+POST {{baseUrl}}/system/dept/create
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "name": "测试部门Gsp",
+  "leaderUserId": "3385310182593531904"
+}
+
+### 请求 /delete 接口 => 成功
+POST {{baseUrl}}/system/dept/delete?id=117
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /update 接口 => 成功
+POST {{baseUrl}}/system/dept/update
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "name":"测试部门Gsp-更新1",
+  "parentId":null,
+  "leaderUserId":null,
+  "adminUserIds":[],
+  "id":"152343898937262080"
+}
+
+### 请求 /update 接口 => 成功
+POST {{baseUrl}}/system/dept/update-dept-admin-or-director
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+Content-Type: application/json
+
+{
+  "userId": 1001,
+  "deptId": 158401074156142592,
+  "updateType": "admin1"
+}
+
+
+### 请求 /get-dept-users 接口 => 成功
+GET {{baseUrl}}/system/dept/get-dept-users
+Authorization: Bearer {{token}}
+tenant-id: 168334577623138304
+
+### 请求 /get-dept-users 接口 => 成功
+GET {{baseUrl}}/app/auth-role/list-dept-users?userType=4&roleId=187881437703897090
+Authorization: Bearer {{token}}
+tenant-id: 168334577623138304
+
+
+
+### 请求 /list 接口（带参数） => 成功
+GET {{baseUrl}}/system/dept/list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /simple-list 接口 => 成功
+GET {{baseUrl}}/system/dept/simple-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /get 接口 => 成功
+GET {{baseUrl}}/system/dept/get?id=152343898937262080
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /get-depts-by-id 接口 => 成功
+GET {{baseUrl}}/system/dept/get-depts-by-id?id=152343898937262080&idType=user
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 请求 /get-depts-by-id 接口 => 成功
+GET {{baseUrl}}/system/dept/get-third-depts
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+

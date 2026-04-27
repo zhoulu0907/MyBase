@@ -1,0 +1,126 @@
+{
+  "nodes": [
+    {
+      "id": "start_0",
+      "type": "start",
+      "data": {
+        "title": "触发节点",
+        "outputs": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      "blocks": []
+    },
+    {
+      "id": "switch_1bNmn",
+      "type": "switch",
+      "data": {
+        "title": "分支节点"
+      },
+      "blocks": [
+        {
+          "id": "JkFE2",
+          "type": "case",
+          "data": {
+            "title": "分支_0",
+            "inputsValues": {
+              "condition": {
+                "type": "constant",
+                "content": ""
+              }
+            },
+            "inputs": {
+              "type": "object",
+              "required": [
+                "condition"
+              ],
+              "properties": {
+                "condition": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "blocks": [
+            {
+              "id": "dataAdd_8cW-ac8XAf3YUGigrR4mK",
+              "type": "dataAdd",
+              "data": {
+                "title": "数据新增节点"
+              },
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "id": "ord-E",
+          "type": "case",
+          "data": {
+            "title": "分支_1",
+            "inputsValues": {
+              "condition": {
+                "type": "constant",
+                "content": ""
+              }
+            },
+            "inputs": {
+              "type": "object",
+              "required": [
+                "condition"
+              ],
+              "properties": {
+                "condition": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "blocks": [
+            {
+              "id": "dataDelete_axnIEymvEKiG_l6meT-yt",
+              "type": "dataDelete",
+              "data": {
+                "title": "数据删除节点"
+              },
+              "blocks": []
+            },
+            {
+              "id": "dataDelete_W-Fa_T2FRgeQbfQDEJDri",
+              "type": "dataDelete",
+              "data": {
+                "title": "数据删除节点"
+              },
+              "blocks": []
+            }
+          ]
+        },
+        {
+          "id": "2QLzZ",
+          "type": "caseDefault",
+          "data": {
+            "title": "默认分支"
+          },
+          "blocks": [
+            {
+              "id": "dataUpdate_9iMil5L3MZ6NEb5Mhy1rc",
+              "type": "dataUpdate",
+              "data": {
+                "title": "数据更新节点"
+              },
+              "blocks": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_0",
+      "type": "end",
+      "data": {
+        "title": "结束"
+      },
+      "blocks": []
+    }
+  ]
+}

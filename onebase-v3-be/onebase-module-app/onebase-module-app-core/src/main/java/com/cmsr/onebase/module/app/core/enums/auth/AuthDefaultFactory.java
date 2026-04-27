@@ -1,0 +1,105 @@
+package com.cmsr.onebase.module.app.core.enums.auth;
+
+
+import com.cmsr.onebase.framework.common.util.json.JsonUtils;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthDataGroupDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppAuthPermissionDO;
+import com.cmsr.onebase.module.app.core.vo.auth.AuthPermissionReq;
+import org.apache.commons.lang3.math.NumberUtils;
+
+import java.util.List;
+
+
+public class AuthDefaultFactory {
+
+    /**
+     * "本人提交"
+     */
+    private static final String OWN_SUBMIT = "ownSubmit";
+
+    /**
+     * "创建"
+     */
+    private static final String CREATE = "create";
+
+
+    /**
+     * "编辑"
+     */
+    private static final String EDIT = "edit";
+
+    /**
+     * "删除"
+     */
+    private static final String DELETE = "delete";
+
+    /**
+     * "导入"
+     */
+    private static final String IMPORT = "import";
+
+    /**
+     * "导出"
+     */
+    private static final String EXPORT = "export";
+
+    /**
+     * "分享"
+     */
+    private static final String SHARE = "share";
+
+    private static final String DEFAULT_OPERATION_TAGS = JsonUtils.toJsonString(List.of(CREATE, EDIT, DELETE, IMPORT, EXPORT, SHARE));
+
+    private static final String EMPTY_DATA_FILTER = JsonUtils.toJsonString(List.of());
+    public static final String DEFAULE_PERMISSION = "默认权限";
+    public static final String SYSTEM_DEFAULE_PERMISSION = "系统提供的默认权限";
+
+    //应用 AppAuthPermissionDO
+    public static AppAuthPermissionDO createDefaultAuthPermissionDO(AuthPermissionReq req) {
+        AppAuthPermissionDO ap = new AppAuthPermissionDO();
+        ap.setApplicationId(req.getApplicationId());
+        ap.setRoleUuid(req.getRoleUuid());
+        ap.setMenuUuid(req.getMenuUuid());
+        ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setOperationTags(DEFAULT_OPERATION_TAGS);
+        return ap;
+    }
+
+    public static AppAuthPermissionDO createDefaultAuthPermissionDO() {
+        AppAuthPermissionDO ap = new AppAuthPermissionDO();
+        ap.setIsPageAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllViewsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setIsAllFieldsAllowed(NumberUtils.INTEGER_ONE);
+        ap.setOperationTags(DEFAULT_OPERATION_TAGS);
+        return ap;
+    }
+
+    //数据组权限 authDataGroupDOS
+    public static AppAuthDataGroupDO createDefaultAuthDataGroupDO(AuthPermissionReq req) {
+
+        AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
+        adg.setGroupName(DEFAULE_PERMISSION);
+        adg.setDescription(SYSTEM_DEFAULE_PERMISSION);
+        adg.setApplicationId(req.getApplicationId());
+        adg.setRoleUuid(req.getRoleUuid());
+        adg.setMenuUuid(req.getMenuUuid());
+        adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
+        adg.setDataFilter(EMPTY_DATA_FILTER);
+        adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
+        return adg;
+    }
+
+    public static AppAuthDataGroupDO createDefaultAuthDataGroupDO() {
+        AppAuthDataGroupDO adg = new AppAuthDataGroupDO();
+        adg.setGroupName(DEFAULE_PERMISSION);
+        adg.setDescription(SYSTEM_DEFAULE_PERMISSION);
+        adg.setScopeTags(JsonUtils.toJsonString(List.of(OWN_SUBMIT)));
+        adg.setDataFilter(EMPTY_DATA_FILTER);
+        adg.setOperationTags(JsonUtils.toJsonString(List.of(EDIT, DELETE)));
+        return adg;
+    }
+
+
+}

@@ -1,0 +1,234 @@
+import mobileLayout1 from '@/assets/images/appRelease/mobile_layout1.svg';
+import mobileLayout2 from '@/assets/images/appRelease/mobile_layout2.svg';
+import webLayout1 from '@/assets/images/appRelease/web_layout1.svg';
+import webLayout2 from '@/assets/images/appRelease/web_layout2.svg';
+import webLayout3 from '@/assets/images/appRelease/web_layout3.svg';
+import { useAppStore } from '@/store';
+import { Form, Radio, TreeSelect, type FormInstance } from '@arco-design/web-react';
+import {
+  getAppNavigationConfig,
+  listApplicationMenu,
+  MenuType,
+  type GetAppNavigationConfigReq,
+  type ListApplicationMenuReq
+} from '@onebase/app';
+import { getPopupContainer } from '@onebase/ui-kit';
+import { useEffect, useRef, useState } from 'react';
+import styles from './index.module.less';
+
+interface IProps {
+  form: FormInstance;
+}
+const NavigatorSetting = (props: IProps) => {
+  const { curAppId } = useAppStore();
+  const { form } = props;
+  const webHomeType = Form.useWatch('webHomeType', form);
+  const mobileHomeType = Form.useWatch('mobileHomeType', form);
+
+  const [menuTree, setMenuTree] = useState<any[]>([]);
+  const prevWebHomeTypeRef = useRef<string>();
+  const prevMobileHomeTypeRef = useRef<string>();
+
+  useEffect(() => {
+    getPages();
+    handleGetNavigationConfig();
+  }, []);
+
+  // 监听 webHomeType 变化，从 default 切换到 custom 时清空下拉菜单值
+  useEffect(() => {
+    if (prevWebHomeTypeRef.current === 'default' && webHomeType === 'custom') {
+      form.setFieldValue('webDefaultMenu', undefined);
+    }
+    prevWebHomeTypeRef.current = webHomeType;
+  }, [webHomeType, form]);
+
+  // 监听 mobileHomeType 变化，从 default 切换到 custom 时清空下拉菜单值
+  useEffect(() => {
+    if (prevMobileHomeTypeRef.current === 'default' && mobileHomeType === 'custom') {
+      form.setFieldValue('mobileDefaultMenu', undefined);
+    }
+    prevMobileHomeTypeRef.current = mobileHomeType;
+  }, [mobileHomeType, form]);
+
+  const handleGetNavigationConfig = async () => {
+    const params: GetAppNavigationConfigReq = {
+      id: curAppId
+    };
+    const res = await getAppNavigationConfig(params);
+    const webHomeTypeValue = !res.webDefaultMenu || res.webDefaultMenu === 'default' ? 'default' : 'custom';
+    const mobileHomeTypeValue = !res.mobileDefaultMenu || res.mobileDefaultMenu === 'default' ? 'default' : 'custom';
+    form.setFieldsValue({
+      webNavLayout: res.webNavLayout || 'SIDEBAR',
+      mobileNavLayout: res.mobileNavLayout || 'GRID',
+      webHomeType: webHomeTypeValue,
+      mobileHomeType: mobileHomeTypeValue,
+      webDefaultMenu: res.webDefaultMenu,
+      mobileDefaultMenu: res.mobileDefaultMenu
+    });
+    // 初始化 ref 值
+    prevWebHomeTypeRef.current = webHomeTypeValue;
+    prevMobileHomeTypeRef.current = mobileHomeTypeValue;
+  };
+
+  // 获取下拉页面
+  const getPages = async () => {
+    const params: ListApplicationMenuReq = {
+      applicationId: curAppId
+    };
+    const res = await listApplicationMenu(params);
+    const newMenuData = [...res];
+    handlemenuData(newMenuData);
+    setMenuTree(newMenuData);
+  };
+  // 递归 判断是否可以选择
+  const handlemenuData = (treeData: any[]) => {
+    treeData.forEach((item: any) => {
+      if (item.menuType === MenuType.GROUP) {
+        item.disabled = true;
+        if (item.children?.length) {
+          handlemenuData(item.children);
+        }
+      }
+    });
+  };
+
+  return (
+    <Form form={form} layout="vertical" className={styles.navigatorForm}>
+      <div className={styles.navigatorSetting}>
+        <div className={styles.moduleTitle}>web端导航设置</div>
+
+        <Form.Item label="web端首页" field="webHomeType" initialValue="default" style={{ marginBottom: 10 }}>
+          <Radio.Group direction="vertical">
+            <Radio value="default">
+              <span>默认首页</span>
+              <span className={styles.radioTip}>自动使用首个非隐藏的菜单页面</span>
+            </Radio>
+            <Radio value="custom">
+              自定义首页
+              {webHomeType === 'custom' && (
+                <Form.Item
+                  field="webDefaultMenu"
+                  className={styles.homePage}
+                  rules={[
+                    {
+                      required: true,
+                      message: '请选择自定义首页'
+                    }
+                  ]}
+                >
+                  <TreeSelect
+                    getPopupContainer={getPopupContainer}
+                    treeData={menuTree}
+                    placeholder="请选择"
+                    fieldNames={{ key: 'menuUuid', title: 'menuName' }}
+                  ></TreeSelect>
+                </Form.Item>
+              )}
+            </Radio>
+          </Radio.Group>
+        </Form.Item>
+
+        <Form.Item label="导航布局" field="webNavLayout" initialValue="SIDEBAR">
+          <Radio.Group>
+            <Radio value={'SIDEBAR'}>
+              {({ checked }) => (
+                <>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}>
+                    <img className={styles.radioLayout} src={webLayout1} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>侧边导航</div>
+                </>
+              )}
+            </Radio>
+            <Radio value={'TOPBAR'}>
+              {({ checked }) => (
+                <>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}>
+                    <img className={styles.radioLayout} src={webLayout2} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>顶部导航</div>
+                </>
+              )}
+            </Radio>
+            <Radio value={'TREE'}>
+              {({ checked }) => (
+                <>
+                  <div className={styles.radioContainer} style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}>
+                    <img className={styles.radioLayout} src={webLayout3} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>厂字导航</div>
+                </>
+              )}
+            </Radio>
+          </Radio.Group>
+        </Form.Item>
+      </div>
+      <div className={styles.navigatorSetting}>
+        <div className={styles.moduleTitle}>移动端导航设置</div>
+
+        <Form.Item label="移动端首页" field="mobileHomeType" initialValue="default" style={{ marginBottom: 10 }}>
+          <Radio.Group direction="vertical">
+            <Radio value="default">
+              <span>默认首页</span>
+            </Radio>
+            <Radio value="custom">
+              自定义首页
+              {mobileHomeType === 'custom' && (
+                <Form.Item
+                  field="mobileDefaultMenu"
+                  className={styles.homePage}
+                  rules={[
+                    {
+                      required: true,
+                      message: '请选择自定义首页'
+                    }
+                  ]}
+                >
+                  <TreeSelect
+                    getPopupContainer={getPopupContainer}
+                    treeData={menuTree}
+                    placeholder="请选择"
+                    fieldNames={{ key: 'menuUuid', title: 'menuName' }}
+                  ></TreeSelect>
+                </Form.Item>
+              )}
+            </Radio>
+          </Radio.Group>
+        </Form.Item>
+
+        <Form.Item label="导航布局" field="mobileNavLayout" initialValue="GRID">
+          <Radio.Group>
+            <Radio value={'GRID'}>
+              {({ checked }) => (
+                <>
+                  <div
+                    className={styles.radioMobileContainer}
+                    style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}
+                  >
+                    <img className={styles.radioLayout} src={mobileLayout1} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>网格式菜单</div>
+                </>
+              )}
+            </Radio>
+            <Radio value={'LIST'}>
+              {({ checked }) => (
+                <>
+                  <div
+                    className={styles.radioMobileContainer}
+                    style={{ borderColor: checked ? 'rgb(var(--primary-6))' : 'transparent' }}
+                  >
+                    <img className={styles.radioLayout} src={mobileLayout2} alt="" />
+                  </div>
+                  <div className={styles.radioTips}>列表式菜单</div>
+                </>
+              )}
+            </Radio>
+          </Radio.Group>
+        </Form.Item>
+      </div>
+    </Form>
+  );
+};
+
+export default NavigatorSetting;

@@ -1,0 +1,149 @@
+.container {
+  width: 100%;
+  min-height: 120px;
+  padding: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.informationListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.informationListHeaderTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.showMore {
+  font-size: 14px;
+  color: #6B7785;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.informationListContent {
+  display: flex;
+  width: 100%;
+  & > div {
+    width: 100%;
+  }
+}
+
+.list {
+  border: none;
+  :global(.cell-group-body) {
+    background-color: transparent !important;
+  }
+}
+
+.listItem {
+  padding: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  :global(.arco-cell-inner) {
+    width: 100%;
+  }
+  :global(.cell-content) {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  cursor: default;
+}
+
+.row[data-runtime='true'] {
+  cursor: pointer;
+}
+
+.row[data-runtime='true']:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.cover {
+  flex: 0 0 auto;
+  width: 110px;
+  height: 54px;
+}
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 4px;
+}
+
+.coverPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: #f7f8fa;
+}
+
+.meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 86px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #1d2129;
+}
+
+.subtitle {
+  font-size: 12px;
+  line-height: 18px;
+  color: #4e5969;
+  /* 多行文本溢出省略 */
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeContainer {
+  font-size: 12px;
+  line-height: 18px;
+  color: #86909c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.divider {
+  background-color: #E5E6EB;
+  width: 1px;
+  height: 10px;
+}

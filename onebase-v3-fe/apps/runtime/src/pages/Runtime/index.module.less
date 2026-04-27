@@ -1,0 +1,69 @@
+@sider-width: 200px;
+@content-header-height: 48px;
+@header-height: 64px;
+
+.runtimePage {
+  width: 100vw;
+  height: calc(100vh);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background-color: #f2f3f5;
+
+  .sider {
+    width: @sider-width;
+    height: 100%;
+    box-sizing: border-box;
+
+    .siderHeader {
+      width: 100%;
+      padding: 0 12px 4px;
+      box-sizing: border-box;
+      margin-top: 16px;
+
+      .siderHeaderInput {
+        border-radius: 16px;
+
+        & span {
+          border-radius: 16px;
+        }
+      }
+    }
+  }
+
+  .content {
+    background-color: #f2f3f5;
+    width: calc(100vw - @sider-width);
+    height: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+    overflow-y: auto;
+
+    .contentBody {
+      width: 100%;
+      height: calc(100vh - @header-height - 32px);
+      background-color: #f2f3f5;
+    }
+  }
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.userDropdown {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #f2f3f5;
+  }
+}

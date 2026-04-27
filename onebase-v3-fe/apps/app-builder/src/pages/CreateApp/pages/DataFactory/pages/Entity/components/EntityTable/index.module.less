@@ -1,0 +1,25 @@
+@import '../../../../styles/variables.less';
+
+.entityTableContainer {
+  height: 100%;
+  background: @backgroundColor;
+
+  .sider {
+    background: @white;
+    .border-right-light();
+    overflow: hidden;
+  }
+
+  .content {
+    padding: 32px;
+    background: @white;
+    overflow: auto;
+  }
+
+  .emptyState {
+    .flex-center();
+    height: 100%;
+    color: @textColorTertiary;
+    font-size: @fontSizeLg;
+  }
+}

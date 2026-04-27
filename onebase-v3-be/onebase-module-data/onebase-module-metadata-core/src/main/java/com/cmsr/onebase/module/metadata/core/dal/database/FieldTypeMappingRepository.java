@@ -1,0 +1,147 @@
+package com.cmsr.onebase.module.metadata.core.dal.database;
+
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.FieldTypeMappingDO;
+import com.cmsr.onebase.module.metadata.core.dal.mapper.FieldTypeMappingMapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.spring.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 字段类型映射仓储类
+ * <p>
+ * 提供字段类型映射相关的数据库操作接口，继承自ServiceImpl获得基础的CRUD能力
+ *
+ * @author matianyu
+ * @date 2025-08-11
+ */
+@Repository
+@Slf4j
+public class FieldTypeMappingRepository extends ServiceImpl<FieldTypeMappingMapper, FieldTypeMappingDO> {
+
+    /**
+     * 根据数据库类型获取字段类型映射列表
+     *
+     * @param databaseType 数据库类型
+     * @return 字段类型映射列表
+     */
+    public List<FieldTypeMappingDO> getFieldTypeMappingsByDatabaseType(String databaseType) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .orderBy(FieldTypeMappingDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据Java类型获取字段类型映射列表
+     *
+     * @param javaType Java类型
+     * @return 字段类型映射列表
+     */
+    public List<FieldTypeMappingDO> getFieldTypeMappingsByJavaType(String javaType) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(FieldTypeMappingDO::getBusinessFieldType, javaType)
+                .orderBy(FieldTypeMappingDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据数据库类型和数据库字段类型获取映射
+     *
+     * @param databaseType 数据库类型
+     * @param dbFieldType 数据库字段类型
+     * @return 字段类型映射对象
+     */
+    public FieldTypeMappingDO getFieldTypeMappingByDbType(String databaseType, String dbFieldType) {
+        QueryWrapper queryWrapper = this.query()
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .eq(FieldTypeMappingDO::getDatabaseField, dbFieldType);
+        return getOne(queryWrapper);
+    }
+
+    /**
+     * 获取所有字段类型映射列表
+     *
+     * @return 字段类型映射列表
+     */
+    public List<FieldTypeMappingDO> getAllFieldTypeMappings() {
+        QueryWrapper queryWrapper = this.query()
+                .orderBy(FieldTypeMappingDO::getDatabaseType, true)
+                .orderBy(FieldTypeMappingDO::getCreateTime, false);
+        return list(queryWrapper);
+    }
+
+    /**
+     * 根据业务字段类型获取默认的数据库字段映射
+     * <p>
+     * 查询 is_default=1 的默认映射，如果没有则返回该类型的第一条记录
+     *
+     * @param businessFieldType 业务字段类型（如 ID, USER, DATETIME, NUMBER 等）
+     * @param databaseType      数据库类型（如 PostgreSQL）
+     * @return 默认的字段类型映射对象，如果未找到则返回 null
+     */
+    public FieldTypeMappingDO getDefaultMappingByBusinessType(String businessFieldType, String databaseType) {
+        if (businessFieldType == null || businessFieldType.trim().isEmpty()) {
+            return null;
+        }
+        
+        // 优先查询 is_default=1 的默认映射
+        QueryWrapper queryWrapper = this.query()
+                .eq(FieldTypeMappingDO::getBusinessFieldType, businessFieldType.toUpperCase())
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .eq(FieldTypeMappingDO::getIsDefault, 1);
+        FieldTypeMappingDO defaultMapping = getOne(queryWrapper);
+        
+        if (defaultMapping != null) {
+            return defaultMapping;
+        }
+        
+        // 如果没有默认映射，返回该类型的第一条记录
+        QueryWrapper fallbackWrapper = this.query()
+                .eq(FieldTypeMappingDO::getBusinessFieldType, businessFieldType.toUpperCase())
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .orderBy(FieldTypeMappingDO::getId, true)
+                .limit(1);
+        return getOne(fallbackWrapper);
+    }
+
+    /**
+     * 根据业务字段类型获取默认的数据库字段映射（不指定数据库类型，默认使用 PostgreSQL）
+     *
+     * @param businessFieldType 业务字段类型
+     * @return 默认的字段类型映射对象
+     */
+    public FieldTypeMappingDO getDefaultMappingByBusinessType(String businessFieldType) {
+        return getDefaultMappingByBusinessType(businessFieldType, "PostgreSQL");
+    }
+
+    public Map<String, FieldTypeMappingDO> getDefaultMappingsByDatabaseType(String databaseType) {
+        if (databaseType == null || databaseType.trim().isEmpty()) {
+            return Map.of();
+        }
+
+        QueryWrapper queryWrapper = this.query()
+                .eq(FieldTypeMappingDO::getDatabaseType, databaseType)
+                .orderBy(FieldTypeMappingDO::getBusinessFieldType, true)
+                .orderBy(FieldTypeMappingDO::getIsDefault, false)
+                .orderBy(FieldTypeMappingDO::getId, true);
+        List<FieldTypeMappingDO> list = list(queryWrapper);
+        if (list == null || list.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<String, FieldTypeMappingDO> result = new HashMap<>();
+        for (FieldTypeMappingDO item : list) {
+            if (item == null || item.getBusinessFieldType() == null || item.getBusinessFieldType().isBlank()) {
+                continue;
+            }
+            String key = item.getBusinessFieldType().trim().toUpperCase();
+            result.putIfAbsent(key, item);
+        }
+        return result;
+    }
+}

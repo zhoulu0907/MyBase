@@ -1,0 +1,8 @@
+### 获得企业授权应用列表-分页
+GET {{baseUrl}}/corp/corp-app-relation/corp-applications-page?corpId=1&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 企业应用启用/禁用
+POST {{baseUrl}}/corp/corp-app-relation/update-status?id=1&status=1
+Authorization: Bearer {{token}}
+

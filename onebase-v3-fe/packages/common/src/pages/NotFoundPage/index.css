@@ -1,0 +1,41 @@
+.notfoundPage {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  /* 渐变背景色 */
+  /* 动态蓝白渐变背景动画 */
+  background: linear-gradient(135deg, #e0f2ff 0%, #9fd4fd 50%, #ffffff 100%);
+  background-size: 200% 200%;
+  animation: gradientBG 10s ease-in-out infinite;
+
+  @keyframes gradientBG {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    .contentTitle {
+      font-size: 150px;
+      font-weight: 500;
+    }
+    p {
+      font-size: 25px;
+      color: white;
+    }
+  }
+}

@@ -1,0 +1,279 @@
+package com.cmsr.onebase.module.system.platform.service.auth;
+
+import com.anji.captcha.model.common.ResponseModel;
+import com.anji.captcha.model.vo.CaptchaVO;
+import com.anji.captcha.service.CaptchaService;
+import com.cmsr.onebase.framework.common.biz.security.SecurityConfigApi;
+import com.cmsr.onebase.framework.common.biz.security.dto.LoginFailureResultDTO;
+import com.cmsr.onebase.framework.common.biz.security.dto.PasswordExpiryCheckDTO;
+import com.cmsr.onebase.framework.common.enums.CommonStatusEnum;
+import com.cmsr.onebase.framework.common.enums.RunModeEnum;
+import com.cmsr.onebase.framework.common.util.servlet.ServletUtils;
+import com.cmsr.onebase.framework.common.util.validation.ValidationUtils;
+import com.cmsr.onebase.module.system.api.logger.dto.LoginLogCreateReqDTO;
+import com.cmsr.onebase.module.system.convert.auth.AuthConvert;
+import com.cmsr.onebase.module.system.dal.dataobject.oauth2.OAuth2AccessTokenDO;
+import com.cmsr.onebase.module.system.dal.dataobject.tenant.TenantDO;
+import com.cmsr.onebase.module.system.dal.dataobject.user.AdminUserDO;
+import com.cmsr.onebase.module.system.enums.logger.LoginLogTypeEnum;
+import com.cmsr.onebase.module.system.enums.logger.LoginResultEnum;
+import com.cmsr.onebase.module.system.enums.oauth2.OAuth2ClientConstants;
+import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
+import com.cmsr.onebase.module.system.service.logger.LoginLogService;
+import com.cmsr.onebase.module.system.service.oauth2.OAuth2TokenService;
+import com.cmsr.onebase.module.system.service.tenant.TenantService;
+import com.cmsr.onebase.module.system.service.user.UserService;
+import com.cmsr.onebase.module.system.vo.CaptchaVerificationReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginReqVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthLoginRespVO;
+import com.cmsr.onebase.module.system.vo.auth.AuthResetPasswordReqVO;
+import com.cmsr.onebase.module.system.vo.auth.UserLoginReqVO;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
+import jakarta.annotation.Resource;
+import jakarta.validation.Validator;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Objects;
+
+import static com.cmsr.onebase.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static com.cmsr.onebase.module.system.enums.ErrorCodeConstants.*;
+import static com.cmsr.onebase.module.system.enums.LogRecordConstants.*;
+
+/**
+ * Auth Service 实现类
+ */
+@Service
+@RefreshScope
+@Slf4j
+public class PlatformAuthServiceImpl implements PlatformAuthService {
+
+    @Resource
+    private UserService        userService;
+    @Resource
+    private LoginLogService    loginLogService;
+    @Resource
+    private OAuth2TokenService oauth2TokenService;
+    @Resource
+    private Validator          validator;
+    @Resource
+    private CaptchaService     captchaService;
+    /**
+     * 验证码的开关，默认为 true
+     */
+    @Value("${onebase.captcha.enable:true}")
+    @Setter // 为了单测：开启或者关闭验证码
+    private Boolean            captchaEnable;
+
+    @Resource
+    private TenantService     tenantService;
+    @Resource
+    private SecurityConfigApi securityConfigApi;
+    @Resource
+    private PwdEnHelper       pwdEnHelper;
+
+    @Override
+    public AdminUserDO authenticate(String username, String password) {
+        final LoginLogTypeEnum logTypeEnum = LoginLogTypeEnum.LOGIN_USERNAME;
+        // 校验账号是否存在
+        AdminUserDO user = userService.getUserByUsername(username);
+        checkUserPsdAndStatus(username, password, user, logTypeEnum);
+        return user;
+    }
+
+    private void checkUserPsdAndStatus(String account, String password, AdminUserDO user, LoginLogTypeEnum logTypeEnum) {
+        if (user == null) {
+            createLoginLog(null, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            throw exception(AUTH_LOGIN_NO_EXISTS);
+        }
+
+        Long userId = user.getId();
+
+        // 检查账号是否被防暴力破解锁定
+        securityConfigApi.checkAccountLocked(userId);
+
+        // 验证密码
+        boolean passwordMatched = userService.isPasswordMatch(password, user.getPassword());
+        if (!passwordMatched) {
+            // 密码错误，记录失败次数并获取返回结果
+            LoginFailureResultDTO failureResult = securityConfigApi.recordLoginFailure(userId).getData();
+            createLoginLog(userId, account, logTypeEnum, LoginResultEnum.BAD_CREDENTIALS);
+            // 使用失败记录中的提示信息作为错误信息参数
+            throw exception(AUTH_LOGIN_BAD_CREDENTIALS, failureResult.getMessage());
+        }
+
+        // 密码正确，清除失败记录
+        securityConfigApi.clearLoginFailureRecord(userId);
+
+        // 校验是否禁用
+        if (CommonStatusEnum.isDisable(user.getStatus())) {
+            createLoginLog(userId, account, logTypeEnum, LoginResultEnum.USER_DISABLED);
+            throw exception(AUTH_LOGIN_USER_DISABLED);
+        }
+    }
+
+    @Override
+    @LogRecord(type = LOGIN_USER_TYPE, subType = LOGIN_USER_PLATFORM_SUB_TYPE, bizNo = "{{#user.id}}",
+            success = LOGIN_USER_PLATFORM_SUCCESS)
+    public AuthLoginRespVO login(AuthLoginReqVO reqVO) {
+        // 校验验证码
+        validateCaptcha(reqVO);
+
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+
+        // 使用账号密码，进行登录
+        AdminUserDO user = authenticate(reqVO.getUsername(), reqVO.getPassword());
+        LogRecordContext.putVariable("user", user);
+        AuthLoginRespVO loginRespVO = createTokenAfterLoginSuccess(user.getId(), user.getUserType(), reqVO.getUsername(), reqVO.getDeviceId(), LoginLogTypeEnum.LOGIN_USERNAME, reqVO.getLoginPlatform());
+        loginRespVO.setLoginPlatform(reqVO.getLoginPlatform());
+        return loginRespVO;
+    }
+
+    private void createLoginLog(Long userId, String username,
+                                LoginLogTypeEnum logTypeEnum, LoginResultEnum loginResult) {
+        // 插入登录日志
+        LoginLogCreateReqDTO reqDTO = new LoginLogCreateReqDTO();
+        reqDTO.setLogType(logTypeEnum.getType());
+        reqDTO.setTraceId("n/a");
+        reqDTO.setUserId(userId);
+        reqDTO.setUsername(username);
+        reqDTO.setUserAgent(ServletUtils.getUserAgent());
+        reqDTO.setUserIp(ServletUtils.getClientIP());
+        reqDTO.setResult(loginResult.getResult());
+        loginLogService.createLoginLog(reqDTO);
+        // 更新最后登录时间
+        if (userId != null && Objects.equals(LoginResultEnum.SUCCESS.getResult(), loginResult.getResult())) {
+            userService.updateUserLogin(userId, ServletUtils.getClientIP());
+        }
+    }
+
+    void validateCaptcha(UserLoginReqVO reqVO) {
+        ResponseModel response = doValidateCaptcha(reqVO);
+        // 校验验证码
+        if (!response.isSuccess()) {
+            // 创建登录失败日志（验证码不正确)
+            createLoginLog(null, reqVO.getUsername(), LoginLogTypeEnum.LOGIN_USERNAME, LoginResultEnum.CAPTCHA_CODE_ERROR);
+            throw exception(AUTH_LOGIN_CAPTCHA_CODE_ERROR, response.getRepMsg());
+        }
+    }
+
+    private ResponseModel doValidateCaptcha(CaptchaVerificationReqVO reqVO) {
+        // 如果验证码关闭，则不进行校验
+        if (!captchaEnable) {
+            return ResponseModel.success();
+        }
+        ValidationUtils.validate(validator, reqVO, CaptchaVerificationReqVO.CodeEnableGroup.class);
+        CaptchaVO captchaVO = new CaptchaVO();
+        captchaVO.setCaptchaVerification(reqVO.getCaptchaVerification());
+        return captchaService.verification(captchaVO);
+    }
+
+    private AuthLoginRespVO createTokenAfterLoginSuccess(Long userId, Integer userType, String username, String deviceId, LoginLogTypeEnum logType, String loginPlatform) {
+        // 插入登陆日志
+        createLoginLog(userId, username, logType, LoginResultEnum.SUCCESS);
+        // 创建访问令牌
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.createAccessTokenWithMode(
+                RunModeEnum.PLATFORM.getValue(), null, null,
+                userId, userType,
+                OAuth2ClientConstants.CLIENT_ID_DEFAULT, null, loginPlatform);
+
+        // 检查并限制设备数，踢出超限的设备
+        List<String> removedTokens = securityConfigApi.checkAndLimitDevices(
+                userId,
+                deviceId,
+                accessTokenDO.getAccessToken()
+        ).getData();
+
+        // 删除被踢出的Token
+        if (removedTokens != null && !removedTokens.isEmpty()) {
+            for (String removedToken : removedTokens) {
+                oauth2TokenService.removeAccessToken(removedToken);
+                log.info("用户[{}]设备数超限，已踢出Token: {}", userId, removedToken);
+            }
+        }
+
+        TenantDO tennantDO = tenantService.getTenant(accessTokenDO.getTenantId());
+        // 构建返回结果
+        AuthLoginRespVO respVO = AuthConvert.INSTANCE.convert(accessTokenDO, tennantDO);
+
+        // 检查密码有效期
+        PasswordExpiryCheckDTO expiryCheckResult = securityConfigApi.checkPasswordExpiry(userId).getData();
+        respVO.setPasswordExpiryInfo(expiryCheckResult);
+
+        // 创建会话空闲检测Key
+        securityConfigApi.createSessionIdleKey(userId, deviceId);
+
+        return respVO;
+    }
+
+    @Override
+    public AuthLoginRespVO refreshToken(String refreshToken) {
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.refreshAccessToken(refreshToken, OAuth2ClientConstants.CLIENT_ID_DEFAULT);
+        return AuthConvert.INSTANCE.convert(accessTokenDO);
+    }
+
+    @Override
+    public void logout(String token, Integer logType) {
+        // 删除访问令牌
+        OAuth2AccessTokenDO accessTokenDO = oauth2TokenService.removeAccessToken(token);
+        if (accessTokenDO == null) {
+            return;
+        }
+        // 删除成功，则记录登出日志
+        createLogoutLog(accessTokenDO.getUserId(), accessTokenDO.getUserType(), logType);
+    }
+
+    private void createLogoutLog(Long userId, Integer userType, Integer logType) {
+        LoginLogCreateReqDTO reqDTO = new LoginLogCreateReqDTO();
+        reqDTO.setLogType(logType);
+        reqDTO.setTraceId("n/a");
+        reqDTO.setUserId(userId);
+        reqDTO.setUserType(userType);
+        reqDTO.setUsername(getUsername(userId));
+        reqDTO.setUserAgent(ServletUtils.getUserAgent());
+        reqDTO.setUserIp(ServletUtils.getClientIP());
+        reqDTO.setResult(LoginResultEnum.SUCCESS.getResult());
+        loginLogService.createLoginLog(reqDTO);
+    }
+
+    private String getUsername(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        AdminUserDO user = userService.getUser(userId);
+        return user != null ? user.getUsername() : null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void resetPassword(AuthResetPasswordReqVO reqVO) {
+        // 暂时屏蔽验证码功能后续恢复
+        // AdminUserDO userByMobile = userService.getUserByMobile(reqVO.getMobile());
+        // if (userByMobile == null) {
+        //     throw exception(USER_MOBILE_NOT_EXISTS);
+        // }
+        //
+        // smsCodeApi.useSmsCode(new SmsCodeUseReqDTO()
+        //         .setCode(reqVO.getCode())
+        //         .setMobile(reqVO.getMobile())
+        //         .setScene(SmsSceneEnum.ADMIN_MEMBER_RESET_PASSWORD.getScene())
+        //         .setUsedIp(getClientIP())
+        // ).checkError();
+
+        AdminUserDO user = userService.getUser(reqVO.getUserId());
+        if (user == null) {
+            throw exception(USER_MOBILE_NOT_EXISTS);
+        }
+        // 解密原文
+        reqVO.setPassword(pwdEnHelper.decryptHexStr(reqVO.getPassword()));
+        userService.updateUserPassword(user.getId(), reqVO.getPassword());
+    }
+
+}

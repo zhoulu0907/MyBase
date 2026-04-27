@@ -1,0 +1,93 @@
+@import url('../public/icon-font/iconfont.css');
+
+:root {
+  width: 100vw;
+  height: 100vh;
+}
+#ai-genapp-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+}
+
+#copilot-container {
+  position: absolute;
+  top: 0px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+.react-grid-item.react-grid-placeholder {
+  background: lightblue !important;
+}
+.pc-color-picker {
+  padding: 4px;
+}
+
+/* tab下划线隐藏 */
+.createAppTabs {
+  .pc-tabs-header {
+    display: flex;
+    gap: 10px;
+
+    .pc-tabs-header-ink {
+      display: none;
+    }
+  }
+
+  .pc-tabs-header-title {
+    .pc-tabs-header-title-text {
+      color: #272e3b;
+      font-weight: 400;
+    }
+    &:hover .pc-tabs-header-title-text {
+      &::before {
+        background-color: transparent;
+      }
+    }
+  }
+
+  .pc-tabs-header-title-active .pc-tabs-header-title-text {
+    font-weight: 500;
+    color: rgb(var(--primary-6));
+  }
+}
+
+/* 菜单隐藏样式 */
+.menuTree {
+  .pc-tree-node-is-leaf .pc-tree-node-switcher {
+    display: none;
+  }
+
+  .pc-tree-node-switcher {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+
+    .pc-tree-node-icon-hover:hover::before {
+      background-color: transparent;
+    }
+  }
+  .pc-tree-node-title {
+    margin: 0;
+    padding-left: 10px;
+  }
+  .pc-tree-node {
+    padding: 0;
+  }
+}
+
+.buttonShowInput .pc-input-inner-wrapper {
+  background-color: #fff;
+}

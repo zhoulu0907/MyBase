@@ -1,0 +1,48 @@
+### 获得应用列表 - 按项目ID筛选（查询指定项目下的应用）
+GET {{baseUrl}}/app/application/page?pageNo=1&pageSize=10&projectId=2
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得应用列表 - 组合条件查询（项目ID + 应用名称 + 状态）
+GET {{baseUrl}}/app/application/page?pageNo=1&pageSize=10&projectId=1&name=测试&status=1
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得应用列表 - 组合条件查询（项目ID + 发布模式 + 排序）
+GET {{baseUrl}}/app/application/page?pageNo=1&pageSize=10&projectId=1&publishModel=inner&orderByTime=update
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 获得企业授权应用列表-分页
+GET {{baseUrl}}/app/application/get?id=1
+Authorization: Bearer {{token}}
+
+### 创建应用 - 成功
+POST {{baseUrl}}/app/application/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+{
+  "appName": "测试应用23",
+  "appCode": "TEST_APP_0023",
+  "appMode": "standard",
+  "themeColor": "#1890ff",
+  "iconName": "app-icon",
+  "iconColor": "#1890ff",
+  "description": "这是一个测试应用23",
+  "publishModel": "inner",
+  "projectId": 2
+}
+
+### 删除应用 - 成功
+POST {{baseUrl}}/app/application/delete?id=1&name=测试应用
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+
+### 删除项目下的所有应用
+POST {{baseUrl}}/app/application/delete-by-project-id?projectId=2
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+

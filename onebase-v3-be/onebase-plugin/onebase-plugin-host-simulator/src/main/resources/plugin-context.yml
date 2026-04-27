@@ -1,0 +1,58 @@
+# OneBase 插件配置模拟文件
+# 用于插件开发阶段模拟宿主系统的配置服务
+#
+# 格式说明：
+#   plugins:
+#     <pluginId>:
+#       <key>: <value>
+#       ...
+#
+# 插件开发者可根据需要添加自己的插件配置
+
+tenant:
+  tenant-id: 1
+  application-id: 100
+
+plugins:
+  # ===== 示例：Hello 插件配置 =====
+  hello-plugin:
+    greeting.message: "欢迎使用 OneBase 插件系统！"
+    greeting.enabled: true
+    max-retry: 3
+
+  # ===== OneBase OCR 插件配置 =====
+  # 提供身份证、港澳台通行证、护照的 OCR 识别功能
+  # 支持多种服务商: 百度/阿里/腾讯等
+  onebase-plugin-ocr:
+    # 服务商选择：baidu / aliyun / tencent
+    provider: "baidu"
+    # OCR 服务商 API 配置 (必填)
+    # 百度: client-id = API Key, client-secret = Secret Key
+    # 阿里: client-id = Access Key ID, client-secret = Access Key Secret
+    # 腾讯: client-id = Secret ID, client-secret = Secret Key
+    client-id: "j54Ub5s7xSBNH8brHrwYpPUy"      # 百度 API Key (来自文档)
+    client-secret: "3rUGXYqwdw0qMzxtEOAWVDA1y8WGtiV6" # 百度 Secret Key (来自文档)
+    endpoint: "https://aip.baidubce.com"   # API 接入点 (可选,默认百度)
+
+  # ===== Dev 模式插件配置（用于开发调试） =====
+  dev-mode-plugin:
+    # API 配置
+    apiKey: "demo-api-key-123456"
+    provider: "baidu"
+    
+    # 性能配置
+    timeout: 5000
+    maxRetries: 3
+    
+    # 功能开关
+    enableLog: true
+    enableCache: false
+    
+    # 业务配置
+    maxFileSize: 10485760  # 10MB
+    supportedFormats: "jpg,png,pdf"
+
+  # ===== 添加你的插件配置 =====
+  # my-plugin:
+  #   key1: value1
+  #   key2: value2

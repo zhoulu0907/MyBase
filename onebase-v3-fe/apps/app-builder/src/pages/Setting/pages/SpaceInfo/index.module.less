@@ -1,0 +1,183 @@
+.spaceInfoPage {
+  height: 100%;
+  min-height: 500px;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+
+  .spaceInfoPageMain {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .infoCard {
+      margin-bottom: 40px;
+      border-radius: 4px;
+      background: var(--color-bg-2);
+
+      .blockHeader {
+        color: var(--color-text-1);
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 24px;
+        margin-bottom: 16px;
+      }
+
+      &.infoCardPrimary {
+        display: flex;
+        flex-direction: column;
+
+        .baseInfo {
+          height: 120px;
+          padding: 20px 24px;
+          border-radius: 16px;
+          box-sizing: border-box;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: url('@/assets/images/info_bg.svg') no-repeat center/cover;
+        }
+        .infoCardPrimaryLeft {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+
+          .avatarText {
+            color: #fff;
+            text-align: right;
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 22px;
+          }
+
+          .enterpriseId {
+            color: var(--color-text-3);
+            font-size: 14px;
+
+            & > span {
+              color: var(--color-text-2);
+            }
+          }
+
+          :global(.pc-upload-list-item-picture) {
+            width: 160px;
+            height: 80px;
+            border: 1px solid var(--color-border-1);
+            border-radius: 12px;
+            background: var(--color-fill-2);
+          }
+
+          .reUploadLogo {
+            border: 1px solid var(--color-border-1);
+            border-radius: 12px;
+            background: var(--color-fill-2);
+
+            :global(.pc-image-footer-with-actions) {
+              width: 100%;
+              height: 100%;
+              border-radius: 12px;
+              background-color: rgba(0, 0, 0, 0.3);
+              opacity: 0;
+
+              &:hover {
+                opacity: 1;
+              }
+
+              :global(.pc-image-actions-item) {
+                margin: auto;
+                font-size: 32px;
+              }
+            }
+          }
+
+          .enterpriseName {
+            color: var(--color-text-1);
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 12px;
+          }
+        }
+      }
+
+      .bottomSection {
+        padding-left: 24px;
+        box-sizing: border-box;
+
+        .infoKey {
+          width: 96px;
+          color: var(--color-text-3);
+          font-size: 14px;
+          font-style: normal;
+          font-weight: 400;
+          line-height: 22px;
+        }
+      }
+    }
+
+    .statsSection {
+      min-width: 180px;
+      display: flex;
+      gap: 24px;
+      .statCard {
+        height: 70px;
+        padding: 8px 16px;
+        min-width: 120px;
+        text-align: center;
+        box-sizing: border-box;
+        position: relative;
+
+        .statLabel {
+          color: var(--color-text-2);
+          font-size: 14px;
+        }
+
+        .statValue {
+          color: var(--color-text-1);
+          font-size: 20px;
+          font-weight: 600;
+        }
+
+        &:last-of-type::after {
+          content: '';
+          position: absolute;
+          left: -12px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 1px;
+          height: 32px;
+          background: var(--color-border-2);
+        }
+      }
+    }
+  }
+
+  .copyIcon {
+    padding-left: 4px;
+    color: var(--color-text-2);
+    &:hover {
+      color: rgb(var(--primary-6));
+      // 移入便小手
+      cursor: pointer;
+    }
+  }
+
+  .tagWrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    cursor: pointer;
+    width: calc(100% - 100px);
+
+    .adminTag {
+      padding: 0 8px 0 6px;
+      span {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+### 获得企业授权应用列表-分页
+GET {{baseUrl}}/corp/user-app-relation/corp-applications-page?corpId=1&pageNo=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### 企业应用启用/禁用
+GET {{baseUrl}}/user/user-app-relation/get-app-by-user-id?userId=156833462627729408
+Authorization: Bearer {{token}}
+
+
+
+### 企业应用启用/禁用
+POST {{baseUrl}}/user/user-app-relation/create
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+"userId":156833462627729408,
+  "applicationIdList":[162947915524571136,162947915524571137]
+}
+

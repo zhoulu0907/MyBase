@@ -1,0 +1,54 @@
+.breadcrumbContainer {
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background: white;
+  white-space: nowrap;
+  height: 44px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  :global(.arco-breadcrumb) {
+    font-size: 14px;
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 1px;
+  }
+
+  :global(.arco-breadcrumb-separator) {
+    font-weight: bold;
+    color: #86909c;
+    margin: 0 4px;
+  }
+
+  :global(.arco-breadcrumb-item) {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .clickable {
+    cursor: pointer;
+    color: rgb(var(--primary-6));
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: rgb(var(--primary-9));
+    }
+  }
+
+  .current {
+    color: #1d2129;
+    font-weight: 500;
+  }
+
+  .homeIcon {
+    margin-right: 4px;
+    font-size: 14px;
+  }
+}

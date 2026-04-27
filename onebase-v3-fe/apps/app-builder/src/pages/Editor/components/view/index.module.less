@@ -1,0 +1,120 @@
+.viewWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  .viewTitle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    .viewTitleText {
+      font-size: 14px;
+      font-weight: 400px;
+      line-height: 22px;
+      color: #4e5969;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+.dropList {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background-color: white;
+  border: 1px solid #e5e6eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  .dropItem {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    .dropItemIcon {
+      width: 16px;
+      height: 16px;
+    }
+
+    .dropItemLabel {
+      font-size: 14px;
+      font-weight: 400px;
+      color: #4e5969;
+      min-width: 120px;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dropItemType {
+      width: 100px;
+      display: flex;
+      flex-direction: row;
+      align-self: center;
+      justify-content: flex-end;
+    }
+
+    .copyIcon {
+      margin-left: 12px;
+    }
+  }
+
+  .addViewButton {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+}
+
+.viewLabel {
+  width: 48px;
+  height: 16px;
+  border-radius: 2px;
+  padding-right: 4px;
+  padding-left: 4px;
+  gap: 4px;
+  opacity: 1;
+
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 20px;
+  letter-spacing: 0%;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.mixViewTitle {
+  background-color: #e8f5ff;
+  color: #1979ff;
+}
+
+.editViewTitle {
+  background-color: #fff2e8;
+  color: #eb693a;
+}
+
+.detailViewTitle {
+  background-color: #f2e8ff;
+  color: #8754ff;
+}

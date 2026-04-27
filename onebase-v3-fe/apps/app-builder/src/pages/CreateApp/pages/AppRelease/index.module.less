@@ -1,0 +1,16 @@
+@import '../../components/variables.less';
+
+.appReleasePage {
+  width: 100%;
+  box-sizing: border-box;
+  background: #f7f8fa;
+  max-height: calc(100vh - @header-height - 52px);
+
+  overflow-y: auto;
+  /* 隐藏滚动条但保持滚动功能 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+}

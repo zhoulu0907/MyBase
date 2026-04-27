@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    com.cmsr.onebase.plugin.ocr: INFO
+
+onebase:
+  plugin:
+    ocr:
+      # 插件元数据
+      plugin-id: "onebase-plugin-ocr"
+      version: "1.0.0"
+      description: "OneBase OCR 插件 - 提供身份证、港澳台通行证及护照的 OCR 识别功能"
+      plugin-class: "com.cmsr.onebase.plugin.ocr.GeneratedPlugin"
+      plugin-provider: "OneBase Team"
+      category: "artificial-intelligence"
+
+      # OCR 服务提供商: tencent (生产环境示例)
+      provider: tencent
+      
+      # 凭证配置
+      client-id: "TENCENT_SECRET_ID_PROD"
+      client-secret: "TENCENT_SECRET_KEY_PROD"
+      endpoint: "ocr.tencentcloudapi.com"

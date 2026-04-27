@@ -1,0 +1,41 @@
+package com.cmsr.onebase.module.system.vo.user;
+
+import com.cmsr.onebase.framework.desensitize.annotation.EMailDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.NicknameDesensitize;
+import com.cmsr.onebase.framework.desensitize.annotation.UsernameDesensitize;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Schema(description = "管理后台 - 用户精简信息 Response VO")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserSimpleRespVO {
+
+    @Schema(description = "用户编号", example = "1024")
+    private Long id;
+
+    @Schema(description = "用户昵称", example = "昵称")
+    @NicknameDesensitize
+    private String nickname;
+
+    @Schema(description = "用户账号", example = "onebase")
+    @UsernameDesensitize
+    private String username;
+
+    @Schema(description = "用户邮箱", example = "a@b.cn")
+    @EMailDesensitize
+    private String email;
+
+    @Schema(description = "部门ID", example = "我是一个用户")
+    private Long deptId;
+
+    @Schema(description = "用户类型", example = "1024")
+    private Integer userType;
+
+    @Schema(description = "用户头像", example = "https://www.cmsr.com")
+    private String avatar;
+
+}

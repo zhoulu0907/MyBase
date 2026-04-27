@@ -1,0 +1,353 @@
+openapi: 3.0.1
+info:
+  title: 连接器环境配置 API
+  description: 连接器环境配置管理接口，环境配置存储在独立的 flow_connector_env 表中
+  version: 2.0.0
+servers:
+  - url: http://localhost:8080/admin-api
+    description: 本地开发环境
+tags:
+  - name: 连接器环境配置
+    description: 连接器环境配置接口
+paths:
+  /flow/connector-env/list:
+    get:
+      tags:
+        - 连接器环境配置
+      summary: 查询环境配置列表
+      description: 从 flow_connector_env 表查询该连接器类型下的所有环境配置
+      operationId: getEnvironments
+      parameters:
+        - name: connectorId
+          in: query
+          description: 连接器实例ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 328979291082227712
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultListFlowConnectorEnvLiteVO'
+  /flow/connector-env/detail:
+    get:
+      tags:
+        - 连接器环境配置
+      summary: 查询指定环境配置
+      description: 从 flow_connector_env 表查询指定环境编码的配置详情
+      operationId: getEnvironmentConfig
+      parameters:
+        - name: connectorId
+          in: query
+          description: 连接器实例ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 328979291082227712
+        - name: envCode
+          in: query
+          description: 环境编码
+          required: true
+          schema:
+            type: string
+            example: DEV
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultEnvironmentConfigVO'
+  /flow/connector-env/template:
+    get:
+      tags:
+        - 连接器环境配置
+      summary: 获取环境配置模板
+      description: 获取连接器类型对应的环境配置 Formily Schema 模板
+      operationId: getEnvConfigTemplate
+      parameters:
+        - name: connectorId
+          in: query
+          description: 连接器实例ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 328979291082227712
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultEnvConfigTemplateVO'
+  /flow/connector-env/create:
+    post:
+      tags:
+        - 连接器环境配置
+      summary: 创建环境配置
+      description: 将新的环境配置保存到 flow_connector_env 表，如果环境编码已存在则拒绝
+      operationId: createEnvironmentConfig
+      parameters:
+        - name: connectorId
+          in: query
+          description: 连接器实例ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 328979291082227712
+      requestBody:
+        description: 环境配置请求
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveEnvironmentConfigReqVO'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultBoolean'
+  /flow/connector-env/update:
+    post:
+      tags:
+        - 连接器环境配置
+      summary: 更新环境配置
+      description: 更新 flow_connector_env 表中已存在的环境配置，环境必须存在
+      operationId: updateEnvironmentConfig
+      parameters:
+        - name: connectorId
+          in: query
+          description: 连接器实例ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 328979291082227712
+      requestBody:
+        description: 环境配置请求
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveEnvironmentConfigReqVO'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultBoolean'
+  /flow/connector-env/enable:
+    post:
+      tags:
+        - 连接器环境配置
+      summary: 设置启用环境
+      description: 在 flow_connector 表设置当前启用的环境（通过 env_uuid 关联），传空取消启用
+      operationId: enableEnvironment
+      parameters:
+        - name: connectorId
+          in: query
+          description: 连接器实例ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 328979291082227712
+        - name: envCode
+          in: query
+          description: 环境编码（传空表示取消启用）
+          required: false
+          schema:
+            type: string
+            example: DEV
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultBoolean'
+  /flow/connector-env/enabled-env:
+    get:
+      tags:
+        - 连接器环境配置
+      summary: 获取启用环境
+      description: 获取连接器当前启用的环境完整信息
+      operationId: getEnabledEnv
+      parameters:
+        - name: connectorId
+          in: query
+          description: 连接器实例ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 328979291082227712
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResultFlowConnectorEnvLiteVO'
+components:
+  schemas:
+    CommonResultListFlowConnectorEnvLiteVO:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 响应码
+          example: 0
+        msg:
+          type: string
+          description: 响应消息
+          example: ""
+        data:
+          type: array
+          description: 环境配置列表
+          items:
+            $ref: '#/components/schemas/FlowConnectorEnvLiteVO'
+    CommonResultEnvironmentConfigVO:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 响应码
+          example: 0
+        msg:
+          type: string
+          description: 响应消息
+          example: ""
+        data:
+          $ref: '#/components/schemas/EnvironmentConfigVO'
+    CommonResultEnvConfigTemplateVO:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 响应码
+          example: 0
+        msg:
+          type: string
+          description: 响应消息
+          example: ""
+        data:
+          $ref: '#/components/schemas/EnvConfigTemplateVO'
+    CommonResultBoolean:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 响应码
+          example: 0
+        msg:
+          type: string
+          description: 响应消息
+          example: ""
+        data:
+          type: boolean
+          description: 操作结果
+          example: true
+    CommonResultFlowConnectorEnvLiteVO:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: 响应码
+          example: 0
+        msg:
+          type: string
+          description: 响应消息
+          example: ""
+        data:
+          $ref: '#/components/schemas/FlowConnectorEnvLiteVO'
+    FlowConnectorEnvLiteVO:
+      type: object
+      description: 连接器环境配置（精简）
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: 环境配置ID
+        envUuid:
+          type: string
+          description: 环境配置UUID
+        envName:
+          type: string
+          description: 环境名称（显示用，如 DEV环境配置）
+        envCode:
+          type: string
+          description: 环境编码（唯一标识，如 DEV）
+        typeCode:
+          type: string
+          description: 连接器类型编号
+        envUrl:
+          type: string
+          description: 环境URL
+        authType:
+          type: string
+          description: 认证方式
+        description:
+          type: string
+          description: 描述
+        activeStatus:
+          type: integer
+          description: 启用状态（0-禁用，1-启用）
+        createTime:
+          type: string
+          format: date-time
+          description: 创建时间
+    EnvironmentConfigVO:
+      type: object
+      description: 环境配置详情（包含 Formily Schema）
+      properties:
+        schema:
+          type: object
+          description: 环境配置的 Formily Schema
+          additionalProperties: {}
+        envCode:
+          type: string
+          description: 环境编码
+        typeCode:
+          type: string
+          description: 连接器类型编号
+    EnvConfigTemplateVO:
+      type: object
+      description: 环境配置模板
+      properties:
+        schema:
+          type: object
+          description: Formily Schema 模板
+          additionalProperties: {}
+    SaveEnvironmentConfigReqVO:
+      type: object
+      required:
+        - config
+      description: 保存环境配置请求
+      properties:
+        config:
+          type: object
+          description: 环境配置对象，包含 envMode 和 envConfig
+          additionalProperties: {}
+      example:
+        config:
+          envMode: custom
+          envConfig:
+            basicInfo:
+              envCode: DEV
+              envName: DEV环境配置
+              description: 开发环境
+            url: https://dev.example.com
+            auth:
+              type: bearer
+              token: xxx

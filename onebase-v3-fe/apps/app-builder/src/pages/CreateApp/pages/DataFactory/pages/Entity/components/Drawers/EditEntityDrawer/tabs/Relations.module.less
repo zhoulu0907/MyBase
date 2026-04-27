@@ -1,0 +1,82 @@
+@import '../../../../../../styles/variables.less';
+
+.relations {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    .form-header-style();
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--color-text-3);
+
+      span {
+        margin-top: 8px;
+        font-size: 14px;
+      }
+    }
+  }
+} 
+
+.relations-collapse {
+  :global(.pc-collapse-item) {
+    border: none !important;
+    margin-bottom: 16px !important;
+  }
+  :global(.pc-collapse-item-header) {
+    background-color: rgb(247, 248, 250) !important;
+    border: none !important;
+  }
+  :global(.pc-collapse-item-content) {
+    background-color: #fff !important;
+    border: none !important;
+  }
+}
+
+.relation-item {
+  margin-bottom: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.relation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .relation-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: @primaryColor;
+  }
+}
+
+.relation-content {
+  .description-section,
+  .url-section {
+    display: flex;
+    margin-bottom: 12px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      min-width: 80px;
+      font-size: 13px;
+      color: var(--color-text-2);
+      margin-right: 8px;
+    }
+  }
+}

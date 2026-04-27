@@ -1,0 +1,81 @@
+import { EditRender, WORKBENCH_COMPONENT_TYPES, type GridItem } from '@onebase/ui-kit';
+import { ResizableWorkbenchItem } from './resizable-workbench-item';
+import { OperationButtons } from './operatio-buttons';
+import type { WorkbenchItemProps } from '../../../types/workbench-component';
+import styles from '../index.module.less';
+
+/**
+ * 工作台组件项
+ */
+export function WorkbenchItem({
+  component,
+  isSelected,
+  currentWidth,
+  containerWidth,
+  pageComponentSchema,
+  onOperation,
+  wbFontSize
+}: WorkbenchItemProps & { wbFontSize?: string }) {
+  // 按钮组件在 web 端完全隐藏，不渲染任何内容
+  if (component.type === WORKBENCH_COMPONENT_TYPES.BUTTON_WORKBENCH) {
+    return null;
+  }
+
+  // 快捷入口和欢迎卡片组件仅能有一个，不可复制
+  const canNotCopy =
+    component.type === WORKBENCH_COMPONENT_TYPES.QUICK_ENTRY ||
+    component.type === WORKBENCH_COMPONENT_TYPES.WELCOME_CARD;
+
+  const handleSelect = () => {
+    onOperation.select(component.id, component);
+  };
+
+  return (
+    <ResizableWorkbenchItem
+      componentId={component.id}
+      componentType={component.type}
+      currentWidth={currentWidth}
+      containerWidth={containerWidth}
+      onWidthChange={onOperation.widthChange}
+      onHeightChange={onOperation.heightChange}
+      isSelected={isSelected}
+      onSelect={handleSelect}
+      layout={
+        (
+          component as GridItem & {
+            layout?: { row: number; column: number; rowSpan?: number; colSpan?: number };
+          }
+        ).layout
+      }
+    >
+      <div
+        data-cp-type={component.type}
+        data-cp-displayname={component.displayName}
+        data-cp-id={component.id}
+        style={wbFontSize ? { fontSize: wbFontSize } : undefined}
+      >
+        <EditRender
+          cpId={component.id}
+          cpType={component.type}
+          runtime={false}
+          pageComponentSchema={pageComponentSchema}
+        />
+
+        {isSelected && pageComponentSchema && (
+          <div className={styles.nameArea}>
+            {pageComponentSchema.config?.cpName && pageComponentSchema.config.cpName}
+          </div>
+        )}
+
+        {isSelected && pageComponentSchema && (
+          <OperationButtons
+            component={component}
+            pageComponentSchema={pageComponentSchema}
+            onOperation={onOperation}
+            canNotCopy={canNotCopy}
+          />
+        )}
+      </div>
+    </ResizableWorkbenchItem>
+  );
+}

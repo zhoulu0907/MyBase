@@ -1,0 +1,48 @@
+.inputTextAreaWrapperOBMobile {
+  .arco-input-wrap.textarea {
+    padding: 0;
+    border: none !important;
+  }
+
+  .arco-input-prefix {
+    padding-right: 0.32rem;
+    font-size: var(--fontSize);
+  }
+
+  .arco-input-wrap {
+    &textarea {
+      height: auto;
+    }
+
+    height: auto;
+  }
+
+  .arco-input-container .arco-input-label {
+    min-width: 1.76rem;
+  }
+
+  &.showStatistics {
+    .arco-textarea {
+      margin-bottom: 0.8rem;
+    }
+  }
+
+  .arco-textarea {
+    line-height: 0.48rem;
+    padding: 0;
+    font-size: var(--fontSize);
+
+    &:hover,
+    &:focus {
+      border-color: transparent;
+      background-color: transparent !important;
+    }
+  }
+
+  .arco-input-container .statistic-text {
+    color: #86909C;
+    font-size: var(--fontSize);
+    bottom: 0.32rem;
+    right: 0.32rem;
+  }
+}

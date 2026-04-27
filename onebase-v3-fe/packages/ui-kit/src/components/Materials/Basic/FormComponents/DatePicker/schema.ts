@@ -1,0 +1,247 @@
+import {
+  baseConfig,
+  baseDefault,
+  dataFieldConfig,
+  layoutConfig,
+  statusConfig,
+  widthConfig,
+  dateRangeConfig,
+  labelConfig,
+  placeholderConfig,
+  tooltipConfig,
+  defaultDateValueConfig,
+  dateFormatConfig,
+  verifyConfig,
+  type ICommonBaseType,
+  type TDateTypeSelectKeyType,
+  type TLayoutSelectKeyType,
+  type TStatusSelectKeyType,
+  type TAlignSelectKeyType,
+  type TWidthSelectKeyType
+} from '../../../common';
+import {
+  ALIGN_VALUES,
+  ALIGN_OPTIONS,
+  CONFIG_TYPES,
+  DATE_OPTIONS,
+  DATE_VALUES,
+  LAYOUT_OPTIONS,
+  LAYOUT_VALUES,
+  STATUS_OPTIONS,
+  STATUS_VALUES,
+  WIDTH_OPTIONS,
+  WIDTH_VALUES,
+  DEFAULT_VALUE_TYPES,
+  DATE_EXTREME_TYPE,
+  DATE_DYNAMIC_TYPE,
+  DATE_DYNAMIC_CUSTOM_TYPE,
+  DATE_DYNAMIC_CUSTOM_VALUE_TYPE
+} from '../../../constants';
+import type {
+  IDataFieldConfigType,
+  ILabelConfigType,
+  ILayoutConfigType,
+  IStatusConfigType,
+  ITooltipConfigType,
+  IVerifyConfigType,
+  IWidthConfigType,
+  TBooleanDefaultType,
+  IPlaceholderConfigType,
+  TSelectDefaultType,
+  TTextAreaDefaultType,
+  TTextDefaultType,
+  IDateFormatConfigType,
+  TRadioDefaultType,
+  IDefaultValueConfigType,
+  IDateRangeConfigType,
+  ICommonConfigType
+} from '../../../types';
+import { ManipulateType } from 'dayjs';
+
+export interface XInputDatePickerSchema {
+  editData: TXInputDatePickerEditData;
+  config: XInputDatePickerConfig;
+}
+
+export type TXInputDatePickerEditData = Array<
+  | ILabelConfigType
+  | IPlaceholderConfigType
+  | ITooltipConfigType
+  | IDataFieldConfigType
+  | IDefaultValueConfigType
+  | IDateFormatConfigType<TDateTypeSelectKeyType>
+  | IDateRangeConfigType
+  | IVerifyConfigType
+  | IStatusConfigType<TStatusSelectKeyType>
+  | ILayoutConfigType<TLayoutSelectKeyType>
+  | IWidthConfigType<TWidthSelectKeyType>
+  | ICommonConfigType
+>;
+
+export interface XInputDatePickerConfig extends ICommonBaseType {
+  /**
+   * 输入框标题
+   * text：标题
+   * display：是否显示
+   */
+  label: {
+    text: TTextDefaultType;
+    display: TBooleanDefaultType;
+  };
+
+  /**
+   * 占位符
+   */
+  placeholder: TTextDefaultType;
+
+  /**
+   * 描述信息（鼠标悬浮时显示）
+   */
+  tooltip?: TTextAreaDefaultType;
+
+  /**
+   * 数据字段
+   */
+  dataField: TTextDefaultType[];
+
+  /**
+   * 默认值
+   */
+  defaultValueConfig?: any;
+
+  /**
+   * 日期格式： 年、年月、年月日、年月日时
+   * 可选值: 'YEAR' | 'MONTH' | 'DATE' | 'FULL'
+   */
+  dateType: TDateTypeSelectKeyType;
+
+  /**
+   * 可选范围
+   * 特定星期   全选/星期一/星期二/星期三/星期四/星期五/星期六/星期日
+   * 最早可选日期  静态值、动态值、变量
+   * 最晚可选日期  静态值、动态值、变量
+   */
+  dateRange: {
+    weekLimit: boolean;
+    week: string[];
+    earliestLimit: boolean;
+    earliestType: string;
+    earliestStaticValue: string;
+    earliestDynamicValue: string;
+    earliestCustomType: string;
+    earliestCustomValue: number;
+    earliestCustomValueType: ManipulateType;
+    earliestVariableValue: string;
+    latestLimit: boolean;
+    latestType: string;
+    latestStaticValue: string;
+    latestDynamicValue: string;
+    latestCustomType: string;
+    latestCustomValue: number;
+    latestCustomValueType: ManipulateType;
+    latestVariableValue: string;
+  };
+
+  /**
+  * required：是否必填，未填写时提交报错
+  * noRepeat：是否不允许重复
+  * lengthLimit 长度范围
+  * minLength 最小长度
+  * maxLength 最大长度
+  */
+  verify: {
+    required: TBooleanDefaultType;
+    noRepeat?: TBooleanDefaultType;
+  };
+
+  /**
+   * 组件状态：可用、隐藏、只读
+   * 可选值: 'default' | 'hidden' | 'readonly'
+   */
+  status?: TRadioDefaultType<TStatusSelectKeyType>;
+
+  /**
+   * 内容对齐方式：左、中、右
+   * 可选值: 'left' | 'center' | 'right'
+   */
+  align?: TSelectDefaultType<TAlignSelectKeyType>;
+
+  /**
+   * 表单的布局：水平、垂直（默认）
+   * 可选值: 'vertical' | 'horizontal'
+   */
+  layout?: TLayoutSelectKeyType;
+
+  /**
+   * 字段宽度
+   */
+  width: TRadioDefaultType<TWidthSelectKeyType>;
+}
+
+const XDatePicker: XInputDatePickerSchema = {
+  editData: [
+    ...baseConfig,
+    labelConfig,
+    placeholderConfig,
+    tooltipConfig,
+    //  数据绑定
+    ...dataFieldConfig,
+    // 默认值
+    defaultDateValueConfig,
+    dateFormatConfig,
+    dateRangeConfig,
+    verifyConfig,
+    // 显示状态
+    statusConfig,
+    // 布局方式
+    layoutConfig,
+    // 字段宽度
+    widthConfig,
+  ],
+  config: {
+    ...baseDefault,
+    label: {
+      text: '日期选择',
+      display: true
+    },
+    placeholder: '请选择日期',
+    tooltip: '',
+    dataField: [],
+    defaultValueConfig: {
+      type: DEFAULT_VALUE_TYPES.CUSTOM,
+      customValue: '',
+      formulaValue: ''
+    },
+    dateType: DATE_VALUES[DATE_OPTIONS.DATE],
+    dateRange: {
+      weekLimit: false,
+      week: [],
+      earliestLimit: false,
+      earliestType: DATE_EXTREME_TYPE.DYNAMIC,
+      earliestStaticValue: '',
+      earliestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      earliestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      earliestCustomValue: 1,
+      earliestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
+      earliestVariableValue: '',
+      latestLimit: false,
+      latestType: DATE_EXTREME_TYPE.DYNAMIC,
+      latestStaticValue: '',
+      latestDynamicValue: DATE_DYNAMIC_TYPE.TODAY,
+      latestCustomType: DATE_DYNAMIC_CUSTOM_TYPE.CURRENT,
+      latestCustomValue: 1,
+      latestCustomValueType: DATE_DYNAMIC_CUSTOM_VALUE_TYPE.DAY,
+      latestVariableValue: ''
+    },
+    verify: {
+      required: false,
+      noRepeat: false
+    },
+    status: STATUS_VALUES[STATUS_OPTIONS.DEFAULT],
+    align: ALIGN_VALUES[ALIGN_OPTIONS.LEFT],
+    layout: LAYOUT_VALUES[LAYOUT_OPTIONS.VERTICAL],
+    width: WIDTH_VALUES[WIDTH_OPTIONS.HALF],
+  }
+};
+
+export default XDatePicker;

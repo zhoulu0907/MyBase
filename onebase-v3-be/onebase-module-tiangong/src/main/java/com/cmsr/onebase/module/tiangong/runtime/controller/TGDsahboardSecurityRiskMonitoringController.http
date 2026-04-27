@@ -1,0 +1,34 @@
+## 默认环境变量配置（直接使用local环境配置）
+# 使用全局环境配置文件 http-client.env.json
+# 请在IntelliJ IDEA中选择对应环境: local/dev/test/gateway
+# 登录成功后会自动更新token到环境变量中
+
+### 1. 获取今日违规统计信息
+GET {{baseUrl}}/tiangong/security-risk-monitoring/today-violation-summary
+Content-Type: application/json
+X-Tenant-Id: 184717008866115584
+
+### 2. 获取今日地址违规TOP5
+GET {{baseUrl}}/tiangong/security-risk-monitoring/violation-address-top5
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 3. 获取违规数据趋势
+GET {{baseUrl}}/tiangong/security-risk-monitoring/violation-trend
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 4. 获取违规分布
+GET {{baseUrl}}/tiangong/security-risk-monitoring/violation-distribution
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 5. 获取当前摄像机截屏列表
+GET {{baseUrl}}/tiangong/security-risk-monitoring/camera-screenshot-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}
+
+### 6. 获取违规列表
+GET {{baseUrl}}/tiangong/security-risk-monitoring/violation-list
+Authorization: Bearer {{token}}
+tenant-id: {{adminTenantId}}

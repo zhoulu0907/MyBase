@@ -1,0 +1,152 @@
+{
+  "nodes": [
+    {
+      "id": "jdbc_input_84bb1c89817a442e82e14c0fa113753c",
+      "title": "从船东系统取数",
+      "description": "",
+      "type": "jdbc_input",
+      "config": {
+        "fields": [
+          {
+            "fieldFqn": "019ae2cb-c90b-7f83-911f-a3d9f552117a.shipowner.shipowner.t_ship_info.fix_id",
+            "fieldName": "fix_id",
+            "displayName": "fix_id",
+            "fieldType": "string",
+            "key": "fix_id"
+          },
+          {
+            "fieldFqn": "019ae2cb-c90b-7f83-911f-a3d9f552117a.shipowner.shipowner.t_ship_info.ship_name_eng",
+            "fieldName": "ship_name_eng",
+            "displayName": "ship_name_eng",
+            "fieldType": "string",
+            "key": "ship_name_eng"
+          },
+          {
+            "fieldFqn": "019ae2cb-c90b-7f83-911f-a3d9f552117a.shipowner.shipowner.t_ship_info.ship_name_chn",
+            "fieldName": "ship_name_chn",
+            "displayName": "ship_name_chn",
+            "fieldType": "string",
+            "key": "ship_name_chn"
+          },
+          {
+            "fieldFqn": "019ae2cb-c90b-7f83-911f-a3d9f552117a.shipowner.shipowner.t_ship_info.business_representative",
+            "fieldName": "business_representative",
+            "displayName": "business_representative",
+            "fieldType": "string",
+            "key": "business_representative"
+          },
+          {
+            "fieldFqn": "019ae2cb-c90b-7f83-911f-a3d9f552117a.shipowner.shipowner.t_ship_info.prog_manager",
+            "fieldName": "prog_manager",
+            "displayName": "prog_manager",
+            "fieldType": "string",
+            "key": "prog_manager"
+          },
+          {
+            "fieldFqn": "019ae2cb-c90b-7f83-911f-a3d9f552117a.shipowner.shipowner.t_ship_info.status",
+            "fieldName": "status",
+            "displayName": "status",
+            "fieldType": "string",
+            "key": "status"
+          }
+        ],
+        "datasourceUuid": "019ae2cb-c90b-7f83-911f-a3d9f552117a",
+        "tableUuid": "019ae2cb-ce7a-7c12-a787-30df895cfef5"
+      },
+      "output": {
+        "verified": true,
+        "fields": [
+          {
+            "fieldFqn": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.fix_id",
+            "fieldName": "fix_id",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.ship_name_eng",
+            "fieldName": "ship_name_eng",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.ship_name_chn",
+            "fieldName": "ship_name_chn",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.business_representative",
+            "fieldName": "business_representative",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.prog_manager",
+            "fieldName": "prog_manager",
+            "fieldType": "string"
+          },
+          {
+            "fieldFqn": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.status",
+            "fieldName": "status",
+            "fieldType": "string"
+          }
+        ]
+      },
+      "meta": {
+        "position": {
+          "x": -609.5,
+          "y": -244
+        }
+      }
+    },
+    {
+      "id": "sql_7577ef7b741a4b3085bdaadf7702b094",
+      "title": "SQL节点",
+      "description": "",
+      "type": "sql",
+      "config": {
+        "sqlValue": "SELECT \n  jdbc_input_84bb1c89817a442e82e14c0fa113753c.fix_id,\n  jdbc_input_84bb1c89817a442e82e14c0fa113753c.ship_name_eng,\n  jdbc_input_84bb1c89817a442e82e14c0fa113753c.ship_name_chn,\n  jdbc_input_84bb1c89817a442e82e14c0fa113753c.business_representative,\n  jdbc_input_84bb1c89817a442e82e14c0fa113753c.prog_manager,\n  jdbc_input_84bb1c89817a442e82e14c0fa113753c.status,\n  '没见过的字段' AS account_manager\nFROM jdbc_input_84bb1c89817a442e82e14c0fa113753c",
+        "sqlVariables": {
+          "jdbc_input_84bb1c89817a442e82e14c0fa113753c.从船东系统取数": "jdbc_input_84bb1c89817a442e82e14c0fa113753c",
+          "jdbc_input_84bb1c89817a442e82e14c0fa113753c#fix_id.从船东系统取数.fix_id": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.fix_id",
+          "jdbc_input_84bb1c89817a442e82e14c0fa113753c#ship_name_eng.从船东系统取数.ship_name_eng": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.ship_name_eng",
+          "jdbc_input_84bb1c89817a442e82e14c0fa113753c#ship_name_chn.从船东系统取数.ship_name_chn": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.ship_name_chn",
+          "jdbc_input_84bb1c89817a442e82e14c0fa113753c#business_representative.从船东系统取数.business_representative": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.business_representative",
+          "jdbc_input_84bb1c89817a442e82e14c0fa113753c#prog_manager.从船东系统取数.prog_manager": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.prog_manager",
+          "jdbc_input_84bb1c89817a442e82e14c0fa113753c#status.从船东系统取数.status": "jdbc_input_84bb1c89817a442e82e14c0fa113753c.status"
+        },
+        "showSQLValue": "SELECT \n  [[jdbc_input_84bb1c89817a442e82e14c0fa113753c#fix_id.从船东系统取数.fix_id]],\n  [[jdbc_input_84bb1c89817a442e82e14c0fa113753c#ship_name_eng.从船东系统取数.ship_name_eng]],\n  [[jdbc_input_84bb1c89817a442e82e14c0fa113753c#ship_name_chn.从船东系统取数.ship_name_chn]],\n  [[jdbc_input_84bb1c89817a442e82e14c0fa113753c#business_representative.从船东系统取数.business_representative]],\n  [[jdbc_input_84bb1c89817a442e82e14c0fa113753c#prog_manager.从船东系统取数.prog_manager]],\n  [[jdbc_input_84bb1c89817a442e82e14c0fa113753c#status.从船东系统取数.status]],\n  '没见过的字段' AS account_manager\nFROM [[jdbc_input_84bb1c89817a442e82e14c0fa113753c.从船东系统取数]]"
+      },
+      "output": {
+        "verified": true,
+        "fields": []
+      },
+      "meta": {
+        "position": {
+          "x": -290.5,
+          "y": -244
+        }
+      }
+    },
+    {
+      "id": "jdbc_output_e91bed7761de4ac0b270dd57fe7b3970",
+      "title": "输出节点",
+      "description": "",
+      "type": "jdbc_output",
+      "config": {},
+      "output": {},
+      "meta": {
+        "position": {
+          "x": 28.5,
+          "y": -244
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "sourceNodeId": "jdbc_input_84bb1c89817a442e82e14c0fa113753c",
+      "targetNodeId": "sql_7577ef7b741a4b3085bdaadf7702b094"
+    },
+    {
+      "sourceNodeId": "sql_7577ef7b741a4b3085bdaadf7702b094",
+      "targetNodeId": "jdbc_output_e91bed7761de4ac0b270dd57fe7b3970"
+    }
+  ]
+}

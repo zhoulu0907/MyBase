@@ -1,0 +1,135 @@
+package com.cmsr.onebase.module.metadata.core.service.datamethod.validator.impl;
+
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.entity.MetadataEntityFieldDO;
+import com.cmsr.onebase.module.metadata.core.dal.dataobject.validation.MetadataValidationLengthDO;
+import com.cmsr.onebase.module.metadata.core.dal.database.MetadataValidationLengthRepository;
+import com.cmsr.onebase.module.metadata.core.domain.query.MetadataDataMethodSubEntityContext;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataTextStorageTypeEnum;
+import com.cmsr.onebase.module.metadata.core.enums.MetadataValidationRuleTypeEnum;
+import com.cmsr.onebase.module.metadata.core.service.datamethod.validator.PrefetchableValidationService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 长度校验服务
+ * 
+ * 校验字段长度是否符合规则
+ *
+ * @author bty418
+ * @date 2025-10-23
+ */
+@Slf4j
+@Component
+public class LengthValidationService implements PrefetchableValidationService {
+
+
+    private final MetadataValidationLengthRepository lengthRepository;
+    private transient Map<String, java.util.List<MetadataValidationLengthDO>> prefetched;
+
+    public LengthValidationService(MetadataValidationLengthRepository lengthRepository) {
+        this.lengthRepository = lengthRepository;
+    }
+
+    @Override
+    public void validate(String entityUuid, String fieldUuid, MetadataEntityFieldDO field, Object value, Map<String, Object> data, List<MetadataDataMethodSubEntityContext> subEntities) {
+        if (value == null) {
+            return; // 空值不校验长度
+        }
+
+        // 查询长度规则
+        List<MetadataValidationLengthDO> rules = null;
+        if (prefetched != null) {
+            rules = prefetched.get(fieldUuid);
+        }
+        if (rules == null) {
+            rules = lengthRepository.findByFieldUuid(fieldUuid);
+        }
+
+        if (rules.isEmpty()) {
+            return; // 没有长度规则，跳过校验
+        }
+
+        // 检查是否有启用的长度规则
+        boolean hasEnabledRule = rules.stream()
+                .anyMatch(rule -> rule.getIsEnabled() != null && rule.getIsEnabled() == 1);
+
+        if (!hasEnabledRule) {
+            return; // 没有启用的长度规则
+        }
+
+        // 执行长度校验
+        String originalValue = value.toString();
+        log.debug("长度校验 - 字段[{}]，原始值长度: {}, 值: {}", field.getDisplayName(), originalValue.length(), originalValue);
+        
+        for (MetadataValidationLengthDO rule : rules) {
+            if (rule.getIsEnabled() == null || rule.getIsEnabled() != 1) {
+                continue; // 跳过未启用的规则
+            }
+
+            // 每个规则使用原始值进行校验，避免规则之间相互影响
+            String stringValue = originalValue;
+            
+            // 是否在校验前去除空格
+            if (rule.getTrimBefore() != null && rule.getTrimBefore() == 1) {
+                stringValue = stringValue.trim();
+                log.debug("长度校验 - 字段[{}]，trim后长度: {}, 值: {}", field.getDisplayName(), stringValue.length(), stringValue);
+            }
+
+            log.debug("长度校验 - 字段[{}]，规则ID: {}, minLength: {}, maxLength: {}, trimBefore: {}", 
+                    field.getDisplayName(), rule.getId(), rule.getMinLength(), rule.getMaxLength(), rule.getTrimBefore());
+
+            // 校验最小长度
+            if (rule.getMinLength() != null && stringValue.length() < rule.getMinLength()) {
+                String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
+                        ? rule.getPromptMessage()
+                        : "字段[" + field.getDisplayName() + "]长度不能小于" + rule.getMinLength() + "个字符";
+                log.error("长度校验失败 - 字段[{}]，当前长度: {}, 要求最小长度: {}, 错误消息: {}", 
+                        field.getDisplayName(), stringValue.length(), rule.getMinLength(), errorMessage);
+                throw new IllegalArgumentException(errorMessage);
+            }
+
+            // 校验最大长度
+            if (rule.getMaxLength() != null && stringValue.length() > rule.getMaxLength()) {
+                String errorMessage = rule.getPromptMessage() != null && !rule.getPromptMessage().trim().isEmpty()
+                        ? rule.getPromptMessage()
+                        : "字段[" + field.getDisplayName() + "]长度不能大于" + rule.getMaxLength() + "个字符";
+                log.error("长度校验失败 - 字段[{}]，当前长度: {}, 要求最大长度: {}, 错误消息: {}", 
+                        field.getDisplayName(), stringValue.length(), rule.getMaxLength(), errorMessage);
+                throw new IllegalArgumentException(errorMessage);
+            }
+        }
+    }
+
+    @Override
+    public void preloadBatchRules(Map<String, Map<String, ? extends java.util.List<?>>> rulesByType) {
+        Map<String, ? extends java.util.List<?>> m = rulesByType != null
+                ? rulesByType.get(MetadataValidationRuleTypeEnum.LENGTH.getCode())
+                : null;
+        if (m != null) {
+            this.prefetched = new java.util.HashMap<>();
+            for (Map.Entry<String, ? extends java.util.List<?>> e : m.entrySet()) {
+                @SuppressWarnings("unchecked")
+                java.util.List<MetadataValidationLengthDO> list = (java.util.List<MetadataValidationLengthDO>) (java.util.List<?>) e.getValue();
+                this.prefetched.put(e.getKey(), list);
+            }
+        }
+    }
+
+    @Override
+    public void clearPrefetchedRules() {
+        this.prefetched = null;
+    }
+
+    @Override
+    public String getValidationType() {
+        return MetadataValidationRuleTypeEnum.LENGTH.getCode();
+    }
+
+    @Override
+    public boolean supports(String fieldType) {
+        return MetadataTextStorageTypeEnum.isTextType(fieldType);
+    }
+}

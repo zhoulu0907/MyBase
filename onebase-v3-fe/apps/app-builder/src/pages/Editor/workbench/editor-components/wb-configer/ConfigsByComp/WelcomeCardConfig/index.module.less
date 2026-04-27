@@ -1,0 +1,131 @@
+.previewCardHeight {
+  height: 96px;
+}
+
+.previewCardHeightTheme3 {
+  height: 150px;
+}
+
+.previewCardTheme3 {
+  gap: 12px;
+  flex-direction: column;
+}
+
+.previewWelcomeTitle {
+  font-size: 16px;
+  font-weight: 500;
+  color: #272E3B;
+  margin-bottom: 8px;
+}
+
+.previewWelcomeTitleTheme3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #272E3B;
+  margin-bottom: 0;
+}
+
+.previewWelcomeDesc {
+  font-size: 14px;
+  color: #86909c;
+}
+
+.previewWelcomeDescTheme3 {
+  color: #4E5969;
+  position: relative;
+  z-index: 1;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.previewCurrentTime {
+  font-size: 12px;
+  color: #86909c;
+  position: relative;
+  z-index: 1;
+  margin-top: 4px;
+}
+
+.previewCardContainer {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.previewBackgroundImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+.previewContentContainer {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.previewContentWrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.previewUserAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.previewUserAvatarImg {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.previewUserAvatarPlaceholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: rgb(var(--primary-6));
+  color: #fff;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.previewTextContainer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.previewTextEllipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+

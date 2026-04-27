@@ -1,0 +1,327 @@
+import { FormulaEditor } from '@/components/FormulaEditor';
+import { Button, Form, Select, Switch } from '@arco-design/web-react';
+import { type AuthRoleUsersPageRespVO, type DeptAndUsersRespDTO } from '@onebase/app';
+import { AddMembers } from '@onebase/common';
+import { getDeptUser, getSimpleUserPage, type GetDeptUserReq } from '@onebase/platform-center';
+import { CONFIG_TYPES, DEFAULT_VALUE_TYPES, DEFAULT_VALUE_TYPES_LABELS, getPopupContainer } from '@onebase/ui-kit';
+import { debounce } from 'lodash-es';
+import React, { useCallback, useEffect, useState } from 'react';
+import { registerConfigRenderer } from '../../registry';
+import { IconLaunch } from '@arco-design/web-react/icon';
+import styles from '../../index.module.less';
+
+export interface DynamicUserDefaultConfigProps {
+  handlePropsChange: (key: string, value: string | number | boolean | any[] | undefined) => void;
+  handleMultiPropsChange: (updates: { key: string; value: any }[]) => void;
+  item: any;
+  configs: any;
+  id: string;
+}
+
+const FormItem = Form.Item;
+const Option = Select.Option;
+
+const DEFAULTUSERVALUE = 'defaultUserValue';
+const ISSELECTSCOPE = 'isSelectScope';
+const SELECTSCOPE = 'selectScope';
+
+const DynamicUserDefaultConfig: React.FC<DynamicUserDefaultConfigProps> = ({
+  handlePropsChange,
+  handleMultiPropsChange,
+  item,
+  configs,
+  id
+}) => {
+  const defaultValueConfigKey = item.key || 'defaultValueConfig';
+
+  const [formulaVisible, setFormulaVisible] = useState<boolean>(false);
+  const [defaultValueConfig, setDefaultValueConfig] = useState({
+    type: '',
+    formulaValue: undefined,
+    formattedFormula: ''
+  });
+
+  const [userData, setUserData] = useState<any[]>([]);
+  // 分页
+  const [pageNo, setPageNo] = useState<number>(1);
+  const [total, setTotal] = useState<number | string>(0);
+  // 搜索条件
+  const [keywords, setKeywords] = useState<string>('');
+  // 是否加载中
+  const [fetching, setFetching] = useState<boolean>(false);
+
+  //选择范围
+  const [showButton, setShowButton] = useState(configs[ISSELECTSCOPE]);
+  const [membersVisible, setMembersVisible] = useState<boolean>(false);
+  const [memberData, setMemberData] = useState<DeptAndUsersRespDTO>();
+  const [memberLoading, setMemberLoading] = useState<boolean>(false);
+  const [selectedMembers, setSelectedMembers] = useState<any[]>(configs[SELECTSCOPE] || []);
+
+  useEffect(() => {
+    if (selectedMembers?.length > 0) {
+      formatUserScope(selectedMembers);
+      setTotal(0);
+      setPageNo(1);
+      setKeywords('');
+    } else {
+      getUserData('');
+    }
+  }, [selectedMembers]);
+
+  useEffect(() => {
+    setDefaultValueConfig((prev) => ({ ...prev, ...configs[defaultValueConfigKey] }));
+  }, [configs[defaultValueConfigKey]]);
+
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      if (selectedMembers.length === 0) {
+        getUserData(value);
+      }
+    }, 500),
+    []
+  );
+
+  // 滚动加载
+  const scrollHandler = async (element: HTMLDivElement) => {
+    const { scrollTop, scrollHeight, clientHeight } = element;
+    const scrollBottom = scrollHeight - (scrollTop + clientHeight);
+
+    if (scrollBottom < 10 && !fetching && Number(total) > userData.length) {
+      setFetching(true);
+      const param = {
+        pageNo: pageNo + 1,
+        pageSize: 20,
+        keywords: keywords
+      };
+      const { list, total } = await getSimpleUserPage(param);
+      setPageNo(pageNo + 1);
+      setTotal(total);
+      setUserData((prev) => [...prev, ...list]);
+      setFetching(false);
+    }
+  };
+
+  const getUserData = async (inputValue: string) => {
+    setFetching(true);
+    setKeywords(inputValue);
+    const param = {
+      pageNo: 1,
+      pageSize: 20,
+      keywords: inputValue
+    };
+    const { list, total } = await getSimpleUserPage(param);
+    setPageNo(1);
+    setTotal(total);
+    setUserData(list || []);
+    setFetching(false);
+  };
+
+  const handleFormulaConfirm = (formulaData: string, formattedFormula: string) => {
+    setFormulaVisible(false);
+    const newConfig = {
+      ...configs[defaultValueConfigKey],
+      formulaValue: formulaData,
+      formattedFormula: formattedFormula
+    };
+    handlePropsChange(defaultValueConfigKey, newConfig);
+  };
+
+  const handleBtnSwitch = (checked: boolean) => {
+    setShowButton(checked);
+
+    if (!checked) {
+      getDeptUsers({});
+      setSelectedMembers([]);
+      handleMultiPropsChange?.([
+        { key: ISSELECTSCOPE, value: checked },
+        { key: SELECTSCOPE, value: [] }
+      ]);
+    } else {
+      handlePropsChange(ISSELECTSCOPE, checked);
+    }
+  };
+
+  // 获取部门用户信息
+  const getDeptUsers = async ({ deptId, keywords }: { deptId?: string; keywords?: string }) => {
+    setMemberLoading(true);
+    try {
+      const params: GetDeptUserReq = {
+        deptId,
+        keywords
+      };
+      const res = await getDeptUser(params);
+      setMemberData(res);
+    } catch (error) {
+      console.error('获取部门用户信息失败 error:', error);
+    } finally {
+      setMemberLoading(false);
+    }
+  };
+
+  const handleMembersVisible = async () => {
+    await getDeptUsers({});
+    setMembersVisible(true);
+  };
+
+  // 展开下级
+  const handleExpand = async (deptId: string) => {
+    await getDeptUsers({ deptId });
+  };
+
+  // 添加成员/部门
+  const handleAddMembers = async (scopeSpecified: any[]) => {
+    console.log('scopeSpecified', scopeSpecified);
+    // 更新已选择的成员状态
+    formatUserScope(scopeSpecified);
+    setSelectedMembers(scopeSpecified);
+    handlePropsChange(SELECTSCOPE, scopeSpecified);
+    // 关闭弹窗
+    setMembersVisible(false);
+  };
+
+  const formatUserScope = (members: any[]) => {
+    if (members.length > 0) {
+      const selectMembers = members.map((member) => ({
+        id: member.key,
+        // deptName: member.deptName
+        nickname: member.name,
+        email: member.email
+      }));
+      setUserData(selectMembers);
+
+      const defaultUser = selectMembers.find((user) => user.id === configs[DEFAULTUSERVALUE]);
+      if (!defaultUser) handlePropsChange(DEFAULTUSERVALUE, undefined);
+    }
+  };
+
+  const handleUpdateSelectedMembers = useCallback((depts: AuthRoleUsersPageRespVO[]) => {
+    setSelectedMembers(depts);
+  }, []);
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
+
+  return (
+    <>
+      <FormItem layout="vertical" labelAlign="left" label={'默认值'} style={{ marginBottom: '8px' }}>
+        <Select
+          getPopupContainer={getPopupContainer}
+          onChange={(value) => {
+            const newConfig = { ...configs[defaultValueConfigKey], type: value, formulaValue: '' };
+            handlePropsChange(defaultValueConfigKey, newConfig);
+          }}
+          value={defaultValueConfig?.type}
+          options={[
+            { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.CUSTOM], value: DEFAULT_VALUE_TYPES.CUSTOM },
+            { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.FORMULA], value: DEFAULT_VALUE_TYPES.FORMULA }
+            // { label: DEFAULT_VALUE_TYPES_LABELS[DEFAULT_VALUE_TYPES.LINKAGE], value: DEFAULT_VALUE_TYPES.LINKAGE }
+          ]}
+        />
+      </FormItem>
+      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.CUSTOM && (
+        <FormItem>
+          <Select
+            placeholder="请选择"
+            allowClear
+            showSearch={true}
+            filterOption={
+              selectedMembers.length > 0
+                ? (input, option) => String(option?.props?.children ?? '').includes(input)
+                : false // 远程搜索时不做本地过滤
+            }
+            defaultValue={configs[DEFAULTUSERVALUE]}
+            value={configs[DEFAULTUSERVALUE]}
+            onSearch={debouncedSearch}
+            onPopupScroll={scrollHandler}
+            getPopupContainer={getPopupContainer}
+            onChange={(value) => handlePropsChange(DEFAULTUSERVALUE, value)}
+          >
+            {userData.map((option) => (
+              <Option key={option.id} value={option.id}>
+                {option.nickname}
+              </Option>
+            ))}
+          </Select>
+        </FormItem>
+      )}
+
+      {defaultValueConfig.type === DEFAULT_VALUE_TYPES.FORMULA && (
+        <FormItem>
+          <Button long onClick={() => setFormulaVisible(true)} className={styles.formulaBtn}>
+            {defaultValueConfig?.formulaValue ? (
+              <>
+                <span>{defaultValueConfig?.formattedFormula}</span>
+                <IconLaunch />
+              </>
+            ) : (
+              <>ƒx 编辑公式</>
+            )}
+          </Button>
+        </FormItem>
+      )}
+
+      {/* 选择范围 */}
+      <FormItem
+        style={{ marginBottom: '8px' }}
+        layout="horizontal"
+        labelAlign="left"
+        labelCol={{
+          span: 21
+        }}
+        wrapperCol={{
+          span: 1
+        }}
+        label={'可选范围'}
+      >
+        <Switch size="small" checked={showButton} onChange={(checked) => handleBtnSwitch(checked)} />
+      </FormItem>
+      {showButton && (
+        <FormItem>
+          <Button long onClick={() => handleMembersVisible()}>
+            {selectedMembers.length > 0 ? '已配置可选范围' : '设置'}
+          </Button>
+        </FormItem>
+      )}
+
+      <FormulaEditor
+        fieldName={configs?.label?.text}
+        initialFormula={defaultValueConfig?.formulaValue}
+        visible={formulaVisible}
+        onCancel={() => setFormulaVisible(false)}
+        onConfirm={handleFormulaConfirm}
+      />
+
+      <AddMembers
+        visible={membersVisible}
+        data={memberData}
+        title={'specifiedPerson'}
+        loading={memberLoading}
+        selectedMembers={selectedMembers || []}
+        selectMemberCanEmpty={true}
+        onExpand={handleExpand}
+        onSearch={debouncedSearch}
+        onConfirm={handleAddMembers}
+        onUpdateSelectedMembers={handleUpdateSelectedMembers}
+        onCancel={() => {
+          setMembersVisible(false);
+        }}
+      />
+    </>
+  );
+};
+
+export default DynamicUserDefaultConfig;
+
+registerConfigRenderer(
+  CONFIG_TYPES.USER_DEFAULT_VALUE,
+  ({ id, handlePropsChange, handleMultiPropsChange, item, configs }) => (
+    <DynamicUserDefaultConfig
+      id={id}
+      handlePropsChange={handlePropsChange}
+      handleMultiPropsChange={handleMultiPropsChange}
+      item={item}
+      configs={configs}
+    />
+  )
+);

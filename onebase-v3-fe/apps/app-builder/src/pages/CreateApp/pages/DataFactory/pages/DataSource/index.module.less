@@ -1,0 +1,87 @@
+@import '../../styles/variables.less';
+
+/* 空数据源页面样式 */
+.emptyDsPage {
+  text-align: center;
+  padding: @spacingXl 0;
+}
+
+.dataSourceContainer {
+  height: calc(100vh - 64px);
+  width: 100%;
+  overflow-y: auto;
+  padding: @spacingMd;
+  background-color: @backgroundColor;
+  box-sizing: border-box;
+  .dataSourceContent {
+    background-color: @white;
+    height: 100%;
+  }
+}
+
+/* 操作头部样式 */
+.operationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 34px 16px;
+
+  &Left {
+    font-size: @fontSizeLg;
+    font-weight: 500;
+    color: @textColor;
+  }
+}
+
+/* 创建数据源表单样式 */
+.dataSourceForm {
+  max-width: 500px;
+  margin: 0 auto;
+
+  &Url {
+    display: inline-block;
+    width: calc(100% - @inputMinWidth - @formItemMarginRight);
+    margin-right: @formItemMarginRight;
+  }
+
+  &TestButton {
+    width: @inputMinWidth;
+    display: inline-block;
+    text-align: right;
+  }
+
+  &Button {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+// 操作按钮样式
+.operationButton {
+  &Edit {
+    color: @primaryColor;
+    margin-right: @operationButtonMargin;
+  }
+
+  &Delete {
+    color: rgb(var(--danger-5));
+  }
+}
+
+// 状态标签样式
+.statusTag {
+  &Success {
+    background-color: rgb(var(--success-5));
+    color: white;
+  }
+
+  &Warning {
+    background-color: rgb(var(--warning-5));
+    color: white;
+  }
+
+  &Error {
+    background-color: rgb(var(--danger-5));
+    color: white;
+  }
+}

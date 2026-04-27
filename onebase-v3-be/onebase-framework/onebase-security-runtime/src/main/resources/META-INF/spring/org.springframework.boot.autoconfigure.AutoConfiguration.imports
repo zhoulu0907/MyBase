@@ -1,0 +1,2 @@
+com.cmsr.onebase.framework.security.runtime.config.RuntimeSecurityAutoConfiguration
+com.cmsr.onebase.framework.security.runtime.config.RuntimeWebSecurityConfigurerAdapter

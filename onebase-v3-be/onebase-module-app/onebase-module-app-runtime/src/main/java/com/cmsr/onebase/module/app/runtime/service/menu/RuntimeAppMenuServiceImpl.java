@@ -1,0 +1,225 @@
+package com.cmsr.onebase.module.app.runtime.service.menu;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import com.cmsr.onebase.framework.common.enums.TerminalEnum;
+import com.cmsr.onebase.framework.common.enums.VersionTagEnum;
+import com.cmsr.onebase.framework.common.security.ApplicationManager;
+import com.cmsr.onebase.framework.common.security.SecurityFrameworkUtils;
+import com.cmsr.onebase.framework.common.security.dto.LoginUser;
+import com.cmsr.onebase.framework.common.util.object.BeanUtils;
+import com.cmsr.onebase.module.app.api.security.AppAuthSecurityApi;
+import com.cmsr.onebase.module.app.core.dal.database.menu.AppMenuRepository;
+import com.cmsr.onebase.module.app.core.dal.database.resource.AppPageSetRepository;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppMenuDO;
+import com.cmsr.onebase.module.app.core.dal.dataobject.AppResourcePagesetDO;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuTypeEnum;
+import com.cmsr.onebase.module.app.core.enums.menu.MenuVisibleEnum;
+import com.cmsr.onebase.module.app.core.utils.MenuUtils;
+import com.cmsr.onebase.module.app.core.vo.menu.MenuListRespVO;
+import com.cmsr.onebase.module.app.runtime.vo.menu.MenuPermissionVO;
+
+import lombok.Setter;
+
+/**
+ * @Author：huangjie
+ *                  @Date：2025/7/23 13:40
+ */
+@Setter
+@Service
+@Validated
+public class RuntimeAppMenuServiceImpl implements RuntimeAppMenuService {
+
+    @Autowired
+    private AppMenuRepository appMenuRepository;
+
+    @Autowired
+    private AppPageSetRepository appPageSetRepository;
+
+    @Autowired
+    private AppAuthSecurityApi appAuthSecurityApi;
+
+    @Override
+    public List<MenuListRespVO> listBpmApplicationMenu() {
+        Long applicationId = ApplicationManager.getApplicationId();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
+        // 获取应用下所有可见的BPM类型菜单
+        List<AppMenuDO> menuDOS = appMenuRepository.findByApplicationIdAndType(applicationId,
+                Set.of(MenuTypeEnum.BPM.getValue()));
+        // 返回菜单
+        return menuDOS.stream()
+                .filter(v -> {
+                    if (terminalEnum == TerminalEnum.PC && MenuVisibleEnum.isVisible(v.getIsVisiblePc())) {
+                        return true;
+                    }
+                    if (terminalEnum == TerminalEnum.MOBILE && MenuVisibleEnum.isVisible(v.getIsVisibleMobile())) {
+                        return true;
+                    }
+                    return false;
+                })
+                .map(v -> BeanUtils.toBean(v, MenuListRespVO.class))
+                .toList();
+    }
+
+    @Override
+    public List<MenuListRespVO> listApplicationMenu(Boolean isDev) {
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
+        // TODO 临时方案，后面要修改
+        appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        //
+
+        if (Boolean.TRUE.equals(isDev)) {
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
+
+        List<Long> menuIds = appAuthSecurityApi.getVisibleMenuIds(userId, applicationId);
+        if (CollectionUtils.isEmpty(menuIds)) {
+            return Collections.emptyList();
+        }
+
+        List<AppMenuDO> menuDOS = appMenuRepository.listByIdsAndOrder(menuIds);
+
+        menuDOS = menuDOS.stream().filter(
+                v -> {
+                    if (terminalEnum == TerminalEnum.PC && MenuVisibleEnum.isVisible(v.getIsVisiblePc())) {
+                        return true;
+                    }
+                    if (terminalEnum == TerminalEnum.MOBILE && MenuVisibleEnum.isVisible(v.getIsVisibleMobile())) {
+                        return true;
+                    }
+                    return false;
+                }).toList();
+        if (CollectionUtils.isEmpty(menuDOS)) {
+            return Collections.emptyList();
+        }
+        LinkedList<MenuListRespVO> menuListRespVOS = convertToMenuListRespVOS(menuDOS);
+        // 过滤掉没有子菜单的菜单
+        Iterator<MenuListRespVO> iterator = menuListRespVOS.iterator();
+        while (iterator.hasNext()) {
+            MenuListRespVO menu = iterator.next();
+            if (MenuTypeEnum.isGroup(menu.getMenuType()) && CollectionUtils.isEmpty(menu.getChildren())) {
+                iterator.remove();
+            }
+        }
+        return menuListRespVOS;
+    }
+
+    @Override
+    public List<Long> listApplicationMenuByName(Boolean isDev, String menuName) {
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        Long applicationId = ApplicationManager.getRequiredApplicationId();
+        LoginUser loginUser = SecurityFrameworkUtils.getLoginUser();
+        String loginPlatform = loginUser.getLoginPlatform();
+        TerminalEnum terminalEnum;
+        if (StringUtils.isNotBlank(loginPlatform)) {
+            terminalEnum = TerminalEnum.ofTerminal(loginPlatform);
+        } else {
+            terminalEnum = TerminalEnum.PC;
+        }
+        // TODO 临时方案，后面要修改
+        appAuthSecurityApi.cleanAuthCache(userId, applicationId);
+        //
+
+        if (Boolean.TRUE.equals(isDev)) {
+            ApplicationManager.setVersionTag(VersionTagEnum.BUILD.getValue());
+        }
+
+        List<Long> menuIds = appAuthSecurityApi.getVisibleMenuIds(userId, applicationId, menuName);
+        if (CollectionUtils.isEmpty(menuIds)) {
+            return Collections.emptyList();
+        }
+
+        return menuIds;
+    }
+
+    private LinkedList<MenuListRespVO> convertToMenuListRespVOS(List<AppMenuDO> menuDOS) {
+        List<MenuListRespVO> menuListRespList = BeanUtils.toBean(menuDOS, MenuListRespVO.class);
+        enrichPagesetType(menuListRespList);
+        // 把第一层的菜单添加到列表中
+        LinkedList<MenuListRespVO> levelOneMenus = menuListRespList.stream()
+                .filter(v -> MenuUtils.ROOT_MENU_UUID.equals(v.getParentUuid()))
+                .collect(Collectors.toCollection(LinkedList::new));
+        // 递归实现每个菜单的子菜单
+        for (MenuListRespVO respVO : levelOneMenus) {
+            LinkedList<MenuListRespVO> children = recursiveGetChildren(respVO.getMenuUuid(), menuListRespList);
+            respVO.setChildren(children);
+        }
+        return levelOneMenus;
+    }
+
+    private LinkedList<MenuListRespVO> recursiveGetChildren(String parentUuid, List<MenuListRespVO> listRespVOS) {
+        LinkedList<MenuListRespVO> children = new LinkedList<>();
+        for (MenuListRespVO respVO : listRespVOS) {
+            if (Objects.equals(respVO.getParentUuid(), parentUuid)) {
+                // 只有父菜单的uuid等于当前菜单的父菜单的uuid时，才添加子菜单，继续递归
+                LinkedList<MenuListRespVO> vos = recursiveGetChildren(respVO.getMenuUuid(), listRespVOS);
+                if (MenuTypeEnum.isGroup(respVO.getMenuType()) && CollectionUtils.isEmpty(vos)) {
+                    // 过滤掉没有子菜单的菜单
+                } else {
+                    respVO.setChildren(vos);
+                    children.add(respVO);
+                }
+            }
+        }
+        return children.isEmpty() ? null : children;
+    }
+
+    private void enrichPagesetType(List<MenuListRespVO> menuListRespList) {
+        List<String> menuUuids = menuListRespList.stream().map(MenuListRespVO::getMenuUuid)
+                .collect(Collectors.toList());
+        Long applicationId = ApplicationManager.getApplicationId();
+        List<AppResourcePagesetDO> pagesets = appPageSetRepository.findByMenuUuids(applicationId, menuUuids);
+        if (CollectionUtils.isEmpty(menuUuids)) {
+            return;
+        }
+        Map<String, Integer> pagesetTypeMap = pagesets.stream()
+                .filter(p -> p.getMenuUuid() != null && p.getPageSetType() != null)
+                .collect(Collectors.toMap(AppResourcePagesetDO::getMenuUuid, AppResourcePagesetDO::getPageSetType,
+                        (v1, v2) -> v1));
+        for (MenuListRespVO menuListRespVO : menuListRespList) {
+            menuListRespVO.setPagesetType(pagesetTypeMap.get(menuListRespVO.getMenuUuid()));
+        }
+    }
+
+    @Override
+    public MenuPermissionVO getMenuPermission(Long menuId) {
+        Long userId = SecurityFrameworkUtils.getLoginUserId();
+        Long applicationId = ApplicationManager.getApplicationId();
+        MenuPermissionVO menuPermissionVO = new MenuPermissionVO();
+        menuPermissionVO
+                .setOperationPermission(appAuthSecurityApi.getMenuOperationPermission(userId, applicationId, menuId));
+        menuPermissionVO.setFieldPermission(appAuthSecurityApi.getMenuFieldPermission(userId, applicationId, menuId));
+        menuPermissionVO.setViewUuids(appAuthSecurityApi.getMenuViewUuids(userId, applicationId, menuId));
+        return menuPermissionVO;
+    }
+
+}

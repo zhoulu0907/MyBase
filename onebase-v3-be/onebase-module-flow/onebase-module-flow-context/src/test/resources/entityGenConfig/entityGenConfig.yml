@@ -1,0 +1,40 @@
+# 连接数据库参数
+jdbcSettings:
+  url: jdbc:postgresql://10.0.104.38:5432/onebase_cloud_v3
+  username: postgres
+  password: onebase@2025
+  driverClassName: org.postgresql.Driver
+
+# 指定生成 JPA Entity 的目录，可使用绝对路径或相对路径
+outputDirectory: d:/tmp/java
+
+# 指定生成 JPA Entity 的包名
+packageName: com.cmsr.onebase.module.flow.core.dal.dataobject
+
+tableScanMode: 'RuleBased'
+
+# 指定需要生成 JPA Entity 的数据库表名，支持正则表达式
+tableScanRules:
+  #  - tableNames: ["test_table", "test_table2", "test_table3"]
+  #  - tableNames: ["test_table[0-9]"]
+  #  - tableNames: ["test_table[2]", "test_table[3]"]
+  - tableNames: ["flow_.*"]
+
+# 指定需要排除的 JPA Entity 的数据库表名，支持正则表达式
+#tableExclusionRules:
+#  - tableNames: ["test_table[0-9]"]
+
+# 指定是否需要修改生成的 Entity 类中字段类型
+modifyType: false
+
+# 修改生成的 Entity 类中字段类型的配置文件路径，可使用绝对路径或相对路径
+modifyTypePropertiesFile: "src/test/resources/entityGenConfig/jpa_modify_type.properties"
+
+# 是否需要在 Entity 类中 @Table 注解中生成索引信息
+genIndexInTableAnnotation: false
+
+# 是否不显示 Entity 类中 @Entity 注解中的 name 属性
+hideEntityAnnotationName: true
+
+# 是否在 Entity 类中增加一条所有字段名称的注释
+addAllFieldsNameLineInComment: true
