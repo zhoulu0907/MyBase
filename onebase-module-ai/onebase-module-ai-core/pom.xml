@@ -18,6 +18,34 @@
     </properties>
     <dependencies>
 
+        <!-- onebase-module-ai-api 模块 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-ai-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- framework-common (TenantContextHolder) -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <!-- ratelimiter starter -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-spring-boot-starter-protection</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
+        <!-- system 模块 (PwdEnHelper) -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-system-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
+
         <!--        <dependency>-->
         <!--            <groupId>org.springframework.cloud</groupId>-->
         <!--            <artifactId>spring-cloud-starter-openfeign</artifactId>-->
@@ -37,6 +65,12 @@
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter</artifactId>
             <version>1.0.0-M6.1</version>
+        </dependency>
+        <!-- Spring AI OpenAI (for OpenAI client) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai</artifactId>
+            <version>1.0.0-M6</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

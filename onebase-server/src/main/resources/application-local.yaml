@@ -3,6 +3,13 @@ server:
 
 --- #################### 数据库相关配置 ####################
 spring:
+  autoconfigure:
+    exclude:
+      - com.alibaba.cloud.ai.autoconfigure.dashscope.DashScopeAutoConfiguration
+  ai:
+    openai:
+      api-key: placeholder
+      base-url: https://api.openai.com
   # 数据源配置项
   datasource:
     driver-class-name: org.postgresql.Driver

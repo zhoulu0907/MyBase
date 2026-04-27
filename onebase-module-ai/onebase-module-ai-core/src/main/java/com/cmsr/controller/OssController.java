@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
+@ConditionalOnProperty(name = "spring.cloud.alicloud.oss.endpoint")
 public class OssController {
 
     private static final Logger log = LoggerFactory.getLogger(OssController.class);
@@ -34,16 +36,16 @@ public class OssController {
     @Autowired(required = false)
     private OSS ossClient;
 
-    @Value("${spring.cloud.alicloud.oss.endpoint}")
+    @Value("${spring.cloud.alicloud.oss.endpoint:}")
     private String enpoint;
 
-    @Value("${spring.cloud.alicloud.oss.bucket}")
+    @Value("${spring.cloud.alicloud.oss.bucket:}")
     private String bucket;
 
-    @Value("${spring.cloud.alicloud.access-key}")
+    @Value("${spring.cloud.alicloud.access-key:}")
     private String accessId;
 
-    @Value("${spring.cloud.alicloud.secret-key}")
+    @Value("${spring.cloud.alicloud.secret-key:}")
     private String accessKeySecret;
 
     @RequestMapping("/oss/policy")

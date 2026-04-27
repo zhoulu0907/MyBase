@@ -10,9 +10,11 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service("aiChatGenerateDSL")
+@ConditionalOnProperty(name = "pic_tab_generate")
 public class AiChatDataDSLServiceImpl implements AiChatService {
     private static final Logger log = LoggerFactory.getLogger(AiChatDataDSLServiceImpl.class);
 
@@ -21,7 +23,7 @@ public class AiChatDataDSLServiceImpl implements AiChatService {
     private final ChatClient dashScopeChatClient;
 
     @Autowired
-    public AiChatDataDSLServiceImpl(ChatClient.Builder chatClientBuilder, @Value("${pic_tab_generate}")String picTabGenerateDsl) {
+    public AiChatDataDSLServiceImpl(ChatClient.Builder chatClientBuilder, @Value("${pic_tab_generate:}")String picTabGenerateDsl) {
         //System.out.println("*******"+datasetDetail);
         this.dashScopeChatClient = chatClientBuilder
                 .defaultSystem(picTabGenerateDsl)

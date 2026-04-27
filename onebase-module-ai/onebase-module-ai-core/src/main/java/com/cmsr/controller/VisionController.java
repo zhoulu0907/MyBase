@@ -15,14 +15,16 @@ import java.util.Map;
 @RequestMapping("/ai")
 public class VisionController {
 
-    @Autowired
+    @Autowired(required = false)
     private QwenVLService qwenService;
 
     @PostMapping("/describe")
     public R describeImage(@RequestBody Map map) {
+        if (qwenService == null) {
+            return new R().put("code", 503).put("msg", "图片描述服务未启用");
+        }
         String imageUrl = (String) map.get("imageUrl");
         String prompt = (String) map.get("prompt");
-        System.out.println(prompt);
         String res = qwenService.generateDescription(imageUrl, prompt);
         Map resMap = new HashMap();
         resMap.put("text",res);

@@ -10,7 +10,11 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Service;
 
+@Service("aiChatPicGenerateDSL")
+@ConditionalOnProperty(name = "text_generate_screen")
 public class AiChatPicGenerateDSLImpl implements AiChatService {
 
     private static final Logger log = LoggerFactory.getLogger(AiChatPicGenerateDSLImpl.class);
@@ -18,7 +22,7 @@ public class AiChatPicGenerateDSLImpl implements AiChatService {
     private final ChatClient dashScopeChatClient;
 
     @Autowired
-    public AiChatPicGenerateDSLImpl(ChatClient.Builder chatClientBuilder, @Value("${text_generate_screen}")String picGenerateScreen) {
+    public AiChatPicGenerateDSLImpl(ChatClient.Builder chatClientBuilder, @Value("${text_generate_screen:}")String picGenerateScreen) {
         this.dashScopeChatClient = chatClientBuilder
                 .defaultSystem(picGenerateScreen)
                 // 实现 Chat Memory 的 Advisor

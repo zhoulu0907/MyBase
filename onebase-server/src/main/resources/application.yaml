@@ -141,6 +141,7 @@ onebase:
       - /admin-api/build/ai/rag/download/**
       - /admin-api/build/ai/copilot/image/download/**
       - /admin-api/build/ai/ai-app/download/**
+      - /admin-api/ai/chat/providers
   tenant: # 多租户相关配置项
     enable: true
     ignore-urls:

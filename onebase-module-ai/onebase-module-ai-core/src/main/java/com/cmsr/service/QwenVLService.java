@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@ConditionalOnProperty(name = "pic_tab_generate")
 public class QwenVLService {
 
     @Autowired
@@ -21,7 +23,7 @@ public class QwenVLService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${pic_tab_generate}")
+    @Value("${pic_tab_generate:}")
     private String systemPrompt;
 
     public String generateDescription(String imageUrl, String prompt) {

@@ -130,6 +130,13 @@
             <artifactId>onebase-module-etl-build</artifactId>
             <version>${revision}</version>
         </dependency>
+
+        <!-- AI 聊天代理模块 -->
+        <dependency>
+            <groupId>com.cmsr.onebase</groupId>
+            <artifactId>onebase-module-ai-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <!-- spring boot 配置所需依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

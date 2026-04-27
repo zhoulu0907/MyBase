@@ -9,16 +9,16 @@ import org.springframework.context.annotation.Configuration;
 public class ChartDSLConfig {
 
     //柱状图DSL
-    @Value("${charBarDSL}")
+    @Value("${charBarDSL:}")
     private String charBarDSL;
     ////折线图DSL
-    @Value("${charLineDSL}")
+    @Value("${charLineDSL:}")
     private String charLineDSL;
     ////饼图DSL
-    @Value("${charPieDSL}")
+    @Value("${charPieDSL:}")
     private String charPieDSL;
     ////漏斗图DSL
-    @Value("${charFunnelDSL}")
+    @Value("${charFunnelDSL:}")
     private String charFunnelDSL;
 
 }

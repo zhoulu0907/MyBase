@@ -8,7 +8,7 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class QwenVLConfig {
 
-    @Value("${spring.ai.dashscope.api-key}")
+    @Value("${spring.ai.dashscope.api-key:}")
     private String apiKey;
 
     @Bean

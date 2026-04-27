@@ -10,9 +10,11 @@ import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service("aiChatDataSetDetail")
+@ConditionalOnProperty(name = "dataset_detail")
 public class AiChatDataSetDetailImpl implements AiChatService {
 
     private static final Logger log = LoggerFactory.getLogger(AiChatDataSetDetailImpl.class);
@@ -23,7 +25,7 @@ public class AiChatDataSetDetailImpl implements AiChatService {
     private final ChatClient dashScopeChatClient;
 
     @Autowired
-    public AiChatDataSetDetailImpl(ChatClient.Builder chatClientBuilder, @Value("${dataset_detail}")String datasetDetail) {
+    public AiChatDataSetDetailImpl(ChatClient.Builder chatClientBuilder, @Value("${dataset_detail:}")String datasetDetail) {
         this.dashScopeChatClient = chatClientBuilder
                 .defaultSystem(datasetDetail)
                 // 实现 Chat Memory 的 Advisor

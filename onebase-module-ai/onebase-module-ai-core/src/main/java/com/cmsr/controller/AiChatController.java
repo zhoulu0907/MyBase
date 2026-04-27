@@ -20,6 +20,7 @@ import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,7 @@ import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvis
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/ai/chat")
+@ConditionalOnProperty(name = "dslTemplate")
 public class AiChatController {
 
     private static final String DEFAULT_PROMPT = "你是一个博学的智能聊天助手，请根据用户提问回答！";
@@ -66,31 +68,31 @@ public class AiChatController {
     @Qualifier("aiChatTextGenerateScreenDSL")
     private AiChatService aiChatTextGenerateDSLImpl;
 
-    @Value("${dslTemplate}")
+    @Value("${dslTemplate:}")
     private String dslTemplate;
 
-    @Value("${chartConfig}")
+    @Value("${chartConfig:}")
     private String charfig;
 
     @Autowired
     private ChartDSLConfig chartDSLConfig;
 
-    @Value("${data_address}")
+    @Value("${data_address:}")
     private String dataServiceUrl;
 
-    @Value("${rlzyDSL}")
+    @Value("${rlzyDSL:}")
     private String rlzyDSL;
 
     //@Value("${ylyqsjDSL}")
     private String yqjgDSL;
 
-    @Value("${dzswDSL}")
+    @Value("${dzswDSL:}")
     private String dzswDSL;
 
-    @Value("${znkfDSL}")
+    @Value("${znkfDSL:}")
     private String znkfDSL;
 
-    @Value("${kjrjDSL}")
+    @Value("${kjrjDSL:}")
     private String kjrjDSL;
 
     //@Value("${getSetData}")
