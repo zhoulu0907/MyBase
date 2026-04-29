@@ -80,6 +80,30 @@ export const getChatbotBaseURL = (): string => {
   return envConfig?.CHATBOT_BASE_URL || 'https://bote-sit.artifex-cmcc.com.cn/bote';
 };
 
+export const getRuntimeURL = (): string => {
+  return envConfig?.RUNTIME_URL;
+};
+
+export const getRuntimeMobileURL = (): string => {
+  return envConfig?.RUNTIME_MOBILE_URL;
+};
+
+export const getDashBoardURL = (): string => {
+  return envConfig?.APP_BUILDER_DASHBOARD_URL;
+};
+
+export const getDashboardDataSetUrl = (): string => {
+  return envConfig?.APP_BUILDER_DATASET_URL;
+};
+
+export const getPlatformBackendURL = (): string => {
+  return envConfig?.PLATFORM_BASE_URL;
+};
+
+export const getRuntimeBackendURL = (): string => {
+  return envConfig?.RUNTIME_BASE_URL;
+};
+
 const RUNTIME_DEV_PATH = '/runtime-dev';
 
 /**

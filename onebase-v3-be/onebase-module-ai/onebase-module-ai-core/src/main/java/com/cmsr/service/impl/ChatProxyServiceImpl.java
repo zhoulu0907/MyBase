@@ -7,8 +7,8 @@ import com.cmsr.onebase.module.ai.api.enums.LlmProvider;
 import com.cmsr.onebase.module.system.framework.security.core.PwdEnHelper;
 import com.cmsr.service.ChatProxyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ChatProxyServiceImpl implements ChatProxyService {
 
-    @Resource
+    @Autowired
     private PwdEnHelper pwdEnHelper;
 
     private final ObjectMapper objectMapper = new ObjectMapper();

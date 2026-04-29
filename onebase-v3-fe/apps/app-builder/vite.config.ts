@@ -56,7 +56,9 @@ export default defineConfig({
     })
   ],
   resolve: {
+    conditions: ['browser'],
     alias: {
+      'path': 'path-browserify',
       '@': path.resolve(__dirname, './src'),
       '@assets': path.join(__dirname, './src/assets'),
       '@workflow/nodes': path.join(__dirname, './src/assets/flow/nodes'),
